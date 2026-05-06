@@ -13479,6 +13479,15 @@
       "method": "test",
       "timestamp": "2026-05-06T01:07:27.184Z",
       "evidence": "Extracted autonomy-lane common/chaining/task lookup/local-safety helpers into packages/pi-stack/extensions/guardrails-core-autonomy-lane-common.ts while preserving re-exports from guardrails-core-autonomy-lane-surface-helpers.ts for previously exported helpers. Reduced guardrails-core-autonomy-lane-surface-helpers.ts to 832 lines; new common module is 393 lines. line_budget_snapshot now reports aboveWatch=1 (only guardrails-core.ts remains above 1000). Validation: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts -> 3 files passed, 76 tests passed. Targeted TypeScript probe for autonomy-lane common/helpers returned no output after switching node:path to namespace import."
+    },
+    {
+      "id": "VERIFY-BUD-886",
+      "target": "TASK-BUD-886",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T01:21:57.566Z",
+      "evidence": "Extracted the guardrails-core tool_call guard into packages/pi-stack/extensions/guardrails-core-tool-call-guard.ts and extracted grouped surface registration into packages/pi-stack/extensions/guardrails-core-surface-registration.ts. guardrails-core.ts reduced from 1395 to 1240 lines; orchestrator budget ratcheted to 1250. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts packages/pi-stack/test/smoke/guardrails-structured-first.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts (5 files, 9 tests); pnpm vitest --run packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-registration.test.ts packages/pi-stack/test/smoke/guardrails-delivery-mode-surface.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/guardrails-marker-check-surface.test.ts packages/pi-stack/test/smoke/guardrails-recurring-failure-surface.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/guardrails-growth-maturity.test.ts (10 files, 37 tests); final focal pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts (1 file, 2 tests). line_budget_snapshot still reports one file above watch (guardrails-core.ts), so continue follow-up extraction separately."
     }
   ]
 }

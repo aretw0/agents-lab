@@ -8,7 +8,6 @@
  * - deterministic scoped web routing enforcement (former web-routing-guard)
  */
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import { statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import {
@@ -94,43 +93,17 @@ import {
   refreshLoopEvidenceHeartbeatFromSnapshot as refreshLoopEvidenceHeartbeatFromSnapshotHelper,
   refreshLoopLeaseOnActivity as refreshLoopLeaseOnActivityHelper,
 } from "./guardrails-core-lane-queue-heartbeat";
-import {
-  registerGuardrailsLaneQueueSurface,
-  type GuardrailsLaneQueueSurfaceRuntimeSnapshot,
-} from "./guardrails-core-lane-queue-surface";
 import { evaluateBoardLongRunReadiness } from "./guardrails-core-board-readiness";
 import { buildBoardExecuteNextIntent, encodeGuardrailsIntent, summarizeGuardrailsIntent } from "./guardrails-core-intent-bus";
-import { buildShellRoutingStatusLabel, resolveBashCommandRoutingDecision, resolveCommandRoutingProfile, type CommandRoutingProfile } from "./guardrails-core-shell-routing";
+import { buildShellRoutingStatusLabel, resolveCommandRoutingProfile, type CommandRoutingProfile } from "./guardrails-core-shell-routing";
 import { DEFAULT_I18N_INTENT_CONFIG, resolveI18nIntentConfig, type I18nIntentConfig } from "./guardrails-core-i18n-intents";
-import { registerGuardrailsShellRouteSurface } from "./guardrails-core-shell-route-surface";
-import { registerGuardrailsDeliverySurface } from "./guardrails-core-delivery-surface";
-import { registerGuardrailsSafeMutationSurface } from "./guardrails-core-safe-mutation-surface";
-import { registerGuardrailsGitMaintenanceSurface } from "./guardrails-core-git-maintenance-surface";
-import { registerGuardrailsMacroRefactorSurface } from "./guardrails-core-macro-refactor-surface";
-import { registerGuardrailsMarkerCheckSurface } from "./guardrails-core-marker-check-surface";
-import { registerGuardrailsRecurringFailureSurface } from "./guardrails-core-recurring-failure-surface";
-import { registerGuardrailsStructuredIoSurface } from "./guardrails-core-structured-io-surface";
-import { registerGuardrailsStructuredInterviewSurface } from "./guardrails-core-structured-interview-surface";
-import { registerGuardrailsAutonomyLaneSurface } from "./guardrails-core-autonomy-lane-surface";
-import { registerGuardrailsUnattendedContinuationSurface } from "./guardrails-core-unattended-continuation-surface";
-import { registerGuardrailsUnattendedRehearsalSurface } from "./guardrails-core-unattended-rehearsal-surface";
-import { registerGuardrailsValidationMethodSurface } from "./guardrails-core-validation-method-surface";
-import { registerGuardrailsToolHygieneSurface } from "./guardrails-core-tool-hygiene-surface";
-import { registerGuardrailsGrowthMaturitySurface } from "./guardrails-core-growth-maturity-surface";
-import { registerGuardrailsAgentSpawnReadinessSurface } from "./guardrails-core-agent-spawn-readiness-surface";
-import { registerGuardrailsOpsCalibrationSurface } from "./guardrails-core-ops-calibration-surface";
-import { registerGuardrailsShellSpoofingScoreSurface } from "./guardrails-core-shell-spoofing-score-surface";
-import { registerGuardrailsI18nLintSurface } from "./guardrails-core-i18n-lint-surface";
-import { registerGuardrailsBackgroundProcessSurface } from "./guardrails-core-background-process-surface";
-import { registerGuardrailsHumanConfirmationSurface } from "./guardrails-core-human-confirmation-surface";
-import { registerGuardrailsRuntimeConfigSurface } from "./guardrails-core-runtime-config-surface";
 import { shouldAnnounceStrictInteractiveMode } from "./guardrails-core-command-utils";
 export { shouldAnnounceStrictInteractiveMode } from "./guardrails-core-command-utils";
-import { guardrailsCoreHandleStructuredMutationBloat, registerGuardrailsCoreEventSurface } from "./guardrails-core-event-surface";
+import { registerGuardrailsCoreEventSurface } from "./guardrails-core-event-surface";
+import { registerGuardrailsCoreToolCallGuard } from "./guardrails-core-tool-call-guard";
+import { registerGuardrailsCoreSurfaces, type GuardrailsLaneQueueSurfaceRuntimeSnapshot } from "./guardrails-core-surface-registration";
 import {
   isInsideCwd,
-  isUpstreamPiPackagePath,
-  upstreamPiPackageMutationToolReason,
 } from "./guardrails-core-path-guard";
 export {
   extractPathsFromBash,
@@ -140,15 +113,9 @@ export {
   isUpstreamPiPackagePath,
   upstreamPiPackageMutationToolReason,
 } from "./guardrails-core-path-guard";
-import { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
-import { evaluateBashGuardPolicies } from "./guardrails-core-bash-guard-policies";
 import { appendAuditEntry } from "./guardrails-core-confirmation-audit";
-import { guardBashPathReads, guardReadPath } from "./guardrails-core-read-path-runtime";
 import {
   classifyRouting,
-  detectPortConflict,
-  isDisallowedBash,
-  readReservedSessionWebPort,
   resolveGuardrailsPortConflictConfig,
   type GuardrailsPortConflictConfig,
 } from "./guardrails-core-web-routing";
@@ -1204,148 +1171,26 @@ export default function (pi: ExtensionAPI) {
   };
   registerGuardrailsCoreEventSurface(pi, eventSurfaceRuntime);
 
-  pi.on("tool_call", async (event, ctx) => {
-    if (isToolCallEventType("read", event)) {
-      return await guardReadPath(event.input.path ?? "", ctx);
-    }
-
-    if (isToolCallEventType("bash", event)) {
-      const command = event.input.command ?? "";
-
-      const shellRoutingDecision = resolveBashCommandRoutingDecision(command, shellRoutingProfile);
-      if (shellRoutingDecision.action === "block") {
-        appendAuditEntry(ctx, "guardrails-core.shell-routing-block", {
-          atIso: new Date().toISOString(),
-          profileId: shellRoutingProfile.profileId,
-          shell: shellRoutingProfile.shell,
-          firstToken: shellRoutingDecision.firstToken,
-          commandPreview: command.slice(0, 240),
-        });
-        return {
-          block: true,
-          reason: shellRoutingDecision.reason ?? "Blocked by guardrails-core (host-shell-routing).",
-        };
-      }
-
-      // Shared policy primitive for bash guardrails (same trigger semantics as monitors)
-      const matchedBashPolicy = evaluateBashGuardPolicies(command);
-      if (matchedBashPolicy) {
-        appendAuditEntry(ctx, matchedBashPolicy.auditKey, {
-          atIso: new Date().toISOString(),
-          policyId: matchedBashPolicy.id,
-          commandPreview: command.slice(0, 240),
-        });
-        return {
-          block: true,
-          reason: matchedBashPolicy.reason(),
-        };
-      }
-
-      // Deterministic scoped web blocker
-      if (strictInteractiveMode && isDisallowedBash(command)) {
-        return {
-          block: true,
-          reason:
-            "Blocked by guardrails-core (strict_interactive): use web-browser CDP scripts first for interactive sensitive-domain tasks.",
-        };
-      }
-
-      // Session web port conflict guard
-      const reservedPort = readReservedSessionWebPort(ctx.cwd);
-      const conflictPort = portConflictConfig.enabled
-        ? detectPortConflict(command, reservedPort)
-        : undefined;
-      if (conflictPort) {
-        return {
-          block: true,
-          reason: `Blocked by guardrails-core (port_conflict): port ${conflictPort} is reserved by session-web. Try --port ${portConflictConfig.suggestedTestPort}.`,
-        };
-      }
-
-      // Sensitive path guard for bash reads
-      return await guardBashPathReads(command, ctx);
-    }
-
-    let structuredMutationToolType: "edit" | "write" | undefined;
-    let structuredMutationPath: string | undefined;
-    if (isToolCallEventType("edit", event)) {
-      structuredMutationToolType = "edit";
-      structuredMutationPath = event.input.path;
-    } else if (isToolCallEventType("write", event)) {
-      structuredMutationToolType = "write";
-      structuredMutationPath = event.input.path;
-    }
-
-    if (structuredMutationToolType && structuredMutationPath && isUpstreamPiPackagePath(structuredMutationPath, ctx.cwd)) {
-      appendAuditEntry(ctx, "guardrails-core.upstream-pi-package-mutation-block", {
-        atIso: new Date().toISOString(),
-        toolType: structuredMutationToolType,
-        path: structuredMutationPath,
-      });
-      return {
-        block: true,
-        reason: upstreamPiPackageMutationToolReason(structuredMutationPath),
-      };
-    }
-
-    if (structuredMutationToolType) {
-      const structuredFirstDecision = resolveStructuredFirstMutationDecision({
-        toolType: structuredMutationToolType,
-        path: structuredMutationPath,
-      });
-      if (structuredFirstDecision.block) {
-        appendAuditEntry(ctx, structuredFirstDecision.auditKey ?? "guardrails-core.structured-first-block", {
-          atIso: new Date().toISOString(),
-          toolType: structuredMutationToolType,
-          path: structuredFirstDecision.path,
-          recommendedSurface: structuredFirstDecision.recommendedSurface,
-        });
-        return {
-          block: true,
-          reason: structuredFirstDecision.reason ?? "Blocked by guardrails-core (structured-first).",
-        };
-      }
-    }
-
-    guardrailsCoreHandleStructuredMutationBloat(event, ctx, bloatSmellConfig, eventSurfaceRuntime, structuredMutationToolType);
-
-    return undefined;
+  registerGuardrailsCoreToolCallGuard(pi, {
+    getShellRoutingProfile: () => shellRoutingProfile,
+    getStrictInteractiveMode: () => strictInteractiveMode,
+    getPortConflictConfig: () => portConflictConfig,
+    getBloatSmellConfig: () => bloatSmellConfig,
+    getEventSurfaceRuntime: () => eventSurfaceRuntime,
   });
 
-  registerGuardrailsRuntimeConfigSurface(pi, appendAuditEntry, {
-    onConfigChanged: (ctx) => {
+  registerGuardrailsCoreSurfaces({
+    pi,
+    appendAuditEntry,
+    isInsideCwd,
+    getShellRoutingProfile: () => shellRoutingProfile,
+    onRuntimeConfigChanged: (ctx) => {
       longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);
       pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(ctx.cwd);
       i18nIntentConfig = resolveI18nIntentConfig(ctx.cwd);
       updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
     },
-  });
-
-  registerGuardrailsShellRouteSurface(pi, appendAuditEntry, () => shellRoutingProfile);
-  registerGuardrailsDeliverySurface(pi, appendAuditEntry);
-  registerGuardrailsSafeMutationSurface(pi, appendAuditEntry);
-  registerGuardrailsGitMaintenanceSurface(pi);
-  registerGuardrailsMacroRefactorSurface(pi, appendAuditEntry, isInsideCwd);
-  registerGuardrailsMarkerCheckSurface(pi);
-  registerGuardrailsRecurringFailureSurface(pi);
-  registerGuardrailsStructuredIoSurface(pi, appendAuditEntry, isInsideCwd);
-  registerGuardrailsStructuredInterviewSurface(pi);
-  registerGuardrailsAutonomyLaneSurface(pi);
-  registerGuardrailsUnattendedContinuationSurface(pi);
-  registerGuardrailsUnattendedRehearsalSurface(pi);
-  registerGuardrailsValidationMethodSurface(pi);
-  registerGuardrailsToolHygieneSurface(pi);
-  registerGuardrailsGrowthMaturitySurface(pi);
-  registerGuardrailsAgentSpawnReadinessSurface(pi);
-  registerGuardrailsOpsCalibrationSurface(pi);
-  registerGuardrailsShellSpoofingScoreSurface(pi);
-  registerGuardrailsI18nLintSurface(pi);
-  registerGuardrailsBackgroundProcessSurface(pi);
-  registerGuardrailsHumanConfirmationSurface(pi);
-  registerGuardrailsLaneQueueSurface({
-    pi,
-    appendAuditEntry,
-    runtime: {
+    laneQueueRuntime: {
       getLongRunIntentQueueConfig: () => longRunIntentQueueConfig,
       getLongRunProviderRetryConfig: () => longRunProviderRetryConfig,
       getLongRunLoopRuntimeState: () => longRunLoopRuntimeState,

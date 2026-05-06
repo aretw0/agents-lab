@@ -19796,7 +19796,7 @@
     {
       "id": "TASK-BUD-886",
       "description": "Extract the next low-risk guardrails-core.ts seam toward the final below-1000 line-budget target.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-874",
@@ -19814,7 +19814,30 @@
         "Do not alter provider budget governor behavior, auto-dispatch semantics, protected-scope policy, or context-watchdog public API."
       ],
       "milestone": "architecture-runway-implementation",
-      "notes": "[auto-seed] After TASK-BUD-885, line_budget_snapshot shows only guardrails-core.ts remains above 1000. Next slice should follow TASK-BUD-874 audit: prefer eventSurfaceRuntime factory, lifecycle helper, or tool-call guard; avoid auto-drain extraction unless explicitly scoped with extra tests.\n[provenance:human] source_task=TASK-BUD-874 reason=User wants to kill the last >1000 TS surfaces while keeping local-safe/protected boundaries intact."
+      "notes": "[auto-seed] After TASK-BUD-885, line_budget_snapshot shows only guardrails-core.ts remains above 1000. Next slice should follow TASK-BUD-874 audit: prefer eventSurfaceRuntime factory, lifecycle helper, or tool-call guard; avoid auto-drain extraction unless explicitly scoped with extra tests.\n[provenance:human] source_task=TASK-BUD-874 reason=User wants to kill the last >1000 TS surfaces while keeping local-safe/protected boundaries intact.\n[slice-start] Reload validated TASK-BUD-884 live quota tools. quota tools now run, but current data source scans C:\\Users\\aretw\\.pi\\agent\\sessions and misses sandbox sessions; record this for provider-economy follow-up. Starting bounded guardrails-core extraction; avoid provider/model/API behavior changes.\n[complete] Extracted tool-call guard and surface registration seams; guardrails-core.ts now 1240 lines with 1250-line ratchet. Remaining below-1000 work should be separate follow-up slice.",
+      "verification": "VERIFY-BUD-886"
+    },
+    {
+      "id": "TASK-BUD-887",
+      "description": "Extract the next low-risk guardrails-core.ts seam to continue toward the <=1000 line-budget target.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-886"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-*.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Move one additional cohesive low-risk seam from guardrails-core.ts into a dedicated guardrails-core-* module without changing public guard behavior.",
+        "Reduce guardrails-core.ts materially below the current 1240-line level and ratchet the orchestrator budget accordingly.",
+        "Run guardrails-core-orchestrator-budget.test.ts plus focal tests for the touched seam.",
+        "Do not alter provider budget governor behavior, auto-dispatch semantics, protected-scope policy, or context-watchdog public API."
+      ],
+      "milestone": "architecture-runway-implementation",
+      "notes": "[auto-seed] TASK-BUD-886 reduced guardrails-core.ts to 1240 lines but line_budget_snapshot still reports one file above the 1000-line watch threshold. Prefer lifecycle/eventSurfaceRuntime/default-state extraction before touching auto-drain semantics."
     }
   ]
 }

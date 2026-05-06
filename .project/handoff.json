@@ -1,56 +1,51 @@
 {
-  "timestamp": "2026-05-06T01:09:05.324Z",
-  "context": "Completed post-compact local-safe continuation. TASK-BUD-884 fixed quota-visibility output-policy binding on disk and added fresh-runtime reg [snip] TASK-BUD-849 remains protected/parked. [truncated:+450 chars]",
+  "timestamp": "2026-05-06T01:23:14.157Z",
+  "context": "Completed TASK-BUD-886 local-safe guardrails-core extraction after reload validation. Extracted tool-call guard and surface registration seam [snip] lveQuotaToolOutputPolicy binding error. [truncated:+245 chars]",
+  "current_tasks": [
+    "TASK-BUD-887"
+  ],
   "next_actions": [
-    "Commit this checkpoint/task seed if dirty.",
-    "Run /reload before trusting live quota_visibility_status/windows/provider_budgets; current liv [snip] otaToolOutputPolicy error. [truncated:+41 chars]",
-    "Next local-safe task: TASK-BUD-886, extract a low-risk guardrails-core.ts seam per TASK-BUD-87 [snip] arately scoped and tested. [truncated:+110 chars]"
+    "Commit TASK-BUD-886 code/board checkpoint if dirty.",
+    "Continue TASK-BUD-887 as the next local-safe extraction if runway remains: prefer lifecycle/ev [snip] arately scoped and tested. [truncated:+85 chars]",
+    "Provider-economy follow-up remains parked/local-planning only: quota visibility scans C:\\Users [snip] sses sandbox session logs. [truncated:+42 chars]"
   ],
   "blockers": [
-    "/reload required for live quota tools to reflect TASK-BUD-884 fix.",
-    "Only remaining >1000 TS surface is guardrails-core.ts; extraction is local-saf [snip] he next slice bounded. [truncated:+34 chars]"
+    "TASK-BUD-849 remains protected/parked for provider/model/cost/API changes with [snip] explicit human focus. [truncated:+3 chars]",
+    "guardrails-core.ts remains above 1000 lines (1240), so below-watch target need [snip] ollow-up TASK-BUD-887. [truncated:+3 chars]"
   ],
   "recent_validation": [
-    "TASK-BUD-884: pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts [snip] e passed, 35 tests passed. [truncated:+8 chars]",
-    "TASK-BUD-885: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts pac [snip] s passed, 76 tests passed. [truncated:+127 chars]",
-    "TASK-BUD-885: targeted TypeScript probe for guardrails-core-autonomy-lane-common/helpers returned no output."
-  ],
-  "recent_commits": [
-    "459df0fe fix(quota): bind output policy helpers",
-    "e6a33de9 refactor(autonomy): extract lane common helpers"
+    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts pac [snip] les passed, 9 tests passed [truncated:+282 chars]",
+    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts pac [snip] es passed, 37 tests passed [truncated:+623 chars]",
+    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts -> [snip] ile passed, 2 tests passed [truncated:+3 chars]"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-885",
+    "focus": "TASK-BUD-887",
     "canonical_links": [
-      "task:TASK-BUD-885",
-      "task:TASK-BUD-884",
-      "commit:459df0fe"
+      "task:TASK-BUD-887",
+      "task:TASK-BUD-886",
+      "task:TASK-BUD-884"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T01:09:05.324Z",
+    "generatedAtIso": "2026-05-06T01:23:14.157Z",
     "level": "ok",
-    "percent": 33,
+    "percent": 28,
     "action": "continue",
-    "recommendation": "commit-checkpoint-then-continue-task-bud-886-after-reload-or-as-local-safe-code-slice",
-    "focus_task_status": "completed"
+    "recommendation": "commit-task-bud-886-then-continue-task-bud-887-local-safe"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T01:09:05.324Z",
+      "atIso": "2026-05-06T01:23:14.157Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 33,
+      "percent": 28,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-checkpoint-then-continue-task-bud-886-after-reload-or-as-local-safe-code-slice"
+      "recommendation": "commit-task-bud-886-then-continue-task-bud-887-local-safe"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-885"
   ]
 }
