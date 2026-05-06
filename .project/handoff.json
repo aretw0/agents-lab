@@ -1,21 +1,23 @@
 {
-  "timestamp": "2026-05-06T18:02:36.246Z",
-  "context": "Micro-slice final de higiene concluída: normalizei todos os 65 itens issues com status resolved/closed sem resolved_by em .project/issues.jso [snip] ed=0. project-validate permanece clean. [truncated:+143 chars]",
+  "timestamp": "2026-05-06T18:03:53.253Z",
+  "context": "Estado final da limpeza de dívida de board alcançado nesta sequência: .project/tasks.json e .project/issues.json normalizados sem dívida resi [snip] e aguardo resolução de gate de parada. [truncated:+236 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "Context-watch action: level=compact 71% (compact-now) · Compact now and continue from checkpoint.",
-    "decidir em 1 ação se TASK-BUD-849 pode encerrar com board debt limpa e handoff consolidado",
-    "se não, manter micro-slices sem ampliar escopo"
+    "Context-watch action: level=compact 73% (compact-now) · Compact now and continue from checkpoint.",
+    "aguardar resolução de stop-conditions para retomar fluxo normal",
+    "manter contexto baixo e só abrir novas frentes com handoff limpo"
   ],
   "blockers": [
     "context-watch-compact-required",
-    "stop-conditions:invalid"
+    "stop-conditions:invalid",
+    "stop-condition-present"
   ],
   "recent_validation": [
     "node scripts/project/board-debt-hygiene.mjs --json",
-    "project-validate"
+    "project-validate",
+    "context-watch-continuation-readiness"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
@@ -24,31 +26,31 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T18:02:36.177Z",
+    "generatedAtIso": "2026-05-06T18:03:53.161Z",
     "level": "ok",
-    "percent": 9,
+    "percent": 8,
     "action": "continue",
-    "recommendation": "Board debt zerada; continuar por checkpoints/decisão de continuidade, sem alterar superfície de runtime."
+    "recommendation": "Board debt encerrada; seguir governança de continuidade/graceful stop até que auto-advance seja permitido."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T18:02:36.177Z",
+      "atIso": "2026-05-06T18:03:53.161Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 9,
+      "percent": 8,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Board debt zerada; continuar por checkpoints/decisão de continuidade, sem alterar superfície de runtime."
+      "recommendation": "Board debt encerrada; seguir governança de continuidade/graceful stop até que auto-advance seja permitido."
     },
     {
-      "atIso": "2026-05-06T18:02:36.246Z",
+      "atIso": "2026-05-06T18:03:53.253Z",
       "reason": "message_end",
       "level": "compact",
-      "percent": 71,
+      "percent": 73,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 55,
