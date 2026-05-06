@@ -11,7 +11,7 @@ import { registerContextWatchdogCheckpointBootstrapSurface } from "./context-wat
 import { extractAutoResumePromptValue, readContextWatchFreshnessSignals, summarizeFocusMnemonicsForPreview } from "./context-watchdog-freshness";
 import { contextWatchEventAgeMs, latestContextWatchEvent, resolveCompactCheckpointPersistence, summarizeContextWatchEvent, type ContextWatchHandoffReason } from "./context-watchdog-handoff-events";
 import { buildAutoResumePromptEnvelopeFromHandoff, formatAutoResumeReloadHintShort, handoffFreshnessAdvice, handoffRefreshMode, resolveHandoffFreshness, summarizeAutoResumePromptDiagnostics, toAgeSec, type AutoResumePromptDiagnostics } from "./context-watchdog-handoff";
-import { buildContextWatchOperatorBrief, readProjectPreferredActiveTaskIds, readProjectTaskDescriptionById, readProjectTaskStatusById, toOperatorTaskMnemonic } from "./context-watchdog-operator-brief";
+import { buildContextWatchOperatorBrief, readProjectPreferredActiveTaskIds, readProjectProtectedAutoResumeTaskIds, readProjectTaskDescriptionById, readProjectTaskStatusById, toOperatorTaskMnemonic } from "./context-watchdog-operator-brief";
 import { describeContextWatchDeterministicStopHint, formatContextWatchSteeringStatus, resolveAutoCompactTimeoutPressureGuard, resolveContextWatchAutoCompactTriggerOrigin, resolveContextWatchDeterministicStopSignal, resolveContextWatchOperatingCadence, resolveContextWatchOperatorActionPlan, resolveContextWatchOperatorSignal, resolveContextWatchSignalNoiseExcessive, type ContextWatchAssessment, type ContextWatchdogLevel } from "./context-watchdog-operator-signals";
 import { resolveContextWatchCompactStage } from "./context-watchdog-policy";
 import { reconcileAutoResumeHandoffFocus, resolveAntiParalysisDispatch, resolveCheckpointEvidenceReadyForCalmClose, resolveContextEconomySignal, resolvePreCompactCalmCloseSignal, resolveProgressPreservationSignal, summarizeContextEconomySignal, summarizeProgressPreservationSignal } from "./context-watchdog-progress-signals";
@@ -471,7 +471,7 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 				readHandoffJson(ctx.cwd),
 				runtime.getConfig().handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd) },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(envelope.diagnostics);
 			const focusTaskIds = Array.isArray(envelope.diagnostics.focusTasksListed)

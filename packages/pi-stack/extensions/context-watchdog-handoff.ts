@@ -256,6 +256,7 @@ export type AutoResumePromptEnvelope = {
 export type AutoResumePromptOptions = {
 	taskStatusById?: Record<string, string | undefined>;
 	preferredTaskIds?: string[];
+	excludedTaskIds?: string[];
 };
 
 export type HandoffBoardReconciliationReason = "fresh" | "stale-hand-off" | "missing-task" | "completed-focus" | "board-handoff-divergence";
@@ -523,8 +524,14 @@ function addAutoResumeStaleFocus(stale: string[], staleIds: Set<string>, task: s
 	staleIds.add(normalizedUpper);
 }
 
-function filterAutoResumeFocusTasks(rawTasks: string[], completedTasks: string[] = [], options?: AutoResumePromptOptions): { active: string[]; stale: string[]; staleIds: Set<string> } {
+function containsExcludedAutoResumeTaskId(value: string, excludedIds: Set<string>): boolean {
+	const normalized = value.toUpperCase();
+	return [...excludedIds].some((id) => id === id.toUpperCase() && normalized.includes(id));
+}
+
+function filterAutoResumeFocusTasks(rawTasks: string[], completedTasks: string[] = [], options?: AutoResumePromptOptions): { active: string[]; stale: string[]; staleIds: Set<string>; excludedIds: Set<string> } {
 	const statuses = options?.taskStatusById ?? {};
+	const excludedIds = new Set(normalizeStringArray(options?.excludedTaskIds).flatMap((id) => [id, id.toUpperCase()]));
 	const active: string[] = [];
 	const stale: string[] = [];
 	const staleIds = new Set<string>();
@@ -535,13 +542,14 @@ function filterAutoResumeFocusTasks(rawTasks: string[], completedTasks: string[]
 		const normalizedTask = normalizePromptSegment(task);
 		const normalizedUpper = normalizedTask.toUpperCase();
 		const status = statuses[normalizedTask] ?? statuses[normalizedUpper];
+		if (excludedIds.has(normalizedTask) || excludedIds.has(normalizedUpper)) continue;
 		if (isAutoResumeActiveTaskStatus(status) && !staleIds.has(normalizedUpper)) {
 			active.push(task);
 		} else {
 			addAutoResumeStaleFocus(stale, staleIds, normalizedTask, status ?? "completed");
 		}
 	}
-	return { active, stale, staleIds };
+	return { active, stale, staleIds, excludedIds };
 }
 
 export function buildAutoResumePromptEnvelopeFromHandoff(
@@ -564,11 +572,11 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 	];
 	const derivedTaskHints = filteredCurrentTasks.active.length > 0
 		? []
-		: extractTaskIdsFromTextLines(focusSourceLines).filter((id) => !filteredCurrentTasks.staleIds.has(id) && !filteredCurrentTasks.staleIds.has(id.toUpperCase()));
+		: extractTaskIdsFromTextLines(focusSourceLines).filter((id) => !filteredCurrentTasks.staleIds.has(id) && !filteredCurrentTasks.staleIds.has(id.toUpperCase()) && !filteredCurrentTasks.excludedIds.has(id) && !filteredCurrentTasks.excludedIds.has(id.toUpperCase()));
 	const preferredTaskHints = filteredCurrentTasks.active.length > 0 || derivedTaskHints.length > 0
 		? []
 		: normalizeStringArray(options?.preferredTaskIds)
-			.filter((id) => !filteredCurrentTasks.staleIds.has(id) && !filteredCurrentTasks.staleIds.has(id.toUpperCase()))
+			.filter((id) => !filteredCurrentTasks.staleIds.has(id) && !filteredCurrentTasks.staleIds.has(id.toUpperCase()) && !filteredCurrentTasks.excludedIds.has(id) && !filteredCurrentTasks.excludedIds.has(id.toUpperCase()))
 			.slice(0, 3);
 	const operationalFocusHints = filteredCurrentTasks.active.length > 0 || derivedTaskHints.length > 0 || preferredTaskHints.length > 0
 		? []
@@ -579,13 +587,16 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 		limit: 3,
 	});
 	const blockersPrepared = preparePromptCollection({
-		values: normalizeStringArray(handoff.blockers).filter((b) => !b.startsWith("context-watch-")),
+		values: normalizeStringArray(handoff.blockers)
+			.filter((b) => !b.startsWith("context-watch-"))
+			.filter((b) => !containsExcludedAutoResumeTaskId(b, filteredCurrentTasks.excludedIds)),
 		maxChars: 80,
 		limit: 2,
 	});
 	const nextPrepared = preparePromptCollection({
 		values: normalizeStringArray(handoff.next_actions)
-			.filter((line) => !line.startsWith(CONTEXT_WATCH_ACTION_PREFIX)),
+			.filter((line) => !line.startsWith(CONTEXT_WATCH_ACTION_PREFIX))
+			.filter((line) => !containsExcludedAutoResumeTaskId(line, filteredCurrentTasks.excludedIds)),
 		maxChars: 140,
 		limit: 2,
 		maxCharsForValue: (value, defaultMaxChars) => (
@@ -601,7 +612,7 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 			: undefined,
 	);
 	const linksPrepared = preparePromptCollection({
-		values: sliceMemoryLinks,
+		values: sliceMemoryLinks.filter((link) => !containsExcludedAutoResumeTaskId(link, filteredCurrentTasks.excludedIds)),
 		maxChars: 48,
 		limit: 3,
 	});

@@ -11,6 +11,7 @@ import {
 } from "./context-watchdog-handoff-events";
 import {
 	readProjectPreferredActiveTaskIds,
+	readProjectProtectedAutoResumeTaskIds,
 	readProjectTaskStatusById,
 } from "./context-watchdog-operator-brief";
 import {
@@ -75,6 +76,7 @@ export function handlePostReloadAutoResume(params: {
 	let handoffForDispatch = handoffForPostReloadResume;
 	const taskStatusById = readProjectTaskStatusById(ctx.cwd);
 	const preferredTaskIds = readProjectPreferredActiveTaskIds(ctx.cwd, 3);
+	const excludedTaskIds = readProjectProtectedAutoResumeTaskIds(ctx.cwd);
 	let handoffBoardReconciliation = resolveHandoffBoardReconciliation({
 		handoff: handoffForDispatch,
 		taskStatusById,
@@ -138,7 +140,7 @@ export function handlePostReloadAutoResume(params: {
 			handoffForDispatch,
 			config.handoffFreshMaxAgeMs,
 			nowMs,
-			{ taskStatusById, preferredTaskIds: preferredTaskIds.slice(0, 1) },
+			{ taskStatusById, preferredTaskIds: preferredTaskIds.slice(0, 1), excludedTaskIds },
 		);
 		autoResumeSnapshot.promptDiagnostics = resumeEnvelope.diagnostics;
 		const clearedHandoff = clearAutoResumeAfterReloadIntent(handoffForDispatch);

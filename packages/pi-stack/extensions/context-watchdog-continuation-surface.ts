@@ -26,6 +26,7 @@ import {
 } from "./context-watchdog-reload-intent";
 import {
 	readProjectPreferredActiveTaskIds,
+	readProjectProtectedAutoResumeTaskIds,
 	readProjectTaskStatusById,
 } from "./context-watchdog-operator-brief";
 import { readHandoffJson } from "./context-watchdog-storage";
@@ -118,7 +119,7 @@ export function registerContextWatchdogContinuationSurface(
 				handoff,
 				config.handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd) },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics);
 			const focusTasks = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusTasks", "none-listed");
@@ -275,7 +276,7 @@ export function registerContextWatchdogContinuationSurface(
 				handoff,
 				config.handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd) },
 			);
 			const focusTasks = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusTasks", "none-listed");
 			const staleFocusCount = resumeEnvelope.diagnostics.staleFocusTasks?.length ?? 0;
@@ -334,7 +335,7 @@ export function registerContextWatchdogContinuationSurface(
 				handoff,
 				config.handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById, preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
+				{ taskStatusById, preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd) },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics);
 			const focusTasks = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusTasks", "none-listed");
@@ -421,7 +422,7 @@ export function registerContextWatchdogContinuationSurface(
 				readHandoffJson(ctx.cwd),
 				config.handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById, preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
+				{ taskStatusById, preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd) },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics);
 			const focusTasks = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusTasks", "none-listed");

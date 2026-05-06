@@ -173,6 +173,18 @@ export function taskIdNumericSuffix(id: string): number {
 	return match ? Number(match[1]) : -1;
 }
 
+export function readProjectProtectedAutoResumeTaskIds(cwd: string): string[] {
+	return readProjectTasksArray(cwd)
+		.filter((task): task is { id: string; milestone?: unknown; files?: unknown[] } => {
+			const id = (task as { id?: unknown }).id;
+			if (typeof id !== "string") return false;
+			const milestone = (task as { milestone?: unknown }).milestone;
+			const files = (task as { files?: unknown }).files;
+			return isProtectedAutoResumeTaskMilestone(milestone) || (Array.isArray(files) && files.some(isProtectedAutoResumeTaskPath));
+		})
+		.map((task) => task.id);
+}
+
 export function readProjectPreferredActiveTaskIds(cwd: string, limit = 3): string[] {
 	return readProjectTasksArray(cwd)
 		.filter((task): task is { id: string; status: string; files?: unknown[] } => {

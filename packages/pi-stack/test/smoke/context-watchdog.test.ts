@@ -2144,9 +2144,10 @@ describe("context-watchdog", () => {
 			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
 				timestamp: "2026-04-30T05:43:29.396Z",
 				completed_tasks: ["TASK-BUD-944"],
-				next_actions: ["select next local-safe task via board"],
-				context: "TASK-BUD-944 completed; choose local-safe successor only.",
+				next_actions: ["select next local-safe task via board; do not resume TASK-BUD-999"],
+				context: "TASK-BUD-944 completed; choose local-safe successor only, not parked TASK-BUD-999.",
 				blockers: [],
+				slice_memory: { canonical_links: ["task:TASK-BUD-999"] },
 			}));
 			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
 				{ id: "TASK-BUD-944", status: "completed" },
