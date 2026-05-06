@@ -19951,6 +19951,28 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] User explicitly steered away from line-count-only edits and toward pragmatic convergence on provider assimilation as GitHub Copilot quota nears end and monitors may need openai-codex. [rationale:risk-control] Provider migration requires reliable evidence and explicit protected boundaries; documenting the runway now reduces future rushed provider changes.\n[slice-start] Creating report-only provider assimilation runway and quota guide correction. No provider settings/routing/model/API/cost changes.\n[rationale:risk-control] GitHub Copilot quota winding down and openai-codex budget pressure require a calm evidence-first migration path. A documented report-only runway lets us evaluate Kimi/Claude Code/OpenAI/Copilot roles without making protected changes prematurely.\n[complete] Provider assimilation runway captured as docs/report-only; protected provider activation remains gated by explicit decision packet.",
       "verification": "VERIFY-BUD-892"
+    },
+    {
+      "id": "TASK-BUD-893",
+      "description": "Create a report-only monitor-provider candidate packet for Copilot quota exhaustion fallback planning.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-892"
+      ],
+      "files": [
+        "docs/research/monitor-provider-candidate-packet-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Define the monitor/classifier provider requirements separately from main control-plane model requirements.",
+        "Propose a bounded canary plan for a cheap provider candidate such as Kimi or equivalent without adding settings/API keys/model refs.",
+        "Define evaluation evidence: cost unit, quality, quota telemetry, failure mode, privacy scope, rollback, and stop conditions.",
+        "State the emergency posture for openai-codex if GitHub Copilot expires before a cheap provider is approved.",
+        "No provider routing/model/API/settings/cost cap changes."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] Next pragmatic report-only step after provider assimilation runway: prepare the concrete monitor/classifier candidate packet so Copilot quota exhaustion does not force a rushed openai-codex migration. [rationale:risk-control] Monitors make many small calls; moving them to the wrong provider can silently burn scarce quota or degrade governance.\n[slice-start] Writing monitor/classifier provider candidate packet. This is report-only; no settings, model refs, API keys, routing or monitor migration.\n[rationale:risk-control] Monitor classifiers are high-frequency governance calls. With Copilot quota ending and openai-codex already budget-blocked, we need a pre-approved evidence packet and canary plan before any provider migration.\n[complete] Monitor-provider candidate packet ready; next provider work remains report-only until explicit protected decision packet.",
+      "verification": "VERIFY-BUD-893"
     }
   ]
 }

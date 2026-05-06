@@ -13542,6 +13542,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-06T02:25:49.701Z",
       "evidence": "Created docs/research/provider-assimilation-runway-2026-05.md documenting current post-reload provider-economy evidence, a provider assimilation rubric, candidate postures for GitHub Copilot/openai-codex/Claude Code/Kimi/OpenAI heavy models, and explicit local-safe vs protected boundaries. Updated docs/guides/quota-visibility.md to mention sandbox session roots, source.sessionRoots, and resumed-session event windowing. No provider settings, routing, model, API key, budget cap, or provider switch changes. Validation passed: i18n_lint_text sample -> pass; pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts -> 4 files passed, 83 tests passed; line_budget_snapshot -> recommendation=ok aboveWatch=0."
+    },
+    {
+      "id": "VERIFY-BUD-893",
+      "target": "TASK-BUD-893",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-06T02:28:34.149Z",
+      "evidence": "Created docs/research/monitor-provider-candidate-packet-2026-05.md as report-only planning for Copilot quota exhaustion fallback. The packet separates monitor/classifier requirements from main-model requirements; defines candidate postures for GitHub Copilot, openai-codex, Kimi/equivalent, Claude Code, and OpenAI heavy models; proposes a bounded manual canary for a cheap monitor provider; defines metrics, stop conditions, rollback, and activation decision packet; and states openai-codex as explicit/emergency fallback only while budget-blocked. No provider settings, model refs, API keys, routing, costs, or monitor overrides were changed. Validation passed: i18n_lint_text sample -> pass; pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts -> 3 files passed, 25 tests passed."
     }
   ]
 }
