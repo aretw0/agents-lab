@@ -398,6 +398,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let consecutiveWarnCount = 0;
 	let compactDeferCount = 0;
 	let compactDeferWindowStartedAt = 0;
+	let compactForceWindowStartedAt = 0;
 	let antiParalysisNotifyCountInWindow = 0;
 	let lastAntiParalysisNotifyAt = 0;
 	let lastPreCompactPrepNotifyAt = 0;
@@ -406,6 +407,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		SIGNAL_NOISE_WINDOW_MS,
 		SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
 		FINAL_TURN_CLOSE_HEADROOM_PCT,
+		COMPACT_FORCE_HOLD_MS,
 		CALM_CLOSE_DEFER_THRESHOLD,
 		ANTI_PARALYSIS_GRACE_WINDOW_MS,
 		ANTI_PARALYSIS_NOTIFY_COOLDOWN_MS,
@@ -521,6 +523,16 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
 		});
 		const autoCompactCandidateLevel = assessment.level === "compact" || assessment.level === "checkpoint";
+		if (!autoCompactCandidateLevel) {
+			compactForceWindowStartedAt = 0;
+		} else if (compactForceWindowStartedAt === 0) {
+			compactForceWindowStartedAt = now;
+		}
+		const compactForceWindowMsRemaining = Math.max(
+			0,
+			COMPACT_FORCE_HOLD_MS - Math.max(0, now - compactForceWindowStartedAt),
+		);
+		const compactForceWindowActive = compactForceWindowMsRemaining > 0;
 		const autoCompactState = buildAutoCompactDiagnostics(assessment, config, {
 			nowMs: now,
 			lastAutoCompactAt,
@@ -530,10 +542,16 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			checkpointEvidenceReady: checkpointEvidenceReadyForAutoCompact,
 			reason,
 		}, AUTO_COMPACT_RETRY_DELAY_MS);
+		const autoCompactDecision = compactForceWindowActive && autoCompactState.decision.trigger
+			? { ...autoCompactState.decision, trigger: false, reason: "pending-messages" as const }
+			: autoCompactState.decision;
+		const autoCompactRetryDelayMs = compactForceWindowActive && autoCompactState.decision.trigger
+			? Math.max(250, Math.floor(compactForceWindowMsRemaining))
+			: autoCompactState.retryDelayMs;
 		if (
 			autoCompactCandidateLevel
-			&& !autoCompactState.decision.trigger
-			&& isAutoCompactDeferralReason(autoCompactState.decision.reason)
+			&& !autoCompactDecision.trigger
+			&& isAutoCompactDeferralReason(autoCompactDecision.reason)
 		) {
 			if (compactDeferCount === 0) {
 				compactDeferWindowStartedAt = now;
@@ -549,12 +567,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		}
 		const preCompactIdlePrep = resolvePreCompactIdlePrepDispatch({
 			assessmentLevel: assessment.level,
-			decisionReason: autoCompactState.decision.reason,
+			decisionReason: autoCompactDecision.reason,
 			nowMs: now,
 			lastNotifyAtMs: lastPreCompactPrepNotifyAt,
 			cooldownMs: config.cooldownMs,
 			timeoutPressureActive: timeoutPressure.active,
 		});
+
 		if (preCompactIdlePrep.shouldNotify) {
 			lastPreCompactPrepNotifyAt = now;
 		}
@@ -564,7 +583,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				{
 					atIso: new Date(now).toISOString(),
 					assessmentLevel: assessment.level,
-					decisionReason: autoCompactState.decision.reason,
+					decisionReason: autoCompactDecision.reason,
 					dispatchReason: preCompactIdlePrep.reason,
 					recommendation: preCompactIdlePrep.recommendation,
 					compactDeferCount,
@@ -617,7 +636,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const deterministicStop = resolveContextWatchDeterministicStopSignal({
 			assessmentLevel: assessment.level,
 			operatorSignal,
-			autoCompactDecision: autoCompactState.decision.reason,
+			autoCompactDecision: autoCompactDecision.reason,
 		});
 		const deterministicStopHint = describeContextWatchDeterministicStopHint(deterministicStop);
 		const operatorAction = resolveContextWatchOperatorActionPlan({ deterministicStop, operatorSignal });
@@ -658,7 +677,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		}
 		const calmCloseSignal = resolvePreCompactCalmCloseSignal({
 			assessmentLevel: assessment.level,
-			decisionReason: autoCompactState.decision.reason,
+			decisionReason: autoCompactDecision.reason,
 			checkpointEvidenceReady: checkpointEvidenceReadyForAutoCompact,
 			deferCount: compactDeferCount,
 			deferThreshold: CALM_CLOSE_DEFER_THRESHOLD,
@@ -682,7 +701,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					atIso: new Date(now).toISOString(),
 					deferCount: compactDeferCount,
 					deferThreshold: CALM_CLOSE_DEFER_THRESHOLD,
-					decisionReason: autoCompactState.decision.reason,
+					decisionReason: autoCompactDecision.reason,
 					recommendation: calmCloseSignal.recommendation,
 					dispatchReason: antiParalysisDispatch.reason,
 					graceWindowMs: ANTI_PARALYSIS_GRACE_WINDOW_MS,
@@ -695,10 +714,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		}
 		const timeoutPressureGuard = resolveAutoCompactTimeoutPressureGuard({
 			assessmentLevel: assessment.level,
-			autoCompactTrigger: autoCompactState.decision.trigger,
+			autoCompactTrigger: autoCompactDecision.trigger,
 			timeoutPressureActive: timeoutPressure.active,
 		});
-		if (autoCompactState.decision.trigger && !timeoutPressureGuard.blocked) {
+		if (autoCompactDecision.trigger && !timeoutPressureGuard.blocked) {
 			const handoffForPrep = readHandoffJson(ctx.cwd);
 			const handoffTsForPrep = typeof handoffForPrep.timestamp === "string" ? handoffForPrep.timestamp : undefined;
 			const handoffFreshnessForPrep = resolveHandoffFreshness(handoffTsForPrep, now, config.handoffFreshMaxAgeMs);
@@ -785,8 +804,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				);
 			}
 			scheduleAutoCompactRetry(ctx, AUTO_COMPACT_RETRY_DELAY_MS);
-		} else if (autoCompactCandidateLevel && autoCompactState.retryDelayMs !== undefined) {
-			scheduleAutoCompactRetry(ctx, autoCompactState.retryDelayMs);
+		} else if (autoCompactCandidateLevel && autoCompactRetryDelayMs !== undefined) {
+			scheduleAutoCompactRetry(ctx, autoCompactRetryDelayMs);
 		} else {
 			clearAutoCompactRetryTimer();
 		}
@@ -841,9 +860,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				level: assessment.level,
 				percent: assessment.percent,
 				action: assessment.action,
-				autoCompactDecision: autoCompactState.decision.reason,
-				autoCompactTrigger: autoCompactState.decision.trigger,
-				retryScheduled: autoCompactState.retryDelayMs !== undefined,
+				autoCompactDecision: autoCompactDecision.reason,
+				autoCompactTrigger: autoCompactDecision.trigger,
+				retryScheduled: autoCompactRetryDelayMs !== undefined,
 				calmCloseReady: calmCloseSignal.calmCloseReady,
 				checkpointEvidenceReady: calmCloseSignal.checkpointEvidenceReady,
 				operatorActionKind: operatorAction.kind,
@@ -926,6 +945,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		consecutiveWarnCount = 0;
 		compactDeferCount = 0;
 		compactDeferWindowStartedAt = 0;
+		compactForceWindowStartedAt = 0;
 		antiParalysisNotifyCountInWindow = 0;
 		lastAntiParalysisNotifyAt = 0;
 		lastPreCompactPrepNotifyAt = 0;
@@ -984,6 +1004,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			consecutiveWarnCount = 0;
 			compactDeferCount = 0;
 			compactDeferWindowStartedAt = 0;
+			compactForceWindowStartedAt = 0;
 			antiParalysisNotifyCountInWindow = 0;
 			lastAntiParalysisNotifyAt = 0;
 			lastPreCompactPrepNotifyAt = 0;

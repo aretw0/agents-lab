@@ -831,7 +831,7 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor",
-      "resolved_by": "false-positive-current-turn"
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mot6fjxg",
@@ -843,7 +843,7 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor",
-      "resolved_by": "false-positive-current-turn"
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mou3ee40",
@@ -856,6 +856,17 @@
       "package": "pi-stack",
       "source": "monitor",
       "resolved_by": "TASK-BUD-913"
+    },
+    {
+      "id": "fragility-fragility-mouaz4e1",
+      "title": "The agent responded with an empty message despite the user reporting it kept working and not listening, leaving the request unresolved without acknowledgment.",
+      "body": "The agent responded with an empty message despite the user reporting it kept working and not listening, leaving the request unresolved without acknowledgment.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }

@@ -1,53 +1,62 @@
 {
-  "timestamp": "2026-05-06T16:36:14.117Z",
-  "context": "Reapresentando continuidade após atualização do backlog de planejamento TASK-BUD-933; mantendo foco local-safe e sem mudança de escopo proteg [snip] idando próximo ciclo sem auto-dispatch. [truncated:+8 chars]",
+  "timestamp": "2026-05-06T17:45:26.735Z",
+  "context": "Avançamos com a primitiva de board-debt hygiene (classificação hard/soft/parked) e registramos evidência. Não há novas violações hard no boar [snip] ue com blocos pequenos + handoff curto. [truncated:+194 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "Usar o plano de regras/fixtures de TASK-BUD-933 e só depois abrir implementação no slice seguinte.",
-    "Executar checkpoints por contrato sem alterar provider/model/settings."
+    "Context-watch action: level=compact 70% (compact-now) · Compact now and continue from checkpoint.",
+    "se necessário, executar o novo script em modo --strict em janela separada para limpeza de back [snip] backfill histórico/legacy [truncated:+53 chars]",
+    "seguir monitorando context_watch_continuation_readiness apenas entre slices"
   ],
   "blockers": [
-    "context-watch-checkpoint-required"
+    "context-watch-compact-required",
+    "git-state:invalid / stop-conditions:invalid"
   ],
   "recent_validation": [
-    "context_watch_continuation_readiness",
-    "local_continuity_audit",
-    "turn_boundary_decision_packet"
-  ],
-  "recent_commits": [
-    "907de330",
-    "aeb09acc"
+    "node scripts/project/board-debt-hygiene.mjs --json",
+    "project-validate",
+    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
     "canonical_links": [
-      "task:TASK-BUD-849",
-      "task:TASK-BUD-933",
-      "commit:907de330"
+      "task:TASK-BUD-849"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T16:36:14.117Z",
-    "level": "checkpoint",
-    "percent": 55,
-    "action": "checkpoint-refresh",
-    "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    "generatedAtIso": "2026-05-06T17:45:26.656Z",
+    "level": "ok",
+    "percent": 18,
+    "action": "continue",
+    "recommendation": "Continuar TASK-BUD-849 com micro-slices até aprovação de limpeza de dívida soft."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T16:36:14.117Z",
+      "atIso": "2026-05-06T17:45:26.656Z",
       "reason": "manual_checkpoint",
-      "level": "checkpoint",
-      "percent": 55,
+      "level": "ok",
+      "percent": 18,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+      "recommendation": "Continuar TASK-BUD-849 com micro-slices até aprovação de limpeza de dívida soft."
+    },
+    {
+      "atIso": "2026-05-06T17:45:26.735Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 70,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }
