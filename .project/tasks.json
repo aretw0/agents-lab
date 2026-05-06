@@ -20625,7 +20625,7 @@
     {
       "id": "TASK-BUD-922",
       "description": "Create a local-safe slice validation matrix for 0.8.0 compounding work.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-919"
@@ -20640,7 +20640,8 @@
         "Validate with marker check and i18n lint."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:quality] A validation matrix reduces per-slice ambiguity and lets low-interaction continuation proceed safely."
+      "notes": "[rationale:quality] A validation matrix reduces per-slice ambiguity and lets low-interaction continuation proceed safely.\n[start] Executing docs-only validation matrix slice from the stocked 0.8 local-safe queue.\n[complete] Validation matrix created; rollback default remains commit revert and protected scopes stop before mutation.",
+      "verification": "VERIFY-BUD-922"
     },
     {
       "id": "TASK-BUD-923",

@@ -13776,6 +13776,15 @@
       "method": "board-seed+charter+readiness reports",
       "timestamp": "2026-05-06T14:24:50.293Z",
       "evidence": "Seeded 7 planned continuation slices TASK-BUD-922..928 under milestone 0.8-local-safe-compounding-lane, each with declared files, validation cue, rollback/stop framing in acceptance criteria, and dependencies on TASK-BUD-919. Updated docs/research/0-8-local-safe-compounding-lane.md with the stocked queue. Validation: safe_marker_check passed for stocked queue markers; git clean after commit c7a13e19; board dependency health has no missing dependencies or cycles. Autonomy readiness is expected to improve after completing TASK-BUD-919 because the stocked tasks depend on it; remaining protected-coupling warnings are parked/protected-adjacent templates, not authorized execution."
+    },
+    {
+      "id": "VERIFY-BUD-922",
+      "target": "TASK-BUD-922",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc+marker+i18n",
+      "timestamp": "2026-05-06T14:28:06.419Z",
+      "evidence": "Created docs/research/0-8-local-safe-slice-validation-matrix.md with validation gates, rollback cues, and stop conditions for docs-only, board-only, test-only, helper/report-only, cleanup, delegation readiness, long-run prep, monitor-economy prep, and CI/CD prep slices. Validation: safe_marker_check matched 8/8 anchors; i18n_lint_text passed for pt-BR summary."
     }
   ]
 }
