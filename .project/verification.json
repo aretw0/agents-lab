@@ -13443,6 +13443,15 @@
       "method": "test",
       "timestamp": "2026-05-06T00:36:10.174Z",
       "evidence": "Added packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts. The test registers monitor-provider-patch with a mock ExtensionAPI, executes /monitor-provider status with a mock context/modelRegistry, and verifies resolved default-provider map, model health ok, divergent override warning, hedge monitor state, and no setEditorText/apply behavior. Validation: pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 2 files passed, 5 tests passed; node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 tests passed."
+    },
+    {
+      "id": "VER-BUD-1247",
+      "target": "TASK-BUD-882",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T00:39:14.320Z",
+      "evidence": "Extracted monitor issue template schema helpers from packages/pi-stack/extensions/monitor-provider-patch.ts into packages/pi-stack/extensions/monitor-provider-issue-template.ts and re-exported ensureMonitorIssueWriteTemplateSchema from monitor-provider-patch.ts to preserve the existing contract. monitor-provider-patch.ts reduced from ~1031 lines after import fix to 947 lines; new module is 89 lines. Schema-compatible .project/issues.json template fields and advisory monitor semantics are unchanged. Validation: pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 2 files passed, 5 tests passed; node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 tests passed; targeted TypeScript missing-name/module probe returned no output."
     }
   ]
 }

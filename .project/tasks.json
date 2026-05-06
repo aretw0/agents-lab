@@ -19699,6 +19699,29 @@
       "milestone": "architecture-runway-implementation",
       "notes": "[auto-seed] Local-safe continuation after TASK-BUD-873..879 completed and no eligible task remained. Derived from TASK-BUD-876 audit recommendation to add status regression coverage before output extraction; preserves provider/model/settings semantics.\n[provenance:human] source_task=TASK-BUD-876 reason=User requested continuous local-safe work; completed audit identified missing status coverage and a status import regression was already fixed in TASK-BUD-880.\n[slice-complete] Status surface regression coverage added before output extraction. No provider/model/settings semantics changed.",
       "verification": "VER-BUD-1246"
+    },
+    {
+      "id": "TASK-BUD-882",
+      "description": "Extract monitor-provider issue template schema helpers into a dedicated module without changing monitor semantics.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-876",
+        "TASK-BUD-881"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-provider-patch.ts",
+        "packages/pi-stack/extensions/monitor-provider-issue-template.ts",
+        "packages/pi-stack/test/monitor-provider-patch.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "Move issue-template constants and ensureMonitorIssueWriteTemplateSchema into a dedicated module with the same exported contract from monitor-provider-patch.ts.",
+        "Preserve schema-compatible .project/issues.json fields and monitor advisory semantics.",
+        "Existing monitor-provider tests and status surface regression pass."
+      ],
+      "milestone": "architecture-runway-implementation",
+      "notes": "[auto-seed] Local-safe implementation from TASK-BUD-876 audit. This is the smallest recommended extraction: issue-template schema helpers have a narrow boundary and clear regression coverage.\n[provenance:human] source_task=TASK-BUD-876 reason=User requested continuous local-safe work; no eligible board tasks remained after interview packet, so continue with audited low-risk extraction.\n[slice-complete] Extracted monitor-provider issue-template helpers with contract-preserving re-export and focal tests green.",
+      "verification": "VER-BUD-1247"
     }
   ]
 }
