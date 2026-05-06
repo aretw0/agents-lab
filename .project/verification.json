@@ -14282,6 +14282,15 @@
       "method": "document marker validation",
       "timestamp": "2026-05-06T22:46:11.126Z",
       "evidence": "Cleaned lane document by replacing the opinionated recommendation/meta-learning section with objective operator selection for Candidate D and a note that rationale belongs in the turn-ending operator packet. Updated `docs/guides/mini-handoff-template.md` with a `Resposta final ao operador (quando parar)` block requiring result, validation, comparison/recommendation in final response, needed decision, safe next step, and blockers/limits. Validation: lane marker check 4/4; mini-handoff marker check 4/4; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-955-HARD-INTENT-FINAL",
+      "target": "TASK-BUD-955",
+      "target_type": "task",
+      "status": "passed",
+      "method": "document marker validation",
+      "timestamp": "2026-05-06T22:50:03.316Z",
+      "evidence": "Updated `docs/guides/mini-handoff-template.md` final operator response block to explicitly require hard-intent snapshot from `turn_boundary_decision_packet` (`decision`, `reasonCode`, `humanActionRequired`, `authorization`, `nextAutoStep`) plus continuation/material blockers. It now separates hard-intent blockers from soft-intent context and requires ask-human + one safe next step when hard intent blocks. Validation: safe_marker_check -> 5/5 markers; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }

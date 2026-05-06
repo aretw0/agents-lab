@@ -992,6 +992,18 @@
       "package": "pi-stack",
       "source": "monitor",
       "resolved_by": "TASK-BUD-950"
+    },
+    {
+      "id": "fragility-fragility-moundpy8",
+      "title": "The agent responded with an empty message, leaving the user's request unresolved without acknowledging any blockage.",
+      "body": "Stale monitor issue resolved by later evidence: previous turn produced substantive Candidate D/operator-response cleanup, validation, commits, and final status. Current turn also acknowledged hard-intent gap and is correcting the template.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "resolved",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor",
+      "resolved_by": "TASK-BUD-954"
     }
   ]
 }

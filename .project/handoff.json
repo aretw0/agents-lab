@@ -1,49 +1,49 @@
 {
-  "timestamp": "2026-05-06T22:46:22.888Z",
-  "context": "TASK-BUD-954 concluída: lane doc limpo para registrar apenas seleção objetiva do Candidate D; recomendação/meta-learning movidos para padrão [snip] pelo operador como primeiro candidato. [truncated:+89 chars]",
+  "timestamp": "2026-05-06T22:50:15.109Z",
+  "context": "TASK-BUD-955 concluída: mini-handoff template agora explicita hard-intent na resposta final ao operador: snapshot do turn_boundary_decision_p [snip] ility moundpy8 via evidência posterior. [truncated:+136 chars]",
   "next_actions": [
-    "commit docs + board/handoff",
-    "materializar Candidate D como task concreta de checklist local-safe",
-    "antes de dispatch, gerar packet e pedir confirmação explícita"
+    "commit docs + board/handoff/issues",
+    "Candidate D aceito; próxima fatia é materializar checklist local-safe como task concreta",
+    "antes de dispatch de agente, usar hard-intent packet e pedir confirmação explícita"
   ],
   "blockers": [
-    "agent dispatch not authorized yet; only Candidate D selection accepted"
+    "agent dispatch not authorized yet"
   ],
   "recent_validation": [
-    "lane marker check: 4/4",
-    "mini-handoff marker check: 4/4",
-    "project-validate: clean"
+    "safe_marker_check mini-handoff: 5/5",
+    "project-validate: clean",
+    "git diff --check: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-954",
+    "focus": "TASK-BUD-955",
     "canonical_links": [
-      "task:TASK-BUD-954"
+      "task:TASK-BUD-955"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T22:46:22.888Z",
+    "generatedAtIso": "2026-05-06T22:50:15.109Z",
     "level": "ok",
-    "percent": 45,
+    "percent": 48,
     "action": "continue",
-    "recommendation": "Commitar; próxima fatia é criar checklist Candidate D localmente ou preparar pacote de decisão para canary.",
+    "recommendation": "Commitar; finalizar resposta com hard-intent atual: ask-human/sem dispatch.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T22:46:22.888Z",
+      "atIso": "2026-05-06T22:50:15.109Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 45,
+      "percent": 48,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar; próxima fatia é criar checklist Candidate D localmente ou preparar pacote de decisão para canary."
+      "recommendation": "Commitar; finalizar resposta com hard-intent atual: ask-human/sem dispatch."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-954"
+    "TASK-BUD-955"
   ]
 }

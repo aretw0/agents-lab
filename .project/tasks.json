@@ -21341,6 +21341,27 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "Feedback do operador: recomendação e meta-learning não deveriam ficar no arquivo canônico; deveriam aparecer na resposta final/packet de parada para facilitar decisão humana.\n[provenance:human] source_task=TASK-BUD-953 reason=Operador aceitou Candidate D e apontou que o padrão correto é sintetizar recomendação na resposta final, não poluir o documento canônico.\n[closure] Operator feedback incorporated: canonical lane artifact is cleaner; final-turn operator response standard now captures recommendations/comparisons where they belong.",
       "verification": "VER-BUD-954-FINAL-OPERATOR-PACKET"
+    },
+    {
+      "id": "TASK-BUD-955",
+      "description": "[P1/local-safe] Tornar explícito o hard-intent na resposta final de parada do operador.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-954"
+      ],
+      "files": [
+        "docs/guides/mini-handoff-template.md"
+      ],
+      "acceptance_criteria": [
+        "Bloco de resposta final deve exigir snapshot hard-intent com decisão do `turn_boundary_decision_packet`, `humanActionRequired`, `authorization`, blockers e `nextAutoStep`.",
+        "Bloco deve separar hard-intent bloqueante de soft-intent/contexto útil para evitar recomendações frouxas.",
+        "Bloco deve dizer que, se hard-intent bloquear, a resposta final deve parar em pergunta objetiva + próximo passo seguro, sem dispatch implícito.",
+        "Validar com marker check, project-validate e git diff --check."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Feedback do operador: a atualização anterior ficou só em soft intent; já existia estrutura hard-intent (`turn_boundary_decision_packet`) para final de turno e ela precisa aparecer explicitamente no template de resposta final.\n[provenance:human] source_task=TASK-BUD-954 reason=Operador apontou lacuna no protocolo de final de turno: hard intent deve ser explícito, não apenas recomendação suave.\n[closure] Operator feedback incorporated: final-turn response standard now explicitly starts from hard intent instead of only soft recommendation/context.",
+      "verification": "VER-BUD-955-HARD-INTENT-FINAL"
     }
   ]
 }
