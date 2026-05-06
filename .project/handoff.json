@@ -1,50 +1,66 @@
 {
-  "timestamp": "2026-05-06T16:02:04.450Z",
-  "context": "Após compact e recálculo de gatilhos, tentei remover bloqueios redundantes do handoff para focar no único impeditivo restante (validation/next-step).",
+  "timestamp": "2026-05-06T16:09:01.864Z",
+  "context": "Backlog do follow-up sanitizado: criado TASK-BUD-933 para incorporar detector determinístico de açúcar sintático ao score de higiene report-o [snip] estes robustos e exceções justificadas. [truncated:+10 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "Reexecutar hard-gates com validação conheci-da para decidir o próximo passo.",
-    "Se continuar bloqueado, aguardar decisão humana para trocar foco para próxima tarefa local-safe."
+    "Context-watch action: level=checkpoint 56% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
+    "Seguir tarefa ativa TASK-BUD-849 até o próximo slice local-safe, com prioridade em organização [snip] providers/models settings. [truncated:+36 chars]",
+    "Se houver novo bloqueio hard-local, fazer pausa com decisão ask-human + recomendação if/then antes de continuar."
   ],
-  "blockers": [],
+  "blockers": [
+    "context-watch-checkpoint-required"
+  ],
   "recent_validation": [
-    "autonomy_lane_material_readiness_packet",
+    "turn_boundary_decision_packet",
     "context_watch_continuation_readiness",
     "local_continuity_audit"
   ],
   "recent_commits": [
-    "dd35c44e",
-    "d4d4308c"
+    "39901633"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
     "canonical_links": [
       "task:TASK-BUD-849",
-      "commit:dd35c44e"
+      "task:TASK-BUD-933",
+      "commit:39901633"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T16:02:04.450Z",
-    "level": "compact",
-    "percent": 67,
+    "generatedAtIso": "2026-05-06T16:09:01.788Z",
+    "level": "checkpoint",
+    "percent": 53,
     "action": "checkpoint-refresh",
-    "recommendation": "Blockers locais em handoff limpos; validação local-safe de TASK-BUD-849 foi explicitada no acceptance_criteria."
+    "recommendation": "Handoff atualizado com criação de backlog e preparação para continuar local-safe em silêncio de parâmetros sensíveis."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T16:02:04.450Z",
+      "atIso": "2026-05-06T16:09:01.788Z",
       "reason": "manual_checkpoint",
-      "level": "compact",
-      "percent": 67,
+      "level": "checkpoint",
+      "percent": 53,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Blockers locais em handoff limpos; validação local-safe de TASK-BUD-849 foi explicitada no acceptance_criteria."
+      "recommendation": "Handoff atualizado com criação de backlog e preparação para continuar local-safe em silêncio de parâmetros sensíveis."
+    },
+    {
+      "atIso": "2026-05-06T16:09:01.864Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 56,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ]
 }
