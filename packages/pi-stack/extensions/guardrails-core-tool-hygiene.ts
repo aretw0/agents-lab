@@ -28,8 +28,49 @@ export interface ToolHygieneScorecard {
     hideBeforeLongLoop: number;
     manualOverrideLike: number;
   };
+  syntaxHygiene: SyntaxHygieneSummary;
   rows: ToolHygieneRow[];
   evidence: string;
+}
+
+export type SyntaxHygieneLanguage = "javascript" | "typescript";
+export type SyntaxHygieneSeverity = "info" | "warn" | "high";
+export type SyntaxHygieneDecision = "requires-rationale" | "exception-recorded";
+
+export interface SyntaxHygieneException {
+  patternId: string;
+  path?: string;
+  line?: number;
+  reason: string;
+}
+
+export interface SyntaxHygieneSource {
+  path: string;
+  language?: SyntaxHygieneLanguage;
+  content: string;
+  exceptions?: SyntaxHygieneException[];
+}
+
+export interface SyntaxHygieneFinding {
+  patternId: string;
+  language: SyntaxHygieneLanguage;
+  path: string;
+  line: number;
+  severity: SyntaxHygieneSeverity;
+  snippet: string;
+  decision: SyntaxHygieneDecision;
+  rationale?: string;
+}
+
+export interface SyntaxHygieneSummary {
+  scanned: number;
+  findings: number;
+  bySeverity: Record<SyntaxHygieneSeverity, number>;
+  requiresRationale: number;
+  exceptionRecorded: number;
+  recommendationCode: "syntax-hygiene-clear" | "syntax-hygiene-rationale-required";
+  evidence: string;
+  rows: SyntaxHygieneFinding[];
 }
 
 export type AgentsAsToolsCalibrationRecommendationCode =
@@ -119,6 +160,110 @@ function lowerText(tool: ToolHygieneInputTool): string {
   return `${tool.name} ${tool.description ?? ""}`.toLowerCase();
 }
 
+function inferSyntaxHygieneLanguage(source: SyntaxHygieneSource): SyntaxHygieneLanguage | undefined {
+  if (source.language) return source.language;
+  const path = source.path.toLowerCase();
+  if (path.endsWith(".ts") || path.endsWith(".tsx")) return "typescript";
+  if (path.endsWith(".js") || path.endsWith(".jsx") || path.endsWith(".mjs") || path.endsWith(".cjs")) return "javascript";
+  return undefined;
+}
+
+function countMatches(text: string, pattern: RegExp): number {
+  return text.match(pattern)?.length ?? 0;
+}
+
+function countTernaryQuestions(line: string): number {
+  return countMatches(line.replace(/\?\.|\?\?/g, ""), /\?/g);
+}
+
+function findSyntaxException(source: SyntaxHygieneSource, patternId: string, line: number): SyntaxHygieneException | undefined {
+  return (source.exceptions ?? []).find((exception) => {
+    if (exception.patternId !== patternId) return false;
+    if (exception.path && exception.path !== source.path) return false;
+    if (exception.line !== undefined && exception.line !== line) return false;
+    return exception.reason.trim().length > 0;
+  });
+}
+
+function makeSyntaxFinding(input: {
+  source: SyntaxHygieneSource;
+  language: SyntaxHygieneLanguage;
+  patternId: string;
+  line: number;
+  severity: SyntaxHygieneSeverity;
+  snippet: string;
+}): SyntaxHygieneFinding {
+  const exception = findSyntaxException(input.source, input.patternId, input.line);
+  return {
+    patternId: input.patternId,
+    language: input.language,
+    path: input.source.path,
+    line: input.line,
+    severity: input.severity,
+    snippet: input.snippet.trim().slice(0, 160),
+    decision: exception ? "exception-recorded" : "requires-rationale",
+    rationale: exception?.reason,
+  };
+}
+
+export function detectSyntaxHygieneFindings(source: SyntaxHygieneSource): SyntaxHygieneFinding[] {
+  const language = inferSyntaxHygieneLanguage(source);
+  if (!language) return [];
+  const findings: SyntaxHygieneFinding[] = [];
+  const lines = String(source.content ?? "").split(/\r?\n/);
+  lines.forEach((line, index) => {
+    const lineNo = index + 1;
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("//") || trimmed.startsWith("*")) return;
+
+    if (countMatches(trimmed, /\?\./g) >= 3) {
+      findings.push(makeSyntaxFinding({ source, language, patternId: "js-ts-optional-chain-stack", line: lineNo, severity: "warn", snippet: trimmed }));
+    }
+    if (countTernaryQuestions(trimmed) >= 2 && countMatches(trimmed, /:/g) >= 2) {
+      findings.push(makeSyntaxFinding({ source, language, patternId: "js-ts-nested-ternary", line: lineNo, severity: "warn", snippet: trimmed }));
+    }
+    if (countMatches(trimmed, /\.[A-Za-z_$][\w$]*\s*\(/g) >= 4) {
+      findings.push(makeSyntaxFinding({ source, language, patternId: "js-ts-fluent-chain-depth", line: lineNo, severity: "high", snippet: trimmed }));
+    }
+    if (/\b(?:css|gql|graphql|html|markdown|md|sql)\s*`/.test(trimmed) && trimmed.includes("${")) {
+      findings.push(makeSyntaxFinding({ source, language, patternId: "js-ts-inline-dsl-template", line: lineNo, severity: "warn", snippet: trimmed }));
+    }
+  });
+  return findings;
+}
+
+export function buildSyntaxHygieneSummary(input: {
+  sources?: SyntaxHygieneSource[];
+  maxFindings?: number;
+} = {}): SyntaxHygieneSummary {
+  const maxFindings = Math.max(1, Math.min(100, Math.floor(input.maxFindings ?? 25)));
+  const sources = input.sources ?? [];
+  const allFindings = sources.flatMap(detectSyntaxHygieneFindings);
+  const rows = allFindings.slice(0, maxFindings);
+  const bySeverity: Record<SyntaxHygieneSeverity, number> = { info: 0, warn: 0, high: 0 };
+  for (const finding of allFindings) bySeverity[finding.severity] += 1;
+  const requiresRationale = allFindings.filter((finding) => finding.decision === "requires-rationale").length;
+  const exceptionRecorded = allFindings.filter((finding) => finding.decision === "exception-recorded").length;
+  const recommendationCode = requiresRationale > 0 ? "syntax-hygiene-rationale-required" : "syntax-hygiene-clear";
+  const evidence = [
+    `syntax-hygiene: scanned=${sources.length}`,
+    `findings=${allFindings.length}`,
+    `requiresRationale=${requiresRationale}`,
+    `exceptions=${exceptionRecorded}`,
+    `code=${recommendationCode}`,
+  ].join(" ");
+  return {
+    scanned: sources.length,
+    findings: allFindings.length,
+    bySeverity,
+    requiresRationale,
+    exceptionRecorded,
+    recommendationCode,
+    evidence,
+    rows,
+  };
+}
+
 function includesAny(text: string, needles: string[]): boolean {
   return needles.some((needle) => text.includes(needle));
 }
@@ -184,6 +329,7 @@ export function classifyToolHygiene(tool: ToolHygieneInputTool): ToolHygieneRow 
 export function buildToolHygieneScorecard(input: {
   tools: ToolHygieneInputTool[];
   limit?: number;
+  syntaxSources?: SyntaxHygieneSource[];
 }): ToolHygieneScorecard {
   const limit = Math.max(1, Math.min(200, Math.floor(input.limit ?? 80)));
   const rows = [...(input.tools ?? [])]
@@ -215,6 +361,8 @@ export function buildToolHygieneScorecard(input: {
     manualOverrideLike: rows.filter((row) => row.flags.includes("manual-override-like")).length,
   };
 
+  const syntaxHygiene = buildSyntaxHygieneSummary({ sources: input.syntaxSources });
+
   const evidence = [
     `tool-hygiene-scorecard: total=${rows.length}`,
     `shown=${shownRows.length}`,
@@ -222,6 +370,8 @@ export function buildToolHygieneScorecard(input: {
     `operational=${summary.operational}`,
     `requiresHuman=${riskSummary.requiresHumanApproval}`,
     `hideBeforeLongLoop=${riskSummary.hideBeforeLongLoop}`,
+    `syntaxFindings=${syntaxHygiene.findings}`,
+    `syntaxRequiresRationale=${syntaxHygiene.requiresRationale}`,
     "dispatch=no",
     "authorization=none",
   ].join(" ");
@@ -235,6 +385,7 @@ export function buildToolHygieneScorecard(input: {
     shown: shownRows.length,
     summary,
     riskSummary,
+    syntaxHygiene,
     rows: shownRows,
     evidence,
   };

@@ -1,10 +1,11 @@
-import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import guardrailsCore, {
   buildAgentsAsToolsCalibrationScore,
   buildLineBudgetSnapshot,
+  buildSyntaxHygieneSummary,
   buildToolHygieneScorecard,
   classifyToolHygiene,
 } from "../../extensions/guardrails-core";
@@ -46,6 +47,64 @@ describe("tool hygiene scorecard", () => {
       classification: "measured",
       maturity: "safe-for-local-loop",
     });
+  });
+
+  it("detects JS/TS syntax hygiene findings with rationale exceptions", () => {
+    const summary = buildSyntaxHygieneSummary({
+      sources: [
+        {
+          path: "sample.ts",
+          content: [
+            "const id = user?.profile?.account?.id;",
+            "const label = state === 'a' ? one : state === 'b' ? two : three;",
+            "const ok = value == null ? fallback : value;",
+            "const query = sql`select * from ${table}`;",
+          ].join("\n"),
+          exceptions: [
+            {
+              patternId: "js-ts-inline-dsl-template",
+              line: 4,
+              reason: "Public SQL DSL keeps the query boundary explicit and covered by parameterization tests.",
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(summary.scanned).toBe(1);
+    expect(summary.findings).toBe(3);
+    expect(summary.requiresRationale).toBe(2);
+    expect(summary.exceptionRecorded).toBe(1);
+    expect(summary.recommendationCode).toBe("syntax-hygiene-rationale-required");
+    expect(summary.rows.map((row) => row.patternId)).toEqual([
+      "js-ts-optional-chain-stack",
+      "js-ts-nested-ternary",
+      "js-ts-inline-dsl-template",
+    ]);
+    expect(summary.rows.find((row) => row.patternId === "js-ts-inline-dsl-template")?.decision).toBe("exception-recorded");
+  });
+
+  it("includes syntax hygiene evidence in the tool hygiene scorecard", () => {
+    const scorecard = buildToolHygieneScorecard({
+      tools: [
+        { name: "structured_interview_plan", description: "Read-only plan; never authorizes dispatch" },
+      ],
+      syntaxSources: [
+        {
+          path: "sample.ts",
+          content: "const result = api.fetch().map().filter().reduce();",
+        },
+      ],
+    });
+
+    expect(scorecard.syntaxHygiene.findings).toBe(1);
+    expect(scorecard.syntaxHygiene.rows[0]).toMatchObject({
+      patternId: "js-ts-fluent-chain-depth",
+      language: "typescript",
+      decision: "requires-rationale",
+    });
+    expect(scorecard.evidence).toContain("syntaxFindings=1");
+    expect(scorecard.evidence).toContain("syntaxRequiresRationale=1");
   });
 
   it("builds a no-dispatch scorecard with risk counts", () => {
@@ -198,6 +257,49 @@ describe("tool hygiene scorecard", () => {
     expect(result.content?.[0]?.text).toContain("tool-hygiene-scorecard:");
     expect(result.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(result.content?.[0]?.text).not.toContain('\"mode\"');
+  });
+
+  it("exposes syntax hygiene findings through tool_hygiene_scorecard", async () => {
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    const cwd = mkdtempSync(path.join(tmpdir(), "tool-hygiene-syntax-surface-"));
+    try {
+      writeFileSync(path.join(cwd, "sample.ts"), "const id = user?.profile?.account?.id;\n", "utf8");
+      guardrailsCore(pi);
+      const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "tool_hygiene_scorecard");
+      const tool = toolCall?.[0] as {
+        execute: (
+          toolCallId: string,
+          params: Record<string, unknown>,
+          signal: AbortSignal,
+          onUpdate: (update: unknown) => void,
+          ctx: { cwd: string },
+        ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: { syntaxHygiene?: { findings?: number; rows?: Array<{ path?: string; patternId?: string }> } } }> | { content?: Array<{ type: "text"; text: string }>; details?: { syntaxHygiene?: { findings?: number; rows?: Array<{ path?: string; patternId?: string }> } } };
+      };
+
+      const result = await tool.execute(
+        "tc-tool-hygiene-syntax",
+        { syntax_files: ["sample.ts"] },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(result.content?.[0]?.text).toContain("syntaxFindings=1");
+      expect(result.details?.syntaxHygiene?.findings).toBe(1);
+      expect(result.details?.syntaxHygiene?.rows?.[0]).toMatchObject({
+        path: "sample.ts",
+        patternId: "js-ts-optional-chain-stack",
+      });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
   });
 
   it("builds line-budget snapshot with stable ok/watch/extract recommendation", () => {

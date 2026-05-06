@@ -1,9 +1,12 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { readFileSync } from "node:fs";
+import { relative, resolve } from "node:path";
 import {
   buildAgentsAsToolsCalibrationScore,
   buildLineBudgetSnapshot,
   buildToolHygieneScorecard,
+  type SyntaxHygieneSource,
   type ToolHygieneInputTool,
 } from "./guardrails-core-tool-hygiene";
 import { buildExtensionLineBudgetEntries } from "./guardrails-core-line-budget-files";
@@ -20,6 +23,26 @@ function toolInfoToInput(tool: unknown): ToolHygieneInputTool | undefined {
   };
 }
 
+function readSyntaxHygieneSources(cwd: string, paths: unknown): SyntaxHygieneSource[] {
+  if (!Array.isArray(paths)) return [];
+  const root = resolve(cwd);
+  return paths
+    .filter((path): path is string => typeof path === "string" && path.trim().length > 0)
+    .slice(0, 20)
+    .map((path) => path.trim())
+    .flatMap((path) => {
+      const absolute = resolve(root, path);
+      const rel = relative(root, absolute);
+      if (rel.startsWith("..") || rel === "" || /^[A-Za-z]:/.test(rel)) return [];
+      try {
+        const content = readFileSync(absolute, "utf8").slice(0, 200_000);
+        return [{ path: rel.replace(/\\/g, "/"), content }];
+      } catch {
+        return [];
+      }
+    });
+}
+
 export function registerGuardrailsToolHygieneSurface(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "tool_hygiene_scorecard",
@@ -28,8 +51,9 @@ export function registerGuardrailsToolHygieneSurface(pi: ExtensionAPI): void {
     parameters: Type.Object({
       tool_names: Type.Optional(Type.Array(Type.String({ description: "Optional tool names to include. Default all configured tools." }))),
       limit: Type.Optional(Type.Number({ description: "Max rows to return, 1..200. Default 80." })),
+      syntax_files: Type.Optional(Type.Array(Type.String({ description: "Optional project-relative JS/TS files to scan for deterministic syntax-hygiene findings." }))),
     }),
-    execute(_toolCallId, params) {
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const selectedNames = Array.isArray(p.tool_names)
         ? new Set(p.tool_names.filter((name): name is string => typeof name === "string"))
@@ -39,6 +63,7 @@ export function registerGuardrailsToolHygieneSurface(pi: ExtensionAPI): void {
       const result = buildToolHygieneScorecard({
         tools,
         limit: typeof p.limit === "number" ? p.limit : undefined,
+        syntaxSources: readSyntaxHygieneSources(ctx.cwd, p.syntax_files),
       });
       return buildOperatorVisibleToolResponse({
         label: "tool_hygiene_scorecard",
