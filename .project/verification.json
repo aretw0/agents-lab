@@ -13830,6 +13830,15 @@
       "method": "board-reports+doc-marker+dependency-dry-run",
       "timestamp": "2026-05-06T14:38:13.615Z",
       "evidence": "Performed local-safe planning hygiene after auto-resume. Completed focus tasks TASK-BUD-925 and TASK-BUD-931 were cleared; TASK-BUD-849 was evaluated with autonomy_lane_protected_focus_packet and recommended defer because high risk/protected. Documented realigned local-safe continuation in docs/research/0-8-readiness-map.md toward TASK-BUD-926/928/929/930 before broader TASK-BUD-921. Attempted a dry-run dependency update for TASK-BUD-921 to depend on TASK-BUD-927/928/931; the tool blocked it due existing protected-coupling through TASK-BUD-917, so no structural dependency mutation was forced. Validation: safe_marker_check passed for planning hygiene anchors; board_dependency_health_snapshot has missing=0 and cycle=0; autonomy_lane_next_task with realigned focus selects TASK-BUD-926."
+    },
+    {
+      "id": "VERIFY-BUD-926",
+      "target": "TASK-BUD-926",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc+marker+i18n+no-protected-mutation",
+      "timestamp": "2026-05-06T14:45:20.675Z",
+      "evidence": "Created docs/research/ci-cd-failure-evidence-intake-template-2026-05.md as report-only intake template for CI/CD preparation. It includes required evidence fields, drift-class taxonomy, mandatory evidence before workflow mutation, stop conditions for protected scopes, and local-safe validation instructions. Validation: safe_marker_check passed for all anchors; i18n_lint_text passed; repository diff confirms no `.github/workflows/**` changes."
     }
   ]
 }

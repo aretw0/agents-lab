@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-06T14:32:19.670Z",
+  "timestamp": "2026-05-06T14:45:11.003Z",
   "context": "Seeded 7 planned local-safe continuation slices for the 0.8.0 compounding lane: TASK-BUD-922 validation matrix, 923 file-reference drift audi [snip] tate readiness validation after commit. [truncated:+263 chars]",
   "current_tasks": [
     "TASK-BUD-925",
@@ -7,13 +7,13 @@
     "TASK-BUD-931"
   ],
   "next_actions": [
-    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
+    "Context-watch action: level=compact 65% (compact-now) · Compact now and continue from checkpoint.",
     "Commit the stocked queue seed.",
     "Re-run autonomy/material readiness on clean git state.",
     "If at least 3 local-safe slices are selectable, complete TASK-BUD-919; otherwise adjust the qu [snip] protected/focus mismatch. [truncated:+13 chars]"
   ],
   "blockers": [
-    "context-watch-checkpoint-required",
+    "context-watch-compact-required",
     "Current git dirty state from intentional board/doc edits blocks autonomy readiness until committed."
   ],
   "recent_validation": [
@@ -66,6 +66,32 @@
       },
       "action": "write-checkpoint",
       "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-06T14:43:45.007Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 57,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-06T14:45:11.003Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 65,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }

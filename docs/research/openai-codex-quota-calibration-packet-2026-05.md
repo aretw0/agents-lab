@@ -83,6 +83,29 @@ Perguntas que precisam ser respondidas antes de alterar caps/settings:
 | `handoff_advisor` | sim | local policy block |
 | `provider_readiness_matrix` | sim | local policy block |
 
+## 5.a. Incidente recente de provider error (2026-05-06)
+
+Observação do operador nesta sessão: houve 5 erros consecutivos de `server_error` da API `openai-codex`, com `sequence_number: 2` e `code: server_error`, mesmo após trocar temporariamente o modelo de controle para `gpt-5.3-codex-spark`.
+
+Evidência coletada:
+
+| Request ID | Erro |
+|---|---|
+| 22f1175f-c99f-4461-96f4-13c37dd869a6 | server_error |
+| 2efe46e2-b480-48bd-a5d5-dff5f748cdac | server_error |
+| b14870bc-66ef-4228-8837-8901e6641f2b | server_error |
+| a54da716-7bbd-41d4-b43b-73aab2de3f36 | server_error |
+
+Interpretação: o padrão é compatível com indisponibilidade transitória do provider (ou falha parcial da rota), não com quota 429 por cota. A troca de `gpt-5.3-codex` para `gpt-5.3-codex-spark` não mudou o sintoma.
+
+Ação recomendada no fluxo local (sem mudança de settings):
+
+1. registrar imediatamente request IDs + contexto no run log;
+2. repetir a chamada com backoff curto (`retry` já existente no orquestrador) e, em novo erro, aguardar uma janela de 30-60 segundos antes de nova tentativa;
+3. para trabalho não crítico, adiar e seguir com tasks locais/docs já prontos;
+4. usar fallback de rota/caso por decisão humana explícita (não por auto-roteamento) apenas se o fluxo travar totalmente;
+5. só classificar como provider-caso se houver falha em modelos múltiplos ou janela >10min com erro replicado, para evitar false positives.
+
 ## 6. Postura operacional recomendada agora
 
 Sem mudar settings:
