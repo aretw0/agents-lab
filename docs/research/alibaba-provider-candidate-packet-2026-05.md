@@ -3,6 +3,7 @@
 Status: report-only / local-safe  
 Tarefa: `TASK-BUD-897`  
 Template: [`docs/primitives/provider-candidate-evaluation-template.md`](../primitives/provider-candidate-evaluation-template.md)  
+Intake: [`docs/research/alibaba-free-trial-dashboard-intake-checklist-2026-05.md`](alibaba-free-trial-dashboard-intake-checklist-2026-05.md)  
 Limite: sem API key, `.pi/settings.json`, `routeModelRefs`, `providerBudgets`, provider/model default, monitor override ou gasto pago.
 
 ## 1. Identidade do candidato
@@ -171,5 +172,5 @@ Alibaba deve ser o próximo provider candidato a passar por intake de dashboard 
 
 Próximo passo local-safe:
 
-- preencher um intake factual do dashboard Alibaba free trial quando o operador trouxer saldo/modelos/expiração;
+- preencher [`docs/research/alibaba-free-trial-dashboard-intake-checklist-2026-05.md`](alibaba-free-trial-dashboard-intake-checklist-2026-05.md) quando o operador trouxer saldo/modelos/expiração/login;
 - depois preparar decision packet protegido para uma única chamada manual se fizer sentido.

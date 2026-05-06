@@ -1,55 +1,55 @@
 {
-  "timestamp": "2026-05-06T02:48:45.450Z",
-  "context": "Completed provider login surface assimilation. User clarified that providers without native pi login need easy setup via /login or equivalent [snip] e/provider/settings/credential changes. [truncated:+157 chars]",
+  "timestamp": "2026-05-06T02:51:21.167Z",
+  "context": "Completed Alibaba free-trial dashboard intake checklist. It converts Alibaba unknowns into an operator-fillable form before any protected can [snip] from Alibaba provider candidate packet. [truncated:+36 chars]",
   "next_actions": [
-    "Commit TASK-BUD-898 docs/board checkpoint if dirty.",
-    "For Alibaba dashboard intake, collect product/API, models, auth method, trial balance/expiry, [snip] covers this Alibaba trial. [truncated:+74 chars]",
-    "Do not implement /login, provider registration, credentials, routeModelRefs, providerBudgets, [snip] K-BUD-849 decision packet. [truncated:+52 chars]"
+    "Commit TASK-BUD-899 docs/board checkpoint if dirty.",
+    "When operator has Alibaba dashboard open, fill checklist facts: product/API, models, auth meth [snip] ility, telemetry, privacy. [truncated:+74 chars]",
+    "Do not implement Alibaba /login/provider registration/settings/routing without protected TASK-BUD-849 decision packet."
   ],
   "blockers": [
-    "TASK-BUD-849 remains protected for any provider/model/settings/routing/API/auth runtime changes.",
-    "Alibaba auth/login applicability is unknown until dashboard/API facts are provided."
+    "TASK-BUD-849 remains protected for provider/auth/runtime/settings changes.",
+    "Alibaba free-trial facts still need human dashboard evidence."
   ],
   "recent_validation": [
-    "safe_marker_check docs/research/provider-login-surface-runway-2026-05.md markers -> pass",
-    "i18n_lint_text sample for provider-login-surface-runway -> pass",
-    "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-st [snip] es passed, 42 tests passed [truncated:+50 chars]"
+    "i18n_lint_text sample for alibaba-free-trial-dashboard-intake-checklist -> pass",
+    "safe_marker_check for billing/login/burn-rate/secret/protected-decision markers -> pass",
+    "pnpm vitest --run packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/te [snip] es passed, 25 tests passed [truncated:+38 chars]"
   ],
   "recent_commits": [
-    "0aaf6a02 docs(providers): queue alibaba free trial"
+    "6f23df27 docs(providers): require login surface for candidates"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-898",
+    "focus": "TASK-BUD-899",
     "canonical_links": [
-      "task:TASK-BUD-898",
+      "task:TASK-BUD-899",
       "task:TASK-BUD-849",
-      "commit:0aaf6a02"
+      "commit:6f23df27"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T02:48:45.450Z",
+    "generatedAtIso": "2026-05-06T02:51:21.167Z",
     "level": "ok",
-    "percent": 27,
+    "percent": 29,
     "action": "continue",
-    "recommendation": "commit-task-bud-898-then-continue-only-report-only-provider-intake",
+    "recommendation": "commit-task-bud-899-and-stop-at-clean-local-safe-checkpoint",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T02:48:45.450Z",
+      "atIso": "2026-05-06T02:51:21.167Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 27,
+      "percent": 29,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-898-then-continue-only-report-only-provider-intake"
+      "recommendation": "commit-task-bud-899-and-stop-at-clean-local-safe-checkpoint"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-898"
+    "TASK-BUD-899"
   ]
 }

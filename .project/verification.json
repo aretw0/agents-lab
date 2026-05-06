@@ -13596,6 +13596,15 @@
       "method": "docs+marker+tests",
       "timestamp": "2026-05-06T02:48:33.030Z",
       "evidence": "Assimilated operator requirement that any provider without native pi login must include an easy `/login <provider>` or equivalent setup path before recurring use. Added docs/research/provider-login-surface-runway-2026-05.md summarizing pi auth surfaces from docs/examples: models.json env/literal/command apiKey resolution, registerProvider oauth support for `/login`, OAuth callbacks, credential storage in ~/.pi/agent/auth.json, and examples custom-provider-qwen-cli/custom-provider-gitlab-duo/custom-provider-anthropic. Updated Alibaba packet with a Login/configuração section and provider-assimilation runway with login as a local-safe/protected decision criterion. Updated docs/primitives/provider-candidate-evaluation-template.md with an Authentication/login surface section and required decision checklist item. No runtime `/login`, provider registration, settings, credentials, routeModelRefs, providerBudgets, model/default, or monitor migration changes. Validation: safe_marker_check on provider-login-surface-runway markers -> pass; i18n_lint_text sample -> pass; pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts -> 2 files passed, 42 tests passed. project-validate still reports pre-existing historical board integrity issues unrelated to TASK-BUD-898."
+    },
+    {
+      "id": "VERIFY-BUD-899",
+      "target": "TASK-BUD-899",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+marker+tests",
+      "timestamp": "2026-05-06T02:51:08.413Z",
+      "evidence": "Created docs/research/alibaba-free-trial-dashboard-intake-checklist-2026-05.md as an operator intake form for factual Alibaba free-trial dashboard/API facts before protected activation. It covers account/product, credits/expiry/limits, billing/auto-charge risk, product/API/baseUrl/endpoint, model availability, login/configuration including native `/login` and `/login qwen-cli` applicability, telemetry for quota visibility, privacy/retention, future smoke constraints, and decision gate. Linked the checklist from docs/research/alibaba-provider-candidate-packet-2026-05.md. No API calls, credentials, settings, provider registration, routeModelRefs, providerBudgets, model/default, monitor migration, or paid spend changes. Validation: i18n_lint_text sample -> pass; safe_marker_check -> pass; pnpm vitest --run packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts -> 2 files passed, 25 tests passed."
     }
   ]
 }

@@ -20090,6 +20090,29 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] User clarified provider assimilation should include an easy login/configuration path when the provider lacks native pi login. Related protected lane: TASK-BUD-849. [rationale:operator-simplicity] Provider adoption should not require fragile manual setup; /login or equivalent must be part of the activation packet before runtime provider changes.\n[slice-start] Capturing provider-login requirement as report-only design. No runtime /login command/provider registration/settings changes.\n[rationale:risk-control] The operator wants provider assimilation to include easy configuration via pi /login or equivalent when native login is absent, so authentication UX must be a gate before protected activation.\n[complete] Provider login/setup requirement captured for all future candidate packets; Alibaba now explicitly gated on native `/login` or equivalent before protected activation.",
       "verification": "VERIFY-BUD-898"
+    },
+    {
+      "id": "TASK-BUD-899",
+      "description": "Prepare Alibaba free-trial dashboard intake checklist before provider activation.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-897",
+        "TASK-BUD-898"
+      ],
+      "files": [
+        "docs/research/alibaba-free-trial-dashboard-intake-checklist-2026-05.md",
+        "docs/research/alibaba-provider-candidate-packet-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Create a concise checklist of factual Alibaba dashboard/API facts needed before any protected canary or login implementation.",
+        "Include trial balance, expiry, billing/auto-charge behavior, product/API, model availability, endpoint/region, auth method, native pi login applicability, pricing unit, usage telemetry, and privacy/retention fields.",
+        "Make it usable as an operator intake form without requiring the agent to access Alibaba or store secrets.",
+        "No API calls, credentials, settings, provider registration, routeModelRefs, providerBudgets, or monitor migration changes."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] Follow-up local-safe slice after TASK-BUD-898: turn Alibaba unknowns into a dashboard intake checklist. [rationale:risk-control] Free-trial value can be maximized only if credits, expiry, billing behavior, auth/login, and telemetry are known before runtime changes.\n[slice-start] Creating Alibaba free-trial dashboard intake checklist. No provider/API/login/settings changes.\n[rationale:risk-control] A factual dashboard checklist lets the operator maximize Alibaba free trial value without accidental paid spend or premature provider activation.\n[complete] Alibaba dashboard intake checklist ready for operator facts: trial balance/expiry, billing behavior, auth/login, endpoint, models, telemetry, and privacy.",
+      "verification": "VERIFY-BUD-899"
     }
   ]
 }
