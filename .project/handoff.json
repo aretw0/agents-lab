@@ -1,51 +1,55 @@
 {
-  "timestamp": "2026-05-06T01:23:14.157Z",
-  "context": "Completed TASK-BUD-886 local-safe guardrails-core extraction after reload validation. Extracted tool-call guard and surface registration seam [snip] lveQuotaToolOutputPolicy binding error. [truncated:+245 chars]",
-  "current_tasks": [
-    "TASK-BUD-887"
-  ],
+  "timestamp": "2026-05-06T01:31:14.892Z",
+  "context": "Completed TASK-BUD-887 after extracting guardrails-core auto-drain/board auto-advance orchestration into guardrails-core-auto-drain.ts. All s [snip] tasks without explicit protected focus. [truncated:+191 chars]",
   "next_actions": [
-    "Commit TASK-BUD-886 code/board checkpoint if dirty.",
-    "Continue TASK-BUD-887 as the next local-safe extraction if runway remains: prefer lifecycle/ev [snip] arately scoped and tested. [truncated:+85 chars]",
-    "Provider-economy follow-up remains parked/local-planning only: quota visibility scans C:\\Users [snip] sses sandbox session logs. [truncated:+42 chars]"
+    "Commit TASK-BUD-887 code/board checkpoint if dirty.",
+    "Stop local-safe auto-selection unless a new non-protected task is seeded or the human explicit [snip] ure/provider-economy work. [truncated:+38 chars]",
+    "Provider-economy follow-up remains a planning/protected-focus topic: quota visibility data-sou [snip] uire explicit human focus. [truncated:+107 chars]"
   ],
   "blockers": [
-    "TASK-BUD-849 remains protected/parked for provider/model/cost/API changes with [snip] explicit human focus. [truncated:+3 chars]",
-    "guardrails-core.ts remains above 1000 lines (1240), so below-watch target need [snip] ollow-up TASK-BUD-887. [truncated:+3 chars]"
+    "No eligible local-safe board task found after TASK-BUD-887 completion.",
+    "TASK-BUD-849 remains protected/parked for provider/model/cost/API changes with [snip] explicit human focus. [truncated:+3 chars]"
   ],
   "recent_validation": [
-    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts pac [snip] les passed, 9 tests passed [truncated:+282 chars]",
-    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts pac [snip] es passed, 37 tests passed [truncated:+623 chars]",
-    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts -> [snip] ile passed, 2 tests passed [truncated:+3 chars]"
+    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts pac [snip] es passed, 57 tests passed [truncated:+223 chars]",
+    "line_budget_snapshot -> recommendation=ok, aboveWatch=0, aboveExtract=0, aboveCritical=0",
+    "autonomy_lane_next_task(use_handoff_focus=false) -> ready=no, code=local-stop-protected-focus-required"
+  ],
+  "recent_commits": [
+    "6c78afc6 refactor(guardrails): extract core registration seams"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-887",
     "canonical_links": [
       "task:TASK-BUD-887",
-      "task:TASK-BUD-886",
-      "task:TASK-BUD-884"
+      "task:TASK-BUD-849",
+      "commit:6c78afc6"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T01:23:14.157Z",
+    "generatedAtIso": "2026-05-06T01:31:14.892Z",
     "level": "ok",
-    "percent": 28,
+    "percent": 41,
     "action": "continue",
-    "recommendation": "commit-task-bud-886-then-continue-task-bud-887-local-safe"
+    "recommendation": "commit-task-bud-887-then-wait-for-explicit-focus-or-new-local-safe-seed",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T01:23:14.157Z",
+      "atIso": "2026-05-06T01:31:14.892Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 28,
+      "percent": 41,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-886-then-continue-task-bud-887-local-safe"
+      "recommendation": "commit-task-bud-887-then-wait-for-explicit-focus-or-new-local-safe-seed"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-887"
   ]
 }

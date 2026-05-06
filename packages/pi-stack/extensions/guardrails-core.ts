@@ -9,6 +9,7 @@
  */
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { statSync } from "node:fs";
+import { createGuardrailsCoreAutoDrain, type GuardrailsCoreAutoDrainState } from "./guardrails-core-auto-drain";
 import { fileURLToPath } from "node:url";
 import {
   DEFAULT_BLOAT_SMELL_CONFIG,
@@ -30,30 +31,13 @@ export type {
 import {
   DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG,
   resolveLongRunIntentQueueConfig,
-  resolveAutoDrainGateReason,
-  resolveAutoDrainRuntimeGateReason,
-  resolveDispatchFailureRuntimeGate,
-  shouldAutoDrainDeferredIntent,
-  resolveAutoDrainRetryDelayMs,
-  shouldSchedulePostDispatchAutoDrain,
-  resolveBoardAutoAdvanceGateReason,
-  shouldAutoAdvanceBoardTask,
-  shouldEmitAutoDrainDeferredAudit,
-  shouldEmitBoardAutoAdvanceGateAudit,
-  resolveLoopActivationMarkers,
-  buildLoopActivationMarkersLabel,
-  shouldAnnounceLoopActivationReady,
-  shouldEmitLoopActivationAudit,
   resolveRuntimeCodeActivationState,
-  enqueueDeferredIntent,
-  dequeueDeferredIntent,
   getDeferredIntentQueueCount,
   readLongRunLoopRuntimeState,
   setLongRunLoopRuntimeMode,
   markLongRunLoopRuntimeDispatch,
   markLongRunLoopRuntimeDegraded,
   markLongRunLoopRuntimeHealthy,
-  shouldBlockRapidSameTaskRedispatch,
   computeIdenticalFailureStreak,
   shouldPauseOnIdenticalFailure,
   type LongRunIntentQueueConfig,
@@ -64,17 +48,11 @@ import {
 } from "./guardrails-core-lane-queue";
 import {
   DEFAULT_LONG_RUN_PROVIDER_TRANSIENT_RETRY_CONFIG,
-  buildProviderRetryExhaustedActionLines,
-  buildToolOutputOrphanRecoveryActionLines,
   classifyLongRunDispatchFailure,
-  extractToolOutputOrphanCallId,
   resolveToolOutputOrphanRedispatchDecision,
-  isProviderTransientRetryExhausted,
-  resolveDispatchFailureBlockAfter,
   resolveDispatchFailurePauseAfter,
   resolveDispatchFailureWindowMs,
   resolveLongRunProviderTransientRetryConfig,
-  resolveProviderTransientRetryDelayMs,
   type DispatchFailureClass,
   type LongRunProviderTransientRetryConfig,
 } from "./guardrails-core-provider-retry";
@@ -93,8 +71,6 @@ import {
   refreshLoopEvidenceHeartbeatFromSnapshot as refreshLoopEvidenceHeartbeatFromSnapshotHelper,
   refreshLoopLeaseOnActivity as refreshLoopLeaseOnActivityHelper,
 } from "./guardrails-core-lane-queue-heartbeat";
-import { evaluateBoardLongRunReadiness } from "./guardrails-core-board-readiness";
-import { buildBoardExecuteNextIntent, encodeGuardrailsIntent, summarizeGuardrailsIntent } from "./guardrails-core-intent-bus";
 import { buildShellRoutingStatusLabel, resolveCommandRoutingProfile, type CommandRoutingProfile } from "./guardrails-core-shell-routing";
 import { DEFAULT_I18N_INTENT_CONFIG, resolveI18nIntentConfig, type I18nIntentConfig } from "./guardrails-core-i18n-intents";
 import { shouldAnnounceStrictInteractiveMode } from "./guardrails-core-command-utils";
@@ -531,540 +507,58 @@ export default function (pi: ExtensionAPI) {
     lastLoopLeaseRefreshAt = refresh.nextLastLeaseRefreshAt;
   }
 
-  function tryAutoDrainDeferredIntent(ctx: ExtensionContext, reason: "agent_end" | "lane_pop" | "idle_timer"): boolean {
-    const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
-    const queuedCount = getDeferredIntentQueueCount(ctx.cwd);
-    const nowMs = Date.now();
-    const runtimeCodeState = currentRuntimeCodeState();
-    const idleSinceMs = Math.max(0, nowMs - lastLongRunBusyAt);
-    const dispatchFailureBlockAfter = resolveDispatchFailureBlockAfter(
-      longRunLoopRuntimeState,
-      longRunIntentQueueConfig.dispatchFailureBlockAfter,
-      longRunProviderRetryConfig,
-    );
+  const autoDrainState: GuardrailsCoreAutoDrainState = {
+    get longRunIntentQueueConfig() { return longRunIntentQueueConfig; },
+    set longRunIntentQueueConfig(value) { longRunIntentQueueConfig = value; },
+    get longRunProviderRetryConfig() { return longRunProviderRetryConfig; },
+    set longRunProviderRetryConfig(value) { longRunProviderRetryConfig = value; },
+    get longRunLoopRuntimeState() { return longRunLoopRuntimeState; },
+    set longRunLoopRuntimeState(value) { longRunLoopRuntimeState = value; },
+    get lastLongRunBusyAt() { return lastLongRunBusyAt; },
+    set lastLongRunBusyAt(value) { lastLongRunBusyAt = value; },
+    get lastAutoDrainAt() { return lastAutoDrainAt; },
+    set lastAutoDrainAt(value) { lastAutoDrainAt = value; },
+    get lastAutoDrainDeferredAuditAt() { return lastAutoDrainDeferredAuditAt; },
+    set lastAutoDrainDeferredAuditAt(value) { lastAutoDrainDeferredAuditAt = value; },
+    get lastAutoDrainDeferredGate() { return lastAutoDrainDeferredGate; },
+    set lastAutoDrainDeferredGate(value) { lastAutoDrainDeferredGate = value; },
+    get lastBoardAutoAdvanceTaskId() { return lastBoardAutoAdvanceTaskId; },
+    set lastBoardAutoAdvanceTaskId(value) { lastBoardAutoAdvanceTaskId = value; },
+    get lastBoardAutoAdvanceAt() { return lastBoardAutoAdvanceAt; },
+    set lastBoardAutoAdvanceAt(value) { lastBoardAutoAdvanceAt = value; },
+    get lastBoardAutoAdvanceGateAuditAt() { return lastBoardAutoAdvanceGateAuditAt; },
+    set lastBoardAutoAdvanceGateAuditAt(value) { lastBoardAutoAdvanceGateAuditAt = value; },
+    get lastBoardAutoAdvanceGate() { return lastBoardAutoAdvanceGate; },
+    set lastBoardAutoAdvanceGate(value) { lastBoardAutoAdvanceGate = value; },
+    get lastLoopActivationAuditAt() { return lastLoopActivationAuditAt; },
+    set lastLoopActivationAuditAt(value) { lastLoopActivationAuditAt = value; },
+    get lastLoopActivationLabel() { return lastLoopActivationLabel; },
+    set lastLoopActivationLabel(value) { lastLoopActivationLabel = value; },
+    get lastLoopActivationEmLoop() { return lastLoopActivationEmLoop; },
+    set lastLoopActivationEmLoop(value) { lastLoopActivationEmLoop = value; },
+    get lastLoopActivationReadyAt() { return lastLoopActivationReadyAt; },
+    set lastLoopActivationReadyAt(value) { lastLoopActivationReadyAt = value; },
+    get lastLoopActivationReadyLabel() { return lastLoopActivationReadyLabel; },
+    set lastLoopActivationReadyLabel(value) { lastLoopActivationReadyLabel = value; },
+  };
 
-    if (longRunLoopRuntimeState.mode === "paused") {
-      updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-      return false;
-    }
-
-    const dispatchFailureGate = resolveDispatchFailureRuntimeGate(
-      longRunLoopRuntimeState,
-      dispatchFailureBlockAfter,
-    );
-    if (dispatchFailureGate === "dispatch-failure-advisory" && queuedCount > 0) {
-      if (shouldEmitAutoDrainDeferredAudit(
-        lastAutoDrainDeferredAuditAt,
-        lastAutoDrainDeferredGate,
-        dispatchFailureGate,
-        nowMs,
-        Math.max(1_000, longRunIntentQueueConfig.autoDrainIdleStableMs),
-      )) {
-        appendAuditEntry(ctx, "guardrails-core.long-run-intent-auto-drain-advisory", {
-          atIso: new Date().toISOString(),
-          reason,
-          gate: dispatchFailureGate,
-          queuedCount,
-          stopCondition: longRunLoopRuntimeState.stopCondition,
-          stopReason: longRunLoopRuntimeState.stopReason,
-        });
-        lastAutoDrainDeferredAuditAt = nowMs;
-      }
-      lastAutoDrainDeferredGate = dispatchFailureGate;
-    }
-
-    const runtimeGate = resolveAutoDrainRuntimeGateReason(
-      resolveAutoDrainGateReason(
-        activeLongRun,
-        queuedCount,
-        nowMs,
-        lastAutoDrainAt,
-        idleSinceMs,
-        longRunIntentQueueConfig,
-      ),
-      longRunLoopRuntimeState,
-      nowMs,
-    );
-    const gate: AutoDrainGateReason =
-      dispatchFailureGate === "dispatch-failure-blocking"
-        ? "dispatch-failure-blocking"
-        : runtimeGate;
-    const providerRetryExhausted =
-      gate === "dispatch-failure-blocking" &&
-      isProviderTransientRetryExhausted(
-        longRunLoopRuntimeState,
-        dispatchFailureBlockAfter,
-        longRunProviderRetryConfig,
-      );
-
-    if (gate === "lease-expired" || gate === "dispatch-failure-blocking") {
-      if (shouldEmitAutoDrainDeferredAudit(
-        lastAutoDrainDeferredAuditAt,
-        lastAutoDrainDeferredGate,
-        gate,
-        nowMs,
-        Math.max(1_000, longRunIntentQueueConfig.autoDrainIdleStableMs),
-      )) {
-        appendAuditEntry(ctx, "guardrails-core.long-run-intent-auto-drain-stopped", {
-          atIso: new Date().toISOString(),
-          reason,
-          gate,
-          queuedCount,
-          stopCondition: longRunLoopRuntimeState.stopCondition,
-          stopReason: longRunLoopRuntimeState.stopReason,
-          leaseOwner: longRunLoopRuntimeState.leaseOwner,
-          leaseExpiresAtIso: longRunLoopRuntimeState.leaseExpiresAtIso,
-          consecutiveDispatchFailures: longRunLoopRuntimeState.consecutiveDispatchFailures,
-          blockAfterFailures: dispatchFailureBlockAfter,
-          providerRetryExhausted,
-          actionHint: providerRetryExhausted
-            ? "provider transient retry exhausted"
-            : undefined,
-          actionLines: providerRetryExhausted
-            ? buildProviderRetryExhaustedActionLines()
-            : undefined,
-        });
-        lastAutoDrainDeferredAuditAt = nowMs;
-      }
-      lastAutoDrainDeferredGate = gate;
-      updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-      return false;
-    }
-
-    const retryDelayMs = resolveAutoDrainRetryDelayMs(
-      activeLongRun,
-      queuedCount,
-      nowMs,
-      lastAutoDrainAt,
-      idleSinceMs,
-      longRunIntentQueueConfig,
-    );
-    if (retryDelayMs !== undefined) {
-      scheduleAutoDrainDeferredIntent(ctx, "idle_timer", retryDelayMs);
-      if (shouldEmitAutoDrainDeferredAudit(
-        lastAutoDrainDeferredAuditAt,
-        lastAutoDrainDeferredGate,
-        gate,
-        nowMs,
-        Math.max(1_000, longRunIntentQueueConfig.autoDrainIdleStableMs),
-      )) {
-        appendAuditEntry(ctx, "guardrails-core.long-run-intent-auto-drain-deferred", {
-          atIso: new Date().toISOString(),
-          reason,
-          gate,
-          queuedCount,
-          retryDelayMs,
-        });
-        lastAutoDrainDeferredAuditAt = nowMs;
-      }
-      lastAutoDrainDeferredGate = gate;
-      updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-      return false;
-    }
-
-    lastAutoDrainDeferredGate = undefined;
-
-    const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: longRunIntentQueueConfig.defaultBoardMilestone });
-    const autoAdvanceDedupeMs = Math.max(
-      30_000,
-      longRunIntentQueueConfig.autoDrainIdleStableMs * 4,
-    );
-    const boardAutoAdvanceGate = resolveBoardAutoAdvanceGateReason({
-      activeLongRun,
-      queuedCount,
-      loopMode: longRunLoopRuntimeState.mode,
-      loopHealth: longRunLoopRuntimeState.health,
-      stopCondition: longRunLoopRuntimeState.stopCondition,
-      boardReady: boardReadiness.ready,
-      nextTaskId: boardReadiness.nextTaskId,
-      nowMs,
-      lastTaskId: lastBoardAutoAdvanceTaskId,
-      lastTaskAtMs: lastBoardAutoAdvanceAt,
-      dedupeWindowMs: autoAdvanceDedupeMs,
-    });
-    const boardAutoAdvanceAllowed = shouldAutoAdvanceBoardTask({
-      activeLongRun,
-      queuedCount,
-      loopMode: longRunLoopRuntimeState.mode,
-      loopHealth: longRunLoopRuntimeState.health,
-      stopCondition: longRunLoopRuntimeState.stopCondition,
-      boardReady: boardReadiness.ready,
-      nextTaskId: boardReadiness.nextTaskId,
-      nowMs,
-      lastTaskId: lastBoardAutoAdvanceTaskId,
-      lastTaskAtMs: lastBoardAutoAdvanceAt,
-      dedupeWindowMs: autoAdvanceDedupeMs,
-    });
-    const loopMarkers = resolveLoopActivationMarkers({
-      activeLongRun,
-      queuedCount,
-      loopMode: longRunLoopRuntimeState.mode,
-      loopHealth: longRunLoopRuntimeState.health,
-      stopCondition: longRunLoopRuntimeState.stopCondition,
-      boardReady: boardReadiness.ready,
-      nextTaskId: boardReadiness.nextTaskId,
-      boardAutoGate: boardAutoAdvanceGate,
-      runtimeCodeState,
-    });
-    const loopMarkersLabel = buildLoopActivationMarkersLabel(loopMarkers);
-    if (shouldEmitLoopActivationAudit(
-      lastLoopActivationAuditAt,
-      lastLoopActivationLabel,
-      loopMarkersLabel,
-      nowMs,
-      Math.max(1_000, longRunIntentQueueConfig.autoDrainIdleStableMs),
-    )) {
-      appendAuditEntry(ctx, "guardrails-core.loop-activation-state", {
-        atIso: new Date().toISOString(),
-        reason,
-        markers: loopMarkers,
-        markersLabel: loopMarkersLabel,
-        runtimeCodeState,
-        boardAutoAdvanceGate,
-        boardReady: boardReadiness.ready,
-        nextTaskId: boardReadiness.nextTaskId,
-        queuedCount,
-      });
-      lastLoopActivationAuditAt = nowMs;
-    }
-    lastLoopActivationLabel = loopMarkersLabel;
-    const announceLoopReady = shouldAnnounceLoopActivationReady(
-      lastLoopActivationEmLoop,
-      loopMarkers.emLoop,
-    );
-    if (announceLoopReady) {
-      appendAuditEntry(ctx, "guardrails-core.loop-activation-ready", {
-        atIso: new Date().toISOString(),
-        reason,
-        markers: loopMarkers,
-        markersLabel: loopMarkersLabel,
-        runtimeCodeState,
-        boardAutoAdvanceGate,
-        nextTaskId: boardReadiness.nextTaskId,
-      });
-      recordLoopReadyEvidence(
-        ctx,
-        loopMarkersLabel,
-        runtimeCodeState,
-        boardAutoAdvanceGate,
-        boardReadiness.nextTaskId,
-        boardReadiness.milestone,
-      );
-      lastLoopActivationReadyAt = nowMs;
-      lastLoopActivationReadyLabel = loopMarkersLabel;
-      ctx.ui.notify(`loop-ready: ${loopMarkersLabel}`, "info");
-    }
-    lastLoopActivationEmLoop = loopMarkers.emLoop;
-
-    if (loopMarkers.emLoop) {
-      refreshLoopEvidenceHeartbeat(
-        ctx,
-        loopMarkersLabel,
-        runtimeCodeState,
-        boardAutoAdvanceGate,
-        boardReadiness.nextTaskId,
-        boardReadiness.milestone,
-      );
-    }
-
-    if (boardAutoAdvanceGate === "ready" && boardAutoAdvanceAllowed) {
-      const nextTaskId = boardReadiness.nextTaskId ?? "";
-      if (!nextTaskId) {
-        appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance-blocked", {
-          atIso: new Date().toISOString(),
-          reason,
-          boardReason: boardReadiness.reason,
-          nextTaskId: boardReadiness.nextTaskId,
-          selectionPolicy: boardReadiness.selectionPolicy,
-          runtimeCodeState,
-        });
-        updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-        return false;
-      }
-
-      const intent = buildBoardExecuteNextIntent(boardReadiness.milestone); const intentText = encodeGuardrailsIntent(intent);
-      const intentSummary = summarizeGuardrailsIntent(intent);
-
-      // Detect silent execution failure: same task dispatched again within the rapid
-      // re-dispatch window. Happens when a compacted session leaves orphaned
-      // function_call_output messages that cause pi to error on execution without
-      // the dispatch itself throwing (so consecutiveDispatchFailures stays at 0).
-      if (shouldBlockRapidSameTaskRedispatch({
-        taskId: nextTaskId,
-        lastDispatchItemId: longRunLoopRuntimeState.lastDispatchItemId,
-        lastDispatchAtIso: longRunLoopRuntimeState.lastDispatchAtIso,
-        nowMs,
-        windowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
-      })) {
-        const sinceMs = nowMs - new Date(longRunLoopRuntimeState.lastDispatchAtIso!).getTime();
-        const message = `task ${nextTaskId} re-dispatched ${Math.round(sinceMs / 1000)}s after last — possible silent execution failure (orphaned function_call_output?)`;
-        markLoopDegraded(ctx, `board-auto-rapid-redispatch:${nextTaskId}`, message);
-        const failureTrack = trackDispatchFailureFingerprint(ctx, `board-auto-rapid-redispatch:${nextTaskId}`, message, {
-          errorClass: "tool-output-orphan",
-          pauseAfterOverride: resolveDispatchFailurePauseAfter("tool-output-orphan", longRunIntentQueueConfig.identicalFailurePauseAfter, longRunIntentQueueConfig.orphanFailurePauseAfter),
-          windowMsOverride: resolveDispatchFailureWindowMs("tool-output-orphan", longRunIntentQueueConfig.identicalFailureWindowMs, longRunIntentQueueConfig.orphanFailureWindowMs),
-        });
-        appendAuditEntry(ctx, "guardrails-core.board-intent-rapid-redispatch-blocked", {
-          atIso: new Date(nowMs).toISOString(),
-          reason,
-          taskId: nextTaskId,
-          sinceLastDispatchMs: sinceMs,
-          rapidRedispatchWindowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
-          consecutiveFailuresNow: longRunLoopRuntimeState.consecutiveDispatchFailures,
-          errorClass: failureTrack.errorClass,
-          errorFingerprint: failureTrack.fingerprint,
-          identicalFailureStreak: failureTrack.streak,
-          pauseAfterUsed: failureTrack.pauseAfterUsed,
-          windowMsUsed: failureTrack.windowMsUsed,
-          pauseTriggered: failureTrack.pauseTriggered,
-          runtimeCodeState,
-        });
-        updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-        if (!failureTrack.pauseTriggered) ctx.ui.notify(`lane-queue: rapid re-dispatch blocked for ${nextTaskId} (${Math.round(sinceMs / 1000)}s since last dispatch) — possible silent execution failure. Investigate session state then run: npm run pi:loop:resume`, "warning");
-        return false;
-      }
-
-      try {
-        pi.sendUserMessage(intentText, { deliverAs: "followUp" });
-        appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance", {
-          atIso: new Date().toISOString(),
-          reason,
-          taskId: nextTaskId,
-          selectionPolicy: boardReadiness.selectionPolicy,
-          milestone: boardReadiness.milestone,
-          intentType: intent.type,
-          intentVersion: intent.version,
-          intentSummary,
-          runtimeCodeState,
-          loopMarkers,
-          loopMarkersLabel,
-        });
-        lastBoardAutoAdvanceTaskId = nextTaskId;
-        lastBoardAutoAdvanceAt = nowMs;
-        lastAutoDrainAt = nowMs;
-        recordBoardAutoAdvanceEvidence(
-          ctx,
-          nextTaskId,
-          boardReadiness.milestone,
-          runtimeCodeState,
-          loopMarkersLabel,
-          loopMarkers.emLoop,
-        );
-        markLoopDispatch(ctx, `board-auto-${nextTaskId}`);
-        updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
-        ctx.ui.notify(
-          runtimeCodeState === "reload-required"
-            ? `lane-queue: auto-advance board task ${nextTaskId} (runtimeCode=${runtimeCodeState}; considere reload para ativar código mais novo)`
-            : `lane-queue: auto-advance board task ${nextTaskId}`,
-          "info",
-        );
-        return true;
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error ?? "unknown-error");
-        const orphanCall = trackToolOutputOrphanCallId(message);
-        const retryDiscarded = orphanCall.repeated;
-        const queued = retryDiscarded
-          ? { queuedCount: getDeferredIntentQueueCount(ctx.cwd), deduped: false }
-          : enqueueDeferredIntent(
-            ctx.cwd,
-            intentText,
-            "board-auto-advance-fallback",
-            longRunIntentQueueConfig.maxItems,
-            {
-              dedupeKey: intentText,
-              dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
-            },
-          );
-        markLoopDegraded(ctx, "board-auto-advance-dispatch-failed", message);
-        const failureTrack = trackClassifiedDispatchFailure(ctx, "board-auto-advance-dispatch-failed", message);
-        const errorClass = failureTrack.errorClass;
-        if (retryDiscarded) {
-          appendAuditEntry(ctx, "guardrails-core.tool-output-orphan-redispatch-discarded", {
-            atIso: new Date().toISOString(),
-            reason,
-            source: "board-auto-advance",
-            taskId: nextTaskId,
-            callId: orphanCall.callId,
-            errorClass,
-            action: "discard-retry-before-redispatch",
-          });
-        }
-        appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance-failed", {
-          atIso: new Date().toISOString(),
-          reason,
-          taskId: nextTaskId,
-          error: message,
-          errorClass,
-          errorFingerprint: failureTrack.fingerprint,
-          identicalFailureStreak: failureTrack.streak,
-          pauseAfterUsed: failureTrack.pauseAfterUsed,
-          windowMsUsed: failureTrack.windowMsUsed,
-          pauseTriggered: failureTrack.pauseTriggered,
-          toolOutputOrphanCallId: orphanCall.callId,
-          repeatedToolOutputOrphanCallId: orphanCall.repeated,
-          retryDiscarded,
-          queuedCount: queued.queuedCount,
-          deduped: queued.deduped,
-          selectionPolicy: boardReadiness.selectionPolicy,
-          intentType: intent.type,
-          intentVersion: intent.version,
-          intentSummary,
-          runtimeCodeState,
-          loopMarkers,
-          loopMarkersLabel,
-        });
-        if (!failureTrack.pauseTriggered) scheduleAutoDrainDeferredIntent(ctx, "idle_timer", longRunIntentQueueConfig.autoDrainIdleStableMs);
-        updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-        return false;
-      }
-    }
-
-    if (boardAutoAdvanceGate !== "ready") {
-      if (shouldEmitBoardAutoAdvanceGateAudit(
-        lastBoardAutoAdvanceGateAuditAt,
-        lastBoardAutoAdvanceGate,
-        boardAutoAdvanceGate,
-        nowMs,
-        Math.max(1_000, longRunIntentQueueConfig.autoDrainIdleStableMs),
-      )) {
-        appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance-deferred", {
-          atIso: new Date().toISOString(),
-          reason,
-          boardAutoAdvanceGate,
-          boardReady: boardReadiness.ready,
-          boardReason: boardReadiness.reason,
-          queuedCount,
-          nextTaskId: boardReadiness.nextTaskId,
-          selectionPolicy: boardReadiness.selectionPolicy,
-          runtimeCodeState,
-          loopMarkers,
-          loopMarkersLabel,
-        });
-        lastBoardAutoAdvanceGateAuditAt = nowMs;
-      }
-      lastBoardAutoAdvanceGate = boardAutoAdvanceGate;
-    } else {
-      lastBoardAutoAdvanceGate = "ready";
-      lastBoardAutoAdvanceGateAuditAt = nowMs;
-    }
-
-    if (!boardReadiness.nextTaskId || !boardReadiness.ready || boardReadiness.nextTaskId !== lastBoardAutoAdvanceTaskId) {
-      lastBoardAutoAdvanceTaskId = undefined;
-      lastBoardAutoAdvanceAt = 0;
-    }
-
-    if (!shouldAutoDrainDeferredIntent(activeLongRun, queuedCount, nowMs, lastAutoDrainAt, idleSinceMs, longRunIntentQueueConfig)) {
-      updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-      return false;
-    }
-
-    const maxBatch = Math.max(1, longRunIntentQueueConfig.autoDrainBatchSize);
-    let dispatched = 0;
-
-    while (dispatched < maxBatch) {
-      const popped = dequeueDeferredIntent(ctx.cwd);
-      if (!popped.item) break;
-
-      appendAuditEntry(ctx, "guardrails-core.long-run-intent-auto-pop", {
-        atIso: new Date().toISOString(),
-        itemId: popped.item.id,
-        reason,
-        queuedCount: popped.queuedCount,
-        batchIndex: dispatched + 1,
-        batchSize: maxBatch,
-      });
-
-      try {
-        pi.sendUserMessage(popped.item.text, { deliverAs: "followUp" });
-        markLoopDispatch(ctx, popped.item.id);
-        dispatched += 1;
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error ?? "unknown-error");
-        const orphanCall = trackToolOutputOrphanCallId(message);
-        const retryDiscarded = orphanCall.repeated;
-        const retryQueued = retryDiscarded
-          ? { queuedCount: getDeferredIntentQueueCount(ctx.cwd), deduped: false }
-          : enqueueDeferredIntent(
-            ctx.cwd,
-            popped.item.text,
-            `auto-drain-retry:${reason}`,
-            longRunIntentQueueConfig.maxItems,
-            {
-              dedupeKey: popped.item.text,
-              dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
-            },
-          );
-        markLoopDegraded(ctx, `dispatch-failed:${reason}`, message);
-        const failureTrack = trackClassifiedDispatchFailure(ctx, `dispatch-failed:${reason}`, message);
-        const errorClass = failureTrack.errorClass;
-        if (retryDiscarded) {
-          appendAuditEntry(ctx, "guardrails-core.tool-output-orphan-redispatch-discarded", {
-            atIso: new Date().toISOString(),
-            reason,
-            source: "auto-drain",
-            itemId: popped.item.id,
-            callId: orphanCall.callId,
-            errorClass,
-            action: "discard-retry-before-redispatch",
-          });
-        }
-        const retryDelayMs =
-          errorClass === "provider-transient" && longRunProviderRetryConfig.enabled
-            ? resolveProviderTransientRetryDelayMs(
-              longRunLoopRuntimeState.consecutiveDispatchFailures,
-              longRunProviderRetryConfig,
-            )
-            : longRunIntentQueueConfig.autoDrainIdleStableMs;
-        appendAuditEntry(ctx, "guardrails-core.long-run-intent-auto-dispatch-failed", {
-          atIso: new Date().toISOString(),
-          reason,
-          itemId: popped.item.id,
-          error: message,
-          errorFingerprint: failureTrack.fingerprint,
-          identicalFailureStreak: failureTrack.streak,
-          pauseTriggered: failureTrack.pauseTriggered,
-          errorClass,
-          pauseAfterUsed: failureTrack.pauseAfterUsed,
-          windowMsUsed: failureTrack.windowMsUsed,
-          toolOutputOrphanCallId: orphanCall.callId,
-          repeatedToolOutputOrphanCallId: orphanCall.repeated,
-          retryDiscarded,
-          retryDelayMs,
-          retryQueuedCount: retryQueued.queuedCount,
-          retryDeduped: retryQueued.deduped,
-        });
-        if (!failureTrack.pauseTriggered) scheduleAutoDrainDeferredIntent(ctx, "idle_timer", retryDelayMs);
-        updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-        return false;
-      }
-
-      if (!ctx.isIdle() || ctx.hasPendingMessages()) {
-        break;
-      }
-    }
-
-    if (dispatched <= 0) {
-      updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-      return false;
-    }
-
-    const remainingQueuedCount = getDeferredIntentQueueCount(ctx.cwd);
-    if (shouldSchedulePostDispatchAutoDrain(dispatched, remainingQueuedCount)) {
-      scheduleAutoDrainDeferredIntent(ctx, "idle_timer");
-      appendAuditEntry(ctx, "guardrails-core.long-run-intent-auto-drain-backstop", {
-        atIso: new Date().toISOString(),
-        reason,
-        dispatched,
-        remainingQueuedCount,
-      });
-    }
-
-    lastAutoDrainAt = nowMs;
-    markLoopHealthy(ctx, "auto-drain-dispatch");
-    updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
-    ctx.ui.notify(`lane-queue: auto-dispatch ${dispatched} item(s)`, "info");
-    return true;
-  }
+  const tryAutoDrainDeferredIntent = createGuardrailsCoreAutoDrain({
+    pi,
+    appendAuditEntry,
+    state: autoDrainState,
+    updateLongRunLaneStatus,
+    scheduleAutoDrainDeferredIntent,
+    markLoopDispatch,
+    markLoopHealthy,
+    markLoopDegraded,
+    trackDispatchFailureFingerprint,
+    trackClassifiedDispatchFailure,
+    trackToolOutputOrphanCallId,
+    recordLoopReadyEvidence,
+    recordBoardAutoAdvanceEvidence,
+    refreshLoopEvidenceHeartbeat,
+    currentRuntimeCodeState,
+  });
 
   pi.on("session_start", (_event, ctx) => {
     strictInteractiveMode = false;

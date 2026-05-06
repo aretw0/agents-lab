@@ -19820,7 +19820,7 @@
     {
       "id": "TASK-BUD-887",
       "description": "Extract the next low-risk guardrails-core.ts seam to continue toward the <=1000 line-budget target.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-886"
@@ -19837,7 +19837,8 @@
         "Do not alter provider budget governor behavior, auto-dispatch semantics, protected-scope policy, or context-watchdog public API."
       ],
       "milestone": "architecture-runway-implementation",
-      "notes": "[auto-seed] TASK-BUD-886 reduced guardrails-core.ts to 1240 lines but line_budget_snapshot still reports one file above the 1000-line watch threshold. Prefer lifecycle/eventSurfaceRuntime/default-state extraction before touching auto-drain semantics."
+      "notes": "[auto-seed] TASK-BUD-886 reduced guardrails-core.ts to 1240 lines but line_budget_snapshot still reports one file above the 1000-line watch threshold. Prefer lifecycle/eventSurfaceRuntime/default-state extraction before touching auto-drain semantics.\n[slice-start] Continuing local-safe guardrails-core extraction after TASK-BUD-886 commit 6c78afc6. Scope stays architecture-only: no provider/model/API behavior changes and no protected-scope policy changes.\n[rationale-sync] Added risk-control rationale before closure because TASK-BUD-887 touches guardrails-core runtime orchestration.\n[rationale:risk-control] Closing the final >1000-line guardrails-core orchestrator surface is rationale-sensitive because this file owns runtime guardrails, long-run dispatch boundaries, protected-scope gates and operator trust signals. Extracting auto-drain behind explicit state accessors lowers mainte…\n[complete] Extracted auto-drain seam; all TS surfaces are now below 1000-line watch threshold (line_budget_snapshot aboveWatch=0).",
+      "verification": "VERIFY-BUD-887"
     }
   ]
 }

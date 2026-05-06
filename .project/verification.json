@@ -13488,6 +13488,15 @@
       "method": "test",
       "timestamp": "2026-05-06T01:21:57.566Z",
       "evidence": "Extracted the guardrails-core tool_call guard into packages/pi-stack/extensions/guardrails-core-tool-call-guard.ts and extracted grouped surface registration into packages/pi-stack/extensions/guardrails-core-surface-registration.ts. guardrails-core.ts reduced from 1395 to 1240 lines; orchestrator budget ratcheted to 1250. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts packages/pi-stack/test/smoke/guardrails-structured-first.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts (5 files, 9 tests); pnpm vitest --run packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-registration.test.ts packages/pi-stack/test/smoke/guardrails-delivery-mode-surface.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/guardrails-marker-check-surface.test.ts packages/pi-stack/test/smoke/guardrails-recurring-failure-surface.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/guardrails-growth-maturity.test.ts (10 files, 37 tests); final focal pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts (1 file, 2 tests). line_budget_snapshot still reports one file above watch (guardrails-core.ts), so continue follow-up extraction separately."
+    },
+    {
+      "id": "VERIFY-BUD-887",
+      "target": "TASK-BUD-887",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T01:30:29.418Z",
+      "evidence": "Extracted long-run auto-drain/board auto-advance orchestration from packages/pi-stack/extensions/guardrails-core.ts into packages/pi-stack/extensions/guardrails-core-auto-drain.ts, preserving runtime state through an explicit accessor-backed GuardrailsCoreAutoDrainState. guardrails-core.ts reduced from 1240 to 734 lines, and guardrails-core-auto-drain.ts is 646 lines; line_budget_snapshot now reports aboveWatch=0, aboveExtract=0, aboveCritical=0. Ratcheted guardrails-core orchestrator budget to 800 and added wiring assertions for createGuardrailsCoreAutoDrain. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-registration.test.ts -> 4 files passed, 57 tests passed."
     }
   ]
 }

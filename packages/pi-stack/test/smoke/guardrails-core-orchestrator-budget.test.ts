@@ -4,7 +4,7 @@ import * as path from "node:path";
 
 const CORE_PATH = path.resolve(__dirname, "../../extensions/guardrails-core.ts");
 // Staged ratchet: tighten gradually as surfaces are extracted.
-const MAX_ORCHESTRATOR_LINES = 1250;
+const MAX_ORCHESTRATOR_LINES = 800;
 
 describe("guardrails-core orchestrator budget", () => {
 	it("stays under orchestrator line budget", () => {
@@ -18,13 +18,17 @@ describe("guardrails-core orchestrator budget", () => {
 
 	it("keeps extracted surface registrars wired in orchestrator", () => {
 		const source = readFileSync(CORE_PATH, "utf8");
+		const autoDrainPath = path.resolve(__dirname, "../../extensions/guardrails-core-auto-drain.ts");
 		const toolCallGuardPath = path.resolve(__dirname, "../../extensions/guardrails-core-tool-call-guard.ts");
 		const surfaceRegistrationPath = path.resolve(__dirname, "../../extensions/guardrails-core-surface-registration.ts");
+		const autoDrainSource = readFileSync(autoDrainPath, "utf8");
 		const toolCallGuardSource = readFileSync(toolCallGuardPath, "utf8");
 		const surfaceRegistrationSource = readFileSync(surfaceRegistrationPath, "utf8");
 		expect(source).toContain("registerGuardrailsCoreEventSurface(pi, eventSurfaceRuntime)");
+		expect(source).toContain("createGuardrailsCoreAutoDrain({");
 		expect(source).toContain("registerGuardrailsCoreToolCallGuard(pi");
 		expect(source).toContain("registerGuardrailsCoreSurfaces({");
+		expect(autoDrainSource).toContain("evaluateBoardLongRunReadiness");
 		expect(surfaceRegistrationSource).toContain("registerGuardrailsDeliverySurface(pi, appendAuditEntry)");
 		expect(surfaceRegistrationSource).toContain("registerGuardrailsSafeMutationSurface(pi, appendAuditEntry)");
 		expect(toolCallGuardSource).toContain("evaluateBashGuardPolicies(command)");
