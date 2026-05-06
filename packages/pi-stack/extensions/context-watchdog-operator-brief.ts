@@ -173,6 +173,10 @@ export function taskIdNumericSuffix(id: string): number {
 	return match ? Number(match[1]) : -1;
 }
 
+export function isLowPriorityPlannedAutoResumeTask(status: unknown, priority: unknown): boolean {
+	return String(status ?? "").toLowerCase() === "planned" && String(priority ?? "").toLowerCase() === "p3";
+}
+
 export function readProjectProtectedAutoResumeTaskIds(cwd: string): string[] {
 	return readProjectTasksArray(cwd)
 		.filter((task): task is { id: string; milestone?: unknown; files?: unknown[] } => {
@@ -192,6 +196,7 @@ export function readProjectPreferredActiveTaskIds(cwd: string, limit = 3): strin
 			const status = (task as { status?: unknown }).status;
 			if (typeof id !== "string" || typeof status !== "string") return false;
 			if (status !== "in-progress" && status !== "planned") return false;
+			if (isLowPriorityPlannedAutoResumeTask(status, (task as { priority?: unknown }).priority)) return false;
 			if (isProtectedAutoResumeTaskMilestone((task as { milestone?: unknown }).milestone)) return false;
 			const files = (task as { files?: unknown }).files;
 			return !Array.isArray(files) || !files.some(isProtectedAutoResumeTaskPath);
