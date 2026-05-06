@@ -24,6 +24,7 @@ Limite: sem mudança em `.pi/settings.json`, `providerBudgets`, `routeModelRefs`
 | Incerteza de timezone/reset | alta o suficiente para conferir perto da data; Brasil pode ver reset em horário estranho ou antecipado |
 | Plano | Pro |
 | Limite rolling de 5h | não tem bloqueado trabalho do operador até aqui |
+| Quota semanal (modelo-control) | em observação (exemplo atual: ~99% disponível) |
 | Bloqueio prático observado | não; operador nunca ficou sem trabalhar por causa do limite de 5h |
 | Evidência manual | relato do operador nesta sessão |
 
@@ -83,7 +84,17 @@ Perguntas que precisam ser respondidas antes de alterar caps/settings:
 | `handoff_advisor` | sim | local policy block |
 | `provider_readiness_matrix` | sim | local policy block |
 
-## 5.a. Incidente recente de provider error (2026-05-06)
+## 5.a. Observação de topologia de quota do modelo (2026-05-06)
+
+O controle operacional reportado indica separação de quotas dentro do mesmo provider:
+
+- janela curta de 5h por operação de rota/modelo;
+- quota semanal/cota de assinatura separada;
+- exemplo prático: no momento, ~99% da quota da assinatura semanal de `gpt-5.3-codex-spark` ainda disponível enquanto a janela de 5h estava em ~2% de uso.
+
+Isso sustenta uma estratégia operacional de **escoamento para janela curta primeiro** e postergação do uso da capacidade mensal geral, para reduzir custo pago não usado.
+
+## 5.b. Incidente recente de provider error (2026-05-06)
 
 Observação do operador nesta sessão: houve 5 erros consecutivos de `server_error` da API `openai-codex`, com `sequence_number: 2` e `code: server_error`, mesmo após trocar temporariamente o modelo de controle para `gpt-5.3-codex-spark`.
 
@@ -114,10 +125,16 @@ Sem mudar settings:
 2. Tratar alertas locais como aviso de burn/projeção, não como indisponibilidade oficial.
 3. Evitar migrar monitores para Codex automaticamente enquanto Copilot está perto do fim.
 4. Se Copilot acabar antes do provider barato estar aprovado:
+   - priorizar o escoamento da janela curta de 5h do `gpt-5.3-codex-spark` antes de consumir mais da quota semanal/mensal:
+     - usar o que já está “grátis” na janela curta;
+     - preservar a capacidade semanal/mensal para recuperação posterior;
    - usar Codex para monitores apenas com decisão emergencial explícita;
    - registrar dashboard antes/depois;
    - limitar duração e número de chamadas;
-   - parar se dashboard ou runtime mostrarem pressão real.
+   - parar se dashboard ou runtime mostrarem pressão real;
+   - seguir ritual de parada graciosa ao atingir `context_watch` de checkpoint/compact:
+     - `context_watch_checkpoint` + handoff + wrap-up;
+     - permitir idle assumir com estado de continuidade preservado.
 5. Recalibrar `providerBudgets` somente em `TASK-BUD-849` com decisão protegida.
 
 ## 7. Canary/validação futura
