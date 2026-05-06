@@ -14165,6 +14165,15 @@
       "method": "surface helper regression test",
       "timestamp": "2026-05-06T20:33:23.447Z",
       "evidence": "Fixed confusing reload surface behavior: when reload is required outside pre-compact (`level-not-precompact`), `context_watch_compact_stage_status` nextAction now uses the `/reload` hint instead of `continue bounded work`. Added `resolveContextWatchCompactStageNextAction` helper and regression in `context-watchdog.test.ts`. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 59 passed; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-943-P1-FRESHNESS-CLEAN-DIRTY",
+      "target": "TASK-BUD-943",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal regression test",
+      "timestamp": "2026-05-06T20:54:17.144Z",
+      "evidence": "Added P1 freshness regression: `readContextWatchFreshnessSignals` reports `dirtySignal=clean` in a fresh temporary git repo, then `dirtySignal=dirty` after creating an untracked file, validating no stale clean/dirty state in the helper. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 60 passed; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }

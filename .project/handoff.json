@@ -1,19 +1,17 @@
 {
-  "timestamp": "2026-05-06T20:33:46.383Z",
-  "context": "Corrigida gordura parada de sinal reload: compact-stage agora aponta /reload quando reload é necessário fora de pre-compact, em vez de sugerir continue bounded work.",
+  "timestamp": "2026-05-06T20:55:06.984Z",
+  "context": "P1 dirty/freshness regression adicionada: readContextWatchFreshnessSignals alterna clean->dirty em git repo temporário sem stale state. Lane [snip] á tem P0 completo e duas regressões P1. [truncated:+16 chars]",
   "current_tasks": [
     "TASK-BUD-943"
   ],
   "next_actions": [
-    "commit source/tests/docs + board",
-    "reload será necessário após commit por alteração runtime",
-    "depois continuar P1 dirty/freshness ou stale handoff"
+    "commit test/doc + board checkpoint",
+    "avaliar fechamento de TASK-BUD-943 ou próxima P1 stale handoff successor",
+    "se alterar runtime, reload; esta fatia é test/doc/board only"
   ],
-  "blockers": [
-    "runtime-reload-required-after-context-watchdog-surface-change"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "context-watchdog.test.ts: 59 passed",
+    "context-watchdog.test.ts: 60 passed",
     "project-validate: clean",
     "git diff --check: clean"
   ],
@@ -24,25 +22,25 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T20:33:46.383Z",
-    "level": "ok",
-    "percent": 50,
+    "generatedAtIso": "2026-05-06T20:55:06.984Z",
+    "level": "warn",
+    "percent": 54,
     "action": "continue",
-    "recommendation": "Commitar e pedir reload antes de confiar no comportamento live da compact-stage."
+    "recommendation": "Commitar; próxima decisão: fechar lane mínima ou adicionar stale handoff successor."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T20:33:46.383Z",
+      "atIso": "2026-05-06T20:55:06.984Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 50,
+      "level": "warn",
+      "percent": 54,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar e pedir reload antes de confiar no comportamento live da compact-stage."
+      "recommendation": "Commitar; próxima decisão: fechar lane mínima ou adicionar stale handoff successor."
     }
   ]
 }
