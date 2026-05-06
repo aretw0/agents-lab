@@ -1,19 +1,19 @@
 {
-  "timestamp": "2026-05-06T20:12:47.643Z",
-  "context": "Primeira fatia da lane de integridade de sinais concluída: inventário versionado criado, com P0/P1/P2 e critérios de maturidade. TASK-BUD-943 [snip] in-progress para regressões adicionais. [truncated:+11 chars]",
+  "timestamp": "2026-05-06T20:19:41.396Z",
+  "context": "Signal integrity lane advanced: P0 critical prefilter preservation + P1 reload consistency regression added. TASK-BUD-943 remains open for di [snip] reshness and stale handoff regressions. [truncated:+5 chars]",
   "current_tasks": [
     "TASK-BUD-943"
   ],
   "next_actions": [
-    "commit doc + board checkpoint",
-    "implementar próxima regressão P0: monitor_stale_feedback_prefilter deve manter allow-classifie [snip] para sinal crítico/fresco [truncated:+1 chars]",
-    "depois avaliar consistência cruzada de reload surfaces"
+    "commit source/tests/docs + board checkpoint",
+    "next slice: dirty/freshness or stale handoff successor test",
+    "keep no provider/settings/apply"
   ],
   "blockers": [],
   "recent_validation": [
-    "safe_marker_check signal audit: 4/4",
-    "project-validate: clean",
-    "git diff --check: clean"
+    "monitor-runtime-contract.test.ts: 10 passed",
+    "context-watchdog.test.ts: 59 passed",
+    "project-validate: clean"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-943",
@@ -22,25 +22,25 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T20:12:47.643Z",
+    "generatedAtIso": "2026-05-06T20:19:41.396Z",
     "level": "ok",
-    "percent": 39,
+    "percent": 46,
     "action": "continue",
-    "recommendation": "Commitar inventário; seguir com regressão P0 em fatia separada."
+    "recommendation": "Commit current house-cleaning slice; continue with next P1 if desired."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T20:12:47.643Z",
+      "atIso": "2026-05-06T20:19:41.396Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 39,
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar inventário; seguir com regressão P0 em fatia separada."
+      "recommendation": "Commit current house-cleaning slice; continue with next P1 if desired."
     }
   ]
 }
