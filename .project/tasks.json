@@ -20875,7 +20875,7 @@
         "Atualizar o pacote de checklist/guideline de higiene (junto aos scores de higiene existentes) para tornar obrigatória a validação desse critério em revisão de score e no planejamento local-safe."
       ],
       "milestone": "ui-cohesion",
-      "notes": "Ajuste de escopo confirmado: o termo 'açúcar sintático' é para ser tratado de forma **agnóstica a linguagem** (JS/TS inicialmente, mas scorecard pensado para expansão cross-language), não só TypeScript. O detector deve priorizar padrões de risco por linguagem sem acoplamento a sintaxe única. Oportunidade futura (não nesta slice): estudar/alinhar com a extensão **pi-lens** para ampliar cobertura para outras linguagens antes da execução ativa."
+      "notes": "Ajuste de escopo confirmado: o termo 'açúcar sintático' é para ser tratado de forma **agnóstica a linguagem** (JS/TS inicialmente, mas scorecard pensado para expansão cross-language), não só TypeScript. O detector deve priorizar padrões de risco por linguagem sem acoplamento a sintaxe única. Oportunidade futura (não nesta slice): estudar/alinhar com a extensão **pi-lens** para ampliar cobertura para outras linguagens antes da execução ativa.\n[scope-refine] Esta task fica com escopo de higiene agnóstico por linguagem (language-agnostic): início JS/TS (padrões de sobrecarga sintática de alta ambiguidade), com evolução por camadas para outras linguagens por linguagem de parser/analisador específico. Estrutura sugerida: registrar padrão, severidade e exceção por linguagem em metadados do detector, não por heurística textual de extensão de arquivo. Investigação em pi-lens fica em follow-up (não ativar nesta etapa)."
     }
   ]
 }
