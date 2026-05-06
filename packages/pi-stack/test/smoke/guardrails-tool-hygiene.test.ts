@@ -84,6 +84,27 @@ describe("tool hygiene scorecard", () => {
     expect(summary.rows.find((row) => row.patternId === "js-ts-inline-dsl-template")?.decision).toBe("exception-recorded");
   });
 
+  it("ignores string-only fixture literals when scanning source files", () => {
+    const summary = buildSyntaxHygieneSummary({
+      sources: [
+        {
+          path: "fixture.test.ts",
+          content: [
+            "\"const id = user?.profile?.account?.id;\",",
+            "'const label = state === a ? one : state === b ? two : three;',",
+            "const real = user?.profile?.account?.id;",
+          ].join("\n"),
+        },
+      ],
+    });
+
+    expect(summary.findings).toBe(1);
+    expect(summary.rows[0]).toMatchObject({
+      patternId: "js-ts-optional-chain-stack",
+      line: 3,
+    });
+  });
+
   it("includes syntax hygiene evidence in the tool hygiene scorecard", () => {
     const scorecard = buildToolHygieneScorecard({
       tools: [

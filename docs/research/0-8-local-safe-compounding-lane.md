@@ -100,6 +100,7 @@ Toda fatia deve declarar o menor gate confiável antes de editar:
 - docs-only: `safe_marker_check`, grep de path/link ou i18n lint para texto user-facing;
 - board-only: `board_dependency_health_snapshot`, `board_planning_clarity_score` ou decision packet específico;
 - helper de código/teste: `npm run test:smoke -- --run <test>` ou `node --test <file>` focal;
+- higiene sintática: `tool_hygiene_scorecard` com `syntax_files` para JS/TS tocados; achados exigem rationale/exception registrada, não fechamento automático;
 - superfície runtime compartilhada: smoke focal primeiro, depois `npm run ci:smoke:gate` apenas quando a fatia muda comportamento compartilhado;
 - handoff/resume: `context_watch_continuation_readiness` mais git limpo.
 

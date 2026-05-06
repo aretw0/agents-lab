@@ -176,6 +176,10 @@ function countTernaryQuestions(line: string): number {
   return countMatches(line.replace(/\?\.|\?\?/g, ""), /\?/g);
 }
 
+function isLikelyFixtureStringLiteralLine(line: string): boolean {
+  return /^(?:["'`].*["'`],?|["'`].*["'`]\)?;?)$/.test(line.trim());
+}
+
 function findSyntaxException(source: SyntaxHygieneSource, patternId: string, line: number): SyntaxHygieneException | undefined {
   return (source.exceptions ?? []).find((exception) => {
     if (exception.patternId !== patternId) return false;
@@ -215,6 +219,7 @@ export function detectSyntaxHygieneFindings(source: SyntaxHygieneSource): Syntax
     const lineNo = index + 1;
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("//") || trimmed.startsWith("*")) return;
+    if (isLikelyFixtureStringLiteralLine(trimmed)) return;
 
     if (countMatches(trimmed, /\?\./g) >= 3) {
       findings.push(makeSyntaxFinding({ source, language, patternId: "js-ts-optional-chain-stack", line: lineNo, severity: "warn", snippet: trimmed }));
