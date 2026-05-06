@@ -46,9 +46,9 @@ Use ao fechar cada micro-lote (3-5 decisões).
 ## 7) Resposta final ao operador (quando parar)
 - Resultado desta fatia: o que mudou e onde.
 - Validação: comandos/tools e status curto.
-- **Hard-intent snapshot:** `turn_boundary_decision_packet` (`decision`, `reasonCode`, `humanActionRequired`, `authorization`, `nextAutoStep`) + blockers de `context_watch_continuation_readiness`/`autonomy_lane_material_readiness_packet`.
-- **Se hard-intent bloquear:** parar em `ask-human`, fazer 1 pergunta objetiva, oferecer 1 próximo passo seguro e não sugerir dispatch/auto-continuação implícita.
-- **Soft-intent/contexto:** só depois do hard-intent; incluir comparação/recomendação em 1-3 bullets quando houver alternativas, sem espalhar recomendação em artefato canônico.
+- **Snapshot de gates determinísticos:** `turn_boundary_decision_packet` (`decision`, `reasonCode`, `humanActionRequired`, `authorization`, `nextAutoStep`) + blockers de `context_watch_continuation_readiness`/`autonomy_lane_material_readiness_packet`.
+- **Se gate determinístico bloquear:** parar em `ask-human`, fazer 1 pergunta objetiva, oferecer 1 próximo passo seguro e não sugerir dispatch/auto-continuação implícita.
+- **Soft-intent/contexto:** textos/templates só registram evidência e direção; hard intent real exige código/tool/runtime gate determinístico. Incluir comparação/recomendação em 1-3 bullets quando houver alternativas, sem espalhar recomendação em artefato canônico.
 - Decisão necessária: uma pergunta objetiva ou `nenhuma`.
 - Próximo passo seguro: uma ação concreta, local-safe e reversível.
 - Bloqueios/limites: o que ainda não está autorizado (ex.: dispatch, protected scope, provider/settings, CI/remote).
