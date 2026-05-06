@@ -14156,6 +14156,15 @@
       "method": "focal regression test",
       "timestamp": "2026-05-06T20:19:25.378Z",
       "evidence": "Added P1 consistency regression for reload-required flow: in assessment level `ok`, pre-compact reload signal remains inactive with `level-not-precompact` but carries `/reload` hint, while operator signal, deterministic stop, and operator action all require reload. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 59 passed; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-943-P1-RELOAD-NEXTACTION",
+      "target": "TASK-BUD-943",
+      "target_type": "task",
+      "status": "passed",
+      "method": "surface helper regression test",
+      "timestamp": "2026-05-06T20:33:23.447Z",
+      "evidence": "Fixed confusing reload surface behavior: when reload is required outside pre-compact (`level-not-precompact`), `context_watch_compact_stage_status` nextAction now uses the `/reload` hint instead of `continue bounded work`. Added `resolveContextWatchCompactStageNextAction` helper and regression in `context-watchdog.test.ts`. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 59 passed; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }

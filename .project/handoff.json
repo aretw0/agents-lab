@@ -1,19 +1,21 @@
 {
-  "timestamp": "2026-05-06T20:19:41.396Z",
-  "context": "Signal integrity lane advanced: P0 critical prefilter preservation + P1 reload consistency regression added. TASK-BUD-943 remains open for di [snip] reshness and stale handoff regressions. [truncated:+5 chars]",
+  "timestamp": "2026-05-06T20:33:46.383Z",
+  "context": "Corrigida gordura parada de sinal reload: compact-stage agora aponta /reload quando reload é necessário fora de pre-compact, em vez de sugerir continue bounded work.",
   "current_tasks": [
     "TASK-BUD-943"
   ],
   "next_actions": [
-    "commit source/tests/docs + board checkpoint",
-    "next slice: dirty/freshness or stale handoff successor test",
-    "keep no provider/settings/apply"
+    "commit source/tests/docs + board",
+    "reload será necessário após commit por alteração runtime",
+    "depois continuar P1 dirty/freshness ou stale handoff"
   ],
-  "blockers": [],
+  "blockers": [
+    "runtime-reload-required-after-context-watchdog-surface-change"
+  ],
   "recent_validation": [
-    "monitor-runtime-contract.test.ts: 10 passed",
     "context-watchdog.test.ts: 59 passed",
-    "project-validate: clean"
+    "project-validate: clean",
+    "git diff --check: clean"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-943",
@@ -22,25 +24,25 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T20:19:41.396Z",
+    "generatedAtIso": "2026-05-06T20:33:46.383Z",
     "level": "ok",
-    "percent": 46,
+    "percent": 50,
     "action": "continue",
-    "recommendation": "Commit current house-cleaning slice; continue with next P1 if desired."
+    "recommendation": "Commitar e pedir reload antes de confiar no comportamento live da compact-stage."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T20:19:41.396Z",
+      "atIso": "2026-05-06T20:33:46.383Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 46,
+      "percent": 50,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commit current house-cleaning slice; continue with next P1 if desired."
+      "recommendation": "Commitar e pedir reload antes de confiar no comportamento live da compact-stage."
     }
   ]
 }
