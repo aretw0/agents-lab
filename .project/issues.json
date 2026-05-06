@@ -1016,6 +1016,18 @@
       "package": "pi-stack",
       "source": "monitor",
       "resolved_by": "TASK-BUD-956"
+    },
+    {
+      "id": "fragility-fragility-mouo48mg",
+      "title": "The agent responded with only an empty message after being asked to proceed, leaving the task unresolved with no acknowledgement or action.",
+      "body": "Stale monitor issue resolved by later evidence: the proceed request produced TASK-BUD-957, TASK-BUD-958, a canary decision packet, validation, commits, and explicit ask-human decision options.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "resolved",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor",
+      "resolved_by": "TASK-BUD-957"
     }
   ]
 }
