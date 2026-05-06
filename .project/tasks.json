@@ -19532,7 +19532,7 @@
     {
       "id": "TASK-BUD-874",
       "description": "Audit guardrails-core.ts toward a <=1000-line surface by identifying registration/orchestration extraction candidates without changing public behavior.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-873"
@@ -19547,7 +19547,8 @@
         "Classify any protected or public-API-sensitive extraction separately."
       ],
       "milestone": "architecture-runway",
-      "notes": "[auto-seed] Local-safe audit first; code extraction can follow only with focused seam and tests.\n[provenance:human] source_task=TASK-BUD-873 reason=Largest TS extension surface is above watch threshold and near extract threshold; audit is safe and architecture-enabling."
+      "notes": "[auto-seed] Local-safe audit first; code extraction can follow only with focused seam and tests.\n[provenance:human] source_task=TASK-BUD-873 reason=Largest TS extension surface is above watch threshold and near extract threshold; audit is safe and architecture-enabling.\n[slice-complete] guardrails-core.ts audit complete. Recommended future implementation starts with a small eventSurfaceRuntime factory or lifecycle helper, not full auto-drain extraction. Next local-safe task: TASK-BUD-875.",
+      "verification": "VER-BUD-1239"
     },
     {
       "id": "TASK-BUD-875",

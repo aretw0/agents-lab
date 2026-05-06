@@ -13371,6 +13371,15 @@
       "method": "inspect",
       "timestamp": "2026-05-06T00:08:28.730Z",
       "evidence": "Created docs/research/pi-stack-architecture-runway-2026-05.md from local evidence: line-budget top files, planning clarity score=63 needs-decomposition, dependency hygiene=100, protected leftovers from TASK-BUD-872, and seeded architecture-runway tasks TASK-BUD-874..879. The doc separates local-safe audit/cleanup slices from protected human-decision areas: TASK-BUD-849 model/provider/cost/API, handoff_advisor execute=true, safe_boot settings UX, claude_code_execute subprocess/budget UX, and colony/scheduler/remote evolution. Validation: doc exists; i18n_lint_text pt-BR pass for representative sections; no runtime/provider/settings code changed."
+    },
+    {
+      "id": "VER-BUD-1239",
+      "target": "TASK-BUD-874",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T00:10:54.719Z",
+      "evidence": "Created docs/research/guardrails-core-line-budget-audit-2026-05.md. Audit records guardrails-core.ts at ~1396 lines, current orchestrator budget 1400, responsibility bands, local-safe extraction seams (eventSurfaceRuntime factory, session lifecycle, loop runtime adapter, tool-call guard, delayed auto-drain), protected/public-API-sensitive limits, rollback pattern, and focal gates. No runtime exports or registration behavior changed. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts -> 1 file passed, 2 tests passed; i18n_lint_text pt-BR pass for representative section."
     }
   ]
 }
