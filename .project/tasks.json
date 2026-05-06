@@ -21385,6 +21385,50 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "Operador aceitou Candidate D e corrigiu a taxonomia: hard intent não nasce de template/texto; texto é soft intent/evidência. Hard intent real requer código/tool/runtime determinístico. Esta fatia materializa o checklist e assimila a correção.\n[provenance:human] source_task=TASK-BUD-955 reason=Operador aceitou Candidate D e pediu assimilação da distinção soft vs hard intent antes de seguir.\n[closure] Candidate D materialized. No agent dispatch authorized. Taxonomy corrected: docs guide decisions; deterministic hard intent must live in code/tools/runtime gates.",
       "verification": "VER-BUD-956-CANDIDATE-D-CHECKLIST"
+    },
+    {
+      "id": "TASK-BUD-957",
+      "description": "[P1/local-safe] Preparar pacote de decisão do primeiro canary simple-delegate usando o checklist Candidate D.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-956"
+      ],
+      "files": [
+        "docs/research/simple-delegate-first-canary-decision-packet-2026-05.md",
+        ".project/tasks.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Definir uma task candidata única, doc-only/local-safe, para o primeiro simple-delegate canary.",
+        "Declarar worker goal, allowed files, validation, rollback, timeout, budget, stop contract e rejeições.",
+        "Incluir snapshot dos gates determinísticos atuais e deixar claro que o pacote não autoriza dispatch.",
+        "Terminar com pergunta objetiva de autorização humana para executar ou deferir o canary.",
+        "Validar com marker check, project-validate e git diff --check."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Após Candidate D materializado, operador pediu para prosseguir. Próximo passo seguro é preparar o pacote de decisão do primeiro canary, sem executar agente ainda.\n[provenance:human] source_task=TASK-BUD-956 reason=Operador pediu continuidade após aceitar/materializar Candidate D; dispatch ainda exige confirmação explícita.\n[closure] First canary decision packet prepared. No dispatch authorized. Await explicit operator decision: approve one canary, defer, or revise packet.",
+      "verification": "VER-BUD-957-FIRST-CANARY-PACKET"
+    },
+    {
+      "id": "TASK-BUD-958",
+      "description": "[P1/canary-candidate] Simple-delegate canary: criar rubrica de revisão de patches de agente em doc local-safe.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-957"
+      ],
+      "files": [
+        "docs/research/0-8-agent-quality-review-rubric-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Criar um único documento de rubrica de revisão de patches de agente com escopo, validação, rollback, reject conditions e acceptance threshold.",
+        "Não tocar runtime, settings, providers, CI, remote/offload, scheduler, publish ou protected scope.",
+        "Worker deve parar após uma fatia e retornar diff/evidência; control plane revisa e integra.",
+        "Validar com marker check do documento; rollback não destrutivo é deletar/restaurar o arquivo."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Candidata para primeiro simple-delegate canary. Não executar sem aprovação humana explícita no pacote de decisão.\n[provenance:human] source_task=TASK-BUD-957 reason=Materializar candidate único para pacote de decisão do primeiro canary simples."
     }
   ]
 }

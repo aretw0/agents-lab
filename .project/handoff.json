@@ -1,49 +1,51 @@
 {
-  "timestamp": "2026-05-06T23:00:51.984Z",
-  "context": "TASK-BUD-956 concluída: Candidate D materializado como checklist report-only em docs/research/simple-delegate-local-safe-checklist-2026-05.md [snip] ni8f8 resolvido por evidência corrente. [truncated:+240 chars]",
+  "timestamp": "2026-05-06T23:06:31.146Z",
+  "context": "TASK-BUD-957 concluída: pacote de decisão do primeiro simple-delegate canary criado em docs/research/simple-delegate-first-canary-decision-pa [snip] pções humanas. Dispatch não autorizado. [truncated:+208 chars]",
   "next_actions": [
-    "commit docs + board/handoff/issues",
-    "próximo passo: preparar pacote de decisão para canary simples usando checklist Candidate D",
-    "não executar agente sem confirmação explícita"
+    "commit packet + board/handoff",
+    "aguardar decisão humana: approve one canary / defer / revise packet",
+    "se aprovado, executar exatamente um simple worker slice; caso contrário manter local-execute"
   ],
   "blockers": [
-    "agent dispatch not authorized"
+    "human approval required before dispatch",
+    "simple_delegate_rehearsal_start_packet still reports rehearsal-not-ready/needs-evidence"
   ],
   "recent_validation": [
-    "checklist marker check: 9/9",
-    "mini-handoff marker check: 4/4",
-    "project-validate: clean"
+    "safe_marker_check decision packet: 8/8",
+    "project-validate: clean",
+    "git diff --check: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-956",
+    "focus": "TASK-BUD-957",
     "canonical_links": [
-      "task:TASK-BUD-956"
+      "task:TASK-BUD-957",
+      "task:TASK-BUD-958"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T23:00:51.984Z",
+    "generatedAtIso": "2026-05-06T23:06:31.146Z",
     "level": "ok",
-    "percent": 50,
+    "percent": 53,
     "action": "continue",
-    "recommendation": "Commitar; final responder com gate determinístico atual e perguntar autorização apenas se for executar canary.",
+    "recommendation": "Commitar e parar em ask-human para autorização explícita do canary.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T23:00:51.984Z",
+      "atIso": "2026-05-06T23:06:31.146Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 50,
+      "percent": 53,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar; final responder com gate determinístico atual e perguntar autorização apenas se for executar canary."
+      "recommendation": "Commitar e parar em ask-human para autorização explícita do canary."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-956"
+    "TASK-BUD-957"
   ]
 }
