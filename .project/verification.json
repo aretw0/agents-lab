@@ -14309,6 +14309,15 @@
       "method": "decision packet + marker validation",
       "timestamp": "2026-05-06T23:06:21.479Z",
       "evidence": "Prepared first simple-delegate canary decision packet at `docs/research/simple-delegate-first-canary-decision-packet-2026-05.md`. Created candidate task `TASK-BUD-958` as planned p1 doc-only canary. Packet declares worker goal, allowed file, validation, rollback, timeout, budget, stop contract, deterministic gate snapshot, reject conditions, and explicit human decision options. It states that dispatch is not authorized. Validation: safe_marker_check -> 8/8; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-958-CANARY-EXECUTED",
+      "target": "TASK-BUD-958",
+      "target_type": "task",
+      "status": "passed",
+      "method": "one-agent canary review + marker validation",
+      "timestamp": "2026-05-06T23:28:15.203Z",
+      "evidence": "Executed one approved simple-delegate canary for TASK-BUD-958 in isolated worktree `canary/task-bud-958-agent-quality-rubric`. Initial `claude_code_execute` attempts exposed Claude Code permission friction for writes; learned direct Claude Code CLI puppeteering path: prompt via stdin with `--print --permission-mode acceptEdits --allowedTools Write,Read --tools Write,Read` allowed exactly the declared file. Worker created only `docs/research/0-8-agent-quality-review-rubric-2026-05.md`, no commits. Control plane copied the single allowed file back to main. Validation: safe_marker_check -> 6/6 markers (`Scope`, `Validation`, `Rollback`, `Reject Conditions`, `Acceptance Threshold`, `Review Burden`); `project-validate` clean; `git diff --check` clean. Touched file matched declared scope."
     }
   ]
 }

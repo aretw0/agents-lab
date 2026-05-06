@@ -1,66 +1,50 @@
 {
-  "timestamp": "2026-05-06T23:13:25.703Z",
-  "context": "TASK-BUD-957 concluída: pacote de decisão do primeiro simple-delegate canary criado em docs/research/simple-delegate-first-canary-decision-pa [snip] pções humanas. Dispatch não autorizado. [truncated:+208 chars]",
+  "timestamp": "2026-05-06T23:28:28.667Z",
+  "context": "TASK-BUD-958 concluída: canary simple-delegate aprovado executado em worktree isolado. Worker Claude Code criou apenas docs/research/0-8-agen [snip] capturado como TASK-BUD-959 planned p2. [truncated:+384 chars]",
   "next_actions": [
-    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
-    "commit packet + board/handoff",
-    "aguardar decisão humana: approve one canary / defer / revise packet",
-    "se aprovado, executar exatamente um simple worker slice; caso contrário manter local-execute"
+    "commit rubric doc separado de board",
+    "commit board/handoff para TASK-BUD-958/TASK-BUD-959",
+    "próximo local-safe: investigar TASK-BUD-959 ou criar hardening para claude_code_execute permission-mode/allowedTools"
   ],
   "blockers": [
-    "context-watch-checkpoint-required",
-    "human approval required before dispatch",
-    "simple_delegate_rehearsal_start_packet still reports rehearsal-not-ready/needs-evidence"
+    "nenhum dispatch adicional autorizado"
   ],
   "recent_validation": [
-    "safe_marker_check decision packet: 8/8",
-    "project-validate: clean",
-    "git diff --check: clean"
+    "worker touched only declared file in worktree",
+    "safe_marker_check rubric: 6/6",
+    "project-validate: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-957",
+    "focus": "TASK-BUD-958",
     "canonical_links": [
-      "task:TASK-BUD-957",
-      "task:TASK-BUD-958"
+      "task:TASK-BUD-958",
+      "task:TASK-BUD-959"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T23:06:31.146Z",
+    "generatedAtIso": "2026-05-06T23:28:28.667Z",
     "level": "ok",
-    "percent": 53,
+    "percent": 29,
     "action": "continue",
-    "recommendation": "Commitar e parar em ask-human para autorização explícita do canary.",
+    "recommendation": "Commitar e responder: sim, worktree status output é pobre; feedback foi capturado sem interromper canary.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T23:06:31.146Z",
+      "atIso": "2026-05-06T23:28:28.667Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 53,
+      "percent": 29,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar e parar em ask-human para autorização explícita do canary."
-    },
-    {
-      "atIso": "2026-05-06T23:13:25.703Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 55,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+      "recommendation": "Commitar e responder: sim, worktree status output é pobre; feedback foi capturado sem interromper canary."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-957"
+    "TASK-BUD-958"
   ]
 }

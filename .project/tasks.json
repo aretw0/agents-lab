@@ -21413,7 +21413,7 @@
     {
       "id": "TASK-BUD-958",
       "description": "[P1/canary-candidate] Simple-delegate canary: criar rubrica de revisão de patches de agente em doc local-safe.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-957"
@@ -21428,7 +21428,30 @@
         "Validar com marker check do documento; rollback não destrutivo é deletar/restaurar o arquivo."
       ],
       "milestone": "agent-quality-calibration-lane",
-      "notes": "Candidata para primeiro simple-delegate canary. Não executar sem aprovação humana explícita no pacote de decisão.\n[provenance:human] source_task=TASK-BUD-957 reason=Materializar candidate único para pacote de decisão do primeiro canary simples."
+      "notes": "Candidata para primeiro simple-delegate canary. Não executar sem aprovação humana explícita no pacote de decisão.\n[provenance:human] source_task=TASK-BUD-957 reason=Materializar candidate único para pacote de decisão do primeiro canary simples.\n[closure] Approved one-agent canary executed and integrated. Calibration notes: adapter path needs permission-mode/allowedTools support; direct CLI stdin puppeteering worked. Operator feedback about poor `worktree status` output captured as TASK-BUD-959.",
+      "verification": "VER-BUD-958-CANARY-EXECUTED"
+    },
+    {
+      "id": "TASK-BUD-959",
+      "description": "[P2/local-safe] Melhorar output operator-visible do `worktree status` para não aparecer como bloco vazio/pouco informativo.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-958"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/*worktree*",
+        "docs/research/worktree-status-operator-output-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Reproduzir ou documentar o caso em que a UI mostra apenas `⌥ worktree status` e `✓ # Worktree status`.",
+        "Localizar o dono real do tool/command `worktree` ou documentar se é tool externo ao pacote atual.",
+        "Propor ou implementar resumo operator-visible mínimo com branch, kind, current worktree root, repo root e count de worktrees/dirty state quando disponível.",
+        "Preservar detalhes completos para inspeção sem inflar a linha principal.",
+        "Validar com teste/marker check local-safe; não tocar settings, CI, publish ou provider config."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Feedback do operador durante TASK-BUD-958: o bloco visual `⌥ worktree status` / `✓ # Worktree status` não comunica nada útil. Isso deve virar melhoria de UX/operator-visible output, mas não interromper o canary atual.\n[provenance:human] source_task=TASK-BUD-958 reason=Operador apontou output pobre do worktree status como problema de observabilidade durante o canary."
     }
   ]
 }
