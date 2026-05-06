@@ -1,48 +1,51 @@
 {
-  "timestamp": "2026-05-06T22:30:11.206Z",
-  "context": "Reload pós-TASK-BUD-950 validado: autonomy_lane_next_task não sugere mais TASK-BUD-946/947; retorna no-eligible-tasks/protected-focus-require [snip] le e resolvido por evidência posterior. [truncated:+165 chars]",
+  "timestamp": "2026-05-06T22:33:26.108Z",
+  "context": "TASK-BUD-951 concluída: contrato report-only do primeiro canary de delegação simples criado em docs/research/0-8-delegation-simple-canary-con [snip] r rehearsal/auto-advance/focus-missing. [truncated:+194 chars]",
   "next_actions": [
-    "seedar ou escolher explicitamente uma task local-safe p1/p2 real",
-    "não promover TASK-BUD-946/947 automaticamente; ficam backlog p3",
-    "delegação simples continua bloqueada até foco local-safe e telemetria auto-advance"
+    "commit doc + board/handoff",
+    "selecionar exatamente uma task local-safe p1/p2 para candidato de canary",
+    "rerun simple_delegate_rehearsal_start_packet só depois de foco concreto declarado"
   ],
-  "blockers": [],
+  "blockers": [
+    "simple-delegate-rehearsal-not-ready",
+    "auto-advance-telemetry-not-ready",
+    "focus-missing-for-delegation"
+  ],
   "recent_validation": [
-    "autonomy_lane_next_task live: next=none code=local-stop-protected-focus-required",
-    "auto-resume live: reload=clear",
-    "project-validate: clean"
+    "safe_marker_check: 5/5 markers",
+    "project-validate: clean",
+    "git diff --check: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-950",
+    "focus": "TASK-BUD-951",
     "canonical_links": [
-      "task:TASK-BUD-950",
-      "task:TASK-BUD-946"
+      "task:TASK-BUD-951"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T22:30:11.206Z",
+    "generatedAtIso": "2026-05-06T22:33:26.108Z",
     "level": "ok",
-    "percent": 36,
+    "percent": 38,
     "action": "continue",
-    "recommendation": "Parar calibração reativa; próximo passo é seed/seleção explícita de foco local-safe ou decisão humana de canary.",
+    "recommendation": "Não delegar ainda; próximo passo é seleção humana/board de um candidato local-safe concreto.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T22:30:11.206Z",
+      "atIso": "2026-05-06T22:33:26.108Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 36,
+      "percent": 38,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Parar calibração reativa; próximo passo é seed/seleção explícita de foco local-safe ou decisão humana de canary."
+      "recommendation": "Não delegar ainda; próximo passo é seleção humana/board de um candidato local-safe concreto."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-950"
+    "TASK-BUD-951"
   ]
 }

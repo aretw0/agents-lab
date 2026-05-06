@@ -21251,6 +21251,29 @@
       "milestone": "signal-integrity-calibration",
       "notes": "Criada porque, mesmo com auto-resume limpo, `autonomy_lane_next_task` e simple-delegate liveNext ainda sugeriam TASK-BUD-946 (planned p3 operator-noise backlog). Próximo passo correto antes de delegação: impedir esse falso foco automático.\n[provenance:tangent-approved] source_task=TASK-BUD-949 reason=Continuation/delegation gates permaneceram bloqueados por focus-missing/liveNext p3 após limpeza do auto-resume.\n[closure] Completed false-focus fix for autonomy_lane_next_task/liveNext: planned p3/no-priority backlog no longer becomes automatic next local-safe task unless explicitly focused. Runtime reload required before live tool output reflects this selector update.",
       "verification": "VER-BUD-950-SKIP-P3-AUTONOMY"
+    },
+    {
+      "id": "TASK-BUD-951",
+      "description": "[P1/local-safe] Preparar contrato report-only do primeiro canary de delegação simples antes de executar qualquer agente worker.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-950"
+      ],
+      "files": [
+        "docs/research/0-8-delegation-simple-canary-contract-2026-05.md",
+        ".project/tasks.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Definir escopo de uma única task local-safe para canary de simple-delegate, com arquivos declarados, rollback não destrutivo, validação focal e timeout.",
+        "Confirmar explicitamente que o contrato é report-only e não autoriza dispatch, scheduler, remote/offload, GitHub Actions ou protected scope.",
+        "Registrar blockers atuais de delegação (`auto-advance-blocked`, `telemetry-not-ready`, `focus-missing` se ainda aparecer) e o critério mínimo para pedir decisão humana.",
+        "Validar com marker check do documento, `project-validate` e `git diff --check`."
+      ],
+      "milestone": "delegation-canary-runway",
+      "notes": "Seed p1 local-safe após a calibração limpar auto-resume/autonomy false focus. Objetivo: sair do whack-a-mole e preparar um contrato visível para o primeiro canary de delegação simples, sem executar agente ainda.\n[provenance:tangent-approved] source_task=TASK-BUD-950 reason=Após reload, não havia task local-safe p1/p2 elegível; próximo desbloqueio correto é materializar contrato report-only de canary simples antes de delegar.\n[closure] Created report-only contract for the first simple-delegate canary. This is a runway artifact only; no agent dispatch authorized. Next step is human/board selection of exactly one local-safe candidate, then rerun rehearsal packet.",
+      "verification": "VER-BUD-951-DELEGATION-CANARY-CONTRACT"
     }
   ]
 }

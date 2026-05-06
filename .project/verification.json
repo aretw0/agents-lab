@@ -14246,6 +14246,15 @@
       "method": "focal regression test",
       "timestamp": "2026-05-06T22:25:23.202Z",
       "evidence": "Aligned autonomy lane task selection with auto-resume low-priority policy. `selectAutonomyLaneTask` now skips planned tasks with priority rank >= p3 by default, while preserving p3 in-progress work and planned p3 tasks only when explicitly focused. Regression covers planned p3 backlog skipped, p1 selected, p3 in-progress preserved, and explicit planned p3 focus allowed. Validation: `npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts` -> 26 passed; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-951-DELEGATION-CANARY-CONTRACT",
+      "target": "TASK-BUD-951",
+      "target_type": "task",
+      "status": "passed",
+      "method": "document + readiness packet inspection",
+      "timestamp": "2026-05-06T22:33:10.488Z",
+      "evidence": "Prepared report-only simple-delegate canary contract at `docs/research/0-8-delegation-simple-canary-contract-2026-05.md`. Evidence recorded: agent spawn primitive is ready for one bounded spawn; subagents are READY; provider matrix has one ready/one blocked; simple-delegate start remains blocked by rehearsal/auto-advance/focus-missing; no dispatch is authorized. Validation: safe_marker_check -> 5/5 markers; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }
