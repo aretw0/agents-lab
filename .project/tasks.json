@@ -20689,7 +20689,7 @@
     {
       "id": "TASK-BUD-925",
       "description": "Create a monitor stale-feedback evidence intake template before runtime calibration work.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-919"
@@ -20704,7 +20704,8 @@
         "Validate with marker check and link from readiness map or charter."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:cost-control] This prepares TASK-BUD-915 without spending tokens or changing monitor behavior prematurely."
+      "notes": "[rationale:cost-control] This prepares TASK-BUD-915 without spending tokens or changing monitor behavior prematurely.\n[start] Creating monitor stale-feedback evidence intake template; docs-only, no monitor runtime/provider/settings changes.\n[complete] Intake template created and linked; TASK-BUD-915 remains protected/prepared, not active runtime calibration.",
+      "verification": "VERIFY-BUD-925"
     },
     {
       "id": "TASK-BUD-926",

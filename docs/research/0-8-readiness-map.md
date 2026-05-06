@@ -31,7 +31,7 @@ O estado recomendado para a 0.8.0 é:
 | Área | Por que importa | Próximo passo seguro |
 |---|---|---|
 | CI/CD e GitHub Actions | GitHub Actions está falhando e precisa coesão com gates locais | `TASK-BUD-914`: começar por coleta report-only de falhas e mapa local↔Actions; mutação de workflow exige aprovação explícita |
-| Monitor stale feedback/token economy | feedback atrasado e classifiers podem gastar tokens demais | `TASK-BUD-915`: coletar exemplos, criar pre-filtro determinístico/cooldown e regressões antes de mexer em runtime amplo |
+| Monitor stale feedback/token economy | feedback atrasado e classifiers podem gastar tokens demais | `TASK-BUD-915`: coletar exemplos com `docs/research/monitor-stale-feedback-intake-template-2026-05.md`, criar pre-filtro determinístico/cooldown e regressões antes de mexer em runtime amplo |
 | Warning de monitor-provider overrides | reload mostra warning possivelmente legado: `overrides divergentes detectados (2)` | `TASK-BUD-916`: reproduzir e decidir downgrade/dedupe/removal; não rodar `/monitor-provider apply` sem aprovação |
 | Model infrastructure ampla | independência de provider e roteamento por tarefa continuam valiosos | manter `TASK-BUD-849` como guarda-chuva protegido; avançar só por canários bounded |
 | Delegação/long-run mais forte | pode acelerar limpeza/pesquisa de forma composta | `TASK-BUD-921`: sintetizar readiness report-only; sem auto-dispatch/scheduler/remote |

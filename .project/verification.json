@@ -13803,6 +13803,15 @@
       "method": "doc+marker+i18n",
       "timestamp": "2026-05-06T14:30:42.401Z",
       "evidence": "Created docs/research/0-8-parked-influences-register.md capturing currently parked influences from the board: impeccable.style, hermes-agent, sandcastle, claude-mem, parked colonies, and model leaderboards/stats. Defined assimilation rules, future triggers, first local-safe slices, and rejection criteria. No new external research was performed. Validation: safe_marker_check passed 7/7 anchors; i18n_lint_text passed for pt-BR summary."
+    },
+    {
+      "id": "VERIFY-BUD-925",
+      "target": "TASK-BUD-925",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc+marker+i18n+link",
+      "timestamp": "2026-05-06T14:33:58.146Z",
+      "evidence": "Created docs/research/monitor-stale-feedback-intake-template-2026-05.md as a report-only evidence template for TASK-BUD-915, including incident fields, mandatory evidence, token-economy fields, allowed no-runtime decisions, stop conditions, and readiness criteria. Linked the template from docs/research/0-8-readiness-map.md. Validation: safe_marker_check passed for template anchors after avoiding command-sensitive backtick marker; safe_marker_check passed for readiness-map link; i18n_lint_text passed for pt-BR summary. No monitor runtime, provider, settings, override, or classifier routing changes were made."
     }
   ]
 }
