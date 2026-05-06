@@ -13398,6 +13398,15 @@
       "method": "test",
       "timestamp": "2026-05-06T00:22:33.135Z",
       "evidence": "Added missing config imports in packages/pi-stack/extensions/monitor-provider-patch.ts for CLASSIFIER_MODEL_SETTING_PATH, CLASSIFIER_MODEL_BY_PROVIDER_SETTING_PATH, and DEFAULT_MODEL_BY_PROVIDER. This fixes buildStatusReport references used by /monitor-provider status without changing provider/model/settings mutation semantics. Validation: node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 tests passed. Targeted TypeScript missing-name probe: pnpm exec tsc --noEmit --pretty false packages/pi-stack/extensions/monitor-provider-patch.ts | rg missing config names -> no output for monitor-provider-patch missing import names; unrelated node_modules/target diagnostics remain outside this fix."
+    },
+    {
+      "id": "VER-BUD-1242",
+      "target": "TASK-BUD-876",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T00:25:03.818Z",
+      "evidence": "Created docs/research/monitor-provider-patch-line-budget-audit-2026-05.md. Audit records monitor-provider-patch.ts at ~1031 lines, maps current families (hedge policy, fragility calibration, instruction nudges, issue schema templates, status/output, command/session_start orchestration), recommends extraction order (monitor-provider-monitor-policy, monitor-provider-calibration, monitor-provider-issue-template, monitor-provider-output, monitor-provider-session-start), and lists invariants for advisory monitor semantics, explicit /monitor-provider apply, no node_modules mutation, lean hedge/fragility contexts, and schema-compatible issue templates. Incidental runtime import fix was split into TASK-BUD-880. Validation: node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 tests passed; pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts -> 2 files passed, 10 tests passed; targeted TypeScript missing-name probe for monitor-provider-patch config constants returned no missing-name output; i18n_lint_text pt-BR pass; project JSON parse pass."
     }
   ]
 }

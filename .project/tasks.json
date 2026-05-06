@@ -19574,7 +19574,7 @@
     {
       "id": "TASK-BUD-876",
       "description": "Audit monitor-provider-patch.ts line budget and split candidates while preserving first-party monitor patch semantics.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-875"
@@ -19590,7 +19590,8 @@
         "No code mutation in audit slice; list focal regression tests for follow-up."
       ],
       "milestone": "architecture-runway",
-      "notes": "[auto-seed] Local-safe audit for third-largest watched file; monitor behavior is advisory and versioned code/tests are the durable path.\n[provenance:human] source_task=TASK-BUD-873 reason=Line-budget snapshot shows monitor-provider-patch.ts above watch threshold; audit is cleanup/alignment work.\n[auto-chain] Continuing after user steer: do not stop just to announce; proceed with bounded local-safe monitor-provider-patch audit until compact/idle boundary."
+      "notes": "[auto-seed] Local-safe audit for third-largest watched file; monitor behavior is advisory and versioned code/tests are the durable path.\n[provenance:human] source_task=TASK-BUD-873 reason=Line-budget snapshot shows monitor-provider-patch.ts above watch threshold; audit is cleanup/alignment work.\n[auto-chain] Continuing after user steer: do not stop just to announce; proceed with bounded local-safe monitor-provider-patch audit until compact/idle boundary.\n[slice-complete] monitor-provider-patch audit complete. Recommended first implementation after runway mapping: issue-template or output split with status regression coverage.",
+      "verification": "VER-BUD-1242"
     },
     {
       "id": "TASK-BUD-877",
