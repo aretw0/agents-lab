@@ -155,6 +155,33 @@ Critério de pre-filtro: se monitor/task aparece em notes como superseded/resolv
 Risco de falso clean: médio; aplicar apenas quando houver task/verification/commit posterior explícito
 ```
 
+## Canary report-only — pre-filtro stale
+
+Status atual: `monitor_stale_feedback_prefilter` expõe a regra como canário report-only. A ferramenta pode recomendar `suppress-stale` ou `suppress-duplicate`, mas não silencia monitores por conta própria.
+
+### Economia estimada
+
+```text
+Incidentes avaliados: 3
+Chamadas provavelmente evitáveis nesta amostra: 3
+Economia mínima esperada: 1 chamada de classifier por alerta stale/duplicado com evidência determinística suficiente
+Regra de fallback: se a evidência estiver incompleta, manter allow-classifier
+```
+
+### Preservação de sinais críticos
+
+Não aplicar supressão automática quando o alerta envolver:
+
+- branch protection, push/tag/release, CI ou publicação;
+- ação destrutiva, alteração de provider/settings ou escopo protegido;
+- monitor de `unauthorized-action` com evidência fresca;
+- falta de commit/verification/task posterior que prove resolução;
+- `reloadGate=reload-required` ou contexto ainda em janela de compactação ativa.
+
+### Rollback e promoção
+
+Rollback: manter a ferramenta report-only e ignorar recomendações do pre-filtro. Promoção para wiring operacional só deve ocorrer depois de canário com falsos clean zero nos casos críticos acima e teste cobrindo pelo menos um alerta fresh que continua em `allow-classifier`.
+
 ## Critério de pronto para `TASK-BUD-915`
 
 `TASK-BUD-915` pode avançar para calibração local-safe quando houver pelo menos 3 incidentes preenchidos ou 1 incidente crítico reproduzível com:
