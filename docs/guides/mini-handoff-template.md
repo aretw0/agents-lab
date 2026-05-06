@@ -14,6 +14,12 @@ Use ao fechar cada micro-lote (3-5 decisões).
 - 
 - 
 
+## 1-bis) Protocolo de parada (hard + soft)
+- [ ] `hard intent` validado: `turn_boundary_decision_packet`, `context_watch_continuation_readiness`, `local_continuity_audit`, `autonomy_lane_material_readiness_packet`, `context_watch_checkpoint` executados antes da decisão de continuidade.
+- [ ] Se houver bloqueio hard-intent: registrar `ask-human` com 1 pergunta objetiva + 1 ação segura proposta.
+- [ ] Soft-intent registrado: contexto útil + ROI da próxima ação (seguir/semeadura/pausar) + o que **não** foi escolhido.
+- IDs continuam úteis como ponteiro, **mas nunca devem ficar sozinhos** (sem contexto de impacto/decisão).
+
 ## 2) Evidências rápidas
 - Arquivos lidos/editados:
 - Comandos/tools usados:

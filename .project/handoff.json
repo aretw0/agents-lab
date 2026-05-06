@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-05-06T15:39:53.329Z",
-  "context": "Pause state check. focus remains TASK-BUD-849; no provider/model settings mutation in this run; waiting for readiness packet (candidate-mater [snip] kpoint) before local-safe continuation. [truncated:+16 chars]",
+  "timestamp": "2026-05-06T15:43:12.385Z",
+  "context": "Local-safe continuation after user ack. No protected settings/model/provider changes in this slice.",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "Context-watch action: level=compact 66% (compact-now) · Compact now and continue from checkpoint.",
-    "Re-run local-safe readiness packets and confirm candidate-material + checkpoint freshness before any task change.",
-    "If still blocked, request explicit operator confirmation with one concise option triage."
+    "Context-watch action: level=compact 74% (compact-now) · Compact now and continue from checkpoint.",
+    "Consolidar alinhamento hard/soft no template de parada e manter TASK-BUD-849 sem mutações protegidas.",
+    "Após validar blocos hard de continuidade, executar próxima fatia local-safe limitada a documentação."
   ],
   "blockers": [
     "context-watch-compact-required"
@@ -17,21 +17,26 @@
     "context_watch_continuation_readiness",
     "local_continuity_audit"
   ],
+  "recent_commits": [
+    "d4d4308c",
+    "3c96dabc"
+  ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
     "canonical_links": [
-      "task:TASK-BUD-849"
+      "task:TASK-BUD-849",
+      "commit:d4d4308c"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T15:37:12.812Z",
+    "generatedAtIso": "2026-05-06T15:43:12.217Z",
     "level": "ok",
     "action": "continue",
     "recommendation": "Progress saved; continue bounded local hardening."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T15:37:12.812Z",
+      "atIso": "2026-05-06T15:43:12.217Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 0,
@@ -44,23 +49,10 @@
       "recommendation": "Local slice checkpoint saved."
     },
     {
-      "atIso": "2026-05-06T15:39:08.806Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 55,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
-    },
-    {
-      "atIso": "2026-05-06T15:39:53.329Z",
+      "atIso": "2026-05-06T15:43:12.385Z",
       "reason": "message_end",
       "level": "compact",
-      "percent": 66,
+      "percent": 74,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 55,
