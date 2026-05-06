@@ -20459,6 +20459,30 @@
       ],
       "milestone": "short-mid-ci-cd-cohesion",
       "notes": "[provenance:human] User requested a short/mid-term backlog tangent for CI/CD cohesion because GitHub Actions is failing, to pick up after current initiatives reach a stable state. [rationale:risk-control] CI/CD and GitHub Actions are protected scope; keep as explicit backlog/planning item, no auto-dispatch or workflow mutation without later approval. Existing related completed history includes TASK-BUD-910 and TASK-BUD-622, but no open backlog item was found.\n[provenance:human] source_task=TASK-BUD-849 reason=User wants future tangent after current provider/model/runtime initiatives stabilize."
+    },
+    {
+      "id": "TASK-BUD-915",
+      "description": "Backlog short/mid-term: calibrate behavior monitors to suppress stale feedback and reduce classifier token spend.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        ".pi/monitors/fragility.monitor.json",
+        ".pi/monitors/*.monitor.json",
+        "packages/pi-stack/extensions/monitor-runtime-contract.ts",
+        "packages/pi-stack/extensions/monitor-summary.ts",
+        "packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts",
+        "packages/pi-stack/test/smoke/monitor-summary.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Collect at least two stale/delayed monitor-feedback examples with task/commit resolution evidence before changing monitor behavior.",
+        "Define stale-feedback suppression rules that recognize already-resolved issues, later commits, and board verification evidence.",
+        "Add a cheap deterministic pre-filter/cooldown plan before any LLM classifier call when a monitor finding is likely stale or duplicate.",
+        "Measure expected token-spend reduction and preserve high-signal critical monitor findings.",
+        "Add regression coverage for stale feedback after a task is resolved or superseded by a later commit.",
+        "Keep changes local-first/report-only until explicit approval for broader monitor/provider routing changes."
+      ],
+      "milestone": "short-mid-monitor-economy-calibration",
+      "notes": "[provenance:human] User requested short/mid-term backlog for pragmatic monitor calibration: avoid delayed feedback and reduce token spend because long-term classifier burn is not viable. [rationale:risk-control] Recurring stale monitor feedback should become a bounded primitive/regression path, not ad hoc dismissal; existing related completed task TASK-BUD-841 exists, but no open backlog item was found for stale-feedback/token-economy calibration.\n[provenance:human] source_task=TASK-BUD-849 reason=Latest fragility feedback was stale after TASK-BUD-913/TASK-BUD-914 had already resolved or backlogged the relevant concern."
     }
   ]
 }
