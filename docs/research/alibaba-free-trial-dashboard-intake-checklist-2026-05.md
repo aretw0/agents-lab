@@ -39,9 +39,9 @@ Critério: se cobrança pós-trial não for clara, manter candidate-only.
 | Campo | Valor |
 | --- | --- |
 | API escolhida |  |
-| Base URL oficial |  |
-| OpenAI-compatible? | sim / não / desconhecido |
-| Endpoint candidato |  |
+| Base URL oficial | erro 401 observado em `https://dashscope.aliyuncs.com/compatible-mode/v1`; testar/confirmar endpoint internacional `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` |
+| OpenAI-compatible? | sim, hipótese operacional via compatible-mode; smoke ainda falhou em auth |
+| Endpoint candidato | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` até confirmação no dashboard |
 | SDK obrigatório? | sim / não / desconhecido |
 | Streaming suportado? | sim / não / desconhecido |
 | Tool/function calling suportado? | sim / não / desconhecido |
@@ -86,8 +86,8 @@ Gate: se não houver `/login` nativo, desenhar `/login` ou equivalente antes de 
 | Custo capturável ou estimável? | sim / não / desconhecido |
 | Requests capturáveis? | sim / não / desconhecido |
 | Dashboard exporta usage? | sim / não / desconhecido |
-| Erros 401/403/429 identificáveis? | sim / não / desconhecido |
-| Burn rate do trial verificável após 1 chamada? | sim / não / desconhecido |
+| Erros 401/403/429 identificáveis? | sim: smoke `OK_ALIBABA_SMOKE` retornou 401 `Incorrect API key provided` no endpoint `dashscope.aliyuncs.com` |
+| Burn rate do trial verificável após 1 chamada? | não verificado; chamada falhou antes de uso válido |
 
 Sem telemetry mínima, manter apenas smoke manual e report-only.
 
@@ -122,7 +122,7 @@ Ainda não autorizado. Quando houver decisão protegida futura, o smoke mínimo 
 Só avançar de `candidate-only` para `canary-ready` quando estes itens estiverem preenchidos:
 
 - [ ] produto/API definido;
-- [ ] endpoint/região confirmado;
+- [ ] endpoint/região confirmado; primeira tentativa em `dashscope.aliyuncs.com` falhou 401, testar/confirmar `dashscope-intl.aliyuncs.com`;
 - [ ] modelos disponíveis e trial-inclusos listados;
 - [ ] crédito, expiração e risco de cobrança entendidos;
 - [ ] método de auth/login definido;
