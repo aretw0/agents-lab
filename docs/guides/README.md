@@ -53,6 +53,10 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 | [i18n-intents.md](./i18n-intents.md) | Runbook de intents soft/hard de internacionalização para comunicação e artefatos |
 | [skill-guide-parity.md](./skill-guide-parity.md) | Protocolo de paridade guide-skill para discoverability e controle de drift documental |
 | [0.8 readiness map](../research/0-8-readiness-map.md) | Mapa operacional de readiness 0.8.0: pronto, protegido, parked e próxima fila local-safe |
+| [0.8 local-safe compounding lane](../research/0-8-local-safe-compounding-lane.md) | Resumo da lane de estabilização 0.8: tarefas, fronteiras e fluxo de continuidade |
+| [0.8 delegation long-run runway](../research/0-8-delegation-long-run-runway.md) | Runway de delegação/long-run para evolução controlada da 0.8 |
+| [0.8 local-safe slice validation matrix](../research/0-8-local-safe-slice-validation-matrix.md) | Matriz de validação para fatias locais: critérios, gates e rastreio de risco |
+| [0.8 local-safe rollback cookbook](../research/0-8-local-safe-rollback-cookbook.md) | Cookbook de rollback local-safe para retomada curta e reversão explícita |
 
 ### Embedding e Integração
 

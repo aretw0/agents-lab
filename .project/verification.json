@@ -13884,6 +13884,15 @@
       "method": "report-only docs",
       "timestamp": "2026-05-06T15:08:14.474Z",
       "evidence": "Created docs/research/alibaba-dashscope-embedding-investigation-intake-2026-05.md and updated it with concrete embedding discovery and a bounded next-step plan: identified candidate embedding models from prior `/models` inventory (text-embedding-v4, text-embedding-v3, tongyi-embedding-vision-plus), separated reranker model (`qwen3-rerank`), added report-only evidence gates and a low-risk canary protocol for quota/erro/latência/consistência, and formalized protected fallback (no protected routing/settings changes, keep TASK-BUD-849 gate)."
+    },
+    {
+      "id": "VERIFY-BUD-930",
+      "target": "TASK-BUD-930",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+index audit",
+      "timestamp": "2026-05-06T15:11:30.066Z",
+      "evidence": "Created docs/research/0-8-docs-index-audit.md listing 0.8.0 lane artifacts, cross-link status (in-lane vs guides index), discoverability gaps, and minimal docs-only remediation recommendations. Added 0.8 lane entry links to docs/guides/README.md under 'Otimização e Operação'. No settings/provider/runtime mutations performed."
     }
   ]
 }

@@ -20796,7 +20796,7 @@
     {
       "id": "TASK-BUD-930",
       "description": "Create a docs index audit for 0.8.0 lane artifacts and missing cross-links.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-919"
@@ -20811,7 +20811,8 @@
         "Validate with safe_marker_check for artifact names and path existence checks."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:cleanup] Documentation discoverability is a safe compounding cleanup target."
+      "notes": "[rationale:cleanup] Documentation discoverability is a safe compounding cleanup target.\n[start] Creating docs index audit for 0.8 artifacts and repairing missing cross-links in guides index where safe.\n[complete] Docs index audit complete for 0.8 lane; added short discoverability cross-links in guides index.",
+      "verification": "VERIFY-BUD-930"
     },
     {
       "id": "TASK-BUD-931",

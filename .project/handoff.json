@@ -1,35 +1,33 @@
 {
-  "timestamp": "2026-05-06T15:09:14.258Z",
-  "context": "Completed short/medium backlog investigation scaffold for DashScope/Alibaba embeddings. Added concrete inventory-backed model candidates, cri [snip] rotegido. No runtime/provider mutation. [truncated:+56 chars]",
+  "timestamp": "2026-05-06T15:12:18.699Z",
+  "context": "Cleanup: previous checkpoint payload corrected to keep handoff evidence consistent; completed TASK-BUD-930 only, with no protected mutations.",
   "next_actions": [
-    "Context-watch action: level=checkpoint 58% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
-    "TASK-BUD-849 continua foco de decisão protegida para qualquer rota real de embeddings/providers.",
-    "Re-run continuity packets on clean git state before any broader readiness changes.",
-    "Resume with compact/idle boundary if context crosses thresholds."
+    "Context-watch action: level=compact 68% (compact-now) · Compact now and continue from checkpoint.",
+    "Return focus to TASK-BUD-849 for guarded provider/model decisions.",
+    "Re-run autonomy/material readiness packets on clean git state before further execution-mode shifts."
   ],
   "blockers": [
-    "context-watch-checkpoint-required",
-    "local continuity and readiness gates still block auto-advance; keep local-safe/docs-only slices"
+    "context-watch-compact-required",
+    "auto-advance and continuity still blocked; keep local-safe-only slices"
   ],
   "recent_validation": [
-    "safe_marker_check on docs/research/alibaba-dashscope-embedding-investigation-intake-2026-05.md",
-    "i18n_lint_text on same doc",
-    "board_task_complete for TASK-BUD-932"
+    "safe_marker_check on docs/guides/README.md and 0-8 index audit",
+    "i18n_lint_text pass",
+    "board_task_complete for TASK-BUD-930"
   ],
   "recent_commits": [
-    "876a97a0",
-    "b4b410a3"
+    "e1a85b52"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-932",
+    "focus": "TASK-BUD-930",
     "canonical_links": [
-      "task:TASK-BUD-932",
+      "task:TASK-BUD-930",
       "task:TASK-BUD-849",
-      "commit:876a97a0"
+      "commit:e1a85b52"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T15:08:44.238Z",
+    "generatedAtIso": "2026-05-06T15:12:18.635Z",
     "level": "warn",
     "percent": 55,
     "action": "continue",
@@ -43,7 +41,7 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T15:08:44.238Z",
+      "atIso": "2026-05-06T15:12:18.635Z",
       "reason": "manual_checkpoint",
       "level": "warn",
       "percent": 55,
@@ -56,20 +54,20 @@
       "recommendation": "compact"
     },
     {
-      "atIso": "2026-05-06T15:09:14.258Z",
+      "atIso": "2026-05-06T15:12:18.699Z",
       "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 58,
+      "level": "compact",
+      "percent": 68,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 55,
         "compactPct": 65
       },
-      "action": "write-checkpoint",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-932"
+    "TASK-BUD-930"
   ]
 }
