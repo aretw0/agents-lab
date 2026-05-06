@@ -113,6 +113,6 @@ Antes de qualquer mudança runtime/settings, responder:
 ## 6. Próximo passo local-safe
 
 1. Preencher o modelo cheap/fast em [`docs/research/alibaba-qwen-llm-shortlist-2026-05.md`](alibaba-qwen-llm-shortlist-2026-05.md).
-2. Definir 10 casos sintéticos para `commit-hygiene` e `work-quality`.
-3. Preparar packet protegido para o canary Qwen cheap/fast.
+2. Usar os 10 casos sintéticos em [`docs/research/qwen-monitor-classifier-synthetic-cases-2026-05.md`](qwen-monitor-classifier-synthetic-cases-2026-05.md).
+3. Se o operador aprovar, executar o packet protegido em [`docs/research/qwen-monitor-classifier-canary-packet-2026-05.md`](qwen-monitor-classifier-canary-packet-2026-05.md).
 4. Só depois discutir alteração real de monitor-provider.

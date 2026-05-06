@@ -20187,6 +20187,31 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] Operator reports GitHub Copilot premium requests at 1423.56/1500 while Qwen free-trial smoke succeeded. [rationale:risk-control] Monitor fallback needs a documented decision packet before quota exhaustion forces a rushed migration to OpenAI Codex or Alibaba.\n[slice-start] Creating Copilot monitor quota fallback packet from current 1423.56/1500 premium request fact. No monitor/provider settings changes.\n[rationale:risk-control] Copilot is near premium-request depletion, while Qwen is smoke-proven but not yet classifier-proven. A fallback packet prevents rushed automatic migration to OpenAI Codex or Alibaba.\n[complete] Copilot near-depletion fallback packet ready: no auto-migration; Qwen cheap/fast canary next, OpenAI Codex emergency only.",
       "verification": "VERIFY-BUD-902"
+    },
+    {
+      "id": "TASK-BUD-903",
+      "description": "Prepare Qwen cheap/fast classifier canary packet and synthetic cases.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-901",
+        "TASK-BUD-902"
+      ],
+      "files": [
+        "docs/research/qwen-monitor-classifier-canary-packet-2026-05.md",
+        "docs/research/qwen-monitor-classifier-synthetic-cases-2026-05.md",
+        "docs/research/copilot-monitor-quota-fallback-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Create a protected decision packet for the Qwen cheap/fast classifier canary with placeholders for selected model id and quota facts.",
+        "Define exactly 10 synthetic/archived-safe classifier cases split across commit-hygiene and work-quality, with expected verdict shape and no protected/private content.",
+        "Include caps, dashboard before/after quota measurement, fallback model before compact, stop conditions, rollback, privacy, and no-auto-migration constraints.",
+        "State that the packet does not authorize execution until the operator provides explicit approval with selected model and caps.",
+        "No settings, monitor-provider defaults, routeModelRefs, providerBudgets, default model, API key, runtime routing, or paid spend changes."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] Next local-safe step after Copilot quota fallback: make the Qwen cheap/fast classifier canary executable as a protected packet once the operator fills model/quota facts. [rationale:risk-control] Copilot quota is near depletion, but Qwen must prove structured classifier behavior before monitor migration.\n[slice-start] Drafting Qwen cheap/fast classifier canary packet and 10 synthetic cases. No runtime/provider/settings changes.\n[rationale:risk-control] A protected canary packet with fixed synthetic cases prevents rushed monitor migration while Copilot premium requests are near depletion.\n[complete] Qwen cheap/fast classifier canary packet and 10 synthetic cases are ready for a future explicit protected decision.",
+      "verification": "VERIFY-BUD-903"
     }
   ]
 }

@@ -13632,6 +13632,15 @@
       "method": "docs+marker+tests",
       "timestamp": "2026-05-06T04:51:20.802Z",
       "evidence": "Created docs/research/copilot-monitor-quota-fallback-2026-05.md recording operator quota fact GitHub Copilot premium requests at 1423.56 / 1500. The packet defines immediate posture: keep Copilot while it works, preserve OpenAI Codex as cockpit/emergency fallback, and evaluate Alibaba/Qwen cheap/fast as a monitor/classifier candidate before migration. It defines attention triggers, maturity levels, Qwen classifier canary scope for commit-hygiene/work-quality only, OpenAI Codex emergency fallback constraints, Qwen allowlist prerequisites, and a protected decision packet with caps/rollback/humanApproval. Updated docs/research/monitor-provider-candidate-packet-2026-05.md to link the fallback packet and prioritize Alibaba/Qwen cheap/fast. No settings, monitor-provider defaults, routeModelRefs, providerBudgets, default model/provider, API key, runtime routing, or paid spend changes. Validation: i18n_lint_text sample -> pass; safe_marker_check -> pass; pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts -> 3 files passed, 26 tests passed."
+    },
+    {
+      "id": "VERIFY-BUD-903",
+      "target": "TASK-BUD-903",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+marker+tests",
+      "timestamp": "2026-05-06T04:56:30.073Z",
+      "evidence": "Created docs/research/qwen-monitor-classifier-canary-packet-2026-05.md and docs/research/qwen-monitor-classifier-synthetic-cases-2026-05.md. The canary packet is protected/not-authorized and requires explicit operator approval with providerModel, quotaBefore, maxCalls, maxTrialQuotaBurnPct, fallbackBeforeCompact, and synthetic-only scope. It limits canary to exactly 10 synthetic classifier cases for commit-hygiene-classifier and work-quality-classifier, excludes unauthorized-action/fragility/hedge and protected scope, defines approval metrics, stop conditions, rollback, and no-auto-migration states. Synthetic cases define 5 commit-hygiene and 5 work-quality cases with expected clean/flag verdicts and action expectations, no private code/secrets/paths. Updated docs/research/copilot-monitor-quota-fallback-2026-05.md to link both artifacts. No settings, monitor-provider defaults, routeModelRefs, providerBudgets, default model, API key, runtime routing, or paid spend changes. Validation: i18n_lint_text samples -> pass; safe_marker_check canary packet -> pass; safe_marker_check synthetic cases -> pass; pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts -> 3 files passed, 10 tests passed."
     }
   ]
 }
