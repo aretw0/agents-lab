@@ -944,6 +944,18 @@
       "package": "pi-stack",
       "source": "monitor",
       "resolved_by": "TASK-BUD-915"
+    },
+    {
+      "id": "fragility-fragility-mouhauu0",
+      "title": "The agent produced only an empty response to a continuation request, leaving the requested update/task unresolved without explanation.",
+      "body": "Monitor feedback reviewed in context: duplicate/superseded by TASK-BUD-915 monitor calibration lane. `monitor_stale_feedback_prefilter` returned `decision=suppress-duplicate classifier=skip reason=superseded-duplicate`. Retained as audit record; no scope change requested.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "resolved",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor",
+      "resolved_by": "TASK-BUD-915"
     }
   ]
 }
