@@ -1,42 +1,42 @@
 {
-  "timestamp": "2026-05-06T12:30:29.637Z",
-  "context": "Committed operator-provided Alibaba/DashScope dashboard quota snapshot for the only Qwen models used so far: qwen-plus, qwen3.6-flash, and qw [snip] rejected despite high remaining quota. [truncated:+148 chars]",
+  "timestamp": "2026-05-06T12:51:46.837Z",
+  "context": "Committed evidence for Alibaba Free quota only confirmation and the commit-hygiene qwen3.6-flash not-found hotfix. Local ignored .sandbox/pi- [snip] oad guidance, and qwen-turbo rejection. [truncated:+115 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "Manual dashboard-check Free quota exhausted stop remains pending; do not print/store keys.",
-    "Resume non-provider local-safe work; keep broader TASK-BUD-849 protected/in-progress.",
-    "Do not use qwen-turbo for classifiers without a new passing canary."
-  ],
-  "blockers": [
-    "Dashboard Alibaba freeQuotaStop state still requires human visual confirmation.",
+    "If same monitor error persists in current session, open /model or restart pi to reload model catalog.",
+    "Resume non-provider local-safe work; qwen-turbo remains rejected without new canary.",
     "Do not push/publish/deploy unless explicitly requested."
   ],
+  "blockers": [
+    ".sandbox/pi-agent/settings.json hotfix is intentionally ignored/local runtime state, not versioned."
+  ],
   "recent_validation": [
-    "safe_marker_check passed for dashboard quota markers in rollout, shortlist, and free-trial strategy docs.",
-    "i18n_lint_text passed for quota snapshot text."
+    "safe_marker_check passed for .sandbox enabledModels qwen3.6-flash marker.",
+    "safe_marker_check passed for rollout/shortlist docs markers.",
+    "i18n_lint_text passed for runtime-hotfix summary."
   ],
   "recent_commits": [
-    "e3a59ea1 docs(providers): record qwen dashboard quotas"
+    "484f6764 docs(providers): record qwen quota stop hotfix"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
     "canonical_links": [
       "task:TASK-BUD-849",
-      "commit:e3a59ea1"
+      "commit:484f6764"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T12:30:29.637Z",
+    "generatedAtIso": "2026-05-06T12:51:46.837Z",
     "level": "checkpoint",
     "percent": 55,
     "action": "checkpoint-refresh",
-    "recommendation": "resume-local-safe-work-dashboard-quota-committed"
+    "recommendation": "resume-local-safe-work-qwen-hotfix-committed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T12:30:29.637Z",
+      "atIso": "2026-05-06T12:51:46.837Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 55,
@@ -46,7 +46,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "resume-local-safe-work-dashboard-quota-committed"
+      "recommendation": "resume-local-safe-work-qwen-hotfix-committed"
     }
   ]
 }

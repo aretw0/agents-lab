@@ -118,10 +118,12 @@ O dashboard oficial continua sendo a fonte final para free quota e cobrança:
 1. abrir `https://modelstudio.console.alibabacloud.com`;
 2. ir em **Model Usage / Free quota** ou no card do modelo;
 3. conferir `qwen3.6-flash` remaining/total;
-4. ligar **Free quota exhausted stop**, se disponível;
-5. se não estiver disponível, registrar motivo e reduzir cap local;
+4. manter ligado o toggle **Free quota only**;
+5. se o toggle sumir ou não estiver disponível, registrar motivo e reduzir cap local;
 6. dar refresh manual antes/depois de canaries ou mudanças;
 7. lembrar que uso pode atrasar alguns minutos e estatística detalhada pode atrasar até cerca de 1h.
+
+Confirmação do operador: o toggle **Free quota only** está ligado, cumprindo a intenção de `free quota exhausted stop`.
 
 Stop oficial esperado quando o free-quota stop está ativo:
 
@@ -154,7 +156,23 @@ Rollback de runtime local ignorado:
 - `unset DASHSCOPE_API_KEY` se houver qualquer suspeita de vazamento;
 - voltar classifiers para `openai-codex/gpt-5.4-mini` ou provider anterior conhecido.
 
-## 7. Estado final desta fatia
+## 7. Incidente de runtime: modelo não habilitado
+
+Erro observado no monitor de commits após o rollout:
+
+```text
+Error: [commit-hygiene] Classification failed: Model dashscope/qwen3.6-flash not found
+```
+
+Causa local provável: o modelo existia em `.sandbox/pi-agent/models.json`, mas não estava listado em `.sandbox/pi-agent/settings.json` `enabledModels`. Hotfix local aplicado no arquivo ignorado pelo git:
+
+```json
+"dashscope/qwen3.6-flash"
+```
+
+Se o mesmo erro persistir na sessão já aberta, recarregar a seleção de modelos (`/model`) ou reiniciar a instância pi para forçar reload do catálogo. Não trocar para `qwen-turbo`: ele tem quota alta, mas falhou no canary por falso `clean` crítico.
+
+## 8. Estado final desta fatia
 
 Estado recomendado depois do rollout:
 

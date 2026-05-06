@@ -17,6 +17,7 @@ Fatos reportados:
 - quota `qwen3.6-flash`: Remaining `986,687` / Total `1,000,000` após canaries;
 - quota `qwen-turbo`: Remaining `999,621` / Total `1,000,000` após canary interrompido;
 - esses são os únicos modelos Qwen/DashScope usados até agora;
+- operador confirmou que o toggle **Free quota only** está ligado;
 - consumo observado: cerca de 3% da quota `qwen-plus`, cerca de 1,33% de `qwen3.6-flash`, e 379 tokens de `qwen-turbo`;
 - catálogo free-trial grande: cerca de 100 LLMs, 55 visual models, 17 multimodal models, 36 speech models e 5 embedding models;
 - trocar para `qwen-plus` em contexto de control-plane fez a UI mostrar cerca de 25% de contexto usado (`31.6k/304`), então Qwen não deve assumir long-context control-plane ainda.
@@ -124,7 +125,7 @@ Qwen pode assumir mais carga quando houver:
 | Copilot pode acabar nos monitores | priorizar Qwen cheap/fast classifier canary |
 | OpenAI Codex virar carga única | reservar OpenAI para cockpit/heavy/recovery |
 | Catálogo Alibaba enorme | tiering, não inventário exaustivo |
-| Quota free trial queima rápido | dashboard before/after em cada smoke; snapshot atual mostra apenas `qwen-plus`, `qwen3.6-flash` e `qwen-turbo` usados |
+| Quota free trial queima rápido | dashboard before/after em cada smoke; snapshot atual mostra apenas `qwen-plus`, `qwen3.6-flash` e `qwen-turbo` usados; toggle **Free quota only** confirmado ligado |
 | Endpoint/API key por região | manter `dashscope-intl` como operacional; documentar `dashscope.aliyuncs.com` 401 |
 
 ## 8. Próximo passo local-safe

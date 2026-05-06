@@ -131,11 +131,11 @@ Só abrir protected packet para smoke cheap/fast + coder se:
 - [ ] `qwen-plus` continuar como baseline, sem repetir chamada desnecessária;
 - [x] cheap/fast escolhido por API/docs como `qwen3.6-flash`;
 - [x] cheap/fast quota/free trial registrada no dashboard: `qwen3.6-flash` Remaining 986,687 / Total 1,000,000;
-- [ ] `free quota exhausted stop` ligado para cheap/fast ou indisponibilidade justificada;
+- [x] `free quota exhausted stop` ligado para cheap/fast: operador confirmou toggle **Free quota only** ativo;
 - [x] coder escolhido por API/docs como `qwen3-coder-next`;
 - [ ] coder quota/free trial registrada no dashboard;
 - [ ] `free quota exhausted stop` ligado para coder ou indisponibilidade justificada;
-- [ ] auto-billing/paid spend entendido;
+- [x] auto-billing/paid spend entendido para o rollout atual: **Free quota only** ativo e cap local conservador mantido;
 - [ ] prompts sintéticos definidos;
 - [ ] fallback model selecionado antes de compactação;
 - [ ] stop condition de burn rate por chamada definida;
