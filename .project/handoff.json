@@ -1,50 +1,51 @@
 {
-  "timestamp": "2026-05-06T23:28:28.667Z",
-  "context": "TASK-BUD-958 concluída: canary simple-delegate aprovado executado em worktree isolado. Worker Claude Code criou apenas docs/research/0-8-agen [snip] capturado como TASK-BUD-959 planned p2. [truncated:+384 chars]",
+  "timestamp": "2026-05-06T23:52:10.938Z",
+  "context": "TASK-BUD-962 concluída e pesquisa assimilada: problema de quota é real. Local gate usa monthly aggregate projection para openai-codex, mas op [snip] om WHAM probe e provider/model budgets. [truncated:+426 chars]",
   "next_actions": [
-    "commit rubric doc separado de board",
-    "commit board/handoff para TASK-BUD-958/TASK-BUD-959",
-    "próximo local-safe: investigar TASK-BUD-959 ou criar hardening para claude_code_execute permission-mode/allowedTools"
+    "commit quota diagnosis doc + board",
+    "próximo: TASK-BUD-963 implementar parsing/probe fail-soft sem rede real nos testes",
+    "depois recalibrar roteamento para provider/model candidates"
   ],
   "blockers": [
-    "nenhum dispatch adicional autorizado"
+    "não alterar .pi/settings.json/routing ativo sem decisão explícita",
+    "live WHAM probe deve ser read-only, timeout/cache/fail-soft"
   ],
   "recent_validation": [
-    "worker touched only declared file in worktree",
-    "safe_marker_check rubric: 6/6",
-    "project-validate: clean"
+    "safe_marker_check quota doc: 6/6",
+    "project-validate: clean",
+    "git diff --check: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-958",
+    "focus": "TASK-BUD-962",
     "canonical_links": [
-      "task:TASK-BUD-958",
-      "task:TASK-BUD-959"
+      "task:TASK-BUD-962",
+      "task:TASK-BUD-963"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T23:28:28.667Z",
+    "generatedAtIso": "2026-05-06T23:52:10.938Z",
     "level": "ok",
-    "percent": 29,
+    "percent": 54,
     "action": "continue",
-    "recommendation": "Commitar e responder: sim, worktree status output é pobre; feedback foi capturado sem interromper canary.",
+    "recommendation": "Commitar e seguir para hardening de quotas antes de confiar no bloqueio agregado do openai-codex.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T23:28:28.667Z",
+      "atIso": "2026-05-06T23:52:10.938Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 29,
+      "percent": 54,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar e responder: sim, worktree status output é pobre; feedback foi capturado sem interromper canary."
+      "recommendation": "Commitar e seguir para hardening de quotas antes de confiar no bloqueio agregado do openai-codex."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-958"
+    "TASK-BUD-962"
   ]
 }

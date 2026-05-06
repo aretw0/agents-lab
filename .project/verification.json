@@ -14318,6 +14318,15 @@
       "method": "one-agent canary review + marker validation",
       "timestamp": "2026-05-06T23:28:15.203Z",
       "evidence": "Executed one approved simple-delegate canary for TASK-BUD-958 in isolated worktree `canary/task-bud-958-agent-quality-rubric`. Initial `claude_code_execute` attempts exposed Claude Code permission friction for writes; learned direct Claude Code CLI puppeteering path: prompt via stdin with `--print --permission-mode acceptEdits --allowedTools Write,Read --tools Write,Read` allowed exactly the declared file. Worker created only `docs/research/0-8-agent-quality-review-rubric-2026-05.md`, no commits. Control plane copied the single allowed file back to main. Validation: safe_marker_check -> 6/6 markers (`Scope`, `Validation`, `Rollback`, `Reject Conditions`, `Acceptance Threshold`, `Review Burden`); `project-validate` clean; `git diff --check` clean. Touched file matched declared scope."
+    },
+    {
+      "id": "VER-BUD-962-DUAL-QUOTA-DIAGNOSIS",
+      "target": "TASK-BUD-962",
+      "target_type": "task",
+      "status": "passed",
+      "method": "diagnostic document + local validation",
+      "timestamp": "2026-05-06T23:47:14.607Z",
+      "evidence": "Created `docs/research/openai-codex-dual-quota-calibration-2026-05.md` documenting the quota tracking gap: local gate models `openai-codex` as monthly aggregate tokens/cost with projection, while operator evidence says real dashboard has separate weekly general Codex quota (~50% available) and `gpt-5.3-codex-spark` pool (~83% available) with separate reset dates (general around 2026-05-11, spark 2026-05-13). Document defines hardening requirements: provider/model budgets, reset anchors, dashboard evidence fields, used vs projected separation, and route advisory over provider/model candidates. Validation: safe_marker_check -> 4/4; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }

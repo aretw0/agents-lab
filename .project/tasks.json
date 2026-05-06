@@ -21502,7 +21502,7 @@
     {
       "id": "TASK-BUD-962",
       "description": "[P1/local-safe] Calibrar quota OpenAI Codex para duas cotas: janela semanal geral e pool separado `gpt-5.3-codex-spark`.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-961"
@@ -21520,7 +21520,32 @@
         "Definir validação local-safe/teste antes de qualquer mudança em routing ou settings."
       ],
       "milestone": "agent-quality-calibration-lane",
-      "notes": "Operador informou que OpenAI Codex tem duas cotas: geral semanal e pool específico do modelo `gpt-5.3-codex-spark`. O site mostra ~50% da janela semanal disponível e ~83% do spark; resets esperados: geral em 11 de maio (talvez dia 10) e spark em 13 de maio. O gate local bloqueou porque usa monthly aggregate projection (`projectedPctCost` ~359%) e não modela essas janelas.\n[provenance:human] source_task=TASK-BUD-961 reason=Roteamento para delegação indicou openai-codex bloqueado, mas operador trouxe evidência de cota real disponível e nuance de pool spark separado."
+      "notes": "Operador informou que OpenAI Codex tem duas cotas: geral semanal e pool específico do modelo `gpt-5.3-codex-spark`. O site mostra ~50% da janela semanal disponível e ~83% do spark; resets esperados: geral em 11 de maio (talvez dia 10) e spark em 13 de maio. O gate local bloqueou porque usa monthly aggregate projection (`projectedPctCost` ~359%) e não modela essas janelas.\n[provenance:human] source_task=TASK-BUD-961 reason=Roteamento para delegação indicou openai-codex bloqueado, mas operador trouxe evidência de cota real disponível e nuance de pool spark separado.\n[start] Operador confirmou hipótese: há problema de acompanhamento de quotas e provável necessidade de hardening focado na parte de quota visibility/routing. Escopo desta fatia: diagnóstico local-safe/documento, sem alterar settings/routing.\n[closure] Quota hardening diagnosis materialized. No `.pi/settings.json` or routing changes applied. Next implementation should add model-specific budget/reset support and tests before trusting openai-codex aggregate block for spark decisions.",
+      "verification": "VER-BUD-962-DUAL-QUOTA-DIAGNOSIS"
+    },
+    {
+      "id": "TASK-BUD-963",
+      "description": "[P1/local-safe] Implementar hardening de quota OpenAI Codex com probe WHAM e budgets provider/model.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-962"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility*.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts",
+        "docs/research/openai-codex-dual-quota-calibration-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Adicionar modelo/tipos para budget por `provider/model` sem quebrar budgets provider-only existentes.",
+        "Projetar ou implementar probe read-only do endpoint OpenAI WHAM `GET /backend-api/wham/usage` usando pi-managed auth quando disponível, com timeout/cache/fail-soft.",
+        "Parsear `rate_limit`, `code_review_rate_limit` e `additional_rate_limits` para janelas percent-left/reset, incluindo pools model-specific como `gpt-5.3-codex-spark`.",
+        "Separar estado `dashboard/live-window` de projeção local de logs; projeção local não deve marcar pool live como esgotado sem evidência da janela real.",
+        "Cobrir parsing/roteamento em testes locais sem chamada de rede real.",
+        "Não alterar `.pi/settings.json`, providers, CI, publish ou routing ativo sem decisão explícita."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Pesquisa local/comunidade encontrou `@ifi/oh-pi-extensions` usage-tracker: usa pi-managed auth e `GET /backend-api/wham/usage`, parseia 5h/weekly windows e `additional_rate_limits` com percent-left/reset. Próximo hardening deve adaptar/importar esse padrão para quota-visibility com testes e fail-soft.\n[provenance:human] source_task=TASK-BUD-962 reason=Operador autorizou pesquisa web/comunidade se necessário e perguntou se precisamos de hardening focado em quotas."
     }
   ]
 }
