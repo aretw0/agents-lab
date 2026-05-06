@@ -20753,7 +20753,7 @@
     {
       "id": "TASK-BUD-928",
       "description": "Create a compact handoff/resume checklist for the 0.8.0 compounding lane.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-919"
@@ -20769,7 +20769,8 @@
         "Validate with marker check and context_watch_continuation_readiness."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:continuity] A compact resume checklist helps future turns continue without asking obvious ordering questions."
+      "notes": "[rationale:continuity] A compact resume checklist helps future turns continue without asking obvious ordering questions.\n[start] Creating a compact 0.8 compounding lane resume checklist from current continuation constraints and local continuity audit output.\n[complete] Resume checklist added to reduce context loss and avoid accidental context jumps in future low-interaction continuation.",
+      "verification": "VERIFY-BUD-928"
     },
     {
       "id": "TASK-BUD-929",
