@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	CONTEXT_WATCHDOG_RUNTIME_RELOAD_RELATIVE_PATHS,
+	CONTEXT_WATCHDOG_RUNTIME_RELOAD_SOURCE_DIRS,
 	readContextWatchdogRuntimeReloadMtimeMs,
 } from "../../extensions/context-watchdog-runtime-status";
 
@@ -49,11 +50,27 @@ describe("context-watchdog runtime reload surfaces", () => {
 		expect(afterAgentOverride).toBeCloseTo(7_000, -1);
 	});
 
+	it("tracks pi-stack extension source changes outside context-watchdog", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-runtime-reload-source-"));
+		const extensionsDir = join(cwd, "packages", "pi-stack", "extensions");
+		mkdirSync(extensionsDir, { recursive: true });
+		const monitorProviderOutputPath = join(extensionsDir, "monitor-provider-output.ts");
+		writeFileSync(monitorProviderOutputPath, "export const changed = false;\n");
+		const when = new Date(9_000);
+		utimesSync(monitorProviderOutputPath, when, when);
+
+		const observed = readContextWatchdogRuntimeReloadMtimeMs(cwd, () => 1_000);
+		expect(observed).toBeCloseTo(9_000, -1);
+	});
+
 	it("keeps the runtime reload surface explicit and bounded", () => {
 		expect(CONTEXT_WATCHDOG_RUNTIME_RELOAD_RELATIVE_PATHS).toEqual([
 			".pi/settings.json",
 			".sandbox/pi-agent/settings.json",
 			".sandbox/pi-agent/models.json",
+		]);
+		expect(CONTEXT_WATCHDOG_RUNTIME_RELOAD_SOURCE_DIRS).toEqual([
+			"packages/pi-stack/extensions",
 		]);
 	});
 });

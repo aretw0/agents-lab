@@ -19,6 +19,10 @@ export const CONTEXT_WATCHDOG_RUNTIME_RELOAD_RELATIVE_PATHS = [
 	".sandbox/pi-agent/models.json",
 ] as const;
 
+export const CONTEXT_WATCHDOG_RUNTIME_RELOAD_SOURCE_DIRS = [
+	"packages/pi-stack/extensions",
+] as const;
+
 function readFileMtimeMs(filePath: string): number | undefined {
 	try {
 		return statSync(filePath).mtimeMs;
@@ -45,6 +49,23 @@ function readAgentOverrideMtimes(cwd: string): number[] {
 	}
 }
 
+function readPiStackExtensionSourceMtimes(cwd: string): number[] {
+	const out: number[] = [];
+	for (const relativeDir of CONTEXT_WATCHDOG_RUNTIME_RELOAD_SOURCE_DIRS) {
+		const fullDir = path.join(cwd, relativeDir);
+		try {
+			for (const name of readdirSync(fullDir)) {
+				if (!name.endsWith(".ts")) continue;
+				const mtime = readFileMtimeMs(path.join(fullDir, name));
+				if (Number.isFinite(mtime)) out.push(mtime as number);
+			}
+		} catch {
+			// Optional in installed/non-monorepo contexts.
+		}
+	}
+	return out;
+}
+
 export function readContextWatchdogRuntimeReloadMtimeMs(
 	cwd: string,
 	sourceMtimeReader?: () => number | undefined,
@@ -55,6 +76,7 @@ export function readContextWatchdogRuntimeReloadMtimeMs(
 			readFileMtimeMs(path.join(cwd, relativePath))
 		)),
 		...readAgentOverrideMtimes(cwd),
+		...readPiStackExtensionSourceMtimes(cwd),
 	]);
 }
 
