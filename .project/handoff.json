@@ -1,45 +1,53 @@
 {
-  "timestamp": "2026-05-06T16:27:10.854Z",
-  "context": "Micro-slice de planejamento da TASK-BUD-933 finalizada nesta borda; bloqueios removidos e gates revalidados em verde.",
+  "timestamp": "2026-05-06T16:36:14.117Z",
+  "context": "Reapresentando continuidade após atualização do backlog de planejamento TASK-BUD-933; mantendo foco local-safe e sem mudança de escopo proteg [snip] idando próximo ciclo sem auto-dispatch. [truncated:+8 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "Prosseguir para próxima micro-slice local-safe: detalhar pacote de regras/fixtures de linguage [snip] pi-lens (após aprovação). [truncated:+102 chars]"
+    "Usar o plano de regras/fixtures de TASK-BUD-933 e só depois abrir implementação no slice seguinte.",
+    "Executar checkpoints por contrato sem alterar provider/model/settings."
   ],
-  "blockers": [],
+  "blockers": [
+    "context-watch-checkpoint-required"
+  ],
   "recent_validation": [
     "context_watch_continuation_readiness",
     "local_continuity_audit",
     "turn_boundary_decision_packet"
   ],
+  "recent_commits": [
+    "907de330",
+    "aeb09acc"
+  ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
     "canonical_links": [
       "task:TASK-BUD-849",
-      "task:TASK-BUD-933"
+      "task:TASK-BUD-933",
+      "commit:907de330"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T16:27:10.854Z",
+    "generatedAtIso": "2026-05-06T16:36:14.117Z",
     "level": "checkpoint",
-    "percent": 56,
+    "percent": 55,
     "action": "checkpoint-refresh",
-    "recommendation": "continue"
+    "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T16:27:10.854Z",
+      "atIso": "2026-05-06T16:36:14.117Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 56,
+      "percent": 55,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue"
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ]
 }
