@@ -1,49 +1,48 @@
 {
-  "timestamp": "2026-05-06T20:56:07.353Z",
-  "context": "TASK-BUD-943 concluída: lane de integridade de sinais atingiu maturidade ROI atual com inventário, P0 completo e duas regressões P1 (reload c [snip] y/nextAction + freshness clean->dirty). [truncated:+9 chars]",
-  "next_actions": [
-    "commit board/handoff closure",
-    "retomar TASK-BUD-933 ou selecionar próxima fatia local-safe via board",
-    "manter P2 signal-integrity como follow-up se recorrência aparecer"
+  "timestamp": "2026-05-06T21:12:11.922Z",
+  "context": "Retomado TASK-BUD-933. Fatia 1 implementou detector determinístico JS/TS de higiene sintática no scorecard: padrões optional-chain stack, nes [snip] _hygiene_scorecard aceita syntax_files. [truncated:+114 chars]",
+  "current_tasks": [
+    "TASK-BUD-933"
   ],
-  "blockers": [],
+  "next_actions": [
+    "commit source/test/docs",
+    "commit board/handoff",
+    "após commit, /reload necessário por alteração runtime de extensão"
+  ],
+  "blockers": [
+    "runtime-reload-required-after-tool-hygiene-surface-change"
+  ],
   "recent_validation": [
-    "monitor-runtime-contract.test.ts: 10 passed",
-    "context-watchdog.test.ts: 60 passed",
-    "project-validate: clean"
+    "guardrails-tool-hygiene.test.ts: 14 passed",
+    "project-validate: clean",
+    "git diff --check: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-943",
+    "focus": "TASK-BUD-933",
     "canonical_links": [
-      "task:TASK-BUD-943",
-      "task:TASK-BUD-933",
-      "commit:6828e0f2"
+      "task:TASK-BUD-933"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T20:56:07.353Z",
-    "level": "warn",
-    "percent": 55,
+    "generatedAtIso": "2026-05-06T21:12:11.922Z",
+    "level": "ok",
+    "percent": 30,
     "action": "continue",
-    "recommendation": "Fechar checkpoint; próxima lane pode voltar ao foco TASK-BUD-933.",
-    "focus_task_status": "completed"
+    "recommendation": "Commitar fatia local-safe e pedir reload antes de usar syntax_files live."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T20:56:07.353Z",
+      "atIso": "2026-05-06T21:12:11.922Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 55,
+      "level": "ok",
+      "percent": 30,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Fechar checkpoint; próxima lane pode voltar ao foco TASK-BUD-933."
+      "recommendation": "Commitar fatia local-safe e pedir reload antes de usar syntax_files live."
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-943"
   ]
 }

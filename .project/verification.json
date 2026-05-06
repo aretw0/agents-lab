@@ -14183,6 +14183,15 @@
       "method": "lane synthesis + focal regression evidence",
       "timestamp": "2026-05-06T20:55:47.629Z",
       "evidence": "Signal-integrity lane reached stated maturity: inventory versioned in `docs/research/control-plane-signal-integrity-audit-2026-05.md`; P0 reloadGate source-dir regression from TASK-BUD-942; P0 critical fresh signal preservation in `monitor-runtime-contract.test.ts` (10 passed); P1 reload surface consistency/nextAction regression in `context-watchdog.test.ts`; P1 freshness clean->dirty transition regression in `context-watchdog.test.ts` (60 passed). Critical non-suppression policy is documented and implemented. Latest validation: `project-validate` clean; git diffs committed."
+    },
+    {
+      "id": "VER-BUD-933-SYNTAX-HYGIENE-SLICE1",
+      "target": "TASK-BUD-933",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal smoke test",
+      "timestamp": "2026-05-06T21:11:01.259Z",
+      "evidence": "Added deterministic JS/TS syntax-hygiene detector and report-only scorecard plumbing. Evidence rows include patternId, language, path, line, severity, snippet, decision, and optional rationale. `tool_hygiene_scorecard` accepts optional project-relative `syntax_files` and exposes findings in `syntaxHygiene` plus summary evidence. Docs added at `docs/primitives/tool-hygiene.md`. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts` -> 14 passed; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }
