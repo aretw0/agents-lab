@@ -21498,6 +21498,29 @@
       ],
       "milestone": "agent-quality-calibration-lane",
       "notes": "Operador quer hardening do adapter Claude Code no geral. Aprendizado do TASK-BUD-958: adapter atual travou em permissão de escrita porque não expõe permission-mode/allowedTools/tools; CLI direto funcionou.\n[provenance:human] source_task=TASK-BUD-958 reason=Puppeteering do Claude Code mostrou gap concreto no adapter durante canary aprovado."
+    },
+    {
+      "id": "TASK-BUD-962",
+      "description": "[P1/local-safe] Calibrar quota OpenAI Codex para duas cotas: janela semanal geral e pool separado `gpt-5.3-codex-spark`.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-961"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility*.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts",
+        "docs/research/openai-codex-dual-quota-calibration-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Registrar evidência do operador: UI mostra ~50% disponível na janela semanal OpenAI Codex e ~83% disponível no pool `gpt-5.3-codex-spark`.",
+        "Explicar por que o gate local marcou `openai-codex` como blocked: configuração atual usa orçamento mensal agregado tokens/cost e projeção, não as janelas reais/reset do provedor.",
+        "Projetar modelo local de duas cotas com reset geral em 2026-05-11 (ou véspera) e reset spark em 2026-05-13, sem editar `.pi/settings.json` nesta fatia.",
+        "Separar provider account budget de model-specific budget para `gpt-5.3-codex-spark`.",
+        "Definir validação local-safe/teste antes de qualquer mudança em routing ou settings."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Operador informou que OpenAI Codex tem duas cotas: geral semanal e pool específico do modelo `gpt-5.3-codex-spark`. O site mostra ~50% da janela semanal disponível e ~83% do spark; resets esperados: geral em 11 de maio (talvez dia 10) e spark em 13 de maio. O gate local bloqueou porque usa monthly aggregate projection (`projectedPctCost` ~359%) e não modela essas janelas.\n[provenance:human] source_task=TASK-BUD-961 reason=Roteamento para delegação indicou openai-codex bloqueado, mas operador trouxe evidência de cota real disponível e nuance de pool spark separado."
     }
   ]
 }
