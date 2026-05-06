@@ -14201,6 +14201,15 @@
       "method": "focal smoke + doc marker validation",
       "timestamp": "2026-05-06T21:21:53.979Z",
       "evidence": "TASK-BUD-933 completed. Implemented report-only, deterministic JS/TS syntax-hygiene layer in `tool_hygiene_scorecard`: stable pattern IDs, structured evidence fields, rationale/exception handling, optional `syntax_files` surface, primitive doc, and local-safe lane checklist update. Added calibration to ignore string-only fixture literals and reduce false positives. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts` -> 15 passed; `safe_marker_check` on `docs/research/0-8-local-safe-compounding-lane.md` matched `tool_hygiene_scorecard`, `syntax_files`, `rationale/exception`; `project-validate` clean; `git diff --check` clean. Source/doc commit: 67b903e1."
+    },
+    {
+      "id": "VER-BUD-944-PROTECTED-SUCCESSOR",
+      "target": "TASK-BUD-944",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal regression test",
+      "timestamp": "2026-05-06T21:48:00.005Z",
+      "evidence": "Added protected/parked successor filter for auto-resume board focus selection. `readProjectPreferredActiveTaskIds` now excludes milestones containing protected/parked/legacy, preventing TASK-BUD-676-like external parked influence from becoming automatic focus after a completed task. Regression: `context_watch_auto_resume_preview skips protected parked successor tasks` keeps local-safe successor and excludes `protected-parked-legacy`. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 61 passed; marker check in signal-integrity audit matched protected successor evidence; `project-validate` clean; `git diff --check` clean. Source/doc commit: ad93dc93."
     }
   ]
 }

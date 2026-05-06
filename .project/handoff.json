@@ -1,50 +1,51 @@
 {
-  "timestamp": "2026-05-06T21:22:12.638Z",
-  "context": "TASK-BUD-933 concluída. Syntax-hygiene scorecard agora tem detector JS/TS report-only, surface syntax_files, evidência estruturada, rationale [snip] ão contra ruído de fixture string-only. [truncated:+37 chars]",
+  "timestamp": "2026-05-06T21:48:09.581Z",
+  "context": "TASK-BUD-944 concluída: auto-resume successor/focus agora filtra milestones protected/parked/legacy, evitando promover influência externa par [snip] o TASK-BUD-676 após uma task concluída. [truncated:+7 chars]",
   "next_actions": [
     "commit board/handoff closure",
-    "/reload necessário antes de confiar no detector live atualizado",
-    "selecionar próxima task local-safe via board"
+    "/reload necessário por alteração runtime de context-watchdog helper",
+    "após reload, validar auto-resume não aponta TASK-BUD-676 e selecionar próxima fatia local-safe"
   ],
   "blockers": [
-    "runtime-reload-required-after-tool-hygiene-detector-change"
+    "runtime-reload-required-after-context-watchdog-successor-filter-change"
   ],
   "recent_validation": [
-    "guardrails-tool-hygiene.test.ts: 15 passed",
-    "safe_marker_check 0-8 lane: 3/3 markers",
+    "context-watchdog.test.ts: 61 passed",
+    "safe_marker_check signal-integrity audit: 2/2",
     "project-validate: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-933",
+    "focus": "TASK-BUD-944",
     "canonical_links": [
-      "task:TASK-BUD-933",
-      "commit:67b903e1"
+      "task:TASK-BUD-944",
+      "task:TASK-BUD-676",
+      "commit:ad93dc93"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T21:22:12.638Z",
+    "generatedAtIso": "2026-05-06T21:48:09.581Z",
     "level": "ok",
-    "percent": 33,
+    "percent": 40,
     "action": "continue",
-    "recommendation": "Commitar board; depois reload antes de nova validação live do tool_hygiene_scorecard.",
+    "recommendation": "Commitar board; fazer reload antes de confiar no auto-resume live.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T21:22:12.638Z",
+      "atIso": "2026-05-06T21:48:09.581Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 33,
+      "percent": 40,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar board; depois reload antes de nova validação live do tool_hygiene_scorecard."
+      "recommendation": "Commitar board; fazer reload antes de confiar no auto-resume live."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-933"
+    "TASK-BUD-944"
   ]
 }
