@@ -19998,6 +19998,28 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] User supplied authoritative operator context: OpenAI site shows ~73% weekly quota available for PRO, reset around May 11 with timezone uncertainty; local tools currently report openai-codex blocked from configured monthly cost/token policy. [rationale:risk-control] We must not confuse local policy projections with official provider quota state; calibration is needed before provider strategy decisions.\n[slice-start] Incorporating operator dashboard evidence into provider-economy docs. No settings/routing/provider/model/API/cost cap changes.\n[rationale:risk-control] Provider-budget surfaces currently express local policy projections. The operator has official-dashboard evidence of substantial OpenAI Pro weekly headroom, so docs must separate local policy-block from actual provider availability before we make provider migration decisions.\n[complete] Reconciled local budget policy language with operator-reported OpenAI Pro dashboard headroom.",
       "verification": "VERIFY-BUD-894"
+    },
+    {
+      "id": "TASK-BUD-895",
+      "description": "Create reusable provider-candidate evaluation template with official-dashboard calibration fields.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-894"
+      ],
+      "files": [
+        "docs/primitives/provider-candidate-evaluation-template.md",
+        "docs/research/provider-assimilation-runway-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Add a reusable report-only template for evaluating new providers before protected activation.",
+        "Include fields for official dashboard evidence, local quota policy, reset window/timezone uncertainty, telemetry coverage, cost unit, privacy scope, monitor suitability, canary plan, stop conditions, and rollback.",
+        "Link the template from the provider assimilation runway.",
+        "No provider settings, routing, API keys, models, budgets, or monitor overrides changed."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] After reconciling OpenAI Pro dashboard headroom with local quota policy, we need a reusable packet so future providers/caps are calibrated before settings changes. [rationale:risk-control] Provider assimilation without a standard evidence template risks confusing official quota, local caps, and runtime telemetry.\n[slice-start] Creating reusable provider candidate evaluation template with official-dashboard vs local-policy calibration fields. Docs-only/report-only.\n[rationale:risk-control] Future providers and budget caps need a standard packet that records official dashboard facts separately from local quota projections before protected settings/routing changes.\n[complete] Provider candidate evaluation template ready for future Kimi/Claude Code/OpenAI/Copilot calibration before protected activation.",
+      "verification": "VERIFY-BUD-895"
     }
   ]
 }

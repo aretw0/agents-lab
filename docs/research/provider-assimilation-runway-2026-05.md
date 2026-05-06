@@ -190,6 +190,10 @@ Protegido — requer decisão humana explícita antes da ação:
 7. adicionar API keys, credenciais ou integrações externas;
 8. alterar caps de custo ou política de overage.
 
+## Template reutilizável
+
+Use [`docs/primitives/provider-candidate-evaluation-template.md`](../primitives/provider-candidate-evaluation-template.md) para avaliar qualquer provider novo ou recalibrar um provider existente antes de mexer em `routeModelRefs`, `providerBudgets`, defaults, monitores ou API keys.
+
 ## Decision packet mínimo antes de entrar em `TASK-BUD-849`
 
 Quando for hora de entrar em provider infrastructure, responder em um packet:

@@ -13560,6 +13560,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-06T02:32:33.190Z",
       "evidence": "Captured operator dashboard evidence in provider assimilation docs: OpenAI Pro dashboard reportedly shows ~73% weekly quota available, reset around 2026-05-11 with Brazil/timezone/reset uncertainty, and 5h rolling limit has not blocked work. Updated docs to distinguish local providerBudgets WARN/BLOCK as configured local policy/projection from official provider availability. Adjusted openai-codex posture from absolute blocked to local policy-blocked pending calibration against the official dashboard. No provider settings, routeModelRefs, providerBudgets, API keys, models, or routing were changed. Validation passed: i18n_lint_text samples -> pass; pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts -> 2 files passed, 57 tests passed."
+    },
+    {
+      "id": "VERIFY-BUD-895",
+      "target": "TASK-BUD-895",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-06T02:35:31.345Z",
+      "evidence": "Added docs/primitives/provider-candidate-evaluation-template.md as a reusable report-only template for provider candidates and recalibration. It separates official dashboard/operator facts from local quota policy; includes reset/timezone uncertainty, telemetry coverage, cost-benefit, privacy/protected scope, monitor suitability, canary plan, stop conditions, rollback, and human decision checklist. Linked it from docs/research/provider-assimilation-runway-2026-05.md. No provider settings, routing, API keys, models, budgets, or monitor overrides were changed. Validation passed: i18n_lint_text sample -> pass; pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts -> 2 files passed, 38 tests passed."
     }
   ]
 }
