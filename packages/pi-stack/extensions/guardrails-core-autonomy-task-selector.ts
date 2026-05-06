@@ -182,6 +182,10 @@ function priorityRank(task: ProjectTaskItem): number {
   return 9;
 }
 
+function isLowPriorityPlannedTask(task: ProjectTaskItem): boolean {
+  return task.status === "planned" && priorityRank(task) >= 3;
+}
+
 function statusRank(task: ProjectTaskItem): number {
   if (task.status === "in-progress") return 0;
   if (task.status === "planned") return 1;
@@ -399,6 +403,7 @@ export function selectAutonomyLaneTask(
   const focusTaskIds = normalizeTaskIdList(options?.focusTaskIds);
   const focusSource = focusTaskIds.length > 0 ? options?.focusSource : undefined;
   const allowProtectedByExplicitFocus = focusTaskIds.length > 0 && focusSource === "explicit";
+  const allowLowPriorityByExplicitFocus = focusTaskIds.length > 0 && focusSource === "explicit";
   const includeProtectedByPolicy = includeProtectedScopes || allowProtectedByExplicitFocus;
   const focusSet = new Set(focusTaskIds);
   const completed = new Set(
@@ -410,6 +415,7 @@ export function selectAutonomyLaneTask(
   const candidate = tasks.filter((task) => {
     if (!normalizeTaskId(task.id)) return false;
     if (task.status !== "in-progress" && task.status !== "planned") return false;
+    if (!allowLowPriorityByExplicitFocus && isLowPriorityPlannedTask(task)) return false;
     if (!milestone) return true;
     return normalizeMilestone(task.milestone) === milestone;
   });
@@ -451,6 +457,7 @@ export function selectAutonomyLaneTask(
         ? "protected-scopes-explicit-focus-only"
         : "protected-scopes-skipped",
     includeMissingRationale ? "missing-rationale-included" : "missing-rationale-skipped",
+    allowLowPriorityByExplicitFocus ? "planned-p3-explicit-focus-only" : "planned-p3-skipped",
     focusTaskIds.length > 0 ? `focus(${focusSource ?? "explicit"}:${focusTaskIds.join(",")})` : undefined,
     milestone ? `milestone(${milestone})` : undefined,
   ].filter(Boolean).join("+");

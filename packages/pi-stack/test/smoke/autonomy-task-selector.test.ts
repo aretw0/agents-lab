@@ -42,6 +42,34 @@ describe("autonomy task selector", () => {
     expect(result.selectionPolicy).toContain("priority(field>description P0..P9)");
   });
 
+  it("skips planned p3 backlog by default while preserving higher-priority planned work", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-P3-BACKLOG", description: "[P3/backlog] operator noise", status: "planned", priority: "p3" }),
+      task({ id: "TASK-P1-LOCAL", description: "[P1] local-safe selector calibration", status: "planned", priority: "p1" }),
+    ]);
+
+    expect(result.ready).toBe(true);
+    expect(result.nextTaskId).toBe("TASK-P1-LOCAL");
+    expect(result.eligibleTaskIds).not.toContain("TASK-P3-BACKLOG");
+    expect(result.selectionPolicy).toContain("planned-p3-skipped");
+  });
+
+  it("keeps p3 work selectable when it is already in progress or explicitly focused", () => {
+    const inProgress = selectAutonomyLaneTask([
+      task({ id: "TASK-P3-INPROGRESS", description: "[P3] active low-priority slice", status: "in-progress", priority: "p3" }),
+    ]);
+    expect(inProgress.ready).toBe(true);
+    expect(inProgress.nextTaskId).toBe("TASK-P3-INPROGRESS");
+
+    const explicit = selectAutonomyLaneTask([
+      task({ id: "TASK-P3-EXPLICIT", description: "[P3] explicitly selected slice", status: "planned", priority: "p3" }),
+      task({ id: "TASK-P1-OTHER", description: "[P1] unrelated local work", status: "planned", priority: "p1" }),
+    ], { focusTaskIds: ["TASK-P3-EXPLICIT"], focusSource: "explicit" });
+    expect(explicit.ready).toBe(true);
+    expect(explicit.nextTaskId).toBe("TASK-P3-EXPLICIT");
+    expect(explicit.selectionPolicy).toContain("planned-p3-explicit-focus-only");
+  });
+
   it("parses bracket variants like [P1/backlog] in description as fallback priority", () => {
     const result = selectAutonomyLaneTask([
       task({ id: "TASK-BRACKET", description: "[P1/backlog] item", status: "planned" }),
