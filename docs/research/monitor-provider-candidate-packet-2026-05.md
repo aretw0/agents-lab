@@ -2,7 +2,8 @@
 
 Status: report-only / local-safe  
 Tarefa: `TASK-BUD-893`  
-Relacionado: `TASK-BUD-849`, `TASK-BUD-892`  
+Relacionado: `TASK-BUD-849`, `TASK-BUD-892`, `TASK-BUD-902`  
+Fallback atualizado: [`docs/research/copilot-monitor-quota-fallback-2026-05.md`](copilot-monitor-quota-fallback-2026-05.md)  
 Limite: sem mudança em `.pi/settings.json`, API keys, routeModelRefs, providerBudgets, default model/provider ou overrides de monitores.
 
 ## Objetivo
@@ -10,6 +11,8 @@ Limite: sem mudança em `.pi/settings.json`, API keys, routeModelRefs, providerB
 Preparar uma decisão calma para o provider dos monitores/classifiers quando a cota do GitHub Copilot acabar. O alvo não é escolher um provider automaticamente; é definir a evidência mínima para que um candidato barato seja avaliado sem empurrar tudo para `openai-codex` por urgência.
 
 ## Contexto operacional
+
+Fato novo: o operador informou GitHub Copilot em `1423.56 / 1500` premium requests, portanto a preparação de fallback saiu de teórica para urgente, ainda sem autorizar migração automática.
 
 Hoje o `monitor-provider-patch` usa defaults provider-aware:
 
@@ -77,9 +80,23 @@ Risco:
 - queimar capacidade de trabalho pesado em classifier de baixo valor;
 - mascarar necessidade de provider barato.
 
+### Alibaba/Qwen cheap/fast
+
+Postura: candidato prioritário para primeiro canary barato de monitor/classifier porque `dashscope/qwen-plus` já passou smoke sintético e há free trial ativo.
+
+O que precisa estar conhecido antes do canary:
+
+- modelo cheap/fast escolhido na shortlist Alibaba;
+- quota remaining/total por modelo;
+- burn rate por chamada sintética;
+- suporte a output estruturado/tool/function calling;
+- latência aceitável;
+- privacidade para snippets de monitor;
+- fallback para OpenAI Codex se Copilot acabar antes do canary.
+
 ### Kimi AI ou provider barato equivalente
 
-Postura: candidato para primeiro canary barato de monitor/classifier.
+Postura: candidato paralelo/alternativo para canary barato de monitor/classifier.
 
 O que precisa estar conhecido antes do canary:
 

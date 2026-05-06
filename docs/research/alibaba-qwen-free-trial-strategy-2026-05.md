@@ -126,7 +126,7 @@ Qwen pode assumir mais carga quando houver:
 
 ## 8. Próximo passo local-safe
 
-Preencher shortlist manual de 3 LLMs no dashboard:
+Preencher a shortlist manual em [`docs/research/alibaba-qwen-llm-shortlist-2026-05.md`](alibaba-qwen-llm-shortlist-2026-05.md):
 
 | Tier | Modelo candidato | Quota restante/total | Motivo |
 | --- | --- | --- | --- |

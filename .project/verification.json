@@ -13614,6 +13614,24 @@
       "method": "docs+marker+tests",
       "timestamp": "2026-05-06T04:43:56.256Z",
       "evidence": "Recorded successful Alibaba/Qwen smoke and dashboard quota evidence. Created docs/research/alibaba-qwen-free-trial-strategy-2026-05.md with evidence that dashscope/qwen-plus responded in a new session via dashscope-intl compatible endpoint, dashboard qwen-plus quota showed Remaining 968,126 / Total 1,000,000 after smoke (~3% used), and Alibaba free trial catalog is large (about 100 LLMs plus visual/multimodal/speech/embedding categories). Strategy preserves OpenAI Codex as long-context control-plane/cockpit and proposes Qwen for small delegated work and monitor/classifier candidates after tiered canaries. Updated Alibaba intake checklist and provider candidate packet from candidate-only to smoke-proven candidate. No settings, routeModelRefs, providerBudgets, monitor-provider defaults, API keys, runtime routing, or paid spend changes. Validation: i18n_lint_text sample -> pass; safe_marker_check strategy markers -> pass; safe_marker_check intake markers -> pass; pnpm vitest --run packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts -> 2 files passed, 25 tests passed."
+    },
+    {
+      "id": "VERIFY-BUD-901",
+      "target": "TASK-BUD-901",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+marker",
+      "timestamp": "2026-05-06T04:49:32.223Z",
+      "evidence": "Created docs/research/alibaba-qwen-llm-shortlist-2026-05.md as a bounded three-tier shortlist template for Alibaba/Qwen LLM free-trial canaries. It pre-fills qwen-plus as baseline with successful smoke, dashscope-intl endpoint, Remaining 968,126 / Total 1,000,000 quota evidence, and prohibition on cockpit/control-plane/auto-compact use. It leaves dashboard-fillable fields for exactly one cheap/fast monitor/classifier candidate and one coder/delegation candidate, plus questions and decision gate for at most two additional synthetic smokes. Updated docs/research/alibaba-qwen-free-trial-strategy-2026-05.md to link the shortlist. No smoke calls, settings, routeModelRefs, providerBudgets, monitor-provider defaults, default model, API key, runtime routing, or paid spend changes. Validation: i18n_lint_text sample -> pass; safe_marker_check -> pass."
+    },
+    {
+      "id": "VERIFY-BUD-902",
+      "target": "TASK-BUD-902",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+marker+tests",
+      "timestamp": "2026-05-06T04:51:20.802Z",
+      "evidence": "Created docs/research/copilot-monitor-quota-fallback-2026-05.md recording operator quota fact GitHub Copilot premium requests at 1423.56 / 1500. The packet defines immediate posture: keep Copilot while it works, preserve OpenAI Codex as cockpit/emergency fallback, and evaluate Alibaba/Qwen cheap/fast as a monitor/classifier candidate before migration. It defines attention triggers, maturity levels, Qwen classifier canary scope for commit-hygiene/work-quality only, OpenAI Codex emergency fallback constraints, Qwen allowlist prerequisites, and a protected decision packet with caps/rollback/humanApproval. Updated docs/research/monitor-provider-candidate-packet-2026-05.md to link the fallback packet and prioritize Alibaba/Qwen cheap/fast. No settings, monitor-provider defaults, routeModelRefs, providerBudgets, default model/provider, API key, runtime routing, or paid spend changes. Validation: i18n_lint_text sample -> pass; safe_marker_check -> pass; pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts -> 3 files passed, 26 tests passed."
     }
   ]
 }

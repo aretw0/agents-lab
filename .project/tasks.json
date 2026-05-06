@@ -20139,6 +20139,54 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] User reported successful qwen-plus smoke in a new session, dashboard usage evidence, huge Alibaba free-trial model catalog, context-window pressure, and desired split: OpenAI Codex as control plane, Qwen delegated as trust grows. [rationale:risk-control] Need strategy before moving monitors/delegation to Alibaba so free quota is used pragmatically without breaking long-context control-plane work.\n[slice-start] Recording successful Alibaba/Qwen smoke and drafting pragmatic free-trial strategy. Report-only; no provider routing/settings/monitor migration changes.\n[rationale:risk-control] Qwen is now proven reachable for a synthetic smoke, but context pressure and quota/quality unknowns require a staged strategy before monitor or delegation load moves off Copilot/OpenAI Codex.\n[complete] Alibaba/Qwen moved to smoke-proven candidate in docs. Strategy: OpenAI Codex remains cockpit; Qwen handles small/delegated/classifier candidates through tiered free-trial canaries.",
       "verification": "VERIFY-BUD-900"
+    },
+    {
+      "id": "TASK-BUD-901",
+      "description": "Prepare Alibaba/Qwen 3-model shortlist template for free-trial canaries.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-900"
+      ],
+      "files": [
+        "docs/research/alibaba-qwen-llm-shortlist-2026-05.md",
+        "docs/research/alibaba-qwen-free-trial-strategy-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Create a shortlist doc for exactly three initial Alibaba/Qwen LLM tiers: baseline, cheap/fast monitor candidate, coder/delegation candidate.",
+        "Pre-fill qwen-plus as baseline with successful smoke and qwen-plus quota evidence.",
+        "Leave dashboard-fillable fields for cheap/fast and coder candidates: model id, remaining/total quota, context, tool calling, streaming, expected role, stop conditions.",
+        "State that no extra smoke, provider routing, monitor migration, routeModelRefs, providerBudgets, default model, or paid spend is authorized by the shortlist.",
+        "Tie next protected packet to at most two additional synthetic smokes for cheap/fast and coder tiers."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] User reported huge Alibaba model catalog and asked for pragmatic next steps. [rationale:risk-control] Shortlist prevents model-catalog sprawl and keeps free-trial exploitation bounded before protected runtime changes.\n[slice-start] Creating 3-model Alibaba/Qwen shortlist template. No extra smoke or provider/runtime changes.\n[rationale:risk-control] The dashboard lists many Alibaba models; a three-tier shortlist keeps evaluation bounded and avoids uncontrolled free-trial burn or premature routing changes.\n[complete] Three-model Alibaba/Qwen shortlist template ready; next facts come from dashboard, not runtime.",
+      "verification": "VERIFY-BUD-901"
+    },
+    {
+      "id": "TASK-BUD-902",
+      "description": "Prepare GitHub Copilot monitor quota depletion fallback packet using Alibaba/Qwen evidence.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-893",
+        "TASK-BUD-900",
+        "TASK-BUD-901"
+      ],
+      "files": [
+        "docs/research/copilot-monitor-quota-fallback-2026-05.md",
+        "docs/research/monitor-provider-candidate-packet-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Record current operator quota fact: GitHub Copilot premium requests are at 1423.56 / 1500, near depletion.",
+        "Define immediate fallback posture: keep Copilot while it works, preserve OpenAI Codex for cockpit/emergency fallback, evaluate Qwen cheap/fast as monitor/classifier candidate before migration.",
+        "Specify trigger thresholds and stop conditions for Copilot exhaustion without automatic monitor migration.",
+        "Define a protected decision packet for any monitor-provider change, including allowed monitors, model candidate, cap, rollback, telemetry, and privacy.",
+        "No settings, monitor-provider defaults, routeModelRefs, providerBudgets, default model, API key, or runtime changes."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] Operator reports GitHub Copilot premium requests at 1423.56/1500 while Qwen free-trial smoke succeeded. [rationale:risk-control] Monitor fallback needs a documented decision packet before quota exhaustion forces a rushed migration to OpenAI Codex or Alibaba.\n[slice-start] Creating Copilot monitor quota fallback packet from current 1423.56/1500 premium request fact. No monitor/provider settings changes.\n[rationale:risk-control] Copilot is near premium-request depletion, while Qwen is smoke-proven but not yet classifier-proven. A fallback packet prevents rushed automatic migration to OpenAI Codex or Alibaba.\n[complete] Copilot near-depletion fallback packet ready: no auto-migration; Qwen cheap/fast canary next, OpenAI Codex emergency only.",
+      "verification": "VERIFY-BUD-902"
     }
   ]
 }
