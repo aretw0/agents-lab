@@ -19017,7 +19017,7 @@
         "Conectar a agents-as-tools/delegação para desonerar o control plane antes de qualquer colônia"
       ],
       "milestone": "protected-parked-model-infrastructure",
-      "notes": "[rationale:strategy] Pedido explícito do usuário para backlog médio prazo. Não implementar agora: envolve provedores externos, custo, APIs e eventual pesquisa periódica. Foco futuro deve ser independência de provider, roteamento por tarefa e economia antes de ampliar agents-as-tools/delegações/colônia.\n[provenance:human] source_task=none reason=User provided Backlog: Model Infrastructure with provider-independence, task-level routing tiers, token-cost efficiency, API-only infra, and periodic leaderboard learning."
+      "notes": "[rationale:strategy] Pedido explícito do usuário para backlog médio prazo. Não implementar agora: envolve provedores externos, custo, APIs e eventual pesquisa periódica. Foco futuro deve ser independência de provider, roteamento por tarefa e economia antes de ampliar agents-as-tools/delegações/colônia.\n[provenance:human] source_task=none reason=User provided Backlog: Model Infrastructure with provider-independence, task-level routing tiers, token-cost efficiency, API-only infra, and periodic leaderboard learning.\n[evidence:rollback-plan] Report-only rollback evidence now exists at docs/research/model-infrastructure-rollback-plan-2026-05.md and is linked from docs/primitives/model-infrastructure-routing.md. This does not authorize settings/provider/routing/monitor/API-key changes; protected decision remains required.\n[rationale:risk-control] Linking rollback evidence to the protected task improves decision readiness without changing runtime configuration."
     },
     {
       "id": "TASK-BUD-850",
