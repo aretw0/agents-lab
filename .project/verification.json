@@ -13380,6 +13380,15 @@
       "method": "test",
       "timestamp": "2026-05-06T00:10:54.719Z",
       "evidence": "Created docs/research/guardrails-core-line-budget-audit-2026-05.md. Audit records guardrails-core.ts at ~1396 lines, current orchestrator budget 1400, responsibility bands, local-safe extraction seams (eventSurfaceRuntime factory, session lifecycle, loop runtime adapter, tool-call guard, delayed auto-drain), protected/public-API-sensitive limits, rollback pattern, and focal gates. No runtime exports or registration behavior changed. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts -> 1 file passed, 2 tests passed; i18n_lint_text pt-BR pass for representative section."
+    },
+    {
+      "id": "VER-BUD-1240",
+      "target": "TASK-BUD-875",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T00:12:56.850Z",
+      "evidence": "Created docs/research/autonomy-lane-helper-line-budget-audit-2026-05.md. Audit records guardrails-core-autonomy-lane-surface-helpers.ts at ~1194 lines, maps helper families, recommends extraction order (common, local-safety, AFK material, influence, batch preview, hard intent), and lists invariants for protected-scope policy, selection, fail-closed behavior, dispatchAllowed=false, mutationAllowed=false, and authorization=none. No autonomy/protected-scope behavior changed. Validation: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts -> 3 files passed, 76 tests passed; i18n_lint_text pt-BR pass for representative section."
     }
   ]
 }

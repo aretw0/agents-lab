@@ -19553,7 +19553,7 @@
     {
       "id": "TASK-BUD-875",
       "description": "Audit guardrails-core-autonomy-lane-surface-helpers.ts line budget and propose cohesive helper splits for autonomy-lane UI/readiness code.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-874"
@@ -19568,7 +19568,8 @@
         "Name focal tests needed for any follow-up extraction."
       ],
       "milestone": "architecture-runway",
-      "notes": "[auto-seed] Local-safe audit for the second-largest extension surface.\n[provenance:human] source_task=TASK-BUD-873 reason=Line-budget snapshot shows this file above watch threshold; audit can proceed without user input."
+      "notes": "[auto-seed] Local-safe audit for the second-largest extension surface.\n[provenance:human] source_task=TASK-BUD-873 reason=Line-budget snapshot shows this file above watch threshold; audit can proceed without user input.\n[auto-chain] Starting autonomy-lane helper line-budget audit. Scope: documentation-only; preserve autonomy/protected-scope policy and selection behavior.\n[slice-complete] Autonomy lane helper audit complete. Recommended future implementation starts with common/local-safety extraction, leaving hard-intent for last. Next local-safe task: TASK-BUD-876.",
+      "verification": "VER-BUD-1240"
     },
     {
       "id": "TASK-BUD-876",
