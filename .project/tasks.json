@@ -20609,7 +20609,7 @@
       ],
       "files": [
         "docs/research/0-8-delegation-long-run-runway.md",
-        "docs/primitives/control-plane-overnight-local-loop.md",
+        "docs/research/control-plane-long-run-maturity-packet-2026-05-01.md",
         "docs/primitives/nudge-free-local-continuity.md"
       ],
       "acceptance_criteria": [
@@ -20646,7 +20646,7 @@
     {
       "id": "TASK-BUD-923",
       "description": "Audit and repair local-safe file-reference drift in the 0.8.0 compounding lane tasks.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-919"
@@ -20662,7 +20662,8 @@
         "Record any remaining intentional future paths as parked."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:quality] We already observed one likely stale primitive path in the planned lane; repair reference drift before longer unattended work."
+      "notes": "[rationale:quality] We already observed one likely stale primitive path in the planned lane; repair reference drift before longer unattended work.\n[start] Auditing file references in 0.8 compounding-lane tasks for missing/stale paths; will repair board/doc references only.\n[complete] Repaired stale file reference without creating fake implementation surfaces; future output files remain intentionally absent until their slices execute.",
+      "verification": "VERIFY-BUD-923"
     },
     {
       "id": "TASK-BUD-924",

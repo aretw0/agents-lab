@@ -13785,6 +13785,15 @@
       "method": "doc+marker+i18n",
       "timestamp": "2026-05-06T14:28:06.419Z",
       "evidence": "Created docs/research/0-8-local-safe-slice-validation-matrix.md with validation gates, rollback cues, and stop conditions for docs-only, board-only, test-only, helper/report-only, cleanup, delegation readiness, long-run prep, monitor-economy prep, and CI/CD prep slices. Validation: safe_marker_check matched 8/8 anchors; i18n_lint_text passed for pt-BR summary."
+    },
+    {
+      "id": "VERIFY-BUD-923",
+      "target": "TASK-BUD-923",
+      "target_type": "task",
+      "status": "passed",
+      "method": "path-audit+structured-json+marker+board-reports",
+      "timestamp": "2026-05-06T14:29:37.671Z",
+      "evidence": "Audited file references for milestone 0.8-local-safe-compounding-lane. Repaired stale/nonexistent planned primitive path in TASK-BUD-921: replaced docs/primitives/control-plane-overnight-local-loop.md with existing docs/research/control-plane-long-run-maturity-packet-2026-05-01.md while preserving future output docs/research/0-8-delegation-long-run-runway.md and existing docs/primitives/nudge-free-local-continuity.md. Documented audit in docs/research/0-8-readiness-map.md. Validation: structured_io_json dry-run then apply succeeded; safe_marker_check passed for audit anchors; board_dependency_health_snapshot for milestone has missing=0 and cycle=0."
     }
   ]
 }

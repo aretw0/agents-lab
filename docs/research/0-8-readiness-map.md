@@ -89,6 +89,12 @@ Para esta jornada, “incrível” significa:
 - assimila influências externas como padrões pequenos e mensuráveis;
 - funciona bem em contextos variados de usuário sem depender do laboratório.
 
+## Auditoria de referências da lane
+
+Atualização local-safe (`TASK-BUD-923`): a referência planejada a `docs/primitives/control-plane-overnight-local-loop.md` foi corrigida porque o arquivo não existe no repositório atual. A task `TASK-BUD-921` agora aponta para o pacote existente `docs/research/control-plane-long-run-maturity-packet-2026-05-01.md` e para `docs/primitives/nudge-free-local-continuity.md`, mantendo `docs/research/0-8-delegation-long-run-runway.md` como artefato futuro da própria task.
+
+Arquivos futuros declarados em `TASK-BUD-924..931` permanecem intencionalmente ausentes até execução das respectivas fatias.
+
 ## Resumo para resume
 
-Foco atual: seguir `TASK-BUD-919` após fechar este mapa. A prioridade é estocar fatias local-safe validadas para permitir evolução contínua com baixa iteração humana, mantendo CI/CD, monitor runtime amplo, provider routing, publish/deploy e remote/offload como escopos protegidos.
+Foco atual: seguir a fila stocked após `TASK-BUD-919`. A prioridade é executar fatias local-safe validadas para permitir evolução contínua com baixa iteração humana, mantendo CI/CD, monitor runtime amplo, provider routing, publish/deploy e remote/offload como escopos protegidos.
