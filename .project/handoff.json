@@ -1,12 +1,13 @@
 {
-  "timestamp": "2026-05-06T17:51:09.060Z",
-  "context": "Auto-resume aplicado: lote 3 de higiene soft concluído (TASK-BUD-906..TASK-BUD-913), mantendo TASK-BUD-849 em execução. Métrica: hard=0, soft [snip] parked=0. project-validate segue clean. [truncated:+5 chars]",
+  "timestamp": "2026-05-06T17:58:09.222Z",
+  "context": "Slice curta de surfagem: normalizei TASK-BUD-917 a TASK-BUD-924 (VERIFY-BUD-* -> VER-BUD-*) em .project/tasks.json. Resultado da varredura: s [snip] tégia micro-slice e checkpoints curtos. [truncated:+202 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "Context-watch action: level=compact 67% (compact-now) · Compact now and continue from checkpoint.",
-    "se manter sem bloqueios humanos, continuar próxima faixa (TASK-BUD-917..TASK-BUD-920) em micro-slice"
+    "Context-watch action: level=compact 68% (compact-now) · Compact now and continue from checkpoint.",
+    "seguir com próximo bloco 925..932 se aprovado",
+    "confirmar continuidade com handoff/continuation sem expandir escopo"
   ],
   "blockers": [
     "context-watch-compact-required",
@@ -20,20 +21,20 @@
     "focus": "TASK-BUD-849",
     "canonical_links": [
       "task:TASK-BUD-849",
-      "task:TASK-BUD-906",
-      "task:TASK-BUD-913"
+      "task:TASK-BUD-917",
+      "task:TASK-BUD-924"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T17:51:08.993Z",
+    "generatedAtIso": "2026-05-06T17:58:09.127Z",
     "level": "ok",
     "percent": 11,
     "action": "continue",
-    "recommendation": "Seguir em lotes curtos para minimizar risco. Sem alteração de escopo protegido."
+    "recommendation": "Continuar lote pequeno de normalização (TASK-BUD-925..TASK-BUD-932) com checkpoint explícito em cada slice."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T17:51:08.993Z",
+      "atIso": "2026-05-06T17:58:09.127Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 11,
@@ -43,13 +44,13 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Seguir em lotes curtos para minimizar risco. Sem alteração de escopo protegido."
+      "recommendation": "Continuar lote pequeno de normalização (TASK-BUD-925..TASK-BUD-932) com checkpoint explícito em cada slice."
     },
     {
-      "atIso": "2026-05-06T17:51:09.060Z",
+      "atIso": "2026-05-06T17:58:09.222Z",
       "reason": "message_end",
       "level": "compact",
-      "percent": 67,
+      "percent": 68,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 55,
