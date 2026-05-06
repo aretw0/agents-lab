@@ -1,46 +1,49 @@
 {
-  "timestamp": "2026-05-06T20:55:06.984Z",
-  "context": "P1 dirty/freshness regression adicionada: readContextWatchFreshnessSignals alterna clean->dirty em git repo temporário sem stale state. Lane [snip] á tem P0 completo e duas regressões P1. [truncated:+16 chars]",
-  "current_tasks": [
-    "TASK-BUD-943"
-  ],
+  "timestamp": "2026-05-06T20:56:07.353Z",
+  "context": "TASK-BUD-943 concluída: lane de integridade de sinais atingiu maturidade ROI atual com inventário, P0 completo e duas regressões P1 (reload c [snip] y/nextAction + freshness clean->dirty). [truncated:+9 chars]",
   "next_actions": [
-    "commit test/doc + board checkpoint",
-    "avaliar fechamento de TASK-BUD-943 ou próxima P1 stale handoff successor",
-    "se alterar runtime, reload; esta fatia é test/doc/board only"
+    "commit board/handoff closure",
+    "retomar TASK-BUD-933 ou selecionar próxima fatia local-safe via board",
+    "manter P2 signal-integrity como follow-up se recorrência aparecer"
   ],
   "blockers": [],
   "recent_validation": [
+    "monitor-runtime-contract.test.ts: 10 passed",
     "context-watchdog.test.ts: 60 passed",
-    "project-validate: clean",
-    "git diff --check: clean"
+    "project-validate: clean"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-943",
     "canonical_links": [
-      "task:TASK-BUD-943"
+      "task:TASK-BUD-943",
+      "task:TASK-BUD-933",
+      "commit:6828e0f2"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T20:55:06.984Z",
+    "generatedAtIso": "2026-05-06T20:56:07.353Z",
     "level": "warn",
-    "percent": 54,
+    "percent": 55,
     "action": "continue",
-    "recommendation": "Commitar; próxima decisão: fechar lane mínima ou adicionar stale handoff successor."
+    "recommendation": "Fechar checkpoint; próxima lane pode voltar ao foco TASK-BUD-933.",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T20:55:06.984Z",
+      "atIso": "2026-05-06T20:56:07.353Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 54,
+      "percent": 55,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar; próxima decisão: fechar lane mínima ou adicionar stale handoff successor."
+      "recommendation": "Fechar checkpoint; próxima lane pode voltar ao foco TASK-BUD-933."
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-943"
   ]
 }

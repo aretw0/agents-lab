@@ -21074,7 +21074,7 @@
     {
       "id": "TASK-BUD-943",
       "description": "[Lane] Inventariar e endurecer sinais/gates falsos do control-plane antes de avançar novas features.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-942"
@@ -21093,8 +21093,8 @@
         "Manter mudanças locais/report-only; sem provider/settings/apply/delegação automática."
       ],
       "milestone": "signal-integrity-calibration",
-      "notes": "Lane criada a partir da observação do usuário: se o reloadGate estava falso, precisamos calibrar sinais/tools que induzem continuidade errada antes de avançar features.\n[slice] Inventário inicial criado com incidente raiz reloadGate, classes de falha, sinais críticos, P0/P1/P2 e critério de maturidade. Próxima fatia recomendada: regressão P0 negativa garantindo que `monitor_stale_feedback_prefilter` não suprime sinal crítico/fresco.\n[slice] P0 critical-signal preservation implemented: stale prefilter now fails open to classifier for fresh/unresolved unauthorized/protected/destructive signals, even when duplicate/superseding hints exist. P0 inventory doc updated with coverage refs.\n[slice] P1 reload consistency regression added. It documents the intended nuance: pre-compact signal is inactive outside checkpoint/compact but must still expose reload hint, and operator stop/action must block continuation on reload-required.\n[slice] Cleaned confusing reload surface: compact-stage nextAction no longer says continue bounded work when reload is known but outside pre-compact; it carries the `/reload` hint via a small tested helper.\n[slice] P1 dirty/freshness regression added: helper observes clean -> dirty transition in a temp git repo, reducing risk of stale clean/dirty gating signals.",
-      "verification": "VER-BUD-943-P1-FRESHNESS-CLEAN-DIRTY"
+      "notes": "Lane criada a partir da observação do usuário: se o reloadGate estava falso, precisamos calibrar sinais/tools que induzem continuidade errada antes de avançar features.\n[slice] Inventário inicial criado com incidente raiz reloadGate, classes de falha, sinais críticos, P0/P1/P2 e critério de maturidade. Próxima fatia recomendada: regressão P0 negativa garantindo que `monitor_stale_feedback_prefilter` não suprime sinal crítico/fresco.\n[slice] P0 critical-signal preservation implemented: stale prefilter now fails open to classifier for fresh/unresolved unauthorized/protected/destructive signals, even when duplicate/superseding hints exist. P0 inventory doc updated with coverage refs.\n[slice] P1 reload consistency regression added. It documents the intended nuance: pre-compact signal is inactive outside checkpoint/compact but must still expose reload hint, and operator stop/action must block continuation on reload-required.\n[slice] Cleaned confusing reload surface: compact-stage nextAction no longer says continue bounded work when reload is known but outside pre-compact; it carries the `/reload` hint via a small tested helper.\n[slice] P1 dirty/freshness regression added: helper observes clean -> dirty transition in a temp git repo, reducing risk of stale clean/dirty gating signals.\n[closure] Lane cleaned enough for current ROI: false reload, critical prefilter suppression, reload-surface ambiguity, and freshness stale-state risk now have explicit inventory/regressions. Further P2 items can be separate follow-ups if they recur.",
+      "verification": "VER-BUD-943-LANE-MATURITY"
     }
   ]
 }
