@@ -19508,6 +19508,147 @@
       "milestone": "ui-cohesion",
       "notes": "[auto-seed] Local-safe documentation/backlog boundary after code migrations removed remaining local-safe raw JSON content candidates.\n[provenance:human] source_task=TASK-BUD-871 reason=autonomy_lane_next_task had no eligible local-safe code tasks; remaining raw JSON surfaces are protected/executable/settings and need a documented boundary.\n[auto-chain] Documenting protected leftovers only. No code/runtime/settings mutation beyond project doc and board evidence.\n[slice-complete] Remaining raw JSON outputs are documented as protected leftovers with suggested future protected tasks. No code/runtime/settings behavior changed.",
       "verification": "VER-BUD-1237"
+    },
+    {
+      "id": "TASK-BUD-873",
+      "description": "Synthesize a local-safe architecture runway map from current line-budget, planning-clarity, and protected-boundary evidence, separating cleanup slices from protected strategic decisions.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-872"
+      ],
+      "files": [
+        "docs/research/pi-stack-architecture-runway-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Document current top line-budget watch files and classify them as local-safe refactor, protected, or public-API-sensitive.",
+        "Identify 5-10 locally executable cleanup/extraction slices that do not require product/provider/cost decisions.",
+        "List protected decisions that still require human interview separately."
+      ],
+      "milestone": "architecture-runway",
+      "notes": "[auto-seed] Does not require interview; uses local repo evidence only. Intended to bridge side-quest cleanup back toward stronger architecture work.\n[provenance:human] source_task=TASK-BUD-872 reason=User asked what remains and whether more non-interview seed work can be created before stronger architecture evolution."
+    },
+    {
+      "id": "TASK-BUD-874",
+      "description": "Audit guardrails-core.ts toward a <=1000-line surface by identifying registration/orchestration extraction candidates without changing public behavior.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-873"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "docs/research/guardrails-core-line-budget-audit-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Produce a bounded extraction plan for guardrails-core.ts with current line count, cohesive seams, and test gates.",
+        "Do not change runtime exports or registration behavior in this audit slice.",
+        "Classify any protected or public-API-sensitive extraction separately."
+      ],
+      "milestone": "architecture-runway",
+      "notes": "[auto-seed] Local-safe audit first; code extraction can follow only with focused seam and tests.\n[provenance:human] source_task=TASK-BUD-873 reason=Largest TS extension surface is above watch threshold and near extract threshold; audit is safe and architecture-enabling."
+    },
+    {
+      "id": "TASK-BUD-875",
+      "description": "Audit guardrails-core-autonomy-lane-surface-helpers.ts line budget and propose cohesive helper splits for autonomy-lane UI/readiness code.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-874"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface-helpers.ts",
+        "docs/research/autonomy-lane-helper-line-budget-audit-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Document cohesive helper groups and recommended extraction order.",
+        "Preserve autonomy/protected-scope policy; no code mutation in audit slice.",
+        "Name focal tests needed for any follow-up extraction."
+      ],
+      "milestone": "architecture-runway",
+      "notes": "[auto-seed] Local-safe audit for the second-largest extension surface.\n[provenance:human] source_task=TASK-BUD-873 reason=Line-budget snapshot shows this file above watch threshold; audit can proceed without user input."
+    },
+    {
+      "id": "TASK-BUD-876",
+      "description": "Audit monitor-provider-patch.ts line budget and split candidates while preserving first-party monitor patch semantics.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-875"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-provider-patch.ts",
+        "packages/pi-stack/test/monitor-provider-patch.test.mjs",
+        "docs/research/monitor-provider-patch-line-budget-audit-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Map major responsibilities in monitor-provider-patch.ts and identify extraction seams.",
+        "Call out fragile runtime/monitor-calibration invariants that must not change.",
+        "No code mutation in audit slice; list focal regression tests for follow-up."
+      ],
+      "milestone": "architecture-runway",
+      "notes": "[auto-seed] Local-safe audit for third-largest watched file; monitor behavior is advisory and versioned code/tests are the durable path.\n[provenance:human] source_task=TASK-BUD-873 reason=Line-budget snapshot shows monitor-provider-patch.ts above watch threshold; audit is cleanup/alignment work."
+    },
+    {
+      "id": "TASK-BUD-877",
+      "description": "Seed a public-API-sensitive context-watchdog decomposition plan that avoids broad API rewrites and focuses on test-backed seams.",
+      "status": "planned",
+      "priority": "p3",
+      "depends_on": [
+        "TASK-BUD-876"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-public-api.ts",
+        "docs/research/context-watchdog-decomposition-runway-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Document context-watchdog decomposition candidates and explicitly mark public-API-sensitive seams.",
+        "Avoid broad context-watchdog-public-api rewrites; this is a plan-only slice.",
+        "List minimal focal tests for any future extraction."
+      ],
+      "milestone": "architecture-runway",
+      "notes": "[auto-seed] Local-safe documentation only; respects prior recovery decision to avoid broad public API rewrites.\n[provenance:human] source_task=TASK-BUD-873 reason=context-watchdog.ts is near watch threshold and strategically important; plan first avoids repeating prior broad API regression."
+    },
+    {
+      "id": "TASK-BUD-878",
+      "description": "Improve board planning clarity by decomposing remaining macro/protected parked items into explicit local-safe audit tasks vs protected decision tasks, without changing protected status.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-877"
+      ],
+      "files": [
+        ".project/tasks.json",
+        "docs/research/board-planning-clarity-runway-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Use board_planning_clarity_score evidence to identify why clarity remains below strong.",
+        "Seed or document decompositions that separate local-safe audits from protected decisions.",
+        "Do not unpark protected tasks or start external/provider/colony work."
+      ],
+      "milestone": "architecture-runway",
+      "notes": "[auto-seed] Board clarity score is currently needs-decomposition; this can be improved locally without interview.\n[provenance:human] source_task=TASK-BUD-873 reason=Planning clarity score was 63 needs-decomposition while dependency hygiene is strong; decomposition is the next local-safe governance cleanup."
+    },
+    {
+      "id": "TASK-BUD-879",
+      "description": "Prepare a protected-interview packet for TASK-BUD-849 Model Infrastructure decisions without implementing provider/model/cost/API changes.",
+      "status": "planned",
+      "priority": "p3",
+      "depends_on": [
+        "TASK-BUD-878"
+      ],
+      "files": [
+        "docs/research/model-infrastructure-interview-packet-2026-05.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Summarize the minimal product/provider/cost/API questions needed before unparked Model Infrastructure work.",
+        "Separate questions from locally inferable cleanup tasks.",
+        "Do not alter routing, provider budgets, settings, or API contracts."
+      ],
+      "milestone": "architecture-runway",
+      "notes": "[auto-seed] This is the only interview-prep slice; actual model/provider/cost decisions still require human answers.\n[provenance:human] source_task=TASK-BUD-849 reason=User asked whether interview is needed; this prepares a bounded packet instead of blocking all cleanup work."
     }
   ]
 }
