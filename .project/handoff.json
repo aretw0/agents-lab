@@ -1,50 +1,50 @@
 {
-  "timestamp": "2026-05-06T22:01:44.979Z",
-  "context": "TASK-BUD-945 concluída: auto-resume agora recebe excludedTaskIds e filtra protected/parked de current focus, derived hints, preferred hints, [snip] tigar duplicação de aviso do tool edit. [truncated:+88 chars]",
+  "timestamp": "2026-05-06T22:10:00.558Z",
+  "context": "TASK-BUD-948 concluída: auto-resume successor selector agora ignora tasks planned p3/no-priority, evitando promover backlog de ruído como TAS [snip] D-946/947 seguem planned p3 no backlog. [truncated:+34 chars]",
   "next_actions": [
     "commit source/test + board/handoff",
     "/reload necessário por alteração runtime",
-    "após reload validar auto-resume live não aponta TASK-BUD-676"
+    "após reload validar auto-resume live não escolhe TASK-BUD-947/TASK-BUD-676"
   ],
   "blockers": [
-    "runtime-reload-required-after-auto-resume-excluded-hints-change"
+    "runtime-reload-required-after-auto-resume-p3-selector-change"
   ],
   "recent_validation": [
-    "context-watchdog.test.ts: 61 passed",
+    "context-watchdog.test.ts: 62 passed",
     "project-validate: clean",
     "git diff --check: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-945",
+    "focus": "TASK-BUD-948",
     "canonical_links": [
-      "task:TASK-BUD-945",
-      "task:TASK-BUD-946"
+      "task:TASK-BUD-948",
+      "task:TASK-BUD-947"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T22:01:44.979Z",
-    "level": "ok",
-    "percent": 50,
+    "generatedAtIso": "2026-05-06T22:10:00.558Z",
+    "level": "warn",
+    "percent": 54,
     "action": "continue",
-    "recommendation": "Commitar e pedir reload antes de continuar validação live.",
+    "recommendation": "Commitar; depois reload antes de confiar no preview live.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T22:01:44.979Z",
+      "atIso": "2026-05-06T22:10:00.558Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 50,
+      "level": "warn",
+      "percent": 54,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar e pedir reload antes de continuar validação live."
+      "recommendation": "Commitar; depois reload antes de confiar no preview live."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-945"
+    "TASK-BUD-948"
   ]
 }

@@ -14219,6 +14219,15 @@
       "method": "focal regression test",
       "timestamp": "2026-05-06T22:01:35.943Z",
       "evidence": "Completed protected/parked exclusion propagation for auto-resume envelopes. Added `excludedTaskIds` to `buildAutoResumePromptEnvelopeFromHandoff`; filtered excluded IDs from current focus, derived hints, preferred hints, blockers, next actions, and slice-memory links. Propagated protected/parked task IDs into preview, continuation readiness, auto-compact, and post-reload resume surfaces. Regression covers protected parked ID appearing in next_actions/context/links while local-safe successor remains selected. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 61 passed; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-948-SKIP-P3-SUCCESSORS",
+      "target": "TASK-BUD-948",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal regression test",
+      "timestamp": "2026-05-06T22:09:36.020Z",
+      "evidence": "Added auto-resume successor guard for planned p3/no-priority tasks. `readProjectPreferredActiveTaskIds` now skips `status=planned` + `priority=p3`, while preserving in-progress tasks. Regression confirms a planned p3 operator-noise backlog task is not promoted and a p1 local-safe successor is selected. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 62 passed; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }

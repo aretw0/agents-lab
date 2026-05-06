@@ -21185,6 +21185,28 @@
       ],
       "milestone": "operator-noise-backlog",
       "notes": "[intake:user] Operador observou uma edição com diff aparentemente idêntico em `context-watchdog-handoff.ts` e pediu backlog sem prioridade. Análise inicial: no caso mostrado provavelmente havia remoção de whitespace invisível/trailing space, então não era necessariamente no-op real; o problema é medir frequência e ruído dessas operações, não bloquear a edição automaticamente.\n[provenance:human] source_task=none reason=Feedback explícito do operador sobre operação de edit visualmente sem sentido/no-op aparente."
+    },
+    {
+      "id": "TASK-BUD-948",
+      "description": "[P1/local-safe] Impedir que auto-resume promova tasks planned p3/no-priority como foco automático após conclusão de uma lane.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-945"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-operator-brief.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`readProjectPreferredActiveTaskIds` deve ignorar tasks `planned` de prioridade `p3` ao escolher foco automático, preservando tasks `in-progress` mesmo se p3 porque já houve intenção explícita.",
+        "Adicionar regressão que reproduza tasks planned p3 em `operator-noise-backlog` e garante que um successor p1 local-safe é preferido.",
+        "Manter escopo local-safe/report-only; sem settings/provider/CI/remote.",
+        "Validar com `context-watchdog.test.ts`, `project-validate` e `git diff --check`."
+      ],
+      "milestone": "signal-integrity-calibration",
+      "notes": "Criada após o reload mostrar `TASK-BUD-947` (p3, sem prioridade explícita do operador) como foco do auto-resume. Isso confirma que o selector ainda promove backlog de ruído/no-priority quando não há foco ativo.\n[provenance:tangent-approved] source_task=TASK-BUD-947 reason=Feedback do operador marcou TASK-BUD-946/947 como sem prioridade; auto-resume não deve promovê-las automaticamente como foco.\n[closure] Completed selector calibration: planned p3/no-priority backlog tasks no longer become automatic auto-resume focus. Runtime reload required before live preview reflects the selector update.",
+      "verification": "VER-BUD-948-SKIP-P3-SUCCESSORS"
     }
   ]
 }
