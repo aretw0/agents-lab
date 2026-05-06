@@ -956,6 +956,18 @@
       "package": "pi-stack",
       "source": "monitor",
       "resolved_by": "TASK-BUD-915"
+    },
+    {
+      "id": "fragility-fragility-moui4tv6",
+      "title": "The agent responded with empty content to an action-oriented request, leaving the task unresolved without acknowledging any blockage.",
+      "body": "Monitor feedback reviewed in context: duplicate/superseded empty-response finding during TASK-BUD-943 signal-integrity lane. `monitor_stale_feedback_prefilter` returned `decision=suppress-duplicate classifier=skip reason=superseded-duplicate`. Retained as audit evidence for signal cleanup; no scope change requested.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "resolved",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor",
+      "resolved_by": "TASK-BUD-943"
     }
   ]
 }
