@@ -1,48 +1,50 @@
 {
-  "timestamp": "2026-05-06T19:50:36.792Z",
-  "context": "Auto-resume list pointed to TASK-BUD-933/936/916. Prior TASK-BUD-941 rollout slice is already committed; current bounded continuation selects [snip] implementation evidence is sufficient. [truncated:+77 chars]",
+  "timestamp": "2026-05-06T19:52:31.474Z",
+  "context": "TASK-BUD-936 concluída e commitada. Próxima fatia conservadora do auto-resume: TASK-BUD-916, apenas investigação/read-only + documentação/tes [snip] ão aplicar overrides/settings/provider. [truncated:+17 chars]",
   "current_tasks": [
-    "TASK-BUD-936"
+    "TASK-BUD-915"
   ],
   "next_actions": [
-    "inspect continuity-abstraction doc and existing stagnation implementation evidence",
-    "perform at most doc/board reconciliation micro-slice",
-    "validate markers/project-validate and commit checkpoint"
+    "localizar warning monitor-provider divergent overrides",
+    "avaliar se há dedupe/downgrade local-safe sem tocar settings",
+    "se não houver escopo seguro, registrar proposta/rollback e parar"
   ],
-  "blockers": [],
+  "blockers": [
+    "protected-scope-approval-required-for-monitor-provider-apply-or-settings"
+  ],
   "recent_validation": [
+    "guardrails-unattended-continuation-surface.test.ts: 12 passed",
     "project-validate: clean",
-    "git dirty limited to handoff auto-resume checkpoint",
-    "autonomy_lane_next_task: TASK-BUD-936"
+    "git clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-936",
+    "focus": "TASK-BUD-916",
     "canonical_links": [
-      "task:TASK-BUD-936",
-      "task:TASK-BUD-933",
-      "task:TASK-BUD-941"
+      "task:TASK-BUD-916",
+      "task:TASK-BUD-936"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T19:50:36.792Z",
+    "generatedAtIso": "2026-05-06T19:52:31.474Z",
     "level": "ok",
-    "percent": 20,
+    "percent": 22,
     "action": "continue",
-    "recommendation": "Proceed with TASK-BUD-936 as local-safe documentation/closure slice; no protected scopes."
+    "recommendation": "TASK-BUD-916 como micro-slice de investigação/documentação; sem mudanças operacionais protegidas."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T19:50:36.792Z",
+      "atIso": "2026-05-06T19:52:31.474Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 20,
+      "percent": 22,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Proceed with TASK-BUD-936 as local-safe documentation/closure slice; no protected scopes."
+      "recommendation": "TASK-BUD-916 como micro-slice de investigação/documentação; sem mudanças operacionais protegidas."
     }
-  ]
+  ],
+  "updated_at": "2026-05-06T19:55:04.504Z"
 }

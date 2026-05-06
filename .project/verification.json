@@ -14102,6 +14102,15 @@
       "method": "documentation marker-check + regression test",
       "timestamp": "2026-05-06T19:51:39.023Z",
       "evidence": "Documented the traceable stagnation signal in `docs/primitives/continuity-abstraction.md`, including `pause-human-replan`, event/evidence fields, local-safe rule, and current implementation evidence. Existing runtime evidence is in `local_continuity_audit.stagnationSignal` and regression `guardrails-unattended-continuation-surface.test.ts`. Validation: safe_marker_check matched 4/4; `npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts` -> 12 passed; `project-validate` -> clean."
+    },
+    {
+      "id": "VER-BUD-916-DIVERGENT-OVERRIDES-NOISE",
+      "target": "TASK-BUD-916",
+      "target_type": "task",
+      "status": "passed",
+      "method": "unit + smoke tests",
+      "timestamp": "2026-05-06T19:55:04.165Z",
+      "evidence": "Reduced stale startup noise for divergent monitor-provider overrides by downgrading divergent-only guidance from a warning notification to non-notifying `[mprov] drift:n` status. Actionable warnings such as unavailable models still notify. No `.pi/settings.json`, `.pi/agents`, provider selection, or `/monitor-provider apply` mutation was performed. Validation: `node --test packages/pi-stack/test/monitor-provider-patch.test.mjs` -> 38 pass; `npx vitest run packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts` -> 1 pass; `project-validate` -> clean."
     }
   ]
 }

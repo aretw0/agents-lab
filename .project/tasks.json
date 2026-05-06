@@ -20497,7 +20497,7 @@
     {
       "id": "TASK-BUD-916",
       "description": "Backlog short/mid-term: reassess reload warning for monitor-provider divergent overrides and reduce stale startup noise.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/monitor-provider-patch.ts",
@@ -20514,7 +20514,8 @@
         "Keep any change to monitor-provider overrides/settings behind explicit protected-scope approval."
       ],
       "milestone": "short-mid-monitor-economy-calibration",
-      "notes": "[provenance:human] User reported that after reload a warning appears then disappears: 'Warning: monitor-provider-patch: overrides divergentes detectados (2) — use /monitor-provider apply'. User suspects it may be legacy noise from a previous override era and said it is not priority. [rationale:risk-control] Startup/reload warnings affect operator trust and token/noise budget, but monitor-provider overrides are protected settings-adjacent scope, so park as backlog until we intentionally calibrate monitor economy/noise.\n[provenance:human] source_task=TASK-BUD-915 reason=Specific reload-noise example to assimilate during future stale-feedback/token-economy monitor calibration."
+      "notes": "[provenance:human] User reported that after reload a warning appears then disappears: 'Warning: monitor-provider-patch: overrides divergentes detectados (2) — use /monitor-provider apply'. User suspects it may be legacy noise from a previous override era and said it is not priority. [rationale:risk-control] Startup/reload warnings affect operator trust and token/noise budget, but monitor-provider overrides are protected settings-adjacent scope, so park as backlog until we intentionally calibrate monitor economy/noise.\n[provenance:human] source_task=TASK-BUD-915 reason=Specific reload-noise example to assimilate during future stale-feedback/token-economy monitor calibration.\n[closure] Implemented local-safe dedupe/downgrade for reload-only divergent override noise. Protected override application remains manual via `/monitor-provider apply`. Runtime reload needed to observe new startup output behavior.",
+      "verification": "VER-BUD-916-DIVERGENT-OVERRIDES-NOISE"
     },
     {
       "id": "TASK-BUD-917",
