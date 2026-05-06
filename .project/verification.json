@@ -14264,6 +14264,15 @@
       "method": "document + marker validation",
       "timestamp": "2026-05-06T22:38:41.329Z",
       "evidence": "Selected and documented the `agents-lab quality calibration lane` at `docs/research/0-8-agent-quality-calibration-lane-2026-05.md`. The lane is local-safe/runway only and does not authorize agent dispatch. It defines allowed work, protected exclusions, initial microtask catalog (review rubric, stale monitor feedback fixture, no-op edit noise fixture, local-safe canary checklist), promotion criteria, execution ladder, and calibration metrics. Validation: safe_marker_check -> 7/7 markers; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-953-CANDIDATE-COMPARISON",
+      "target": "TASK-BUD-953",
+      "target_type": "task",
+      "status": "passed",
+      "method": "document marker validation",
+      "timestamp": "2026-05-06T22:42:04.017Z",
+      "evidence": "Added explicit Candidate A vs Candidate D comparison and recommendation to `docs/research/0-8-agent-quality-calibration-lane-2026-05.md`. Recommendation now names Candidate D as the first simple-delegate canary, with Candidate A as the follow-up. Captured meta-learning that candidate alternatives should include comparison and recommendation by default. Validation: safe_marker_check -> 4/4 markers; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }

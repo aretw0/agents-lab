@@ -21298,6 +21298,27 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "Seed aprovado pelo operador: primeira aplicação de agentes deve ser melhorar a qualidade do agents-lab. Esta task escolhe a lane e prepara material local-safe para calibrar delegação sem executar agente ainda.\n[provenance:human] source_task=TASK-BUD-951 reason=Operador pediu escolher uma lane para experimentar agentes com material de melhorias/calibração de qualidade do agents-lab.\n[closure] Lane chosen: agents-lab quality calibration lane. Recommended first canary candidates are doc-only Candidate A (review rubric) or Candidate D (local-safe canary checklist), after explicit human approval; no dispatch authorized by this task.",
       "verification": "VER-BUD-952-AGENT-QUALITY-LANE"
+    },
+    {
+      "id": "TASK-BUD-953",
+      "description": "[P1/local-safe] Adicionar comparação e recomendação explícita entre Candidate A e Candidate D na lane de qualidade agêntica.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-952"
+      ],
+      "files": [
+        "docs/research/0-8-agent-quality-calibration-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Documento deve comparar Candidate A e Candidate D em valor, risco, validação, rollback e utilidade para o primeiro canary.",
+        "Documento deve conter uma recomendação explícita e humilde sobre qual candidato executar primeiro.",
+        "Registrar aprendizado: quando apresentar alternativas, incluir comparação e recomendação por padrão para evitar ida-e-volta desnecessária.",
+        "Validar com marker check, project-validate e git diff --check."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Feedback do operador: eu deveria ter incluído comparação e recomendação entre Candidate A e D no texto inicial; o fato de precisar perguntar é sinal de falta de síntese útil.\n[provenance:human] source_task=TASK-BUD-952 reason=Operador pediu melhoria explícita no documento da lane: comparação entre opções e recomendação.\n[closure] Operator feedback incorporated: document now includes comparison table, humble recommendation, and meta-learning about under-synthesized decision packets.",
+      "verification": "VER-BUD-953-CANDIDATE-COMPARISON"
     }
   ]
 }

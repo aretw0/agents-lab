@@ -1,49 +1,49 @@
 {
-  "timestamp": "2026-05-06T22:38:54.699Z",
-  "context": "TASK-BUD-952 concluída: lane escolhida é agents-lab quality calibration lane, documentada em docs/research/0-8-agent-quality-calibration-lane [snip] A ou D após aprovação humana explícita. [truncated:+237 chars]",
+  "timestamp": "2026-05-06T22:42:30.267Z",
+  "context": "TASK-BUD-953 concluída: documento da agents-lab quality calibration lane agora compara Candidate A vs Candidate D e recomenda explicitamente [snip] m comparação e recomendação por padrão. [truncated:+112 chars]",
   "next_actions": [
     "commit doc + board/handoff",
-    "se operador aprovar, criar task p1 para Candidate A ou Candidate D como primeiro canary simples",
-    "antes de dispatch, rerun simple_delegate_rehearsal_start_packet com foco concreto"
+    "próxima task provável: materializar Candidate D como canary checklist, ainda sem dispatch automático",
+    "antes de qualquer agente: pedir aprovação explícita"
   ],
   "blockers": [
-    "simple-delegate still requires explicit human approval before dispatch"
+    "agent dispatch still requires explicit human approval"
   ],
   "recent_validation": [
-    "safe_marker_check: 7/7 markers",
+    "safe_marker_check: 4/4 markers",
     "project-validate: clean",
     "git diff --check: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-952",
+    "focus": "TASK-BUD-953",
     "canonical_links": [
-      "task:TASK-BUD-952"
+      "task:TASK-BUD-953"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T22:38:54.699Z",
+    "generatedAtIso": "2026-05-06T22:42:30.267Z",
     "level": "ok",
-    "percent": 40,
+    "percent": 41,
     "action": "continue",
-    "recommendation": "Commitar e apresentar lane/candidatos; não disparar agente ainda.",
+    "recommendation": "Commitar e seguir com Candidate D se o operador aprovar.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T22:38:54.699Z",
+      "atIso": "2026-05-06T22:42:30.267Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 40,
+      "percent": 41,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar e apresentar lane/candidatos; não disparar agente ainda."
+      "recommendation": "Commitar e seguir com Candidate D se o operador aprovar."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-952"
+    "TASK-BUD-953"
   ]
 }
