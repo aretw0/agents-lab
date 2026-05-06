@@ -20530,7 +20530,7 @@
     {
       "id": "TASK-BUD-918",
       "description": "Create a 0.8.0 readiness map that closes current tabs and separates ready, prepared, protected, and future-tangent work.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-917"
@@ -20548,7 +20548,8 @@
         "Include a recommended next 3-7 slice queue with validation gates."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:planning] The user asked whether we finished what was started and where to go next; a readiness map makes the answer durable and resumable instead of conversational only.\n[provenance:human] source_task=TASK-BUD-917 reason=First practical artifact for the local-safe compounding lane."
+      "notes": "[rationale:planning] The user asked whether we finished what was started and where to go next; a readiness map makes the answer durable and resumable instead of conversational only.\n[provenance:human] source_task=TASK-BUD-917 reason=First practical artifact for the local-safe compounding lane.\n[start] Writing 0.8.0 readiness map from completed provider/reload/backlog evidence and current compounding-lane queue.\n[complete] 0.8.0 readiness map created and indexed; next local-safe continuation is TASK-BUD-919 stocked slice queue.",
+      "verification": "VERIFY-BUD-918"
     },
     {
       "id": "TASK-BUD-919",

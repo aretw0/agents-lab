@@ -13758,6 +13758,15 @@
       "method": "doc+marker+i18n+board inspection",
       "timestamp": "2026-05-06T14:19:08.395Z",
       "evidence": "Created docs/research/0-8-local-safe-compounding-lane.md defining purpose, operating mode, allowed unattended local-safe scopes, explicit protected non-goals, stop conditions, validation expectations, rollback expectations, learning loop, first queue, and operator summary. Sub-lane tasks TASK-BUD-918..921 already exist for readiness map, stocked slice queue, planning hygiene, and delegation/long-run runway. Validation: safe_marker_check passed for charter anchors; i18n_lint_text passed for pt-BR operator summary; board_task_quality_gate flagged macro/decomposition caution, addressed by explicit downstream tasks TASK-BUD-918..921 rather than expanding this slice."
+    },
+    {
+      "id": "VERIFY-BUD-918",
+      "target": "TASK-BUD-918",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc+index+marker+i18n",
+      "timestamp": "2026-05-06T14:21:07.890Z",
+      "evidence": "Created docs/research/0-8-readiness-map.md with current ready evidence, protected/prepared work, parked medium/long-term tangents, recommended 7-slice queue, auto-continue criteria, stop criteria, and 0.8.0 success definition. Added docs/guides/README.md index link to the readiness map. Validation: safe_marker_check passed for readiness-map anchors including TASK-BUD-914/915/916; safe_marker_check passed for README link; i18n_lint_text passed for pt-BR summary."
     }
   ]
 }

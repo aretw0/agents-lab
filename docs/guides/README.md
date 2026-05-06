@@ -52,6 +52,7 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 | [agents-lab-editorial-pipeline.md](./agents-lab-editorial-pipeline.md) | Pipeline/template editorial para release notes e posts separando nossa stack, upstream Pi, deps e curadoria |
 | [i18n-intents.md](./i18n-intents.md) | Runbook de intents soft/hard de internacionalização para comunicação e artefatos |
 | [skill-guide-parity.md](./skill-guide-parity.md) | Protocolo de paridade guide-skill para discoverability e controle de drift documental |
+| [0.8 readiness map](../research/0-8-readiness-map.md) | Mapa operacional de readiness 0.8.0: pronto, protegido, parked e próxima fila local-safe |
 
 ### Embedding e Integração
 
