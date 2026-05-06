@@ -1,16 +1,18 @@
 {
-  "timestamp": "2026-05-06T16:15:44.787Z",
-  "context": "Adendo de escopo assimilado: açúcar sintático agora fica como regra de higiene language-agnostic (JS/TS como início, expansão cross-language [snip] pt-5.3-codex-spark no playbook/handoff. [truncated:+84 chars]",
+  "timestamp": "2026-05-06T16:20:13.392Z",
+  "context": "Janela graceful-stop já tratada nesta borda: checkpoint persistido sem bloqueadores ativos para permitir o próximo ciclo de continuidade quan [snip] tir; sem alteração de escopo protegido. [truncated:+21 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
-  "blockers": [
-    "context-watch-checkpoint-required"
+  "next_actions": [
+    "Encerrar fluxo atual conforme protocolo e aguardar o retorno do próximo hard-gate antes de retomar.",
+    "Se retornar ready, executar próximo micro-slice local-safe ligado à revisão de continuidade/higiene."
   ],
+  "blockers": [],
   "recent_validation": [
-    "turn_boundary_decision_packet",
     "context_watch_continuation_readiness",
-    "local_continuity_audit"
+    "local_continuity_audit",
+    "turn_boundary_decision_packet"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
@@ -19,53 +21,25 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T16:15:25.502Z",
-    "level": "ok",
-    "action": "continue",
-    "recommendation": "Progress saved; continue bounded local hardening."
+    "generatedAtIso": "2026-05-06T16:20:13.392Z",
+    "level": "checkpoint",
+    "percent": 56,
+    "action": "checkpoint-refresh",
+    "recommendation": "Etapa de checkpoint concluída; pronto para revalidação de continuidade."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T16:15:25.502Z",
+      "atIso": "2026-05-06T16:20:13.392Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 0,
+      "level": "checkpoint",
+      "percent": 56,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Local slice checkpoint saved."
-    },
-    {
-      "atIso": "2026-05-06T16:15:25.585Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 99,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
-    },
-    {
-      "atIso": "2026-05-06T16:15:44.787Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 58,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+      "recommendation": "Etapa de checkpoint concluída; pronto para revalidação de continuidade."
     }
-  ],
-  "next_actions": [
-    "Context-watch action: level=checkpoint 58% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
   ]
 }
