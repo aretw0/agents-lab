@@ -1,55 +1,57 @@
 {
-  "timestamp": "2026-05-06T04:56:41.214Z",
-  "context": "Completed Qwen cheap/fast classifier canary preparation. Added protected/not-authorized canary packet and 10 synthetic cases for commit-hygie [snip] quota/cap facts from Alibaba dashboard. [truncated:+166 chars]",
+  "timestamp": "2026-05-06T05:13:51.092Z",
+  "context": "Completed DashScope/Qwen model discovery study after user noted we should use web-search tooling. Read-only /models with DASHSCOPE_API_KEY on [snip] canary packet; no execution authorized. [truncated:+275 chars]",
   "next_actions": [
-    "Commit TASK-BUD-903 docs/board checkpoint if dirty.",
-    "Need operator/dashboard facts before execution: selected cheap/fast model id, quota before, ma [snip] ct, fallbackBeforeCompact. [truncated:+16 chars]",
-    "Then protected canary can run exactly 10 synthetic cases; no monitor migration until results pass."
+    "Commit TASK-BUD-904 docs/board checkpoint if dirty.",
+    "If continuing local-safe: TASK-BUD-905 can evaluate provider-model-discovery skill/runbook.",
+    "Before any canary execution still need dashboard quota/free-trial/cap/fallback confirmation for qwen3.6-flash."
   ],
   "blockers": [
-    "TASK-BUD-849 remains protected for monitor/provider/settings changes.",
-    "Current untracked .workflows monitor artifact remains untouched.",
-    "No explicit approval yet for canary execution."
+    "TASK-BUD-849 remains protected for monitor/provider/settings/routing/budget changes.",
+    "No canary execution approval yet.",
+    "Current untracked .workflows monitor artifact remains untouched."
   ],
   "recent_validation": [
-    "i18n_lint_text qwen canary packet sample -> pass",
-    "i18n_lint_text synthetic cases sample -> pass",
-    "safe_marker_check canary packet markers -> pass"
+    "i18n_lint_text discovery doc sample -> pass",
+    "safe_marker_check discovery doc -> pass",
+    "safe_marker_check shortlist -> pass"
   ],
   "recent_commits": [
-    "3c1f3f86 docs(providers): plan qwen monitor fallback"
+    "3c1f3f86 docs(providers): plan qwen monitor fallback",
+    "67880ece docs(monitors): prepare qwen classifier canary"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-903",
+    "focus": "TASK-BUD-904",
     "canonical_links": [
-      "task:TASK-BUD-903",
+      "task:TASK-BUD-904",
+      "task:TASK-BUD-905",
       "commit:3c1f3f86"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T04:56:41.214Z",
+    "generatedAtIso": "2026-05-06T05:13:51.092Z",
     "level": "ok",
-    "percent": 50,
+    "percent": 35,
     "action": "continue",
-    "recommendation": "commit-task-bud-903-and-await-cheap-fast-model-facts-or-continue-docs-only",
+    "recommendation": "commit-discovery-docs-then-continue-with-skill-runbook-or-dashboard-facts",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T04:56:41.214Z",
+      "atIso": "2026-05-06T05:13:51.092Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 50,
+      "percent": 35,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-903-and-await-cheap-fast-model-facts-or-continue-docs-only"
+      "recommendation": "commit-discovery-docs-then-continue-with-skill-runbook-or-dashboard-facts"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-903"
+    "TASK-BUD-904"
   ]
 }

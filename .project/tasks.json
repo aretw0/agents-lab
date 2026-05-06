@@ -20212,6 +20212,50 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] Next local-safe step after Copilot quota fallback: make the Qwen cheap/fast classifier canary executable as a protected packet once the operator fills model/quota facts. [rationale:risk-control] Copilot quota is near depletion, but Qwen must prove structured classifier behavior before monitor migration.\n[slice-start] Drafting Qwen cheap/fast classifier canary packet and 10 synthetic cases. No runtime/provider/settings changes.\n[rationale:risk-control] A protected canary packet with fixed synthetic cases prevents rushed monitor migration while Copilot premium requests are near depletion.\n[complete] Qwen cheap/fast classifier canary packet and 10 synthetic cases are ready for a future explicit protected decision.",
       "verification": "VERIFY-BUD-903"
+    },
+    {
+      "id": "TASK-BUD-904",
+      "description": "Study Alibaba/DashScope model discovery API and public Qwen model guidance for shortlist selection.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-901",
+        "TASK-BUD-903"
+      ],
+      "files": [
+        "docs/research/alibaba-dashscope-api-model-discovery-2026-05.md",
+        "docs/research/alibaba-qwen-llm-shortlist-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Document whether the existing DASHSCOPE_API_KEY can list models or useful metadata through DashScope/OpenAI-compatible APIs without exposing the key.",
+        "Collect public/documentation-backed guidance for choosing baseline, cheap/fast, coder/delegation, and long-context Qwen tiers.",
+        "Update the Qwen shortlist with evidence-backed candidate recommendations or clearly mark gaps if API/docs do not expose enough information.",
+        "Record all API calls as read-only metadata discovery, with no prompt/completion calls, no settings/routing/monitor migration changes, and no key material in docs/logs.",
+        "Identify whether this pattern should become a future skill/runbook for provider model discovery."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] User needs help choosing Qwen models and asked whether the same API key can expose model information; also asked to study/document API and public model analyses for future skill potential. [rationale:risk-control] Model selection should be evidence-backed and read-only before any protected canary or monitor migration.\n[slice-start] Studying DashScope model discovery and public Qwen guidance. Read-only API/docs; no prompt calls, no settings/routing changes, no key exposure.\n[rationale:risk-control] Choosing from a large provider catalog needs metadata and public guidance before spending free-trial quota or moving monitors/delegation.\n[complete] API/docs/web-search study selected qwen3.6-flash as cheap/fast candidate and qwen3-coder-next as coder candidate; quota/free trial remains dashboard-confirmed before any canary execution.",
+      "verification": "VERIFY-BUD-904"
+    },
+    {
+      "id": "TASK-BUD-905",
+      "description": "Evaluate/cultivate a provider-model-discovery skill from the DashScope research pattern.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-904"
+      ],
+      "files": [
+        "docs/research/alibaba-dashscope-api-model-discovery-2026-05.md",
+        "packages/lab-skills/skills/provider-model-discovery/SKILL.md"
+      ],
+      "acceptance_criteria": [
+        "Decide whether the provider model discovery pattern should become a reusable skill, runbook, or extension primitive.",
+        "If approved, draft a skill skeleton that checks env presence without leaking secrets, lists models read-only, classifies families, fetches docs, and emits a protected canary packet.",
+        "Keep first implementation docs-only or disabled; no provider calls beyond read-only metadata discovery and no runtime/settings/routing changes."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[seed] User noted the DashScope API/model research pattern may become a skill in the future. [rationale:primitive-cultivation] Provider catalogs are large and repeated across vendors; a deterministic discovery primitive can prevent ad hoc web/API research."
     }
   ]
 }

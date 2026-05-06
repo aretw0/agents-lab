@@ -2,7 +2,7 @@
 
 Status: protected decision packet / not authorized  
 Tarefa: `TASK-BUD-903`  
-Relacionado: `TASK-BUD-902`, `TASK-BUD-901`, `TASK-BUD-849` protegido  
+Relacionado: `TASK-BUD-902`, `TASK-BUD-901`, `TASK-BUD-904`, `TASK-BUD-849` protegido  
 Casos: [`docs/research/qwen-monitor-classifier-synthetic-cases-2026-05.md`](qwen-monitor-classifier-synthetic-cases-2026-05.md)
 
 ## 1. Decisão requerida
@@ -14,7 +14,7 @@ Para autorizar, o operador deve preencher:
 ```json
 {
   "approveQwenClassifierCanary": true,
-  "providerModel": "dashscope/<modelo-cheap-fast>",
+  "providerModel": "dashscope/qwen3.6-flash",
   "quotaBefore": "remaining/total do dashboard",
   "maxCalls": 10,
   "maxTrialQuotaBurnPct": "ex: 1% do modelo candidato",
@@ -30,8 +30,8 @@ Sem esse payload explícito, manter como report-only.
 | Gate | Status |
 | --- | --- |
 | `qwen-plus` baseline respondeu smoke | sim |
-| cheap/fast model escolhido na shortlist | pendente |
-| quota remaining/total do cheap/fast registrada | pendente |
+| cheap/fast model escolhido na shortlist | sim: `qwen3.6-flash` por descoberta API/docs |
+| quota remaining/total do cheap/fast registrada | pendente no dashboard |
 | auto-billing/paid spend entendido | pendente |
 | fallback model selecionado antes de compactar | pendente |
 | casos sintéticos prontos | sim, 10 casos |
@@ -63,7 +63,7 @@ Excluído:
 
 ## 4. Procedimento manual sugerido
 
-1. Selecionar o modelo cheap/fast em `/model` ou sessão isolada curta.
+1. Selecionar `dashscope/qwen3.6-flash` em `/model` ou sessão isolada curta; se o dashboard negar free trial/endpoint/cap, voltar para `qwen-flash` ou `qwen-turbo`.
 2. Registrar quota antes no dashboard Alibaba.
 3. Confirmar fallback model funcional para compactação antes de começar.
 4. Executar os 10 casos em sessão curta, preferencialmente sem histórico grande.
