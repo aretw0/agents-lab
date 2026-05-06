@@ -20505,6 +20505,119 @@
       ],
       "milestone": "short-mid-monitor-economy-calibration",
       "notes": "[provenance:human] User reported that after reload a warning appears then disappears: 'Warning: monitor-provider-patch: overrides divergentes detectados (2) — use /monitor-provider apply'. User suspects it may be legacy noise from a previous override era and said it is not priority. [rationale:risk-control] Startup/reload warnings affect operator trust and token/noise budget, but monitor-provider overrides are protected settings-adjacent scope, so park as backlog until we intentionally calibrate monitor economy/noise.\n[provenance:human] source_task=TASK-BUD-915 reason=Specific reload-noise example to assimilate during future stale-feedback/token-economy monitor calibration."
+    },
+    {
+      "id": "TASK-BUD-917",
+      "description": "Define the 0.8.0 local-safe compounding lane charter for unattended-friendly cleanup, bounded research, delegation readiness, and long-run improvement.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "docs/research/0-8-local-safe-compounding-lane.md",
+        ".project/tasks.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Document the lane purpose, allowed scopes, explicit non-goals, and stop conditions.",
+        "Define what can proceed without human iteration: local-safe cleanup, bounded research synthesis, report-only readiness, docs/tests refactors.",
+        "Define what cannot proceed without approval: CI/CD workflow mutation, provider/settings/routing changes, publish/deploy, remote/offload, destructive cleanup.",
+        "Include validation and rollback expectations for every slice type.",
+        "Produce a compact operator summary suitable for handoff/resume."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[provenance:human] User asked for a lane that can keep evolving many things without frequent iteration: cleanup, research, delegation and long-run improvements that compound safely toward 0.8.0. [rationale:strategy] A lane charter prevents open-ended expansion from drifting into protected scope while still enabling continuous local-safe improvement.\n[provenance:human] source_task=TASK-BUD-849 reason=User wants to return from opened tangents to controlled/audited power while preparing 0.8.0."
+    },
+    {
+      "id": "TASK-BUD-918",
+      "description": "Create a 0.8.0 readiness map that closes current tabs and separates ready, prepared, protected, and future-tangent work.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-917"
+      ],
+      "files": [
+        "docs/research/0-8-readiness-map.md",
+        ".project/tasks.json",
+        "docs/guides/README.md"
+      ],
+      "acceptance_criteria": [
+        "Summarize completed current initiatives: provider economy rollout, reload signal fix, monitor/CI backlog capture.",
+        "List short-term local-safe work that can proceed without human iteration.",
+        "List protected work that must wait for explicit approval.",
+        "List medium/long-term research/tangents parked for later assimilation.",
+        "Include a recommended next 3-7 slice queue with validation gates."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:planning] The user asked whether we finished what was started and where to go next; a readiness map makes the answer durable and resumable instead of conversational only.\n[provenance:human] source_task=TASK-BUD-917 reason=First practical artifact for the local-safe compounding lane."
+    },
+    {
+      "id": "TASK-BUD-919",
+      "description": "Seed a stocked queue of 7 local-safe compounding slices with validation and rollback cues for low-interaction continuation.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-917"
+      ],
+      "files": [
+        ".project/tasks.json",
+        "docs/research/0-8-local-safe-compounding-lane.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Produce 7 small local-safe slices spanning cleanup, bounded research, docs/readiness, delegation report-only, and long-run safety.",
+        "Each slice has declared files or file-selection rule, validation gate, rollback cue, and stop condition.",
+        "Exclude protected scopes unless separately marked parked.",
+        "Ensure autonomy lane can select at least 3 local-safe validated slices without focus mismatch.",
+        "Record queue in board/handoff so resume can continue without asking obvious ordering questions."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:throughput] The current AFK material readiness reported enough local-safe validation but selection-focus mismatch; stocked slices should remove the mismatch and enable safer low-interaction progress.\n[provenance:human] source_task=TASK-BUD-917 reason=User wants a lane that can continue evolving without frequent interaction."
+    },
+    {
+      "id": "TASK-BUD-920",
+      "description": "Local-safe planning hygiene pass: reduce board focus mismatch and decompose macro planned items into executable 0.8.0 slices.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-917",
+        "TASK-BUD-919"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/handoff.json",
+        "docs/research/0-8-readiness-map.md"
+      ],
+      "acceptance_criteria": [
+        "Review open/planned tasks for macro ambiguity and focus mismatch.",
+        "Do not close tasks automatically; only decompose or annotate with rationale and validation paths.",
+        "Keep protected items parked and clearly labeled.",
+        "Improve board planning clarity score or document remaining blockers.",
+        "Validate with board planning/dependency reports."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:quality] Current planning clarity score is 63 with macro items; improving decomposition increases unattended-safe throughput without touching protected systems.\n[provenance:human] source_task=TASK-BUD-917 reason=Prepare the lane for controlled autonomous continuation."
+    },
+    {
+      "id": "TASK-BUD-921",
+      "description": "Report-only delegation and long-run improvement synthesis for compounding local-safe evolution before any stronger automation.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-917"
+      ],
+      "files": [
+        "docs/research/0-8-delegation-long-run-runway.md",
+        "docs/primitives/control-plane-overnight-local-loop.md",
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "Synthesize what delegation/long-run primitives are already ready, needs-evidence, or blocked.",
+        "Recommend only report-only/local-first improvements unless explicit approval exists.",
+        "Identify cleanup/research loops that can compound safely without scheduler/remote/offload.",
+        "Define measurable gates before promoting to stronger unattended/delegated execution.",
+        "Include rollback/stop guidance for long-run experiments."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:strategy] User frames evolution as compounding cleanup/research/delegation/long-run improvements. This keeps that compounding path evidence-based before increasing autonomy.\n[provenance:human] source_task=TASK-BUD-917 reason=Prepare future delegation and long-run work in a controlled audited lane."
     }
   ]
 }
