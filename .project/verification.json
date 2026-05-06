@@ -14012,6 +14012,69 @@
       "method": "inspect",
       "evidence": "Board hygiene normalized end-to-end for TASK-BUD-849:  VERIFY-* references converted, issues resolved_by backfilled, and board debt zeroed (hard=0 soft=0 parked=0) after checkpointed micro-slices.",
       "timestamp": "2026-05-06T18:17:55.456Z"
+    },
+    {
+      "id": "VER-BUD-934-LOC",
+      "target": "TASK-BUD-934",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-06T18:38:43.694Z",
+      "evidence": "Slice 934: recalibrou foco via `context_watch_checkpoint`, removeu blockers do handoff e validou `local_continuity_audit`/`context_watch_continuation_readiness` até estado `ready` (até `autoAdvance` permanecer bloqueado por telemetria)."
+    },
+    {
+      "id": "VER-BUD-935-LOC2",
+      "target": "TASK-BUD-935",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-06T18:39:41.129Z",
+      "evidence": "Micro-slice de evidência executado: handoff focado em TASK-BUD-935, validações de continuidade prontas (`continuation_readiness` pronto, `local_continuity_audit` pronto, `project-validate` limpo) e contexto em `compact`? status ok."
+    },
+    {
+      "id": "VER-BUD-935-LOC3",
+      "target": "TASK-BUD-935",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-06T18:46:44.634Z",
+      "evidence": "Slice de alinhamento de continuidade encerrada após definir TASK-BUD-936 como pista de controle para estagnação. `continuation_readiness` fica bloqueado por `stop-condition-present`; `autoAdvance` permanece blocked; sem progresso funcional adicional nesta janela sem nova condição de parada."
+    },
+    {
+      "id": "VER-BUD-937-ADVISORY-BLOCKERS",
+      "target": "TASK-BUD-937",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal test",
+      "timestamp": "2026-05-06T19:00:19.983Z",
+      "evidence": "Implemented advisory-blocker classification for local continuity. `context-watch-compact-required`, `context-watch-checkpoint-required`, and `auto-advance-telemetry-needs-evidence` no longer count as local stop-condition blockers, while non-advisory blockers still do. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts` -> 11 tests passed; `project-validate` -> clean."
+    },
+    {
+      "id": "VER-BUD-937-STAGNATION-SIGNAL",
+      "target": "TASK-BUD-937",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal test",
+      "timestamp": "2026-05-06T19:05:11.291Z",
+      "evidence": "Added advisory stagnation signal in local continuity audit: repeated context pressure events (`checkpoint`/`compact`) with unchanged focus and no completion produce `stagnation=pause-human-replan events=2`, advisoryOnly=true, humanActionRequired=true, without turning advisory compact blockers into stop-conditions. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts` -> 12 passed; `project-validate` -> clean."
+    },
+    {
+      "id": "VER-BUD-938-INTAKE",
+      "target": "TASK-BUD-938",
+      "target_type": "task",
+      "status": "passed",
+      "method": "marker-check + project validation",
+      "timestamp": "2026-05-06T19:28:21.835Z",
+      "evidence": "Preenchidos 3 incidentes no intake de feedback stale: INCIDENT-STALE-001 (compact blocker pós-compact), INCIDENT-STALE-002 (reload-required pós-reload real), INCIDENT-STALE-003 (fragility supersedido por tasks posteriores). Validação: safe_marker_check encontrou INCIDENT-STALE-001/002/003 e Critério de pre-filtro; project-validate clean."
+    },
+    {
+      "id": "VER-BUD-939-PREFILTER",
+      "target": "TASK-BUD-939",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal test",
+      "timestamp": "2026-05-06T19:33:54.020Z",
+      "evidence": "Added pure report-only `resolveMonitorStaleFeedbackPrefilter` helper covering stale context-watch transient blockers, resolved runtime reload blockers, board-evidence resolved signals, superseded duplicates, and fresh/unknown fallback. Validation: `npx vitest run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts` -> 9 passed; `project-validate` -> clean."
     }
   ]
 }

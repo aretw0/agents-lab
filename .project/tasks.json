@@ -20492,7 +20492,7 @@
         "Keep changes local-first/report-only until explicit approval for broader monitor/provider routing changes."
       ],
       "milestone": "short-mid-monitor-economy-calibration",
-      "notes": "[provenance:human] User requested short/mid-term backlog for pragmatic monitor calibration: avoid delayed feedback and reduce token spend because long-term classifier burn is not viable. [rationale:risk-control] Recurring stale monitor feedback should become a bounded primitive/regression path, not ad hoc dismissal; existing related completed task TASK-BUD-841 exists, but no open backlog item was found for stale-feedback/token-economy calibration.\n[provenance:human] source_task=TASK-BUD-849 reason=Latest fragility feedback was stale after TASK-BUD-913/TASK-BUD-914 had already resolved or backlogged the relevant concern."
+      "notes": "[provenance:human] User requested short/mid-term backlog for pragmatic monitor calibration: avoid delayed feedback and reduce token spend because long-term classifier burn is not viable. [rationale:risk-control] Recurring stale monitor feedback should become a bounded primitive/regression path, not ad hoc dismissal; existing related completed task TASK-BUD-841 exists, but no open backlog item was found for stale-feedback/token-economy calibration.\n[provenance:human] source_task=TASK-BUD-849 reason=Latest fragility feedback was stale after TASK-BUD-913/TASK-BUD-914 had already resolved or backlogged the relevant concern.\n[monitor-feedback] fragility monitor emitted stale/incorrect empty-message warning after a non-empty response and checkpoint/commit sequence. Classify as duplicate/stale candidate for prefilter canary; do not change scope based on it."
     },
     {
       "id": "TASK-BUD-916",
@@ -20885,6 +20885,123 @@
       ],
       "milestone": "ui-cohesion",
       "notes": "Ajuste de escopo confirmado: o termo 'açúcar sintático' é para ser tratado de forma **agnóstica a linguagem** (JS/TS inicialmente, mas scorecard pensado para expansão cross-language), não só TypeScript. O detector deve priorizar padrões de risco por linguagem sem acoplamento a sintaxe única. Oportunidade futura (não nesta slice): estudar/alinhar com a extensão **pi-lens** para ampliar cobertura para outras linguagens antes da execução ativa.\n[scope-refine] Esta task fica com escopo de higiene agnóstico por linguagem (language-agnostic): início JS/TS (padrões de sobrecarga sintática de alta ambiguidade), com evolução por camadas para outras linguagens por linguagem de parser/analisador específico. Estrutura sugerida: registrar padrão, severidade e exceção por linguagem em metadados do detector, não por heurística textual de extensão de arquivo. Investigação em pi-lens fica em follow-up (não ativar nesta etapa).\nMicro-slice iniciado (planejamento): preparar pacote language-agnostic de higiene sintática em 2 camadas: (1) regras mínimas por linguagem com catálogo de padrões de alto impacto (ex.: concat/chaining excessivo, DSL-like over-abstração, wrappers sem ganho funcional), (2) camada de evidência determinística com campos padrão: patternId, linguagem, arquivo, severidade, trecho, justificativa. O sinal de falha deve incluir exceção obrigatória (task note/registro) para usos deliberados de API pública/legibilidade/compatibilidade. Fixtures devem cobrir equivalência semântica com estilos/verbose diferente.\nPróximo pacote de micro-slices definido (sem mutação de escopo protegido): (A) consolidar catálogo inicial de padrões language-agnostic por linguagem (JS/TS): over-chaining funcional sem ganho, wrappers de camada sem redução de entropia, DSL-like inline sem contrato estável; (B) definir esquema de evidência mínimo comum para tool-hygiene score: {patternId, linguagem, arquivo, linha/trecho, severidade, frequência, decisão, justificativa/deferência}; (C) mapear fixtures mínimos cross-verbose: variação de estilo (pontos de semântica equivalente) para reduzir falsos positivos por formatação."
+    },
+    {
+      "id": "TASK-BUD-934",
+      "description": "[Slice] Resolver bloqueio de continuidade/ponto de retomada com handoff local-safe (sem alterações de produção).",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-933"
+      ],
+      "acceptance_criteria": [
+        "Definir foco local-safe único e reescrever handoff sem blockers.",
+        "Alinhar continuidade para reduzir bloqueio por candidato/tamanho.",
+        "Executar pré-checagens (`context_watch_continuation_readiness`, `local_continuity_audit`) até estado pronto para micro-slice.",
+        "Manter mudanças apenas em `.project/handoff.json` nesta janela de transição."
+      ],
+      "notes": "Slice operacional de continuidade para sair da retenção de auto-resume e validar retorno seguro.\n[closure] Continuidade recuperada em cadeia: handoff reorientado, readiness/local audit posteriormente ficaram verdes, e TASK-BUD-937 corrigiu o falso stop-condition que mantinha o loop. Verificação existente: VER-BUD-934-LOC.",
+      "verification": "VER-BUD-934-LOC"
+    },
+    {
+      "id": "TASK-BUD-935",
+      "description": "[Slice] Smoke-test de continuidade: validar retomada local-safe (continuation readiness) sem mutações de código, apenas checkpoint e evidências.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-934"
+      ],
+      "acceptance_criteria": [
+        "Executar `context_watch_continuation_readiness` e `local_continuity_audit` com candidato em verde/ready.",
+        "Executar uma validação smoke local no limite atual.",
+        "Registrar evidência de bloqueios remanescentes no handoff.",
+        "Manter janela curta (<=3 arquivos planejados)."
+      ],
+      "notes": "[closure] Smoke de continuidade concluído: readiness/local audit verdes após limpeza de blocker transitório e patch de advisory blockers; bloqueio remanescente é apenas autoAdvance/dirty-state, não continuidade local. Verificações existentes: VER-BUD-935-LOC2, VER-BUD-935-LOC3.",
+      "verification": "VER-BUD-935-LOC3"
+    },
+    {
+      "id": "TASK-BUD-936",
+      "description": "[BUDGET / GOVERNANCE] Traduzir loops de falta de progresso em sinal rastreável do board (sem progressão + auto-continuation bloqueado).",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation-surface.ts",
+        "docs/primitives/continuity-abstraction.md"
+      ],
+      "acceptance_criteria": [
+        "Definir um sinal de 'stagnation' rastreável no board quando continuidade/local-slice ficar sem avanço por limiar de janelas.",
+        "Adicionar evidência mínima (tentativas, blockers, snapshots) e gatilho de parada/replani- famento automático para revisão humana.",
+        "Ligar o sinal ao board (`board_query`/handoff) com trilha de decisão para lane e delegação.",
+        "Registrar e validar atualização com teste de regressão e comando de validação no PR de governança."
+      ],
+      "notes": "Sinal rastreável solicitado: quando `continuation_readiness=defer` + auto-advance blocked por >N janelas sem avanço de foco, emitir issue no board como trigger de pausa/replanejamento. Isso deve incluir blockers, staleFocus, context, tentativa_count.\nRegra operacional proposta (fase 1): em cada retorno, se `continuation_readiness=blocked/defer` por >2 janelas consecutivas sem mudança de `focusTask` + sem nova validação com autoAdvance ready, criar automaticamente issue/sinal + congelar avanço de lane até revisão humana (não abrir nova task sem checkpoint novo)."
+    },
+    {
+      "id": "TASK-BUD-937",
+      "description": "[POC] Ajustar stop-conditions para não travar continuidade por compact-evento sem progresso real (contador separado de estagnação).",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-936"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/context-watchdog-handoff-events.ts"
+      ],
+      "acceptance_criteria": [
+        "Diferenciar blocker de compact/watch-evento de blocker operacional persistente em `stop-conditions`.",
+        "Implementar contador de retornos com `audit eligible/blocked` sem progresso e sinalizar pausa/revisão humana.",
+        "Adicionar teste de regressão em smoke (sem bloquear auto-execução local quando há apenas retorno de compact.)",
+        "Validar com `context_watch_continuation_readiness`/`local_continuity_audit` em cenário simulado."
+      ],
+      "notes": "[operator-observation] Control plane voltou de `gpt-5.3-codex-spark` para `gpt-5.5` via provider `openai-codex` para testar se a calibração/ritmo melhora após regressão de estouro de contexto e blocker de compactação persistente.\n[operator-hypothesis] `gpt-5.3-codex-spark` pode ter janela efetiva menor/menos folga operacional que `gpt-5.5`; hipótese: não usar como control-plane principal até provar estabilidade, mas manter como candidato para tarefas menores/especializadas com contexto bounded.\n[implementation] Classificou `context-watch-compact-required`, `context-watch-checkpoint-required` e `auto-advance-telemetry-needs-evidence` como advisory blockers para `local_continuity_audit`; blockers operacionais continuam travando stop-conditions. Teste focal adicionado em `guardrails-unattended-continuation-surface.test.ts`. Validação: `npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts` (11 passed) e `project-validate` clean.\n[implementation] Adicionado `stagnationSignal` read-only no `local_continuity_audit`: duas ocorrências consecutivas de pressão de contexto (`checkpoint/compact`) sem completed task viram `pause-human-replan` advisory-only. Isso sinaliza revisão humana sem bloquear a continuidade local-safe quando blockers são apenas advisory. Validação: `npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts` (12 passed) e `project-validate` clean.\n[closure] Reload feito e validação viva concluída: `local_continuity_audit` eligible=yes com `stagnation=watch events=1`; `context_watch_continuation_readiness` ready=yes; `context_watch_compact_stage_status` normal-window/reload-not-required; `project-validate` clean. Código/testes já commitados em `3b243c29` e `2b5081ba`.",
+      "verification": "VER-BUD-937-STAGNATION-SIGNAL"
+    },
+    {
+      "id": "TASK-BUD-938",
+      "description": "[Slice] Coletar evidências de feedback stale de monitores antes de alterar comportamento de classificação.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-915"
+      ],
+      "files": [
+        "docs/research/monitor-stale-feedback-intake-template-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Registrar pelo menos 2 exemplos de feedback stale/delayed com task/commit/verificação que demonstre resolução ou supersedência.",
+        "Não alterar monitores nem roteamento nesta slice; apenas evidência e critério de supressão candidato.",
+        "Usar marker validation no documento para confirmar presença dos exemplos e do critério candidato."
+      ],
+      "milestone": "short-mid-monitor-economy-calibration",
+      "notes": "Decompõe TASK-BUD-915 em fatia local-safe (1 arquivo) porque a task mãe é ampla demais para continuity audit.\n[closure] Evidência mínima para TASK-BUD-915 coletada no intake; próxima fatia pode desenhar pre-filtro/cooldown determinístico sem tocar provider/settings.",
+      "verification": "VER-BUD-938-INTAKE"
+    },
+    {
+      "id": "TASK-BUD-939",
+      "description": "[Slice] Desenhar pre-filtro determinístico para feedback stale/duplicado de monitores antes de chamadas de classifier.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-938"
+      ],
+      "files": [
+        "docs/research/monitor-stale-feedback-intake-template-2026-05.md",
+        "packages/pi-stack/extensions/monitor-runtime-contract.ts",
+        "packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Definir regra determinística report-only para classificar sinais stale/duplicate antes do classifier.",
+        "Cobrir ao menos os incidentes INCIDENT-STALE-001 e INCIDENT-STALE-002 como suppression/advisory sem tocar provider/settings.",
+        "Adicionar teste focal de helper puro ou, se código ficar grande, registrar design testável no intake sem runtime change.",
+        "Validar com teste focal ou marker check + project-validate."
+      ],
+      "milestone": "short-mid-monitor-economy-calibration",
+      "notes": "Segue TASK-BUD-938: agora converter evidência em regra determinística pequena, evitando mudança protegida de provider/settings.\n[implementation] Implemented pure report-only monitor stale prefilter in `monitor-runtime-contract.ts`, covering INCIDENT-STALE-001/002 and general board/superseded duplicate signals. No provider/settings/runtime apply changed. Focal test: monitor-runtime-contract 9 passed; project-validate clean.\n[closure] Source/test committed as 160fc514. Next TASK-BUD-915 slice can decide whether to wire this helper into runtime summary/classifier path or keep it report-only for canary.",
+      "verification": "VER-BUD-939-PREFILTER"
     }
   ]
 }
