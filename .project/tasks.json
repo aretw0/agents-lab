@@ -20367,6 +20367,24 @@
       "milestone": "ci-local-parity",
       "notes": "[provenance:human] User explicitly requested local-safe CI/CD fixes for pushed GitHub Actions failing tests, to reproduce locally and leave correction ready without pushing. [rationale:risk-control] CI workflow edits are protected-adjacent but explicitly requested; scope is local repo only, no push/publish/deploy.\n[slice-start] Reproducing CI smoke/parity locally. Scope: local workflow/package changes only; no push/publish/deploy/provider switch. Copilot 429 treated as monitor-provider risk evidence, not as authorization to change routing.\n[rationale:risk-control] User explicitly approved local CI/CD parity fixes while preserving no-push and no provider-migration boundaries.\n[complete] Local CI gate reproduced and repaired; correction is ready locally with no push and no protected provider/routing changes.\n[extra-validation] Added VERIFY-BUD-910-PUBLISH-GATE after npm test also passed. Local ignored monitor overrides were trimmed to reduce Copilot classifier context, but no monitor provider/routing/settings migration was performed.",
       "verification": "VERIFY-BUD-910"
+    },
+    {
+      "id": "TASK-BUD-911",
+      "description": "Record Copilot monitor classifier quota-exhaustion incident and safe non-routing posture.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/research/copilot-monitor-quota-fallback-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Add the observed hedge-classifier 429 quota exceeded error as current evidence.",
+        "Clarify local-safe mitigation: reduce monitor context/no loops, but do not change provider routing or monitor provider without protected decision.",
+        "Preserve OpenAI Codex cockpit and Qwen canary-only posture.",
+        "Validate with marker/i18n checks."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[provenance:human] User reported GitHub Copilot quota ended with hedge classifier 429 quota exceeded. [rationale:risk-control] Record fresh provider-quota incident as evidence while preserving TASK-BUD-849 protected boundary.\n[slice-start] Recording fresh Copilot classifier 429 incident as report-only evidence. No provider/settings/routing/monitor-provider changes.\n[rationale:risk-control] Fresh quota exhaustion evidence should update the fallback packet while the protected model infrastructure boundary remains intact.\n[complete] Fresh Copilot 429 classifier quota incident recorded; fallback remains report-only/protected.",
+      "verification": "VERIFY-BUD-911"
     }
   ]
 }

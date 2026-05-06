@@ -1,57 +1,57 @@
 {
-  "timestamp": "2026-05-06T06:08:00.659Z",
-  "context": "Completed local CI/CD parity repair requested by user. Reproduced npm run ci:smoke:gate failure in guardrails-human-confirmation-runtime-wiri [snip] y/provider-routing/API-key/Qwen canary. [truncated:+256 chars]",
+  "timestamp": "2026-05-06T06:10:41.117Z",
+  "context": "Recorded fresh Copilot monitor classifier quota exhaustion incident. Updated docs/research/copilot-monitor-quota-fallback-2026-05.md with hed [snip] s or canary without protected decision. [truncated:+193 chars]",
   "next_actions": [
-    "Commit TASK-BUD-910 tracked changes locally; do not push.",
-    "Continue only non-protected local-safe tasks; provider/monitor routing fallback remains protected.",
-    "If user wants monitor provider fallback, use TASK-BUD-849 protected decision/canary path."
+    "Commit TASK-BUD-911 docs/board changes if dirty.",
+    "Context is checkpoint; stop or only continue tiny local-safe docs tasks.",
+    "Do not auto-switch monitor provider; use TASK-BUD-849 protected path for fallback/canary."
   ],
   "blockers": [
-    "GitHub Copilot quota exhausted for monitor classifier; do not auto-switch providers.",
+    "Copilot classifier quota exhausted/429.",
     "TASK-BUD-849 protected for provider/model/settings/routing/monitor-provider changes.",
     "No Qwen canary execution approval."
   ],
   "recent_validation": [
-    "pnpm vitest --run guardrails-human-confirmation-runtime-wiring + human-confirmation + workflow [snip] es passed, 19 tests passed [truncated:+34 chars]",
-    "npm run test:smoke -- --run packages/pi-stack/test/smoke/guardrails-human-confirmation-runtime [snip] file passed, 1 test passed [truncated:+21 chars]",
-    "node --test monitor-context-budget + monitor-interference-matrix + monitor-provider-patch -> 49 tests passed"
+    "safe_marker_check copilot fallback doc -> pass",
+    "i18n_lint_text copilot fallback sample -> pass",
+    "quota_alerts -> block=2"
   ],
   "recent_commits": [
-    "5b139e76 chore(board): link model rollback evidence",
-    "24e5c30f docs(providers): add model infrastructure rollback plan"
+    "95f9de2c fix(ci): repair local parity gates",
+    "5b139e76 chore(board): link model rollback evidence"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-910",
+    "focus": "TASK-BUD-911",
     "canonical_links": [
-      "task:TASK-BUD-910",
+      "task:TASK-BUD-911",
       "task:TASK-BUD-849",
-      "commit:5b139e76"
+      "commit:95f9de2c"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T06:08:00.659Z",
-    "level": "warn",
-    "percent": 61,
-    "action": "continue",
-    "recommendation": "commit-local-ci-parity-fix-then-reassess",
+    "generatedAtIso": "2026-05-06T06:10:41.117Z",
+    "level": "checkpoint",
+    "percent": 64,
+    "action": "checkpoint-refresh",
+    "recommendation": "commit-copilot-429-doc-then-stop-protected-focus",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T06:08:00.659Z",
+      "atIso": "2026-05-06T06:10:41.117Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 61,
+      "level": "checkpoint",
+      "percent": 64,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-local-ci-parity-fix-then-reassess"
+      "recommendation": "commit-copilot-429-doc-then-stop-protected-focus"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-910"
+    "TASK-BUD-911"
   ]
 }

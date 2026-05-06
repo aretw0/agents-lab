@@ -10,6 +10,15 @@ O operador informou que GitHub Copilot está em `1423.56 / 1500` premium request
 
 Interpretação conservadora: Copilot está perto do limite do pacote de premium requests; monitores/classifiers precisam de fallback antes que o limite force uma decisão apressada.
 
+Atualização 2026-05-06: o operador reportou esgotamento efetivo de quota em classifier:
+
+```text
+Warning: [hedge] classify failed: Agent 'hedge-classifier' dispatch failed: no tool call in response
+(content types: [] error: 429 quota exceeded)
+```
+
+Interpretação atualizada: Copilot classifier está `quota-blocked/degraded` para monitores nesta janela. Isso justifica reduzir contexto/chamadas de monitor localmente e evitar loops de retry, mas **não autoriza** troca automática de provider, alteração de `.pi/settings.json`, migração de monitor provider, Qwen canary ou uso de OpenAI Codex para monitor sem decisão protegida.
+
 ## 2. Postura imediata
 
 | Provider | Postura agora | Motivo |
@@ -26,7 +35,7 @@ Regra: **não trocar monitores automaticamente só porque Copilot está acabando
 | --- | --- |
 | Copilot > 90% de requests usados | preparar fallback packet e shortlist Qwen |
 | Copilot > 95% usado | parar trabalho de monitor-heavy desnecessário; priorizar classifier canary protegido |
-| Copilot retorna 429/quota exceeded | usar decisão emergencial explícita: OpenAI Codex temporário ou Qwen canary se já validado |
+| Copilot retorna 429/quota exceeded | registrar provider como quota-blocked/degraded, reduzir chamadas/contexto local quando possível e usar decisão emergencial explícita: OpenAI Codex temporário ou Qwen canary se já validado |
 | Copilot auth/model errors repetidos | coletar evidência; não migrar silenciosamente |
 | Qwen cheap/fast passa classifier mini-batch | propor monitor allowlist parcial |
 
@@ -38,11 +47,11 @@ Com `1423.56 / 1500`, o estado já está em zona > 90%.
 
 Permitido:
 
-- manter Copilot;
-- documentar quota;
+- manter Copilot quando responder;
+- documentar quota e 429;
 - preencher shortlist Qwen;
 - desenhar canary;
-- reduzir chamadas desnecessárias de monitor se houver escolha manual.
+- reduzir contexto/chamadas desnecessárias de monitor em overrides locais, sem alterar monitor provider.
 
 Não permitido:
 
@@ -112,6 +121,7 @@ Antes de qualquer mudança runtime/settings, responder:
 
 ## 6. Próximo passo local-safe
 
+0. Tratar novos `429 quota exceeded` como sinal de quota bloqueada, não como falha de qualidade do monitor; evitar retry/loop automático.
 1. Preencher o modelo cheap/fast em [`docs/research/alibaba-qwen-llm-shortlist-2026-05.md`](alibaba-qwen-llm-shortlist-2026-05.md).
 2. Usar os 10 casos sintéticos em [`docs/research/qwen-monitor-classifier-synthetic-cases-2026-05.md`](qwen-monitor-classifier-synthetic-cases-2026-05.md).
 3. Se o operador aprovar, executar o packet protegido em [`docs/research/qwen-monitor-classifier-canary-packet-2026-05.md`](qwen-monitor-classifier-canary-packet-2026-05.md).

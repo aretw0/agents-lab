@@ -13722,6 +13722,15 @@
       "method": "npm-test+monitor-regression+ci-smoke-gate",
       "timestamp": "2026-05-06T06:07:36.917Z",
       "evidence": "After completing the first CI smoke fix, ran npm test and found local monitor regression failures caused by ignored .pi/monitors hedge/unauthorized-action overrides including conversation_history despite budget tests expecting conversation_history opt-in. Adjusted local ignored monitor overrides to remove conversation_history and preserve tool_calls/custom_messages; updated packages/pi-stack/test/monitor-interference-matrix.test.mjs to assert authorization monitors are context-aware but lean by default. Validation: node --test packages/pi-stack/test/monitor-context-budget.test.mjs packages/pi-stack/test/monitor-interference-matrix.test.mjs packages/pi-stack/test/monitor-provider-patch.test.mjs -> 49 tests passed; npm test -> 163 tests passed, 0 failed; npm run ci:smoke:gate -> test:smoke 128 files/1172 tests passed, audit:sovereignty ok blockers=0 strict=true, audit:sovereignty:diff ok blockers=0 strict=true. No push/publish/deploy, no provider/model/settings/routing/monitor-provider migration, no API keys, no Qwen canary."
+    },
+    {
+      "id": "VERIFY-BUD-911",
+      "target": "TASK-BUD-911",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+marker+i18n+quota-signal",
+      "timestamp": "2026-05-06T06:10:31.551Z",
+      "evidence": "Updated docs/research/copilot-monitor-quota-fallback-2026-05.md with the user-reported hedge-classifier 429 quota exceeded incident. Classified current Copilot classifier state as quota-blocked/degraded for monitor use in this window. Clarified safe posture: reduce monitor context/calls locally and avoid retry loops, but do not authorize automatic provider switch, .pi/settings.json changes, monitor provider migration, Qwen canary, API keys, or OpenAI Codex monitor fallback without protected decision. Preserved Qwen canary-only posture and TASK-BUD-849 protected boundary. Validation: safe_marker_check -> pass; i18n_lint_text -> pass; quota_alerts -> block=2; monitor_classify_failure_readiness -> warn total=1 last=hedge dispatch=no authorization=none."
     }
   ]
 }
