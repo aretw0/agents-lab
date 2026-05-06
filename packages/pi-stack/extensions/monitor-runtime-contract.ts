@@ -32,6 +32,103 @@ const REQUIRED_READ_ONLY_PREFILTER_MARKERS = [
   '"board_dependency_hygiene_score"',
 ];
 
+export type MonitorStaleFeedbackPrefilterDecision =
+  | "allow-classifier"
+  | "suppress-stale"
+  | "suppress-duplicate";
+
+export type MonitorStaleFeedbackPrefilterReason =
+  | "fresh-or-unknown"
+  | "context-watch-transient-resolved"
+  | "runtime-reload-transient-resolved"
+  | "board-evidence-resolved"
+  | "superseded-duplicate";
+
+export interface MonitorStaleFeedbackPrefilterInput {
+  monitor?: string;
+  message?: string;
+  blocker?: string;
+  compactStage?: string;
+  reloadGate?: string;
+  taskStatus?: string;
+  hasLaterCommit?: boolean;
+  hasLaterVerification?: boolean;
+  hasSupersedingTask?: boolean;
+  duplicateCount?: number;
+}
+
+export interface MonitorStaleFeedbackPrefilterResult {
+  decision: MonitorStaleFeedbackPrefilterDecision;
+  classifierAllowed: boolean;
+  reasonCode: MonitorStaleFeedbackPrefilterReason;
+  tokenSpendAvoidable: boolean;
+  evidence: string[];
+  summary: string;
+}
+
+function normalizeMonitorSignal(value: unknown): string {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
+}
+
+function hasContextWatchTransientSignal(input: MonitorStaleFeedbackPrefilterInput): boolean {
+  const text = [input.monitor, input.message, input.blocker].map(normalizeMonitorSignal).join(" ");
+  return text.includes("context-watch-compact-required") || text.includes("context-watch-checkpoint-required");
+}
+
+function hasRuntimeReloadTransientSignal(input: MonitorStaleFeedbackPrefilterInput): boolean {
+  const text = [input.monitor, input.message, input.blocker].map(normalizeMonitorSignal).join(" ");
+  return text.includes("runtime-reload-required-for-updated-tool-behavior");
+}
+
+export function resolveMonitorStaleFeedbackPrefilter(
+  input: MonitorStaleFeedbackPrefilterInput,
+): MonitorStaleFeedbackPrefilterResult {
+  const compactStage = normalizeMonitorSignal(input.compactStage);
+  const reloadGate = normalizeMonitorSignal(input.reloadGate);
+  const taskStatus = normalizeMonitorSignal(input.taskStatus);
+  const duplicateCount = Number.isFinite(input.duplicateCount) ? Math.max(0, Math.floor(Number(input.duplicateCount))) : 0;
+  const evidence: string[] = [];
+
+  if (hasContextWatchTransientSignal(input) && compactStage === "normal-window" && reloadGate === "reload-not-required") {
+    evidence.push("context-watch-transient=resolved", `compactStage=${compactStage}`, `reloadGate=${reloadGate}`);
+    return buildMonitorStaleFeedbackPrefilterResult("suppress-stale", "context-watch-transient-resolved", evidence);
+  }
+
+  if (hasRuntimeReloadTransientSignal(input) && reloadGate === "reload-not-required") {
+    evidence.push("runtime-reload=resolved", `reloadGate=${reloadGate}`);
+    return buildMonitorStaleFeedbackPrefilterResult("suppress-stale", "runtime-reload-transient-resolved", evidence);
+  }
+
+  if ((input.hasLaterCommit || input.hasLaterVerification) && (taskStatus === "completed" || taskStatus === "resolved")) {
+    evidence.push(`taskStatus=${taskStatus}`, `laterCommit=${input.hasLaterCommit === true}`, `laterVerification=${input.hasLaterVerification === true}`);
+    return buildMonitorStaleFeedbackPrefilterResult("suppress-stale", "board-evidence-resolved", evidence);
+  }
+
+  if (input.hasSupersedingTask === true && duplicateCount > 0) {
+    evidence.push("supersedingTask=true", `duplicateCount=${duplicateCount}`);
+    return buildMonitorStaleFeedbackPrefilterResult("suppress-duplicate", "superseded-duplicate", evidence);
+  }
+
+  evidence.push("prefilter=no-match");
+  return buildMonitorStaleFeedbackPrefilterResult("allow-classifier", "fresh-or-unknown", evidence);
+}
+
+function buildMonitorStaleFeedbackPrefilterResult(
+  decision: MonitorStaleFeedbackPrefilterDecision,
+  reasonCode: MonitorStaleFeedbackPrefilterReason,
+  evidence: string[],
+): MonitorStaleFeedbackPrefilterResult {
+  const classifierAllowed = decision === "allow-classifier";
+  return {
+    decision,
+    classifierAllowed,
+    reasonCode,
+    tokenSpendAvoidable: !classifierAllowed,
+    evidence: evidence.slice(0, 4),
+    summary: `monitor-stale-prefilter: decision=${decision} classifier=${classifierAllowed ? "allow" : "skip"} reason=${reasonCode}`,
+  };
+}
+
 const READ_ONLY_PREFILTER_HELPER = `
 function isUnauthorizedActionReadOnlyShellCommand(command) {
     if (typeof command !== "string")

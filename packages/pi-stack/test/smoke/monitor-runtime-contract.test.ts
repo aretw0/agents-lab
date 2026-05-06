@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { repairClassifyContractContent } from "../../extensions/monitor-runtime-contract";
+import { repairClassifyContractContent, resolveMonitorStaleFeedbackPrefilter } from "../../extensions/monitor-runtime-contract";
 
 const TOOL_CALL_SNIPPET = `
                     // Build pending tool call context for template injection.
@@ -29,6 +29,50 @@ function runtimeFixture(systemPromptLine = "        systemPrompt: compiled.syste
 }
 
 describe("monitor runtime contract repair", () => {
+  it("suppresses resolved context-watch transient feedback before classifier", () => {
+    const result = resolveMonitorStaleFeedbackPrefilter({
+      monitor: "context-watch",
+      blocker: "context-watch-compact-required",
+      compactStage: "normal-window",
+      reloadGate: "reload-not-required",
+    });
+
+    expect(result).toMatchObject({
+      decision: "suppress-stale",
+      classifierAllowed: false,
+      reasonCode: "context-watch-transient-resolved",
+      tokenSpendAvoidable: true,
+      summary: "monitor-stale-prefilter: decision=suppress-stale classifier=skip reason=context-watch-transient-resolved",
+    });
+  });
+
+  it("suppresses resolved runtime reload feedback before classifier", () => {
+    const result = resolveMonitorStaleFeedbackPrefilter({
+      message: "runtime-reload-required-for-updated-tool-behavior",
+      reloadGate: "reload-not-required",
+    });
+
+    expect(result.decision).toBe("suppress-stale");
+    expect(result.classifierAllowed).toBe(false);
+    expect(result.reasonCode).toBe("runtime-reload-transient-resolved");
+  });
+
+  it("allows classifier when stale evidence is incomplete", () => {
+    const result = resolveMonitorStaleFeedbackPrefilter({
+      monitor: "fragility",
+      message: "possible unresolved fragility",
+      hasSupersedingTask: false,
+      duplicateCount: 0,
+    });
+
+    expect(result).toMatchObject({
+      decision: "allow-classifier",
+      classifierAllowed: true,
+      reasonCode: "fresh-or-unknown",
+      tokenSpendAvoidable: false,
+    });
+  });
+
   it("adds robust system prompt fallback and unauthorized-action read-only prefilter", () => {
     const result = repairClassifyContractContent(runtimeFixture());
 
