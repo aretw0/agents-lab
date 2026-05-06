@@ -182,9 +182,13 @@ export function readProjectProtectedAutoResumeTaskIds(cwd: string): string[] {
 		.filter((task): task is { id: string; milestone?: unknown; files?: unknown[] } => {
 			const id = (task as { id?: unknown }).id;
 			if (typeof id !== "string") return false;
+			const status = (task as { status?: unknown }).status;
+			const priority = (task as { priority?: unknown }).priority;
 			const milestone = (task as { milestone?: unknown }).milestone;
 			const files = (task as { files?: unknown }).files;
-			return isProtectedAutoResumeTaskMilestone(milestone) || (Array.isArray(files) && files.some(isProtectedAutoResumeTaskPath));
+			return isLowPriorityPlannedAutoResumeTask(status, priority)
+				|| isProtectedAutoResumeTaskMilestone(milestone)
+				|| (Array.isArray(files) && files.some(isProtectedAutoResumeTaskPath));
 		})
 		.map((task) => task.id);
 }
