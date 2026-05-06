@@ -13875,6 +13875,15 @@
       "method": "doc+marker+i18n",
       "timestamp": "2026-05-06T14:51:01.197Z",
       "evidence": "Created docs/research/0-8-operator-glossary-alignment.md defining local-safe operating terms for 0.8 lane (lane, slice, local-safe, report-only, protected, parked, validation gate, rollback cue, stop condition, readiness, handoff/checkpoint, runway) and rules for language consistency. Validation: safe_marker_check passed for all required anchors; i18n_lint_text passed."
+    },
+    {
+      "id": "VERIFY-BUD-932",
+      "target": "TASK-BUD-932",
+      "target_type": "task",
+      "status": "passed",
+      "method": "report-only docs",
+      "timestamp": "2026-05-06T15:08:14.474Z",
+      "evidence": "Created docs/research/alibaba-dashscope-embedding-investigation-intake-2026-05.md and updated it with concrete embedding discovery and a bounded next-step plan: identified candidate embedding models from prior `/models` inventory (text-embedding-v4, text-embedding-v3, tongyi-embedding-vision-plus), separated reranker model (`qwen3-rerank`), added report-only evidence gates and a low-risk canary protocol for quota/erro/latência/consistência, and formalized protected fallback (no protected routing/settings changes, keep TASK-BUD-849 gate)."
     }
   ]
 }

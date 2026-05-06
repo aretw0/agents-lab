@@ -20837,7 +20837,7 @@
     {
       "id": "TASK-BUD-932",
       "description": "Curto/médio prazo: investigar potencial de models de embedding do Alibaba/DashScope (disponibilidade de trial, janelas, custo e risco de dependência).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "docs/research/alibaba-dashscope-embedding-investigation-intake-2026-05.md"
@@ -20850,7 +20850,8 @@
         "Manter evidência de que não há mudança de settings/providers sem decisão em TASK-BUD-849."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "backlog request from user: estudar embedding models como domínio adicional de controle de custo/risco sem bloquear operação atual.\n[provenance:human] source_task=none reason=unspecified"
+      "notes": "backlog request from user: estudar embedding models como domínio adicional de controle de custo/risco sem bloquear operação atual.\n[provenance:human] source_task=none reason=unspecified\n[start] Assimilating embedding model discoverability into short/medium backlog as separate non-protected doc track; no runtime/provider changes.\n[complete] Backlog investigation scaffolded for short/medium-term embedding use-case without changing routing/provider settings.",
+      "verification": "VERIFY-BUD-932"
     }
   ]
 }

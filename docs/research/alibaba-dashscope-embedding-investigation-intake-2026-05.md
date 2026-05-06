@@ -38,7 +38,38 @@ Prosseguir para teste prático apenas quando:
 - sem canary produtivo, permanecer em monitoramento/documentação;
 - evitar qualquer mudança de `.pi/settings.json`, `routeModelRefs` e `providerBudgets` nesta fase.
 
-## 6) Resultado esperado do backlog
+## 6) Descoberta inicial (report-only)
+
+- Há evidência local de que o Model Studio/`/models` apresenta modelos de embedding no catálogo observado: `text-embedding-v4`, `text-embedding-v3` e `tongyi-embedding-vision-plus`.
+- Na trilha `modelos de texto + vetores` do painel, aparecem também itens como `qwen3-rerank` (reranker), que é candidato distinto do embedding puro.
+- Não há, nesta rodada, evidência de uso real de chamada de embedding ainda (apenas inventário documental).
+- O endpoint operacional já validado para LLM (`dashscope-intl.aliyuncs.com`) permanece o ponto provável para testes futuros de embedding também.
+
+## 7) Plano proposto para próximo corte (report-only + canary controlado)
+
+### 7.1 Checkpoint mínimo pré-canary
+
+1. Salvar snapshot de quotas gratuitas visíveis por modelo no dashboard (nome/modelo, região, quota atual, reset observado).
+2. Registrar se `free quota only` está ativo no profile atual.
+3. Validar se a conta permite chamada de embedding no mesmo mecanismo OpenAI-compatible com `DASHSCOPE_API_KEY`.
+
+### 7.2 Canary de risco baixo (apenas se quotas disponíveis)
+
+- Iniciar com chamadas não-produtivas de baixa carga em `text-embedding-v4` ou `text-embedding-v3` com prompts curtos e volume pequeno.
+- Medir:
+  - taxa de erro;
+  - latência p50/p95;
+  - estabilidade de ranking repetido com inputs idênticos;
+  - consumo de quota por chamada.
+- Critério de avanço: sem erro estrutural por 5–10 chamadas, sem vazamento de erro persistente.
+
+### 7.3 Integração condicional
+
+- Não migrar control-plane/critico para embedding sem aprovação explícita em `TASK-BUD-849`.
+- Se útil, evoluir para fluxo complementar em tarefas auxiliares (ex.: deduplicação/re-rank) com rollback imediato para rota padrão.
+- Se não útil: manter backlog como vigilância de domínio e reavaliar quando surgir novo fluxo de custo/necessidade.
+
+## 8) Resultado esperado do backlog
 
 - se útil: adicionar novo subitem em `alibaba-provider-candidate-packet` + ajuste do pipeline de custo;
-- se pouco útil: registrar lições e manter como domínio 
+- se pouco útil: registrar lições e manter como domínio em observação para reabordagem sem bloqueio de produção.
