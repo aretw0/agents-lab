@@ -19928,6 +19928,29 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] line_budget_snapshot after TASK-BUD-890 showed aboveWatch=1 because packages/pi-stack/extensions/quota-visibility.ts reached 1001 lines. This is a tiny no-behavior formatting compression to preserve the <=1000-line runway.\n[slice-start] One-line signature compression in quota-visibility.ts to restore line-budget watch threshold; no behavior intended.\n[complete] Restored quota-visibility.ts below the 1000-line watch threshold after TASK-BUD-890.",
       "verification": "VERIFY-BUD-891"
+    },
+    {
+      "id": "TASK-BUD-892",
+      "description": "Document provider assimilation runway from current quota evidence without changing provider settings or routing.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-890"
+      ],
+      "files": [
+        "docs/research/provider-assimilation-runway-2026-05.md",
+        "docs/guides/quota-visibility.md"
+      ],
+      "acceptance_criteria": [
+        "Capture current post-reload provider-economy evidence: sandbox-aware quota scans, openai-codex blocked projection, quota_alerts/handoff/provider_readiness aligned.",
+        "Define a pragmatic provider assimilation rubric for cost-benefit canaries, monitor provider migration, and fallback posture while GitHub Copilot quota winds down.",
+        "Separate local-safe/report-only next steps from protected actions that require explicit human decision before settings, routing, budgets, API keys, provider switches, or model changes.",
+        "Update quota visibility guide to mention sandbox session roots and resumed-session windowing.",
+        "No runtime provider/model/cost/API/settings changes."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] User explicitly steered away from line-count-only edits and toward pragmatic convergence on provider assimilation as GitHub Copilot quota nears end and monitors may need openai-codex. [rationale:risk-control] Provider migration requires reliable evidence and explicit protected boundaries; documenting the runway now reduces future rushed provider changes.\n[slice-start] Creating report-only provider assimilation runway and quota guide correction. No provider settings/routing/model/API/cost changes.\n[rationale:risk-control] GitHub Copilot quota winding down and openai-codex budget pressure require a calm evidence-first migration path. A documented report-only runway lets us evaluate Kimi/Claude Code/OpenAI/Copilot roles without making protected changes prematurely.\n[complete] Provider assimilation runway captured as docs/report-only; protected provider activation remains gated by explicit decision packet.",
+      "verification": "VERIFY-BUD-892"
     }
   ]
 }

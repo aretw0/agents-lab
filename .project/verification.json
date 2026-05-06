@@ -13533,6 +13533,15 @@
       "method": "test",
       "timestamp": "2026-05-06T02:17:02.957Z",
       "evidence": "Compressed two adjacent analyzeQuota parameter declaration lines in quota-visibility.ts with no behavior change. wc -l packages/pi-stack/extensions/quota-visibility.ts -> 999. line_budget_snapshot -> recommendation=ok, aboveWatch=0, aboveExtract=0, aboveCritical=0. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -> 1 file passed, 37 tests passed."
+    },
+    {
+      "id": "VERIFY-BUD-892",
+      "target": "TASK-BUD-892",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-06T02:25:49.701Z",
+      "evidence": "Created docs/research/provider-assimilation-runway-2026-05.md documenting current post-reload provider-economy evidence, a provider assimilation rubric, candidate postures for GitHub Copilot/openai-codex/Claude Code/Kimi/OpenAI heavy models, and explicit local-safe vs protected boundaries. Updated docs/guides/quota-visibility.md to mention sandbox session roots, source.sessionRoots, and resumed-session event windowing. No provider settings, routing, model, API key, budget cap, or provider switch changes. Validation passed: i18n_lint_text sample -> pass; pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts -> 4 files passed, 83 tests passed; line_budget_snapshot -> recommendation=ok aboveWatch=0."
     }
   ]
 }

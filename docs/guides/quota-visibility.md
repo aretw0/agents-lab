@@ -2,7 +2,7 @@
 
 Guia para auditar consumo de tokens/custo localmente e gerar evidências para contestação com fornecedores de modelo.
 
-> Fonte primária dos dados: `~/.pi/agent/sessions/**/*.jsonl`.
+> Fontes primárias dos dados: `~/.pi/agent/sessions/**/*.jsonl` e, quando a stack roda isolada no workspace, `.sandbox/pi-agent/sessions/**/*.jsonl`.
 
 ---
 
@@ -44,6 +44,7 @@ A extensão `quota-visibility` adiciona:
 ```
 
 Mostra:
+- raízes de sessão analisadas (`source.sessionRoots`);
 - tokens e custo na janela;
 - burn rate diário (calendário);
 - projeção de 7 dias;
@@ -137,6 +138,12 @@ Gera arquivo JSON em:
 ```
 
 Esse bundle é o anexo ideal para abrir ticket com provedor.
+
+### 7) Sessões sandbox e sessões retomadas
+
+Quando `pi` roda com isolamento local do workspace, as sessões podem ficar em `.sandbox/pi-agent/sessions`. As ferramentas de quota devem reportar as raízes analisadas em `source.sessionRoots` para deixar claro se a evidência veio do diretório global, do sandbox local, ou de ambos.
+
+Sessões longas retomadas podem ter filename antigo, mas conter eventos recentes. A janela de quota deve considerar eventos de uso dentro do período solicitado, não apenas a data do filename da sessão.
 
 ---
 
