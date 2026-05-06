@@ -1,12 +1,11 @@
 {
-  "timestamp": "2026-05-06T16:26:06.678Z",
-  "context": "Compact aplicado e hard-gates revalidados como verdes; iniciando micro-slice de planejamento da TASK-BUD-933 com foco em detector language-ag [snip] tocar .settings/.models nem providers. [truncated:+90 chars]",
+  "timestamp": "2026-05-06T16:27:10.854Z",
+  "context": "Micro-slice de planejamento da TASK-BUD-933 finalizada nesta borda; bloqueios removidos e gates revalidados em verde.",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "Consolidar formato de evidência determinístico para score de higiene e mapear tarefas de fixture no próximo passo.",
-    "Em seguida, manter micro-slice local-safe e só então decidir próxima tarefa."
+    "Prosseguir para próxima micro-slice local-safe: detalhar pacote de regras/fixtures de linguage [snip] pi-lens (após aprovação). [truncated:+102 chars]"
   ],
   "blockers": [],
   "recent_validation": [
@@ -14,30 +13,26 @@
     "local_continuity_audit",
     "turn_boundary_decision_packet"
   ],
-  "recent_commits": [
-    "9c56e153"
-  ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
     "canonical_links": [
       "task:TASK-BUD-849",
-      "task:TASK-BUD-933",
-      "commit:9c56e153"
+      "task:TASK-BUD-933"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T16:26:06.678Z",
+    "generatedAtIso": "2026-05-06T16:27:10.854Z",
     "level": "checkpoint",
-    "percent": 58,
+    "percent": 56,
     "action": "checkpoint-refresh",
     "recommendation": "continue"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T16:26:06.678Z",
+      "atIso": "2026-05-06T16:27:10.854Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 58,
+      "percent": 56,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
