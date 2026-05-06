@@ -19574,7 +19574,7 @@
     {
       "id": "TASK-BUD-876",
       "description": "Audit monitor-provider-patch.ts line budget and split candidates while preserving first-party monitor patch semantics.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-875"
@@ -19590,7 +19590,7 @@
         "No code mutation in audit slice; list focal regression tests for follow-up."
       ],
       "milestone": "architecture-runway",
-      "notes": "[auto-seed] Local-safe audit for third-largest watched file; monitor behavior is advisory and versioned code/tests are the durable path.\n[provenance:human] source_task=TASK-BUD-873 reason=Line-budget snapshot shows monitor-provider-patch.ts above watch threshold; audit is cleanup/alignment work."
+      "notes": "[auto-seed] Local-safe audit for third-largest watched file; monitor behavior is advisory and versioned code/tests are the durable path.\n[provenance:human] source_task=TASK-BUD-873 reason=Line-budget snapshot shows monitor-provider-patch.ts above watch threshold; audit is cleanup/alignment work.\n[auto-chain] Continuing after user steer: do not stop just to announce; proceed with bounded local-safe monitor-provider-patch audit until compact/idle boundary."
     },
     {
       "id": "TASK-BUD-877",
@@ -19652,6 +19652,27 @@
       ],
       "milestone": "architecture-runway",
       "notes": "[auto-seed] This is the only interview-prep slice; actual model/provider/cost decisions still require human answers.\n[provenance:human] source_task=TASK-BUD-849 reason=User asked whether interview is needed; this prepares a bounded packet instead of blocking all cleanup work."
+    },
+    {
+      "id": "TASK-BUD-880",
+      "description": "Fix monitor-provider status missing config imports discovered during line-budget audit.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-876"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-provider-patch.ts",
+        "packages/pi-stack/test/monitor-provider-patch.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "/monitor-provider status no longer references unimported config constants.",
+        "Existing monitor-provider patch regression tests pass.",
+        "Fix remains local-safe and does not alter provider/model/settings mutation semantics."
+      ],
+      "milestone": "architecture-runway",
+      "notes": "[emergent:runtime-fix] Discovered while auditing TASK-BUD-876: monitor-provider-patch.ts buildStatusReport used CLASSIFIER_MODEL_SETTING_PATH, CLASSIFIER_MODEL_BY_PROVIDER_SETTING_PATH, and DEFAULT_MODEL_BY_PROVIDER without importing them. Runtime-local import repair takes precedence over pure audit constraint.\n[provenance:tangent-approved] source_task=TASK-BUD-876 reason=Runtime-visible missing imports were discovered during local-safe audit; minimal fix is safer than leaving status command broken.\n[slice-complete] Minimal runtime-local import repair completed during TASK-BUD-876 audit; continue pure audit documentation next.",
+      "verification": "VER-BUD-1241"
     }
   ]
 }

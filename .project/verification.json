@@ -13389,6 +13389,15 @@
       "method": "test",
       "timestamp": "2026-05-06T00:12:56.850Z",
       "evidence": "Created docs/research/autonomy-lane-helper-line-budget-audit-2026-05.md. Audit records guardrails-core-autonomy-lane-surface-helpers.ts at ~1194 lines, maps helper families, recommends extraction order (common, local-safety, AFK material, influence, batch preview, hard intent), and lists invariants for protected-scope policy, selection, fail-closed behavior, dispatchAllowed=false, mutationAllowed=false, and authorization=none. No autonomy/protected-scope behavior changed. Validation: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts -> 3 files passed, 76 tests passed; i18n_lint_text pt-BR pass for representative section."
+    },
+    {
+      "id": "VER-BUD-1241",
+      "target": "TASK-BUD-880",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T00:22:33.135Z",
+      "evidence": "Added missing config imports in packages/pi-stack/extensions/monitor-provider-patch.ts for CLASSIFIER_MODEL_SETTING_PATH, CLASSIFIER_MODEL_BY_PROVIDER_SETTING_PATH, and DEFAULT_MODEL_BY_PROVIDER. This fixes buildStatusReport references used by /monitor-provider status without changing provider/model/settings mutation semantics. Validation: node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 tests passed. Targeted TypeScript missing-name probe: pnpm exec tsc --noEmit --pretty false packages/pi-stack/extensions/monitor-provider-patch.ts | rg missing config names -> no output for monitor-provider-patch missing import names; unrelated node_modules/target diagnostics remain outside this fix."
     }
   ]
 }
