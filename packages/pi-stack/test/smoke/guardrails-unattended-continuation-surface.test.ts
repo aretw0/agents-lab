@@ -179,6 +179,57 @@ describe("guardrails unattended continuation surface", () => {
     }
   });
 
+  it("surfaces repeated context pressure as advisory stagnation signal", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "local-continuity-stagnation-"));
+    try {
+      execFileSync("git", ["init"], { cwd, stdio: "ignore" });
+      execFileSync("git", ["config", "user.email", "test@example.com"], { cwd, stdio: "ignore" });
+      execFileSync("git", ["config", "user.name", "Test User"], { cwd, stdio: "ignore" });
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      mkdirSync(join(cwd, "packages", "pi-stack", "extensions"), { recursive: true });
+      writeFileSync(join(cwd, "packages", "pi-stack", "extensions", "foo.ts"), "export const foo = 1;\n");
+      writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+        timestamp: new Date().toISOString(),
+        current_tasks: ["TASK-SURFACE"],
+        blockers: ["context-watch-compact-required"],
+        context_watch_events: [
+          { reason: "message_end", level: "checkpoint", percent: 70, action: "checkpoint-refresh" },
+          { reason: "message_end", level: "compact", percent: 92, action: "compact-now" },
+        ],
+      }));
+      writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
+        id: "TASK-SURFACE",
+        status: "in-progress",
+        description: "Marker based local audit surface smoke",
+        files: ["packages/pi-stack/extensions/foo.ts"],
+        acceptance_criteria: ["Use marker validation."],
+      }] }));
+      writeFileSync(join(cwd, ".project", "verification.json"), JSON.stringify({ verification: [] }));
+      execFileSync("git", ["add", "."], { cwd, stdio: "ignore" });
+      execFileSync("git", ["commit", "-m", "init"], { cwd, stdio: "ignore" });
+
+      const tools: RegisteredTool[] = [];
+      registerGuardrailsUnattendedContinuationSurface({
+        registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+      } as never);
+      const auditTool = tools.find((tool) => tool.name === "local_continuity_audit");
+      const result = auditTool?.execute("call-audit", {}, undefined, undefined, { cwd });
+
+      expect(result?.content?.[0]?.text).toContain("local-continuity-audit: eligible=yes collectors=8/8");
+      expect(result?.content?.[0]?.text).toContain("stagnation=pause-human-replan events=2");
+      expect(result?.details.stagnationSignal).toMatchObject({
+        decision: "pause-human-replan",
+        reasonCode: "context-pressure-repeat",
+        consecutiveContextPressureEvents: 2,
+        focusTask: "TASK-SURFACE",
+        humanActionRequired: true,
+        advisoryOnly: true,
+      });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("surfaces protected drift paths as read-only audit evidence", () => {
     const cwd = mkdtempSync(join(tmpdir(), "local-continuity-protected-paths-"));
     try {

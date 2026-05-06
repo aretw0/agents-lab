@@ -72,6 +72,53 @@ function localContinuityStopBlockerEvidence(input: { advisoryCount: number; stop
   return "blocker=none";
 }
 
+type LocalContinuityStagnationSignal = {
+  decision: "none" | "watch" | "pause-human-replan";
+  reasonCode: "no-stagnation" | "context-pressure-repeat";
+  consecutiveContextPressureEvents: number;
+  focusTask: string;
+  humanActionRequired: boolean;
+  advisoryOnly: true;
+};
+
+function isContextPressureEvent(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const event = value as Record<string, unknown>;
+  const level = typeof event.level === "string" ? event.level : "";
+  const action = typeof event.action === "string" ? event.action : "";
+  return level === "compact" || level === "checkpoint" || action === "compact-now" || action === "checkpoint-refresh";
+}
+
+function buildLocalContinuityStagnationSignal(handoffJson: any): LocalContinuityStagnationSignal {
+  const focusTask = Array.isArray(handoffJson?.current_tasks) ? String(handoffJson.current_tasks[0] ?? "none") : "none";
+  const events = Array.isArray(handoffJson?.context_watch_events) ? handoffJson.context_watch_events : [];
+  let consecutiveContextPressureEvents = 0;
+  for (const event of events.slice().reverse()) {
+    if (!isContextPressureEvent(event)) break;
+    consecutiveContextPressureEvents += 1;
+  }
+  const hasFreshCompletion = Array.isArray(handoffJson?.completed_tasks) && handoffJson.completed_tasks.length > 0;
+  const decision = consecutiveContextPressureEvents >= 2 && focusTask !== "none" && !hasFreshCompletion
+    ? "pause-human-replan"
+    : consecutiveContextPressureEvents === 1 && focusTask !== "none" && !hasFreshCompletion
+      ? "watch"
+      : "none";
+  return {
+    decision,
+    reasonCode: decision === "none" ? "no-stagnation" : "context-pressure-repeat",
+    consecutiveContextPressureEvents,
+    focusTask,
+    humanActionRequired: decision === "pause-human-replan",
+    advisoryOnly: true,
+  };
+}
+
+function localContinuityStagnationSummary(result: unknown): string | undefined {
+  const signal = (result as { stagnationSignal?: LocalContinuityStagnationSignal } | undefined)?.stagnationSignal;
+  if (!signal || signal.decision === "none") return undefined;
+  return `${signal.decision} events=${signal.consecutiveContextPressureEvents}`;
+}
+
 function isProtectedAuditPath(path: string): boolean {
   const normalized = normalizePathForAudit(path).toLowerCase();
   return normalized === ".pi/settings.json" || normalized === ".obsidian" || normalized.startsWith(".obsidian/") || normalized.startsWith(".github/");
@@ -193,12 +240,14 @@ export function formatLocalContinuityAuditSummary(
   reasons = localContinuityAuditReasons(result),
 ): string {
   const protectedPaths = localContinuityProtectedPaths(result);
+  const stagnation = localContinuityStagnationSummary(result);
   return [
     `local-continuity-audit: eligible=${result.envelope.eligibleForAuditedRuntimeSurface ? "yes" : "no"}`,
     `collectors=${result.collectorResults.length}/8`,
     `packet=${result.envelope.packet.gate.decision}`,
     reasons.length > 0 ? `reasons=${reasons.join("|")}` : undefined,
     protectedPaths.length > 0 ? `protected=${protectedPaths.join("|")}` : undefined,
+    stagnation ? `stagnation=${stagnation}` : undefined,
     "authorization=none",
   ].filter(Boolean).join(" ");
 }
@@ -262,7 +311,12 @@ export function buildLocalContinuityAudit(cwd: string) {
       ],
     },
   });
-  return { ...audit, protectedPaths: protectedPaths.slice(0, 10), advisoryBlockers: blockers.filter((blocker) => !isLocalContinuityStopBlocker(blocker)).slice(0, 10) };
+  return {
+    ...audit,
+    protectedPaths: protectedPaths.slice(0, 10),
+    advisoryBlockers: blockers.filter((blocker) => !isLocalContinuityStopBlocker(blocker)).slice(0, 10),
+    stagnationSignal: buildLocalContinuityStagnationSignal(handoff.json),
+  };
 }
 
 export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI): void {
