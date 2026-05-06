@@ -42,3 +42,11 @@ Use ao fechar cada micro-lote (3-5 decisões).
 - Arquivo de entrada recomendado:
 - Task(s) envolvidas:
 - Estado atual em 1 frase:
+
+## 7) Resposta final ao operador (quando parar)
+- Resultado desta fatia: o que mudou e onde.
+- Validação: comandos/tools e status curto.
+- Se havia alternativas: comparação em 1-3 bullets + recomendação explícita na resposta, não espalhada em artefato canônico.
+- Decisão necessária: uma pergunta objetiva ou `nenhuma`.
+- Próximo passo seguro: uma ação concreta, local-safe e reversível.
+- Bloqueios/limites: o que ainda não está autorizado (ex.: dispatch, protected scope, provider/settings, CI/remote).
