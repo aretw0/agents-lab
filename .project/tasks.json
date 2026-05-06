@@ -19792,6 +19792,29 @@
       "milestone": "architecture-runway-implementation",
       "notes": "[auto-seed] Continuing user-approved local-safe line-budget runway after TASK-BUD-884. This avoids protected provider/model changes while live quota tools await /reload.\n[provenance:human] source_task=TASK-BUD-875 reason=User wants to kill the last >1000 TS surfaces; audit identified autonomy-lane-common/local-safety as the safest first extraction.\n[slice-complete] Extracted autonomy-lane common/local-safety helpers; helper surface now below 1000 and focal autonomy tests are green.",
       "verification": "VER-BUD-1250"
+    },
+    {
+      "id": "TASK-BUD-886",
+      "description": "Extract the next low-risk guardrails-core.ts seam toward the final below-1000 line-budget target.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-874",
+        "TASK-BUD-885"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-*.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Move one cohesive low-risk seam from guardrails-core.ts into a dedicated guardrails-core-* module without changing public guard behavior.",
+        "Keep guardrails-core.ts as visible wiring/orchestrator and reduce its line count materially toward <=1000.",
+        "Run guardrails-core-orchestrator-budget.test.ts plus any focal tests for the touched seam.",
+        "Do not alter provider budget governor behavior, auto-dispatch semantics, protected-scope policy, or context-watchdog public API."
+      ],
+      "milestone": "architecture-runway-implementation",
+      "notes": "[auto-seed] After TASK-BUD-885, line_budget_snapshot shows only guardrails-core.ts remains above 1000. Next slice should follow TASK-BUD-874 audit: prefer eventSurfaceRuntime factory, lifecycle helper, or tool-call guard; avoid auto-drain extraction unless explicitly scoped with extra tests.\n[provenance:human] source_task=TASK-BUD-874 reason=User wants to kill the last >1000 TS surfaces while keeping local-safe/protected boundaries intact."
     }
   ]
 }
