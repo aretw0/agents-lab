@@ -14093,6 +14093,15 @@
       "method": "marker-check + project validation",
       "timestamp": "2026-05-06T19:48:29.369Z",
       "evidence": "Added report-only rollout/canary section to `docs/research/monitor-stale-feedback-intake-template-2026-05.md` with token-spend estimate, critical-signal preservation, rollback, and promotion gate. Validation: safe_marker_check matched Canary report-only, Economia estimada, Preservação de sinais críticos, Rollback e promoção; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-936-STAGNATION-CONTRACT",
+      "target": "TASK-BUD-936",
+      "target_type": "task",
+      "status": "passed",
+      "method": "documentation marker-check + regression test",
+      "timestamp": "2026-05-06T19:51:39.023Z",
+      "evidence": "Documented the traceable stagnation signal in `docs/primitives/continuity-abstraction.md`, including `pause-human-replan`, event/evidence fields, local-safe rule, and current implementation evidence. Existing runtime evidence is in `local_continuity_audit.stagnationSignal` and regression `guardrails-unattended-continuation-surface.test.ts`. Validation: safe_marker_check matched 4/4; `npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts` -> 12 passed; `project-validate` -> clean."
     }
   ]
 }

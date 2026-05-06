@@ -20923,7 +20923,7 @@
     {
       "id": "TASK-BUD-936",
       "description": "[BUDGET / GOVERNANCE] Traduzir loops de falta de progresso em sinal rastreável do board (sem progressão + auto-continuation bloqueado).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
@@ -20936,7 +20936,8 @@
         "Ligar o sinal ao board (`board_query`/handoff) com trilha de decisão para lane e delegação.",
         "Registrar e validar atualização com teste de regressão e comando de validação no PR de governança."
       ],
-      "notes": "Sinal rastreável solicitado: quando `continuation_readiness=defer` + auto-advance blocked por >N janelas sem avanço de foco, emitir issue no board como trigger de pausa/replanejamento. Isso deve incluir blockers, staleFocus, context, tentativa_count.\nRegra operacional proposta (fase 1): em cada retorno, se `continuation_readiness=blocked/defer` por >2 janelas consecutivas sem mudança de `focusTask` + sem nova validação com autoAdvance ready, criar automaticamente issue/sinal + congelar avanço de lane até revisão humana (não abrir nova task sem checkpoint novo)."
+      "notes": "Sinal rastreável solicitado: quando `continuation_readiness=defer` + auto-advance blocked por >N janelas sem avanço de foco, emitir issue no board como trigger de pausa/replanejamento. Isso deve incluir blockers, staleFocus, context, tentativa_count.\nRegra operacional proposta (fase 1): em cada retorno, se `continuation_readiness=blocked/defer` por >2 janelas consecutivas sem mudança de `focusTask` + sem nova validação com autoAdvance ready, criar automaticamente issue/sinal + congelar avanço de lane até revisão humana (não abrir nova task sem checkpoint novo).\n[closure] TASK-BUD-936 closed as governance/documentation reconciliation over the implemented stagnation signal from the unattended-continuation surface. No runtime/protected-scope change in this slice.",
+      "verification": "VER-BUD-936-STAGNATION-CONTRACT"
     },
     {
       "id": "TASK-BUD-937",
