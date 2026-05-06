@@ -106,6 +106,21 @@ Track after each canary:
 - review time and number of control-plane corrections;
 - whether the agent attempted protected scope or broadening.
 
+## Candidate A vs Candidate D
+
+| Criterion | Candidate A — review rubric fixture | Candidate D — local-safe canary checklist |
+| --- | --- | --- |
+| Primary value | Improves how the control plane judges worker patches after they exist. | Improves the pre-dispatch gate before a worker starts. |
+| Risk | Very low; doc-only and review-oriented. | Very low; doc-only and operationally bounded. |
+| Validation | Marker check for `scope`, `validation`, `rollback`, `reject conditions`, `acceptance threshold`. | Marker check for `one agent`, `one task`, `declared files`, `timeout`, `rollback`, `stop after one slice`. |
+| Rollback | Delete/restore one new doc. | Delete/restore one new doc. |
+| Calibration signal | Measures whether an agent can produce a useful evaluation rubric. | Measures whether an agent can follow tight operational constraints. |
+| First-canary fit | Good second step, because it helps review later patches. | Best first step, because it tests boundedness before delegation expands. |
+
 ## Current recommendation
 
-Use **Candidate A** or **Candidate D** as the first real simple-delegate canary after human approval. Both are doc-only, local-safe, easy to validate, and directly improve the quality gate for later agents.
+Humble recommendation: use **Candidate D — local-safe canary checklist** as the first real simple-delegate canary after explicit human approval.
+
+Reason: the most important unknown is not whether an agent can write a decent rubric; it is whether the agent can obey a small, declared, stop-after-one-slice operational contract. Candidate D directly tests that behavior while producing a reusable checklist for every later canary. Candidate A should follow immediately after, because the review rubric becomes more valuable once there is a first worker patch to judge.
+
+Meta-learning: when this lane presents multiple candidate paths, it should include a comparison and recommendation by default. If the operator has to ask which option is better, the control plane has under-synthesized the decision packet.
