@@ -20483,6 +20483,28 @@
       ],
       "milestone": "short-mid-monitor-economy-calibration",
       "notes": "[provenance:human] User requested short/mid-term backlog for pragmatic monitor calibration: avoid delayed feedback and reduce token spend because long-term classifier burn is not viable. [rationale:risk-control] Recurring stale monitor feedback should become a bounded primitive/regression path, not ad hoc dismissal; existing related completed task TASK-BUD-841 exists, but no open backlog item was found for stale-feedback/token-economy calibration.\n[provenance:human] source_task=TASK-BUD-849 reason=Latest fragility feedback was stale after TASK-BUD-913/TASK-BUD-914 had already resolved or backlogged the relevant concern."
+    },
+    {
+      "id": "TASK-BUD-916",
+      "description": "Backlog short/mid-term: reassess reload warning for monitor-provider divergent overrides and reduce stale startup noise.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/monitor-provider-patch.ts",
+        "packages/pi-stack/extensions/monitor-provider-output.ts",
+        "packages/pi-stack/test/monitor-provider-patch.test.mjs",
+        "packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts",
+        "docs/guides/monitor-overrides.md"
+      ],
+      "acceptance_criteria": [
+        "Reproduce the reload warning: 'Warning: monitor-provider-patch: overrides divergentes detectados (2) — use /monitor-provider apply'.",
+        "Determine whether divergent overrides are still actionable after the newer per-monitor provider evaluation flow.",
+        "If warning is still useful, downgrade or dedupe it so reload does not produce noisy repeated guidance.",
+        "If warning is obsolete, propose a safe migration/removal path with regression coverage.",
+        "Keep any change to monitor-provider overrides/settings behind explicit protected-scope approval."
+      ],
+      "milestone": "short-mid-monitor-economy-calibration",
+      "notes": "[provenance:human] User reported that after reload a warning appears then disappears: 'Warning: monitor-provider-patch: overrides divergentes detectados (2) — use /monitor-provider apply'. User suspects it may be legacy noise from a previous override era and said it is not priority. [rationale:risk-control] Startup/reload warnings affect operator trust and token/noise budget, but monitor-provider overrides are protected settings-adjacent scope, so park as backlog until we intentionally calibrate monitor economy/noise.\n[provenance:human] source_task=TASK-BUD-915 reason=Specific reload-noise example to assimilate during future stale-feedback/token-economy monitor calibration."
     }
   ]
 }
