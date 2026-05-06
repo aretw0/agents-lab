@@ -144,6 +144,12 @@ Após `TASK-BUD-919`, a lane mantém as seguintes fatias pequenas para continuid
 6. `TASK-BUD-927` — baseline report-only de delegação/long-run.
 7. `TASK-BUD-928` — checklist compacto de handoff/resume da lane.
 
+Extensão de estoque para aumentar fatias docs/readiness com validação conhecida:
+
+8. `TASK-BUD-929` — alinhamento compacto de glossário operacional 0.8.0.
+9. `TASK-BUD-930` — auditoria de índice/cross-links dos artefatos da lane.
+10. `TASK-BUD-931` — cookbook de rollback cues para fatias local-safe recorrentes.
+
 ## Resumo para operador
 
 Use esta lane quando a instrução for, na prática: “continue melhorando agents-lab/pi-stack sem precisar de mim a menos que apareça risco”.

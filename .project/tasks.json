@@ -20572,7 +20572,7 @@
         "Record queue in board/handoff so resume can continue without asking obvious ordering questions."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:throughput] The current AFK material readiness reported enough local-safe validation but selection-focus mismatch; stocked slices should remove the mismatch and enable safer low-interaction progress.\n[provenance:human] source_task=TASK-BUD-917 reason=User wants a lane that can continue evolving without frequent interaction.\n[start] Seeding 7 small local-safe continuation slices with validation/rollback cues for low-interaction execution.\n[complete] Stocked queue created in board and charter; downstream slices TASK-BUD-922..928 are ready to inspect after dependency release.",
+      "notes": "[rationale:throughput] The current AFK material readiness reported enough local-safe validation but selection-focus mismatch; stocked slices should remove the mismatch and enable safer low-interaction progress.\n[provenance:human] source_task=TASK-BUD-917 reason=User wants a lane that can continue evolving without frequent interaction.\n[start] Seeding 7 small local-safe continuation slices with validation/rollback cues for low-interaction execution.\n[complete] Stocked queue created in board and charter; downstream slices TASK-BUD-922..928 are ready to inspect after dependency release.\n[follow-up] Extended stocked queue with pure docs/readiness slices TASK-BUD-929..931 after material-readiness packet showed only 2 validation-known slices among the first 7; target is >=3 local-safe validation-known slices for low-interaction continuation.",
       "verification": "VERIFY-BUD-919"
     },
     {
@@ -20763,6 +20763,65 @@
       ],
       "milestone": "0.8-local-safe-compounding-lane",
       "notes": "[rationale:continuity] A compact resume checklist helps future turns continue without asking obvious ordering questions."
+    },
+    {
+      "id": "TASK-BUD-929",
+      "description": "Create a compact 0.8.0 operator glossary alignment note for local-safe continuation terms.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-919"
+      ],
+      "files": [
+        "docs/research/0-8-operator-glossary-alignment.md"
+      ],
+      "acceptance_criteria": [
+        "Define the local meanings of lane, slice, local-safe, report-only, protected, parked, validation gate, rollback cue, and stop condition.",
+        "Keep it documentation-only and aligned with existing control-plane glossary terms.",
+        "Validate with safe_marker_check for key terms and i18n lint."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:clarity] Shared terms reduce low-interaction ambiguity without changing runtime behavior."
+    },
+    {
+      "id": "TASK-BUD-930",
+      "description": "Create a docs index audit for 0.8.0 lane artifacts and missing cross-links.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-919"
+      ],
+      "files": [
+        "docs/research/0-8-docs-index-audit.md",
+        "docs/guides/README.md"
+      ],
+      "acceptance_criteria": [
+        "List current 0.8.0 lane artifacts and whether they are indexed from docs/guides or related research docs.",
+        "Recommend only documentation cross-link fixes, not content expansion.",
+        "Validate with safe_marker_check for artifact names and path existence checks."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:cleanup] Documentation discoverability is a safe compounding cleanup target."
+    },
+    {
+      "id": "TASK-BUD-931",
+      "description": "Create a local-safe rollback cue cookbook for recurring 0.8.0 slice types.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-919"
+      ],
+      "files": [
+        "docs/research/0-8-local-safe-rollback-cookbook.md"
+      ],
+      "acceptance_criteria": [
+        "Document rollback cues for docs-only, board-only, test-only, helper extraction, cleanup, and handoff/checkpoint slices.",
+        "Include stop conditions when rollback is not a simple commit revert.",
+        "Keep documentation-only.",
+        "Validate with safe_marker_check and i18n lint."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:rollback] Clear rollback cues support longer low-interaction runs while keeping changes reversible."
     }
   ]
 }
