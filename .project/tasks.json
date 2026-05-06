@@ -21022,8 +21022,29 @@
         "Validar com teste focal e project-validate."
       ],
       "milestone": "short-mid-monitor-economy-calibration",
-      "notes": "Wiring seguro: exposição report-only/canary, sem provider/settings e sem aplicar supressão runtime automática.\n[implementation] Added `monitor_stale_feedback_prefilter` as report-only/canary tool in monitor-summary. It surfaces stale/duplicate prefilter decisions without suppressing monitor output automatically. Validation: monitor-summary smoke 12 passed; project-validate clean.\n[closure] Source/test committed as b5d6a7d5. Tool remains report-only; no automatic monitor suppression/provider/settings change was applied. Runtime reload required before the live tool is available.",
+      "notes": "Wiring seguro: exposição report-only/canary, sem provider/settings e sem aplicar supressão runtime automática.\n[implementation] Added `monitor_stale_feedback_prefilter` as report-only/canary tool in monitor-summary. It surfaces stale/duplicate prefilter decisions without suppressing monitor output automatically. Validation: monitor-summary smoke 12 passed; project-validate clean.\n[closure] Source/test committed as b5d6a7d5. Tool remains report-only; no automatic monitor suppression/provider/settings change was applied. Runtime reload required before the live tool is available.\n[live-validation] Após reload, `monitor_stale_feedback_prefilter` executado com `context-watch-compact-required` + `normal-window` + `reload-not-required` retornou `decision=suppress-stale classifier=skip reason=context-watch-transient-resolved`. `project-validate` clean e git clean antes da próxima fatia.",
       "verification": "VER-BUD-940-PREFILTER-TOOL"
+    },
+    {
+      "id": "TASK-BUD-941",
+      "description": "[Slice] Registrar rollout/canary report-only do pre-filtro stale de monitores com estimativa de economia e preservação de sinais críticos.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-940"
+      ],
+      "files": [
+        "docs/research/monitor-stale-feedback-intake-template-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Registrar política de rollout/canary: helper/tool report-only antes de qualquer supressão automática.",
+        "Adicionar estimativa simples de economia de classifier baseada nos incidentes coletados.",
+        "Registrar regra de preservação de sinais críticos (não suprimir branch protection/unauthorized/destructive/protected scope sem evidência forte).",
+        "Validar com marker check e project-validate."
+      ],
+      "milestone": "short-mid-monitor-economy-calibration",
+      "notes": "Fecha lacuna de TASK-BUD-915 sobre economia esperada e preservação de high-signal antes de qualquer wiring operacional.\n[closure] TASK-BUD-915 now has evidence, pure prefilter, live report-only tool, and rollout/promotion guardrails documented.",
+      "verification": "VER-BUD-941-ROLLOUT"
     }
   ]
 }

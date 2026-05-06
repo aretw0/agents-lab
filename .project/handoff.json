@@ -1,50 +1,62 @@
 {
-  "timestamp": "2026-05-06T19:43:15.759Z",
-  "context": "TASK-BUD-940 concluída: prefilter stale de monitores exposto como tool report-only/canary e código commitado.",
+  "timestamp": "2026-05-06T19:48:09.551Z",
+  "context": "Reload validado: monitor_stale_feedback_prefilter live funciona. Próxima fatia local-safe: documentar rollout/canary, economia esperada e preservação de sinais críticos.",
+  "current_tasks": [
+    "TASK-BUD-941"
+  ],
   "next_actions": [
-    "reload para disponibilizar monitor_stale_feedback_prefilter live",
-    "validar tool live com incidente context-watch resolvido",
-    "salvar board/handoff maduro em commit"
+    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
+    "editar apenas intake doc com rollout/canary e economia",
+    "validar markers",
+    "commit doc + board se clean"
   ],
   "blockers": [
-    "runtime-reload-required-for-updated-tool-behavior"
+    "context-watch-checkpoint-required"
   ],
   "recent_validation": [
-    "monitor-summary.test.ts: 12 passed",
+    "monitor_stale_feedback_prefilter live: suppress-stale classifier=skip",
     "project-validate: clean",
-    "commit: b5d6a7d5"
+    "git clean antes da fatia"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-940",
+    "focus": "TASK-BUD-941",
     "canonical_links": [
-      "task:TASK-BUD-940",
-      "commit:b5d6a7d5"
+      "task:TASK-BUD-941"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T19:43:15.759Z",
-    "level": "ok",
-    "percent": 53,
+    "generatedAtIso": "2026-05-06T19:47:38.050Z",
+    "level": "warn",
+    "percent": 54,
     "action": "continue",
-    "recommendation": "Antes de próxima implementação, reload + validação viva curta; depois commit .project se clean.",
-    "focus_task_status": "completed"
+    "recommendation": "Fatia doc-only curta; checkpoint/commit ao final."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T19:43:15.759Z",
+      "atIso": "2026-05-06T19:47:38.050Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 53,
+      "level": "warn",
+      "percent": 54,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Antes de próxima implementação, reload + validação viva curta; depois commit .project se clean."
+      "recommendation": "Fatia doc-only curta; checkpoint/commit ao final."
+    },
+    {
+      "atIso": "2026-05-06T19:48:09.551Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-940"
   ]
 }

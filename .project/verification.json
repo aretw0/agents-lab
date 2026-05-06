@@ -14084,6 +14084,15 @@
       "method": "focal test",
       "timestamp": "2026-05-06T19:41:57.409Z",
       "evidence": "Exposed `monitor_stale_feedback_prefilter` report-only tool through monitor-summary. Tool returns compact summary plus details with effect=none, mode=report-only, authorization=none, classifierAllowed, and tokenSpendAvoidable. Validation: `npx vitest run packages/pi-stack/test/smoke/monitor-summary.test.ts` -> 12 passed; `project-validate` -> clean."
+    },
+    {
+      "id": "VER-BUD-941-ROLLOUT",
+      "target": "TASK-BUD-941",
+      "target_type": "task",
+      "status": "passed",
+      "method": "marker-check + project validation",
+      "timestamp": "2026-05-06T19:48:29.369Z",
+      "evidence": "Added report-only rollout/canary section to `docs/research/monitor-stale-feedback-intake-template-2026-05.md` with token-spend estimate, critical-signal preservation, rollback, and promotion gate. Validation: safe_marker_check matched Canary report-only, Economia estimada, Preservação de sinais críticos, Rollback e promoção; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }
