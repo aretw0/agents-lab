@@ -1,14 +1,15 @@
 {
-  "timestamp": "2026-05-06T17:49:55.659Z",
-  "context": "Nova micro-slice concluída: normalizei mais 10 tasks (TASK-BUD-896..TASK-BUD-905) de VERIFY-* para VER-* em .project/tasks.json após verifica [snip] t-hygiene.mjs --json, project-validate. [truncated:+155 chars]",
+  "timestamp": "2026-05-06T17:51:09.060Z",
+  "context": "Auto-resume aplicado: lote 3 de higiene soft concluído (TASK-BUD-906..TASK-BUD-913), mantendo TASK-BUD-849 em execução. Métrica: hard=0, soft [snip] parked=0. project-validate segue clean. [truncated:+5 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "prosseguir com próxima faixa 906..913 se autorizado",
-    "registrar estado final e continuar monitorando context_watch_continuation_readiness/local_continuity_audit entre slices"
+    "Context-watch action: level=compact 67% (compact-now) · Compact now and continue from checkpoint.",
+    "se manter sem bloqueios humanos, continuar próxima faixa (TASK-BUD-917..TASK-BUD-920) em micro-slice"
   ],
   "blockers": [
+    "context-watch-compact-required",
     "stop-conditions:invalid"
   ],
   "recent_validation": [
@@ -19,30 +20,43 @@
     "focus": "TASK-BUD-849",
     "canonical_links": [
       "task:TASK-BUD-849",
-      "task:TASK-BUD-896",
-      "task:TASK-BUD-905"
+      "task:TASK-BUD-906",
+      "task:TASK-BUD-913"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T17:49:55.659Z",
+    "generatedAtIso": "2026-05-06T17:51:08.993Z",
     "level": "ok",
-    "percent": 12,
+    "percent": 11,
     "action": "continue",
-    "recommendation": "Continuar com lotes pequenos de 10 e manter snapshot de continuidade curto."
+    "recommendation": "Seguir em lotes curtos para minimizar risco. Sem alteração de escopo protegido."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T17:49:55.659Z",
+      "atIso": "2026-05-06T17:51:08.993Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 12,
+      "percent": 11,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Continuar com lotes pequenos de 10 e manter snapshot de continuidade curto."
+      "recommendation": "Seguir em lotes curtos para minimizar risco. Sem alteração de escopo protegido."
+    },
+    {
+      "atIso": "2026-05-06T17:51:09.060Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 67,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }
