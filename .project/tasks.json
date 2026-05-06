@@ -21452,6 +21452,52 @@
       ],
       "milestone": "agent-quality-calibration-lane",
       "notes": "Feedback do operador durante TASK-BUD-958: o bloco visual `⌥ worktree status` / `✓ # Worktree status` não comunica nada útil. Feedback adicional: `⌥ worktree list` / `✓ # Worktree list` sofre do mesmo problema. Isso deve virar melhoria de UX/operator-visible output, mas não interromper o canary atual.\n[provenance:human] source_task=TASK-BUD-958 reason=Operador apontou output pobre do worktree status/list como problema de observabilidade durante o canary."
+    },
+    {
+      "id": "TASK-BUD-960",
+      "description": "[P2/local-safe] Compactar output operator-visible de `workflow-agents` para evitar despejo gigante na conversa.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-959"
+      ],
+      "files": [
+        "node_modules/@davidorex/pi-project-workflows/**",
+        "packages/pi-stack/extensions/*workflow*",
+        "docs/research/workflow-agents-compact-output-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Documentar o caso em que `workflow-agents` sem `name` despeja a lista completa de agentes na conversa.",
+        "Propor ou implementar modo/resumo compacto com count de agentes, roles, modelos e instrução para usar `workflow-agents(name=...)` para detalhes.",
+        "Preservar caminho de detalhe completo sob demanda sem poluir output padrão.",
+        "Se a tool for externa ao pacote editável, registrar limitação e proposta de wrapper/upstream PR.",
+        "Validar com marker check ou teste local-safe; não tocar settings, CI, publish ou provider config."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Feedback do operador: a chamada `workflow-agents` retornou JSON grande demais na sessão. Desejo: versão reduzida/colapsada para não poluir conversa.\n[provenance:human] source_task=TASK-BUD-959 reason=Observação de UX/operator-visible output durante exploração de delegação e providers."
+    },
+    {
+      "id": "TASK-BUD-961",
+      "description": "[P1/local-safe] Hardening do `claude_code_execute`: expor permission-mode/allowedTools/tools para canaries isolados.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-958"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/claude-code-adapter.ts",
+        "packages/pi-stack/test/smoke/claude-code-adapter-parsers.test.ts",
+        "docs/research/claude-code-adapter-puppeteering-hardening-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Adicionar ou projetar parâmetros seguros para `permissionMode`, `allowedTools` e `tools` no `claude_code_execute`, mantendo args array-form sem shell interpolation.",
+        "Fail-closed para modos perigosos; não permitir bypass/dangerous permissions por padrão.",
+        "Documentar aprendizado do canary: `--print --permission-mode acceptEdits --allowedTools Write,Read --tools Write,Read` funcionou via stdin no worktree.",
+        "Cobrir parsing/arg building em teste local sem invocar provider real.",
+        "Não tocar settings/provider config; execução real continua exigindo confirmação explícita."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Operador quer hardening do adapter Claude Code no geral. Aprendizado do TASK-BUD-958: adapter atual travou em permissão de escrita porque não expõe permission-mode/allowedTools/tools; CLI direto funcionou.\n[provenance:human] source_task=TASK-BUD-958 reason=Puppeteering do Claude Code mostrou gap concreto no adapter durante canary aprovado."
     }
   ]
 }
