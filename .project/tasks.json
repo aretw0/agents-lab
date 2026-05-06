@@ -19677,6 +19677,28 @@
       "milestone": "architecture-runway",
       "notes": "[emergent:runtime-fix] Discovered while auditing TASK-BUD-876: monitor-provider-patch.ts buildStatusReport used CLASSIFIER_MODEL_SETTING_PATH, CLASSIFIER_MODEL_BY_PROVIDER_SETTING_PATH, and DEFAULT_MODEL_BY_PROVIDER without importing them. Runtime-local import repair takes precedence over pure audit constraint.\n[provenance:tangent-approved] source_task=TASK-BUD-876 reason=Runtime-visible missing imports were discovered during local-safe audit; minimal fix is safer than leaving status command broken.\n[slice-complete] Minimal runtime-local import repair completed during TASK-BUD-876 audit; continue pure audit documentation next.",
       "verification": "VER-BUD-1241"
+    },
+    {
+      "id": "TASK-BUD-881",
+      "description": "Add regression coverage for /monitor-provider status output before monitor-provider output extraction.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-876",
+        "TASK-BUD-880"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-provider-patch.ts",
+        "packages/pi-stack/test/monitor-provider-patch.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "/monitor-provider status is exercised through the registered command with a mock extension context.",
+        "Test covers resolved default provider map and divergent override warning without invoking apply or changing settings semantics.",
+        "Existing monitor-provider tests pass."
+      ],
+      "milestone": "architecture-runway-implementation",
+      "notes": "[auto-seed] Local-safe continuation after TASK-BUD-873..879 completed and no eligible task remained. Derived from TASK-BUD-876 audit recommendation to add status regression coverage before output extraction; preserves provider/model/settings semantics.\n[provenance:human] source_task=TASK-BUD-876 reason=User requested continuous local-safe work; completed audit identified missing status coverage and a status import regression was already fixed in TASK-BUD-880.\n[slice-complete] Status surface regression coverage added before output extraction. No provider/model/settings semantics changed.",
+      "verification": "VER-BUD-1246"
     }
   ]
 }
