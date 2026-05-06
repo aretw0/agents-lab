@@ -1,55 +1,54 @@
 {
-  "timestamp": "2026-05-06T02:35:54.209Z",
-  "context": "Completed reusable provider-candidate evaluation template. It codifies official dashboard vs local quota policy separation, reset/timezone un [snip] tings/routing/API/model/budget changes. [truncated:+217 chars]",
+  "timestamp": "2026-05-06T02:38:07.230Z",
+  "context": "Completed OpenAI Codex quota calibration packet from the provider candidate template. It preserves operator fact that OpenAI Pro dashboard sh [snip] ections. No protected provider changes. [truncated:+152 chars]",
   "next_actions": [
-    "Commit TASK-BUD-895 docs/board checkpoint if dirty.",
-    "Next local-safe slice: optionally instantiate the template for OpenAI Codex calibration or Kim [snip] ging settings/API/routing. [truncated:+24 chars]",
-    "Protected TASK-BUD-849 still requires explicit decision before modifying providerBudgets/route [snip] rovider/monitor migration. [truncated:+19 chars]"
+    "Commit TASK-BUD-896 docs/board checkpoint if dirty.",
+    "Assimilate new operator fact: Alibaba free trial account exists; add Alibaba/Qwen-style provid [snip] aluate, report-only first. [truncated:+57 chars]",
+    "Do not change settings/API keys/routing/providerBudgets/model refs until protected TASK-BUD-849 decision."
   ],
   "blockers": [
-    "Local budget policy currently diverges from operator-reported OpenAI Pro dashb [snip] ial provider pressure. [truncated:+73 chars]",
-    "GitHub Copilot quota near exhaustion still requires fallback planning.",
-    "Provider settings/model/API/routing/monitor migration remain protected."
+    "Provider settings/model/API/routing/monitor migration remain protected.",
+    "Alibaba account/free trial exists but no runtime/provider settings should be a [snip] ted activation packet. [truncated:+28 chars]"
   ],
   "recent_validation": [
-    "i18n_lint_text sample for provider-candidate-evaluation-template.md -> pass",
-    "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-st [snip] es passed, 38 tests passed [truncated:+62 chars]"
+    "i18n_lint_text sample for docs/research/openai-codex-quota-calibration-packet-2026-05.md -> pass",
+    "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-st [snip] es passed, 62 tests passed [truncated:+100 chars]"
   ],
   "recent_commits": [
-    "9f8cd35e docs(quota): clarify local budget policy"
+    "bafea907 docs(providers): add candidate evaluation template"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-895",
+    "focus": "TASK-BUD-896",
     "canonical_links": [
-      "task:TASK-BUD-895",
+      "task:TASK-BUD-896",
       "task:TASK-BUD-849",
-      "commit:9f8cd35e"
+      "commit:bafea907"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T02:35:54.209Z",
+    "generatedAtIso": "2026-05-06T02:38:07.230Z",
     "level": "ok",
-    "percent": 45,
+    "percent": 47,
     "action": "continue",
-    "recommendation": "commit-task-bud-895-and-prepare-report-only-calibration-instance",
+    "recommendation": "commit-task-bud-896-then-seed-alibaba-provider-candidate",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T02:35:54.209Z",
+      "atIso": "2026-05-06T02:38:07.230Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 45,
+      "percent": 47,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-895-and-prepare-report-only-calibration-instance"
+      "recommendation": "commit-task-bud-896-then-seed-alibaba-provider-candidate"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-895"
+    "TASK-BUD-896"
   ]
 }

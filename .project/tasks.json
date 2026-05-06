@@ -20020,6 +20020,28 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] After reconciling OpenAI Pro dashboard headroom with local quota policy, we need a reusable packet so future providers/caps are calibrated before settings changes. [rationale:risk-control] Provider assimilation without a standard evidence template risks confusing official quota, local caps, and runtime telemetry.\n[slice-start] Creating reusable provider candidate evaluation template with official-dashboard vs local-policy calibration fields. Docs-only/report-only.\n[rationale:risk-control] Future providers and budget caps need a standard packet that records official dashboard facts separately from local quota projections before protected settings/routing changes.\n[complete] Provider candidate evaluation template ready for future Kimi/Claude Code/OpenAI/Copilot calibration before protected activation.",
       "verification": "VERIFY-BUD-895"
+    },
+    {
+      "id": "TASK-BUD-896",
+      "description": "Instantiate provider evaluation template for OpenAI Codex quota calibration.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-895"
+      ],
+      "files": [
+        "docs/research/openai-codex-quota-calibration-packet-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Create a report-only OpenAI Codex calibration packet using the provider candidate template.",
+        "Record operator dashboard facts: OpenAI Pro, about 73% weekly quota available, reset around 2026-05-11 with timezone/reset uncertainty, 5h window has not practically blocked work.",
+        "Record local quota policy facts: current providerBudgets report policy-blocked under configured monthly caps/projections.",
+        "Define calibration questions/actions before any providerBudgets/routeModelRefs/default/monitor migration changes.",
+        "No provider settings, routing, model, API key, budget cap, or monitor override changes."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] Instantiate the new template for OpenAI Codex now because operator supplied official dashboard evidence that diverges from local policy-block status. [rationale:risk-control] This keeps Codex usable/pragmatic while preventing local telemetry from becoming either false panic or ignored warning.\n[slice-start] Instantiating OpenAI Codex calibration packet from provider template. Report-only; no settings/routing/provider/model/API/budget changes.\n[rationale:risk-control] OpenAI Codex has official dashboard headroom but local policy-block warnings. A calibration packet lets us keep using Codex pragmatically while making budget policy changes only under protected focus.\n[complete] OpenAI Codex calibration packet captures official dashboard headroom vs local policy-block mismatch for future protected decision.",
+      "verification": "VERIFY-BUD-896"
     }
   ]
 }

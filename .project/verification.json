@@ -13569,6 +13569,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-06T02:35:31.345Z",
       "evidence": "Added docs/primitives/provider-candidate-evaluation-template.md as a reusable report-only template for provider candidates and recalibration. It separates official dashboard/operator facts from local quota policy; includes reset/timezone uncertainty, telemetry coverage, cost-benefit, privacy/protected scope, monitor suitability, canary plan, stop conditions, rollback, and human decision checklist. Linked it from docs/research/provider-assimilation-runway-2026-05.md. No provider settings, routing, API keys, models, budgets, or monitor overrides were changed. Validation passed: i18n_lint_text sample -> pass; pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts -> 2 files passed, 38 tests passed."
+    },
+    {
+      "id": "VERIFY-BUD-896",
+      "target": "TASK-BUD-896",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-06T02:37:48.262Z",
+      "evidence": "Created docs/research/openai-codex-quota-calibration-packet-2026-05.md from the provider candidate template. It records operator official-dashboard evidence: OpenAI Pro, ~73% weekly quota available, reset around 2026-05-11 with timezone/reset uncertainty, and no practical 5h rolling-window blockage. It records local policy facts: openai-codex appears blocked under current providerBudgets tokens-cost monthly caps/projections. It defines calibration gaps, telemetry coverage, immediate posture, future protected canary/reconciliation steps, stop conditions, rollback, and current decision=calibration-needed/report-only. No provider settings, routeModelRefs, providerBudgets, API keys, models, routing, or monitor overrides were changed. Validation passed: i18n_lint_text sample -> pass; pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts -> 3 files passed, 62 tests passed."
     }
   ]
 }
