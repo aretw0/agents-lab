@@ -69,11 +69,11 @@ Classificação sugerida:
 | `/login` nativo no pi existe para esse provider? | sim / não / desconhecido |
 | `/login qwen-cli` cobre esta conta/trial? | sim / não / desconhecido |
 | Provider id desejado | alibaba / dashscope / qwen-cli / outro |
-| Auth oficial | OAuth / device-code / API key / service token / desconhecido |
-| Refresh/expiração de token |  |
-| Onde o segredo ficaria | env / secret manager / `~/.pi/agent/auth.json` / outro |
-| Logout/rollback claro? | sim / não / desconhecido |
-| Setup sem segredo no repo? | sim / não / desconhecido |
+| Auth oficial | API key disponível pelo operador; OAuth/device-code ainda desconhecido |
+| Refresh/expiração de token | API key; rotação/expiração ainda desconhecida |
+| Onde o segredo ficaria | recomendado: variável de ambiente `DASHSCOPE_API_KEY`; nunca no repo |
+| Logout/rollback claro? | remover/unset `DASHSCOPE_API_KEY` e remover provider de `models.json`; dashboard key revocation ainda a confirmar |
+| Setup sem segredo no repo? | sim, se `models.json` referenciar apenas `DASHSCOPE_API_KEY` e não o valor da chave |
 
 Gate: se não houver `/login` nativo, desenhar `/login` ou equivalente antes de uso recorrente.
 
