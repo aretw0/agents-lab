@@ -20668,7 +20668,7 @@
     {
       "id": "TASK-BUD-924",
       "description": "Create a parked-influences register for 0.8.0 so external inspirations stay bounded and actionable later.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-919"
@@ -20683,7 +20683,8 @@
         "Validate with marker check."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:focus] The user wants to close tabs while preserving useful influences for later pragmatic assimilation."
+      "notes": "[rationale:focus] The user wants to close tabs while preserving useful influences for later pragmatic assimilation.\n[start] Creating parked-influences register without new external research; only current board-known influences will be captured.\n[complete] Parked influences are now compressed into bounded future triggers instead of active open tabs.",
+      "verification": "VERIFY-BUD-924"
     },
     {
       "id": "TASK-BUD-925",

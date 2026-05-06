@@ -13794,6 +13794,15 @@
       "method": "path-audit+structured-json+marker+board-reports",
       "timestamp": "2026-05-06T14:29:37.671Z",
       "evidence": "Audited file references for milestone 0.8-local-safe-compounding-lane. Repaired stale/nonexistent planned primitive path in TASK-BUD-921: replaced docs/primitives/control-plane-overnight-local-loop.md with existing docs/research/control-plane-long-run-maturity-packet-2026-05-01.md while preserving future output docs/research/0-8-delegation-long-run-runway.md and existing docs/primitives/nudge-free-local-continuity.md. Documented audit in docs/research/0-8-readiness-map.md. Validation: structured_io_json dry-run then apply succeeded; safe_marker_check passed for audit anchors; board_dependency_health_snapshot for milestone has missing=0 and cycle=0."
+    },
+    {
+      "id": "VERIFY-BUD-924",
+      "target": "TASK-BUD-924",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc+marker+i18n",
+      "timestamp": "2026-05-06T14:30:42.401Z",
+      "evidence": "Created docs/research/0-8-parked-influences-register.md capturing currently parked influences from the board: impeccable.style, hermes-agent, sandcastle, claude-mem, parked colonies, and model leaderboards/stats. Defined assimilation rules, future triggers, first local-safe slices, and rejection criteria. No new external research was performed. Validation: safe_marker_check passed 7/7 anchors; i18n_lint_text passed for pt-BR summary."
     }
   ]
 }
