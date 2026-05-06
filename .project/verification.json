@@ -13605,6 +13605,15 @@
       "method": "docs+marker+tests",
       "timestamp": "2026-05-06T02:51:08.413Z",
       "evidence": "Created docs/research/alibaba-free-trial-dashboard-intake-checklist-2026-05.md as an operator intake form for factual Alibaba free-trial dashboard/API facts before protected activation. It covers account/product, credits/expiry/limits, billing/auto-charge risk, product/API/baseUrl/endpoint, model availability, login/configuration including native `/login` and `/login qwen-cli` applicability, telemetry for quota visibility, privacy/retention, future smoke constraints, and decision gate. Linked the checklist from docs/research/alibaba-provider-candidate-packet-2026-05.md. No API calls, credentials, settings, provider registration, routeModelRefs, providerBudgets, model/default, monitor migration, or paid spend changes. Validation: i18n_lint_text sample -> pass; safe_marker_check -> pass; pnpm vitest --run packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts -> 2 files passed, 25 tests passed."
+    },
+    {
+      "id": "VERIFY-BUD-900",
+      "target": "TASK-BUD-900",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+marker+tests",
+      "timestamp": "2026-05-06T04:43:56.256Z",
+      "evidence": "Recorded successful Alibaba/Qwen smoke and dashboard quota evidence. Created docs/research/alibaba-qwen-free-trial-strategy-2026-05.md with evidence that dashscope/qwen-plus responded in a new session via dashscope-intl compatible endpoint, dashboard qwen-plus quota showed Remaining 968,126 / Total 1,000,000 after smoke (~3% used), and Alibaba free trial catalog is large (about 100 LLMs plus visual/multimodal/speech/embedding categories). Strategy preserves OpenAI Codex as long-context control-plane/cockpit and proposes Qwen for small delegated work and monitor/classifier candidates after tiered canaries. Updated Alibaba intake checklist and provider candidate packet from candidate-only to smoke-proven candidate. No settings, routeModelRefs, providerBudgets, monitor-provider defaults, API keys, runtime routing, or paid spend changes. Validation: i18n_lint_text sample -> pass; safe_marker_check strategy markers -> pass; safe_marker_check intake markers -> pass; pnpm vitest --run packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts -> 2 files passed, 25 tests passed."
     }
   ]
 }

@@ -10,11 +10,11 @@ Use este checklist para registrar fatos do dashboard Alibaba antes de qualquer A
 
 | Campo | Valor |
 | --- | --- |
-| Conta Alibaba criada? | sim / não |
-| Produto principal | DashScope / Model Studio / Alibaba Cloud Model Service / outro / desconhecido |
-| Região da conta |  |
-| Região do endpoint pretendido |  |
-| Plano | free trial / pay-as-you-go / outro |
+| Conta Alibaba criada? | sim |
+| Produto principal | Model Studio / DashScope compatible-mode observado no dashboard `https://modelstudio.console.alibabacloud.com` |
+| Região da conta | desconhecido |
+| Região do endpoint pretendido | endpoint internacional `dashscope-intl.aliyuncs.com` validou smoke em sessão nova |
+| Plano | free trial |
 | Billing pago automático ativo? | sim / não / desconhecido |
 | Precisa adicionar cartão para usar o trial? | sim / não / desconhecido |
 | Observação do dashboard |  |
@@ -23,8 +23,8 @@ Use este checklist para registrar fatos do dashboard Alibaba antes de qualquer A
 
 | Campo | Valor |
 | --- | --- |
-| Créditos/saldo do trial |  |
-| Moeda/unidade | USD / CNY / tokens / requests / outro |
+| Créditos/saldo do trial | qwen-plus Remaining 968,126 / Total 1,000,000 após smoke; cerca de 3% consumido |
+| Moeda/unidade | quota por modelo no dashboard; qwen-plus parece token/quota unit de 1,000,000 |
 | Data de expiração |  |
 | Reset ou janela de quota | diário / semanal / mensal / trial único / desconhecido |
 | Hard cap documentado |  |
@@ -38,10 +38,10 @@ Critério: se cobrança pós-trial não for clara, manter candidate-only.
 
 | Campo | Valor |
 | --- | --- |
-| API escolhida |  |
-| Base URL oficial | erro 401 observado em `https://dashscope.aliyuncs.com/compatible-mode/v1`; testar/confirmar endpoint internacional `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` |
-| OpenAI-compatible? | sim, hipótese operacional via compatible-mode; smoke ainda falhou em auth |
-| Endpoint candidato | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` até confirmação no dashboard |
+| API escolhida | DashScope compatible-mode para LLM inicial |
+| Base URL oficial | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` validado em sessão nova; `https://dashscope.aliyuncs.com/compatible-mode/v1` retornou 401 para esta chave/conta |
+| OpenAI-compatible? | sim para smoke sintético via compatible-mode |
+| Endpoint candidato | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` |
 | SDK obrigatório? | sim / não / desconhecido |
 | Streaming suportado? | sim / não / desconhecido |
 | Tool/function calling suportado? | sim / não / desconhecido |
@@ -53,14 +53,16 @@ Hipótese inicial a verificar: `https://dashscope.aliyuncs.com/compatible-mode/v
 
 | Modelo | Contexto | Input | Thinking/reasoning | Tool calling | Preço/unidade | Trial incluso? | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-|  |  | text / image | sim / não / desconhecido | sim / não / desconhecido |  | sim / não / desconhecido |  |
+| qwen-plus | pi exibiu cerca de 31.6k/304 como 25% no smoke, sugerindo janela operacional bem menor que o control-plane atual | text | não configurado | desconhecido | quota free trial: Remaining 968,126 / Total 1,000,000 após smoke | sim | smoke sintético respondeu; bom candidato inicial, mas não para long-context control-plane |
+| qwen-turbo | configurado localmente para smoke futuro | text | não configurado | desconhecido | desconhecido | provavelmente sim, confirmar no dashboard | provável candidato barato/rápido para classificadores se qualidade passar |
+| catálogo Alibaba | dashboard mostra cerca de 100 LLMs, 55 visual models, 17 multimodal, 36 speech, 5 embeddings com quotas/free-trial variadas | variado | variado | variado | variado | sim para muitos, confirmar por tier | não enumerar tudo agora; selecionar shortlist pragmática |
 
 Classificação sugerida:
 
-- monitor/classifier barato:
-- local-safe implementation pequeno:
-- review pesado:
-- não usar:
+- monitor/classifier barato: começar por `qwen-turbo` ou outro Qwen barato/rápido após 10 casos sintéticos.
+- local-safe implementation pequeno: `qwen-plus` para tarefas curtas/delegadas, sem contexto grande.
+- review pesado: manter OpenAI Codex por enquanto; avaliar Qwen maior só após shortlist.
+- não usar: Qwen como control-plane longo/auto-compact nesta fase, pois contexto subiu para ~25% em smoke e falhas de auth anteriores quebraram compactação.
 
 ## 5. Login/configuração
 
@@ -81,13 +83,13 @@ Gate: se não houver `/login` nativo, desenhar `/login` ou equivalente antes de 
 
 | Sinal | Resposta |
 | --- | --- |
-| Provider/model aparecem nos logs pi? | sim / não / desconhecido |
-| Tokens input/output capturáveis? | sim / não / desconhecido |
+| Provider/model aparecem nos logs pi? | sim: UI mostrou `dashscope/qwen-plus` e uso `31.6k/304` no smoke |
+| Tokens input/output capturáveis? | sim na UI/pi para a chamada; dashboard também mostrou redução de quota qwen-plus |
 | Custo capturável ou estimável? | sim / não / desconhecido |
 | Requests capturáveis? | sim / não / desconhecido |
 | Dashboard exporta usage? | sim / não / desconhecido |
 | Erros 401/403/429 identificáveis? | sim: smoke `OK_ALIBABA_SMOKE` retornou 401 `Incorrect API key provided` no endpoint `dashscope.aliyuncs.com` |
-| Burn rate do trial verificável após 1 chamada? | não verificado; chamada falhou antes de uso válido |
+| Burn rate do trial verificável após 1 chamada? | sim: qwen-plus ficou Remaining 968,126 / Total 1,000,000, cerca de 3% usado após smoke válido em sessão nova |
 
 Sem telemetry mínima, manter apenas smoke manual e report-only.
 
@@ -122,8 +124,8 @@ Ainda não autorizado. Quando houver decisão protegida futura, o smoke mínimo 
 Só avançar de `candidate-only` para `canary-ready` quando estes itens estiverem preenchidos:
 
 - [ ] produto/API definido;
-- [ ] endpoint/região confirmado; primeira tentativa em `dashscope.aliyuncs.com` falhou 401, testar/confirmar `dashscope-intl.aliyuncs.com`;
-- [ ] modelos disponíveis e trial-inclusos listados;
+- [x] endpoint/região operacional para smoke: `dashscope-intl.aliyuncs.com`; primeira tentativa em `dashscope.aliyuncs.com` falhou 401;
+- [ ] modelos disponíveis e trial-inclusos priorizados em shortlist; dashboard lista muitos modelos, não enumerar todos antes de tiering;
 - [ ] crédito, expiração e risco de cobrança entendidos;
 - [ ] método de auth/login definido;
 - [ ] `/login` nativo ou equivalente planejado;

@@ -1,54 +1,55 @@
 {
-  "timestamp": "2026-05-06T04:06:40.778Z",
-  "context": "Alibaba smoke attempted by operator with dashscope/qwen-plus. Model was visible/selectable, but request and auto-compaction failed with 401 I [snip] ed failure in Alibaba intake checklist. [truncated:+276 chars]",
+  "timestamp": "2026-05-06T04:44:11.519Z",
+  "context": "Completed Alibaba/Qwen free-trial strategy after successful smoke. Operator reported qwen-plus responded in a new session, dashboard shows Re [snip] vider routing/settings/monitor changes. [truncated:+296 chars]",
   "next_actions": [
-    "In the UI, switch away from dashscope before compaction if the next smoke still fails; use ope [snip] to allow compact/recovery. [truncated:+43 chars]",
-    "Open /model to reload models.json, pick dashscope/qwen-plus, retry one synthetic smoke only af [snip] noting dashboard balance. [truncated:+3 chars]",
-    "If 401 persists on dashscope-intl, verify API key product/region in Alibaba dashboard, key act [snip] is enabled for the trial. [truncated:+30 chars]"
+    "Commit TASK-BUD-900 docs/board checkpoint if dirty.",
+    "Next local-safe: fill 3-model Alibaba LLM shortlist from dashboard: baseline=qwen-plus, cheap/ [snip] andidate, coder candidate. [truncated:+6 chars]",
+    "Future protected packet can authorize at most two additional synthetic Qwen smokes (cheap/fast [snip] der budget/routing change. [truncated:+49 chars]"
   ],
   "blockers": [
-    "Current qwen-plus smoke failed auth; do not use DashScope for compaction/long [snip] short smoke succeeds. [truncated:+17 chars]",
-    "Endpoint/region and API key product applicability remain unconfirmed."
+    "TASK-BUD-849 remains protected for routeModelRefs/providerBudgets/monitor migr [snip] ault provider changes. [truncated:+9 chars]",
+    "Do not use Qwen as control-plane/auto-compact yet; context pressure and trust still need canaries.",
+    "GitHub Copilot monitor quota risk remains; Qwen fallback must be canaried before migration."
   ],
   "recent_validation": [
-    "DASHSCOPE_API_KEY present in process; value not printed",
-    "models.json validates and references DASHSCOPE_API_KEY only; secretStored=false",
-    "PI_CODING_AGENT_DIR=.sandbox/pi-agent pi --list-models shows dashscope/qwen-plus and dashscope/qwen-turbo"
+    "i18n_lint_text sample for alibaba-qwen strategy -> pass",
+    "safe_marker_check strategy markers -> pass",
+    "safe_marker_check Alibaba intake markers -> pass"
   ],
   "recent_commits": [
-    "23bdaa38 docs(providers): record alibaba api key auth fact"
+    "47ed5027 docs(providers): record alibaba smoke auth failure"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-899",
+    "focus": "TASK-BUD-900",
     "canonical_links": [
-      "task:TASK-BUD-899",
-      "commit:23bdaa38"
+      "task:TASK-BUD-900",
+      "commit:47ed5027"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T04:06:40.778Z",
+    "generatedAtIso": "2026-05-06T04:44:11.519Z",
     "level": "ok",
-    "percent": 37,
+    "percent": 42,
     "action": "continue",
-    "recommendation": "retry-one-smoke-on-intl-endpoint-then-fallback-model-before-compact",
+    "recommendation": "commit-task-bud-900-then-prepare-3-model-shortlist-template",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T04:06:40.778Z",
+      "atIso": "2026-05-06T04:44:11.519Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 37,
+      "percent": 42,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "retry-one-smoke-on-intl-endpoint-then-fallback-model-before-compact"
+      "recommendation": "commit-task-bud-900-then-prepare-3-model-shortlist-template"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-899"
+    "TASK-BUD-900"
   ]
 }

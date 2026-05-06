@@ -4,6 +4,7 @@ Status: report-only / local-safe
 Tarefa: `TASK-BUD-897`  
 Template: [`docs/primitives/provider-candidate-evaluation-template.md`](../primitives/provider-candidate-evaluation-template.md)  
 Intake: [`docs/research/alibaba-free-trial-dashboard-intake-checklist-2026-05.md`](alibaba-free-trial-dashboard-intake-checklist-2026-05.md)  
+Strategy: [`docs/research/alibaba-qwen-free-trial-strategy-2026-05.md`](alibaba-qwen-free-trial-strategy-2026-05.md)  
 Limite: sem API key, `.pi/settings.json`, `routeModelRefs`, `providerBudgets`, provider/model default, monitor override ou gasto pago.
 
 ## 1. Identidade do candidato
@@ -25,9 +26,9 @@ Limite: sem API key, `.pi/settings.json`, `routeModelRefs`, `providerBudgets`, p
 | Estratégia de custo | aproveitar o máximo do free trial antes de pagar fornecedor novo |
 | Política de pagamento | não gastar sem decisão futura explícita |
 | Reset/expiração do trial | desconhecido |
-| Créditos ou limites do trial | desconhecido |
-| Região/endpoint | desconhecido |
-| Evidência manual | relato do operador; dashboard ainda precisa ser registrado em packet/canary |
+| Créditos ou limites do trial | qwen-plus: Remaining 968,126 / Total 1,000,000 após smoke; dashboard mostra muitas quotas por modelo |
+| Região/endpoint | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` validou smoke; endpoint não-internacional retornou 401 para esta chave/conta |
+| Evidência manual | operador reportou smoke sintético respondido em sessão nova e dashboard Model Studio com cerca de 3% de quota qwen-plus consumida |
 
 ## 3. Política local atual
 
@@ -166,9 +167,9 @@ Parar avaliação se:
 
 ## 11. Decisão atual
 
-Decision: candidate-only / backlog-priority.
+Decision: smoke-proven candidate / backlog-priority.
 
-Alibaba deve ser o próximo provider candidato a passar por intake de dashboard e canary design, antes de qualquer gasto pago ou mudança de runtime.
+Alibaba/Qwen já respondeu a um smoke sintético curto e deve avançar para tiering pragmático de free trial, antes de qualquer gasto pago ou mudança recorrente de runtime.
 
 Próximo passo local-safe:
 

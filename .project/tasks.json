@@ -20113,6 +20113,32 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] Follow-up local-safe slice after TASK-BUD-898: turn Alibaba unknowns into a dashboard intake checklist. [rationale:risk-control] Free-trial value can be maximized only if credits, expiry, billing behavior, auth/login, and telemetry are known before runtime changes.\n[slice-start] Creating Alibaba free-trial dashboard intake checklist. No provider/API/login/settings changes.\n[rationale:risk-control] A factual dashboard checklist lets the operator maximize Alibaba free trial value without accidental paid spend or premature provider activation.\n[complete] Alibaba dashboard intake checklist ready for operator facts: trial balance/expiry, billing behavior, auth/login, endpoint, models, telemetry, and privacy.",
       "verification": "VERIFY-BUD-899"
+    },
+    {
+      "id": "TASK-BUD-900",
+      "description": "Synthesize Alibaba/Qwen free-trial strategy after successful smoke and dashboard quota evidence.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-897",
+        "TASK-BUD-898",
+        "TASK-BUD-899"
+      ],
+      "files": [
+        "docs/research/alibaba-qwen-free-trial-strategy-2026-05.md",
+        "docs/research/alibaba-free-trial-dashboard-intake-checklist-2026-05.md",
+        "docs/research/alibaba-provider-candidate-packet-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Record successful qwen-plus synthetic smoke evidence and dashboard quota evidence: qwen-plus remaining 968,126 / total 1,000,000 after about 3% used.",
+        "Record operator observation that selecting qwen-plus in this control-plane session consumed about 25% context due smaller context window relative to current providers, so OpenAI Codex should remain control-plane/default for long-context work for now.",
+        "Define a pragmatic free-trial exploitation strategy: shortlist model tiers instead of enumerating all Alibaba free-trial models, use Qwen for delegated/simple/local-safe/classifier candidates, preserve OpenAI Codex for heavy control-plane work, and avoid protected monitor migration until canaries p…",
+        "Capture urgency that GitHub Copilot monitor quota may run out and Alibaba should be evaluated as a fallback before putting all monitor load on OpenAI Codex.",
+        "No settings, routeModelRefs, providerBudgets, monitor-provider defaults, API keys, or runtime routing changes."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] User reported successful qwen-plus smoke in a new session, dashboard usage evidence, huge Alibaba free-trial model catalog, context-window pressure, and desired split: OpenAI Codex as control plane, Qwen delegated as trust grows. [rationale:risk-control] Need strategy before moving monitors/delegation to Alibaba so free quota is used pragmatically without breaking long-context control-plane work.\n[slice-start] Recording successful Alibaba/Qwen smoke and drafting pragmatic free-trial strategy. Report-only; no provider routing/settings/monitor migration changes.\n[rationale:risk-control] Qwen is now proven reachable for a synthetic smoke, but context pressure and quota/quality unknowns require a staged strategy before monitor or delegation load moves off Copilot/OpenAI Codex.\n[complete] Alibaba/Qwen moved to smoke-proven candidate in docs. Strategy: OpenAI Codex remains cockpit; Qwen handles small/delegated/classifier candidates through tiered free-trial canaries.",
+      "verification": "VERIFY-BUD-900"
     }
   ]
 }
