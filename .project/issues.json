@@ -9,7 +9,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "quality-work-quality-mnslo6ba",
@@ -20,7 +21,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnsxyu9l",
@@ -29,7 +31,8 @@
       "category": "fragility",
       "priority": "warning",
       "source": "monitor",
-      "resolution": "Pi-lens markdown warnings são linting cosmético — não há markdownlint instalado no projeto. Não é blocker. Fica como item de qualidade quando o projeto configurar tooling de lint."
+      "resolution": "Pi-lens markdown warnings são linting cosmético — não há markdownlint instalado no projeto. Não é blocker. Fica como item de qualidade quando o projeto configurar tooling de lint.",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnsy43e4",
@@ -38,7 +41,8 @@
       "category": "fragility",
       "priority": "warning",
       "source": "monitor",
-      "resolution": "Acknowledged: 2 low CVEs in @mozilla/readability via pi-web-access (DoS via Regex, no upstream fix). Accepted risk in interactive use. Flagged as acceptance criteria for future first-party web-access package. npm.cmd shell error was a WSL/Windows path mismatch — resolved by calling cmd.exe directly."
+      "resolution": "Acknowledged: 2 low CVEs in @mozilla/readability via pi-web-access (DoS via Regex, no upstream fix). Accepted risk in interactive use. Flagged as acceptance criteria for future first-party web-access package. npm.cmd shell error was a WSL/Windows path mismatch — resolved by calling cmd.exe directly.",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnsyc33n",
@@ -49,7 +53,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnsyf60e",
@@ -60,7 +65,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnszcj6n",
@@ -71,7 +77,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnszysge",
@@ -82,7 +89,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-shell-path-mingw",
@@ -91,7 +99,8 @@
       "category": "fragility",
       "priority": "warning",
       "source": "monitor",
-      "resolution": "Investigado e confirmado: ambiente é MINGW64. Usar /c/ em todos os paths daqui em diante."
+      "resolution": "Investigado e confirmado: ambiente é MINGW64. Usar /c/ em todos os paths daqui em diante.",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnt09dh4",
@@ -102,7 +111,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnt0esz7",
@@ -113,7 +123,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnt0jsit",
@@ -124,7 +135,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntmab9i",
@@ -135,7 +147,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntmwvga",
@@ -146,7 +159,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "External dependency issue — not actionable from codebase"
+      "resolvedNote": "External dependency issue — not actionable from codebase",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntmyfeb",
@@ -157,7 +171,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "External dependency issue — not actionable from codebase"
+      "resolvedNote": "External dependency issue — not actionable from codebase",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntn6kam",
@@ -168,7 +183,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntn84cy",
@@ -179,7 +195,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntnr0qb",
@@ -190,7 +207,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntnvf5s",
@@ -201,7 +219,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntnwzlp",
@@ -212,7 +231,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntoa7hf",
@@ -223,7 +243,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by unauthorized-action monitor (patterns.json)"
+      "resolvedNote": "Pattern absorbed by unauthorized-action monitor (patterns.json)",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntodg9q",
@@ -234,7 +255,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by unauthorized-action monitor (patterns.json)"
+      "resolvedNote": "Pattern absorbed by unauthorized-action monitor (patterns.json)",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntoghcd",
@@ -245,7 +267,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntojlhg",
@@ -256,7 +279,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntotb39",
@@ -267,7 +291,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntowm3c",
@@ -278,7 +303,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntozz8g",
@@ -289,7 +315,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntp3mpq",
@@ -300,7 +327,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntpjl31",
@@ -311,7 +339,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntqcncy",
@@ -322,7 +351,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntqp4oq",
@@ -333,7 +363,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntr00k6",
@@ -344,7 +375,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntr4kux",
@@ -363,7 +395,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntrhn6h",
@@ -374,7 +407,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntrjy3n",
@@ -385,7 +419,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntru79o",
@@ -412,7 +447,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnts4iqh",
@@ -423,7 +459,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntse7k6",
@@ -434,7 +471,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntsjvoi",
@@ -445,7 +483,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntslpg7",
@@ -480,7 +519,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnttf135",
@@ -491,7 +531,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by unauthorized-action monitor (patterns.json)"
+      "resolvedNote": "Pattern absorbed by unauthorized-action monitor (patterns.json)",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mntthell",
@@ -510,7 +551,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnx1n057",
@@ -521,7 +563,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnx1omua",
@@ -532,7 +575,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnx1s91r",
@@ -543,7 +587,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnx1wq0o",
@@ -554,7 +599,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnx1z0fs",
@@ -565,7 +611,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnx207kz",
@@ -576,7 +623,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnx228l7",
@@ -587,7 +635,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnx23z8j",
@@ -598,7 +647,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnx25fvu",
@@ -609,7 +659,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnx26i2g",
@@ -620,7 +671,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnx29nmr",
@@ -631,7 +683,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnx2arbb",
@@ -642,7 +695,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnxp0pzj",
@@ -653,7 +707,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mnxs1hbq",
@@ -664,7 +719,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mo89xnoe",
@@ -675,7 +731,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mo8a3x1q",
@@ -686,7 +743,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mo8a90b9",
@@ -705,7 +763,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mo8aghaz",
@@ -716,7 +775,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mo8ampax",
@@ -727,7 +787,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mo8az1cn",
@@ -738,7 +799,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mo8bgdh6",
@@ -749,7 +811,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mo8bzzp8",
@@ -760,7 +823,8 @@
       "source": "monitor",
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
-      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+      "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-mojbbo7i",
@@ -771,7 +835,8 @@
       "source": "monitor",
       "resolution": "fixed-immediately",
       "resolvedAtIso": "2026-04-29T00:25:30.000Z",
-      "resolvedNote": "Rewrote .project/handoff.json with fresh context-watch checkpoint/compact state and current machine-maintenance OK evidence; removed stale disk-pressure-block payload."
+      "resolvedNote": "Rewrote .project/handoff.json with fresh context-watch checkpoint/compact state and current machine-maintenance OK evidence; removed stale disk-pressure-block payload.",
+      "resolved_by": "TASK-BUD-849"
     },
     {
       "id": "fragility-fragility-morulqak",
