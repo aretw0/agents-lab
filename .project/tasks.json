@@ -20554,7 +20554,7 @@
     {
       "id": "TASK-BUD-919",
       "description": "Seed a stocked queue of 7 local-safe compounding slices with validation and rollback cues for low-interaction continuation.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-917"
@@ -20572,7 +20572,7 @@
         "Record queue in board/handoff so resume can continue without asking obvious ordering questions."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:throughput] The current AFK material readiness reported enough local-safe validation but selection-focus mismatch; stocked slices should remove the mismatch and enable safer low-interaction progress.\n[provenance:human] source_task=TASK-BUD-917 reason=User wants a lane that can continue evolving without frequent interaction."
+      "notes": "[rationale:throughput] The current AFK material readiness reported enough local-safe validation but selection-focus mismatch; stocked slices should remove the mismatch and enable safer low-interaction progress.\n[provenance:human] source_task=TASK-BUD-917 reason=User wants a lane that can continue evolving without frequent interaction.\n[start] Seeding 7 small local-safe continuation slices with validation/rollback cues for low-interaction execution."
     },
     {
       "id": "TASK-BUD-920",
@@ -20620,6 +20620,148 @@
       ],
       "milestone": "0.8-local-safe-compounding-lane",
       "notes": "[rationale:strategy] User frames evolution as compounding cleanup/research/delegation/long-run improvements. This keeps that compounding path evidence-based before increasing autonomy.\n[provenance:human] source_task=TASK-BUD-917 reason=Prepare future delegation and long-run work in a controlled audited lane."
+    },
+    {
+      "id": "TASK-BUD-922",
+      "description": "Create a local-safe slice validation matrix for 0.8.0 compounding work.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-919"
+      ],
+      "files": [
+        "docs/research/0-8-local-safe-slice-validation-matrix.md"
+      ],
+      "acceptance_criteria": [
+        "Define validation gates for docs-only, board-only, test-only, report-only helper, cleanup, delegation-readiness, and long-run-prep slices.",
+        "Include rollback cue and stop condition for each slice type.",
+        "Keep matrix local-safe and documentation-only.",
+        "Validate with marker check and i18n lint."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:quality] A validation matrix reduces per-slice ambiguity and lets low-interaction continuation proceed safely."
+    },
+    {
+      "id": "TASK-BUD-923",
+      "description": "Audit and repair local-safe file-reference drift in the 0.8.0 compounding lane tasks.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-919"
+      ],
+      "files": [
+        ".project/tasks.json",
+        "docs/research/0-8-readiness-map.md"
+      ],
+      "acceptance_criteria": [
+        "Inspect lane task file references for missing or stale paths.",
+        "Repair only board/doc references; do not create implementation surfaces just to satisfy stale paths.",
+        "Validate with path existence checks and board dependency health.",
+        "Record any remaining intentional future paths as parked."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:quality] We already observed one likely stale primitive path in the planned lane; repair reference drift before longer unattended work."
+    },
+    {
+      "id": "TASK-BUD-924",
+      "description": "Create a parked-influences register for 0.8.0 so external inspirations stay bounded and actionable later.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-919"
+      ],
+      "files": [
+        "docs/research/0-8-parked-influences-register.md"
+      ],
+      "acceptance_criteria": [
+        "List currently parked influences and why they are not active now.",
+        "For each influence, define a future assimilation trigger and local-safe first slice.",
+        "Do not perform new external research.",
+        "Validate with marker check."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:focus] The user wants to close tabs while preserving useful influences for later pragmatic assimilation."
+    },
+    {
+      "id": "TASK-BUD-925",
+      "description": "Create a monitor stale-feedback evidence intake template before runtime calibration work.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-919"
+      ],
+      "files": [
+        "docs/research/monitor-stale-feedback-intake-template-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Define the evidence needed for stale/delayed monitor feedback: monitor message, task state, later commit, verification, and expected suppression decision.",
+        "Include token-economy fields for estimated avoidable classifier calls.",
+        "Do not change monitor runtime.",
+        "Validate with marker check and link from readiness map or charter."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:cost-control] This prepares TASK-BUD-915 without spending tokens or changing monitor behavior prematurely."
+    },
+    {
+      "id": "TASK-BUD-926",
+      "description": "Create a CI/CD failure evidence intake template for future GitHub Actions cohesion work.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-919"
+      ],
+      "files": [
+        "docs/research/ci-cd-failure-evidence-intake-template-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Define the evidence needed before touching workflows: failing run URL, job name, step, log excerpt, local parity command, suspected drift class, rollback note.",
+        "Keep template report-only; do not mutate .github workflows.",
+        "Validate with marker check.",
+        "Reference TASK-BUD-914 as protected follow-up."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:risk-control] This prepares CI/CD cohesion while preserving protected boundary around workflow mutation."
+    },
+    {
+      "id": "TASK-BUD-927",
+      "description": "Capture a report-only delegation and long-run readiness baseline for the compounding lane.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-919"
+      ],
+      "files": [
+        "docs/research/0-8-delegation-long-run-baseline.md"
+      ],
+      "acceptance_criteria": [
+        "Use read-only readiness/status packets to summarize current delegation and long-run posture.",
+        "Classify ready, needs-evidence, and blocked surfaces without dispatching agents or starting background processes.",
+        "Recommend the next local-safe preparation slice only.",
+        "Validate with marker check and no-dispatch language."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:strategy] This prepares compounding delegation/long-run improvements without increasing autonomy level."
+    },
+    {
+      "id": "TASK-BUD-928",
+      "description": "Create a compact handoff/resume checklist for the 0.8.0 compounding lane.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-919"
+      ],
+      "files": [
+        "docs/research/0-8-compounding-lane-resume-checklist.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Define the minimal resume checks: git clean, current task, validation gate, protected boundary, rollback cue, checkpoint freshness.",
+        "Include a short prompt/handoff pattern for low-interaction continuation.",
+        "Keep checklist docs/handoff only.",
+        "Validate with marker check and context_watch_continuation_readiness."
+      ],
+      "milestone": "0.8-local-safe-compounding-lane",
+      "notes": "[rationale:continuity] A compact resume checklist helps future turns continue without asking obvious ordering questions."
     }
   ]
 }

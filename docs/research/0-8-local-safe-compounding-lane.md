@@ -132,6 +132,18 @@ A lane deve aprender com a própria execução sem virar ruído:
 4. `TASK-BUD-920` — higiene de planejamento/foco.
 5. `TASK-BUD-921` — runway report-only de delegação e long-run.
 
+## Fila stocked local-safe
+
+Após `TASK-BUD-919`, a lane mantém as seguintes fatias pequenas para continuidade com baixa iteração:
+
+1. `TASK-BUD-922` — matriz de validação por classe de fatia.
+2. `TASK-BUD-923` — auditoria de drift em referências de arquivos da lane.
+3. `TASK-BUD-924` — registro de influências parked para 0.8.0.
+4. `TASK-BUD-925` — template de intake para feedback stale de monitores.
+5. `TASK-BUD-926` — template de intake para falhas CI/CD sem mutar workflows.
+6. `TASK-BUD-927` — baseline report-only de delegação/long-run.
+7. `TASK-BUD-928` — checklist compacto de handoff/resume da lane.
+
 ## Resumo para operador
 
 Use esta lane quando a instrução for, na prática: “continue melhorando agents-lab/pi-stack sem precisar de mim a menos que apareça risco”.
