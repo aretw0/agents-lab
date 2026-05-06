@@ -13749,6 +13749,15 @@
       "method": "focused smoke+marker",
       "timestamp": "2026-05-06T13:19:22.462Z",
       "evidence": "Expanded context-watch reload-required surface to bounded runtime/model files: .pi/settings.json, .sandbox/pi-agent/settings.json, .sandbox/pi-agent/models.json, and shallow .pi/agents/*.agent.yaml/yml overrides. context-watchdog now baselines that runtime reload mtime on session_start and reports reload-required when any covered surface changes after start. Added focused smoke coverage in packages/pi-stack/test/smoke/context-watchdog-runtime-reload.test.ts. Validation: safe_marker_check passed for reload surface markers; npm run test:smoke -- --run packages/pi-stack/test/smoke/context-watchdog-runtime-reload.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts passed 2 files / 60 tests."
+    },
+    {
+      "id": "VERIFY-BUD-917",
+      "target": "TASK-BUD-917",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc+marker+i18n+board inspection",
+      "timestamp": "2026-05-06T14:19:08.395Z",
+      "evidence": "Created docs/research/0-8-local-safe-compounding-lane.md defining purpose, operating mode, allowed unattended local-safe scopes, explicit protected non-goals, stop conditions, validation expectations, rollback expectations, learning loop, first queue, and operator summary. Sub-lane tasks TASK-BUD-918..921 already exist for readiness map, stocked slice queue, planning hygiene, and delegation/long-run runway. Validation: safe_marker_check passed for charter anchors; i18n_lint_text passed for pt-BR operator summary; board_task_quality_gate flagged macro/decomposition caution, addressed by explicit downstream tasks TASK-BUD-918..921 rather than expanding this slice."
     }
   ]
 }

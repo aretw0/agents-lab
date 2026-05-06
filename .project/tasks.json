@@ -20509,7 +20509,7 @@
     {
       "id": "TASK-BUD-917",
       "description": "Define the 0.8.0 local-safe compounding lane charter for unattended-friendly cleanup, bounded research, delegation readiness, and long-run improvement.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "docs/research/0-8-local-safe-compounding-lane.md",
@@ -20524,7 +20524,8 @@
         "Produce a compact operator summary suitable for handoff/resume."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[provenance:human] User asked for a lane that can keep evolving many things without frequent iteration: cleanup, research, delegation and long-run improvements that compound safely toward 0.8.0. [rationale:strategy] A lane charter prevents open-ended expansion from drifting into protected scope while still enabling continuous local-safe improvement.\n[provenance:human] source_task=TASK-BUD-849 reason=User wants to return from opened tangents to controlled/audited power while preparing 0.8.0."
+      "notes": "[provenance:human] User asked for a lane that can keep evolving many things without frequent iteration: cleanup, research, delegation and long-run improvements that compound safely toward 0.8.0. [rationale:strategy] A lane charter prevents open-ended expansion from drifting into protected scope while still enabling continuous local-safe improvement.\n[provenance:human] source_task=TASK-BUD-849 reason=User wants to return from opened tangents to controlled/audited power while preparing 0.8.0.\n[start] Beginning bounded local-safe charter slice for the 0.8.0 compounding lane; no protected CI/CD/provider/settings/publish/remote changes.\n[complete] Charter written and validated; decomposition continues through TASK-BUD-918..921.",
+      "verification": "VERIFY-BUD-917"
     },
     {
       "id": "TASK-BUD-918",
