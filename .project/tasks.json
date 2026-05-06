@@ -21229,6 +21229,28 @@
       "milestone": "signal-integrity-calibration",
       "notes": "Criada após reload de TASK-BUD-948: o selector deixou de preferir planned p3, mas TASK-BUD-947 ainda entrou por hints derivados do handoff/canonical_links. Completar exclusão no caminho de hints.\n[provenance:tangent-approved] source_task=TASK-BUD-948 reason=Follow-up live: planned p3 ainda foi promovida por hints derivados apesar do filtro de preferred successor.\n[closure] Completed follow-up after reload showed TASK-BUD-947 still came from handoff-derived hints. Planned p3 tasks are now part of excludedTaskIds, not only skipped by preferred successor selection. Runtime reload required before live preview reflects this fix.",
       "verification": "VER-BUD-949-P3-DERIVED-HINTS"
+    },
+    {
+      "id": "TASK-BUD-950",
+      "description": "[P1/local-safe] Alinhar autonomia-lane selector para não sugerir planned p3/no-priority como próximo foco automático.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-949"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`selectAutonomyLaneTask` deve pular tasks `planned` de prioridade p3 por padrão, para não promover backlog low-priority como TASK-BUD-946/947.",
+        "Tasks p3 com `status=in-progress` continuam elegíveis porque já representam intenção explícita.",
+        "Tasks planned p3 podem ser selecionadas apenas quando houver foco explícito (`focusSource=explicit`).",
+        "Adicionar regressões focais e validar com `autonomy-task-selector.test.ts`, `project-validate` e `git diff --check`."
+      ],
+      "milestone": "signal-integrity-calibration",
+      "notes": "Criada porque, mesmo com auto-resume limpo, `autonomy_lane_next_task` e simple-delegate liveNext ainda sugeriam TASK-BUD-946 (planned p3 operator-noise backlog). Próximo passo correto antes de delegação: impedir esse falso foco automático.\n[provenance:tangent-approved] source_task=TASK-BUD-949 reason=Continuation/delegation gates permaneceram bloqueados por focus-missing/liveNext p3 após limpeza do auto-resume.\n[closure] Completed false-focus fix for autonomy_lane_next_task/liveNext: planned p3/no-priority backlog no longer becomes automatic next local-safe task unless explicitly focused. Runtime reload required before live tool output reflects this selector update.",
+      "verification": "VER-BUD-950-SKIP-P3-AUTONOMY"
     }
   ]
 }

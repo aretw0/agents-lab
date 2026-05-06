@@ -1,48 +1,50 @@
 {
-  "timestamp": "2026-05-06T22:19:51.257Z",
-  "context": "TASK-BUD-949 concluída e validada live: auto-resume agora retorna focusTasks=none-listed, não promove TASK-BUD-947/TASK-BUD-676. Reload gate [snip] runtime-reload anterior foi consumido. [truncated:+19 chars]",
+  "timestamp": "2026-05-06T22:25:34.025Z",
+  "context": "TASK-BUD-950 concluída: autonomy lane selector agora pula planned p3/no-priority por padrão, preserva p3 in-progress e planned p3 apenas com [snip] ASK-BUD-947 como falso foco automático. [truncated:+50 chars]",
   "next_actions": [
-    "selecionar explicitamente próxima task local-safe p1/p2 ou seedar material antes de nova continuação",
-    "não executar TASK-BUD-946/947 automaticamente; ambos são backlog p3 de ruído operador",
-    "delegação simples continua bloqueada até haver foco local-safe e telemetria auto-advance suficiente"
+    "commit source/test + board/handoff",
+    "/reload necessário por alteração runtime",
+    "após reload validar autonomy_lane_next_task não sugere TASK-BUD-946/947 e atualizar delegation readiness"
   ],
-  "blockers": [],
+  "blockers": [
+    "runtime-reload-required-after-autonomy-selector-p3-change"
+  ],
   "recent_validation": [
-    "auto-resume live: focusTasks=none-listed, reload=clear",
-    "context-watchdog.test.ts: 62 passed",
-    "project-validate: clean"
+    "autonomy-task-selector.test.ts: 26 passed",
+    "project-validate: clean",
+    "git diff --check: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-949",
+    "focus": "TASK-BUD-950",
     "canonical_links": [
-      "task:TASK-BUD-949",
-      "task:TASK-BUD-947"
+      "task:TASK-BUD-950",
+      "task:TASK-BUD-946"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T22:19:51.257Z",
+    "generatedAtIso": "2026-05-06T22:25:34.025Z",
     "level": "warn",
-    "percent": 24,
+    "percent": 35,
     "action": "continue",
-    "recommendation": "Pausar auto-continuação ampla; próxima ação deve escolher/seedar foco local-safe real.",
+    "recommendation": "Commitar e reload antes de confiar nos gates live de autonomia/delegação.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T22:19:51.257Z",
+      "atIso": "2026-05-06T22:25:34.025Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 24,
+      "percent": 35,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Pausar auto-continuação ampla; próxima ação deve escolher/seedar foco local-safe real."
+      "recommendation": "Commitar e reload antes de confiar nos gates live de autonomia/delegação."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-949"
+    "TASK-BUD-950"
   ]
 }
