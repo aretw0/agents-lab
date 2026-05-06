@@ -20473,7 +20473,7 @@
     {
       "id": "TASK-BUD-915",
       "description": "Backlog short/mid-term: calibrate behavior monitors to suppress stale feedback and reduce classifier token spend.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         ".pi/monitors/fragility.monitor.json",
@@ -20492,7 +20492,8 @@
         "Keep changes local-first/report-only until explicit approval for broader monitor/provider routing changes."
       ],
       "milestone": "short-mid-monitor-economy-calibration",
-      "notes": "[provenance:human] User requested short/mid-term backlog for pragmatic monitor calibration: avoid delayed feedback and reduce token spend because long-term classifier burn is not viable. [rationale:risk-control] Recurring stale monitor feedback should become a bounded primitive/regression path, not ad hoc dismissal; existing related completed task TASK-BUD-841 exists, but no open backlog item was found for stale-feedback/token-economy calibration.\n[provenance:human] source_task=TASK-BUD-849 reason=Latest fragility feedback was stale after TASK-BUD-913/TASK-BUD-914 had already resolved or backlogged the relevant concern.\n[monitor-feedback] fragility monitor emitted stale/incorrect empty-message warning after a non-empty response and checkpoint/commit sequence. Classify as duplicate/stale candidate for prefilter canary; do not change scope based on it."
+      "notes": "[provenance:human] User requested short/mid-term backlog for pragmatic monitor calibration: avoid delayed feedback and reduce token spend because long-term classifier burn is not viable. [rationale:risk-control] Recurring stale monitor feedback should become a bounded primitive/regression path, not ad hoc dismissal; existing related completed task TASK-BUD-841 exists, but no open backlog item was found for stale-feedback/token-economy calibration.\n[provenance:human] source_task=TASK-BUD-849 reason=Latest fragility feedback was stale after TASK-BUD-913/TASK-BUD-914 had already resolved or backlogged the relevant concern.\n[monitor-feedback] fragility monitor emitted stale/incorrect empty-message warning after a non-empty response and checkpoint/commit sequence. Classify as duplicate/stale candidate for prefilter canary; do not change scope based on it.\n[closure] Acceptance met via TASK-BUD-938..941 and TASK-BUD-916. No classifier provider/settings apply was performed; runtime code changed in monitor-provider output, so reload is recommended before relying on live startup behavior.",
+      "verification": "VER-BUD-915-MONITOR-ECONOMY-CALIBRATION"
     },
     {
       "id": "TASK-BUD-916",

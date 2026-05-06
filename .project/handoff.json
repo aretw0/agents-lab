@@ -1,50 +1,50 @@
 {
-  "timestamp": "2026-05-06T19:52:31.474Z",
-  "context": "TASK-BUD-936 concluída e commitada. Próxima fatia conservadora do auto-resume: TASK-BUD-916, apenas investigação/read-only + documentação/tes [snip] ão aplicar overrides/settings/provider. [truncated:+17 chars]",
-  "current_tasks": [
-    "TASK-BUD-915"
-  ],
+  "timestamp": "2026-05-06T19:56:23.306Z",
+  "context": "TASK-BUD-915 concluída: stale feedback/token-economy calibration consolidada com incidentes, prefilter puro, tool report-only, rollout guardr [snip] e downgrade de warning divergente-only. [truncated:+5 chars]",
   "next_actions": [
-    "localizar warning monitor-provider divergent overrides",
-    "avaliar se há dedupe/downgrade local-safe sem tocar settings",
-    "se não houver escopo seguro, registrar proposta/rollback e parar"
+    "/reload recomendado antes de validar comportamento live de monitor-provider startup noise",
+    "após reload, continuar TASK-BUD-933 se ainda for foco humano",
+    "manter provider/settings/apply protegidos"
   ],
   "blockers": [
-    "protected-scope-approval-required-for-monitor-provider-apply-or-settings"
+    "runtime-reload-recommended-after-monitor-provider-output-change"
   ],
   "recent_validation": [
-    "guardrails-unattended-continuation-surface.test.ts: 12 passed",
-    "project-validate: clean",
-    "git clean"
+    "monitor-runtime-contract.test.ts: 9 pass (slice anterior)",
+    "monitor-summary.test.ts: 12 pass",
+    "monitor-provider-patch.test.mjs: 38 pass"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-916",
+    "focus": "TASK-BUD-915",
     "canonical_links": [
-      "task:TASK-BUD-916",
-      "task:TASK-BUD-936"
+      "task:TASK-BUD-915",
+      "task:TASK-BUD-933"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T19:52:31.474Z",
+    "generatedAtIso": "2026-05-06T19:56:23.306Z",
     "level": "ok",
-    "percent": 22,
+    "percent": 27,
     "action": "continue",
-    "recommendation": "TASK-BUD-916 como micro-slice de investigação/documentação; sem mudanças operacionais protegidas."
+    "recommendation": "Checkpoint/board pronto para commit; parar para reload antes de confiar na nova saída live.",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T19:52:31.474Z",
+      "atIso": "2026-05-06T19:56:23.306Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 22,
+      "percent": 27,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "TASK-BUD-916 como micro-slice de investigação/documentação; sem mudanças operacionais protegidas."
+      "recommendation": "Checkpoint/board pronto para commit; parar para reload antes de confiar na nova saída live."
     }
   ],
-  "updated_at": "2026-05-06T19:55:04.504Z"
+  "completed_tasks": [
+    "TASK-BUD-915"
+  ]
 }
