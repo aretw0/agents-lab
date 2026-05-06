@@ -68,8 +68,27 @@ Antes de qualquer protected activation, responder:
 10. Quais termos de privacidade e retenção se aplicam a prompts/código?
 11. Há risco de enviar conteúdo protegido para região/termos não aprovados?
 12. Como rollback remove credenciais/configuração sem resíduo?
+13. Existe login nativo no pi para Alibaba/Qwen/DashScope?
+14. Se não existir, qual fluxo `/login` ou equivalente deve ser criado antes de ativação recorrente?
 
-## 6. Telemetry desejada
+## 6. Login/configuração
+
+Requirement assimilado: provider candidato sem login nativo no pi precisa de um caminho fácil via `/login <provider>` ou equivalente antes de virar rota recorrente, monitor provider ou default.
+
+Para Alibaba, confirmar:
+
+- se `/login qwen-cli` cobre a conta Alibaba free trial ou apenas `chat.qwen.ai`;
+- se DashScope usa API key, OAuth/device-code ou outro mecanismo;
+- se a configuração final deve ser `qwen-cli`, `alibaba`, `dashscope` ou outro provider id;
+- se o segredo pode ficar em env/secret manager sem arquivo versionado;
+- se há refresh/expiração automática ou rotação manual;
+- qual rollback limpa credenciais e provider registration.
+
+Caminho preferido: primeiro descobrir login/auth oficial e só depois propor packet protegido para `/login` nativo ou wrapper equivalente. `models.json` manual pode servir para smoke curto, mas não deve ser a experiência final de assimilação.
+
+Referência local: [`docs/research/provider-login-surface-runway-2026-05.md`](provider-login-surface-runway-2026-05.md).
+
+## 7. Telemetry desejada
 
 | Sinal | Status atual | Necessário antes do canary |
 | --- | --- | --- |
@@ -81,7 +100,7 @@ Antes de qualquer protected activation, responder:
 | Dashboard exportável | desconhecido | screenshot/manual note suficiente para início |
 | Quota reset/expiração | desconhecido | obrigatório antes de gastar trial |
 
-## 7. Canary proposto, ainda não autorizado
+## 8. Canary proposto, ainda não autorizado
 
 ### Fase 0 — intake do dashboard
 
@@ -122,7 +141,7 @@ Somente depois de canary:
 - política de monitores allowlist/exclusion;
 - rollback validado.
 
-## 8. Stop conditions
+## 9. Stop conditions
 
 Parar avaliação se:
 
@@ -135,7 +154,7 @@ Parar avaliação se:
 - qualquer configuração exigir armazenar segredo em repositório;
 - custo do trial começar a consumir crédito rápido demais.
 
-## 9. Postura relativa aos outros providers
+## 10. Postura relativa aos outros providers
 
 | Provider | Postura frente ao Alibaba trial |
 | --- | --- |
@@ -144,7 +163,7 @@ Parar avaliação se:
 | Claude Code | avaliar oportunisticamente em separado; não substituir trial barato para monitores |
 | Kimi/equivalente | permanece candidato paralelo; Alibaba entra como próximo da fila por já ter conta trial |
 
-## 10. Decisão atual
+## 11. Decisão atual
 
 Decision: candidate-only / backlog-priority.
 

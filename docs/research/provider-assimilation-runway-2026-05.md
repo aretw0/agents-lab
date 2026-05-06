@@ -159,8 +159,8 @@ Usar antes de adicionar Kimi, Claude Code, novo tier OpenAI ou outro provider:
 ### Alibaba Cloud / DashScope / Qwen-compatible
 
 - Postura atual: próximo provider candidato na fila porque o operador criou uma conta Alibaba free trial.
-- Risco: limites do trial, unidade de custo, modelos, endpoint, privacidade e telemetry ainda desconhecidos.
-- Próximo passo local-safe: usar [`docs/research/alibaba-provider-candidate-packet-2026-05.md`](alibaba-provider-candidate-packet-2026-05.md) para registrar saldo/modelos/expiração antes de qualquer API key/settings/canary.
+- Risco: limites do trial, unidade de custo, modelos, endpoint, privacidade, login/configuração e telemetry ainda desconhecidos.
+- Próximo passo local-safe: usar [`docs/research/alibaba-provider-candidate-packet-2026-05.md`](alibaba-provider-candidate-packet-2026-05.md) para registrar saldo/modelos/expiração/login antes de qualquer API key/settings/canary.
 
 ### Kimi AI ou outro provider barato
 
@@ -183,7 +183,8 @@ Local-safe/report-only:
 3. definir vocabulário de tiers sem aplicar;
 4. desenhar canaries de migração de monitor-provider;
 5. adicionar testes para consistência advisory e formato de saída;
-6. documentar lacunas de telemetry por provider.
+6. documentar lacunas de telemetry por provider;
+7. documentar se o provider já tem `/login` nativo ou precisa de wrapper equivalente antes da ativação.
 
 Protegido — requer decisão humana explícita antes da ação:
 
@@ -194,7 +195,8 @@ Protegido — requer decisão humana explícita antes da ação:
 5. habilitar switch automático de provider;
 6. mover monitores/classifiers para novo provider;
 7. adicionar API keys, credenciais ou integrações externas;
-8. alterar caps de custo ou política de overage.
+8. alterar caps de custo ou política de overage;
+9. registrar provider/runtime extension ou comando `/login` operacional para um novo provider.
 
 ## Template reutilizável
 
@@ -212,7 +214,8 @@ Quando for hora de entrar em provider infrastructure, responder em um packet:
 6. O que warn/block deve fazer: apenas alertar, sugerir switch, bloquear ou exigir confirmação?
 7. Monitores/classifiers podem usar `openai-codex` quando Copilot acabar, ou só fallback emergencial?
 8. Qual provider candidato recebe o primeiro canary bounded?
-9. Qual rollback: snapshot de settings, commit revert, feature flag ou os três?
+9. Esse provider já tem `/login` nativo no pi? Se não, qual fluxo `/login` ou equivalente será criado antes de uso recorrente?
+10. Qual rollback: snapshot de settings, commit revert, feature flag ou os três?
 
 Enquanto esse packet não existir, manter provider work como report-only e observability-first.
 
@@ -221,7 +224,7 @@ Enquanto esse packet não existir, manter provider work como report-only e obser
 1. Manter runtime atual em provider selecionado explicitamente por humano.
 2. Tratar `openai-codex` como `policy-blocked` localmente até reconciliar o cap configurado com o dashboard oficial.
 3. Não migrar monitores para `openai-codex` automaticamente; se Copilot acabar, usar decisão emergencial explícita, dashboard oficial conferido, ou provider barato em canary.
-4. Priorizar Alibaba free trial como próximo provider candidato, preenchendo saldo/modelos/expiração antes de qualquer runtime.
+4. Priorizar Alibaba free trial como próximo provider candidato, preenchendo saldo/modelos/expiração/login antes de qualquer runtime.
 5. Usar as superfícies de quota após cada reload como fonte única de verdade:
    - `quota_visibility_provider_budgets`;
    - `quota_alerts`;

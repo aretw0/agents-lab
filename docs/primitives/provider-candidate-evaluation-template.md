@@ -44,7 +44,22 @@ Record dashboard/provider facts separately from local estimates.
 
 Rule: if local `blocked` conflicts with official dashboard headroom, call it `policy-blocked` until caps/units/reset are reconciled.
 
-## 4. Telemetry coverage
+## 4. Authentication/login surface
+
+| Question | Answer |
+| --- | --- |
+| Native pi `/login` exists? | yes / no / unknown |
+| Provider id for login |  |
+| Auth method | OAuth / device-code / API key / service token / unknown |
+| Secret storage location | env / secret manager / `~/.pi/agent/auth.json` / unknown |
+| Refresh/expiry behavior known? | yes / no / unknown |
+| Logout/rollback known? | yes / no / unknown |
+| Login-equivalent needed? | yes / no / unknown |
+| Setup can run without writing secrets to repo? | yes / no / unknown |
+
+Rule: if native `/login` is absent, define an equivalent setup flow before recurring use, monitor routing, defaults, or activation.
+
+## 5. Telemetry coverage
 
 | Signal | Status | Notes |
 | --- | --- | --- |
@@ -59,7 +74,7 @@ Rule: if local `blocked` conflicts with official dashboard headroom, call it `po
 
 If telemetry is missing, keep candidate at report-only or manual-canary level.
 
-## 5. Cost-benefit estimate
+## 6. Cost-benefit estimate
 
 | Dimension | Answer |
 | --- | --- |
@@ -74,7 +89,7 @@ If telemetry is missing, keep candidate at report-only or manual-canary level.
 | Main benefit vs current provider |  |
 | Main risk vs current provider |  |
 
-## 6. Privacy and protected scope
+## 7. Privacy and protected scope
 
 | Question | Answer |
 | --- | --- |
@@ -88,7 +103,7 @@ If telemetry is missing, keep candidate at report-only or manual-canary level.
 
 Default: unknown privacy means no protected scope and no automatic routing.
 
-## 7. Monitor/classifier suitability
+## 8. Monitor/classifier suitability
 
 | Check | Result |
 | --- | --- |
@@ -106,7 +121,7 @@ Initial monitor allowlist proposal:
 - excluded until review:
 - never allowed without protected decision:
 
-## 8. Canary plan
+## 9. Canary plan
 
 | Field | Value |
 | --- | --- |
@@ -128,7 +143,7 @@ Suggested phases:
 4. advisory-only route candidate;
 5. protected activation.
 
-## 9. Stop conditions
+## 10. Stop conditions
 
 Stop immediately if any apply:
 
@@ -141,7 +156,7 @@ Stop immediately if any apply:
 - severe quality miss on safety/authorization cases;
 - operator dashboard disagrees with local budget in a way not yet explained.
 
-## 10. Rollback plan
+## 11. Rollback plan
 
 | Mechanism | Ready? | Notes |
 | --- | --- | --- |
@@ -153,7 +168,7 @@ Stop immediately if any apply:
 
 No rollback, no activation.
 
-## 11. Decision summary
+## 12. Decision summary
 
 Decision: candidate-only / canary-ready / advisory-ready / activation-ready / blocked
 
@@ -165,6 +180,7 @@ Required human decision before next step:
 - [ ] model ref allowed?
 - [ ] budget cap accepted?
 - [ ] privacy scope accepted?
+- [ ] login/setup path accepted?
 - [ ] canary cap accepted?
 - [ ] rollback accepted?
 - [ ] activation remains manual/report-only?

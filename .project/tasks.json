@@ -20066,6 +20066,30 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] User created an Alibaba free trial account and wants Alibaba queued as the next provider to assimilate pragmatically, maximizing free trial value before paying any provider. [rationale:risk-control] Free-trial provider evaluation must be tracked before credentials/settings changes so cost, telemetry, privacy, and rollback are explicit.\n[slice-start] Creating Alibaba free-trial provider candidate packet. Report-only; no API key/settings/routing/model/budget/monitor changes.\n[rationale:risk-control] Alibaba free trial is a strong next candidate for cost-saving, but trial value should be measured before any paid spend or protected settings changes. A packet prevents rushed provider assimilation.\n[complete] Alibaba free trial queued as next provider candidate; ready for factual dashboard intake before any protected runtime change.",
       "verification": "VERIFY-BUD-897"
+    },
+    {
+      "id": "TASK-BUD-898",
+      "description": "Define provider login surface requirement for providers without native pi login.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-897"
+      ],
+      "files": [
+        "docs/research/provider-login-surface-runway-2026-05.md",
+        "docs/research/alibaba-provider-candidate-packet-2026-05.md",
+        "docs/research/provider-assimilation-runway-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Record the operator requirement that if a provider has no native login flow in pi, assimilation must include an easy setup path via /login or equivalent.",
+        "Summarize pi's existing provider auth surfaces: models.json API key/env/command resolution and extension registerProvider oauth support for /login.",
+        "Define local-safe design requirements for a provider login wrapper without implementing runtime changes.",
+        "Add Alibaba-specific checklist item to confirm whether native /login exists or whether a custom login extension is needed.",
+        "No provider settings, credentials, API key storage, routeModelRefs, providerBudgets, runtime command registration, or monitor migration changes."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] User clarified provider assimilation should include an easy login/configuration path when the provider lacks native pi login. Related protected lane: TASK-BUD-849. [rationale:operator-simplicity] Provider adoption should not require fragile manual setup; /login or equivalent must be part of the activation packet before runtime provider changes.\n[slice-start] Capturing provider-login requirement as report-only design. No runtime /login command/provider registration/settings changes.\n[rationale:risk-control] The operator wants provider assimilation to include easy configuration via pi /login or equivalent when native login is absent, so authentication UX must be a gate before protected activation.\n[complete] Provider login/setup requirement captured for all future candidate packets; Alibaba now explicitly gated on native `/login` or equivalent before protected activation.",
+      "verification": "VERIFY-BUD-898"
     }
   ]
 }

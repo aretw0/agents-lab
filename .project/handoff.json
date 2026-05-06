@@ -1,54 +1,55 @@
 {
-  "timestamp": "2026-05-06T02:40:39.642Z",
-  "context": "Completed Alibaba free-trial provider candidate assimilation. Operator created Alibaba free trial and wants it queued next to maximize trial [snip] No protected runtime/provider changes. [truncated:+95 chars]",
+  "timestamp": "2026-05-06T02:48:45.450Z",
+  "context": "Completed provider login surface assimilation. User clarified that providers without native pi login need easy setup via /login or equivalent [snip] e/provider/settings/credential changes. [truncated:+157 chars]",
   "next_actions": [
-    "Commit TASK-BUD-897 docs/board checkpoint if dirty.",
-    "Next local-safe slice: prepare an Alibaba free-trial dashboard intake checklist or wait for op [snip] ling auto-charge behavior. [truncated:+72 chars]",
-    "Do not add Alibaba API keys/settings/routeModelRefs/providerBudgets/model refs until protected decision packet."
+    "Commit TASK-BUD-898 docs/board checkpoint if dirty.",
+    "For Alibaba dashboard intake, collect product/API, models, auth method, trial balance/expiry, [snip] covers this Alibaba trial. [truncated:+74 chars]",
+    "Do not implement /login, provider registration, credentials, routeModelRefs, providerBudgets, [snip] K-BUD-849 decision packet. [truncated:+52 chars]"
   ],
   "blockers": [
-    "Alibaba account exists but API/product/model/pricing/expiry/privacy/telemetry are unknown.",
-    "Provider settings/model/API/routing/monitor migration remain protected.",
-    "Paid Alibaba spend is explicitly not authorized."
+    "TASK-BUD-849 remains protected for any provider/model/settings/routing/API/auth runtime changes.",
+    "Alibaba auth/login applicability is unknown until dashboard/API facts are provided."
   ],
   "recent_validation": [
-    "i18n_lint_text sample for docs/research/alibaba-provider-candidate-packet-2026-05.md -> pass",
-    "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-st [snip] es passed, 58 tests passed [truncated:+112 chars]"
+    "safe_marker_check docs/research/provider-login-surface-runway-2026-05.md markers -> pass",
+    "i18n_lint_text sample for provider-login-surface-runway -> pass",
+    "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-st [snip] es passed, 42 tests passed [truncated:+50 chars]"
   ],
   "recent_commits": [
-    "6421e77b docs(quota): calibrate openai codex policy"
+    "0aaf6a02 docs(providers): queue alibaba free trial"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-897",
+    "focus": "TASK-BUD-898",
     "canonical_links": [
-      "task:TASK-BUD-897",
-      "commit:6421e77b"
+      "task:TASK-BUD-898",
+      "task:TASK-BUD-849",
+      "commit:0aaf6a02"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T02:40:39.642Z",
+    "generatedAtIso": "2026-05-06T02:48:45.450Z",
     "level": "ok",
-    "percent": 48,
+    "percent": 27,
     "action": "continue",
-    "recommendation": "commit-task-bud-897-and-continue-report-only-intake-checklist-if-useful",
+    "recommendation": "commit-task-bud-898-then-continue-only-report-only-provider-intake",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T02:40:39.642Z",
+      "atIso": "2026-05-06T02:48:45.450Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 48,
+      "percent": 27,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-897-and-continue-report-only-intake-checklist-if-useful"
+      "recommendation": "commit-task-bud-898-then-continue-only-report-only-provider-intake"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-897"
+    "TASK-BUD-898"
   ]
 }

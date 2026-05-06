@@ -13587,6 +13587,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-06T02:40:24.840Z",
       "evidence": "Created docs/research/alibaba-provider-candidate-packet-2026-05.md recording that the operator created an Alibaba free trial account and wants Alibaba queued as the next provider candidate. The packet is report-only and captures free-trial-first strategy, no paid spend without later explicit decision, unknowns (API/product, models, pricing unit, trial cap/expiry, endpoint/region, privacy, telemetry), phased intake/canary plan, stop conditions, and posture relative to Copilot/OpenAI Codex/Claude Code/Kimi. Updated provider assimilation runway to list Alibaba Cloud/DashScope/Qwen-compatible as the next candidate and link the packet. No API key, settings, routeModelRefs, providerBudgets, model, routing, monitor override, or paid spend change. Validation passed: i18n_lint_text sample -> pass; pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts -> 3 files passed, 58 tests passed."
+    },
+    {
+      "id": "VERIFY-BUD-898",
+      "target": "TASK-BUD-898",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+marker+tests",
+      "timestamp": "2026-05-06T02:48:33.030Z",
+      "evidence": "Assimilated operator requirement that any provider without native pi login must include an easy `/login <provider>` or equivalent setup path before recurring use. Added docs/research/provider-login-surface-runway-2026-05.md summarizing pi auth surfaces from docs/examples: models.json env/literal/command apiKey resolution, registerProvider oauth support for `/login`, OAuth callbacks, credential storage in ~/.pi/agent/auth.json, and examples custom-provider-qwen-cli/custom-provider-gitlab-duo/custom-provider-anthropic. Updated Alibaba packet with a Login/configuração section and provider-assimilation runway with login as a local-safe/protected decision criterion. Updated docs/primitives/provider-candidate-evaluation-template.md with an Authentication/login surface section and required decision checklist item. No runtime `/login`, provider registration, settings, credentials, routeModelRefs, providerBudgets, model/default, or monitor migration changes. Validation: safe_marker_check on provider-login-surface-runway markers -> pass; i18n_lint_text sample -> pass; pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts -> 2 files passed, 42 tests passed. project-validate still reports pre-existing historical board integrity issues unrelated to TASK-BUD-898."
     }
   ]
 }
