@@ -89,6 +89,12 @@ Para esta jornada, “incrível” significa:
 - assimila influências externas como padrões pequenos e mensuráveis;
 - funciona bem em contextos variados de usuário sem depender do laboratório.
 
+## Higiene de planejamento da lane
+
+Atualização local-safe (`TASK-BUD-920`): após auto-resume, os focos `TASK-BUD-925` e `TASK-BUD-931` foram concluídos e `TASK-BUD-849` continua protegido/defer por decisão de protected-focus packet. A continuação local-safe deve realinhar para fatias planejadas da lane, especialmente `TASK-BUD-926`, `TASK-BUD-928`, `TASK-BUD-929` e `TASK-BUD-930`, antes de sínteses mais amplas como `TASK-BUD-921`.
+
+Tentativa dry-run de adicionar dependências explícitas em `TASK-BUD-921` foi bloqueada por protected-coupling herdado de `TASK-BUD-917`; a decisão segura é não forçar a mutação estrutural e manter o alinhamento documentado aqui.
+
 ## Auditoria de referências da lane
 
 Atualização local-safe (`TASK-BUD-923`): a referência planejada a `docs/primitives/control-plane-overnight-local-loop.md` foi corrigida porque o arquivo não existe no repositório atual. A task `TASK-BUD-921` agora aponta para o pacote existente `docs/research/control-plane-long-run-maturity-packet-2026-05-01.md` e para `docs/primitives/nudge-free-local-continuity.md`, mantendo `docs/research/0-8-delegation-long-run-runway.md` como artefato futuro da própria task.

@@ -20578,7 +20578,7 @@
     {
       "id": "TASK-BUD-920",
       "description": "Local-safe planning hygiene pass: reduce board focus mismatch and decompose macro planned items into executable 0.8.0 slices.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-917",
@@ -20597,7 +20597,8 @@
         "Validate with board planning/dependency reports."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:quality] Current planning clarity score is 63 with macro items; improving decomposition increases unattended-safe throughput without touching protected systems.\n[provenance:human] source_task=TASK-BUD-917 reason=Prepare the lane for controlled autonomous continuation."
+      "notes": "[rationale:quality] Current planning clarity score is 63 with macro items; improving decomposition increases unattended-safe throughput without touching protected systems.\n[provenance:human] source_task=TASK-BUD-917 reason=Prepare the lane for controlled autonomous continuation.\n[start] Reducing focus mismatch after auto-resume: completed focus tasks TASK-BUD-925/TASK-BUD-931 are done; TASK-BUD-849 remains protected/defer; local-safe continuation should prefer lane tasks such as TASK-BUD-926/928/929/930 before broader synthesis.\n[complete] Focus mismatch documented and next local-safe queue realigned; protected TASK-BUD-849 remains deferred, not mutated.",
+      "verification": "VERIFY-BUD-920"
     },
     {
       "id": "TASK-BUD-921",

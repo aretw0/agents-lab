@@ -13821,6 +13821,15 @@
       "method": "doc+marker+i18n",
       "timestamp": "2026-05-06T14:35:16.871Z",
       "evidence": "Created docs/research/0-8-local-safe-rollback-cookbook.md with rollback cues for docs-only, board-only, test-only, helper-pure, cleanup, handoff/checkpoint, delegation-readiness, monitor-economy, and CI/CD-prep slices. It defines when commit revert is insufficient and a quick pre-edit checklist. Validation: safe_marker_check passed 6/6 anchors; i18n_lint_text passed for pt-BR summary."
+    },
+    {
+      "id": "VERIFY-BUD-920",
+      "target": "TASK-BUD-920",
+      "target_type": "task",
+      "status": "passed",
+      "method": "board-reports+doc-marker+dependency-dry-run",
+      "timestamp": "2026-05-06T14:38:13.615Z",
+      "evidence": "Performed local-safe planning hygiene after auto-resume. Completed focus tasks TASK-BUD-925 and TASK-BUD-931 were cleared; TASK-BUD-849 was evaluated with autonomy_lane_protected_focus_packet and recommended defer because high risk/protected. Documented realigned local-safe continuation in docs/research/0-8-readiness-map.md toward TASK-BUD-926/928/929/930 before broader TASK-BUD-921. Attempted a dry-run dependency update for TASK-BUD-921 to depend on TASK-BUD-927/928/931; the tool blocked it due existing protected-coupling through TASK-BUD-917, so no structural dependency mutation was forced. Validation: safe_marker_check passed for planning hygiene anchors; board_dependency_health_snapshot has missing=0 and cycle=0; autonomy_lane_next_task with realigned focus selects TASK-BUD-926."
     }
   ]
 }
