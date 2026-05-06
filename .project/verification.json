@@ -14192,6 +14192,15 @@
       "method": "focal smoke test",
       "timestamp": "2026-05-06T21:11:01.259Z",
       "evidence": "Added deterministic JS/TS syntax-hygiene detector and report-only scorecard plumbing. Evidence rows include patternId, language, path, line, severity, snippet, decision, and optional rationale. `tool_hygiene_scorecard` accepts optional project-relative `syntax_files` and exposes findings in `syntaxHygiene` plus summary evidence. Docs added at `docs/primitives/tool-hygiene.md`. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts` -> 14 passed; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-933-SYNTAX-HYGIENE-COMPLETE",
+      "target": "TASK-BUD-933",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal smoke + doc marker validation",
+      "timestamp": "2026-05-06T21:21:53.979Z",
+      "evidence": "TASK-BUD-933 completed. Implemented report-only, deterministic JS/TS syntax-hygiene layer in `tool_hygiene_scorecard`: stable pattern IDs, structured evidence fields, rationale/exception handling, optional `syntax_files` surface, primitive doc, and local-safe lane checklist update. Added calibration to ignore string-only fixture literals and reduce false positives. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts` -> 15 passed; `safe_marker_check` on `docs/research/0-8-local-safe-compounding-lane.md` matched `tool_hygiene_scorecard`, `syntax_files`, `rationale/exception`; `project-validate` clean; `git diff --check` clean. Source/doc commit: 67b903e1."
     }
   ]
 }

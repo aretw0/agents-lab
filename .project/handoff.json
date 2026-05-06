@@ -1,48 +1,50 @@
 {
-  "timestamp": "2026-05-06T21:12:11.922Z",
-  "context": "Retomado TASK-BUD-933. Fatia 1 implementou detector determinístico JS/TS de higiene sintática no scorecard: padrões optional-chain stack, nes [snip] _hygiene_scorecard aceita syntax_files. [truncated:+114 chars]",
-  "current_tasks": [
-    "TASK-BUD-933"
-  ],
+  "timestamp": "2026-05-06T21:22:12.638Z",
+  "context": "TASK-BUD-933 concluída. Syntax-hygiene scorecard agora tem detector JS/TS report-only, surface syntax_files, evidência estruturada, rationale [snip] ão contra ruído de fixture string-only. [truncated:+37 chars]",
   "next_actions": [
-    "commit source/test/docs",
-    "commit board/handoff",
-    "após commit, /reload necessário por alteração runtime de extensão"
+    "commit board/handoff closure",
+    "/reload necessário antes de confiar no detector live atualizado",
+    "selecionar próxima task local-safe via board"
   ],
   "blockers": [
-    "runtime-reload-required-after-tool-hygiene-surface-change"
+    "runtime-reload-required-after-tool-hygiene-detector-change"
   ],
   "recent_validation": [
-    "guardrails-tool-hygiene.test.ts: 14 passed",
-    "project-validate: clean",
-    "git diff --check: clean"
+    "guardrails-tool-hygiene.test.ts: 15 passed",
+    "safe_marker_check 0-8 lane: 3/3 markers",
+    "project-validate: clean"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-933",
     "canonical_links": [
-      "task:TASK-BUD-933"
+      "task:TASK-BUD-933",
+      "commit:67b903e1"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T21:12:11.922Z",
+    "generatedAtIso": "2026-05-06T21:22:12.638Z",
     "level": "ok",
-    "percent": 30,
+    "percent": 33,
     "action": "continue",
-    "recommendation": "Commitar fatia local-safe e pedir reload antes de usar syntax_files live."
+    "recommendation": "Commitar board; depois reload antes de nova validação live do tool_hygiene_scorecard.",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T21:12:11.922Z",
+      "atIso": "2026-05-06T21:22:12.638Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 30,
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar fatia local-safe e pedir reload antes de usar syntax_files live."
+      "recommendation": "Commitar board; depois reload antes de nova validação live do tool_hygiene_scorecard."
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-933"
   ]
 }
