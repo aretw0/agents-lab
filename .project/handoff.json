@@ -1,18 +1,16 @@
 {
-  "timestamp": "2026-05-06T22:25:34.025Z",
-  "context": "TASK-BUD-950 concluída: autonomy lane selector agora pula planned p3/no-priority por padrão, preserva p3 in-progress e planned p3 apenas com [snip] ASK-BUD-947 como falso foco automático. [truncated:+50 chars]",
+  "timestamp": "2026-05-06T22:30:11.206Z",
+  "context": "Reload pós-TASK-BUD-950 validado: autonomy_lane_next_task não sugere mais TASK-BUD-946/947; retorna no-eligible-tasks/protected-focus-require [snip] le e resolvido por evidência posterior. [truncated:+165 chars]",
   "next_actions": [
-    "commit source/test + board/handoff",
-    "/reload necessário por alteração runtime",
-    "após reload validar autonomy_lane_next_task não sugere TASK-BUD-946/947 e atualizar delegation readiness"
+    "seedar ou escolher explicitamente uma task local-safe p1/p2 real",
+    "não promover TASK-BUD-946/947 automaticamente; ficam backlog p3",
+    "delegação simples continua bloqueada até foco local-safe e telemetria auto-advance"
   ],
-  "blockers": [
-    "runtime-reload-required-after-autonomy-selector-p3-change"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "autonomy-task-selector.test.ts: 26 passed",
-    "project-validate: clean",
-    "git diff --check: clean"
+    "autonomy_lane_next_task live: next=none code=local-stop-protected-focus-required",
+    "auto-resume live: reload=clear",
+    "project-validate: clean"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-950",
@@ -22,26 +20,26 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T22:25:34.025Z",
-    "level": "warn",
-    "percent": 35,
+    "generatedAtIso": "2026-05-06T22:30:11.206Z",
+    "level": "ok",
+    "percent": 36,
     "action": "continue",
-    "recommendation": "Commitar e reload antes de confiar nos gates live de autonomia/delegação.",
+    "recommendation": "Parar calibração reativa; próximo passo é seed/seleção explícita de foco local-safe ou decisão humana de canary.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T22:25:34.025Z",
+      "atIso": "2026-05-06T22:30:11.206Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 35,
+      "level": "ok",
+      "percent": 36,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar e reload antes de confiar nos gates live de autonomia/delegação."
+      "recommendation": "Parar calibração reativa; próximo passo é seed/seleção explícita de foco local-safe ou decisão humana de canary."
     }
   ],
   "completed_tasks": [

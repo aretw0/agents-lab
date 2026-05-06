@@ -980,6 +980,18 @@
       "package": "pi-stack",
       "source": "monitor",
       "resolved_by": "TASK-BUD-949"
+    },
+    {
+      "id": "fragility-fragility-moumn0hq",
+      "title": "The agent responded with no substantive content to the user's request, leaving the task unresolved.",
+      "body": "Stale monitor issue resolved by later evidence: the request was answered with TASK-BUD-950 implementation, verification, commits, and explicit next-step summary.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "resolved",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor",
+      "resolved_by": "TASK-BUD-950"
     }
   ]
 }
