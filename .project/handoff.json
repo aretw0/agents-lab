@@ -1,13 +1,8 @@
 {
-  "timestamp": "2026-05-06T16:09:01.864Z",
-  "context": "Backlog do follow-up sanitizado: criado TASK-BUD-933 para incorporar detector determinístico de açúcar sintático ao score de higiene report-o [snip] estes robustos e exceções justificadas. [truncated:+10 chars]",
+  "timestamp": "2026-05-06T16:15:44.787Z",
+  "context": "Adendo de escopo assimilado: açúcar sintático agora fica como regra de higiene language-agnostic (JS/TS como início, expansão cross-language [snip] pt-5.3-codex-spark no playbook/handoff. [truncated:+84 chars]",
   "current_tasks": [
     "TASK-BUD-849"
-  ],
-  "next_actions": [
-    "Context-watch action: level=checkpoint 56% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
-    "Seguir tarefa ativa TASK-BUD-849 até o próximo slice local-safe, com prioridade em organização [snip] providers/models settings. [truncated:+36 chars]",
-    "Se houver novo bloqueio hard-local, fazer pausa com decisão ask-human + recomendação if/then antes de continuar."
   ],
   "blockers": [
     "context-watch-checkpoint-required"
@@ -17,43 +12,50 @@
     "context_watch_continuation_readiness",
     "local_continuity_audit"
   ],
-  "recent_commits": [
-    "39901633"
-  ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
     "canonical_links": [
-      "task:TASK-BUD-849",
-      "task:TASK-BUD-933",
-      "commit:39901633"
+      "task:TASK-BUD-849"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T16:09:01.788Z",
-    "level": "checkpoint",
-    "percent": 53,
-    "action": "checkpoint-refresh",
-    "recommendation": "Handoff atualizado com criação de backlog e preparação para continuar local-safe em silêncio de parâmetros sensíveis."
+    "generatedAtIso": "2026-05-06T16:15:25.502Z",
+    "level": "ok",
+    "action": "continue",
+    "recommendation": "Progress saved; continue bounded local hardening."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T16:09:01.788Z",
+      "atIso": "2026-05-06T16:15:25.502Z",
       "reason": "manual_checkpoint",
-      "level": "checkpoint",
-      "percent": 53,
+      "level": "ok",
+      "percent": 0,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Handoff atualizado com criação de backlog e preparação para continuar local-safe em silêncio de parâmetros sensíveis."
+      "recommendation": "Local slice checkpoint saved."
     },
     {
-      "atIso": "2026-05-06T16:09:01.864Z",
+      "atIso": "2026-05-06T16:15:25.585Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 99,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
+    },
+    {
+      "atIso": "2026-05-06T16:15:44.787Z",
       "reason": "message_end",
       "level": "checkpoint",
-      "percent": 56,
+      "percent": 58,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 55,
@@ -62,5 +64,8 @@
       "action": "write-checkpoint",
       "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
+  ],
+  "next_actions": [
+    "Context-watch action: level=checkpoint 58% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
   ]
 }
