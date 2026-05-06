@@ -21274,6 +21274,30 @@
       "milestone": "delegation-canary-runway",
       "notes": "Seed p1 local-safe após a calibração limpar auto-resume/autonomy false focus. Objetivo: sair do whack-a-mole e preparar um contrato visível para o primeiro canary de delegação simples, sem executar agente ainda.\n[provenance:tangent-approved] source_task=TASK-BUD-950 reason=Após reload, não havia task local-safe p1/p2 elegível; próximo desbloqueio correto é materializar contrato report-only de canary simples antes de delegar.\n[closure] Created report-only contract for the first simple-delegate canary. This is a runway artifact only; no agent dispatch authorized. Next step is human/board selection of exactly one local-safe candidate, then rerun rehearsal packet.",
       "verification": "VER-BUD-951-DELEGATION-CANARY-CONTRACT"
+    },
+    {
+      "id": "TASK-BUD-952",
+      "description": "[P1/local-safe] Definir a lane experimental de qualidade para agentes melhorarem agents-lab com microtarefas seguras e calibráveis.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-951"
+      ],
+      "files": [
+        "docs/research/0-8-agent-quality-calibration-lane-2026-05.md",
+        ".project/tasks.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Escolher e nomear uma lane única para experimentos de agente focados em qualidade do agents-lab.",
+        "Definir escopo permitido: docs, testes, fixtures, rubricas, monitores report-only e pequenos helpers locais; excluir settings/provedores/CI/remote/publish/protected scope por padrão.",
+        "Definir catálogo inicial de microtarefas candidatas para canary simples, todas com arquivos declarados, validação focal e rollback.",
+        "Definir critérios de promoção: quando uma microtarefa pode ir para simple-delegate canary e quando deve ficar local-execute.",
+        "Validar com marker check do documento, `project-validate` e `git diff --check`."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Seed aprovado pelo operador: primeira aplicação de agentes deve ser melhorar a qualidade do agents-lab. Esta task escolhe a lane e prepara material local-safe para calibrar delegação sem executar agente ainda.\n[provenance:human] source_task=TASK-BUD-951 reason=Operador pediu escolher uma lane para experimentar agentes com material de melhorias/calibração de qualidade do agents-lab.\n[closure] Lane chosen: agents-lab quality calibration lane. Recommended first canary candidates are doc-only Candidate A (review rubric) or Candidate D (local-safe canary checklist), after explicit human approval; no dispatch authorized by this task.",
+      "verification": "VER-BUD-952-AGENT-QUALITY-LANE"
     }
   ]
 }

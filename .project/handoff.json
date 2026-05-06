@@ -1,51 +1,49 @@
 {
-  "timestamp": "2026-05-06T22:33:26.108Z",
-  "context": "TASK-BUD-951 concluída: contrato report-only do primeiro canary de delegação simples criado em docs/research/0-8-delegation-simple-canary-con [snip] r rehearsal/auto-advance/focus-missing. [truncated:+194 chars]",
+  "timestamp": "2026-05-06T22:38:54.699Z",
+  "context": "TASK-BUD-952 concluída: lane escolhida é agents-lab quality calibration lane, documentada em docs/research/0-8-agent-quality-calibration-lane [snip] A ou D após aprovação humana explícita. [truncated:+237 chars]",
   "next_actions": [
     "commit doc + board/handoff",
-    "selecionar exatamente uma task local-safe p1/p2 para candidato de canary",
-    "rerun simple_delegate_rehearsal_start_packet só depois de foco concreto declarado"
+    "se operador aprovar, criar task p1 para Candidate A ou Candidate D como primeiro canary simples",
+    "antes de dispatch, rerun simple_delegate_rehearsal_start_packet com foco concreto"
   ],
   "blockers": [
-    "simple-delegate-rehearsal-not-ready",
-    "auto-advance-telemetry-not-ready",
-    "focus-missing-for-delegation"
+    "simple-delegate still requires explicit human approval before dispatch"
   ],
   "recent_validation": [
-    "safe_marker_check: 5/5 markers",
+    "safe_marker_check: 7/7 markers",
     "project-validate: clean",
     "git diff --check: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-951",
+    "focus": "TASK-BUD-952",
     "canonical_links": [
-      "task:TASK-BUD-951"
+      "task:TASK-BUD-952"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T22:33:26.108Z",
+    "generatedAtIso": "2026-05-06T22:38:54.699Z",
     "level": "ok",
-    "percent": 38,
+    "percent": 40,
     "action": "continue",
-    "recommendation": "Não delegar ainda; próximo passo é seleção humana/board de um candidato local-safe concreto.",
+    "recommendation": "Commitar e apresentar lane/candidatos; não disparar agente ainda.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T22:33:26.108Z",
+      "atIso": "2026-05-06T22:38:54.699Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 38,
+      "percent": 40,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Não delegar ainda; próximo passo é seleção humana/board de um candidato local-safe concreto."
+      "recommendation": "Commitar e apresentar lane/candidatos; não disparar agente ainda."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-951"
+    "TASK-BUD-952"
   ]
 }

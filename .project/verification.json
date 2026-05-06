@@ -14255,6 +14255,15 @@
       "method": "document + readiness packet inspection",
       "timestamp": "2026-05-06T22:33:10.488Z",
       "evidence": "Prepared report-only simple-delegate canary contract at `docs/research/0-8-delegation-simple-canary-contract-2026-05.md`. Evidence recorded: agent spawn primitive is ready for one bounded spawn; subagents are READY; provider matrix has one ready/one blocked; simple-delegate start remains blocked by rehearsal/auto-advance/focus-missing; no dispatch is authorized. Validation: safe_marker_check -> 5/5 markers; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-952-AGENT-QUALITY-LANE",
+      "target": "TASK-BUD-952",
+      "target_type": "task",
+      "status": "passed",
+      "method": "document + marker validation",
+      "timestamp": "2026-05-06T22:38:41.329Z",
+      "evidence": "Selected and documented the `agents-lab quality calibration lane` at `docs/research/0-8-agent-quality-calibration-lane-2026-05.md`. The lane is local-safe/runway only and does not authorize agent dispatch. It defines allowed work, protected exclusions, initial microtask catalog (review rubric, stale monitor feedback fixture, no-op edit noise fixture, local-safe canary checklist), promotion criteria, execution ladder, and calibration metrics. Validation: safe_marker_check -> 7/7 markers; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }
