@@ -267,7 +267,7 @@ export async function buildQuotaAlerts(cwd: string, lookbackHours = 24): Promise
     configuredProviders = Object.keys(routeModelRefs);
 
     const days = safeNum(qv.defaultDays) || 30;
-    const status = await analyzeQuota({ days, providerBudgets, providerWindowHours: {} });
+    const status = await analyzeQuota({ days, providerBudgets, providerWindowHours: {}, cwd });
     budgetStatuses = status.providerBudgets;
   } catch {
     // no settings or analysis error — still produce alerts for 429 streak

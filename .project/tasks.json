@@ -19883,6 +19883,32 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] Post-reload validation showed source.sessionRoots includes .sandbox/pi-agent/sessions but scannedFiles still 0 for days=7 because this resumed session file is named 2026-04-28 and was pre-filtered by filename even though it contains current activity. [rationale:risk-control] Quota evidence must not undercount active resumed long sessions; otherwise provider-economy decisions rest on false zero-usage telemetry.\n[slice-start] Implemented scan/window correction: known-root files are parsed without filename prefilter; sessions older than the window are represented by usage events inside the requested window only. No provider strategy/settings changes.\n[rationale:risk-control] Resumed pi sessions can have old filenames while containing current usage events. Filename-only prefiltering creates false zero-usage telemetry, which can mislead provider-economy decisions; windowing events after parse preserves bounded read-only observability without changing …\n[complete] Fixed resumed-session undercount after TASK-BUD-888 reload validation; requires /reload before live quota tools show updated scannedFiles/windowed usage.",
       "verification": "VERIFY-BUD-889"
+    },
+    {
+      "id": "TASK-BUD-890",
+      "description": "Reconcile quota advisory surfaces so route/advisor/alerts agree on provider budget pressure after sandbox session ingestion.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-889"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/quota-alerts.ts",
+        "packages/pi-stack/extensions/handoff-advisor.ts",
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "packages/pi-stack/test/smoke/quota-alerts.test.ts",
+        "packages/pi-stack/test/smoke/handoff-advisor*.test.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Identify why quota_visibility_route reports openai-codex blocked while handoff_advisor reports currentState ok and quota_alerts reports no alerts after the same quota ingestion path.",
+        "Make read-only advisory surfaces use consistent quota/provider budget evidence without auto-switching providers or changing settings.",
+        "Add/adjust focal smoke coverage for the mismatch or document a deliberate semantic difference in output evidence.",
+        "Do not change provider routing, models, costs, API keys, settings, or execute any provider switch."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] Post-reload validation after TASK-BUD-889: quota_visibility_provider_budgets(openai-codex) reports state=blocked/projectedCost≈302%, quota_visibility_route(balanced) reports blocked, but handoff_advisor(current_provider=openai-codex, execute=false) reports currentState=ok and quota_alerts reports total=0. [rationale:risk-control] Provider-economy control surfaces must not disagree silently; inconsistent budget evidence can cause unsafe routing decisions or false calm.\n[slice-start] Starting read-only advisory consistency fix after live mismatch: route/provider_budgets blocked, but handoff_advisor ok and quota_alerts zero. No provider switch/settings/model changes.\n[rationale:risk-control] Budget advisory surfaces gate provider-economy decisions. If they disagree on the same observed quota pressure, the operator can receive false calm or conflicting recovery advice; this fix keeps behavior read-only and evidence-consistent without changing routing/settings.\n[complete] Reconciled read-only quota advisory surfaces around cwd/sessionRoots. Requires /reload before live handoff_advisor, quota_alerts, and provider_readiness_matrix show the aligned budget state.",
+      "verification": "VERIFY-BUD-890"
     }
   ]
 }

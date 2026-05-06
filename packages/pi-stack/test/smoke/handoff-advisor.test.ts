@@ -1,9 +1,13 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   computeHandoffScore,
   isAvailable,
   selectNextProvider,
   resolveHandoffModelRef,
+  buildHandoffAdvisory,
   type ProviderHandoffScore,
 } from "../../extensions/handoff-advisor";
 
@@ -115,6 +119,69 @@ describe("handoff-advisor — selectNextProvider", () => {
 // ---------------------------------------------------------------------------
 // resolveHandoffModelRef (execute path — pure helper)
 // ---------------------------------------------------------------------------
+
+function writeQuotaFixture(cwd: string, provider: string): void {
+  mkdirSync(join(cwd, ".pi"), { recursive: true });
+  writeFileSync(
+    join(cwd, ".pi", "settings.json"),
+    JSON.stringify({
+      piStack: {
+        quotaVisibility: {
+          defaultDays: 7,
+          routeModelRefs: { [provider]: `${provider}/model-1` },
+          providerBudgets: {
+            [provider]: {
+              period: "monthly",
+              unit: "tokens-cost",
+              monthlyQuotaTokens: 10,
+              monthlyQuotaCostUsd: 0.01,
+              warnPct: 50,
+              hardPct: 80,
+            },
+          },
+        },
+      },
+    }),
+    "utf8",
+  );
+
+  const sessionRoot = join(cwd, ".sandbox", "pi-agent", "sessions", "workspace");
+  mkdirSync(sessionRoot, { recursive: true });
+  const stamp = new Date().toISOString();
+  writeFileSync(
+    join(sessionRoot, "2020-01-01T00-00-00-000Z_resumed.jsonl"),
+    [
+      JSON.stringify({ type: "session", timestamp: "2020-01-01T00:00:00.000Z" }),
+      JSON.stringify({
+        type: "message",
+        timestamp: stamp,
+        provider,
+        model: "model-1",
+        message: { role: "assistant" },
+        usage: { input: 20, output: 5, totalTokens: 25, cost: { total: 1 } },
+      }),
+    ].join("\n"),
+    "utf8",
+  );
+}
+
+describe("handoff-advisor — quota evidence integration", () => {
+  it("usa cwd ao avaliar orçamento para sessões sandbox retomadas", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "handoff-quota-"));
+    try {
+      const provider = "test-handoff-provider";
+      writeQuotaFixture(cwd, provider);
+
+      const advisory = await buildHandoffAdvisory(cwd, provider);
+
+      expect(advisory.currentState).toBe("block");
+      expect(advisory.blockedProviders).toContain(provider);
+      expect(advisory.candidates.find((c) => c.provider === provider)?.budgetState).toBe("blocked");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+});
 
 describe("handoff-advisor — resolveHandoffModelRef", () => {
   it("retorna modelRef configurado para o provider", () => {

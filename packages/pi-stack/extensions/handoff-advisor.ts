@@ -129,7 +129,7 @@ export async function buildHandoffAdvisory(
   let routeAdvisory;
   try {
     const days = safeNum(qv.defaultDays) || 30;
-    const status = await analyzeQuota({ days, providerBudgets, providerWindowHours: {} });
+    const status = await analyzeQuota({ days, providerBudgets, providerWindowHours: {}, cwd });
     routeAdvisory = buildRouteAdvisory(status, toRoutingProfile(undefined));
   } catch {
     routeAdvisory = null;

@@ -1,55 +1,56 @@
 {
-  "timestamp": "2026-05-06T02:03:37.948Z",
-  "context": "After reload, TASK-BUD-888 was partially validated: quota_visibility_status now reports source.sessionRoots including the workspace .sandbox/ [snip] etry without provider strategy changes. [truncated:+351 chars]",
+  "timestamp": "2026-05-06T02:13:25.581Z",
+  "context": "Completed read-only quota advisory consistency fix. After TASK-BUD-889 reload validation, quota_visibility_provider_budgets and quota_visibil [snip] ver old-named resumed sandbox sessions. [truncated:+337 chars]",
   "next_actions": [
-    "Commit TASK-BUD-889 code/board checkpoint if dirty.",
-    "Run /reload before trusting live quota_visibility_status/windows/provider_budgets to reflect TASK-BUD-889 windowing fix.",
-    "After reload, rerun quota_visibility_status(days=7) and confirm scannedFiles > 0 and parsedSes [snip] resumed sandbox activity. [truncated:+19 chars]"
+    "Commit TASK-BUD-890 code/board checkpoint if dirty.",
+    "Run /reload before trusting live handoff_advisor, quota_alerts, or provider_readiness_matrix budget states.",
+    "After reload, rerun quota_alerts, handoff_advisor(current_provider=openai-codex), provider_rea [snip] nai-codex budget pressure. [truncated:+77 chars]"
   ],
   "blockers": [
-    "TASK-BUD-889 live effect requires /reload because quota-visibility extension code changed.",
+    "TASK-BUD-890 live effect requires /reload because provider-economy extension code changed.",
     "TASK-BUD-849 remains protected/parked for provider/model/cost/API strategy cha [snip] explicit human focus. [truncated:+12 chars]"
   ],
   "recent_validation": [
-    "quota_visibility_status(days=7) after reload -> source.sessionRoots includes C:\\Users\\aretw\\Do [snip] e TASK-BUD-889 code change [truncated:+77 chars]",
-    "find .sandbox/pi-agent/sessions -type f -name '*.jsonl' -> 11 files, including resumed 2026-04-28 session",
-    "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -> 1 file passed, 37 tests passed"
+    "Post-reload live evidence before fix: quota_visibility_status(days=7) source.sessionRoots incl [snip] iles=66 parsedEvents=13206 [truncated:+26 chars]",
+    "quota_visibility_provider_budgets(openai-codex) -> state=blocked projectedPctCost≈302%",
+    "quota_visibility_route(balanced) -> state=blocked"
   ],
   "recent_commits": [
-    "f87f7230 fix(quota): include sandbox session roots"
+    "f87f7230 fix(quota): include sandbox session roots",
+    "b1582ebd fix(quota): count resumed sandbox usage"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-889",
+    "focus": "TASK-BUD-890",
     "canonical_links": [
+      "task:TASK-BUD-890",
       "task:TASK-BUD-889",
-      "task:TASK-BUD-888",
       "commit:f87f7230"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T02:03:37.948Z",
-    "level": "ok",
-    "percent": 52,
+    "generatedAtIso": "2026-05-06T02:13:25.581Z",
+    "level": "warn",
+    "percent": 26,
     "action": "continue",
-    "recommendation": "commit-task-bud-889-then-reload-validate-quota-windowing",
+    "recommendation": "commit-task-bud-890-then-reload-validate-advisory-consistency",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T02:03:37.948Z",
+      "atIso": "2026-05-06T02:13:25.581Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 52,
+      "level": "warn",
+      "percent": 26,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-889-then-reload-validate-quota-windowing"
+      "recommendation": "commit-task-bud-890-then-reload-validate-advisory-consistency"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-889"
+    "TASK-BUD-890"
   ]
 }

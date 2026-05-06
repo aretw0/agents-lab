@@ -155,7 +155,7 @@ export async function buildProviderReadinessMatrix(cwd: string): Promise<Provide
   if (Object.keys(providerBudgets).length > 0) {
     try {
       const days = safeNum((qv.defaultDays)) || 30;
-      const status = await analyzeQuota({ days, providerBudgets, providerWindowHours: {} });
+      const status = await analyzeQuota({ days, providerBudgets, providerWindowHours: {}, cwd });
       for (const b of status.providerBudgets) {
         budgetStateByProvider[b.provider] = b.state;
       }

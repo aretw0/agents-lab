@@ -1,3 +1,6 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
   buildBudgetAlerts,
@@ -181,6 +184,50 @@ describe("quota-alerts — buildWindowPressureAlerts", () => {
   });
 });
 
+function writeQuotaAlertsFixture(cwd: string, provider: string): void {
+  mkdirSync(join(cwd, ".pi"), { recursive: true });
+  writeFileSync(
+    join(cwd, ".pi", "settings.json"),
+    JSON.stringify({
+      piStack: {
+        quotaVisibility: {
+          defaultDays: 7,
+          routeModelRefs: { [provider]: `${provider}/model-1` },
+          providerBudgets: {
+            [provider]: {
+              period: "monthly",
+              unit: "tokens-cost",
+              monthlyQuotaTokens: 10,
+              monthlyQuotaCostUsd: 0.01,
+              warnPct: 50,
+              hardPct: 80,
+            },
+          },
+        },
+      },
+    }),
+    "utf8",
+  );
+
+  const sessionRoot = join(cwd, ".sandbox", "pi-agent", "sessions", "workspace");
+  mkdirSync(sessionRoot, { recursive: true });
+  writeFileSync(
+    join(sessionRoot, "2020-01-01T00-00-00-000Z_resumed.jsonl"),
+    [
+      JSON.stringify({ type: "session", timestamp: "2020-01-01T00:00:00.000Z" }),
+      JSON.stringify({
+        type: "message",
+        timestamp: new Date().toISOString(),
+        provider,
+        model: "model-1",
+        message: { role: "assistant" },
+        usage: { input: 20, output: 5, totalTokens: 25, cost: { total: 1 } },
+      }),
+    ].join("\n"),
+    "utf8",
+  );
+}
+
 // ---------------------------------------------------------------------------
 // buildQuotaAlerts (integração — sem sessoes reais)
 // ---------------------------------------------------------------------------
@@ -227,5 +274,21 @@ describe("quota-alerts — buildQuotaAlerts", () => {
     expect(result.summary).toHaveProperty("warn");
     expect(result.summary).toHaveProperty("block");
     expect(result.summary).toHaveProperty("total");
+  });
+
+  it("usa cwd ao gerar alertas de orçamento para sessões sandbox retomadas", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "quota-alerts-"));
+    try {
+      const provider = "test-alerts-provider";
+      writeQuotaAlertsFixture(cwd, provider);
+
+      const result = await buildQuotaAlerts(cwd, 24);
+
+      expect(result.summary.block).toBeGreaterThanOrEqual(2);
+      expect(result.alerts.some((a) => a.provider === provider && a.source === "budget")).toBe(true);
+      expect(result.alerts.some((a) => a.provider === provider && a.source === "overage-consent")).toBe(true);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
   });
 });

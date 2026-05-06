@@ -13515,6 +13515,15 @@
       "method": "test",
       "timestamp": "2026-05-06T02:03:26.576Z",
       "evidence": "Updated analyzeQuota to parse all JSONL files in known session roots instead of pre-filtering by filename timestamp, then build a windowed SessionSample for sessions whose original start is older than the requested window but whose usage events fall inside it. This avoids missing resumed long sessions and avoids counting old usage outside the window. Added regression by creating an old-named sandbox session file with a current assistant timestamp and verifying it is counted; missing roots remain safe. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -> 1 file passed, 37 tests passed."
+    },
+    {
+      "id": "VERIFY-BUD-890",
+      "target": "TASK-BUD-890",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T02:13:13.151Z",
+      "evidence": "Fixed quota advisory consistency by passing cwd into analyzeQuota from handoff-advisor, quota-alerts, and provider-readiness. This makes all read-only provider-economy advisory surfaces use the same sandbox-aware quota session roots introduced by TASK-BUD-888/889. Added regression coverage for handoff_advisor and quota_alerts using a temp workspace with a resumed old-named sandbox session and blocked budget; focal pack also covered provider-readiness and quota parser behavior. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -> 4 files passed, 83 tests passed. No provider switch, model routing, API key, cost cap, or settings mutation was performed."
     }
   ]
 }
