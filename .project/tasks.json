@@ -19512,7 +19512,7 @@
     {
       "id": "TASK-BUD-873",
       "description": "Synthesize a local-safe architecture runway map from current line-budget, planning-clarity, and protected-boundary evidence, separating cleanup slices from protected strategic decisions.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-872"
@@ -19526,7 +19526,8 @@
         "List protected decisions that still require human interview separately."
       ],
       "milestone": "architecture-runway",
-      "notes": "[auto-seed] Does not require interview; uses local repo evidence only. Intended to bridge side-quest cleanup back toward stronger architecture work.\n[provenance:human] source_task=TASK-BUD-872 reason=User asked what remains and whether more non-interview seed work can be created before stronger architecture evolution."
+      "notes": "[auto-seed] Does not require interview; uses local repo evidence only. Intended to bridge side-quest cleanup back toward stronger architecture work.\n[provenance:human] source_task=TASK-BUD-872 reason=User asked what remains and whether more non-interview seed work can be created before stronger architecture evolution.\n[auto-chain] Starting architecture runway synthesis after reload. Scope: documentation-only evidence map; no provider/model/settings/API changes.\n[slice-complete] Architecture runway map written. Next local-safe task: TASK-BUD-874 guardrails-core.ts line-budget audit. Rollback: remove docs/research/pi-stack-architecture-runway-2026-05.md and revert this task/verification update.",
+      "verification": "VER-BUD-1238"
     },
     {
       "id": "TASK-BUD-874",
