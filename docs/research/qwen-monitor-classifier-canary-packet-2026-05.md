@@ -2,7 +2,7 @@
 
 Status: protected decision packet / not authorized  
 Tarefa: `TASK-BUD-903`  
-Relacionado: `TASK-BUD-902`, `TASK-BUD-901`, `TASK-BUD-904`, `TASK-BUD-849` protegido  
+Relacionado: `TASK-BUD-902`, `TASK-BUD-901`, `TASK-BUD-904`, `TASK-BUD-906`, `TASK-BUD-849` protegido  
 Casos: [`docs/research/qwen-monitor-classifier-synthetic-cases-2026-05.md`](qwen-monitor-classifier-synthetic-cases-2026-05.md)
 
 ## 1. Decisão requerida
@@ -15,8 +15,10 @@ Para autorizar, o operador deve preencher:
 {
   "approveQwenClassifierCanary": true,
   "providerModel": "dashscope/qwen3.6-flash",
-  "quotaBefore": "remaining/total do dashboard",
+  "quotaBefore": "remaining/total do dashboard após refresh manual",
+  "freeQuotaStop": "enabled | unavailable-with-reason",
   "maxCalls": 10,
+  "executionMode": "serial-no-retry-no-loop",
   "maxTrialQuotaBurnPct": "ex: 1% do modelo candidato",
   "fallbackBeforeCompact": "openai-codex/gpt-5.4-mini ou outro funcional",
   "scope": "synthetic-cases-only-no-protected-content"
@@ -31,8 +33,9 @@ Sem esse payload explícito, manter como report-only.
 | --- | --- |
 | `qwen-plus` baseline respondeu smoke | sim |
 | cheap/fast model escolhido na shortlist | sim: `qwen3.6-flash` por descoberta API/docs |
-| quota remaining/total do cheap/fast registrada | pendente no dashboard |
-| auto-billing/paid spend entendido | pendente |
+| quota remaining/total do cheap/fast registrada | pendente no dashboard após refresh manual |
+| `free quota exhausted stop` ligado ou indisponibilidade justificada | pendente |
+| auto-billing/paid spend entendido | pendente; docs oficiais alertam cobrança pay-as-you-go se quota acabar sem stop |
 | fallback model selecionado antes de compactar | pendente |
 | casos sintéticos prontos | sim, 10 casos |
 | segredo fora do repo | sim, via `DASHSCOPE_API_KEY` env reference |
@@ -63,18 +66,19 @@ Excluído:
 
 ## 4. Procedimento manual sugerido
 
-1. Selecionar `dashscope/qwen3.6-flash` em `/model` ou sessão isolada curta; se o dashboard negar free trial/endpoint/cap, voltar para `qwen-flash` ou `qwen-turbo`.
-2. Registrar quota antes no dashboard Alibaba.
-3. Confirmar fallback model funcional para compactação antes de começar.
-4. Executar os 10 casos em sessão curta, preferencialmente sem histórico grande.
-5. Registrar:
+1. Selecionar `dashscope/qwen3.6-flash` em `/model` ou sessão isolada curta; se o dashboard negar free trial/endpoint/cap, voltar para `qwen-turbo` ou `qwen-flash`.
+2. Registrar quota antes no dashboard Alibaba após refresh manual.
+3. Ligar `free quota exhausted stop` se o dashboard permitir; se não permitir, registrar motivo e reduzir cap manual.
+4. Confirmar fallback model funcional para compactação antes de começar.
+5. Executar os 10 casos em sessão curta, serial, sem retry automático e sem histórico grande.
+6. Registrar:
    - latência aproximada;
    - parse/verdict válido;
    - expected verdict match;
    - quota depois;
    - erros 401/403/429;
    - qualquer drift de idioma/estrutura.
-6. Trocar de volta para provider cockpit/fallback antes de compactar.
+7. Trocar de volta para provider cockpit/fallback antes de compactar.
 
 ## 5. Critérios de aprovação
 
@@ -89,6 +93,7 @@ Canary passa somente se:
   - QWEN-WQ-002;
   - QWEN-WQ-004;
 - burn rate dentro do cap aprovado;
+- `free quota exhausted stop` estava ligado ou a indisponibilidade foi justificada antes do teste;
 - sem auth/rate errors;
 - sem sugestão de migração automática;
 - sem exposição de segredo/protected scope.
@@ -98,6 +103,8 @@ Canary passa somente se:
 Parar imediatamente se:
 
 - 401/403/429;
+- `403 AllocationQuota.FreeTierOnly`;
+- `Allocated quota exceeded` ou `Request rate increased too quickly`;
 - resposta não estruturada em mais de 1 caso;
 - resposta sugere editar settings/migrar monitor sem decisão;
 - quota cai mais que o cap;

@@ -20256,6 +20256,31 @@
       ],
       "milestone": "provider-economy-observability",
       "notes": "[seed] User noted the DashScope API/model research pattern may become a skill in the future. [rationale:primitive-cultivation] Provider catalogs are large and repeated across vendors; a deterministic discovery primitive can prevent ad hoc web/API research."
+    },
+    {
+      "id": "TASK-BUD-906",
+      "description": "Converge Alibaba official documentation into Qwen model selection and protected canary prerequisites.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-904"
+      ],
+      "files": [
+        "docs/research/alibaba-official-docs-qwen-selection-2026-05.md",
+        "docs/research/alibaba-dashscope-api-model-discovery-2026-05.md",
+        "docs/research/alibaba-qwen-llm-shortlist-2026-05.md",
+        "docs/research/qwen-monitor-classifier-canary-packet-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Search and fetch Alibaba/aliyun official documentation for Qwen model list, pricing, free quota/trial, rate limits, billing stop controls, endpoint regions, and tool/function calling support.",
+        "Extract only actionable facts relevant to choosing cheap/fast classifier and coder/delegation candidates, with source URLs and uncertainty markers.",
+        "Update existing DashScope discovery/shortlist/canary docs with any official-doc-backed improvements or blockers.",
+        "Keep all activity local-safe/read-only: no prompt/completion calls, no paid spend, no settings/routing/monitor-provider changes, no API key exposure.",
+        "Conclude with a converged next-step checklist for the protected canary and future provider-model-discovery skill/runbook."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] User asked to squeeze useful official Alibaba documentation into the current Qwen selection/canary path. [rationale:decision-quality] Official docs should reduce dashboard ambiguity before protected canary execution or skill cultivation.\n[slice-start] Official Alibaba docs convergence: model list/pricing/free quota/rate limits/billing stop/regions/tool calling. Read-only docs/API metadata only.\n[rationale:risk-control] Official provider docs can narrow model selection and canary prerequisites without spending quota or changing protected runtime configuration.\n[complete] Official Alibaba docs now converge the next Qwen canary: qwen3.6-flash primary, qwen-turbo cost-floor fallback, qwen3-coder-next coder candidate, freeQuotaStop/dashboard gates required.",
+      "verification": "VERIFY-BUD-906"
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 Status: research / local-safe  
 Tarefa: `TASK-BUD-904`  
-Relacionado: `TASK-BUD-901`, `TASK-BUD-903`, `TASK-BUD-849` protegido
+Relacionado: `TASK-BUD-901`, `TASK-BUD-903`, `TASK-BUD-906`, `TASK-BUD-849` protegido
 
 ## 1. Pergunta respondida
 
@@ -94,7 +94,19 @@ Estas fontes não substituem dashboard/canary, mas ajudam a criar norte:
 | 16x Engineer Qwen3 Coder eval | `https://eval.16x.engineer/blog/qwen3-coder-evaluation-results` | referência externa para avaliar Qwen3 Coder em tarefas de programação |
 | Qwen3-Coder GitHub | `https://github.com/QwenLM/Qwen3-Coder` | fonte do projeto: família Coder é voltada a coding/agentic tasks |
 
-## 7. Recomendação pragmática inicial
+## 7. Convergência com docs oficiais Alibaba
+
+Síntese detalhada: [`docs/research/alibaba-official-docs-qwen-selection-2026-05.md`](alibaba-official-docs-qwen-selection-2026-05.md).
+
+Achados oficiais que mudam o gate:
+
+- `qwen3.6-flash` continua como candidato cheap/fast moderno; docs oficiais também citam `qwen-turbo` como exemplo de modelo leve para classificação/resumo simples, então `qwen-turbo` vira fallback cost-floor se o dashboard favorecer.
+- `qwen3-coder-next` fica confirmado por doc oficial Qwen-Coder como melhor equilíbrio de qualidade de código, velocidade e custo; `qwen3-coder-plus` fica para qualidade máxima.
+- Free quota deve ser confirmada no dashboard por modelo; docs oficiais dizem que `free quota exhausted stop` retorna `403 AllocationQuota.FreeTierOnly` e evita cobrança extra.
+- A página de free quota fala em China Mainland; isso precisa ser reconciliado com nossa observação prática de quota no dashboard internacional antes de qualquer canary.
+- Rate limits são por main account somando API keys/RAM/spaces; canary deve ser serial, sem retry automático.
+
+## 8. Recomendação pragmática inicial
 
 Sem executar novos prompts, a seleção recomendada para preencher a shortlist é:
 
@@ -106,7 +118,7 @@ Sem executar novos prompts, a seleção recomendada para preencher a shortlist �
 
 Regra de escolha final: se dashboard mostrar que `qwen3.6-flash` ou `qwen3-coder-next` não têm free trial/endpoint internacional/controle de gasto, escolher a alternativa mais próxima com quota visível e endpoint `dashscope-intl`.
 
-## 8. Como essa descoberta deve virar runbook/skill no futuro
+## 9. Como essa descoberta deve virar runbook/skill no futuro
 
 Candidato a skill futura: `provider-model-discovery` ou `dashscope-model-discovery`.
 
@@ -116,12 +128,13 @@ Fluxo reutilizável:
 2. consultar endpoint `/compatible-mode/v1/models` da região configurada;
 3. classificar ids por família (`flash`, `plus`, `max`, `coder`, `turbo`, multimodal, embedding);
 4. buscar docs oficiais de pricing/API/model selection;
-5. buscar 2–4 fontes externas para baseline de mercado;
-6. produzir shortlist de 3 modelos por papel;
-7. bloquear execução até dashboard quota/cap/fallback serem preenchidos;
-8. registrar que `/models` não prova quota, preço, latência ou qualidade.
+5. buscar docs oficiais de free quota, free-quota stop e rate limits;
+6. buscar 2–4 fontes externas para baseline de mercado;
+7. produzir shortlist de 3 modelos por papel;
+8. bloquear execução até dashboard quota/cap/fallback/free-quota-stop serem preenchidos;
+9. registrar que `/models` não prova quota, preço, latência ou qualidade.
 
-## 9. Guardrails mantidos
+## 10. Guardrails mantidos
 
 Esta pesquisa não fez:
 

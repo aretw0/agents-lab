@@ -2,7 +2,7 @@
 
 Status: operator-fillable / report-only  
 Tarefa: `TASK-BUD-901`  
-Relacionado: `TASK-BUD-900`, `TASK-BUD-899`, `TASK-BUD-904`, `TASK-BUD-849` protegido
+Relacionado: `TASK-BUD-900`, `TASK-BUD-899`, `TASK-BUD-904`, `TASK-BUD-906`, `TASK-BUD-849` protegido
 
 Objetivo: escolher **somente três** LLMs Alibaba/Qwen para os próximos canaries, apesar do dashboard listar cerca de 100 LLMs. O foco é usar o free trial com disciplina antes de qualquer migração de monitores ou roteamento.
 
@@ -58,10 +58,10 @@ Critério: priorizar custo/latência para monitores e classifiers simples.
 | Tool/function calling | provável para famílias Qwen recentes; confirmar por modelo antes de monitor canary |
 | Structured output esperado | desconhecido até canary dos 10 casos |
 | Preço/unidade | preencher via dashboard/pricing |
-| Motivo da escolha | `/models` retornou `qwen3.6-flash`; naming `flash` e fontes públicas indicam custo/velocidade para tarefas simples; é melhor ponto inicial que enumerar 100 modelos |
-| Stop condition específica | parar se não houver free trial/quota visível no dashboard, se endpoint `dashscope-intl` não aceitar o modelo, ou se burn por chamada exceder cap aprovado |
+| Motivo da escolha | `/models` retornou `qwen3.6-flash`; docs oficiais listam `qwen3.6-flash` entre modelos principais de texto e recomendam `qwen3.6-flash` para tarefas leves/auxiliares; é melhor ponto inicial moderno que enumerar 100 modelos |
+| Stop condition específica | parar se não houver free trial/quota visível no dashboard, se `free quota exhausted stop` não puder ser ligado nem justificado, se endpoint `dashscope-intl` não aceitar o modelo, ou se burn por chamada exceder cap aprovado |
 
-Alternativas se o dashboard negar free trial/endpoint/cap: `qwen-flash`, depois `qwen-turbo`. `qwen-turbo` permanece fallback de custo/legado, não primeira escolha, porque fontes públicas indicam que Flash é a linha custo/velocidade mais atual.
+Alternativas se o dashboard negar free trial/endpoint/cap: `qwen-turbo` como fallback cost-floor porque docs oficiais citam modelos leves como `qwen-turbo` para classificação/resumo simples; `qwen-flash` como alternativa intermediária se tiver quota melhor.
 
 Canary futuro sugerido:
 
@@ -108,7 +108,7 @@ Ao escolher os dois modelos restantes, preencher:
 7. O dashboard mostra usage/burn logo após uma chamada?
 8. A documentação indica contexto real menor que o anunciado?
 
-## 7. Evidência de descoberta API/docs
+## 7. Evidência de descoberta API/docs e docs oficiais
 
 Resumo detalhado: [`docs/research/alibaba-dashscope-api-model-discovery-2026-05.md`](alibaba-dashscope-api-model-discovery-2026-05.md).
 
@@ -118,7 +118,10 @@ Achados importantes:
 - o endpoint China `https://dashscope.aliyuncs.com/compatible-mode/v1/models` retornou `401 invalid_api_key`, consistente com a chave/região internacional atual;
 - `/models` retorna ids, mas não quota/preço/context/tool capability por modelo;
 - docs oficiais Qwen-Coder recomendam `qwen3-coder-next` para equilíbrio código/velocidade/custo e `qwen3-coder-plus` para qualidade máxima;
-- fontes públicas ajudam a orientar: Flash para custo/velocidade, Plus para equilíbrio, Max para qualidade, Coder para programação.
+- fontes públicas ajudam a orientar: Flash para custo/velocidade, Plus para equilíbrio, Max para qualidade, Coder para programação;
+- síntese oficial adicional: [`docs/research/alibaba-official-docs-qwen-selection-2026-05.md`](alibaba-official-docs-qwen-selection-2026-05.md);
+- docs oficiais reforçam `qwen3.6-flash` para tarefas leves e `qwen3-coder-next` para código equilibrado;
+- docs oficiais de free quota exigem dashboard refresh, checagem de `free quota exhausted stop`, e stop em `403 AllocationQuota.FreeTierOnly`.
 
 ## 8. Decision gate para os próximos dois smokes
 
@@ -127,8 +130,10 @@ Só abrir protected packet para smoke cheap/fast + coder se:
 - [ ] `qwen-plus` continuar como baseline, sem repetir chamada desnecessária;
 - [x] cheap/fast escolhido por API/docs como `qwen3.6-flash`;
 - [ ] cheap/fast quota/free trial registrada no dashboard;
+- [ ] `free quota exhausted stop` ligado para cheap/fast ou indisponibilidade justificada;
 - [x] coder escolhido por API/docs como `qwen3-coder-next`;
 - [ ] coder quota/free trial registrada no dashboard;
+- [ ] `free quota exhausted stop` ligado para coder ou indisponibilidade justificada;
 - [ ] auto-billing/paid spend entendido;
 - [ ] prompts sintéticos definidos;
 - [ ] fallback model selecionado antes de compactação;

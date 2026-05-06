@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-06T05:13:51.092Z",
-  "context": "Completed DashScope/Qwen model discovery study after user noted we should use web-search tooling. Read-only /models with DASHSCOPE_API_KEY on [snip] canary packet; no execution authorized. [truncated:+275 chars]",
+  "timestamp": "2026-05-06T05:37:14.936Z",
+  "context": "Completed official Alibaba documentation convergence for Qwen selection/canary. Official docs confirm qwen3.6-flash as light/fast candidate a [snip] and serial-no-retry-no-loop execution. [truncated:+317 chars]",
   "next_actions": [
-    "Commit TASK-BUD-904 docs/board checkpoint if dirty.",
-    "If continuing local-safe: TASK-BUD-905 can evaluate provider-model-discovery skill/runbook.",
-    "Before any canary execution still need dashboard quota/free-trial/cap/fallback confirmation for qwen3.6-flash."
+    "Commit TASK-BUD-906 docs/board checkpoint if dirty.",
+    "Next local-safe: TASK-BUD-905 provider-model-discovery skill/runbook skeleton, using this offi [snip] cs step as required stage. [truncated:+7 chars]",
+    "Before canary execution: operator must confirm qwen3.6-flash quota after dashboard refresh, fr [snip] ct, and explicit approval. [truncated:+43 chars]"
   ],
   "blockers": [
     "TASK-BUD-849 remains protected for monitor/provider/settings/routing/budget changes.",
@@ -12,46 +12,45 @@
     "Current untracked .workflows monitor artifact remains untouched."
   ],
   "recent_validation": [
-    "i18n_lint_text discovery doc sample -> pass",
-    "safe_marker_check discovery doc -> pass",
-    "safe_marker_check shortlist -> pass"
+    "i18n_lint_text official docs sample -> pass",
+    "safe_marker_check official docs -> pass",
+    "safe_marker_check discovery doc -> pass"
   ],
   "recent_commits": [
-    "3c1f3f86 docs(providers): plan qwen monitor fallback",
-    "67880ece docs(monitors): prepare qwen classifier canary"
+    "2d8065b7 docs(providers): document dashscope model discovery"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-904",
+    "focus": "TASK-BUD-906",
     "canonical_links": [
-      "task:TASK-BUD-904",
+      "task:TASK-BUD-906",
       "task:TASK-BUD-905",
-      "commit:3c1f3f86"
+      "commit:2d8065b7"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T05:13:51.092Z",
+    "generatedAtIso": "2026-05-06T05:37:14.936Z",
     "level": "ok",
-    "percent": 35,
+    "percent": 48,
     "action": "continue",
-    "recommendation": "commit-discovery-docs-then-continue-with-skill-runbook-or-dashboard-facts",
+    "recommendation": "commit-official-docs-convergence-then-continue-skill-runbook",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T05:13:51.092Z",
+      "atIso": "2026-05-06T05:37:14.936Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 35,
+      "percent": 48,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-discovery-docs-then-continue-with-skill-runbook-or-dashboard-facts"
+      "recommendation": "commit-official-docs-convergence-then-continue-skill-runbook"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-904"
+    "TASK-BUD-906"
   ]
 }
