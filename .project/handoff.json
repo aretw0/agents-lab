@@ -1,16 +1,14 @@
 {
-  "timestamp": "2026-05-06T18:07:40.575Z",
-  "context": "Auto-resume aplicado conforme instrução: foco TASK-BUD-849 permanece ativo, sem novas frentes abertas. Estado atual permanece bloqueado por c [snip] nditions antes de retomar fluxo normal. [truncated:+200 chars]",
+  "timestamp": "2026-05-06T18:13:12.381Z",
+  "context": "Reaproveitamento pragmático após diagnóstico: o bloqueio atual não vinha de integridade de board nem de git sujo, mas do próprio handoff.json [snip] na quando o estado local estiver limpo. [truncated:+283 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "aguardar desobstrução de stop-conditions"
+    "Context-watch action: level=compact 71% (compact-now) · Compact now and continue from checkpoint.",
+    "se continuidade retornar ok, retomar micro-slice de validação final / fechamento do ticket; se [snip] a com nova causa concreta. [truncated:+29 chars]"
   ],
-  "blockers": [
-    "stop-conditions:invalid",
-    "stop-condition-present"
-  ],
+  "blockers": [],
   "recent_validation": [
     "context_watch_continuation_readiness",
     "local_continuity_audit",
@@ -23,25 +21,38 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T18:07:40.575Z",
+    "generatedAtIso": "2026-05-06T18:13:12.286Z",
     "level": "ok",
-    "percent": 9,
+    "percent": 8,
     "action": "continue",
-    "recommendation": "Continuar em estado de espera controlada; sem mutações locais até gate liberar."
+    "recommendation": "Remover bloqueio de continuidade residual e manter handoff limpo; sem mutar runtime."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T18:07:40.575Z",
+      "atIso": "2026-05-06T18:13:12.286Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 9,
+      "percent": 8,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Continuar em estado de espera controlada; sem mutações locais até gate liberar."
+      "recommendation": "Remover bloqueio de continuidade residual e manter handoff limpo; sem mutar runtime."
+    },
+    {
+      "atIso": "2026-05-06T18:13:12.381Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 71,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }
