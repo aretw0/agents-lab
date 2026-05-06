@@ -14003,6 +14003,15 @@
       "evidence": "Retroactive schema backfill para desbloquear gates locais: evidência não recuperável com segurança histórica.",
       "timestamp": "2026-05-06T16:42:52.779Z",
       "criteria_results": []
+    },
+    {
+      "id": "VER-BUD-1251",
+      "target": "TASK-BUD-849",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Board hygiene normalized end-to-end for TASK-BUD-849:  VERIFY-* references converted, issues resolved_by backfilled, and board debt zeroed (hard=0 soft=0 parked=0) after checkpointed micro-slices.",
+      "timestamp": "2026-05-06T18:17:55.456Z"
     }
   ]
 }
