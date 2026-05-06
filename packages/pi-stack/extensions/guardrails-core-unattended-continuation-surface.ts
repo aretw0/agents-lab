@@ -54,6 +54,24 @@ const LOCAL_CONTINUITY_AUDIT_BOOKKEEPING_PATHS = [
   ".project/handoff.json",
 ];
 
+const LOCAL_CONTINUITY_ADVISORY_BLOCKERS = new Set([
+  "context-watch-compact-required",
+  "context-watch-checkpoint-required",
+  "auto-advance-telemetry-needs-evidence",
+]);
+
+function isLocalContinuityStopBlocker(blocker: string): boolean {
+  const normalized = blocker.trim();
+  if (!normalized) return false;
+  return !LOCAL_CONTINUITY_ADVISORY_BLOCKERS.has(normalized);
+}
+
+function localContinuityStopBlockerEvidence(input: { advisoryCount: number; stopCount: number }): string {
+  if (input.stopCount > 0) return "blocker=present";
+  if (input.advisoryCount > 0) return `blocker=advisory-only count=${input.advisoryCount}`;
+  return "blocker=none";
+}
+
 function isProtectedAuditPath(path: string): boolean {
   const normalized = normalizePathForAudit(path).toLowerCase();
   return normalized === ".pi/settings.json" || normalized === ".obsidian" || normalized.startsWith(".obsidian/") || normalized.startsWith(".github/");
@@ -196,7 +214,8 @@ export function buildLocalContinuityAudit(cwd: string) {
   const expectedPaths = localContinuityExpectedPaths(task);
   const changedPaths = git.paths ?? [];
   const protectedPaths = [...new Set([...changedPaths, ...expectedPaths].filter(isProtectedAuditPath))];
-  const blockers = Array.isArray(handoff.json?.blockers) ? handoff.json.blockers.filter(Boolean) : [];
+  const blockers = Array.isArray(handoff.json?.blockers) ? handoff.json.blockers.filter(Boolean).map(String) : [];
+  const stopBlockers = blockers.filter(isLocalContinuityStopBlocker);
   const audit = buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts({
     optIn: true,
     nowMs: Date.now(),
@@ -234,12 +253,16 @@ export function buildLocalContinuityAudit(cwd: string) {
     stopConditions: {
       readStatus: handoff.status,
       conditions: [
-        { kind: "blocker", present: blockers.length > 0, evidence: blockers.length > 0 ? "blocker=present" : "blocker=none" },
+        {
+          kind: "blocker",
+          present: stopBlockers.length > 0,
+          evidence: localContinuityStopBlockerEvidence({ advisoryCount: blockers.length - stopBlockers.length, stopCount: stopBlockers.length }),
+        },
         { kind: "protected-scope", present: protectedPaths.length > 0, evidence: protectedPaths.length > 0 ? "protected=present" : "protected=none" },
       ],
     },
   });
-  return { ...audit, protectedPaths: protectedPaths.slice(0, 10) };
+  return { ...audit, protectedPaths: protectedPaths.slice(0, 10), advisoryBlockers: blockers.filter((blocker) => !isLocalContinuityStopBlocker(blocker)).slice(0, 10) };
 }
 
 export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI): void {
