@@ -1,7 +1,7 @@
 name: work-quality-classifier
 role: sensor
 description: Classifies work quality issues in agent output
-model: github-copilot/claude-haiku-4.5
+model: dashscope/qwen3.6-flash
 thinking: "off"
 output:
   format: json

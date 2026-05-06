@@ -55,9 +55,10 @@
       "classifierThinking": "off",
       "hedgeWhen": "has_bash",
       "hedgeIncludeProjectContext": false,
-      "hedgeConversationHistory": true,
+      "hedgeConversationHistory": false,
       "classifierModelByProvider": {
-        "openai-codex": "openai-codex/gpt-5.4-mini"
+        "openai-codex": "openai-codex/gpt-5.4-mini",
+        "dashscope": "dashscope/qwen3.6-flash"
       }
     },
     "colonyPilot": {
@@ -179,10 +180,20 @@
           "monthlyQuotaCostUsd": 500,
           "warnPct": 85,
           "hardPct": 98
+        },
+        "dashscope": {
+          "owner": "alibaba-free-trial-local-cap",
+          "period": "monthly",
+          "unit": "tokens-cost",
+          "monthlyQuotaTokens": 250000,
+          "monthlyQuotaCostUsd": 0.01,
+          "warnPct": 70,
+          "hardPct": 90
         }
       },
       "routeModelRefs": {
-        "openai-codex": "openai-codex/gpt-5.3-codex"
+        "openai-codex": "openai-codex/gpt-5.3-codex",
+        "dashscope": "dashscope/qwen3.6-flash"
       }
     },
     "quotaPanel": {

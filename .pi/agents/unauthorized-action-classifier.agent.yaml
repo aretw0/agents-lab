@@ -1,7 +1,7 @@
 name: unauthorized-action-classifier
 role: sensor
 description: Classifies whether agent is about to take an unauthorized action
-model: github-copilot/claude-haiku-4.5
+model: openai-codex/gpt-5.4-mini
 thinking: "off"
 output:
   format: json

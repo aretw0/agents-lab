@@ -28,8 +28,8 @@ describe("settings shape guard", () => {
     assert.ok(cfg && typeof cfg === "object", "piStack.monitorProviderPatch should be an object");
     assert.equal(
       cfg.hedgeConversationHistory,
-      true,
-      "long-run calibration keeps bounded conversation history enabled for hedge",
+      false,
+      "quota-economy calibration keeps hedge conversation history opt-in by default",
     );
   });
 });

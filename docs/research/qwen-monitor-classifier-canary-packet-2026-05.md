@@ -1,15 +1,15 @@
 # Qwen cheap/fast monitor classifier canary packet — 2026-05
 
-Status: protected decision packet / not authorized  
+Status: protected canary executed with operator approval  
 Tarefa: `TASK-BUD-903`  
 Relacionado: `TASK-BUD-902`, `TASK-BUD-901`, `TASK-BUD-904`, `TASK-BUD-906`, `TASK-BUD-849` protegido  
 Casos: [`docs/research/qwen-monitor-classifier-synthetic-cases-2026-05.md`](qwen-monitor-classifier-synthetic-cases-2026-05.md)
 
 ## 1. Decisão requerida
 
-Este packet prepara, mas **não autoriza**, um canary de classifier usando um modelo Alibaba/Qwen cheap/fast.
+Este packet preparou o canary de classifier usando um modelo Alibaba/Qwen cheap/fast. Em 2026-05-06, o operador aprovou explicitamente a estratégia híbrida Qwen/OpenAI para sair do Copilot quota-blocked.
 
-Para autorizar, o operador deve preencher:
+Payload de autorização equivalente:
 
 ```json
 {
@@ -25,7 +25,7 @@ Para autorizar, o operador deve preencher:
 }
 ```
 
-Sem esse payload explícito, manter como report-only.
+A execução permaneceu limitada a casos sintéticos, serial, sem retry/loop e sem alteração automática irreversível.
 
 ## 2. Pré-condições
 
@@ -33,10 +33,10 @@ Sem esse payload explícito, manter como report-only.
 | --- | --- |
 | `qwen-plus` baseline respondeu smoke | sim |
 | cheap/fast model escolhido na shortlist | sim: `qwen3.6-flash` por descoberta API/docs |
-| quota remaining/total do cheap/fast registrada | pendente no dashboard após refresh manual |
-| `free quota exhausted stop` ligado ou indisponibilidade justificada | pendente |
-| auto-billing/paid spend entendido | pendente; docs oficiais alertam cobrança pay-as-you-go se quota acabar sem stop |
-| fallback model selecionado antes de compactar | pendente |
+| quota remaining/total do cheap/fast registrada | pendente no dashboard; cap local conservador configurado |
+| `free quota exhausted stop` ligado ou indisponibilidade justificada | pendente no dashboard; stop manual em 403/429 mantido |
+| auto-billing/paid spend entendido | parcial; docs oficiais alertam cobrança pay-as-you-go se quota acabar sem stop |
+| fallback model selecionado antes de compactar | sim: OpenAI Codex cockpit/fallback |
 | casos sintéticos prontos | sim, 10 casos |
 | segredo fora do repo | sim, via `DASHSCOPE_API_KEY` env reference |
 | runtime settings/monitor migration ausentes | sim |
@@ -124,9 +124,21 @@ Como este packet não altera runtime, rollback do canary manual aprovado é:
 
 Se algum commit futuro alterar provider/monitor settings, rollback deve incluir snapshot/revert explícito antes de ativação.
 
-## 8. Resultado esperado do packet
+## 8. Resultado do canary 2026-05-06
 
-Depois do canary, produzir um destes estados:
+Resumo registrado em [`qwen-monitor-provider-rollout-2026-05.md`](qwen-monitor-provider-rollout-2026-05.md):
+
+| Modelo | Resultado | Uso observado | Decisão |
+| --- | --- | ---: | --- |
+| `qwen3.6-flash` default thinking | 10/10 parseável, 10/10 verdict, 0 falso clean crítico | 10.980 tokens / ~77s | Qualidade ok, custo/latência ruins. |
+| `qwen-turbo` | parou em 2 casos por falso `clean` crítico no QWEN-CH-002 | 379 tokens / ~3s | Barato, mas inseguro. |
+| `qwen3.6-flash` com `enable_thinking=false` | 10/10 parseável, 10/10 verdict, 0 falso clean crítico | 1.922 tokens / ~13s | Aprovado para volume advisory inicial. |
+
+Estado produzido: `classifier-canary-passed` para `commit-hygiene` e `work-quality` usando `qwen3.6-flash` com thinking off.
+
+## 9. Estados possíveis do packet
+
+Depois de futuros canaries, produzir um destes estados:
 
 | Estado | Significado |
 | --- | --- |

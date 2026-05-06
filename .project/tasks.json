@@ -19002,7 +19002,7 @@
     {
       "id": "TASK-BUD-849",
       "description": "Backlog médio prazo: Model Infrastructure para reduzir dependência de provedores específicos e otimizar custo por roteamento dinâmico de modelos.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p2",
       "files": [
         "docs/primitives/model-infrastructure-routing.md",
@@ -19017,7 +19017,7 @@
         "Conectar a agents-as-tools/delegação para desonerar o control plane antes de qualquer colônia"
       ],
       "milestone": "protected-parked-model-infrastructure",
-      "notes": "[rationale:strategy] Pedido explícito do usuário para backlog médio prazo. Não implementar agora: envolve provedores externos, custo, APIs e eventual pesquisa periódica. Foco futuro deve ser independência de provider, roteamento por tarefa e economia antes de ampliar agents-as-tools/delegações/colônia.\n[provenance:human] source_task=none reason=User provided Backlog: Model Infrastructure with provider-independence, task-level routing tiers, token-cost efficiency, API-only infra, and periodic leaderboard learning.\n[evidence:rollback-plan] Report-only rollback evidence now exists at docs/research/model-infrastructure-rollback-plan-2026-05.md and is linked from docs/primitives/model-infrastructure-routing.md. This does not authorize settings/provider/routing/monitor/API-key changes; protected decision remains required.\n[rationale:risk-control] Linking rollback evidence to the protected task improves decision readiness without changing runtime configuration."
+      "notes": "[rationale:strategy] Pedido explícito do usuário para backlog médio prazo. Não implementar agora: envolve provedores externos, custo, APIs e eventual pesquisa periódica. Foco futuro deve ser independência de provider, roteamento por tarefa e economia antes de ampliar agents-as-tools/delegações/colônia.\n[provenance:human] source_task=none reason=User provided Backlog: Model Infrastructure with provider-independence, task-level routing tiers, token-cost efficiency, API-only infra, and periodic leaderboard learning.\n[evidence:rollback-plan] Report-only rollback evidence now exists at docs/research/model-infrastructure-rollback-plan-2026-05.md and is linked from docs/primitives/model-infrastructure-routing.md. This does not authorize settings/provider/routing/monitor/API-key changes; protected decision remains required.\n[rationale:risk-control] Linking rollback evidence to the protected task improves decision readiness without changing runtime configuration.\n[protected-approval] User approved strategy: Qwen/DashScope carries cheap advisory monitor volume; OpenAI Codex remains cockpit/critical fallback; Copilot exits classifier critical path while 429 quota-blocked. User objective: finish provider-economy setup so normal work can resume with minimal quota worry. Next slice: run bounded Qwen classifier canary and document DashScope spend tracking.\n[rationale:risk-control] Protected provider/monitor strategy is now explicitly approved, but changes remain staged through canary, budget evidence, and rollback rather than immediate full migration.\n[evidence:rollout] Concrete protected monitor-provider slice completed as TASK-BUD-912 / VERIFY-BUD-912. Current posture: Copilot out of classifier critical path while 429; DashScope/Qwen handles commit-hygiene and work-quality advisory classifiers with thinking off and local quota cap; OpenAI Codex remains cockpit and critical-monitor fallback. Broader Model Infrastructure remains in-progress/protected for future routing tiers and dashboard/provider-governor maturation."
     },
     {
       "id": "TASK-BUD-850",
@@ -20385,6 +20385,37 @@
       "milestone": "provider-economy-observability",
       "notes": "[provenance:human] User reported GitHub Copilot quota ended with hedge classifier 429 quota exceeded. [rationale:risk-control] Record fresh provider-quota incident as evidence while preserving TASK-BUD-849 protected boundary.\n[slice-start] Recording fresh Copilot classifier 429 incident as report-only evidence. No provider/settings/routing/monitor-provider changes.\n[rationale:risk-control] Fresh quota exhaustion evidence should update the fallback packet while the protected model infrastructure boundary remains intact.\n[complete] Fresh Copilot 429 classifier quota incident recorded; fallback remains report-only/protected.",
       "verification": "VERIFY-BUD-911"
+    },
+    {
+      "id": "TASK-BUD-912",
+      "description": "Execute protected monitor-provider economy rollout after Copilot classifier quota exhaustion.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-849"
+      ],
+      "files": [
+        ".pi/settings.json",
+        ".pi/agents/commit-hygiene-classifier.agent.yaml",
+        ".pi/agents/work-quality-classifier.agent.yaml",
+        ".pi/agents/fragility-classifier.agent.yaml",
+        ".pi/agents/hedge-classifier.agent.yaml",
+        ".pi/agents/unauthorized-action-classifier.agent.yaml",
+        "packages/pi-stack/test/settings-shape-guard.test.mjs",
+        "docs/research/qwen-monitor-provider-rollout-2026-05.md",
+        "docs/research/qwen-monitor-classifier-canary-packet-2026-05.md",
+        "docs/research/alibaba-qwen-llm-shortlist-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Run bounded synthetic Qwen canary with no secrets and no retries.",
+        "Route advisory monitor volume away from Copilot to DashScope/Qwen while preserving OpenAI Codex for critical/cockpit fallback.",
+        "Configure local quota visibility cap for DashScope and document dashboard tracking.",
+        "Validate monitor/settings contract with focused tests and marker/i18n checks.",
+        "Do not push, publish, deploy, or store API keys."
+      ],
+      "milestone": "protected-parked-model-infrastructure",
+      "notes": "[provenance:human] User explicitly approved hybrid Qwen/OpenAI monitor-provider strategy after Copilot quota exhaustion. [rationale:risk-control] Capture the concrete protected rollout slice separately from the broader model-infrastructure umbrella.\n[provenance:human] source_task=TASK-BUD-849 reason=Approved protected execution slice for monitor-provider migration and quota economy.\n[complete] Protected monitor-provider economy rollout complete: advisory monitor volume moved to DashScope/Qwen with thinking off; critical/cockpit fallback remains OpenAI Codex; local DashScope quota cap and dashboard runbook documented.",
+      "verification": "VERIFY-BUD-912"
     }
   ]
 }

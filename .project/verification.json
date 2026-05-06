@@ -13731,6 +13731,15 @@
       "method": "docs+marker+i18n+quota-signal",
       "timestamp": "2026-05-06T06:10:31.551Z",
       "evidence": "Updated docs/research/copilot-monitor-quota-fallback-2026-05.md with the user-reported hedge-classifier 429 quota exceeded incident. Classified current Copilot classifier state as quota-blocked/degraded for monitor use in this window. Clarified safe posture: reduce monitor context/calls locally and avoid retry loops, but do not authorize automatic provider switch, .pi/settings.json changes, monitor provider migration, Qwen canary, API keys, or OpenAI Codex monitor fallback without protected decision. Preserved Qwen canary-only posture and TASK-BUD-849 protected boundary. Validation: safe_marker_check -> pass; i18n_lint_text -> pass; quota_alerts -> block=2; monitor_classify_failure_readiness -> warn total=1 last=hedge dispatch=no authorization=none."
+    },
+    {
+      "id": "VERIFY-BUD-912",
+      "target": "TASK-BUD-912",
+      "target_type": "task",
+      "status": "passed",
+      "method": "canary+tests+inspection",
+      "timestamp": "2026-05-06T12:19:43.419Z",
+      "evidence": "Protected rollout executed with operator approval. Qwen canary: qwen3.6-flash default thinking passed but high burn; qwen-turbo rejected after false clean; qwen3.6-flash with enable_thinking=false passed 10/10 parseable, 10/10 verdicts, 0 critical false clean, 1,922 tokens/~13s. Config routes commit-hygiene/work-quality classifiers to dashscope/qwen3.6-flash with thinking off; fragility/hedge/unauthorized-action remain openai-codex/gpt-5.4-mini. DashScope local cap added to quota visibility. Validation passed: marker checks, i18n lint, node --test focused monitor/settings tests 51/51, focused vitest 26/26, npm test 163/163, npm run ci:smoke:gate 128 files/1172 tests plus sovereignty audits blockers=0."
     }
   ]
 }

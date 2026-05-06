@@ -27,7 +27,7 @@ Próxima execução real deve ser um packet protegido com no máximo **duas cham
 | Tier | Modelo candidato | Status | Quota restante/total | Papel | Próxima ação |
 | --- | --- | --- | --- | --- | --- |
 | baseline curto | `qwen-plus` | smoke passou | 968,126 / 1,000,000 | referência Qwen inicial para prompts curtos | não repetir até ter necessidade clara |
-| cheap/fast | `qwen3.6-flash` | API/docs/public-guidance selecionado; não testado | preencher no dashboard | monitor/classifier barato | confirmar quota/free trial, depois smoke sintético protegido |
+| cheap/fast | `qwen3.6-flash` | canary passou com `enable_thinking=false` | dashboard pendente; uso canary manual 1.922 tokens/10 casos sem thinking | monitor/classifier advisory barato | usar em `commit-hygiene`/`work-quality`; acompanhar dashboard + cap local |
 | coder/delegation | `qwen3-coder-next` | doc oficial recomenda para código; não testado | preencher no dashboard | fatias local-safe pequenas | confirmar quota/free trial, depois smoke sintético protegido |
 
 ## 3. Baseline já provado — qwen-plus
@@ -56,12 +56,12 @@ Critério: priorizar custo/latência para monitores e classifiers simples.
 | Context window | preencher no dashboard/docs |
 | Streaming | documentado genericamente para Qwen/DashScope; confirmar por modelo |
 | Tool/function calling | provável para famílias Qwen recentes; confirmar por modelo antes de monitor canary |
-| Structured output esperado | desconhecido até canary dos 10 casos |
+| Structured output esperado | canary 10/10 parseável com `enable_thinking=false` |
 | Preço/unidade | preencher via dashboard/pricing |
 | Motivo da escolha | `/models` retornou `qwen3.6-flash`; docs oficiais listam `qwen3.6-flash` entre modelos principais de texto e recomendam `qwen3.6-flash` para tarefas leves/auxiliares; é melhor ponto inicial moderno que enumerar 100 modelos |
-| Stop condition específica | parar se não houver free trial/quota visível no dashboard, se `free quota exhausted stop` não puder ser ligado nem justificado, se endpoint `dashscope-intl` não aceitar o modelo, ou se burn por chamada exceder cap aprovado |
+| Stop condition específica | parar se não houver free trial/quota visível no dashboard, se `free quota exhausted stop` não puder ser ligado nem justificado, se endpoint `dashscope-intl` não aceitar o modelo, se `enable_thinking=false` deixar de funcionar, ou se burn por chamada exceder cap aprovado |
 
-Alternativas se o dashboard negar free trial/endpoint/cap: `qwen-turbo` como fallback cost-floor porque docs oficiais citam modelos leves como `qwen-turbo` para classificação/resumo simples; `qwen-flash` como alternativa intermediária se tiver quota melhor.
+Alternativas se o dashboard negar free trial/endpoint/cap: `qwen-flash`/`qwen3-coder-flash` como próximos candidatos. `qwen-turbo` é barato, mas o canary parou cedo por falso `clean` crítico no QWEN-CH-002; não promover sem prompt/canary novo.
 
 Canary futuro sugerido:
 

@@ -1,57 +1,53 @@
 {
-  "timestamp": "2026-05-06T06:10:41.117Z",
-  "context": "Recorded fresh Copilot monitor classifier quota exhaustion incident. Updated docs/research/copilot-monitor-quota-fallback-2026-05.md with hed [snip] s or canary without protected decision. [truncated:+193 chars]",
+  "timestamp": "2026-05-06T12:21:54.666Z",
+  "context": "Committed protected monitor-provider economy rollout slice TASK-BUD-912 after Copilot classifier quota exhaustion. Advisory classifiers commi [snip] dashboard tracking runbook documented. [truncated:+162 chars]",
+  "current_tasks": [
+    "TASK-BUD-849"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-911 docs/board changes if dirty.",
-    "Context is checkpoint; stop or only continue tiny local-safe docs tasks.",
-    "Do not auto-switch monitor provider; use TASK-BUD-849 protected path for fallback/canary."
+    "Manual dashboard-check DashScope free quota/freeQuotaStop when operator is available; do not print/store keys.",
+    "Resume non-provider local-safe work; keep TASK-BUD-849 broader model infrastructure protected/in-progress.",
+    "Do not use qwen-turbo for classifiers without a new passing canary."
   ],
   "blockers": [
-    "Copilot classifier quota exhausted/429.",
-    "TASK-BUD-849 protected for provider/model/settings/routing/monitor-provider changes.",
-    "No Qwen canary execution approval."
+    "Dashboard Alibaba freeQuotaStop/remaining quota still requires human visual confirmation.",
+    "Do not push/publish/deploy unless explicitly requested."
   ],
   "recent_validation": [
-    "safe_marker_check copilot fallback doc -> pass",
-    "i18n_lint_text copilot fallback sample -> pass",
-    "quota_alerts -> block=2"
+    "Qwen canary: qwen3.6-flash enable_thinking=false 10/10 parseable, 10/10 verdicts, 0 critical f [snip] ejected after false clean. [truncated:+43 chars]",
+    "safe_marker_check passed for settings/agents/docs markers.",
+    "i18n_lint_text passed for rollout doc."
   ],
   "recent_commits": [
-    "95f9de2c fix(ci): repair local parity gates",
-    "5b139e76 chore(board): link model rollback evidence"
+    "chore(providers): route monitor volume to qwen"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-911",
+    "focus": "TASK-BUD-849",
     "canonical_links": [
-      "task:TASK-BUD-911",
       "task:TASK-BUD-849",
-      "commit:95f9de2c"
+      "task:TASK-BUD-912"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T06:10:41.117Z",
+    "generatedAtIso": "2026-05-06T12:21:54.666Z",
     "level": "checkpoint",
-    "percent": 64,
+    "percent": 55,
     "action": "checkpoint-refresh",
-    "recommendation": "commit-copilot-429-doc-then-stop-protected-focus",
-    "focus_task_status": "completed"
+    "recommendation": "resume-local-safe-work-provider-rollout-committed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T06:10:41.117Z",
+      "atIso": "2026-05-06T12:21:54.666Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 64,
+      "percent": 55,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-copilot-429-doc-then-stop-protected-focus"
+      "recommendation": "resume-local-safe-work-provider-rollout-committed"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-911"
   ]
 }
