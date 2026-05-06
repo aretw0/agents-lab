@@ -21207,6 +21207,28 @@
       "milestone": "signal-integrity-calibration",
       "notes": "Criada após o reload mostrar `TASK-BUD-947` (p3, sem prioridade explícita do operador) como foco do auto-resume. Isso confirma que o selector ainda promove backlog de ruído/no-priority quando não há foco ativo.\n[provenance:tangent-approved] source_task=TASK-BUD-947 reason=Feedback do operador marcou TASK-BUD-946/947 como sem prioridade; auto-resume não deve promovê-las automaticamente como foco.\n[closure] Completed selector calibration: planned p3/no-priority backlog tasks no longer become automatic auto-resume focus. Runtime reload required before live preview reflects the selector update.",
       "verification": "VER-BUD-948-SKIP-P3-SUCCESSORS"
+    },
+    {
+      "id": "TASK-BUD-949",
+      "description": "[P1/local-safe] Excluir planned p3/no-priority também de hints derivados do auto-resume, não só de preferred successor.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-948"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-operator-brief.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "IDs de tasks planned p3 devem entrar na lista de exclusão usada por `buildAutoResumePromptEnvelopeFromHandoff`.",
+        "Regressão deve cobrir planned p3 aparecendo em next_actions/context/slice_memory links sem virar focus ou texto de prompt.",
+        "Se não houver successor local-safe p1/p2, auto-resume deve preferir `none-listed`/sem foco concreto em vez de promover backlog p3.",
+        "Validar com context-watchdog.test.ts, project-validate e git diff --check."
+      ],
+      "milestone": "signal-integrity-calibration",
+      "notes": "Criada após reload de TASK-BUD-948: o selector deixou de preferir planned p3, mas TASK-BUD-947 ainda entrou por hints derivados do handoff/canonical_links. Completar exclusão no caminho de hints.\n[provenance:tangent-approved] source_task=TASK-BUD-948 reason=Follow-up live: planned p3 ainda foi promovida por hints derivados apesar do filtro de preferred successor.\n[closure] Completed follow-up after reload showed TASK-BUD-947 still came from handoff-derived hints. Planned p3 tasks are now part of excludedTaskIds, not only skipped by preferred successor selection. Runtime reload required before live preview reflects this fix.",
+      "verification": "VER-BUD-949-P3-DERIVED-HINTS"
     }
   ]
 }

@@ -14228,6 +14228,15 @@
       "method": "focal regression test",
       "timestamp": "2026-05-06T22:09:36.020Z",
       "evidence": "Added auto-resume successor guard for planned p3/no-priority tasks. `readProjectPreferredActiveTaskIds` now skips `status=planned` + `priority=p3`, while preserving in-progress tasks. Regression confirms a planned p3 operator-noise backlog task is not promoted and a p1 local-safe successor is selected. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 62 passed; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-949-P3-DERIVED-HINTS",
+      "target": "TASK-BUD-949",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal regression test",
+      "timestamp": "2026-05-06T22:18:21.124Z",
+      "evidence": "Completed planned-p3/no-priority exclusion across derived auto-resume hints. `readProjectProtectedAutoResumeTaskIds` now returns planned p3 IDs as excluded IDs, so `buildAutoResumePromptEnvelopeFromHandoff` filters them from focus hints, next_actions, blockers, and slice_memory links. Regression covers TASK-BUD-999 appearing in next_actions/context/canonical_links while TASK-BUD-998 is selected. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 62 passed; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }

@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-05-06T22:10:00.558Z",
-  "context": "TASK-BUD-948 concluída: auto-resume successor selector agora ignora tasks planned p3/no-priority, evitando promover backlog de ruído como TAS [snip] D-946/947 seguem planned p3 no backlog. [truncated:+34 chars]",
+  "timestamp": "2026-05-06T22:18:29.100Z",
+  "context": "TASK-BUD-949 concluída: planned p3/no-priority agora entra em excludedTaskIds e é filtrada também de hints derivados do handoff, next_actions [snip] pós reload via canonical_links/context. [truncated:+78 chars]",
   "next_actions": [
     "commit source/test + board/handoff",
     "/reload necessário por alteração runtime",
-    "após reload validar auto-resume live não escolhe TASK-BUD-947/TASK-BUD-676"
+    "após reload validar auto-resume live não escolhe TASK-BUD-947/TASK-BUD-676 e não contém esses IDs no prompt"
   ],
   "blockers": [
-    "runtime-reload-required-after-auto-resume-p3-selector-change"
+    "runtime-reload-required-after-auto-resume-p3-derived-hints-change"
   ],
   "recent_validation": [
     "context-watchdog.test.ts: 62 passed",
@@ -15,26 +15,26 @@
     "git diff --check: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-948",
+    "focus": "TASK-BUD-949",
     "canonical_links": [
-      "task:TASK-BUD-948",
+      "task:TASK-BUD-949",
       "task:TASK-BUD-947"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T22:10:00.558Z",
+    "generatedAtIso": "2026-05-06T22:18:29.100Z",
     "level": "warn",
-    "percent": 54,
+    "percent": 23,
     "action": "continue",
     "recommendation": "Commitar; depois reload antes de confiar no preview live.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T22:10:00.558Z",
+      "atIso": "2026-05-06T22:18:29.100Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 54,
+      "percent": 23,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -45,6 +45,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-948"
+    "TASK-BUD-949"
   ]
 }
