@@ -20416,6 +20416,27 @@
       "milestone": "protected-parked-model-infrastructure",
       "notes": "[provenance:human] User explicitly approved hybrid Qwen/OpenAI monitor-provider strategy after Copilot quota exhaustion. [rationale:risk-control] Capture the concrete protected rollout slice separately from the broader model-infrastructure umbrella.\n[provenance:human] source_task=TASK-BUD-849 reason=Approved protected execution slice for monitor-provider migration and quota economy.\n[complete] Protected monitor-provider economy rollout complete: advisory monitor volume moved to DashScope/Qwen with thinking off; critical/cockpit fallback remains OpenAI Codex; local DashScope quota cap and dashboard runbook documented.",
       "verification": "VERIFY-BUD-912"
+    },
+    {
+      "id": "TASK-BUD-913",
+      "description": "Expand context-watch reload-required detection to model catalog and runtime settings surfaces.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-runtime-status.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-runtime-reload.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Treat .sandbox/pi-agent/settings.json enabledModels changes as reload-relevant.",
+        "Treat .sandbox/pi-agent/models.json model catalog changes as reload-relevant.",
+        "Treat .pi/settings.json and .pi/agents/*.agent.yaml classifier override changes as reload-relevant.",
+        "Keep detection bounded and non-recursive.",
+        "Add focused smoke coverage."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[provenance:human] User observed qwen monitor not-found was probably missing reload and noted reload signal coverage is incomplete. [rationale:risk-control] Making reload-required signal cover model/runtime settings reduces hidden provider/monitor failures without changing routing choices. Related protected umbrella: TASK-BUD-849.\n[provenance:human] source_task=TASK-BUD-849 reason=Reload signal gap found during protected Qwen monitor rollout.\n[complete] Reload-required signal now covers model catalog, sandbox enabledModels/settings, project settings, and classifier agent override files with bounded non-recursive checks.\n[validation] Final gate passed after formatting/test refinements: npm run ci:smoke:gate (129 files / 1174 tests, stack-sovereignty blockers=0, sovereignty diff blockers=0).",
+      "verification": "VERIFY-BUD-913"
     }
   ]
 }

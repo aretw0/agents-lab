@@ -1,42 +1,39 @@
 {
-  "timestamp": "2026-05-06T12:51:46.837Z",
-  "context": "Committed evidence for Alibaba Free quota only confirmation and the commit-hygiene qwen3.6-flash not-found hotfix. Local ignored .sandbox/pi- [snip] oad guidance, and qwen-turbo rejection. [truncated:+115 chars]",
+  "timestamp": "2026-05-06T13:26:53.231Z",
+  "context": "Completed protected-adjacent local-safe reload signal slice TASK-BUD-913 under the model infrastructure umbrella. Context-watch reload-requir [snip] er reload-required after session start. [truncated:+198 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
+    "Commit the TASK-BUD-913 reload-signal slice if not already committed.",
     "If same monitor error persists in current session, open /model or restart pi to reload model catalog.",
-    "Resume non-provider local-safe work; qwen-turbo remains rejected without new canary.",
-    "Do not push/publish/deploy unless explicitly requested."
+    "Resume non-provider local-safe work; qwen-turbo remains rejected without new canary."
   ],
   "blockers": [
     ".sandbox/pi-agent/settings.json hotfix is intentionally ignored/local runtime state, not versioned."
   ],
   "recent_validation": [
-    "safe_marker_check passed for .sandbox enabledModels qwen3.6-flash marker.",
-    "safe_marker_check passed for rollout/shortlist docs markers.",
-    "i18n_lint_text passed for runtime-hotfix summary."
-  ],
-  "recent_commits": [
-    "484f6764 docs(providers): record qwen quota stop hotfix"
+    "safe_marker_check passed for runtime reload markers.",
+    "Focused smoke passed: npm run test:smoke -- --run packages/pi-stack/test/smoke/context-watchdo [snip] t.ts (2 files / 60 tests). [truncated:+74 chars]",
+    "Final gate passed: npm run ci:smoke:gate (129 files / 1174 tests, sovereignty blockers=0)."
   ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
     "canonical_links": [
       "task:TASK-BUD-849",
-      "commit:484f6764"
+      "task:TASK-BUD-913"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T12:51:46.837Z",
+    "generatedAtIso": "2026-05-06T13:26:53.231Z",
     "level": "checkpoint",
     "percent": 55,
     "action": "checkpoint-refresh",
-    "recommendation": "resume-local-safe-work-qwen-hotfix-committed"
+    "recommendation": "commit-reload-signal-slice-then-resume-local-safe"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T12:51:46.837Z",
+      "atIso": "2026-05-06T13:26:53.231Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 55,
@@ -46,7 +43,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "resume-local-safe-work-qwen-hotfix-committed"
+      "recommendation": "commit-reload-signal-slice-then-resume-local-safe"
     }
   ]
 }

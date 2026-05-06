@@ -63,6 +63,7 @@ import {
 } from "./context-watchdog-status-formatting";
 import {
 	makeContextWatchdogSourceMtimeReader,
+	readContextWatchdogRuntimeReloadMtimeMs,
 	readContextThresholdOverrides,
 	readDeferredLaneQueueCount,
 	readWatchdogConfig,
@@ -367,7 +368,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	const AUTO_COMPACT_RETRY_DELAY_MS = 2_000;
 	let config = DEFAULT_CONFIG;
 	let thresholdOverrides: ContextThresholdOverrides | undefined;
-	let sourceMtimeMsAtSessionStart: number | undefined;
+	let runtimeReloadCwdAtSessionStart: string | undefined;
+	let runtimeReloadMtimeMsAtSessionStart: number | undefined;
 	let lastAssessment: ContextWatchAssessment | null = null;
 	let lastAnnouncedLevel: ContextWatchdogLevel | null = null;
 	let lastAnnouncedAt = 0;
@@ -424,10 +426,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	} = createContextWatchTimeoutPressure();
 
 	const isReloadRequiredForSourceUpdate = (): boolean => {
-		if (!Number.isFinite(sourceMtimeMsAtSessionStart)) return false;
-		const current = readContextWatchdogSourceMtimeMs();
+		if (!Number.isFinite(runtimeReloadMtimeMsAtSessionStart)) return false;
+		const current = readContextWatchdogRuntimeReloadMtimeMs(
+			runtimeReloadCwdAtSessionStart ?? process.cwd(),
+			readContextWatchdogSourceMtimeMs,
+		);
 		if (!Number.isFinite(current)) return false;
-		return (current as number) > (sourceMtimeMsAtSessionStart as number);
+		return (current as number) > (runtimeReloadMtimeMsAtSessionStart as number);
 	};
 
 	const clearAutoCompactRetryTimer = () => {
@@ -901,7 +906,11 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	pi.on("session_start", (_event, ctx) => {
 		config = readWatchdogConfig(ctx.cwd);
 		thresholdOverrides = readContextThresholdOverrides(ctx.cwd);
-		sourceMtimeMsAtSessionStart = readContextWatchdogSourceMtimeMs();
+		runtimeReloadCwdAtSessionStart = ctx.cwd;
+		runtimeReloadMtimeMsAtSessionStart = readContextWatchdogRuntimeReloadMtimeMs(
+			ctx.cwd,
+			readContextWatchdogSourceMtimeMs,
+		);
 		lastAssessment = null;
 		lastAnnouncedLevel = null;
 		lastAnnouncedAt = 0;

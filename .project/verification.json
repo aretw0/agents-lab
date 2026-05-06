@@ -13740,6 +13740,15 @@
       "method": "canary+tests+inspection",
       "timestamp": "2026-05-06T12:19:43.419Z",
       "evidence": "Protected rollout executed with operator approval. Qwen canary: qwen3.6-flash default thinking passed but high burn; qwen-turbo rejected after false clean; qwen3.6-flash with enable_thinking=false passed 10/10 parseable, 10/10 verdicts, 0 critical false clean, 1,922 tokens/~13s. Config routes commit-hygiene/work-quality classifiers to dashscope/qwen3.6-flash with thinking off; fragility/hedge/unauthorized-action remain openai-codex/gpt-5.4-mini. DashScope local cap added to quota visibility. Validation passed: marker checks, i18n lint, node --test focused monitor/settings tests 51/51, focused vitest 26/26, npm test 163/163, npm run ci:smoke:gate 128 files/1172 tests plus sovereignty audits blockers=0."
+    },
+    {
+      "id": "VERIFY-BUD-913",
+      "target": "TASK-BUD-913",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke+marker",
+      "timestamp": "2026-05-06T13:19:22.462Z",
+      "evidence": "Expanded context-watch reload-required surface to bounded runtime/model files: .pi/settings.json, .sandbox/pi-agent/settings.json, .sandbox/pi-agent/models.json, and shallow .pi/agents/*.agent.yaml/yml overrides. context-watchdog now baselines that runtime reload mtime on session_start and reports reload-required when any covered surface changes after start. Added focused smoke coverage in packages/pi-stack/test/smoke/context-watchdog-runtime-reload.test.ts. Validation: safe_marker_check passed for reload surface markers; npm run test:smoke -- --run packages/pi-stack/test/smoke/context-watchdog-runtime-reload.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts passed 2 files / 60 tests."
     }
   ]
 }

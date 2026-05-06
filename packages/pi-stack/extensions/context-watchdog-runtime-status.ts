@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -10,13 +10,52 @@ import type { ContextThresholdOverrides } from "./custom-footer";
 
 export function makeContextWatchdogSourceMtimeReader(sourceUrl: string): () => number | undefined {
 	const sourcePath = fileURLToPath(sourceUrl);
-	return () => {
-		try {
-			return statSync(sourcePath).mtimeMs;
-		} catch {
-			return undefined;
-		}
-	};
+	return () => readFileMtimeMs(sourcePath);
+}
+
+export const CONTEXT_WATCHDOG_RUNTIME_RELOAD_RELATIVE_PATHS = [
+	".pi/settings.json",
+	".sandbox/pi-agent/settings.json",
+	".sandbox/pi-agent/models.json",
+] as const;
+
+function readFileMtimeMs(filePath: string): number | undefined {
+	try {
+		return statSync(filePath).mtimeMs;
+	} catch {
+		return undefined;
+	}
+}
+
+function maxFiniteMtime(values: Array<number | undefined>): number | undefined {
+	const finite = values.filter((value): value is number => Number.isFinite(value));
+	if (finite.length === 0) return undefined;
+	return Math.max(...finite);
+}
+
+function readAgentOverrideMtimes(cwd: string): number[] {
+	const agentsDir = path.join(cwd, ".pi", "agents");
+	try {
+		return readdirSync(agentsDir)
+			.filter((name) => name.endsWith(".agent.yaml") || name.endsWith(".agent.yml"))
+			.map((name) => readFileMtimeMs(path.join(agentsDir, name)))
+			.filter((value): value is number => Number.isFinite(value));
+	} catch {
+		return [];
+	}
+}
+
+export function readContextWatchdogRuntimeReloadMtimeMs(
+	cwd: string,
+	sourceMtimeReader?: () => number | undefined,
+): number | undefined {
+	return maxFiniteMtime([
+		sourceMtimeReader?.(),
+		...CONTEXT_WATCHDOG_RUNTIME_RELOAD_RELATIVE_PATHS.map((relativePath) => (
+			readFileMtimeMs(path.join(cwd, relativePath))
+		)),
+		...readAgentOverrideMtimes(cwd),
+	]);
 }
 
 export function readContextThresholdOverrides(cwd: string): ContextThresholdOverrides | undefined {
