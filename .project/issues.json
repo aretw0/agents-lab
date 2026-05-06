@@ -932,6 +932,18 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mougj55a",
+      "title": "The agent responded with an empty message to the user’s action-oriented request, leaving the task unresolved without any acknowledgement or handoff.",
+      "body": "Monitor feedback reviewed in current turn: false positive/stale. The prior turn contained a non-empty response plus commits/checkpoints, and the signal is now covered by TASK-BUD-915 stale-feedback prefilter work. Resolved while retaining audit record.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "resolved",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor",
+      "resolved_by": "TASK-BUD-915"
     }
   ]
 }
