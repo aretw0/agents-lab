@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
+import { readContextWatchFreshnessSignals } from "../../extensions/context-watchdog-freshness";
 import contextWatchdogExtension, {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
@@ -1954,6 +1955,27 @@ describe("context-watchdog", () => {
 			expect(notifications.length).toBe(1);
 			expect(notifications[0]?.msg).toContain("noise=0/4 suppressed=0 excessive=no");
 			expect(notifications[0]?.msg).toContain("details=context_watch_status structured payload");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("reads git freshness as clean then dirty without stale state", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-freshness-git-"));
+		try {
+			execFileSync("git", ["init"], { cwd, stdio: "pipe" });
+
+			const clean = readContextWatchFreshnessSignals(cwd, "control-plane-core");
+			expect(clean.dirtySignal).toBe("clean");
+			expect(clean.gitDirty.clean).toBe(true);
+			expect(clean.gitDirty.rowCount).toBe(0);
+
+			writeFileSync(join(cwd, "untracked.txt"), "dirty\n", "utf8");
+			const dirty = readContextWatchFreshnessSignals(cwd, "control-plane-core");
+			expect(dirty.dirtySignal).toBe("dirty");
+			expect(dirty.gitDirty.clean).toBe(false);
+			expect(dirty.gitDirty.rowCount).toBe(1);
+			expect(dirty.gitDirty.summary).toContain("clean=no");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
