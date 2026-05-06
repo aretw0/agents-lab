@@ -1,49 +1,49 @@
 {
-  "timestamp": "2026-05-06T22:50:15.109Z",
-  "context": "TASK-BUD-955 concluída: mini-handoff template agora explicita hard-intent na resposta final ao operador: snapshot do turn_boundary_decision_p [snip] ility moundpy8 via evidência posterior. [truncated:+136 chars]",
+  "timestamp": "2026-05-06T23:00:51.984Z",
+  "context": "TASK-BUD-956 concluída: Candidate D materializado como checklist report-only em docs/research/simple-delegate-local-safe-checklist-2026-05.md [snip] ni8f8 resolvido por evidência corrente. [truncated:+240 chars]",
   "next_actions": [
     "commit docs + board/handoff/issues",
-    "Candidate D aceito; próxima fatia é materializar checklist local-safe como task concreta",
-    "antes de dispatch de agente, usar hard-intent packet e pedir confirmação explícita"
+    "próximo passo: preparar pacote de decisão para canary simples usando checklist Candidate D",
+    "não executar agente sem confirmação explícita"
   ],
   "blockers": [
-    "agent dispatch not authorized yet"
+    "agent dispatch not authorized"
   ],
   "recent_validation": [
-    "safe_marker_check mini-handoff: 5/5",
-    "project-validate: clean",
-    "git diff --check: clean"
+    "checklist marker check: 9/9",
+    "mini-handoff marker check: 4/4",
+    "project-validate: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-955",
+    "focus": "TASK-BUD-956",
     "canonical_links": [
-      "task:TASK-BUD-955"
+      "task:TASK-BUD-956"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T22:50:15.109Z",
+    "generatedAtIso": "2026-05-06T23:00:51.984Z",
     "level": "ok",
-    "percent": 48,
+    "percent": 50,
     "action": "continue",
-    "recommendation": "Commitar; finalizar resposta com hard-intent atual: ask-human/sem dispatch.",
+    "recommendation": "Commitar; final responder com gate determinístico atual e perguntar autorização apenas se for executar canary.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T22:50:15.109Z",
+      "atIso": "2026-05-06T23:00:51.984Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 48,
+      "percent": 50,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar; finalizar resposta com hard-intent atual: ask-human/sem dispatch."
+      "recommendation": "Commitar; final responder com gate determinístico atual e perguntar autorização apenas se for executar canary."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-955"
+    "TASK-BUD-956"
   ]
 }

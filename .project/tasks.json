@@ -21362,6 +21362,29 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "Feedback do operador: a atualização anterior ficou só em soft intent; já existia estrutura hard-intent (`turn_boundary_decision_packet`) para final de turno e ela precisa aparecer explicitamente no template de resposta final.\n[provenance:human] source_task=TASK-BUD-954 reason=Operador apontou lacuna no protocolo de final de turno: hard intent deve ser explícito, não apenas recomendação suave.\n[closure] Operator feedback incorporated: final-turn response standard now explicitly starts from hard intent instead of only soft recommendation/context.",
       "verification": "VER-BUD-955-HARD-INTENT-FINAL"
+    },
+    {
+      "id": "TASK-BUD-956",
+      "description": "[P1/local-safe] Materializar Candidate D como checklist local-safe de canary simples e corrigir taxonomia soft/hard intent.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-955"
+      ],
+      "files": [
+        "docs/research/simple-delegate-local-safe-checklist-2026-05.md",
+        "docs/guides/mini-handoff-template.md"
+      ],
+      "acceptance_criteria": [
+        "Criar checklist Candidate D doc-only para pré-dispatch de simple-delegate com one agent, one task, declared files, timeout, rollback e stop after one slice.",
+        "Checklist deve distinguir texto/docs/templates como soft intent/evidência operacional de hard intent determinístico em tools/runtime/gates.",
+        "Ajustar o mini-handoff template para não chamar template de hard intent; usar linguagem de evidência/snapshot e deixar claro que enforcement determinístico não vive em doc.",
+        "Não autorizar dispatch de agente; apenas preparar material local-safe.",
+        "Validar com marker checks, project-validate e git diff --check."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Operador aceitou Candidate D e corrigiu a taxonomia: hard intent não nasce de template/texto; texto é soft intent/evidência. Hard intent real requer código/tool/runtime determinístico. Esta fatia materializa o checklist e assimila a correção.\n[provenance:human] source_task=TASK-BUD-955 reason=Operador aceitou Candidate D e pediu assimilação da distinção soft vs hard intent antes de seguir.\n[closure] Candidate D materialized. No agent dispatch authorized. Taxonomy corrected: docs guide decisions; deterministic hard intent must live in code/tools/runtime gates.",
+      "verification": "VER-BUD-956-CANDIDATE-D-CHECKLIST"
     }
   ]
 }

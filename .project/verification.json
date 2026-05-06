@@ -14291,6 +14291,15 @@
       "method": "document marker validation",
       "timestamp": "2026-05-06T22:50:03.316Z",
       "evidence": "Updated `docs/guides/mini-handoff-template.md` final operator response block to explicitly require hard-intent snapshot from `turn_boundary_decision_packet` (`decision`, `reasonCode`, `humanActionRequired`, `authorization`, `nextAutoStep`) plus continuation/material blockers. It now separates hard-intent blockers from soft-intent context and requires ask-human + one safe next step when hard intent blocks. Validation: safe_marker_check -> 5/5 markers; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-956-CANDIDATE-D-CHECKLIST",
+      "target": "TASK-BUD-956",
+      "target_type": "task",
+      "status": "passed",
+      "method": "document marker validation",
+      "timestamp": "2026-05-06T23:00:08.463Z",
+      "evidence": "Materialized Candidate D as `docs/research/simple-delegate-local-safe-checklist-2026-05.md` with report-only pre-dispatch checklist: one agent, one task, declared files, timeout, rollback, stop after one slice, validation, budget, cwd isolation, reject conditions, and calibration metrics. Assimilated operator taxonomy: text/docs/templates are soft intent/evidence; hard intent requires deterministic code/tool/runtime gates. Updated `docs/guides/mini-handoff-template.md` to say `Snapshot de gates determinísticos` instead of implying templates are hard intent. Validation: checklist marker check -> 9/9; mini-handoff marker check -> 4/4; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }
