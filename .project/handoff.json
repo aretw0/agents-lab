@@ -1,13 +1,12 @@
 {
-  "timestamp": "2026-05-06T17:58:09.222Z",
-  "context": "Slice curta de surfagem: normalizei TASK-BUD-917 a TASK-BUD-924 (VERIFY-BUD-* -> VER-BUD-*) em .project/tasks.json. Resultado da varredura: s [snip] tégia micro-slice e checkpoints curtos. [truncated:+202 chars]",
+  "timestamp": "2026-05-06T17:59:53.590Z",
+  "context": "Concluí a limpeza soft completa de verification no board: TASK-BUD-886..TASK-BUD-932 já normalizados para VER-*; verificação atual indica sof [snip] e integridade (project-validate clean). [truncated:+106 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "Context-watch action: level=compact 68% (compact-now) · Compact now and continue from checkpoint.",
-    "seguir com próximo bloco 925..932 se aprovado",
-    "confirmar continuidade com handoff/continuation sem expandir escopo"
+    "Context-watch action: level=compact 69% (compact-now) · Compact now and continue from checkpoint.",
+    "decidir em uma próxima micro-slice se vamos normalizar os 65 issue_soft históricos (opcional) [snip] vidência técnica/histórica [truncated:+16 chars]"
   ],
   "blockers": [
     "context-watch-compact-required",
@@ -15,42 +14,43 @@
   ],
   "recent_validation": [
     "node scripts/project/board-debt-hygiene.mjs --json",
-    "project-validate"
+    "project-validate",
+    "context-watch-continuation"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
     "canonical_links": [
       "task:TASK-BUD-849",
-      "task:TASK-BUD-917",
-      "task:TASK-BUD-924"
+      "task:TASK-BUD-886",
+      "task:TASK-BUD-932"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T17:58:09.127Z",
+    "generatedAtIso": "2026-05-06T17:59:53.499Z",
     "level": "ok",
-    "percent": 11,
+    "percent": 10,
     "action": "continue",
-    "recommendation": "Continuar lote pequeno de normalização (TASK-BUD-925..TASK-BUD-932) com checkpoint explícito em cada slice."
+    "recommendation": "Seguir com micro-slice curta apenas após gate de continuação desbloquear; sem abrir escopo agora."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T17:58:09.127Z",
+      "atIso": "2026-05-06T17:59:53.499Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 11,
+      "percent": 10,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Continuar lote pequeno de normalização (TASK-BUD-925..TASK-BUD-932) com checkpoint explícito em cada slice."
+      "recommendation": "Seguir com micro-slice curta apenas após gate de continuação desbloquear; sem abrir escopo agora."
     },
     {
-      "atIso": "2026-05-06T17:58:09.222Z",
+      "atIso": "2026-05-06T17:59:53.590Z",
       "reason": "message_end",
       "level": "compact",
-      "percent": 68,
+      "percent": 69,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 55,
