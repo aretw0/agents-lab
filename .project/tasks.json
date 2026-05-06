@@ -20301,6 +20301,26 @@
       "milestone": "local-safe-maintenance",
       "notes": "[auto-seed] Repo has a persistent untracked .workflows/monitors/*.jsonl artifact, including a large unauthorized-action log. [rationale:risk-control] Generated monitor logs should not pollute commits, but workflow specs must remain versionable if introduced later.\n[slice-start] Classifying .workflows/monitors JSONL as generated runtime logs and adding narrow ignore rule. No deletion or monitor settings changes.\n[rationale:risk-control] Large generated monitor JSONL artifacts should not remain as untracked commit noise, while future .workflows specs must remain discoverable/versionable.\n[complete] Narrow ignore rule added for generated .workflows monitor JSONL logs; workflow specs remain versionable; local logs were not deleted.",
       "verification": "VERIFY-BUD-907"
+    },
+    {
+      "id": "TASK-BUD-908",
+      "description": "Add report-only model infrastructure routing primitive stub for TASK-BUD-849.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/primitives/model-infrastructure-routing.md",
+        "docs/primitives/README.md"
+      ],
+      "acceptance_criteria": [
+        "Create docs/primitives/model-infrastructure-routing.md as a report-only protected-boundary primitive stub that summarizes routing tiers, decision gates, evidence inputs, and non-authorization rules for TASK-BUD-849.",
+        "Link the primitive from docs/primitives/README.md.",
+        "State clearly that the primitive does not authorize routeModelRefs/providerBudgets/default provider/model/monitor migration/API key changes or paid spend.",
+        "Use existing research/interview packets as inputs and keep the slice documentation-only.",
+        "Validate with marker checks and focused docs/package tests if applicable."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] TASK-BUD-849 references docs/primitives/model-infrastructure-routing.md, but the file is missing. [rationale:risk-control] A report-only primitive stub can make the protected boundary explicit without implementing routing.\n[slice-start] Adding report-only model infrastructure routing primitive stub. Docs only; no provider/settings/routing implementation.\n[rationale:risk-control] The protected TASK-BUD-849 references a missing primitive file; adding a non-authorizing contract clarifies gates without changing runtime.\n[complete] Added non-authorizing model infrastructure routing primitive stub and catalog link for TASK-BUD-849.",
+      "verification": "VERIFY-BUD-908"
     }
   ]
 }

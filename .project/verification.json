@@ -13677,6 +13677,15 @@
       "method": "artifact-inspection+ignore-rule+marker+tests",
       "timestamp": "2026-05-06T05:45:45.292Z",
       "evidence": "Inspected untracked .workflows artifacts. Found only generated monitor JSONL logs under .workflows/monitors for commit-hygiene, fragility, hedge, and unauthorized-action; largest file was unauthorized-action/2026-05-06.jsonl at ~10.9 MB. Read-only samples showed session_start/classify_call monitor telemetry with monitorName/agentName/model/cwd/renderedPrompt, consistent with runtime logs. Added narrow .gitignore rule .workflows/monitors/**/*.jsonl, intentionally not ignoring all .workflows so future workflow specs remain versionable. Created docs/research/workflows-monitor-artifact-ignore-2026-05.md documenting evidence, decision, non-actions, validation, and rollback. Did not delete logs, did not alter monitor settings, did not change .pi/settings.json/providers/routing/budgets/defaults. Validation: safe_marker_check .gitignore -> pass; safe_marker_check decision doc -> pass; i18n_lint_text -> pass; git status no longer lists .workflows; git check-ignore shows .gitignore rule matching .workflows/monitors/unauthorized-action/2026-05-06.jsonl; pnpm vitest --run packages/pi-stack/test/smoke/manifest-integrity.test.ts packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts -> 2 files passed, 57 tests passed."
+    },
+    {
+      "id": "VERIFY-BUD-908",
+      "target": "TASK-BUD-908",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+marker+tests",
+      "timestamp": "2026-05-06T05:50:01.089Z",
+      "evidence": "Created docs/primitives/model-infrastructure-routing.md as a report-only/protected-boundary primitive stub for TASK-BUD-849. It defines conceptual routing tiers (cheap-fast, balanced, reliable-critical, coder-delegation, long-context, fallback-emergency), minimum evidence packet fields, maturity states from catalogued through activated, protected canary gate, automation allowed by state, rollback minimum, and current Alibaba/Qwen mapping. It explicitly does not authorize .pi/settings.json, routeModelRefs, providerBudgets, default provider/model, monitor migration, API keys, paid spend, automatic switching, provider use in protected scope, scheduler/loop/offload/CI. Linked it from docs/primitives/README.md. No runtime/provider/settings/routing changes. Validation: i18n_lint_text -> pass; safe_marker_check primitive -> pass; safe_marker_check README -> pass; pnpm vitest --run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/manifest-integrity.test.ts -> 2 files passed, 53 tests passed."
     }
   ]
 }
