@@ -94,6 +94,8 @@ Mostra, por provider configurado em `providerBudgets`:
   - `BLOCK` (>= `hardPct`).
 
 > Observação importante: hoje a medição é por **provider**. Se você usar múltiplas chaves no mesmo provider, o runtime local não separa automaticamente por chave/conta sem tagging adicional.
+>
+> `providerBudgets` é uma política local configurada pela stack: `WARN/BLOCK` indica pressão contra os caps locais e projeções dos logs locais, não necessariamente o estado oficial do dashboard do provider. Para planos como OpenAI Pro, reconcilie periodicamente com o dashboard oficial, especialmente perto de resets semanais e diferenças de timezone.
 
 ### 5) Route advisory (rodízio determinístico, sem auto-switch silencioso)
 

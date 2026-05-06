@@ -1,55 +1,57 @@
 {
-  "timestamp": "2026-05-06T02:28:45.404Z",
-  "context": "Completed report-only monitor-provider candidate packet for Copilot quota exhaustion fallback. It defines why monitor/classifier providers di [snip] odel/API/cost/monitor override changes. [truncated:+203 chars]",
+  "timestamp": "2026-05-06T02:32:46.300Z",
+  "context": "Completed quota calibration documentation after operator supplied official OpenAI Pro dashboard context. Important correction: local quota_vi [snip] s/routing/model/API/budget cap changes. [truncated:+377 chars]",
   "next_actions": [
-    "Commit TASK-BUD-893 docs/board checkpoint if dirty.",
-    "Next local-safe slice: create a reusable provider-candidate-evaluation template for TASK-BUD-8 [snip] tings/API/routing changes. [truncated:+24 chars]",
-    "Protected TASK-BUD-849 can start only after human decision packet for allowed providers, budge [snip] r migration, and rollback. [truncated:+26 chars]"
+    "Commit TASK-BUD-894 docs/board checkpoint if dirty.",
+    "Next local-safe slice: create provider-candidate-evaluation template and quota calibration fie [snip] rotected settings changes. [truncated:+56 chars]",
+    "Protected TASK-BUD-849 still requires explicit decision before changing providerBudgets/routeM [snip] rovider/monitor migration. [truncated:+18 chars]"
   ],
   "blockers": [
-    "openai-codex remains budget-blocked by projected cost pressure; do not silentl [snip] cheap monitor default. [truncated:+10 chars]",
-    "GitHub Copilot quota near exhaustion requires fallback planning but not automatic migration.",
+    "Current local providerBudgets caps appear conservative or mismatched versus of [snip] icial provider outage. [truncated:+69 chars]",
+    "GitHub Copilot quota near exhaustion still needs fallback planning.",
     "Provider settings/model/API/routing/monitor migration remain protected."
   ],
   "recent_validation": [
-    "i18n_lint_text sample for docs/research/monitor-provider-candidate-packet-2026-05.md -> pass",
-    "pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts packages [snip] es passed, 25 tests passed [truncated:+130 chars]"
+    "quota_visibility_provider_budgets(openai-codex) still reports local policy state=blocked under current configured caps",
+    "quota_alerts(24h) still reports local policy block alerts",
+    "i18n_lint_text samples for updated provider docs -> pass"
   ],
   "recent_commits": [
-    "8ab1d818 docs(quota): define provider assimilation runway"
+    "8ab1d818 docs(quota): define provider assimilation runway",
+    "64f35415 docs(monitors): plan provider fallback canary"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-893",
+    "focus": "TASK-BUD-894",
     "canonical_links": [
-      "task:TASK-BUD-893",
+      "task:TASK-BUD-894",
       "task:TASK-BUD-849",
       "commit:8ab1d818"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T02:28:45.404Z",
+    "generatedAtIso": "2026-05-06T02:32:46.300Z",
     "level": "ok",
-    "percent": 39,
+    "percent": 43,
     "action": "continue",
-    "recommendation": "commit-task-bud-893-and-continue-report-only-provider-template",
+    "recommendation": "commit-task-bud-894-and-continue-with-report-only-template",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T02:28:45.404Z",
+      "atIso": "2026-05-06T02:32:46.300Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 39,
+      "percent": 43,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-893-and-continue-report-only-provider-template"
+      "recommendation": "commit-task-bud-894-and-continue-with-report-only-template"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-893"
+    "TASK-BUD-894"
   ]
 }

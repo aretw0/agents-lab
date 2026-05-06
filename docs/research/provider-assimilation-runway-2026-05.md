@@ -31,7 +31,14 @@ Validação pós-reload depois de `TASK-BUD-888`..`TASK-BUD-890`:
 - `provider_readiness_matrix` agora reporta:
   - `ready=0`, `blocked=1`, `entries=1`.
 
-Interpretação: as superfícies de observabilidade agora concordam. Isso ainda não é uma solução de roteamento; é evidência para uma decisão protegida de roteamento.
+Evidência humana posterior:
+
+- o dashboard oficial da OpenAI Pro mostra aproximadamente `73%` de cota semanal disponível;
+- o reset esperado é em torno de `2026-05-11`;
+- o horário exato pode variar por timezone/servidores da OpenAI e às vezes parecer antecipado para o Brasil;
+- o limite rolling de 5h nunca bloqueou o trabalho do operador até aqui.
+
+Interpretação: as superfícies locais de observabilidade agora concordam entre si, mas o `blocked` acima é um estado de **política local/projeção configurada**, não uma prova de indisponibilidade oficial do provider. Antes de qualquer roteamento protegido, precisamos calibrar caps/unidades/janelas locais contra o dashboard oficial.
 
 ## Correção de rumo: disciplina de line budget
 
@@ -48,7 +55,7 @@ Daqui em diante:
 
 | Papel | Necessidade | Risco atual | Postura desejada |
 | --- | --- | --- | --- |
-| Provider de monitores/classifiers | barato, previsível, baixa latência, muitas chamadas pequenas | GitHub Copilot acabando; `openai-codex` projetado como blocked | provider barato allowlisted depois de canary com evidência |
+| Provider de monitores/classifiers | barato, previsível, baixa latência, muitas chamadas pequenas | GitHub Copilot acabando; `openai-codex` está policy-blocked localmente, embora o dashboard oficial ainda mostre headroom | provider barato allowlisted depois de canary com evidência |
 | Modelo principal do control plane | qualidade alta e contexto estável | caro se usado para tudo | preservar para raciocínio complexo e review protegido |
 | Implementação local-safe | boa qualidade em código, custo bounded | overuse em sessões longas | rotear por risco da task e headroom de quota |
 | Review/security/protected | confiabilidade e rastreabilidade | modelo barato errado pode perder risco crítico | confirmação humana explícita antes de mudar tier/provider |
@@ -139,9 +146,9 @@ Usar antes de adicionar Kimi, Claude Code, novo tier OpenAI ou outro provider:
 
 ### OpenAI Codex
 
-- Postura atual: alto valor, mas sob pressão `blocked` projetada.
-- Risco: usar em monitores pode queimar capacidade cara necessária para trabalho pesado.
-- Próximo passo local-safe: manter como fallback explícito ou provider de heavy-work até política de budget ser aprovada.
+- Postura atual: alto valor; localmente aparece `blocked` pela política configurada, mas o dashboard oficial informado pelo operador ainda mostra cerca de `73%` de cota semanal disponível.
+- Risco: confundir projeção local conservadora com quota oficial real, ou usar capacidade valiosa em monitores antes de calibrar budget/janela.
+- Próximo passo local-safe: reconciliar unidade/cap/reset local com o dashboard oficial; manter como fallback explícito ou provider de heavy-work até política de budget ser aprovada.
 
 ### Claude Code
 
@@ -202,8 +209,8 @@ Enquanto esse packet não existir, manter provider work como report-only e obser
 ## Caminho pragmático imediato
 
 1. Manter runtime atual em provider selecionado explicitamente por humano.
-2. Tratar `openai-codex` como `blocked` para long-runs unattended ou trabalho caro.
-3. Não migrar monitores para `openai-codex` automaticamente; se Copilot acabar, usar decisão emergencial explícita ou provider barato em canary.
+2. Tratar `openai-codex` como `policy-blocked` localmente até reconciliar o cap configurado com o dashboard oficial.
+3. Não migrar monitores para `openai-codex` automaticamente; se Copilot acabar, usar decisão emergencial explícita, dashboard oficial conferido, ou provider barato em canary.
 4. Preparar um packet de candidato para o provider barato mais plausível para monitor/classifier.
 5. Usar as superfícies de quota após cada reload como fonte única de verdade:
    - `quota_visibility_provider_budgets`;

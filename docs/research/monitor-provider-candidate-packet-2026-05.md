@@ -18,7 +18,7 @@ Hoje o `monitor-provider-patch` usa defaults provider-aware:
 | `github-copilot` | `github-copilot/claude-haiku-4.5` |
 | `openai-codex` | `openai-codex/gpt-5.4-mini` |
 
-Isso resolve drift de provider, mas não resolve economia. Se Copilot acabar, migrar monitores para `openai-codex` pode funcionar tecnicamente, porém a evidência atual mostra `openai-codex` como `blocked` em budget projetado. Portanto `openai-codex` deve ser fallback explícito ou emergency mode, não default barato silencioso.
+Isso resolve drift de provider, mas não resolve economia. Se Copilot acabar, migrar monitores para `openai-codex` pode funcionar tecnicamente. A evidência local atual mostra `openai-codex` como `blocked` pela política/projeção configurada, enquanto o dashboard oficial informado pelo operador ainda mostra cerca de `73%` de cota semanal disponível. Portanto `openai-codex` deve ser fallback explícito ou emergency mode com checagem de dashboard, não default barato silencioso.
 
 ## Requisitos específicos de monitor/classifier
 
@@ -59,7 +59,7 @@ Próxima evidência necessária:
 
 ### OpenAI Codex
 
-Postura: fallback técnico e provider de trabalho pesado, não default barato.
+Postura: fallback técnico e provider de trabalho pesado, não default barato. O estado `blocked` local é conservador/policy-based até calibrarmos contra o dashboard oficial da OpenAI Pro.
 
 Uso permitido sem decisão protegida:
 
@@ -70,7 +70,7 @@ Uso possível com decisão explícita:
 
 - emergency monitor fallback por tempo limitado;
 - cap curto por sessão;
-- stop condition se `quota_alerts` continuar `block`.
+- stop condition se `quota_alerts` continuar `block` e o dashboard oficial também indicar pressão real, ou se o operador decidir respeitar o cap local mesmo com headroom oficial.
 
 Risco:
 
@@ -195,8 +195,8 @@ Antes de qualquer mudança runtime, o operador deve confirmar:
 | Situação | Ação recomendada |
 | --- | --- |
 | Copilot ainda tem quota | manter, medir, preparar fallback |
-| Copilot acaba e não há candidato aprovado | pausar monitores caros ou usar `openai-codex` só com emergency decision |
-| `openai-codex` segue `blocked` | não usar como default barato |
+| Copilot acaba e não há candidato aprovado | pausar monitores caros ou usar `openai-codex` só com emergency decision + checagem de dashboard |
+| `openai-codex` segue `blocked` localmente, mas dashboard oficial mostra headroom | calibrar policy/cap antes de tratar como indisponível |
 | Kimi/equivalente tem preço e privacidade claros | preparar canary manual pequeno |
 | Provider barato não aparece em quota logs | documentar telemetry gap antes de ativar |
 | Canary passa em qualidade mas custo é incerto | não promover para rota |

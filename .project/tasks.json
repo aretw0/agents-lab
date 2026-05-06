@@ -19973,6 +19973,31 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] Next pragmatic report-only step after provider assimilation runway: prepare the concrete monitor/classifier candidate packet so Copilot quota exhaustion does not force a rushed openai-codex migration. [rationale:risk-control] Monitors make many small calls; moving them to the wrong provider can silently burn scarce quota or degrade governance.\n[slice-start] Writing monitor/classifier provider candidate packet. This is report-only; no settings, model refs, API keys, routing or monitor migration.\n[rationale:risk-control] Monitor classifiers are high-frequency governance calls. With Copilot quota ending and openai-codex already budget-blocked, we need a pre-approved evidence packet and canary plan before any provider migration.\n[complete] Monitor-provider candidate packet ready; next provider work remains report-only until explicit protected decision packet.",
       "verification": "VERIFY-BUD-893"
+    },
+    {
+      "id": "TASK-BUD-894",
+      "description": "Reconcile local quota policy evidence with operator-reported OpenAI Pro dashboard headroom.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-892",
+        "TASK-BUD-893"
+      ],
+      "files": [
+        "docs/research/provider-assimilation-runway-2026-05.md",
+        "docs/research/monitor-provider-candidate-packet-2026-05.md",
+        "docs/guides/quota-visibility.md"
+      ],
+      "acceptance_criteria": [
+        "Record operator evidence that OpenAI Pro dashboard currently shows about 73% weekly quota available and reset around 2026-05-11, with timezone/reset uncertainty.",
+        "Clarify that quota_visibility providerBudgets state is a local policy/projection based on configured caps and local session logs, not an official provider availability fact.",
+        "Adjust provider assimilation language so openai-codex is treated as locally policy-blocked/conservative pending calibration, not necessarily unavailable in the official dashboard.",
+        "Keep provider/model/routing/settings/API/budget caps unchanged.",
+        "Validate docs with i18n lint or inspection."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] User supplied authoritative operator context: OpenAI site shows ~73% weekly quota available for PRO, reset around May 11 with timezone uncertainty; local tools currently report openai-codex blocked from configured monthly cost/token policy. [rationale:risk-control] We must not confuse local policy projections with official provider quota state; calibration is needed before provider strategy decisions.\n[slice-start] Incorporating operator dashboard evidence into provider-economy docs. No settings/routing/provider/model/API/cost cap changes.\n[rationale:risk-control] Provider-budget surfaces currently express local policy projections. The operator has official-dashboard evidence of substantial OpenAI Pro weekly headroom, so docs must separate local policy-block from actual provider availability before we make provider migration decisions.\n[complete] Reconciled local budget policy language with operator-reported OpenAI Pro dashboard headroom.",
+      "verification": "VERIFY-BUD-894"
     }
   ]
 }
