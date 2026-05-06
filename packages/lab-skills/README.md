@@ -10,6 +10,7 @@
 | `cultivate-primitive` | Guia o cultivo de primitivas reutilizáveis — da identificação ao pacote publicado |
 | `stack-feedback` | Coleta feedback estruturado sobre a stack para orientar curadoria e priorização |
 | `session-triage` | Consolida histórico recente (incluindo branch summaries) em pendências executáveis no board canônico |
+| `provider-model-discovery` | Descobre modelos de providers LLM em modo report-only, com inventário read-only, docs oficiais, gates de quota/billing/rate e shortlist para canary protegido |
 | `control-plane-ops` | Guia operação local-first com board canônico, long-runs bounded, handoff, rollout/rollback e mirrors externos |
 | `cross-stack-intake` | Triagem inicial universal (leve/médio/pesado) com primeira fatia local-safe e validação focal |
 

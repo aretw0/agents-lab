@@ -20240,7 +20240,7 @@
     {
       "id": "TASK-BUD-905",
       "description": "Evaluate/cultivate a provider-model-discovery skill from the DashScope research pattern.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-904"
@@ -20255,7 +20255,8 @@
         "Keep first implementation docs-only or disabled; no provider calls beyond read-only metadata discovery and no runtime/settings/routing changes."
       ],
       "milestone": "provider-economy-observability",
-      "notes": "[seed] User noted the DashScope API/model research pattern may become a skill in the future. [rationale:primitive-cultivation] Provider catalogs are large and repeated across vendors; a deterministic discovery primitive can prevent ad hoc web/API research."
+      "notes": "[seed] User noted the DashScope API/model research pattern may become a skill in the future. [rationale:primitive-cultivation] Provider catalogs are large and repeated across vendors; a deterministic discovery primitive can prevent ad hoc web/API research.\n[slice-start] Creating provider-model-discovery as report-only skill/runbook skeleton. Scope: package skill docs only, no scripts, no provider calls, no runtime/settings changes.\n[rationale:risk-control] DashScope catalog selection required repeated safe API/docs/web-search steps; a skill is the lightest reusable form before any extension/tool implementation.\n[complete] provider-model-discovery promoted as report-only lab skill/runbook skeleton; future extension/tool deferred until repeated multi-provider use proves need.",
+      "verification": "VERIFY-BUD-905"
     },
     {
       "id": "TASK-BUD-906",

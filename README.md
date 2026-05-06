@@ -42,7 +42,7 @@ Este repositório é a fábrica onde a curadoria nasce. Os pacotes first-party s
 | `@aretw0/git-skills` | Skills de git: `commit`, `git-workflow`, `github` (`gh`), `glab` |
 | `@aretw0/web-skills` | Skills de web: `web-browser` (CDP) |
 | `@aretw0/pi-skills` | Skills de fábrica: `terminal-setup`, `create-pi-skill/extension/theme/prompt`, `test-pi-extension` |
-| `@aretw0/lab-skills` | Skills experimentais: `evaluate-extension`, `cultivate-primitive`, `stack-feedback` |
+| `@aretw0/lab-skills` | Skills experimentais: `evaluate-extension`, `cultivate-primitive`, `stack-feedback`, `provider-model-discovery` |
 
 ### Pacotes Pi Relevantes (Terceiros)
 
@@ -65,7 +65,7 @@ agents-lab/
 │   ├── git-skills/     # @aretw0/git-skills — commit, git-workflow, github, glab
 │   ├── web-skills/     # @aretw0/web-skills — web-browser (CDP)
 │   ├── pi-skills/      # @aretw0/pi-skills — terminal-setup, create-pi-*, test-pi-extension
-│   └── lab-skills/     # @aretw0/lab-skills — evaluate, cultivate, feedback
+│   └── lab-skills/     # @aretw0/lab-skills — evaluate, cultivate, feedback, provider discovery
 ├── scripts/
 │   └── pi-source-switch.mjs  # Alterna entre dev local e pacotes npm
 ├── docs/
