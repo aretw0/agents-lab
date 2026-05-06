@@ -19722,6 +19722,30 @@
       "milestone": "architecture-runway-implementation",
       "notes": "[auto-seed] Local-safe implementation from TASK-BUD-876 audit. This is the smallest recommended extraction: issue-template schema helpers have a narrow boundary and clear regression coverage.\n[provenance:human] source_task=TASK-BUD-876 reason=User requested continuous local-safe work; no eligible board tasks remained after interview packet, so continue with audited low-risk extraction.\n[slice-complete] Extracted monitor-provider issue-template helpers with contract-preserving re-export and focal tests green.",
       "verification": "VER-BUD-1247"
+    },
+    {
+      "id": "TASK-BUD-883",
+      "description": "Extract monitor-provider output/status helpers into a dedicated module after adding status regression coverage.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-881",
+        "TASK-BUD-882"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-provider-patch.ts",
+        "packages/pi-stack/extensions/monitor-provider-output.ts",
+        "packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts",
+        "packages/pi-stack/test/monitor-provider-patch.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "Move planSessionStartOutput and /monitor-provider status/template formatting helpers into a dedicated module with contract-preserving re-exports.",
+        "Preserve /monitor-provider status output, template snippet, and session_start notification semantics.",
+        "Run monitor-provider status surface and existing monitor-provider patch tests."
+      ],
+      "milestone": "architecture-runway-implementation",
+      "notes": "[auto-seed] Local-safe continuation from TASK-BUD-876 audit after TASK-BUD-881 status coverage and TASK-BUD-882 issue-template extraction. No provider/model/settings semantics should change.\n[provenance:human] source_task=TASK-BUD-876 reason=User requested continuous local-safe work; status coverage is now in place, making output extraction the next bounded audit-derived slice.\n[slice-complete] Extracted monitor-provider output/status helpers with status surface regression green. Context is warn/continue-bounded; checkpoint next.",
+      "verification": "VER-BUD-1248"
     }
   ]
 }

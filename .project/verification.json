@@ -13452,6 +13452,15 @@
       "method": "test",
       "timestamp": "2026-05-06T00:39:14.320Z",
       "evidence": "Extracted monitor issue template schema helpers from packages/pi-stack/extensions/monitor-provider-patch.ts into packages/pi-stack/extensions/monitor-provider-issue-template.ts and re-exported ensureMonitorIssueWriteTemplateSchema from monitor-provider-patch.ts to preserve the existing contract. monitor-provider-patch.ts reduced from ~1031 lines after import fix to 947 lines; new module is 89 lines. Schema-compatible .project/issues.json template fields and advisory monitor semantics are unchanged. Validation: pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 2 files passed, 5 tests passed; node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 tests passed; targeted TypeScript missing-name/module probe returned no output."
+    },
+    {
+      "id": "VER-BUD-1248",
+      "target": "TASK-BUD-883",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T00:46:13.021Z",
+      "evidence": "Extracted monitor-provider output/status helpers into packages/pi-stack/extensions/monitor-provider-output.ts and re-exported buildStatusReport, buildTemplateSnippet, and planSessionStartOutput from monitor-provider-patch.ts. monitor-provider-patch.ts reduced to 762 lines; new output module is 199 lines. /monitor-provider status/template formatting and session_start notification semantics remain unchanged. Validation: pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 2 files passed, 5 tests passed; node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 tests passed; targeted TypeScript missing-name/module probe returned no output."
     }
   ]
 }
