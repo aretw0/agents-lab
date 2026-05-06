@@ -968,6 +968,18 @@
       "package": "pi-stack",
       "source": "monitor",
       "resolved_by": "TASK-BUD-943"
+    },
+    {
+      "id": "fragility-fragility-moumev0h",
+      "title": "The agent responded with an empty message despite an action-oriented handoff that included a known blocker, leaving the task unresolved without acknowledging the blockage.",
+      "body": "Stale monitor issue resolved by later evidence: TASK-BUD-949 completed, verified, committed, and live auto-resume showed reload=clear/focusTasks=none-listed.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "resolved",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor",
+      "resolved_by": "TASK-BUD-949"
     }
   ]
 }
