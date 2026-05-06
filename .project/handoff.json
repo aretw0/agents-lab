@@ -1,49 +1,50 @@
 {
-  "timestamp": "2026-05-06T19:35:02.587Z",
-  "context": "TASK-BUD-939 concluída: pre-filtro report-only para feedback stale/duplicado de monitores implementado e commitado.",
+  "timestamp": "2026-05-06T19:43:15.759Z",
+  "context": "TASK-BUD-940 concluída: prefilter stale de monitores exposto como tool report-only/canary e código commitado.",
   "next_actions": [
-    "voltar para TASK-BUD-915 e avaliar wiring/canary do prefilter",
-    "não tocar provider/settings",
-    "manter mudanças de runtime protegidas até decisão explícita"
+    "reload para disponibilizar monitor_stale_feedback_prefilter live",
+    "validar tool live com incidente context-watch resolvido",
+    "salvar board/handoff maduro em commit"
   ],
-  "blockers": [],
+  "blockers": [
+    "runtime-reload-required-for-updated-tool-behavior"
+  ],
   "recent_validation": [
-    "monitor-runtime-contract.test.ts: 9 passed",
+    "monitor-summary.test.ts: 12 passed",
     "project-validate: clean",
-    "commit: 160fc514"
+    "commit: b5d6a7d5"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-939",
+    "focus": "TASK-BUD-940",
     "canonical_links": [
-      "task:TASK-BUD-939",
-      "task:TASK-BUD-915",
-      "commit:160fc514"
+      "task:TASK-BUD-940",
+      "commit:b5d6a7d5"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T19:35:02.587Z",
+    "generatedAtIso": "2026-05-06T19:43:15.759Z",
     "level": "ok",
-    "percent": 41,
+    "percent": 53,
     "action": "continue",
-    "recommendation": "Próxima fatia: canary/report wiring pequeno ou doc de rollout.",
+    "recommendation": "Antes de próxima implementação, reload + validação viva curta; depois commit .project se clean.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T19:35:02.587Z",
+      "atIso": "2026-05-06T19:43:15.759Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 41,
+      "percent": 53,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Próxima fatia: canary/report wiring pequeno ou doc de rollout."
+      "recommendation": "Antes de próxima implementação, reload + validação viva curta; depois commit .project se clean."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-939"
+    "TASK-BUD-940"
   ]
 }

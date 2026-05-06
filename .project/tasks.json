@@ -21002,6 +21002,28 @@
       "milestone": "short-mid-monitor-economy-calibration",
       "notes": "Segue TASK-BUD-938: agora converter evidência em regra determinística pequena, evitando mudança protegida de provider/settings.\n[implementation] Implemented pure report-only monitor stale prefilter in `monitor-runtime-contract.ts`, covering INCIDENT-STALE-001/002 and general board/superseded duplicate signals. No provider/settings/runtime apply changed. Focal test: monitor-runtime-contract 9 passed; project-validate clean.\n[closure] Source/test committed as 160fc514. Next TASK-BUD-915 slice can decide whether to wire this helper into runtime summary/classifier path or keep it report-only for canary.",
       "verification": "VER-BUD-939-PREFILTER"
+    },
+    {
+      "id": "TASK-BUD-940",
+      "description": "[Slice] Expor canário/report-only do pre-filtro stale de monitores como ferramenta read-only antes de wiring operacional.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-939"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-summary.ts",
+        "packages/pi-stack/test/smoke/monitor-summary.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Registrar ferramenta read-only/report-only para avaliar `resolveMonitorStaleFeedbackPrefilter` sem suprimir monitores automaticamente.",
+        "A ferramenta deve retornar summary compacto e details estruturados com `classifierAllowed` e `tokenSpendAvoidable`.",
+        "Adicionar smoke test cobrindo supressão stale de context-watch resolvido e garantir que `monitors_compact_status` continua registrado.",
+        "Validar com teste focal e project-validate."
+      ],
+      "milestone": "short-mid-monitor-economy-calibration",
+      "notes": "Wiring seguro: exposição report-only/canary, sem provider/settings e sem aplicar supressão runtime automática.\n[implementation] Added `monitor_stale_feedback_prefilter` as report-only/canary tool in monitor-summary. It surfaces stale/duplicate prefilter decisions without suppressing monitor output automatically. Validation: monitor-summary smoke 12 passed; project-validate clean.\n[closure] Source/test committed as b5d6a7d5. Tool remains report-only; no automatic monitor suppression/provider/settings change was applied. Runtime reload required before the live tool is available.",
+      "verification": "VER-BUD-940-PREFILTER-TOOL"
     }
   ]
 }

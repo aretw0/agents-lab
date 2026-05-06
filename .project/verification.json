@@ -14075,6 +14075,15 @@
       "method": "focal test",
       "timestamp": "2026-05-06T19:33:54.020Z",
       "evidence": "Added pure report-only `resolveMonitorStaleFeedbackPrefilter` helper covering stale context-watch transient blockers, resolved runtime reload blockers, board-evidence resolved signals, superseded duplicates, and fresh/unknown fallback. Validation: `npx vitest run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts` -> 9 passed; `project-validate` -> clean."
+    },
+    {
+      "id": "VER-BUD-940-PREFILTER-TOOL",
+      "target": "TASK-BUD-940",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal test",
+      "timestamp": "2026-05-06T19:41:57.409Z",
+      "evidence": "Exposed `monitor_stale_feedback_prefilter` report-only tool through monitor-summary. Tool returns compact summary plus details with effect=none, mode=report-only, authorization=none, classifierAllowed, and tokenSpendAvoidable. Validation: `npx vitest run packages/pi-stack/test/smoke/monitor-summary.test.ts` -> 12 passed; `project-validate` -> clean."
     }
   ]
 }
