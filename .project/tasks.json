@@ -21165,6 +21165,26 @@
       "milestone": "signal-integrity-calibration",
       "notes": "Criada após reload mostrar que TASK-BUD-944 filtrava preferred successor, mas `TASK-BUD-676` ainda podia ser reintroduzida por hints derivados do handoff/canonical links. Escopo local-safe, sem protected mutation.\n[provenance:tangent-approved] source_task=TASK-BUD-944 reason=Follow-up necessário para completar correção de successor protected/parked observada em runtime live.\n[closure] Completed follow-up after reload showed TASK-BUD-676 still came from derived handoff hints. Auto-resume now has explicit excludedTaskIds path and filters protected/parked references from focus/hints/next/links. Runtime reload required before live preview reflects this fix.",
       "verification": "VER-BUD-945-EXCLUDED-HINTS"
+    },
+    {
+      "id": "TASK-BUD-947",
+      "description": "[P3/backlog] Monitorar e quantificar operações de edição no-op ou quase no-op do agente para reduzir ruído e custo sem bloquear correções triviais.",
+      "status": "planned",
+      "priority": "p3",
+      "files": [
+        "packages/pi-stack/extensions",
+        "packages/pi-stack/test/smoke",
+        "docs/research/control-plane-signal-integrity-audit-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Coletar evidência de operações `edit` cujo diff visual parece idêntico ou altera apenas whitespace invisível/trailing whitespace.",
+        "Definir métrica report-only de no-op/near-no-op edits por sessão ou por janela, sem bloquear automaticamente o fluxo.",
+        "Avaliar custo/benefício de comparar `oldText` e `newText` antes da tool call com normalizações baratas: igualdade exata, igualdade após trim de trailing whitespace, igualdade whitespace-insensitive por linha para payloads pequenos.",
+        "Propor guardrail leve que apenas avise/agregue quando houver repetição, preservando edições legítimas como remoção de trailing whitespace ou formatação intencional.",
+        "Adicionar regressão/fixture se uma implementação for feita futuramente."
+      ],
+      "milestone": "operator-noise-backlog",
+      "notes": "[intake:user] Operador observou uma edição com diff aparentemente idêntico em `context-watchdog-handoff.ts` e pediu backlog sem prioridade. Análise inicial: no caso mostrado provavelmente havia remoção de whitespace invisível/trailing space, então não era necessariamente no-op real; o problema é medir frequência e ruído dessas operações, não bloquear a edição automaticamente.\n[provenance:human] source_task=none reason=Feedback explícito do operador sobre operação de edit visualmente sem sentido/no-op aparente."
     }
   ]
 }
