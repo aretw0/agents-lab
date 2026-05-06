@@ -49,7 +49,7 @@ P0 — já iniciado:
 
 P1 — próxima onda:
 
-3. Consistência cruzada: `compact_stage`, `auto_resume_preview` e `operator stop` devem concordar sobre reload required/clear.
+3. Consistência cruzada: `compact_stage`, `auto_resume_preview` e `operator stop` devem concordar sobre reload required/clear. Parcialmente coberto por `context-watchdog.test.ts`: reload em janela `ok` fica não ativo em pre-compact, mas segue visível para operator/stop/action.
 4. Dirty/freshness: dirty source ou board deve impedir strong continuation; clean real não deve bloquear por dirty stale.
 5. Handoff stale: task concluída no board não deve manter `focus-mismatch`/`candidate:invalid` sem sugestão de sucessor.
 

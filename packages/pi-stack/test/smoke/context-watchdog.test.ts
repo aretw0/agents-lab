@@ -1382,6 +1382,45 @@ describe("context-watchdog", () => {
 		})).toContain("provider timeout pressure observed (3/2)");
 	});
 
+	it("keeps reload-required visible across compact, operator, stop, and action planning", () => {
+		const preCompact = resolvePreCompactReloadSignal({
+			assessmentLevel: "ok",
+			reloadRequired: true,
+		});
+		expect(preCompact).toMatchObject({
+			active: false,
+			reason: "level-not-precompact",
+		});
+		expect(preCompact.hint).toContain("/reload");
+
+		const operatorSignal = resolveContextWatchOperatorSignal({
+			reloadRequired: true,
+			handoffManualRefreshRequired: false,
+		});
+		expect(operatorSignal.reasons).toContain("reload-required");
+		expect(operatorSignal.humanActionRequired).toBe(true);
+
+		const deterministicStop = resolveContextWatchDeterministicStopSignal({
+			assessmentLevel: "ok",
+			operatorSignal,
+		});
+		expect(deterministicStop).toEqual({
+			required: true,
+			reason: "reload-required",
+			action: "reload-and-resume",
+		});
+
+		expect(resolveContextWatchOperatorActionPlan({
+			deterministicStop,
+			operatorSignal,
+		})).toEqual({
+			blocking: true,
+			kind: "reload",
+			summary: "reload required before continuing long-run",
+			commandHint: "/reload",
+		});
+	});
+
 	it("resolves operating cadence with post-resume recalibration signal", () => {
 		expect(resolveContextWatchOperatingCadence({
 			assessmentLevel: "warn",
