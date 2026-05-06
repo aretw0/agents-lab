@@ -14138,6 +14138,15 @@
       "method": "marker-check + project validation",
       "timestamp": "2026-05-06T20:12:23.008Z",
       "evidence": "Created `docs/research/control-plane-signal-integrity-audit-2026-05.md` with root incident, failure classes, initial inventory of critical signals/tools, P0/P1/P2 regression priorities, and lane maturity criteria. Validation: safe_marker_check matched 4/4 (`Incidente raiz`, `Inventário inicial de sinais críticos`, `Priorização de regressões`, `Critério de pronto da lane`); `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-943-P0-CRITICAL-PREFILTER",
+      "target": "TASK-BUD-943",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal regression test",
+      "timestamp": "2026-05-06T20:15:50.755Z",
+      "evidence": "Added P0 regression and guard so `monitor_stale_feedback_prefilter` does not suppress critical fresh/unresolved findings. Critical signals include unauthorized-action, protected scope, destructive, branch protection, git push, and `/monitor-provider apply`. Validation: `npx vitest run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts` -> 10 passed; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }
