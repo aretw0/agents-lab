@@ -21433,7 +21433,7 @@
     },
     {
       "id": "TASK-BUD-959",
-      "description": "[P2/local-safe] Melhorar output operator-visible do `worktree status` para não aparecer como bloco vazio/pouco informativo.",
+      "description": "[P2/local-safe] Melhorar output operator-visible do `worktree status/list` para não aparecer como bloco vazio/pouco informativo.",
       "status": "planned",
       "priority": "p2",
       "depends_on": [
@@ -21444,14 +21444,14 @@
         "docs/research/worktree-status-operator-output-2026-05.md"
       ],
       "acceptance_criteria": [
-        "Reproduzir ou documentar o caso em que a UI mostra apenas `⌥ worktree status` e `✓ # Worktree status`.",
+        "Reproduzir ou documentar os casos em que a UI mostra apenas `⌥ worktree status` / `✓ # Worktree status` e `⌥ worktree list` / `✓ # Worktree list`.",
         "Localizar o dono real do tool/command `worktree` ou documentar se é tool externo ao pacote atual.",
-        "Propor ou implementar resumo operator-visible mínimo com branch, kind, current worktree root, repo root e count de worktrees/dirty state quando disponível.",
+        "Propor ou implementar resumo operator-visible mínimo para `status` e `list` com repo, current branch/kind, current worktree root, count de worktrees, count pi-owned e dirty state quando disponível.",
         "Preservar detalhes completos para inspeção sem inflar a linha principal.",
         "Validar com teste/marker check local-safe; não tocar settings, CI, publish ou provider config."
       ],
       "milestone": "agent-quality-calibration-lane",
-      "notes": "Feedback do operador durante TASK-BUD-958: o bloco visual `⌥ worktree status` / `✓ # Worktree status` não comunica nada útil. Isso deve virar melhoria de UX/operator-visible output, mas não interromper o canary atual.\n[provenance:human] source_task=TASK-BUD-958 reason=Operador apontou output pobre do worktree status como problema de observabilidade durante o canary."
+      "notes": "Feedback do operador durante TASK-BUD-958: o bloco visual `⌥ worktree status` / `✓ # Worktree status` não comunica nada útil. Feedback adicional: `⌥ worktree list` / `✓ # Worktree list` sofre do mesmo problema. Isso deve virar melhoria de UX/operator-visible output, mas não interromper o canary atual.\n[provenance:human] source_task=TASK-BUD-958 reason=Operador apontou output pobre do worktree status/list como problema de observabilidade durante o canary."
     }
   ]
 }
