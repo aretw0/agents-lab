@@ -1,49 +1,49 @@
 {
-  "timestamp": "2026-05-06T22:42:30.267Z",
-  "context": "TASK-BUD-953 concluída: documento da agents-lab quality calibration lane agora compara Candidate A vs Candidate D e recomenda explicitamente [snip] m comparação e recomendação por padrão. [truncated:+112 chars]",
+  "timestamp": "2026-05-06T22:46:22.888Z",
+  "context": "TASK-BUD-954 concluída: lane doc limpo para registrar apenas seleção objetiva do Candidate D; recomendação/meta-learning movidos para padrão [snip] pelo operador como primeiro candidato. [truncated:+89 chars]",
   "next_actions": [
-    "commit doc + board/handoff",
-    "próxima task provável: materializar Candidate D como canary checklist, ainda sem dispatch automático",
-    "antes de qualquer agente: pedir aprovação explícita"
+    "commit docs + board/handoff",
+    "materializar Candidate D como task concreta de checklist local-safe",
+    "antes de dispatch, gerar packet e pedir confirmação explícita"
   ],
   "blockers": [
-    "agent dispatch still requires explicit human approval"
+    "agent dispatch not authorized yet; only Candidate D selection accepted"
   ],
   "recent_validation": [
-    "safe_marker_check: 4/4 markers",
-    "project-validate: clean",
-    "git diff --check: clean"
+    "lane marker check: 4/4",
+    "mini-handoff marker check: 4/4",
+    "project-validate: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-953",
+    "focus": "TASK-BUD-954",
     "canonical_links": [
-      "task:TASK-BUD-953"
+      "task:TASK-BUD-954"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T22:42:30.267Z",
+    "generatedAtIso": "2026-05-06T22:46:22.888Z",
     "level": "ok",
-    "percent": 41,
+    "percent": 45,
     "action": "continue",
-    "recommendation": "Commitar e seguir com Candidate D se o operador aprovar.",
+    "recommendation": "Commitar; próxima fatia é criar checklist Candidate D localmente ou preparar pacote de decisão para canary.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T22:42:30.267Z",
+      "atIso": "2026-05-06T22:46:22.888Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 41,
+      "percent": 45,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar e seguir com Candidate D se o operador aprovar."
+      "recommendation": "Commitar; próxima fatia é criar checklist Candidate D localmente ou preparar pacote de decisão para canary."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-953"
+    "TASK-BUD-954"
   ]
 }

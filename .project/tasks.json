@@ -21319,6 +21319,28 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "Feedback do operador: eu deveria ter incluído comparação e recomendação entre Candidate A e D no texto inicial; o fato de precisar perguntar é sinal de falta de síntese útil.\n[provenance:human] source_task=TASK-BUD-952 reason=Operador pediu melhoria explícita no documento da lane: comparação entre opções e recomendação.\n[closure] Operator feedback incorporated: document now includes comparison table, humble recommendation, and meta-learning about under-synthesized decision packets.",
       "verification": "VER-BUD-953-CANDIDATE-COMPARISON"
+    },
+    {
+      "id": "TASK-BUD-954",
+      "description": "[P1/local-safe] Ajustar lane doc para separar material canônico de recomendação de turno e padronizar resposta final de parada.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-953"
+      ],
+      "files": [
+        "docs/research/0-8-agent-quality-calibration-lane-2026-05.md",
+        "docs/guides/mini-handoff-template.md"
+      ],
+      "acceptance_criteria": [
+        "Remover do documento da lane a nota de meta-learning e a recomendação opinativa que pertencem à resposta final do turno.",
+        "Preservar no documento apenas comparação factual entre Candidate A e Candidate D e registrar seleção do operador de forma objetiva, se necessário.",
+        "Adicionar ao mini-handoff template um bloco curto de resposta final ao operador com: resultado, comparação/recomendação quando houver alternativas, decisão necessária, próximo passo seguro e blockers.",
+        "Validar com marker check, project-validate e git diff --check."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Feedback do operador: recomendação e meta-learning não deveriam ficar no arquivo canônico; deveriam aparecer na resposta final/packet de parada para facilitar decisão humana.\n[provenance:human] source_task=TASK-BUD-953 reason=Operador aceitou Candidate D e apontou que o padrão correto é sintetizar recomendação na resposta final, não poluir o documento canônico.\n[closure] Operator feedback incorporated: canonical lane artifact is cleaner; final-turn operator response standard now captures recommendations/comparisons where they belong.",
+      "verification": "VER-BUD-954-FINAL-OPERATOR-PACKET"
     }
   ]
 }

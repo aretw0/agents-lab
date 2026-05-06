@@ -14273,6 +14273,15 @@
       "method": "document marker validation",
       "timestamp": "2026-05-06T22:42:04.017Z",
       "evidence": "Added explicit Candidate A vs Candidate D comparison and recommendation to `docs/research/0-8-agent-quality-calibration-lane-2026-05.md`. Recommendation now names Candidate D as the first simple-delegate canary, with Candidate A as the follow-up. Captured meta-learning that candidate alternatives should include comparison and recommendation by default. Validation: safe_marker_check -> 4/4 markers; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VER-BUD-954-FINAL-OPERATOR-PACKET",
+      "target": "TASK-BUD-954",
+      "target_type": "task",
+      "status": "passed",
+      "method": "document marker validation",
+      "timestamp": "2026-05-06T22:46:11.126Z",
+      "evidence": "Cleaned lane document by replacing the opinionated recommendation/meta-learning section with objective operator selection for Candidate D and a note that rationale belongs in the turn-ending operator packet. Updated `docs/guides/mini-handoff-template.md` with a `Resposta final ao operador (quando parar)` block requiring result, validation, comparison/recommendation in final response, needed decision, safe next step, and blockers/limits. Validation: lane marker check 4/4; mini-handoff marker check 4/4; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }
