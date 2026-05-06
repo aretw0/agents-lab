@@ -2,7 +2,7 @@
 
 Status: primitive stub / report-only / protected boundary  
 Fonte: `TASK-BUD-849`  
-Relacionado: [`docs/research/model-infrastructure-interview-packet-2026-05.md`](../research/model-infrastructure-interview-packet-2026-05.md), [`docs/research/provider-assimilation-runway-2026-05.md`](../research/provider-assimilation-runway-2026-05.md), [`docs/research/alibaba-official-docs-qwen-selection-2026-05.md`](../research/alibaba-official-docs-qwen-selection-2026-05.md)
+Relacionado: [`docs/research/model-infrastructure-interview-packet-2026-05.md`](../research/model-infrastructure-interview-packet-2026-05.md), [`docs/research/model-infrastructure-rollback-plan-2026-05.md`](../research/model-infrastructure-rollback-plan-2026-05.md), [`docs/research/provider-assimilation-runway-2026-05.md`](../research/provider-assimilation-runway-2026-05.md), [`docs/research/alibaba-official-docs-qwen-selection-2026-05.md`](../research/alibaba-official-docs-qwen-selection-2026-05.md)
 
 ## 1. Objetivo
 

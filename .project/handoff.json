@@ -1,55 +1,56 @@
 {
-  "timestamp": "2026-05-06T05:50:10.890Z",
-  "context": "Completed model infrastructure routing primitive stub. Added docs/primitives/model-infrastructure-routing.md and linked from docs/primitives/ [snip] ng. No route/settings/provider changes. [truncated:+187 chars]",
+  "timestamp": "2026-05-06T05:53:54.535Z",
+  "context": "Completed report-only rollback plan for protected TASK-BUD-849 model infrastructure. Added docs/research/model-infrastructure-rollback-plan-2 [snip] r/API-key changes; no canary execution. [truncated:+110 chars]",
   "next_actions": [
-    "Commit TASK-BUD-908 docs if dirty.",
-    "Context now near checkpoint; prefer pause/checkpoint or very small local-safe docs only.",
-    "Protected TASK-BUD-849 remains blocked for any real model infrastructure implementation."
+    "Commit TASK-BUD-909 docs if dirty.",
+    "Re-check protected focus packet for TASK-BUD-849; keep defer if still blocked.",
+    "Do not change providers/settings/routing/monitors or run Qwen canary without explicit approval."
   ],
   "blockers": [
-    "TASK-BUD-849 protected for routeModelRefs/providerBudgets/default provider/mod [snip] n/API keys/paid spend. [truncated:+19 chars]",
+    "TASK-BUD-849 protected for real model infrastructure changes.",
     "No Qwen canary execution approval yet."
   ],
   "recent_validation": [
-    "i18n_lint_text primitive sample -> pass",
-    "safe_marker_check primitive -> pass",
-    "safe_marker_check docs/primitives README -> pass"
+    "safe_marker_check rollback doc -> pass",
+    "safe_marker_check model-infrastructure-routing link -> pass",
+    "i18n_lint_text rollback doc sample -> pass"
   ],
   "recent_commits": [
+    "6b293936 docs(primitives): add model routing boundary",
     "66c7ecbc chore(gitignore): ignore workflow monitor logs"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-908",
+    "focus": "TASK-BUD-909",
     "canonical_links": [
-      "task:TASK-BUD-908",
+      "task:TASK-BUD-909",
       "task:TASK-BUD-849",
-      "commit:66c7ecbc"
+      "commit:6b293936"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T05:50:10.890Z",
-    "level": "checkpoint",
-    "percent": 63,
-    "action": "checkpoint-refresh",
-    "recommendation": "commit-primitive-stub-then-stop-or-compact-before-more-work",
+    "generatedAtIso": "2026-05-06T05:53:54.535Z",
+    "level": "ok",
+    "percent": 23,
+    "action": "continue",
+    "recommendation": "commit-rollback-doc-then-reassess-protected-focus-report-only",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T05:50:10.890Z",
+      "atIso": "2026-05-06T05:53:54.535Z",
       "reason": "manual_checkpoint",
-      "level": "checkpoint",
-      "percent": 63,
+      "level": "ok",
+      "percent": 23,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-primitive-stub-then-stop-or-compact-before-more-work"
+      "recommendation": "commit-rollback-doc-then-reassess-protected-focus-report-only"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-908"
+    "TASK-BUD-909"
   ]
 }

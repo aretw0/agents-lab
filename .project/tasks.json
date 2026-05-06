@@ -20321,6 +20321,29 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] TASK-BUD-849 references docs/primitives/model-infrastructure-routing.md, but the file is missing. [rationale:risk-control] A report-only primitive stub can make the protected boundary explicit without implementing routing.\n[slice-start] Adding report-only model infrastructure routing primitive stub. Docs only; no provider/settings/routing implementation.\n[rationale:risk-control] The protected TASK-BUD-849 references a missing primitive file; adding a non-authorizing contract clarifies gates without changing runtime.\n[complete] Added non-authorizing model infrastructure routing primitive stub and catalog link for TASK-BUD-849.",
       "verification": "VERIFY-BUD-908"
+    },
+    {
+      "id": "TASK-BUD-909",
+      "description": "Add report-only rollback plan for protected model infrastructure routing.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-908"
+      ],
+      "files": [
+        "docs/research/model-infrastructure-rollback-plan-2026-05.md",
+        "docs/primitives/model-infrastructure-routing.md"
+      ],
+      "acceptance_criteria": [
+        "Create a documentation-only rollback plan for future TASK-BUD-849 provider/model/routing/settings changes.",
+        "Cover settings snapshot, commit revert, feature flag/disable path, monitor migration rollback, API key/auth cleanup, canary abort, and evidence retention without secrets.",
+        "Link the rollback plan from the model-infrastructure-routing primitive.",
+        "State explicitly that the plan does not authorize protected changes or paid spend.",
+        "Validate with marker checks and focused docs tests."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] Protected focus packet for TASK-BUD-849 reported missing-rollback-plan. [rationale:risk-control] A report-only rollback plan can close the planning gap without touching settings/providers/routing.\n[slice-start] Drafting documentation-only rollback plan for future TASK-BUD-849 protected model infrastructure changes. No settings/provider/routing changes.\n[rationale:risk-control] Protected focus packet flagged missing rollback evidence; documenting rollback prerequisites reduces risk while preserving the protected boundary.\n[complete] Added report-only rollback plan and linked primitive; protected model infrastructure remains unimplemented/blocked pending human decision.",
+      "verification": "VERIFY-BUD-909"
     }
   ]
 }
