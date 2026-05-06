@@ -20733,7 +20733,7 @@
     {
       "id": "TASK-BUD-927",
       "description": "Capture a report-only delegation and long-run readiness baseline for the compounding lane.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-919"
@@ -20748,7 +20748,8 @@
         "Validate with marker check and no-dispatch language."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:strategy] This prepares compounding delegation/long-run improvements without increasing autonomy level."
+      "notes": "[rationale:strategy] This prepares compounding delegation/long-run improvements without increasing autonomy level.\n[start] Capturing readiness baseline for delegation/long-run (report-only) via read-only packets and generating local 0.8 baseline doc.\n[complete] Baseline synthesis added; delegation/runway remains report-only until readiness gates are filled.",
+      "verification": "VERIFY-BUD-927"
     },
     {
       "id": "TASK-BUD-928",
