@@ -1,47 +1,50 @@
 {
-  "timestamp": "2026-05-06T19:59:36.431Z",
-  "context": "User asked to proceed after closing TASK-BUD-915. Runtime gate reports reload-not-required and git is clean; stale handoff blocker about moni [snip] slice. Focus realigned to TASK-BUD-933. [truncated:+51 chars]",
-  "current_tasks": [
-    "TASK-BUD-933"
-  ],
+  "timestamp": "2026-05-06T20:05:43.743Z",
+  "context": "TASK-BUD-942 concluída: reloadGate false negative corrigido para observar fontes packages/pi-stack/extensions/*.ts, incluindo mudanças fora do context-watchdog.",
   "next_actions": [
-    "execute one bounded TASK-BUD-933 slice: inspect tool-hygiene surface and tests",
-    "add minimal language-agnostic syntactic hygiene evidence or document detector schema",
-    "run focal validation and commit"
+    "commit source/test + board checkpoint",
+    "/reload necessário para a correção do próprio reloadGate ficar ativa live",
+    "depois continuar TASK-BUD-933"
   ],
-  "blockers": [],
+  "blockers": [
+    "runtime-reload-required-for-updated-reload-gate"
+  ],
   "recent_validation": [
-    "context_watch_compact_stage_status: normal-window reload-not-required",
+    "context-watchdog-runtime-reload.test.ts: 3 passed",
     "project-validate: clean",
-    "git status: clean"
+    "git diff --check: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-933",
+    "focus": "TASK-BUD-942",
     "canonical_links": [
-      "task:TASK-BUD-933",
-      "task:TASK-BUD-915"
+      "task:TASK-BUD-942",
+      "task:TASK-BUD-933"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T19:59:36.431Z",
+    "generatedAtIso": "2026-05-06T20:05:43.743Z",
     "level": "ok",
-    "percent": 28,
+    "percent": 36,
     "action": "continue",
-    "recommendation": "Proceed with TASK-BUD-933 micro-slice; no protected scopes."
+    "recommendation": "Commitar e pedir reload; depois seguir TASK-BUD-933.",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T19:59:36.431Z",
+      "atIso": "2026-05-06T20:05:43.743Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 28,
+      "percent": 36,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Proceed with TASK-BUD-933 micro-slice; no protected scopes."
+      "recommendation": "Commitar e pedir reload; depois seguir TASK-BUD-933."
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-942"
   ]
 }

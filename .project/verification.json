@@ -14120,6 +14120,15 @@
       "method": "slice synthesis + regression evidence",
       "timestamp": "2026-05-06T19:56:00.999Z",
       "evidence": "Closed monitor stale-feedback/token-economy calibration through bounded slices: incidents collected in `docs/research/monitor-stale-feedback-intake-template-2026-05.md` (INCIDENT-STALE-001..003); pure deterministic helper `resolveMonitorStaleFeedbackPrefilter` with regression coverage in `monitor-runtime-contract.test.ts`; live report-only tool `monitor_stale_feedback_prefilter` with smoke coverage in `monitor-summary.test.ts`; rollout/economy/critical-signal preservation documented; divergent-only monitor-provider reload noise downgraded without applying settings/provider overrides. Validations across slices: monitor-runtime-contract 9 pass; monitor-summary 12 pass; monitor-provider-patch 38 pass; monitor-provider-patch-surface 1 pass; project-validate clean."
+    },
+    {
+      "id": "VER-BUD-942-RELOAD-GATE-SOURCE-DIR",
+      "target": "TASK-BUD-942",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal regression test",
+      "timestamp": "2026-05-06T20:05:31.830Z",
+      "evidence": "Confirmed and fixed reloadGate false negative: previous logic only compared context-watchdog source mtime plus settings/agent overrides, so changes in other pi-stack extension sources such as `monitor-provider-output.ts` were missed. Added bounded scan of `packages/pi-stack/extensions/*.ts` to `readContextWatchdogRuntimeReloadMtimeMs` and regression covering a changed `monitor-provider-output.ts` file. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog-runtime-reload.test.ts` -> 3 passed; `project-validate` -> clean; `git diff --check` -> clean."
     }
   ]
 }

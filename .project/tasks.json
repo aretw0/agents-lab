@@ -21048,6 +21048,28 @@
       "milestone": "short-mid-monitor-economy-calibration",
       "notes": "Fecha lacuna de TASK-BUD-915 sobre economia esperada e preservação de high-signal antes de qualquer wiring operacional.\n[closure] TASK-BUD-915 now has evidence, pure prefilter, live report-only tool, and rollout/promotion guardrails documented.",
       "verification": "VER-BUD-941-ROLLOUT"
+    },
+    {
+      "id": "TASK-BUD-942",
+      "description": "[Bug] Corrigir falso negativo do `reloadGate` quando código de extensão pi-stack muda fora do próprio context-watchdog.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-915"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-runtime-status.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-runtime-reload.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`readContextWatchdogRuntimeReloadMtimeMs` deve considerar mudanças em fontes de extensão pi-stack carregáveis, não só context-watchdog/settings/agents.",
+        "Adicionar regressão mostrando que alteração em `packages/pi-stack/extensions/*.ts` aumenta o mtime observado.",
+        "Manter superfície bounded/read-only e sem tocar provider/settings.",
+        "Validar com teste focal e project-validate."
+      ],
+      "milestone": "short-mid-monitor-economy-calibration",
+      "notes": "Achado do usuário: `reloadGate=reload-not-required` ficou falso-negativo após alteração em `monitor-provider-output.ts`; a lógica exigia reload, mas o gate só observava sourceMtime do context-watchdog + settings/agents.\n[closure] User correctly identified that `reloadGate=reload-not-required` was a false negative after runtime extension source changes. Fix is local/bounded and does not touch provider/settings. Because this changes runtime detection code, one more reload is required before the improved gate can be trusted live.",
+      "verification": "VER-BUD-942-RELOAD-GATE-SOURCE-DIR"
     }
   ]
 }
