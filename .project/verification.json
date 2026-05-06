@@ -13407,6 +13407,15 @@
       "method": "test",
       "timestamp": "2026-05-06T00:25:03.818Z",
       "evidence": "Created docs/research/monitor-provider-patch-line-budget-audit-2026-05.md. Audit records monitor-provider-patch.ts at ~1031 lines, maps current families (hedge policy, fragility calibration, instruction nudges, issue schema templates, status/output, command/session_start orchestration), recommends extraction order (monitor-provider-monitor-policy, monitor-provider-calibration, monitor-provider-issue-template, monitor-provider-output, monitor-provider-session-start), and lists invariants for advisory monitor semantics, explicit /monitor-provider apply, no node_modules mutation, lean hedge/fragility contexts, and schema-compatible issue templates. Incidental runtime import fix was split into TASK-BUD-880. Validation: node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 tests passed; pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts -> 2 files passed, 10 tests passed; targeted TypeScript missing-name probe for monitor-provider-patch config constants returned no missing-name output; i18n_lint_text pt-BR pass; project JSON parse pass."
+    },
+    {
+      "id": "VER-BUD-1243",
+      "target": "TASK-BUD-877",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T00:28:03.150Z",
+      "evidence": "Created docs/research/context-watchdog-decomposition-runway-2026-05.md. Audit records context-watchdog.ts at ~999 lines plus related context-watchdog files, clarifies that context-watchdog-public-api.ts does not currently exist and context-watchdog.ts is the public barrel, maps safe decomposition order (public-api reexports first, runtime factory, run loop, status runtime adapter), and lists invariants for warn-as-steering, checkpoint graceful-stop, auto-compact gates, reload/auto-resume, bounded handoff, and report-only tools. No context-watchdog code changed. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts -> 5 files passed, 91 tests passed; i18n_lint_text pt-BR pass; project JSON parse pass."
     }
   ]
 }

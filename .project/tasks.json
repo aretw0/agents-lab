@@ -19596,7 +19596,7 @@
     {
       "id": "TASK-BUD-877",
       "description": "Seed a public-API-sensitive context-watchdog decomposition plan that avoids broad API rewrites and focuses on test-backed seams.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "depends_on": [
         "TASK-BUD-876"
@@ -19612,7 +19612,8 @@
         "List minimal focal tests for any future extraction."
       ],
       "milestone": "architecture-runway",
-      "notes": "[auto-seed] Local-safe documentation only; respects prior recovery decision to avoid broad public API rewrites.\n[provenance:human] source_task=TASK-BUD-873 reason=context-watchdog.ts is near watch threshold and strategically important; plan first avoids repeating prior broad API regression."
+      "notes": "[auto-seed] Local-safe documentation only; respects prior recovery decision to avoid broad public API rewrites.\n[provenance:human] source_task=TASK-BUD-873 reason=context-watchdog.ts is near watch threshold and strategically important; plan first avoids repeating prior broad API regression.\n[auto-chain] Starting context-watchdog decomposition runway audit. Scope: documentation-only; public API sensitive, no broad rewrites.\n[slice-complete] context-watchdog decomposition runway complete. First future implementation should be reexport-only public API stabilization; do not reorder run loop in the same slice.",
+      "verification": "VER-BUD-1243"
     },
     {
       "id": "TASK-BUD-878",
