@@ -13425,6 +13425,15 @@
       "method": "inspection",
       "timestamp": "2026-05-06T00:31:26.472Z",
       "evidence": "Created docs/research/board-planning-clarity-runway-2026-05.md. Document uses board_planning_clarity_score evidence (63, planning-clarity-needs-decomposition) and dependency hygiene evidence (100, strong) to identify that clarity debt comes from macro/protected parked items rather than dependency health. It decomposes remaining protected legacy colony promotions, external influence parked tasks, and TASK-BUD-849 Model Infrastructure into local-safe packet/audit vs protected decision phases without unparking protected tasks or starting external/provider/colony work. Validation: i18n_lint_text pt-BR pass; board_dependency_hygiene_score 100 strong; board_dependency_health_snapshot strong with no missing/cycle/protected coupling blockers; project JSON parse pass."
+    },
+    {
+      "id": "VER-BUD-1245",
+      "target": "TASK-BUD-879",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-06T00:33:31.165Z",
+      "evidence": "Created docs/research/model-infrastructure-interview-packet-2026-05.md. Packet summarizes minimal product/provider/cost/API questions for TASK-BUD-849, separates locally inferable cleanup from protected post-interview implementation, and explicitly blocks routing/provider budget/settings/API changes in this slice. Validation: structured_interview_plan over the 10 proposed questions returned needs-human-answer with dispatch=no and next=primary-objective, confirming the packet is interview-only; i18n_lint_text pt-BR pass; project JSON parse pass; context_watch_status ok/continue."
     }
   ]
 }

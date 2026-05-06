@@ -19639,7 +19639,7 @@
     {
       "id": "TASK-BUD-879",
       "description": "Prepare a protected-interview packet for TASK-BUD-849 Model Infrastructure decisions without implementing provider/model/cost/API changes.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "depends_on": [
         "TASK-BUD-878"
@@ -19654,7 +19654,8 @@
         "Do not alter routing, provider budgets, settings, or API contracts."
       ],
       "milestone": "architecture-runway",
-      "notes": "[auto-seed] This is the only interview-prep slice; actual model/provider/cost decisions still require human answers.\n[provenance:human] source_task=TASK-BUD-849 reason=User asked whether interview is needed; this prepares a bounded packet instead of blocking all cleanup work."
+      "notes": "[auto-seed] This is the only interview-prep slice; actual model/provider/cost decisions still require human answers.\n[provenance:human] source_task=TASK-BUD-849 reason=User asked whether interview is needed; this prepares a bounded packet instead of blocking all cleanup work.\n[auto-chain] Starting protected-interview packet for TASK-BUD-849. Scope: questions/doc only; no provider/model/cost/API routing/settings changes.\n[slice-complete] Protected interview packet prepared. TASK-BUD-849 remains parked until human answers; no provider/model/cost/API runtime changes made.",
+      "verification": "VER-BUD-1245"
     },
     {
       "id": "TASK-BUD-880",
