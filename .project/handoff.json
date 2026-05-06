@@ -1,12 +1,14 @@
 {
-  "timestamp": "2026-05-06T23:06:31.146Z",
+  "timestamp": "2026-05-06T23:13:25.703Z",
   "context": "TASK-BUD-957 concluída: pacote de decisão do primeiro simple-delegate canary criado em docs/research/simple-delegate-first-canary-decision-pa [snip] pções humanas. Dispatch não autorizado. [truncated:+208 chars]",
   "next_actions": [
+    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
     "commit packet + board/handoff",
     "aguardar decisão humana: approve one canary / defer / revise packet",
     "se aprovado, executar exatamente um simple worker slice; caso contrário manter local-execute"
   ],
   "blockers": [
+    "context-watch-checkpoint-required",
     "human approval required before dispatch",
     "simple_delegate_rehearsal_start_packet still reports rehearsal-not-ready/needs-evidence"
   ],
@@ -43,6 +45,19 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "Commitar e parar em ask-human para autorização explícita do canary."
+    },
+    {
+      "atIso": "2026-05-06T23:13:25.703Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ],
   "completed_tasks": [
