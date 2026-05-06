@@ -1,23 +1,20 @@
 {
-  "timestamp": "2026-05-06T18:03:53.253Z",
-  "context": "Estado final da limpeza de dívida de board alcançado nesta sequência: .project/tasks.json e .project/issues.json normalizados sem dívida resi [snip] e aguardo resolução de gate de parada. [truncated:+236 chars]",
+  "timestamp": "2026-05-06T18:07:40.575Z",
+  "context": "Auto-resume aplicado conforme instrução: foco TASK-BUD-849 permanece ativo, sem novas frentes abertas. Estado atual permanece bloqueado por c [snip] nditions antes de retomar fluxo normal. [truncated:+200 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "Context-watch action: level=compact 73% (compact-now) · Compact now and continue from checkpoint.",
-    "aguardar resolução de stop-conditions para retomar fluxo normal",
-    "manter contexto baixo e só abrir novas frentes com handoff limpo"
+    "aguardar desobstrução de stop-conditions"
   ],
   "blockers": [
-    "context-watch-compact-required",
     "stop-conditions:invalid",
     "stop-condition-present"
   ],
   "recent_validation": [
-    "node scripts/project/board-debt-hygiene.mjs --json",
-    "project-validate",
-    "context-watch-continuation-readiness"
+    "context_watch_continuation_readiness",
+    "local_continuity_audit",
+    "project-validate"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
@@ -26,38 +23,25 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T18:03:53.161Z",
+    "generatedAtIso": "2026-05-06T18:07:40.575Z",
     "level": "ok",
-    "percent": 8,
+    "percent": 9,
     "action": "continue",
-    "recommendation": "Board debt encerrada; seguir governança de continuidade/graceful stop até que auto-advance seja permitido."
+    "recommendation": "Continuar em estado de espera controlada; sem mutações locais até gate liberar."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T18:03:53.161Z",
+      "atIso": "2026-05-06T18:07:40.575Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 8,
+      "percent": 9,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Board debt encerrada; seguir governança de continuidade/graceful stop até que auto-advance seja permitido."
-    },
-    {
-      "atIso": "2026-05-06T18:03:53.253Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 73,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
+      "recommendation": "Continuar em estado de espera controlada; sem mutações locais até gate liberar."
     }
   ]
 }
