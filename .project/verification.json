@@ -13578,6 +13578,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-06T02:37:48.262Z",
       "evidence": "Created docs/research/openai-codex-quota-calibration-packet-2026-05.md from the provider candidate template. It records operator official-dashboard evidence: OpenAI Pro, ~73% weekly quota available, reset around 2026-05-11 with timezone/reset uncertainty, and no practical 5h rolling-window blockage. It records local policy facts: openai-codex appears blocked under current providerBudgets tokens-cost monthly caps/projections. It defines calibration gaps, telemetry coverage, immediate posture, future protected canary/reconciliation steps, stop conditions, rollback, and current decision=calibration-needed/report-only. No provider settings, routeModelRefs, providerBudgets, API keys, models, routing, or monitor overrides were changed. Validation passed: i18n_lint_text sample -> pass; pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts -> 3 files passed, 62 tests passed."
+    },
+    {
+      "id": "VERIFY-BUD-897",
+      "target": "TASK-BUD-897",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-06T02:40:24.840Z",
+      "evidence": "Created docs/research/alibaba-provider-candidate-packet-2026-05.md recording that the operator created an Alibaba free trial account and wants Alibaba queued as the next provider candidate. The packet is report-only and captures free-trial-first strategy, no paid spend without later explicit decision, unknowns (API/product, models, pricing unit, trial cap/expiry, endpoint/region, privacy, telemetry), phased intake/canary plan, stop conditions, and posture relative to Copilot/OpenAI Codex/Claude Code/Kimi. Updated provider assimilation runway to list Alibaba Cloud/DashScope/Qwen-compatible as the next candidate and link the packet. No API key, settings, routeModelRefs, providerBudgets, model, routing, monitor override, or paid spend change. Validation passed: i18n_lint_text sample -> pass; pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts -> 3 files passed, 58 tests passed."
     }
   ]
 }

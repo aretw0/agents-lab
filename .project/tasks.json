@@ -20042,6 +20042,30 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] Instantiate the new template for OpenAI Codex now because operator supplied official dashboard evidence that diverges from local policy-block status. [rationale:risk-control] This keeps Codex usable/pragmatic while preventing local telemetry from becoming either false panic or ignored warning.\n[slice-start] Instantiating OpenAI Codex calibration packet from provider template. Report-only; no settings/routing/provider/model/API/budget changes.\n[rationale:risk-control] OpenAI Codex has official dashboard headroom but local policy-block warnings. A calibration packet lets us keep using Codex pragmatically while making budget policy changes only under protected focus.\n[complete] OpenAI Codex calibration packet captures official dashboard headroom vs local policy-block mismatch for future protected decision.",
       "verification": "VERIFY-BUD-896"
+    },
+    {
+      "id": "TASK-BUD-897",
+      "description": "Add Alibaba free-trial provider candidate to the provider assimilation backlog.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-895",
+        "TASK-BUD-896"
+      ],
+      "files": [
+        "docs/research/alibaba-provider-candidate-packet-2026-05.md",
+        "docs/research/provider-assimilation-runway-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Record that the operator created an Alibaba free trial account and wants Alibaba queued as the next provider candidate to evaluate before spending money elsewhere.",
+        "Create a report-only Alibaba provider candidate packet using the provider-candidate evaluation template.",
+        "Capture free-trial-first strategy: use free trial value carefully, measure cost/quality/telemetry, and avoid paid spend without later explicit decision.",
+        "Define unknowns and next evidence needed before any Alibaba API key, model ref, routeModelRefs, providerBudgets, monitor migration, or routing change.",
+        "No provider settings, API keys, routing, model, budget cap, or monitor override changes."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] User created an Alibaba free trial account and wants Alibaba queued as the next provider to assimilate pragmatically, maximizing free trial value before paying any provider. [rationale:risk-control] Free-trial provider evaluation must be tracked before credentials/settings changes so cost, telemetry, privacy, and rollback are explicit.\n[slice-start] Creating Alibaba free-trial provider candidate packet. Report-only; no API key/settings/routing/model/budget/monitor changes.\n[rationale:risk-control] Alibaba free trial is a strong next candidate for cost-saving, but trial value should be measured before any paid spend or protected settings changes. A packet prevents rushed provider assimilation.\n[complete] Alibaba free trial queued as next provider candidate; ready for factual dashboard intake before any protected runtime change.",
+      "verification": "VERIFY-BUD-897"
     }
   ]
 }

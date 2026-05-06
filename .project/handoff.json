@@ -1,54 +1,54 @@
 {
-  "timestamp": "2026-05-06T02:38:07.230Z",
-  "context": "Completed OpenAI Codex quota calibration packet from the provider candidate template. It preserves operator fact that OpenAI Pro dashboard sh [snip] ections. No protected provider changes. [truncated:+152 chars]",
+  "timestamp": "2026-05-06T02:40:39.642Z",
+  "context": "Completed Alibaba free-trial provider candidate assimilation. Operator created Alibaba free trial and wants it queued next to maximize trial [snip] No protected runtime/provider changes. [truncated:+95 chars]",
   "next_actions": [
-    "Commit TASK-BUD-896 docs/board checkpoint if dirty.",
-    "Assimilate new operator fact: Alibaba free trial account exists; add Alibaba/Qwen-style provid [snip] aluate, report-only first. [truncated:+57 chars]",
-    "Do not change settings/API keys/routing/providerBudgets/model refs until protected TASK-BUD-849 decision."
+    "Commit TASK-BUD-897 docs/board checkpoint if dirty.",
+    "Next local-safe slice: prepare an Alibaba free-trial dashboard intake checklist or wait for op [snip] ling auto-charge behavior. [truncated:+72 chars]",
+    "Do not add Alibaba API keys/settings/routeModelRefs/providerBudgets/model refs until protected decision packet."
   ],
   "blockers": [
+    "Alibaba account exists but API/product/model/pricing/expiry/privacy/telemetry are unknown.",
     "Provider settings/model/API/routing/monitor migration remain protected.",
-    "Alibaba account/free trial exists but no runtime/provider settings should be a [snip] ted activation packet. [truncated:+28 chars]"
+    "Paid Alibaba spend is explicitly not authorized."
   ],
   "recent_validation": [
-    "i18n_lint_text sample for docs/research/openai-codex-quota-calibration-packet-2026-05.md -> pass",
-    "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-st [snip] es passed, 62 tests passed [truncated:+100 chars]"
+    "i18n_lint_text sample for docs/research/alibaba-provider-candidate-packet-2026-05.md -> pass",
+    "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-st [snip] es passed, 58 tests passed [truncated:+112 chars]"
   ],
   "recent_commits": [
-    "bafea907 docs(providers): add candidate evaluation template"
+    "6421e77b docs(quota): calibrate openai codex policy"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-896",
+    "focus": "TASK-BUD-897",
     "canonical_links": [
-      "task:TASK-BUD-896",
-      "task:TASK-BUD-849",
-      "commit:bafea907"
+      "task:TASK-BUD-897",
+      "commit:6421e77b"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T02:38:07.230Z",
+    "generatedAtIso": "2026-05-06T02:40:39.642Z",
     "level": "ok",
-    "percent": 47,
+    "percent": 48,
     "action": "continue",
-    "recommendation": "commit-task-bud-896-then-seed-alibaba-provider-candidate",
+    "recommendation": "commit-task-bud-897-and-continue-report-only-intake-checklist-if-useful",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T02:38:07.230Z",
+      "atIso": "2026-05-06T02:40:39.642Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 47,
+      "percent": 48,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-896-then-seed-alibaba-provider-candidate"
+      "recommendation": "commit-task-bud-897-and-continue-report-only-intake-checklist-if-useful"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-896"
+    "TASK-BUD-897"
   ]
 }

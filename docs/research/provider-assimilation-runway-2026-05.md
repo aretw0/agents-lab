@@ -156,11 +156,17 @@ Usar antes de adicionar Kimi, Claude Code, novo tier OpenAI ou outro provider:
 - Risco: budget de CLI/sessão e comportamento de subprocesso precisam de canary bounded.
 - Próximo passo local-safe: packet report-only de capability e desenho de canary manual pequeno; sem roteamento always-on.
 
+### Alibaba Cloud / DashScope / Qwen-compatible
+
+- Postura atual: próximo provider candidato na fila porque o operador criou uma conta Alibaba free trial.
+- Risco: limites do trial, unidade de custo, modelos, endpoint, privacidade e telemetry ainda desconhecidos.
+- Próximo passo local-safe: usar [`docs/research/alibaba-provider-candidate-packet-2026-05.md`](alibaba-provider-candidate-packet-2026-05.md) para registrar saldo/modelos/expiração antes de qualquer API key/settings/canary.
+
 ### Kimi AI ou outro provider barato
 
-- Postura atual: candidato para monitor/classifier barato ou apoio a fatias local-safe.
+- Postura atual: candidato paralelo para monitor/classifier barato ou apoio a fatias local-safe.
 - Risco: qualidade/custo/telemetry desconhecidos até canary.
-- Próximo passo local-safe: criar packet de avaliação com unidade de preço esperada, janela de contexto, model refs, notas de privacidade e uma proposta de canary bounded para classifier.
+- Próximo passo local-safe: manter como alternativa se Alibaba trial não encaixar ou se custo-benefício for pior.
 
 ### Modelos OpenAI pesados
 
@@ -215,7 +221,7 @@ Enquanto esse packet não existir, manter provider work como report-only e obser
 1. Manter runtime atual em provider selecionado explicitamente por humano.
 2. Tratar `openai-codex` como `policy-blocked` localmente até reconciliar o cap configurado com o dashboard oficial.
 3. Não migrar monitores para `openai-codex` automaticamente; se Copilot acabar, usar decisão emergencial explícita, dashboard oficial conferido, ou provider barato em canary.
-4. Preparar um packet de candidato para o provider barato mais plausível para monitor/classifier.
+4. Priorizar Alibaba free trial como próximo provider candidato, preenchendo saldo/modelos/expiração antes de qualquer runtime.
 5. Usar as superfícies de quota após cada reload como fonte única de verdade:
    - `quota_visibility_provider_budgets`;
    - `quota_alerts`;
