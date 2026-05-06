@@ -13839,6 +13839,15 @@
       "method": "doc+marker+i18n+no-protected-mutation",
       "timestamp": "2026-05-06T14:45:20.675Z",
       "evidence": "Created docs/research/ci-cd-failure-evidence-intake-template-2026-05.md as report-only intake template for CI/CD preparation. It includes required evidence fields, drift-class taxonomy, mandatory evidence before workflow mutation, stop conditions for protected scopes, and local-safe validation instructions. Validation: safe_marker_check passed for all anchors; i18n_lint_text passed; repository diff confirms no `.github/workflows/**` changes."
+    },
+    {
+      "id": "VERIFY-BUD-921",
+      "target": "TASK-BUD-921",
+      "target_type": "task",
+      "status": "passed",
+      "method": "read-only packets+doc synthesis",
+      "timestamp": "2026-05-06T14:47:19.922Z",
+      "evidence": "Executed report-only readiness packets for delegation/long-run baseline: `delegation_readiness_status_packet`, `simple_delegate_rehearsal_packet`, `growth_maturity_score_packet`, `local_continuity_audit`, `context_watch_continuation_readiness`, `unattended_rehearsal_gate`, and `autonomy_lane_material_seed_packet`. Wrote docs/research/0-8-delegation-long-run-runway.md summarizing ready/needs-evidence/blocked classes, local-execute-first posture, simple-delegate/autoadvance blockers (`auto-advance-blocked`, `auto-advance-telemetry-not-ready`, `focus-not-complete`), and explicit next local-safe prep sequence. Validation: safe_marker_check passed (8/8 anchors); i18n_lint_text passed. No dispatch/process spawn executed."
     }
   ]
 }

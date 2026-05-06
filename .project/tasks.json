@@ -20603,7 +20603,7 @@
     {
       "id": "TASK-BUD-921",
       "description": "Report-only delegation and long-run improvement synthesis for compounding local-safe evolution before any stronger automation.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-917"
@@ -20621,7 +20621,8 @@
         "Include rollback/stop guidance for long-run experiments."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:strategy] User frames evolution as compounding cleanup/research/delegation/long-run improvements. This keeps that compounding path evidence-based before increasing autonomy.\n[provenance:human] source_task=TASK-BUD-917 reason=Prepare future delegation and long-run work in a controlled audited lane."
+      "notes": "[rationale:strategy] User frames evolution as compounding cleanup/research/delegation/long-run improvements. This keeps that compounding path evidence-based before increasing autonomy.\n[provenance:human] source_task=TASK-BUD-917 reason=Prepare future delegation and long-run work in a controlled audited lane.\n[start] Capturing report-only delegation/long-run readiness baseline for lane using existing packets/tools only; no dispatch or runtime mutation.\n[complete] Delegation/long-run runway is in read-only mode until continuity/foco e readiness são limpos por próximas fatias locais.",
+      "verification": "VERIFY-BUD-921"
     },
     {
       "id": "TASK-BUD-922",
