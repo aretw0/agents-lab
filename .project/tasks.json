@@ -19767,6 +19767,31 @@
       "milestone": "provider-economy",
       "notes": "[auto-seed] User confirmed provider economy is becoming urgent: Copilot monitor quota is ending, OpenAI should be reserved for heavier models, Kimi/Claude Code opportunities need measured use. First local-safe step is fixing quota observability tools before strategy changes.\n[provenance:human] source_task=TASK-BUD-879 reason=Runtime regression observed in quota_visibility_status/windows/provider_budgets while planning provider economy; fix is local-safe and prerequisite to informed provider decisions.\n[slice-complete] Fixed quota output-policy binding and added fresh-runtime tool execution regression. Live session still needs /reload before current tool registry reflects the fix.",
       "verification": "VER-BUD-1249"
+    },
+    {
+      "id": "TASK-BUD-885",
+      "description": "Extract autonomy-lane common/local-safety helpers to bring the helper surface below 1000 lines.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-875"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface-helpers.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-common.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Move common normalization, handoff/chaining, task lookup, and local-safety helper code into a dedicated module without changing report-only/autonomy semantics.",
+        "Keep existing imports from guardrails-core-autonomy-lane-surface-helpers stable via re-exports for previously exported helpers.",
+        "Reduce guardrails-core-autonomy-lane-surface-helpers.ts below 1000 lines.",
+        "Run focal autonomy lane tests."
+      ],
+      "milestone": "architecture-runway-implementation",
+      "notes": "[auto-seed] Continuing user-approved local-safe line-budget runway after TASK-BUD-884. This avoids protected provider/model changes while live quota tools await /reload.\n[provenance:human] source_task=TASK-BUD-875 reason=User wants to kill the last >1000 TS surfaces; audit identified autonomy-lane-common/local-safety as the safest first extraction.\n[slice-complete] Extracted autonomy-lane common/local-safety helpers; helper surface now below 1000 and focal autonomy tests are green.",
+      "verification": "VER-BUD-1250"
     }
   ]
 }

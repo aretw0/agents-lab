@@ -13470,6 +13470,15 @@
       "method": "test",
       "timestamp": "2026-05-06T01:01:49.328Z",
       "evidence": "Fixed quota-visibility tool runtime output-policy binding on disk by importing formatQuotaToolJsonOutput and resolveQuotaToolOutputPolicy from quota-visibility-output-policy in packages/pi-stack/extensions/quota-visibility.ts. Added regression coverage that executes registered quota_visibility_status, quota_visibility_windows, and quota_visibility_provider_budgets tools in a fresh extension instance and asserts content/details. Validation: pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -> 1 file passed, 35 tests passed. Live current-session tool calls still report resolveQuotaToolOutputPolicy is not defined because the extension runtime is stale until /reload; no provider routing, budgets, settings, or external API behavior changed."
+    },
+    {
+      "id": "VER-BUD-1250",
+      "target": "TASK-BUD-885",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T01:07:27.184Z",
+      "evidence": "Extracted autonomy-lane common/chaining/task lookup/local-safety helpers into packages/pi-stack/extensions/guardrails-core-autonomy-lane-common.ts while preserving re-exports from guardrails-core-autonomy-lane-surface-helpers.ts for previously exported helpers. Reduced guardrails-core-autonomy-lane-surface-helpers.ts to 832 lines; new common module is 393 lines. line_budget_snapshot now reports aboveWatch=1 (only guardrails-core.ts remains above 1000). Validation: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts -> 3 files passed, 76 tests passed. Targeted TypeScript probe for autonomy-lane common/helpers returned no output after switching node:path to namespace import."
     }
   ]
 }
