@@ -1,51 +1,50 @@
 {
-  "timestamp": "2026-05-06T21:48:09.581Z",
-  "context": "TASK-BUD-944 concluída: auto-resume successor/focus agora filtra milestones protected/parked/legacy, evitando promover influência externa par [snip] o TASK-BUD-676 após uma task concluída. [truncated:+7 chars]",
+  "timestamp": "2026-05-06T22:01:44.979Z",
+  "context": "TASK-BUD-945 concluída: auto-resume agora recebe excludedTaskIds e filtra protected/parked de current focus, derived hints, preferred hints, [snip] tigar duplicação de aviso do tool edit. [truncated:+88 chars]",
   "next_actions": [
-    "commit board/handoff closure",
-    "/reload necessário por alteração runtime de context-watchdog helper",
-    "após reload, validar auto-resume não aponta TASK-BUD-676 e selecionar próxima fatia local-safe"
+    "commit source/test + board/handoff",
+    "/reload necessário por alteração runtime",
+    "após reload validar auto-resume live não aponta TASK-BUD-676"
   ],
   "blockers": [
-    "runtime-reload-required-after-context-watchdog-successor-filter-change"
+    "runtime-reload-required-after-auto-resume-excluded-hints-change"
   ],
   "recent_validation": [
     "context-watchdog.test.ts: 61 passed",
-    "safe_marker_check signal-integrity audit: 2/2",
-    "project-validate: clean"
+    "project-validate: clean",
+    "git diff --check: clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-944",
+    "focus": "TASK-BUD-945",
     "canonical_links": [
-      "task:TASK-BUD-944",
-      "task:TASK-BUD-676",
-      "commit:ad93dc93"
+      "task:TASK-BUD-945",
+      "task:TASK-BUD-946"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T21:48:09.581Z",
+    "generatedAtIso": "2026-05-06T22:01:44.979Z",
     "level": "ok",
-    "percent": 40,
+    "percent": 50,
     "action": "continue",
-    "recommendation": "Commitar board; fazer reload antes de confiar no auto-resume live.",
+    "recommendation": "Commitar e pedir reload antes de continuar validação live.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T21:48:09.581Z",
+      "atIso": "2026-05-06T22:01:44.979Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 40,
+      "percent": 50,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar board; fazer reload antes de confiar no auto-resume live."
+      "recommendation": "Commitar e pedir reload antes de continuar validação live."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-944"
+    "TASK-BUD-945"
   ]
 }

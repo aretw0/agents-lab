@@ -21121,6 +21121,50 @@
       "milestone": "signal-integrity-calibration",
       "notes": "Criada como follow-up direto do estado pós TASK-BUD-933: auto-resume escolheu TASK-BUD-676 (protected-parked-legacy) após foco concluído, gerando candidate invalid e material blocked. Escopo local-safe: teste + helper de seleção.\n[provenance:tangent-approved] source_task=TASK-BUD-943 reason=P2 signal-integrity recorrente: stale/successor focus após conclusão de task induz foco protegido inválido.\n[closure] Completed local-safe signal fix: auto-resume successor selection now filters protected/parked/legacy milestones before choosing planned/in-progress board focus. Runtime reload required before trusting live preview behavior.",
       "verification": "VER-BUD-944-PROTECTED-SUCCESSOR"
+    },
+    {
+      "id": "TASK-BUD-946",
+      "description": "[P3/backlog] Investigar duplicação de aviso de falha do tool `edit` quando `oldText` não casa, para reduzir ruído operador sem mascarar o erro real.",
+      "status": "planned",
+      "priority": "p3",
+      "files": [
+        "packages/pi-stack/extensions",
+        "docs/research/control-plane-signal-integrity-audit-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Reproduzir ou coletar evidência de uma falha `edit oldText must match` aparecendo duplicada na UI/log.",
+        "Determinar se a duplicação vem do wrapper de tool output, renderização do TUI, monitor/summary ou retry explícito.",
+        "Propor correção report-only ou teste de regressão que preserve a mensagem de erro uma vez sem suprimir erros reais."
+      ],
+      "milestone": "operator-noise-backlog",
+      "notes": "[intake:user] Operador observou duplicação do aviso `Could not find edits[1]... oldText must match exactly`. Não é prioridade; registrar para não esquecer. O problema é ruído duplicado, não o erro em si.\n[provenance:human] source_task=none reason=Feedback explícito do operador durante TASK-BUD-944 follow-up: mensagem de falha do edit apareceu duplicada."
+    },
+    {
+      "id": "TASK-BUD-945",
+      "description": "[P1/local-safe] Completar filtro de auto-resume para excluir tasks protected/parked também de hints derivados do handoff, não só de preferred successor.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-944"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/extensions/context-watchdog-operator-brief.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog-status-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog-auto-compact-runtime.ts",
+        "packages/pi-stack/extensions/context-watchdog-post-reload-runtime.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`context_watch_auto_resume_preview` não deve listar TASK-BUD-676/protected parked quando o id aparece em `completed_tasks`, `slice_memory.canonical_links`, `next_actions`, blockers ou context.",
+        "O envelope de auto-resume deve aceitar lista explícita de task IDs excluídos e aplicá-la a current, derived e preferred hints.",
+        "Propagar exclusões protected/parked para preview, continuation readiness, post-reload e auto-compact resume envelopes.",
+        "Validar com teste focal de context-watchdog, project-validate e git diff --check."
+      ],
+      "milestone": "signal-integrity-calibration",
+      "notes": "Criada após reload mostrar que TASK-BUD-944 filtrava preferred successor, mas `TASK-BUD-676` ainda podia ser reintroduzida por hints derivados do handoff/canonical links. Escopo local-safe, sem protected mutation.\n[provenance:tangent-approved] source_task=TASK-BUD-944 reason=Follow-up necessário para completar correção de successor protected/parked observada em runtime live.\n[closure] Completed follow-up after reload showed TASK-BUD-676 still came from derived handoff hints. Auto-resume now has explicit excludedTaskIds path and filters protected/parked references from focus/hints/next/links. Runtime reload required before live preview reflects this fix.",
+      "verification": "VER-BUD-945-EXCLUDED-HINTS"
     }
   ]
 }

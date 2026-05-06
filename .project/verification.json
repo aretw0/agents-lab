@@ -14210,6 +14210,15 @@
       "method": "focal regression test",
       "timestamp": "2026-05-06T21:48:00.005Z",
       "evidence": "Added protected/parked successor filter for auto-resume board focus selection. `readProjectPreferredActiveTaskIds` now excludes milestones containing protected/parked/legacy, preventing TASK-BUD-676-like external parked influence from becoming automatic focus after a completed task. Regression: `context_watch_auto_resume_preview skips protected parked successor tasks` keeps local-safe successor and excludes `protected-parked-legacy`. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 61 passed; marker check in signal-integrity audit matched protected successor evidence; `project-validate` clean; `git diff --check` clean. Source/doc commit: ad93dc93."
+    },
+    {
+      "id": "VER-BUD-945-EXCLUDED-HINTS",
+      "target": "TASK-BUD-945",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal regression test",
+      "timestamp": "2026-05-06T22:01:35.943Z",
+      "evidence": "Completed protected/parked exclusion propagation for auto-resume envelopes. Added `excludedTaskIds` to `buildAutoResumePromptEnvelopeFromHandoff`; filtered excluded IDs from current focus, derived hints, preferred hints, blockers, next actions, and slice-memory links. Propagated protected/parked task IDs into preview, continuation readiness, auto-compact, and post-reload resume surfaces. Regression covers protected parked ID appearing in next_actions/context/links while local-safe successor remains selected. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 61 passed; `project-validate` clean; `git diff --check` clean."
     }
   ]
 }
