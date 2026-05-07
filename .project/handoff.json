@@ -1,51 +1,52 @@
 {
-  "timestamp": "2026-05-07T21:34:19.940Z",
-  "context": "After reload, continuing TASK-BUD-989 revealed one more contract issue before counting read-only canaries: agent_run_outcome_packet previousl [snip] before live tool accepts file_contract. [truncated:+447 chars]",
+  "timestamp": "2026-05-07T21:53:53.019Z",
+  "context": "After reload, ran one bounded provider-native DashScope read-only canary using the new minimal-no-extensions isolation and read-only outcome [snip] motion yet (target remains 2-3 passes). [truncated:+658 chars]",
+  "current_tasks": [
+    "TASK-BUD-989"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-996 code/board/handoff evidence.",
-    "Ask/reload before using live agent_run_outcome_packet file_contract=read-only.",
-    "After reload, run exactly one bounded minimal-no-extensions DashScope canary and evaluate outc [snip] h file_contract=read-only. [truncated:+7 chars]"
+    "Commit board/verification/handoff evidence for the passing canary.",
+    "Continue TASK-BUD-989 with 1-2 more bounded minimal-no-extensions provider-native canaries before any promotion.",
+    "Keep each canary single-run, read-only, timeout-bounded, and evaluated with file_contract=read-only."
   ],
   "blockers": [
-    "Runtime reload required for live outcome tool schema/code.",
-    "Machine disk threshold remains tactical local override; avoid broad scans/builds.",
-    "TASK-BUD-968 parked WIP remains dirty."
+    "Need 1-2 additional valid bounded passes before delegation promotion.",
+    "Machine disk threshold remains a tactical local override; avoid broad scans/builds.",
+    "TASK-BUD-968 quota/footer WIP remains parked and dirty."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporte [snip] > 1 file / 17 tests passed [truncated:+7 chars]",
-    "TASK-BUD-996 completed via VERIF-TASK-BUD-996-READ-ONLY-OUTCOME"
+    "agent_run_start_packet -> ready-for-human-decision ext=minimal-no-extensions budget=ok dispatch=no",
+    "Run log .pi/reports/task-bud-989-dashscope-readonly-canary-2.log -> exit_code=0 output_bytes=665 PASS stale_count=0",
+    "safe_marker_check required markers -> ok yes"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-996",
+    "focus": "TASK-BUD-989",
     "canonical_links": [
-      "task:TASK-BUD-996",
-      "task:TASK-BUD-989"
+      "task:TASK-BUD-989",
+      "task:TASK-BUD-989-DASHSCOPE-READONLY-CANARY-2",
+      "task:TASK-BUD-989-DASHSCOPE-CANARY-2-PASS"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T21:34:19.940Z",
+    "generatedAtIso": "2026-05-07T21:53:53.019Z",
     "level": "ok",
-    "percent": 48,
+    "percent": 49,
     "action": "continue",
-    "recommendation": "commit-then-reload-before-next-canary",
-    "focus_task_status": "completed"
+    "recommendation": "commit-pass-evidence-then-plan-next-bounded-canary"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T21:34:19.940Z",
+      "atIso": "2026-05-07T21:53:53.019Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 48,
+      "percent": 49,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-before-next-canary"
+      "recommendation": "commit-pass-evidence-then-plan-next-bounded-canary"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-996"
   ]
 }

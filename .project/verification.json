@@ -14678,6 +14678,15 @@
       "method": "vitest",
       "timestamp": "2026-05-07T21:33:54.486Z",
       "evidence": "[rationale:risk-control] Added `fileContract`/`file_contract` support to agent-run outcome packets so read-only workers can pass with no touched files when process completed, output is non-empty, no unexpected files are reported, and markers pass. Mutation contract remains unchanged: no touched files still yields partial. Surface remains report-only and does not grant dispatch/start/stop authority. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 1 file / 17 tests passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-989-DASHSCOPE-CANARY-2-PASS",
+      "target": "TASK-BUD-989",
+      "target_type": "task",
+      "status": "passed",
+      "method": "provider-native-canary",
+      "timestamp": "2026-05-07T21:53:15.188Z",
+      "evidence": "Executed bounded minimal-no-extensions DashScope provider-native read-only canary after reload: run_id=task-bud-989-dashscope-readonly-canary-2, model=dashscope/qwen3-coder-plus, command used `pi --no-session --no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files --model dashscope/qwen3-coder-plus --tools read,grep,find,ls --print`, timeout 90s. Process exited 0; output_bytes=665; worker output non-empty with PASS verdict; stale ctx count=0. safe_marker_check passed required markers. agent_run_outcome_packet with file_contract=read-only returned contract=pass, process=completed, recommendation=stop, touched=0. Log: .pi/reports/task-bud-989-dashscope-readonly-canary-2.log. This is one valid promotion evidence item; TASK-BUD-989 still needs 1-2 more bounded passes before promotion."
     }
   ]
 }
