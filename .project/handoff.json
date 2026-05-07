@@ -1,56 +1,54 @@
 {
-  "timestamp": "2026-05-07T02:08:26.378Z",
-  "context": "TASK-BUD-969 completed after reload. One-slice agent run controls are live and documented: plan/status/log-tail/abort are report-only or dry- [snip] xecutor. No provider canary dispatched. [truncated:+74 chars]",
+  "timestamp": "2026-05-07T03:41:50.671Z",
+  "context": "AFK lane avançou coesão semântica da execução agêntica. Consolidado namespace público recém-criado de one_slice_agent_run_* para agent_run_* [snip] der/routing/settings/CI/publish tocado. [truncated:+360 chars]",
   "next_actions": [
-    "Only after explicit human approval, prepare one one-slice provider canary to create docs/resea [snip] anary-scorecard-2026-05.md [truncated:+14 chars]",
-    "Use one_slice_agent_run_plan before any dispatch; check status/log/abort registry during run",
-    "Do not use pi-workflows as main canary executor until heartbeat/status/abort are sufficient"
+    "Run /reload before trusting live tool surface names; expected new tools are agent_run_plan/sta [snip] ket/registry_upsert/abort. [truncated:+24 chars]",
+    "If continuing local-safe, avoid broad simple_delegate rename until a compatibility/backcompat [snip] 26-05.md as naming source. [truncated:+70 chars]",
+    "Consider a future bounded task to migrate delegation runway wording, but do not add aliases or [snip] t explicit human decision. [truncated:+23 chars]"
   ],
   "blockers": [
-    "No agent dispatch authorized by this checkpoint",
-    "routing/settings remain protected",
-    "simple-delegate rehearsal auto readiness may still be blocked by broader telemetry gates"
+    "Live runtime still needs reload after extension surface rename.",
+    "Historical docs/board evidence still mention one_slice_agent_run_* and ready-f [snip] dit history wholesale. [truncated:+48 chars]"
   ],
   "recent_validation": [
-    "one_slice_agent_run_plan live returned ready-for-human-decision for Spark scorecard packet",
-    "one_slice_agent_run_status live returned safe not-found for missing run",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 9 passed"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 11 passed",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-colony-promotion-gate.test.ts packages/ [snip] iness.test.ts -> 14 passed [truncated:+47 chars]",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts package [snip] -list.test.ts -> 59 passed [truncated:+85 chars]"
   ],
   "recent_commits": [
-    "8c987311 feat(delegation): add one-slice agent run controls",
-    "ef5ed161 test(delegation): cover one-slice agent control tools"
+    "4fe6bb02 refactor(delegation): simplify agent run semantics",
+    "75f6dfbf docs(delegation): map agent run semantics"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-969",
+    "focus": "TASK-BUD-976",
     "canonical_links": [
-      "task:TASK-BUD-969",
-      "commit:8c987311"
+      "task:TASK-BUD-976",
+      "commit:4fe6bb02"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T02:08:26.378Z",
+    "generatedAtIso": "2026-05-07T03:41:50.671Z",
     "level": "checkpoint",
-    "percent": 56,
     "action": "checkpoint-refresh",
-    "recommendation": "pause for explicit human decision before any provider canary dispatch",
+    "recommendation": "pause-after-checkpoint-until-reload-or-next-local-safe-doc-task",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T02:08:26.378Z",
+      "atIso": "2026-05-07T03:41:50.671Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 56,
+      "percent": 0,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "pause for explicit human decision before any provider canary dispatch"
+      "recommendation": "pause-after-checkpoint-until-reload-or-next-local-safe-doc-task"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-969"
+    "TASK-BUD-976"
   ]
 }
