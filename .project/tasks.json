@@ -22093,6 +22093,66 @@
       "milestone": "subagent-sovereignty-lane-2026-05",
       "notes": "Created from human steer: recurring disk pressure should become reusable tools/skills/troubleshooting primitives for easier control-plane maintenance.\n[implementation] Added `workspace_storage_pressure_report` as a report-only machine-maintenance tool. It targets recurring disk-pressure troubleshooting by listing bounded, reversible gzip candidates in the workspace pi session directory and refuses to execute cleanup. Focal vitest passed; runtime reload required before live use.",
       "verification": "VERIF-TASK-BUD-991-STORAGE-PRESSURE-REPORT"
+    },
+    {
+      "id": "TASK-BUD-992",
+      "description": "Criar roadmap de adoção de ferramentas rápidas para agentes na pi-stack",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "docs/research/tooling-acceleration-roadmap-2026-05.md",
+        "packages/pi-stack/README.md"
+      ],
+      "acceptance_criteria": [
+        "Mapear ferramentas candidatas que podem acelerar o trabalho dos agentes sem substituir Node/Python quando eles forem a escolha correta.",
+        "Separar avaliação report-only, canary local e adoção/install em fases com rollback claro.",
+        "Incluir critérios de decisão: velocidade, compatibilidade, segurança, disponibilidade offline/cache, manutenção e custo cognitivo.",
+        "Definir política: ferramentas como `bun` e `uv` devem ser prontas para uso quando disponíveis, mas agentes continuam usando Node/Python diretamente quando convém."
+      ],
+      "milestone": "tooling-acceleration-roadmap-2026-05",
+      "notes": "Backlog criado por steering humano: facilitar que agentes tenham `bun` e `uv` instalados/prontos na pi-stack e cultivar um roadmap contínuo para ferramentas que tornam o trabalho mais rápido."
+    },
+    {
+      "id": "TASK-BUD-993",
+      "description": "Avaliar e empacotar suporte opcional a Bun para agentes pi-stack",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-992"
+      ],
+      "files": [
+        "packages/pi-stack",
+        "docs/research/tooling-acceleration-roadmap-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Detectar presença/versão de `bun` de forma read-only em ambiente do agente.",
+        "Comparar casos onde `bun` acelera tarefas JS/TS versus quando `node`/`npm`/`pnpm` continuam preferíveis.",
+        "Propor instalação/bootstrap opt-in com rollback e sem alterar ambiente global sem confirmação explícita.",
+        "Adicionar orientação para agentes escolherem `bun` apenas quando compatível com o projeto."
+      ],
+      "milestone": "tooling-acceleration-roadmap-2026-05",
+      "notes": "Backlog: Bun como acelerador opcional/pronto para uso na pi-stack, sem substituir Node quando Node for mais correto."
+    },
+    {
+      "id": "TASK-BUD-994",
+      "description": "Avaliar e empacotar suporte opcional a uv para agentes pi-stack",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-992"
+      ],
+      "files": [
+        "packages/pi-stack",
+        "docs/research/tooling-acceleration-roadmap-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Detectar presença/versão de `uv` de forma read-only em ambiente do agente.",
+        "Comparar casos onde `uv` acelera tarefas Python versus quando `python`/`pip`/ambiente existente continuam preferíveis.",
+        "Propor instalação/bootstrap opt-in com rollback e sem alterar ambiente global sem confirmação explícita.",
+        "Adicionar orientação para agentes escolherem `uv` apenas quando compatível com o projeto."
+      ],
+      "milestone": "tooling-acceleration-roadmap-2026-05",
+      "notes": "Backlog: uv como acelerador opcional/pronto para uso na pi-stack, sem substituir Python/pip quando o caminho direto for mais correto."
     }
   ]
 }
