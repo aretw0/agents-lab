@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-05-07T17:01:35.628Z",
-  "context": "After reload, confirmed live agent_run_start_packet accepts budget evidence and remains report-only. Then applied the shared provider executi [snip] der/settings/routing changes were made. [truncated:+339 chars]",
+  "timestamp": "2026-05-07T17:04:32.868Z",
+  "context": "Continued after reload. Live start packet smoke succeeded with budget evidence and dispatch=no. Reused shared provider execution budget evide [snip] rty working tree, preserving isolation. [truncated:+324 chars]",
   "current_tasks": [
     "TASK-BUD-989"
   ],
   "next_actions": [
-    "Reload before trusting live quota_visibility_route and agent_run_start_packet because extension code changed.",
-    "After reload, run quota_visibility_route to verify live output includes executionBudgetDecisio [snip] ils; still no auto-switch. [truncated:+15 chars]",
-    "Prepare one provider-native canary only after choosing provider/model with explicit budget evi [snip] el-specific/WHAM evidence. [truncated:+60 chars]"
+    "Reload before trusting live quota_visibility_route or agent_run_start_packet because runtime extension code changed.",
+    "After reload, run live quota_visibility_route to confirm executionBudgetDecision/Ready appears [snip] tails without auto-switch. [truncated:+6 chars]",
+    "Only execute provider-native worker after explicit confirmation/policy; dashscope remains cons [snip] el-specific/WHAM evidence. [truncated:+44 chars]"
   ],
   "blockers": [
     "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated.",
@@ -16,39 +16,40 @@
   ],
   "recent_validation": [
     "Live agent_run_start_packet: ready-for-human-decision, budget=ok, dispatch=no",
-    "npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack [snip] > 2 files, 62 tests passed [truncated:+54 chars]",
-    "git diff --check scoped quota route/control-plane reuse files -> passed"
+    "npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack [snip] after isolation correction [truncated:+81 chars]"
   ],
   "recent_commits": [
-    "7c227a54 refactor(quota): reuse provider budget evidence in route advisory"
+    "7c227a54 refactor(quota): reuse provider budget evidence in route advisory",
+    "41327874 chore(quota): checkpoint route budget evidence reuse"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-989",
     "canonical_links": [
       "task:TASK-BUD-989",
+      "task:TASK-BUD-968",
       "commit:7c227a54"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T17:01:35.628Z",
-    "level": "ok",
-    "percent": 50,
+    "generatedAtIso": "2026-05-07T17:04:32.868Z",
+    "level": "warn",
+    "percent": 54,
     "action": "continue",
-    "recommendation": "reload-then-live-route-budget-evidence-smoke"
+    "recommendation": "reload-then-live-route-smoke-or-checkpoint"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T17:01:35.628Z",
+      "atIso": "2026-05-07T17:04:32.868Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 50,
+      "level": "warn",
+      "percent": 54,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-live-route-budget-evidence-smoke"
+      "recommendation": "reload-then-live-route-smoke-or-checkpoint"
     }
   ]
 }
