@@ -14399,6 +14399,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-07T02:07:28.884Z",
       "evidence": "Implemented one-slice agent observability/control lane: `one_slice_agent_run_plan`, `one_slice_agent_run_status`, `one_slice_agent_run_log_tail`, and `one_slice_agent_run_abort` after reload. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` → 9 passed; `git diff --check` passed; marker check passed for `docs/research/simple-delegate-workflow-observability-gap-2026-05.md` markers covering status/log/abort and docs-not-dispatch rule. [rationale:risk-control] bounded report-only/dry-first controls reduce risk before any future agent dispatch."
+    },
+    {
+      "id": "VERIF-TASK-BUD-967-SPARK-CANARY",
+      "target": "TASK-BUD-967",
+      "target_type": "task",
+      "status": "passed",
+      "method": "one-slice-provider-canary+inspection",
+      "timestamp": "2026-05-07T02:17:15.158Z",
+      "evidence": "Executed approved one-slice provider canary with provider/model `openai-codex/gpt-5.3-codex-spark` targeting only `docs/research/provider-canary-scorecard-2026-05.md`. Evidence: first run `provider-canary-spark-1778119890862` timed out/SIGTERM at 45s with no useful output; retry run `provider-canary-spark-direct-1778120044943` completed in ~34s and created the scorecard. Validation: one_slice_agent_run_status reported completed; one_slice_agent_run_log_tail available; safe_marker_check passed for provider/model, run id, latency and rollback markers; i18n lint passed; git diff --check passed. [rationale:risk-control] bounded one-file local-safe dispatch with observable timeout/log/rollback and no protected-scope edits."
     }
   ]
 }

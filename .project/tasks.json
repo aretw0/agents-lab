@@ -21554,7 +21554,7 @@
     {
       "id": "TASK-BUD-967",
       "description": "[P1/local-safe] Canary de delegação agêntica com providers operacionais (Dashscope/OpenAI Codex Spark), deixando Claude Code em backlog.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "docs/research/provider-canary-scorecard-2026-05.md"
@@ -21567,7 +21567,8 @@
         "Parar após uma fatia e pedir decisão antes de próximo provider."
       ],
       "milestone": "agent-quality-calibration-lane",
-      "notes": "Direção do operador: não insistir no Claude Code adapter agora; priorizar providers já disponíveis para aprender delegação agêntica e produzir valor.\n[start] Operador escolheu começar com gpt-5.3-codex-spark. Caminho escolhido: workflow local-safe com agent spec project-level em .project/agents usando model openai-codex/gpt-5.3-codex-spark; sem alterar .pi/settings.json/routing.\n[stall] provider-canary-spark passou de ~10min na etapa implement sem artefato alvo visível; tratar como canary stalled/observability gap, não como sucesso. Próxima ação recomendada: pausar/abortar pelo controle do workflow/TUI e registrar evidência antes de retry."
+      "notes": "Direção do operador: não insistir no Claude Code adapter agora; priorizar providers já disponíveis para aprender delegação agêntica e produzir valor.\n[start] Operador escolheu começar com gpt-5.3-codex-spark. Caminho escolhido: workflow local-safe com agent spec project-level em .project/agents usando model openai-codex/gpt-5.3-codex-spark; sem alterar .pi/settings.json/routing.\n[stall] provider-canary-spark passou de ~10min na etapa implement sem artefato alvo visível; tratar como canary stalled/observability gap, não como sucesso. Próxima ação recomendada: pausar/abortar pelo controle do workflow/TUI e registrar evidência antes de retry.\n[canary] Após aprovação explícita, executado one-slice provider canary com `openai-codex/gpt-5.3-codex-spark` para arquivo único `docs/research/provider-canary-scorecard-2026-05.md`. Primeira tentativa (`provider-canary-spark-1778119890862`) atingiu timeout/SIGTERM em 45s sem saída útil; retry único com 90s (`provider-canary-spark-direct-1778120044943`) completou em ~34s e criou o artifact. Nenhuma alteração de settings/routing/CI/publish/credenciais.\n[rationale:risk-control] O retry único foi mantido local-safe porque preservou arquivo único declarado, timeout bounded, registry/log observável e não tocou escopos protegidos; a tentativa anterior havia falhado sem saída e foi registrada como evidência, não ocultada.\n[complete] Spark one-slice canary completed and scorecard artifact created. Stop after this one slice; next provider/model requires a new explicit decision.",
+      "verification": "VERIF-TASK-BUD-967-SPARK-CANARY"
     },
     {
       "id": "TASK-BUD-968",
