@@ -1,39 +1,40 @@
 {
-  "timestamp": "2026-05-07T14:22:16.004Z",
-  "context": "Subagent sovereignty steering slice is ready to checkpoint/commit separately from parked TASK-BUD-968 UI quota patch. TASK-BUD-968 remains pl [snip] ert dry-run only; no worker dispatched. [truncated:+150 chars]",
+  "timestamp": "2026-05-07T15:03:57.624Z",
+  "context": "User explicitly confirmed execution of worker task-bud-986-quota-ui-review-rehearsal. Registry was applied as planned, claude_code_execute ra [snip] delegation should not be promoted yet. [truncated:+393 chars]",
   "current_tasks": [
     "TASK-BUD-986"
   ],
   "next_actions": [
-    "If committing now, stage only .project/tasks.json, .project/handoff.json, and docs/research/su [snip] md for the steering slice. [truncated:+37 chars]",
-    "Keep parked TASK-BUD-968 quota/footer implementation changes uncommitted until TUI/WEB review is intentionally resumed.",
-    "Before any worker real dispatch, require explicit human confirmation for run_id task-bud-986-q [snip] status/log/abort/outcome. [truncated:+64 chars]"
+    "Do not promote multiple workers or auto delegation from this run.",
+    "Decide whether to retry the same review with adjusted executor/prompt requiring non-empty outp [snip] tection/registry metadata. [truncated:+35 chars]",
+    "Keep TASK-BUD-968 parked until review evidence exists; do not close it from this failed worker."
   ],
   "blockers": [
-    "Parked quota/footer patch remains in working tree and is intentionally not par [snip] agent steering commit. [truncated:+12 chars]",
-    "Delegation readiness still needs real rehearsal evidence before multiple workers/background/colony."
+    "First real worker produced empty output, so contract failed despite process exit 0.",
+    "Actual executor was claude_code_execute although planned provider_model_ref re [snip] cit in the run packet. [truncated:+85 chars]"
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack [snip] tion.test.ts -> 100 passed [truncated:+83 chars]",
-    "safe_marker_check docs/research/subagent-sovereignty-rehearsal-2026-05.md -> ok",
-    "git diff --check -> ok"
+    "claude_code_execute exitCode=0 output_bytes=0",
+    "agent_run_log_tail found=yes lines=16",
+    "agent_run_outcome_packet -> process=completed contract=fail markerFailures=1"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-986",
     "canonical_links": [
       "task:TASK-BUD-986",
+      "task:TASK-BUD-986-QUOTA-UI-REVIEW-REHEARSAL",
       "task:TASK-BUD-968"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T14:22:16.004Z",
+    "generatedAtIso": "2026-05-07T15:03:57.624Z",
     "level": "ok",
     "action": "continue",
-    "recommendation": "commit-subagent-steering-slice-only"
+    "recommendation": "pause-before-retry-or-harden-empty-output"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T14:22:16.004Z",
+      "atIso": "2026-05-07T15:03:57.624Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 0,
@@ -43,7 +44,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-subagent-steering-slice-only"
+      "recommendation": "pause-before-retry-or-harden-empty-output"
     }
   ]
 }
