@@ -21630,6 +21630,28 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:risk-control] Task criada após aprovação explícita do operador para próximo provider e cultivo de primitivas; escopo docs-only/local-safe com dois arquivos declarados.\n[provenance:human] source_task=TASK-BUD-967 reason=Operador aprovou seguir para próximo provider enquanto cultiva ergonomia/primitivas do control-plane.\n[complete] Dashscope canary recorded as contract-failure evidence, not hidden as success. Unexpected files were removed. Ergonomics artifact identifies next primitive: one-slice run outcome packet with declared-file validation.",
       "verification": "VERIF-TASK-BUD-970-DASHSCOPE-ERGONOMICS"
+    },
+    {
+      "id": "TASK-BUD-971",
+      "description": "[P1/local-safe] Implementar one-slice run outcome packet para separar processState de contractDecision.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-one-slice-agent-run-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/primitives/agents-as-tools-calibration-score.md"
+      ],
+      "acceptance_criteria": [
+        "Expor primitive/tool report-only que leia run registrada e compare arquivos declarados com arquivos tocados informados.",
+        "Separar processState de contractDecision pass/partial/fail.",
+        "Retornar arquivos inesperados, arquivos declarados ausentes, validações pass/fail e rollback sugerido.",
+        "Não despachar, iniciar, parar, commitar ou alterar settings/routing/CI/publish/credenciais.",
+        "Adicionar smoke tests cobrindo pass e fail por arquivo inesperado/missing marker."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:risk-control] Criada após canary Dashscope mostrar que process completed não equivale a contrato cumprido; escopo é report-only/local-safe.\n[provenance:human] source_task=TASK-BUD-970 reason=Operador pediu para prosseguir cultivando primitivas do control-plane após explicar falha Dashscope.\n[slice] Implementado `buildOneSliceAgentRunOutcomePacket` e tool `one_slice_agent_run_outcome_packet`: separa `processState` de `contractDecision`, compara arquivos declarados no registry com `touched_files`, incorpora `marker_results`, retorna arquivos inesperados/ausentes, rollback sugerido e recomendação stop/retry-once/ask-human. Teste focal: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` → 10 passed; `git diff --check` passou.\n[rationale:risk-control] A primitive é segura porque é report-only, não despacha nem interrompe processos, e torna explícita a diferença entre término do subprocesso e cumprimento do contrato; isso reduz risco antes de novos canaries.\n[complete] Outcome packet primitive added and documented. Requires reload before trusting live tool surface.",
+      "verification": "VERIF-TASK-BUD-971-OUTCOME-PACKET"
     }
   ]
 }

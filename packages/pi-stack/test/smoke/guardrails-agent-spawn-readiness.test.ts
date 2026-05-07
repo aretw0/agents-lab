@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import guardrailsCore, { buildOneSliceAgentRunPlan, evaluateAgentSpawnReadiness } from "../../extensions/guardrails-core";
-import { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunStatus } from "../../extensions/guardrails-core-one-slice-agent-run-runtime";
+import { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunOutcomePacket, buildOneSliceAgentRunStatus } from "../../extensions/guardrails-core-one-slice-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
   it("returns ready-for-simple-spawn for single agent with explicit bounded controls", () => {
@@ -148,6 +148,45 @@ describe("agent spawn readiness contract", () => {
     });
   });
 
+  it("separates process completion from one-slice contract outcome", () => {
+    const entry = {
+      runId: "run-outcome",
+      state: "completed" as const,
+      providerModelRef: "dashscope/qwen-plus",
+      cwd: process.cwd(),
+      declaredFiles: ["docs/research/provider-canary-scorecard-dashscope-2026-05.md"],
+    };
+
+    const passed = buildOneSliceAgentRunOutcomePacket({
+      runId: "run-outcome",
+      entry,
+      touchedFiles: ["docs/research/provider-canary-scorecard-dashscope-2026-05.md"],
+      markerResults: [{ label: "provider-marker", ok: true }],
+    });
+    expect(passed).toMatchObject({
+      mode: "one-slice-agent-run-outcome-packet",
+      processState: "completed",
+      contractDecision: "pass",
+      recommendation: "stop",
+      rollbackFiles: [],
+    });
+
+    const failed = buildOneSliceAgentRunOutcomePacket({
+      runId: "run-outcome",
+      entry,
+      touchedFiles: ["file1.txt", "file2.txt"],
+      markerResults: [{ label: "dashscope-path-marker", ok: false }],
+    });
+    expect(failed).toMatchObject({
+      processState: "completed",
+      contractDecision: "fail",
+      recommendationCode: "one-slice-agent-outcome-fail-unexpected-files",
+      unexpectedFiles: ["file1.txt", "file2.txt"],
+      markerFailures: ["dashscope-path-marker"],
+      rollbackFiles: ["file1.txt", "file2.txt"],
+    });
+  });
+
   it("exposes agent_spawn_readiness_gate as read-only tool", async () => {
     const rawPi = {
       on: vi.fn(),
@@ -211,6 +250,15 @@ describe("agent spawn readiness contract", () => {
         logPath,
         startedAtIso: "2026-05-07T00:00:00.000Z",
         lastEventAtIso: "2026-05-07T00:00:30.000Z",
+      }, {
+        runId: "run-outcome",
+        state: "completed",
+        providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+        cwd,
+        declaredFiles: ["docs/research/provider-canary-scorecard-2026-05.md"],
+        logPath,
+        startedAtIso: "2026-05-07T00:00:00.000Z",
+        lastEventAtIso: "2026-05-07T00:00:40.000Z",
       }],
     }), "utf8");
 
@@ -241,6 +289,21 @@ describe("agent spawn readiness contract", () => {
     expect(status.details?.mode).toBe("one-slice-agent-run-status");
     expect(status.details?.processStopAllowed).toBe(false);
     expect(status.content?.[0]?.text).toContain("state=running");
+
+    const outcome = await getTool("one_slice_agent_run_outcome_packet").execute(
+      "tc-outcome",
+      {
+        run_id: "run-outcome",
+        touched_files: ["docs/research/provider-canary-scorecard-2026-05.md"],
+        marker_results: [{ label: "scorecard-marker", ok: true }],
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+    expect(outcome.details?.mode).toBe("one-slice-agent-run-outcome-packet");
+    expect(outcome.details?.contractDecision).toBe("pass");
+    expect(outcome.content?.[0]?.text).toContain("contract=pass");
 
     const tail = await getTool("one_slice_agent_run_log_tail").execute("tc-tail", { run_id: "run-1", max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });
     expect(tail.details?.mode).toBe("one-slice-agent-run-log-tail");

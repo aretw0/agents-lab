@@ -14417,6 +14417,15 @@
       "method": "one-slice-provider-canary+inspection",
       "timestamp": "2026-05-07T02:28:36.089Z",
       "evidence": "Approved Dashscope canary used provider/model `dashscope/qwen-plus` with declared files `docs/research/provider-canary-scorecard-dashscope-2026-05.md` and `docs/research/one-slice-control-plane-ergonomics-2026-05.md`. Evidence: run `provider-canary-dashscope-direct-1778120606017` completed but asked for file names/content and created no declared files; retry `provider-canary-dashscope-retry-1778120743078` completed but created unexpected `file1.txt`/`file2.txt`, which were rolled back. Parent control-plane created scorecard/ergonomics docs preserving this failure evidence. Validation: safe_marker_check passed for Dashscope scorecard and ergonomics markers; i18n lint passed; git diff --check passed. [rationale:risk-control] failure was made explicit and converted into next primitive requirement: declared-file validation/run outcome packet."
+    },
+    {
+      "id": "VERIF-TASK-BUD-971-OUTCOME-PACKET",
+      "target": "TASK-BUD-971",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-07T02:40:49.449Z",
+      "evidence": "Implemented report-only `one_slice_agent_run_outcome_packet` backed by `buildOneSliceAgentRunOutcomePacket`. It separates `processState` from `contractDecision`, compares registry declared files with parent-provided touched files, accepts marker results, returns unexpected/missing files, marker failures, rollback files, and stop/retry-once/ask-human recommendation. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` → 10 passed; `git diff --check` passed; marker check passed for docs primitive markers. [rationale:risk-control] report-only outcome gate prevents treating completed subprocesses as contract success."
     }
   ]
 }

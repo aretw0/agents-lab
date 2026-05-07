@@ -68,6 +68,23 @@ A primitive `buildOneSliceAgentRunPlan` (exposta no runtime como `one_slice_agen
 
 Mesmo no caminho verde, ela apenas retorna `ready-for-human-decision`; não autoriza dispatch.
 
+## Outcome packet pós-run
+
+A primitive `buildOneSliceAgentRunOutcomePacket` (exposta como `one_slice_agent_run_outcome_packet`) separa `processState` de `contractDecision` depois da run. Ela é report-only e compara:
+
+- arquivos declarados no registry;
+- arquivos tocados informados pelo parent/control-plane;
+- resultados de marker checks;
+- rollback sugerido para arquivos inesperados ou falhas de contrato.
+
+Decisões canônicas:
+
+- `contractDecision=pass`: processo completou, arquivos tocados batem com declarados e markers passaram;
+- `contractDecision=partial`: faltam sinais parent-side, por exemplo `touched_files` não informado;
+- `contractDecision=fail`: processo falhou/timeout, arquivo inesperado, arquivo declarado ausente ou marker falhou.
+
+Isso evita tratar `completed` como sucesso quando o provider cria paths errados, como ocorreu no canary Dashscope.
+
 ## Invariantes
 
 - report-only

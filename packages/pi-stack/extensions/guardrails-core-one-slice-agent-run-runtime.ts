@@ -1,5 +1,7 @@
 export type OneSliceAgentRunState = "planned" | "running" | "completed" | "failed" | "timed-out" | "aborted" | "unknown";
 export type OneSliceAgentAbortDecision = "dry-run" | "abort-ready" | "blocked";
+export type OneSliceAgentRunContractDecision = "pass" | "partial" | "fail";
+export type OneSliceAgentRunOutcomeRecommendation = "stop" | "retry-once" | "ask-human";
 
 export interface OneSliceAgentRunRegistryEntry {
   runId?: string;
@@ -38,6 +40,48 @@ export interface OneSliceAgentRunStatusResult {
   elapsedMs?: number;
   stale: boolean;
   warnings: string[];
+  summary: string;
+}
+
+export interface OneSliceAgentRunMarkerResult {
+  label?: string;
+  ok?: boolean;
+}
+
+export interface OneSliceAgentRunOutcomeInput {
+  runId?: string;
+  entry?: OneSliceAgentRunRegistryEntry;
+  touchedFiles?: string[];
+  markerResults?: OneSliceAgentRunMarkerResult[];
+}
+
+export interface OneSliceAgentRunOutcomeResult {
+  mode: "one-slice-agent-run-outcome-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  processStopAllowed: false;
+  runId: string;
+  found: boolean;
+  processState: OneSliceAgentRunState;
+  contractDecision: OneSliceAgentRunContractDecision;
+  recommendation: OneSliceAgentRunOutcomeRecommendation;
+  recommendationCode:
+    | "one-slice-agent-outcome-pass"
+    | "one-slice-agent-outcome-partial-no-touched-files"
+    | "one-slice-agent-outcome-fail-missing-run"
+    | "one-slice-agent-outcome-fail-process-state"
+    | "one-slice-agent-outcome-fail-unexpected-files"
+    | "one-slice-agent-outcome-fail-missing-declared-files"
+    | "one-slice-agent-outcome-fail-marker";
+  declaredFiles: string[];
+  touchedFiles: string[];
+  missingDeclaredFiles: string[];
+  unexpectedFiles: string[];
+  markerFailures: string[];
+  rollbackFiles: string[];
+  blockers: string[];
   summary: string;
 }
 
@@ -146,6 +190,99 @@ export function buildOneSliceAgentRunStatus(runId: string, entry?: OneSliceAgent
     ...(elapsedMs !== undefined ? { elapsedMs } : {}),
     stale,
     warnings,
+    summary,
+  };
+}
+
+export function buildOneSliceAgentRunOutcomePacket(input: OneSliceAgentRunOutcomeInput = {}): OneSliceAgentRunOutcomeResult {
+  const runId = normalizeText(input.runId ?? input.entry?.runId);
+  const found = !!input.entry;
+  const processState = normalizeState(input.entry?.state);
+  const declaredFiles = normalizeFiles(input.entry?.declaredFiles);
+  const touchedFiles = normalizeFiles(input.touchedFiles);
+  const declaredSet = new Set(declaredFiles);
+  const touchedSet = new Set(touchedFiles);
+  const missingDeclaredFiles = declaredFiles.filter((file) => !touchedSet.has(file));
+  const unexpectedFiles = touchedFiles.filter((file) => !declaredSet.has(file));
+  const markerFailures = Array.isArray(input.markerResults)
+    ? input.markerResults
+      .filter((marker) => marker?.ok === false)
+      .map((marker, index) => normalizeText(marker.label) || `marker-${index + 1}`)
+    : [];
+  const blockers: string[] = [];
+  if (!found) blockers.push("run-not-found");
+  if (found && processState !== "completed") blockers.push(`process-state-${processState}`);
+  if (unexpectedFiles.length > 0) blockers.push("unexpected-files");
+  if (touchedFiles.length > 0 && missingDeclaredFiles.length > 0) blockers.push("declared-files-missing");
+  if (markerFailures.length > 0) blockers.push("marker-failures");
+
+  let contractDecision: OneSliceAgentRunContractDecision = "pass";
+  let recommendation: OneSliceAgentRunOutcomeRecommendation = "stop";
+  let recommendationCode: OneSliceAgentRunOutcomeResult["recommendationCode"] = "one-slice-agent-outcome-pass";
+
+  if (!found) {
+    contractDecision = "fail";
+    recommendation = "ask-human";
+    recommendationCode = "one-slice-agent-outcome-fail-missing-run";
+  } else if (processState !== "completed") {
+    contractDecision = "fail";
+    recommendation = processState === "timed-out" ? "retry-once" : "ask-human";
+    recommendationCode = "one-slice-agent-outcome-fail-process-state";
+  } else if (unexpectedFiles.length > 0) {
+    contractDecision = "fail";
+    recommendation = "ask-human";
+    recommendationCode = "one-slice-agent-outcome-fail-unexpected-files";
+  } else if (touchedFiles.length > 0 && missingDeclaredFiles.length > 0) {
+    contractDecision = "fail";
+    recommendation = "ask-human";
+    recommendationCode = "one-slice-agent-outcome-fail-missing-declared-files";
+  } else if (markerFailures.length > 0) {
+    contractDecision = "fail";
+    recommendation = "ask-human";
+    recommendationCode = "one-slice-agent-outcome-fail-marker";
+  } else if (touchedFiles.length === 0) {
+    contractDecision = "partial";
+    recommendation = "ask-human";
+    recommendationCode = "one-slice-agent-outcome-partial-no-touched-files";
+    blockers.push("touched-files-not-provided");
+  }
+
+  const rollbackFiles = [...new Set([...unexpectedFiles, ...touchedFiles.filter((file) => declaredSet.has(file) && contractDecision === "fail")])];
+  const summary = [
+    "one-slice-agent-run-outcome:",
+    `contract=${contractDecision}`,
+    `process=${processState}`,
+    `recommendation=${recommendation}`,
+    `runId=${runId || "unknown"}`,
+    `declared=${declaredFiles.length}`,
+    `touched=${touchedFiles.length}`,
+    unexpectedFiles.length > 0 ? `unexpected=${unexpectedFiles.length}` : undefined,
+    missingDeclaredFiles.length > 0 && touchedFiles.length > 0 ? `missing=${missingDeclaredFiles.length}` : undefined,
+    markerFailures.length > 0 ? `markerFailures=${markerFailures.length}` : undefined,
+    "dispatch=no",
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+
+  return {
+    mode: "one-slice-agent-run-outcome-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    runId,
+    found,
+    processState,
+    contractDecision,
+    recommendation,
+    recommendationCode,
+    declaredFiles,
+    touchedFiles,
+    missingDeclaredFiles: touchedFiles.length > 0 ? missingDeclaredFiles : [],
+    unexpectedFiles,
+    markerFailures,
+    rollbackFiles,
+    blockers,
     summary,
   };
 }

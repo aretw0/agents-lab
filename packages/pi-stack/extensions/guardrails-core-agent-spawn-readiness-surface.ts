@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { Type } from "@sinclair/typebox";
 import { buildOneSliceAgentRunPlan, evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
-import { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunStatus, type OneSliceAgentRunRegistryEntry } from "./guardrails-core-one-slice-agent-run-runtime";
+import { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunOutcomePacket, buildOneSliceAgentRunStatus, type OneSliceAgentRunMarkerResult, type OneSliceAgentRunRegistryEntry } from "./guardrails-core-one-slice-agent-run-runtime";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
@@ -13,6 +13,17 @@ function asOptionalBoolean(value: unknown): boolean | undefined {
 function asOptionalStringArray(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
   return value.filter((entry): entry is string => typeof entry === "string");
+}
+
+function asMarkerResults(value: unknown): OneSliceAgentRunMarkerResult[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value.filter((entry): entry is OneSliceAgentRunMarkerResult => !!entry && typeof entry === "object").map((entry) => {
+    const row = entry as Record<string, unknown>;
+    return {
+      ...(typeof row.label === "string" ? { label: row.label } : {}),
+      ...(typeof row.ok === "boolean" ? { ok: row.ok } : {}),
+    };
+  });
 }
 
 function registryPath(cwd: string): string {
@@ -156,6 +167,36 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       };
       return buildOperatorVisibleToolResponse({
         label: "one_slice_agent_run_log_tail",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "one_slice_agent_run_outcome_packet",
+    label: "One-Slice Agent Run Outcome Packet",
+    description: "Report-only outcome packet for one-slice agent runs. Separates processState from contractDecision using declared files, touched files, marker results, and rollback cues. Never dispatches execution.",
+    parameters: Type.Object({
+      run_id: Type.String({ description: "One-slice agent run id." }),
+      touched_files: Type.Optional(Type.Array(Type.String(), { description: "Files observed as touched after the run, usually from git status/diff." })),
+      marker_results: Type.Optional(Type.Array(Type.Object({
+        label: Type.Optional(Type.String({ description: "Marker/check label." })),
+        ok: Type.Optional(Type.Boolean({ description: "Whether the marker/check passed." })),
+      }), { description: "Optional parent-side validation marker/check results." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const runId = typeof p.run_id === "string" ? p.run_id : "";
+      const entry = readRegistryEntry(ctx.cwd, runId);
+      const result = buildOneSliceAgentRunOutcomePacket({
+        runId,
+        entry,
+        touchedFiles: asOptionalStringArray(p.touched_files),
+        markerResults: asMarkerResults(p.marker_results),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "one_slice_agent_run_outcome_packet",
         summary: result.summary,
         details: result,
       });
