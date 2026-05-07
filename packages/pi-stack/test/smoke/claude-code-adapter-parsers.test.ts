@@ -5,6 +5,8 @@ import claudeCodeAdapterExtension, {
   parseClaudeCodeRequestBudget,
   checkBudgetGate,
   buildProviderHint,
+  parseClaudeCodeExecuteOptions,
+  buildClaudePrintArgs,
 } from "../../extensions/claude-code-adapter";
 
 describe("claude-code adapter — parseWhichLikeOutput", () => {
@@ -123,6 +125,46 @@ describe("claude-code adapter — checkBudgetGate", () => {
   });
 });
 
+describe("claude-code adapter — execute options", () => {
+  it("normaliza permissionMode, allowedTools e tools", () => {
+    expect(parseClaudeCodeExecuteOptions({
+      permissionMode: " acceptEdits ",
+      allowedTools: " Write, Read ",
+      tools: ["Write", "", "Read"],
+    })).toEqual({
+      permissionMode: "acceptEdits",
+      allowedTools: ["Write", "Read"],
+      tools: ["Write", "Read"],
+    });
+
+    expect(parseClaudeCodeExecuteOptions({
+      permission_mode: "default",
+      allowed_tools: ["Bash", "Read"],
+    })).toEqual({
+      permissionMode: "default",
+      allowedTools: ["Bash", "Read"],
+      tools: undefined,
+    });
+  });
+
+  it("monta argumentos do claude sem interpolação shell", () => {
+    expect(buildClaudePrintArgs("do work", {
+      permissionMode: "acceptEdits",
+      allowedTools: ["Write", "Read"],
+      tools: ["Write", "Read"],
+    })).toEqual([
+      "--print",
+      "--permission-mode",
+      "acceptEdits",
+      "--allowedTools",
+      "Write,Read",
+      "--tools",
+      "Write,Read",
+      "do work",
+    ]);
+  });
+});
+
 describe("claude-code adapter — execute signature", () => {
   it("emits summary-first status content with details preserved", async () => {
     let registeredTool: {
@@ -173,6 +215,45 @@ describe("claude-code adapter — execute signature", () => {
     expect(output?.details.dryRun).toBe(true);
     expect(output?.details.goal).toBe("hello");
     expect(output?.details.cwd).toBe("C:/tmp/work");
+  });
+
+  it("inclui flags de permissão/tooling no dry-run sem invocar subprocesso", async () => {
+    let registeredTool: {
+      name: string;
+      execute: (toolCallId: string, params: Record<string, unknown>, signal?: AbortSignal) => Promise<{ details: Record<string, unknown> }>;
+    } | undefined;
+
+    claudeCodeAdapterExtension({
+      registerTool(tool: unknown) {
+        const candidate = tool as typeof registeredTool;
+        if (candidate?.name === "claude_code_execute") registeredTool = candidate;
+      },
+      registerCommand() {},
+    } as never);
+
+    const output = await registeredTool?.execute("call-test", {
+      goal: "hello",
+      dry_run: true,
+      permissionMode: "acceptEdits",
+      allowedTools: ["Write", "Read"],
+      tools: "Write,Read",
+    });
+
+    expect(output?.details.subprocessArgs).toEqual([
+      "--print",
+      "--permission-mode",
+      "acceptEdits",
+      "--allowedTools",
+      "Write,Read",
+      "--tools",
+      "Write,Read",
+      "hello",
+    ]);
+    expect(output?.details.executeOptions).toEqual({
+      permissionMode: "acceptEdits",
+      allowedTools: ["Write", "Read"],
+      tools: ["Write", "Read"],
+    });
   });
 
   it("propaga AbortSignal para probes e subprocesso do claude", async () => {

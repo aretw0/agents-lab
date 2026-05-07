@@ -1,50 +1,54 @@
 {
-  "timestamp": "2026-05-07T00:25:03.198Z",
-  "context": "Live WHAM probe pós-/reload executado com autorização explícita. Resultado ok=true status=200 e cache escrito em .pi/reports/quota-openai-wha [snip] Nenhuma alteração em settings/routing. [truncated:+304 chars]",
+  "timestamp": "2026-05-07T00:43:43.811Z",
+  "context": "TASK-BUD-961 completed and committed locally. claude_code_execute now accepts permissionMode/permission_mode, allowedTools/allowed_tools, and [snip] routing change, CI, or protected scope. [truncated:+158 chars]",
   "next_actions": [
-    "commit board/handoff verification for live probe",
-    "se quiser usar OpenAI Codex agora, tratar como available com cautela: Spark tem maior headroom que pool Codex geral",
-    "não alterar roteamento automático sem decisão explícita"
+    "run /reload before trusting live claude_code_execute schema",
+    "after /reload, run claude_code_execute dry_run=true with permissionMode/allowedTools/tools to validate live tool schema",
+    "prepare next simple-delegate canary contract before any worker dispatch"
   ],
   "blockers": [
-    "routing/settings ainda protegidos",
-    "probes live devem continuar opt-in quando causarem request externo"
+    "routing/settings remain protected",
+    "live external probes remain opt-in",
+    "runtime extension changes require /reload before trusting live tool output"
   ],
   "recent_validation": [
-    "quota_visibility_openai_wham_probe probe=true: ok status=200",
-    "cache read .pi/reports/quota-openai-wham-cache.json: windows present",
-    "board verification VERIF-BUD-963-LIVE-WHAM-PROBE appended"
+    "npx vitest run packages/pi-stack/test/smoke/claude-code-adapter-parsers.test.ts -> 27 passed",
+    "git diff --check -> clean",
+    "project-validate -> clean"
+  ],
+  "recent_commits": [
+    "feat(claude-code): expose execution tool flags"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-963",
+    "focus": "TASK-BUD-961",
     "canonical_links": [
-      "task:TASK-BUD-963"
+      "task:TASK-BUD-961"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T00:25:03.198Z",
+    "generatedAtIso": "2026-05-07T00:43:43.811Z",
     "level": "ok",
-    "percent": 47,
+    "percent": 24,
     "action": "continue",
-    "recommendation": "Pode considerar gpt-5.3-codex-spark disponível para canary local-safe; manter no-auto-switch.",
+    "recommendation": "Continue agentic evolution in bounded ladder: reload, validate adapter dry-run, then prepare o [snip] it simple-delegate canary. [truncated:+9 chars]",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T00:25:03.198Z",
+      "atIso": "2026-05-07T00:43:43.811Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 47,
+      "percent": 24,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Pode considerar gpt-5.3-codex-spark disponível para canary local-safe; manter no-auto-switch."
+      "recommendation": "Continue agentic evolution in bounded ladder: reload, validate adapter dry-run, then prepare o [snip] it simple-delegate canary. [truncated:+9 chars]"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-963"
+    "TASK-BUD-961"
   ]
 }

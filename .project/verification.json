@@ -14354,6 +14354,15 @@
       "method": "live read-only probe",
       "timestamp": "2026-05-07T00:24:53.517Z",
       "evidence": "After /reload and explicit user authorization, quota_visibility_openai_wham_probe({probe:true, allowStaleCache:true}) returned ok=true status=200 and wrote .pi/reports/quota-openai-wham-cache.json. Live WHAM windows: Codex 5h 64% remaining reset ~2h17m; Codex 7d 50% remaining reset ~4d23h; GPT-5.3-Codex-Spark 5h 100% remaining reset ~5h; GPT-5.3-Codex-Spark 7d 83% remaining reset ~6d14h. No settings/routing changes."
+    },
+    {
+      "id": "VERIF-BUD-961-CLAUDE-CODE-ARGS",
+      "target": "TASK-BUD-961",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-07T00:42:12.708Z",
+      "evidence": "Implemented claude_code_execute options for permissionMode/permission_mode, allowedTools/allowed_tools, and tools using array-form CLI args via buildClaudePrintArgs. Validation: npx vitest run packages/pi-stack/test/smoke/claude-code-adapter-parsers.test.ts -> 27 passed; git diff --check -> clean."
     }
   ]
 }

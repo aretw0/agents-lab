@@ -191,6 +191,12 @@ async function detectClaudeAuth(pi: ExtensionAPI, binaryPath: string, signal?: A
 // Goal execution — uses pi.exec with array args (no shell interpolation)
 // ---------------------------------------------------------------------------
 
+export interface ClaudeCodeExecuteOptions {
+  permissionMode?: string;
+  allowedTools?: string[];
+  tools?: string[];
+}
+
 export interface ClaudeCodeExecuteResult {
   dryRun: boolean;
   budgetState: ClaudeCodeBudgetState;
@@ -198,6 +204,42 @@ export interface ClaudeCodeExecuteResult {
   exitCode?: number;
   error?: string;
   binaryPath?: string;
+  subprocessArgs?: string[];
+}
+
+function normalizeClaudeToolList(raw: unknown): string[] | undefined {
+  const items = Array.isArray(raw)
+    ? raw
+    : typeof raw === "string"
+      ? raw.split(",")
+      : [];
+  const out = items
+    .map((item) => (typeof item === "string" ? item.trim() : ""))
+    .filter(Boolean);
+  return out.length > 0 ? out : undefined;
+}
+
+function normalizeClaudePermissionMode(raw: unknown): string | undefined {
+  if (typeof raw !== "string") return undefined;
+  const value = raw.trim();
+  return value.length > 0 ? value : undefined;
+}
+
+export function parseClaudeCodeExecuteOptions(raw: Record<string, unknown>): ClaudeCodeExecuteOptions {
+  return {
+    permissionMode: normalizeClaudePermissionMode(raw.permissionMode ?? raw.permission_mode),
+    allowedTools: normalizeClaudeToolList(raw.allowedTools ?? raw.allowed_tools),
+    tools: normalizeClaudeToolList(raw.tools),
+  };
+}
+
+export function buildClaudePrintArgs(goal: string, options: ClaudeCodeExecuteOptions = {}): string[] {
+  const args = ["--print"];
+  if (options.permissionMode) args.push("--permission-mode", options.permissionMode);
+  if (options.allowedTools && options.allowedTools.length > 0) args.push("--allowedTools", options.allowedTools.join(","));
+  if (options.tools && options.tools.length > 0) args.push("--tools", options.tools.join(","));
+  args.push(goal);
+  return args;
 }
 
 /**
@@ -274,12 +316,16 @@ export default function claudeCodeAdapterExtension(pi: ExtensionAPI) {
       "Request-budget gated: blocked when session cap is reached.",
       "Set dry_run=true to preview budget state without invoking the subprocess.",
       "Set cwd to a specific directory for deterministic swarm isolation.",
+      "Optional permissionMode, allowedTools, and tools map to Claude CLI flags without shell interpolation.",
     ].join(" "),
     parameters: Type.Object({
       goal: Type.String({ description: "The goal or prompt to execute via Claude Code CLI." }),
       cwd: Type.Optional(Type.String({ description: "Working directory for subprocess isolation." })),
       dry_run: Type.Optional(Type.Boolean({ description: "Preview budget state without executing. Default: false." })),
       timeout_ms: Type.Optional(Type.Number({ description: "Subprocess timeout in milliseconds. Default: 120000." })),
+      permissionMode: Type.Optional(Type.String({ description: "Optional Claude CLI --permission-mode value, e.g. acceptEdits." })),
+      allowedTools: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())], { description: "Optional Claude CLI --allowedTools list (comma string or string array)." })),
+      tools: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())], { description: "Optional Claude CLI --tools list (comma string or string array)." })),
     }),
     async execute(_toolCallId, params, signal) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -287,11 +333,13 @@ export default function claudeCodeAdapterExtension(pi: ExtensionAPI) {
       const cwd = typeof p.cwd === "string" ? p.cwd : undefined;
       const dry_run = typeof p.dry_run === "boolean" ? p.dry_run : false;
       const timeout_ms = typeof p.timeout_ms === "number" ? p.timeout_ms : undefined;
+      const executeOptions = parseClaudeCodeExecuteOptions(p);
       const isDryRun = dry_run ?? false;
       const timeoutMs = typeof timeout_ms === "number" && timeout_ms > 0 ? timeout_ms : 120_000;
+      const subprocessArgs = buildClaudePrintArgs(goal, executeOptions);
       const budgetState = checkBudgetGate(sessionRequests, budgetCfg);
 
-      const base: ClaudeCodeExecuteResult = { dryRun: isDryRun, budgetState };
+      const base: ClaudeCodeExecuteResult = { dryRun: isDryRun, budgetState, subprocessArgs };
 
       if (budgetState.state === "block") {
         return {
@@ -306,6 +354,7 @@ export default function claudeCodeAdapterExtension(pi: ExtensionAPI) {
           goal,
           cwd: cwd ?? process.cwd(),
           note: "Dry-run: subprocess not invoked.",
+          executeOptions,
         };
         return {
           content: [{ type: "text", text: JSON.stringify(preview, null, 2) }],
@@ -322,8 +371,7 @@ export default function claudeCodeAdapterExtension(pi: ExtensionAPI) {
       }
 
       sessionRequests += 1;
-      // Array-form args: ["--print", goal] — goal is a separate element, not shell-interpolated.
-      const subprocessArgs = ["--print", goal];
+      // Array-form args keep goal/options as separate elements, never shell-interpolated.
       const { output, exitCode, error } = await runClaudeSubprocess(
         pi, binaryPath, subprocessArgs, { timeout: timeoutMs, cwd, signal },
       );

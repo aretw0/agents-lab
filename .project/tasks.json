@@ -21479,7 +21479,7 @@
     {
       "id": "TASK-BUD-961",
       "description": "[P1/local-safe] Hardening do `claude_code_execute`: expor permission-mode/allowedTools/tools para canaries isolados.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-958"
@@ -21497,7 +21497,8 @@
         "Não tocar settings/provider config; execução real continua exigindo confirmação explícita."
       ],
       "milestone": "agent-quality-calibration-lane",
-      "notes": "Operador quer hardening do adapter Claude Code no geral. Aprendizado do TASK-BUD-958: adapter atual travou em permissão de escrita porque não expõe permission-mode/allowedTools/tools; CLI direto funcionou.\n[provenance:human] source_task=TASK-BUD-958 reason=Puppeteering do Claude Code mostrou gap concreto no adapter durante canary aprovado."
+      "notes": "Operador quer hardening do adapter Claude Code no geral. Aprendizado do TASK-BUD-958: adapter atual travou em permissão de escrita porque não expõe permission-mode/allowedTools/tools; CLI direto funcionou.\n[provenance:human] source_task=TASK-BUD-958 reason=Puppeteering do Claude Code mostrou gap concreto no adapter durante canary aprovado.\n[start] Aprovada recomendação: executar primeiro fatia local-safe para hardening do claude_code_execute; sem dispatch agêntico ainda. Escopo: adapter + testes locais, sem provider real, sem settings/routing.\n[complete] Exposed Claude CLI permission/tool flags through claude_code_execute dry-run/runtime path; no provider call, settings, routing, CI, or protected scope touched.",
+      "verification": "VERIF-BUD-961-CLAUDE-CODE-ARGS"
     },
     {
       "id": "TASK-BUD-962",
