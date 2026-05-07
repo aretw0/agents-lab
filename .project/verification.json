@@ -14795,6 +14795,15 @@
       "method": "read-only-detection-and-doc-markers",
       "timestamp": "2026-05-07T23:28:40.857Z",
       "evidence": "Evaluated optional Bun support without installation. Read-only detection: `bun` not found in PATH; `node v24.6.0` and `pnpm 10.33.0` are available. Updated `docs/research/tooling-acceleration-roadmap-2026-05.md` with a Bun package section: current decision `needs-opt-in-install`, use cases where Bun can accelerate, cases where Node/pnpm remain preferred, and an opt-in bootstrap sequence that detects first, emits a report-only packet if absent, and only uses Bun after a local canary. Updated `packages/pi-stack/README.md` to state the `use-if-available` policy. Validation: safe_marker_check roadmap Bun markers -> pass; safe_marker_check README opt-in policy -> pass; board_task_quality_gate TASK-BUD-993 -> closeAllowed=yes. [rationale:risk-control] No install/bootstrap/global PATH change was performed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-994-UV-OPTIONAL-PACKET",
+      "target": "TASK-BUD-994",
+      "target_type": "task",
+      "status": "passed",
+      "method": "read-only-detection-and-doc-markers",
+      "timestamp": "2026-05-07T23:31:05.964Z",
+      "evidence": "Evaluated optional uv support without creating environments or downloading dependencies. Read-only detection: `uv` is available at `/c/users/aretw/.local/bin/uv` with version `uv 0.8.22`; `python`, `python3`, and `py` were not found by the current shell. Updated `docs/research/tooling-acceleration-roadmap-2026-05.md` with uv state `use-if-project-python-context-exists`, use/avoid criteria, and opt-in bootstrap that first detects Python project context before proposing any cache/venv canary. Validation: safe_marker_check uv roadmap markers -> pass; i18n_lint_text pt-BR excerpt -> pass; board_task_quality_gate TASK-BUD-994 -> closeAllowed=yes. [rationale:risk-control] No venv/cache creation, dependency install, or global environment change was performed."
     }
   ]
 }

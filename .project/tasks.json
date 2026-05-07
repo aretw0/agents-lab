@@ -22141,7 +22141,7 @@
     {
       "id": "TASK-BUD-994",
       "description": "Avaliar e empacotar suporte opcional a uv para agentes pi-stack",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-992"
@@ -22157,7 +22157,8 @@
         "Adicionar orientação para agentes escolherem `uv` apenas quando compatível com o projeto."
       ],
       "milestone": "tooling-acceleration-roadmap-2026-05",
-      "notes": "Backlog: uv como acelerador opcional/pronto para uso na pi-stack, sem substituir Python/pip quando o caminho direto for mais correto."
+      "notes": "Backlog: uv como acelerador opcional/pronto para uso na pi-stack, sem substituir Python/pip quando o caminho direto for mais correto.\n[rationale:risk-control] uv is available locally but can create caches/environments; support must therefore be scoped to read-only detection and project-context canaries before any environment creation or dependency download.\nCompleted optional uv support evaluation. uv is available locally, but should only be used when a Python project context exists and after a small explicit canary with rollback; no environment creation was performed.",
+      "verification": "VERIF-TASK-BUD-994-UV-OPTIONAL-PACKET"
     },
     {
       "id": "TASK-BUD-995",

@@ -87,9 +87,39 @@ Tornar a pi-stack pronta para usar ferramentas rápidas quando elas ajudam, sem 
 3. Se presente, rodar canary pequeno comparando comando Bun com comando oficial.
 4. Só documentar `use-if-available` após canary passar.
 
+## Pacote inicial: uv (`TASK-BUD-994`)
+
+### Detecção read-only local
+
+- `uv`: disponível em `/c/users/aretw/.local/bin/uv` (`uv 0.8.22`).
+- `python`/`python3`/`py`: não encontrados pelo shell atual.
+
+### Decisão atual
+
+`uv` fica em estado `use-if-project-python-context-exists`. Ele está disponível para agentes, mas não deve criar ambiente, baixar dependências ou substituir fluxo Python do projeto sem um canary explícito.
+
+### Quando uv pode acelerar
+
+- Criação/uso de ambiente Python local quando o projeto já tem contexto Python claro.
+- Execução de ferramentas Python isoladas com cache conhecido e rollback simples.
+- Canaries onde `uv` reproduz o comportamento esperado do comando Python oficial.
+
+### Quando evitar uv
+
+- Repositórios sem tarefa Python ativa.
+- Ambientes que dependem de `conda`, `poetry`, `pipenv` ou Python gerenciado externamente.
+- Situações de disco apertado em que criar cache/venv novo pode piorar pressão local.
+
+### Bootstrap opt-in proposto
+
+1. Detectar `uv --version` e presença de arquivos Python (`pyproject.toml`, `requirements*.txt`, scripts relevantes).
+2. Se não houver contexto Python, manter `uv` apenas como disponível.
+3. Se houver contexto, propor canary pequeno com cache/venv local e rollback explícito.
+4. Só recomendar `uv` após comparar com o comando oficial do projeto.
+
 ## Próximas tarefas
 
-- `TASK-BUD-994`: avaliar suporte opcional a uv.
+- Cultivar wrappers report-only para detecção de tooling quando houver repetição suficiente.
 
 ## Rollback padrão
 
