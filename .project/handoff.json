@@ -1,45 +1,42 @@
 {
-  "timestamp": "2026-05-07T13:23:24.639Z",
-  "context": "Completed local-safe semantic convergence from one-slice public runtime namespace to local slice/singleSliceOnly. Committed ae4ef35a refactor [snip] guidance after reload is already done. [truncated:+139 chars]",
+  "timestamp": "2026-05-07T13:36:38.196Z",
+  "context": "Completed stale auto-resume reload guidance fix. Auto-resume prompt construction now accepts current reloadRequired runtime signal and filter [snip] lso cleaned from old one-slice wording. [truncated:+227 chars]",
   "next_actions": [
-    "Run /reload before trusting renamed live tool surfaces: local_slice_backlog_gate, local_slice_ [snip] e_operator_packet_preview. [truncated:+82 chars]",
-    "Then consider TASK-BUD-985 to reconcile auto-resume handoff blockers with live reload state be [snip] playing operator guidance. [truncated:+8 chars]",
-    "Do not dispatch agent/provider canaries without explicit human confirmation."
+    "Run /reload before trusting the newly changed live context-watch surfaces.",
+    "After reload, use context_watch_auto_resume_preview to confirm reload=clear and no stale /relo [snip] tains old reload guidance. [truncated:+35 chars]",
+    "Continue with local-safe semantic cleanup only if a scoped task exists; avoid provider/agent c [snip] out explicit confirmation. [truncated:+12 chars]"
   ],
   "blockers": [
-    "Live runtime needs reload after extension surface rename before using new tool names.",
-    "TASK-BUD-985 planned: stale auto-resume reload guidance observed; fix later."
+    "Runtime reload required after this extension code change before live tool behavior reflects the fix."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts package [snip] > 7 files/140 tests passed [truncated:+392 chars]",
-    "git diff --check -> passed",
-    "git grep focal: remaining one-slice only in semantic note/regression guard, not local-slice runtime public names"
+    "npx vitest run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-s [snip] -> 3 files/70 tests passed [truncated:+102 chars]",
+    "git diff --check -> passed"
   ],
   "recent_commits": [
-    "ae4ef35a refactor(context): rename one-slice to local slice"
+    "5b0c8176 fix(context): suppress stale reload resume guidance"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-984",
+    "focus": "TASK-BUD-985",
     "canonical_links": [
-      "task:TASK-BUD-984",
       "task:TASK-BUD-985",
-      "commit:ae4ef35a"
+      "commit:5b0c8176"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T13:23:24.639Z",
+    "generatedAtIso": "2026-05-07T13:36:38.196Z",
     "level": "ok",
-    "percent": 29,
+    "percent": 44,
     "action": "continue",
     "recommendation": "checkpoint",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T13:23:24.639Z",
+      "atIso": "2026-05-07T13:36:38.196Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 29,
+      "percent": 44,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -50,6 +47,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-984"
+    "TASK-BUD-985"
   ]
 }
