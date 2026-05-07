@@ -2,11 +2,11 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildOneSliceAgentRunPlan, evaluateAgentSpawnReadiness } from "../../extensions/guardrails-core";
-import { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunOutcomePacket, buildOneSliceAgentRunRegistryUpsertPacket, buildOneSliceAgentRunStatus } from "../../extensions/guardrails-core-one-slice-agent-run-runtime";
+import guardrailsCore, { buildAgentRunPlan, evaluateAgentSpawnReadiness } from "../../extensions/guardrails-core";
+import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
-  it("returns ready-for-simple-spawn for single agent with explicit bounded controls", () => {
+  it("returns ready-for-agent-run for single agent with explicit bounded controls", () => {
     const result = evaluateAgentSpawnReadiness({
       maxAgentsRequested: 1,
       timeoutMs: 120_000,
@@ -22,8 +22,8 @@ describe("agent spawn readiness contract", () => {
       activation: "none",
       authorization: "none",
       dispatchAllowed: false,
-      decision: "ready-for-simple-spawn",
-      recommendationCode: "agent-spawn-ready-simple",
+      decision: "ready-for-agent-run",
+      recommendationCode: "agent-spawn-ready-agent-run",
       blockers: [],
     });
   });
@@ -60,8 +60,8 @@ describe("agent spawn readiness contract", () => {
     expect(result.blockers).toContain("multi-agent-requested");
   });
 
-  it("builds a report-only one-slice agent run plan when all L1 controls are present", () => {
-    const result = buildOneSliceAgentRunPlan({
+  it("builds a report-only agent run plan when all L1 controls are present", () => {
+    const result = buildAgentRunPlan({
       goal: "create provider canary scorecard",
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
       cwd: process.cwd(),
@@ -75,21 +75,21 @@ describe("agent spawn readiness contract", () => {
     });
 
     expect(result).toMatchObject({
-      mode: "one-slice-agent-run-plan",
+      mode: "agent-run-plan",
       activation: "none",
       authorization: "none",
       dispatchAllowed: false,
       executorApproved: false,
       requiresHumanDecision: true,
-      oneSliceOnly: true,
+      singleRunOnly: true,
       decision: "ready-for-human-decision",
-      recommendationCode: "one-slice-agent-run-ready-for-human-decision",
+      recommendationCode: "agent-run-ready-for-human-decision",
       blockers: [],
     });
   });
 
-  it("blocks one-slice agent run plans without abort and bounded logs", () => {
-    const result = buildOneSliceAgentRunPlan({
+  it("blocks agent run plans without abort and bounded logs", () => {
+    const result = buildAgentRunPlan({
       goal: "create provider canary scorecard",
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
       cwd: process.cwd(),
@@ -103,13 +103,13 @@ describe("agent spawn readiness contract", () => {
     });
 
     expect(result.decision).toBe("blocked");
-    expect(result.recommendationCode).toBe("one-slice-agent-run-blocked-abort");
+    expect(result.recommendationCode).toBe("agent-run-blocked-abort");
     expect(result.blockers).toContain("abort-contract-missing");
     expect(result.blockers).toContain("bounded-log-tail-missing");
   });
 
   it("builds dry-first registry upsert packets without dispatch", () => {
-    const dryRun = buildOneSliceAgentRunRegistryUpsertPacket({
+    const dryRun = buildAgentRunRegistryUpsertPacket({
       runId: "run-upsert",
       state: "planned",
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
@@ -120,7 +120,7 @@ describe("agent spawn readiness contract", () => {
     });
 
     expect(dryRun).toMatchObject({
-      mode: "one-slice-agent-run-registry-upsert",
+      mode: "agent-run-registry-upsert",
       decision: "dry-run",
       writeAllowed: false,
       dispatchAllowed: false,
@@ -129,7 +129,7 @@ describe("agent spawn readiness contract", () => {
       authorization: "none",
     });
 
-    const apply = buildOneSliceAgentRunRegistryUpsertPacket({
+    const apply = buildAgentRunRegistryUpsertPacket({
       ...dryRun.entry,
       dryRun: false,
       nowIso: "2026-05-07T00:00:00.000Z",
@@ -146,7 +146,7 @@ describe("agent spawn readiness contract", () => {
     });
   });
 
-  it("reports one-slice agent run status and dry-first abort plans", () => {
+  it("reports agent run status and dry-first abort plans", () => {
     const entry = {
       runId: "run-1",
       pid: 12345,
@@ -158,9 +158,9 @@ describe("agent spawn readiness contract", () => {
       lastEventAtIso: "2026-05-07T00:00:30.000Z",
     };
 
-    const status = buildOneSliceAgentRunStatus("run-1", entry, Date.parse("2026-05-07T00:00:45.000Z"));
+    const status = buildAgentRunStatus("run-1", entry, Date.parse("2026-05-07T00:00:45.000Z"));
     expect(status).toMatchObject({
-      mode: "one-slice-agent-run-status",
+      mode: "agent-run-status",
       dispatchAllowed: false,
       processStartAllowed: false,
       processStopAllowed: false,
@@ -169,15 +169,15 @@ describe("agent spawn readiness contract", () => {
       stale: false,
     });
 
-    const dryRun = buildOneSliceAgentAbortPlan({ runId: "run-1", entry, cwdExpected: process.cwd() });
+    const dryRun = buildAgentRunAbortPlan({ runId: "run-1", entry, cwdExpected: process.cwd() });
     expect(dryRun).toMatchObject({
-      mode: "one-slice-agent-abort-plan",
+      mode: "agent-run-abort-plan",
       decision: "dry-run",
       processStopAllowed: false,
       authorization: "none",
     });
 
-    const confirmed = buildOneSliceAgentAbortPlan({ runId: "run-1", entry, execute: true, operatorConfirmed: true, cwdExpected: process.cwd() });
+    const confirmed = buildAgentRunAbortPlan({ runId: "run-1", entry, execute: true, operatorConfirmed: true, cwdExpected: process.cwd() });
     expect(confirmed).toMatchObject({
       decision: "abort-ready",
       processStopAllowed: true,
@@ -186,7 +186,7 @@ describe("agent spawn readiness contract", () => {
     });
   });
 
-  it("separates process completion from one-slice contract outcome", () => {
+  it("separates process completion from agent-run contract outcome", () => {
     const entry = {
       runId: "run-outcome",
       state: "completed" as const,
@@ -195,21 +195,21 @@ describe("agent spawn readiness contract", () => {
       declaredFiles: ["docs/research/provider-canary-scorecard-dashscope-2026-05.md"],
     };
 
-    const passed = buildOneSliceAgentRunOutcomePacket({
+    const passed = buildAgentRunOutcomePacket({
       runId: "run-outcome",
       entry,
       touchedFiles: ["docs/research/provider-canary-scorecard-dashscope-2026-05.md"],
       markerResults: [{ label: "provider-marker", ok: true }],
     });
     expect(passed).toMatchObject({
-      mode: "one-slice-agent-run-outcome-packet",
+      mode: "agent-run-outcome-packet",
       processState: "completed",
       contractDecision: "pass",
       recommendation: "stop",
       rollbackFiles: [],
     });
 
-    const failed = buildOneSliceAgentRunOutcomePacket({
+    const failed = buildAgentRunOutcomePacket({
       runId: "run-outcome",
       entry,
       touchedFiles: ["file1.txt", "file2.txt"],
@@ -218,7 +218,7 @@ describe("agent spawn readiness contract", () => {
     expect(failed).toMatchObject({
       processState: "completed",
       contractDecision: "fail",
-      recommendationCode: "one-slice-agent-outcome-fail-unexpected-files",
+      recommendationCode: "agent-run-outcome-fail-unexpected-files",
       unexpectedFiles: ["file1.txt", "file2.txt"],
       markerFailures: ["dashscope-path-marker"],
       rollbackFiles: ["file1.txt", "file2.txt"],
@@ -265,19 +265,19 @@ describe("agent spawn readiness contract", () => {
 
     expect(result.details?.mode).toBe("agent-spawn-readiness");
     expect(result.details?.dispatchAllowed).toBe(false);
-    expect(result.details?.decision).toBe("ready-for-simple-spawn");
-    expect(result.content?.[0]?.text).toContain("agent-spawn-readiness: decision=ready-for-simple-spawn");
+    expect(result.details?.decision).toBe("ready-for-agent-run");
+    expect(result.content?.[0]?.text).toContain("agent-spawn-readiness: decision=ready-for-agent-run");
     expect(result.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(result.content?.[0]?.text).not.toContain('\"decision\"');
   });
 
-  it("exposes one-slice agent status, log tail, and abort surfaces", async () => {
-    const cwd = mkdtempSync(path.join(tmpdir(), "one-slice-agent-run-"));
+  it("exposes agent run status, log tail, and abort surfaces", async () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "agent-run-"));
     const reportsDir = path.join(cwd, ".pi", "reports");
     mkdirSync(reportsDir, { recursive: true });
     const logPath = path.join(reportsDir, "run-1.log");
     writeFileSync(logPath, "line-1\nline-2\nline-3\n", "utf8");
-    writeFileSync(path.join(reportsDir, "one-slice-agent-runs.json"), JSON.stringify({
+    writeFileSync(path.join(reportsDir, "agent-runs.json"), JSON.stringify({
       runs: [{
         runId: "run-1",
         pid: 12345,
@@ -323,8 +323,8 @@ describe("agent spawn readiness contract", () => {
       };
     };
 
-    const registryFile = path.join(reportsDir, "one-slice-agent-runs.json");
-    const upsertDry = await getTool("one_slice_agent_run_registry_upsert").execute(
+    const registryFile = path.join(reportsDir, "agent-runs.json");
+    const upsertDry = await getTool("agent_run_registry_upsert").execute(
       "tc-upsert-dry",
       {
         run_id: "run-dry",
@@ -341,7 +341,7 @@ describe("agent spawn readiness contract", () => {
     expect(upsertDry.details?.decision).toBe("dry-run");
     expect(readFileSync(registryFile, "utf8")).not.toContain("run-dry");
 
-    const upsertApply = await getTool("one_slice_agent_run_registry_upsert").execute(
+    const upsertApply = await getTool("agent_run_registry_upsert").execute(
       "tc-upsert-apply",
       {
         run_id: "run-apply",
@@ -360,12 +360,12 @@ describe("agent spawn readiness contract", () => {
     expect(existsSync(registryFile)).toBe(true);
     expect(readFileSync(registryFile, "utf8")).toContain("run-apply");
 
-    const status = await getTool("one_slice_agent_run_status").execute("tc-status", { run_id: "run-1" }, undefined as unknown as AbortSignal, () => {}, { cwd });
-    expect(status.details?.mode).toBe("one-slice-agent-run-status");
+    const status = await getTool("agent_run_status").execute("tc-status", { run_id: "run-1" }, undefined as unknown as AbortSignal, () => {}, { cwd });
+    expect(status.details?.mode).toBe("agent-run-status");
     expect(status.details?.processStopAllowed).toBe(false);
     expect(status.content?.[0]?.text).toContain("state=running");
 
-    const outcome = await getTool("one_slice_agent_run_outcome_packet").execute(
+    const outcome = await getTool("agent_run_outcome_packet").execute(
       "tc-outcome",
       {
         run_id: "run-outcome",
@@ -376,22 +376,22 @@ describe("agent spawn readiness contract", () => {
       () => {},
       { cwd },
     );
-    expect(outcome.details?.mode).toBe("one-slice-agent-run-outcome-packet");
+    expect(outcome.details?.mode).toBe("agent-run-outcome-packet");
     expect(outcome.details?.contractDecision).toBe("pass");
     expect(outcome.content?.[0]?.text).toContain("contract=pass");
 
-    const tail = await getTool("one_slice_agent_run_log_tail").execute("tc-tail", { run_id: "run-1", max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });
-    expect(tail.details?.mode).toBe("one-slice-agent-run-log-tail");
+    const tail = await getTool("agent_run_log_tail").execute("tc-tail", { run_id: "run-1", max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });
+    expect(tail.details?.mode).toBe("agent-run-log-tail");
     expect(tail.details?.lines).toEqual(["line-3", ""]);
 
     const killSpy = vi.spyOn(process, "kill").mockImplementation(() => true);
     try {
-      const dryAbort = await getTool("one_slice_agent_run_abort").execute("tc-abort-dry", { run_id: "run-1" }, undefined as unknown as AbortSignal, () => {}, { cwd });
+      const dryAbort = await getTool("agent_run_abort").execute("tc-abort-dry", { run_id: "run-1" }, undefined as unknown as AbortSignal, () => {}, { cwd });
       expect(dryAbort.details?.decision).toBe("dry-run");
       expect(dryAbort.details?.processStopAllowed).toBe(false);
       expect(killSpy).not.toHaveBeenCalled();
 
-      const confirmedAbort = await getTool("one_slice_agent_run_abort").execute("tc-abort", { run_id: "run-1", execute: true, operator_confirmed: true }, undefined as unknown as AbortSignal, () => {}, { cwd });
+      const confirmedAbort = await getTool("agent_run_abort").execute("tc-abort", { run_id: "run-1", execute: true, operator_confirmed: true }, undefined as unknown as AbortSignal, () => {}, { cwd });
       expect(confirmedAbort.details?.decision).toBe("abort-ready");
       expect(confirmedAbort.details?.processStopAllowed).toBe(true);
       expect(killSpy).toHaveBeenCalledWith(12345, "SIGTERM");
@@ -400,7 +400,7 @@ describe("agent spawn readiness contract", () => {
     }
   });
 
-  it("exposes one_slice_agent_run_plan as report-only tool", async () => {
+  it("exposes agent_run_plan as report-only tool", async () => {
     const rawPi = {
       on: vi.fn(),
       registerTool: vi.fn(),
@@ -411,7 +411,7 @@ describe("agent spawn readiness contract", () => {
     const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
 
     guardrailsCore(pi);
-    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "one_slice_agent_run_plan");
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_plan");
     const tool = toolCall?.[0] as {
       execute: (
         toolCallId: string,
@@ -423,7 +423,7 @@ describe("agent spawn readiness contract", () => {
     };
 
     const result = await tool.execute(
-      "tc-one-slice-agent-run-plan",
+      "tc-agent-run-plan",
       {
         goal: "create provider canary scorecard",
         provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
@@ -440,11 +440,11 @@ describe("agent spawn readiness contract", () => {
       { cwd: process.cwd() },
     );
 
-    expect(result.details?.mode).toBe("one-slice-agent-run-plan");
+    expect(result.details?.mode).toBe("agent-run-plan");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.executorApproved).toBe(false);
     expect(result.details?.decision).toBe("ready-for-human-decision");
-    expect(result.content?.[0]?.text).toContain("one-slice-agent-run-plan: decision=ready-for-human-decision");
+    expect(result.content?.[0]?.text).toContain("agent-run-plan: decision=ready-for-human-decision");
     expect(result.content?.[0]?.text).not.toContain('"runSpec"');
   });
 });

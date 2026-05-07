@@ -2,8 +2,9 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Type } from "@sinclair/typebox";
-import { buildOneSliceAgentRunPlan, evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
-import { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunOutcomePacket, buildOneSliceAgentRunRegistryUpsertPacket, buildOneSliceAgentRunStatus, type OneSliceAgentRunMarkerResult, type OneSliceAgentRunRegistryEntry, type OneSliceAgentRunState } from "./guardrails-core-one-slice-agent-run-runtime";
+import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
+import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
+import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunRegistryEntry, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
@@ -15,9 +16,9 @@ function asOptionalStringArray(value: unknown): string[] | undefined {
   return value.filter((entry): entry is string => typeof entry === "string");
 }
 
-function asMarkerResults(value: unknown): OneSliceAgentRunMarkerResult[] | undefined {
+function asMarkerResults(value: unknown): AgentRunMarkerResult[] | undefined {
   if (!Array.isArray(value)) return undefined;
-  return value.filter((entry): entry is OneSliceAgentRunMarkerResult => !!entry && typeof entry === "object").map((entry) => {
+  return value.filter((entry): entry is AgentRunMarkerResult => !!entry && typeof entry === "object").map((entry) => {
     const row = entry as Record<string, unknown>;
     return {
       ...(typeof row.label === "string" ? { label: row.label } : {}),
@@ -27,21 +28,21 @@ function asMarkerResults(value: unknown): OneSliceAgentRunMarkerResult[] | undef
 }
 
 function registryPath(cwd: string): string {
-  return path.join(cwd, ".pi", "reports", "one-slice-agent-runs.json");
+  return path.join(cwd, ".pi", "reports", "agent-runs.json");
 }
 
-function readRegistryRows(cwd: string): OneSliceAgentRunRegistryEntry[] {
+function readRegistryRows(cwd: string): AgentRunRegistryEntry[] {
   const filePath = registryPath(cwd);
   if (!existsSync(filePath)) return [];
-  const parsed = JSON.parse(readFileSync(filePath, "utf8")) as { runs?: OneSliceAgentRunRegistryEntry[] } | OneSliceAgentRunRegistryEntry[];
+  const parsed = JSON.parse(readFileSync(filePath, "utf8")) as { runs?: AgentRunRegistryEntry[] } | AgentRunRegistryEntry[];
   return Array.isArray(parsed) ? parsed : Array.isArray(parsed.runs) ? parsed.runs : [];
 }
 
-function readRegistryEntry(cwd: string, runId: string): OneSliceAgentRunRegistryEntry | undefined {
+function readRegistryEntry(cwd: string, runId: string): AgentRunRegistryEntry | undefined {
   return readRegistryRows(cwd).find((row) => row?.runId === runId);
 }
 
-function writeRegistryEntry(cwd: string, entry: OneSliceAgentRunRegistryEntry): void {
+function writeRegistryEntry(cwd: string, entry: AgentRunRegistryEntry): void {
   const filePath = registryPath(cwd);
   const rows = readRegistryRows(cwd).filter((row) => row?.runId !== entry.runId);
   rows.push(entry);
@@ -61,7 +62,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
     label: "Agent Spawn Readiness Gate",
     description: "Report-only agent spawn readiness gate (single worker, timeout, cwd, budget, rollback, bounded scope). Never dispatches execution.",
     parameters: Type.Object({
-      max_agents_requested: Type.Optional(Type.Number({ description: "Requested number of agents for this spawn attempt (must be 1 for simple spawn lane)." })),
+      max_agents_requested: Type.Optional(Type.Number({ description: "Requested number of agents for this spawn attempt (must be 1 for agent-run lane)." })),
       timeout_ms: Type.Optional(Type.Number({ description: "Explicit timeout in milliseconds (bounded)." })),
       cwd_isolation_known: Type.Optional(Type.Boolean({ description: "Whether cwd isolation is explicitly known." })),
       budget_known: Type.Optional(Type.Boolean({ description: "Whether bounded budget is explicitly known." })),
@@ -89,11 +90,11 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   });
 
   pi.registerTool({
-    name: "one_slice_agent_run_plan",
-    label: "One-Slice Agent Run Plan",
-    description: "Report-only one-slice agent run packet with provider/model, declared files, timeout, validation, rollback, budget, abort, and log-tail gates. Never dispatches execution.",
+    name: "agent_run_plan",
+    label: "Agent Run Plan",
+    description: "Report-only agent run packet with provider/model, declared files, timeout, validation, rollback, budget, abort, and log-tail gates. Never dispatches execution.",
     parameters: Type.Object({
-      goal: Type.Optional(Type.String({ description: "One-slice goal for the future worker." })),
+      goal: Type.Optional(Type.String({ description: "Run goal for the future worker." })),
       provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. openai-codex/gpt-5.3-codex-spark." })),
       cwd: Type.Optional(Type.String({ description: "Explicit worker cwd." })),
       declared_files: Type.Optional(Type.Array(Type.String(), { description: "Exact file scope for the future worker." })),
@@ -107,7 +108,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const result = buildOneSliceAgentRunPlan({
+      const result = buildAgentRunPlan({
         goal: typeof p.goal === "string" ? p.goal : undefined,
         providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
         cwd: typeof p.cwd === "string" ? p.cwd : ctx?.cwd,
@@ -121,7 +122,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       return buildOperatorVisibleToolResponse({
-        label: "one_slice_agent_run_plan",
+        label: "agent_run_plan",
         summary: result.summary,
         details: result,
       });
@@ -129,11 +130,11 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   });
 
   pi.registerTool({
-    name: "one_slice_agent_run_registry_upsert",
-    label: "One-Slice Agent Run Registry Upsert",
-    description: "Dry-first local registry upsert for one-slice agent runs under .pi/reports. apply=true writes only registry state; it never starts, stops, or dispatches execution.",
+    name: "agent_run_registry_upsert",
+    label: "Agent Run Registry Upsert",
+    description: "Dry-first local registry upsert for agent runs under .pi/reports. apply=true writes only registry state; it never starts, stops, or dispatches execution.",
     parameters: Type.Object({
-      run_id: Type.String({ description: "One-slice agent run id." }),
+      run_id: Type.String({ description: "Agent run id." }),
       state: Type.Optional(Type.String({ description: "Run state: planned, running, completed, failed, timed-out, aborted, or unknown." })),
       provider_model_ref: Type.Optional(Type.String({ description: "Provider/model reference used by the run." })),
       cwd: Type.Optional(Type.String({ description: "Run cwd. Defaults to current tool cwd." })),
@@ -147,10 +148,10 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const runId = typeof p.run_id === "string" ? p.run_id : "";
       const cwd = typeof p.cwd === "string" ? p.cwd : ctx.cwd;
       const entry = readRegistryEntry(ctx.cwd, runId);
-      const result = buildOneSliceAgentRunRegistryUpsertPacket({
+      const result = buildAgentRunRegistryUpsertPacket({
         runId,
         existingEntry: entry,
-        state: typeof p.state === "string" ? p.state as OneSliceAgentRunState : undefined,
+        state: typeof p.state === "string" ? p.state as AgentRunState : undefined,
         providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
         cwd,
         declaredFiles: asOptionalStringArray(p.declared_files),
@@ -160,7 +161,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
       if (result.writeAllowed) writeRegistryEntry(ctx.cwd, result.entry);
       return buildOperatorVisibleToolResponse({
-        label: "one_slice_agent_run_registry_upsert",
+        label: "agent_run_registry_upsert",
         summary: result.summary,
         details: result,
       });
@@ -168,19 +169,19 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   });
 
   pi.registerTool({
-    name: "one_slice_agent_run_status",
-    label: "One-Slice Agent Run Status",
-    description: "Read-only status lookup for a registered one-slice agent run. Never starts, stops, or dispatches execution.",
+    name: "agent_run_status",
+    label: "Agent Run Status",
+    description: "Read-only status lookup for a registered agent run. Never starts, stops, or dispatches execution.",
     parameters: Type.Object({
-      run_id: Type.String({ description: "Simple-agent run id." }),
+      run_id: Type.String({ description: "Agent run id." }),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const runId = typeof p.run_id === "string" ? p.run_id : "";
       const entry = readRegistryEntry(ctx.cwd, runId);
-      const result = buildOneSliceAgentRunStatus(runId, entry);
+      const result = buildAgentRunStatus(runId, entry);
       return buildOperatorVisibleToolResponse({
-        label: "one_slice_agent_run_status",
+        label: "agent_run_status",
         summary: result.summary,
         details: result,
       });
@@ -188,11 +189,11 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   });
 
   pi.registerTool({
-    name: "one_slice_agent_run_log_tail",
-    label: "One-Slice Agent Run Log Tail",
-    description: "Read-only bounded log tail for a registered one-slice agent run. Never starts, stops, or dispatches execution.",
+    name: "agent_run_log_tail",
+    label: "Agent Run Log Tail",
+    description: "Read-only bounded log tail for a registered agent run. Never starts, stops, or dispatches execution.",
     parameters: Type.Object({
-      run_id: Type.String({ description: "Simple-agent run id." }),
+      run_id: Type.String({ description: "Agent run id." }),
       max_lines: Type.Optional(Type.Number({ description: "Maximum tail lines, clamped to 1..500." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -202,7 +203,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const maxLines = typeof p.max_lines === "number" ? p.max_lines : 80;
       const lines = entry?.logPath ? readLogTail(entry.logPath, maxLines) : [];
       const result = {
-        mode: "one-slice-agent-run-log-tail" as const,
+        mode: "agent-run-log-tail" as const,
         activation: "none" as const,
         authorization: "none" as const,
         dispatchAllowed: false,
@@ -213,10 +214,10 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         logPath: entry?.logPath,
         maxLines: Math.max(1, Math.min(500, Math.floor(maxLines))),
         lines,
-        summary: `one-slice-agent-run-log-tail: runId=${runId || "unknown"} found=${entry ? "yes" : "no"} lines=${lines.length} dispatch=no authorization=none`,
+        summary: `agent-run-log-tail: runId=${runId || "unknown"} found=${entry ? "yes" : "no"} lines=${lines.length} dispatch=no authorization=none`,
       };
       return buildOperatorVisibleToolResponse({
-        label: "one_slice_agent_run_log_tail",
+        label: "agent_run_log_tail",
         summary: result.summary,
         details: result,
       });
@@ -224,11 +225,11 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   });
 
   pi.registerTool({
-    name: "one_slice_agent_run_outcome_packet",
-    label: "One-Slice Agent Run Outcome Packet",
-    description: "Report-only outcome packet for one-slice agent runs. Separates processState from contractDecision using declared files, touched files, marker results, and rollback cues. Never dispatches execution.",
+    name: "agent_run_outcome_packet",
+    label: "Agent Run Outcome Packet",
+    description: "Report-only outcome packet for agent runs. Separates processState from contractDecision using declared files, touched files, marker results, and rollback cues. Never dispatches execution.",
     parameters: Type.Object({
-      run_id: Type.String({ description: "One-slice agent run id." }),
+      run_id: Type.String({ description: "Agent run id." }),
       touched_files: Type.Optional(Type.Array(Type.String(), { description: "Files observed as touched after the run, usually from git status/diff." })),
       marker_results: Type.Optional(Type.Array(Type.Object({
         label: Type.Optional(Type.String({ description: "Marker/check label." })),
@@ -239,14 +240,14 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const p = (params ?? {}) as Record<string, unknown>;
       const runId = typeof p.run_id === "string" ? p.run_id : "";
       const entry = readRegistryEntry(ctx.cwd, runId);
-      const result = buildOneSliceAgentRunOutcomePacket({
+      const result = buildAgentRunOutcomePacket({
         runId,
         entry,
         touchedFiles: asOptionalStringArray(p.touched_files),
         markerResults: asMarkerResults(p.marker_results),
       });
       return buildOperatorVisibleToolResponse({
-        label: "one_slice_agent_run_outcome_packet",
+        label: "agent_run_outcome_packet",
         summary: result.summary,
         details: result,
       });
@@ -254,11 +255,11 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   });
 
   pi.registerTool({
-    name: "one_slice_agent_run_abort",
-    label: "One-Slice Agent Run Abort",
-    description: "Dry-first abort plan for a registered one-slice agent run. execute=true requires operator_confirmed=true and only targets the registered worker pid.",
+    name: "agent_run_abort",
+    label: "Agent Run Abort",
+    description: "Dry-first abort plan for a registered agent run. execute=true requires operator_confirmed=true and only targets the registered worker pid.",
     parameters: Type.Object({
-      run_id: Type.String({ description: "Simple-agent run id." }),
+      run_id: Type.String({ description: "Agent run id." }),
       execute: Type.Optional(Type.Boolean({ description: "When true, send SIGTERM to the registered worker pid after gates pass." })),
       operator_confirmed: Type.Optional(Type.Boolean({ description: "Explicit human confirmation for execute=true." })),
     }),
@@ -266,7 +267,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const p = (params ?? {}) as Record<string, unknown>;
       const runId = typeof p.run_id === "string" ? p.run_id : "";
       const entry = readRegistryEntry(ctx.cwd, runId);
-      const plan = buildOneSliceAgentAbortPlan({
+      const plan = buildAgentRunAbortPlan({
         runId,
         entry,
         execute: asOptionalBoolean(p.execute),
@@ -277,7 +278,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         process.kill(plan.pid, "SIGTERM");
       }
       return buildOperatorVisibleToolResponse({
-        label: "one_slice_agent_run_abort",
+        label: "agent_run_abort",
         summary: plan.summary,
         details: plan,
       });

@@ -21674,6 +21674,30 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:risk-control] Próxima primitive após outcome packet live validar falha Dashscope: remover scripts ad hoc de registry mantendo operação local-safe/dry-first.\n[provenance:human] source_task=TASK-BUD-971 reason=Operador pediu continuar cultivando ergonomia/visão do control-plane após reload.\n[slice] Implementado `buildOneSliceAgentRunRegistryUpsertPacket` e tool `one_slice_agent_run_registry_upsert`: default dry-run, `dry_run=false` permite apenas upsert em `.pi/reports/one-slice-agent-runs.json`, sem start/stop/dispatch. Smoke test cobre dry-run sem escrita e apply com upsert em cwd temporário. Validação: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` → 11 passed; `git diff --check` passou; marker check doc passou; line budget segue watch sem extract/critical.\n[rationale:risk-control] A mudança reduz scripts ad hoc sem aumentar autonomia: por padrão não escreve, apply explícito só altera registry local e nunca inicia/para processo nem toca escopos protegidos.\n[complete] Registry upsert primitive added and documented. Requires reload before trusting live tool surface.",
       "verification": "VERIF-TASK-BUD-972-REGISTRY-UPSERT"
+    },
+    {
+      "id": "TASK-BUD-973",
+      "description": "[P1/local-safe] Reorganizar coesão da família one-slice agent run sem sobrepor primitivas.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness.ts",
+        "packages/pi-stack/extensions/guardrails-core-one-slice-agent-run-plan.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/primitives/agents-as-tools-calibration-score.md"
+      ],
+      "acceptance_criteria": [
+        "Mover `buildOneSliceAgentRunPlan` e tipos de plan para arquivo coeso de pre-run plan.",
+        "Manter `evaluateAgentSpawnReadiness` separado como gate genérico de spawn readiness.",
+        "Manter runtime/status/registry/outcome/abort em runtime/control sem duplicar conceitos públicos.",
+        "Atualizar imports/exports/tests/docs sem mudar contrato público das tools.",
+        "Rodar smoke focal e `git diff --check`; não alterar settings/routing/CI/publish/credenciais."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:refactor] Operador apontou baixa coesão: plan ficou separado por histórico, não design; refatoração deve organizar fronteiras sem crescer arquivos demais nem criar overlap de conceitos.\n[provenance:human] source_task=TASK-BUD-972 reason=Pedido explícito para abraçar coesão mínima e evitar primitivas repetidas/overlapping na lane AFK.\n[slice] Consolidada semântica para `agent_run_*`: `one-slice` virou detalhe de contrato (`singleRunOnly`) em vez de namespace público, e `simple` saiu do gate focal. Sem aliases para evitar overlap; mudança exige reload antes de confiar na nova surface live.\n[validation] `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` -> 11 passed; `git diff --check` passou; `line_budget_snapshot` -> watch/0 extract/0 critical.",
+      "verification": "VERIF-TASK-BUD-973-AGENT-RUN-SEMANTICS"
     }
   ]
 }

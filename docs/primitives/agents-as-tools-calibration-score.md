@@ -35,7 +35,7 @@ Campos principais:
 - `agents-as-tools-calibration-needs-boundedness`
 - `agents-as-tools-calibration-needs-observability`
 
-## Contrato complementar de simple spawn
+## Contrato complementar de agent run
 
 A primitive `evaluateAgentSpawnReadiness` (exposta no runtime como `agent_spawn_readiness_gate`) cobre o próximo passo após calibração geral e exige, em modo report-only:
 
@@ -48,12 +48,12 @@ A primitive `evaluateAgentSpawnReadiness` (exposta no runtime como `agent_spawn_
 
 Decisão canônica:
 
-- `ready-for-simple-spawn`
+- `ready-for-agent-run`
 - `keep-report-only`
 
-## Contrato complementar de one-slice agent run plan
+## Contrato complementar de agent run plan
 
-A primitive `buildOneSliceAgentRunPlan` (exposta no runtime como `one_slice_agent_run_plan`) é o degrau L1 report-only antes de qualquer novo worker de uma fatia. Ela bloqueia quando faltam:
+A primitive `buildAgentRunPlan` (exposta no runtime como `agent_run_plan`) é o degrau L1 report-only antes de qualquer novo worker de uma fatia. Ela bloqueia quando faltam:
 
 - objetivo de uma fatia;
 - provider/model completo;
@@ -70,7 +70,7 @@ Mesmo no caminho verde, ela apenas retorna `ready-for-human-decision`; não auto
 
 ## Registry upsert dry-first
 
-A primitive `buildOneSliceAgentRunRegistryUpsertPacket` (exposta como `one_slice_agent_run_registry_upsert`) reduz scripts ad hoc para criar/atualizar `.pi/reports/one-slice-agent-runs.json`.
+A primitive `buildAgentRunRegistryUpsertPacket` (exposta como `agent_run_registry_upsert`) reduz scripts ad hoc para criar/atualizar `.pi/reports/agent-runs.json`.
 
 Contrato:
 
@@ -81,7 +81,7 @@ Contrato:
 
 ## Outcome packet pós-run
 
-A primitive `buildOneSliceAgentRunOutcomePacket` (exposta como `one_slice_agent_run_outcome_packet`) separa `processState` de `contractDecision` depois da run. Ela é report-only e compara:
+A primitive `buildAgentRunOutcomePacket` (exposta como `agent_run_outcome_packet`) separa `processState` de `contractDecision` depois da run. Ela é report-only e compara:
 
 - arquivos declarados no registry;
 - arquivos tocados informados pelo parent/control-plane;

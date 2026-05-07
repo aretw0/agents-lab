@@ -14435,6 +14435,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-07T02:58:19.742Z",
       "evidence": "Implemented dry-first `one_slice_agent_run_registry_upsert` backed by `buildOneSliceAgentRunRegistryUpsertPacket`. Default dry-run does not write; `dry_run=false` only upserts `.pi/reports/one-slice-agent-runs.json`, preserving no dispatch/start/stop. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` → 11 passed; `git diff --check` passed; safe_marker_check passed for `one_slice_agent_run_registry_upsert` docs; line budget remains watch with no extract/critical. [rationale:risk-control] first-party registry upsert reduces ad hoc scripts while remaining local-safe and dry-first."
+    },
+    {
+      "id": "VERIF-TASK-BUD-973-AGENT-RUN-SEMANTICS",
+      "target": "TASK-BUD-973",
+      "target_type": "task",
+      "status": "passed",
+      "method": "refactor+smoke",
+      "timestamp": "2026-05-07T03:26:08.634Z",
+      "evidence": "Renomeado contrato recém-criado de one_slice_agent_run_* para agent_run_* sem aliases sobrepostos; removido uso de simple do gate focal. Plan extraído para guardrails-core-agent-run-plan.ts; runtime/control renomeado para guardrails-core-agent-run-runtime.ts; surface/exports/tests/docs atualizados. Validação: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 11 passed; git diff --check passou; line_budget_snapshot -> watch, aboveExtract=0, aboveCritical=0."
     }
   ]
 }

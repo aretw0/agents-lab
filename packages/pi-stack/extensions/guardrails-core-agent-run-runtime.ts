@@ -1,13 +1,13 @@
-export type OneSliceAgentRunState = "planned" | "running" | "completed" | "failed" | "timed-out" | "aborted" | "unknown";
-export type OneSliceAgentAbortDecision = "dry-run" | "abort-ready" | "blocked";
-export type OneSliceAgentRunContractDecision = "pass" | "partial" | "fail";
-export type OneSliceAgentRunOutcomeRecommendation = "stop" | "retry-once" | "ask-human";
-export type OneSliceAgentRunRegistryUpsertDecision = "dry-run" | "write-ready" | "blocked";
+export type AgentRunState = "planned" | "running" | "completed" | "failed" | "timed-out" | "aborted" | "unknown";
+export type AgentRunAbortDecision = "dry-run" | "abort-ready" | "blocked";
+export type AgentRunContractDecision = "pass" | "partial" | "fail";
+export type AgentRunOutcomeRecommendation = "stop" | "retry-once" | "ask-human";
+export type AgentRunRegistryUpsertDecision = "dry-run" | "write-ready" | "blocked";
 
-export interface OneSliceAgentRunRegistryEntry {
+export interface AgentRunRegistryEntry {
   runId?: string;
   pid?: number;
-  state?: OneSliceAgentRunState;
+  state?: AgentRunState;
   providerModelRef?: string;
   cwd?: string;
   declaredFiles?: string[];
@@ -20,8 +20,8 @@ export interface OneSliceAgentRunRegistryEntry {
   stopSource?: "human" | "agent" | "timeout" | "unknown";
 }
 
-export interface OneSliceAgentRunStatusResult {
-  mode: "one-slice-agent-run-status";
+export interface AgentRunStatusResult {
+  mode: "agent-run-status";
   activation: "none";
   authorization: "none";
   dispatchAllowed: false;
@@ -29,7 +29,7 @@ export interface OneSliceAgentRunStatusResult {
   processStopAllowed: false;
   runId: string;
   found: boolean;
-  state: OneSliceAgentRunState;
+  state: AgentRunState;
   pid?: number;
   providerModelRef?: string;
   cwd?: string;
@@ -44,10 +44,10 @@ export interface OneSliceAgentRunStatusResult {
   summary: string;
 }
 
-export interface OneSliceAgentRunRegistryUpsertInput {
+export interface AgentRunRegistryUpsertInput {
   runId?: string;
-  existingEntry?: OneSliceAgentRunRegistryEntry;
-  state?: OneSliceAgentRunState;
+  existingEntry?: AgentRunRegistryEntry;
+  state?: AgentRunState;
   providerModelRef?: string;
   cwd?: string;
   declaredFiles?: string[];
@@ -57,42 +57,42 @@ export interface OneSliceAgentRunRegistryUpsertInput {
   nowIso?: string;
 }
 
-export interface OneSliceAgentRunRegistryUpsertResult {
-  mode: "one-slice-agent-run-registry-upsert";
+export interface AgentRunRegistryUpsertResult {
+  mode: "agent-run-registry-upsert";
   activation: "none";
   authorization: "none" | "explicit-apply";
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
   writeAllowed: boolean;
-  decision: OneSliceAgentRunRegistryUpsertDecision;
+  decision: AgentRunRegistryUpsertDecision;
   recommendationCode:
-    | "one-slice-agent-registry-upsert-dry-run"
-    | "one-slice-agent-registry-upsert-write-ready"
-    | "one-slice-agent-registry-upsert-blocked-run-id"
-    | "one-slice-agent-registry-upsert-blocked-cwd"
-    | "one-slice-agent-registry-upsert-blocked-files"
-    | "one-slice-agent-registry-upsert-blocked-state";
+    | "agent-run-registry-upsert-dry-run"
+    | "agent-run-registry-upsert-write-ready"
+    | "agent-run-registry-upsert-blocked-run-id"
+    | "agent-run-registry-upsert-blocked-cwd"
+    | "agent-run-registry-upsert-blocked-files"
+    | "agent-run-registry-upsert-blocked-state";
   blockers: string[];
   runId: string;
-  entry: OneSliceAgentRunRegistryEntry;
+  entry: AgentRunRegistryEntry;
   summary: string;
 }
 
-export interface OneSliceAgentRunMarkerResult {
+export interface AgentRunMarkerResult {
   label?: string;
   ok?: boolean;
 }
 
-export interface OneSliceAgentRunOutcomeInput {
+export interface AgentRunOutcomeInput {
   runId?: string;
-  entry?: OneSliceAgentRunRegistryEntry;
+  entry?: AgentRunRegistryEntry;
   touchedFiles?: string[];
-  markerResults?: OneSliceAgentRunMarkerResult[];
+  markerResults?: AgentRunMarkerResult[];
 }
 
-export interface OneSliceAgentRunOutcomeResult {
-  mode: "one-slice-agent-run-outcome-packet";
+export interface AgentRunOutcomeResult {
+  mode: "agent-run-outcome-packet";
   activation: "none";
   authorization: "none";
   dispatchAllowed: false;
@@ -100,17 +100,17 @@ export interface OneSliceAgentRunOutcomeResult {
   processStopAllowed: false;
   runId: string;
   found: boolean;
-  processState: OneSliceAgentRunState;
-  contractDecision: OneSliceAgentRunContractDecision;
-  recommendation: OneSliceAgentRunOutcomeRecommendation;
+  processState: AgentRunState;
+  contractDecision: AgentRunContractDecision;
+  recommendation: AgentRunOutcomeRecommendation;
   recommendationCode:
-    | "one-slice-agent-outcome-pass"
-    | "one-slice-agent-outcome-partial-no-touched-files"
-    | "one-slice-agent-outcome-fail-missing-run"
-    | "one-slice-agent-outcome-fail-process-state"
-    | "one-slice-agent-outcome-fail-unexpected-files"
-    | "one-slice-agent-outcome-fail-missing-declared-files"
-    | "one-slice-agent-outcome-fail-marker";
+    | "agent-run-outcome-pass"
+    | "agent-run-outcome-partial-no-touched-files"
+    | "agent-run-outcome-fail-missing-run"
+    | "agent-run-outcome-fail-process-state"
+    | "agent-run-outcome-fail-unexpected-files"
+    | "agent-run-outcome-fail-missing-declared-files"
+    | "agent-run-outcome-fail-marker";
   declaredFiles: string[];
   touchedFiles: string[];
   missingDeclaredFiles: string[];
@@ -121,31 +121,31 @@ export interface OneSliceAgentRunOutcomeResult {
   summary: string;
 }
 
-export interface OneSliceAgentAbortPlanInput {
+export interface AgentRunAbortPlanInput {
   runId?: string;
-  entry?: OneSliceAgentRunRegistryEntry;
+  entry?: AgentRunRegistryEntry;
   execute?: boolean;
   operatorConfirmed?: boolean;
   cwdExpected?: string;
   nowMs?: number;
 }
 
-export interface OneSliceAgentAbortPlanResult {
-  mode: "one-slice-agent-abort-plan";
+export interface AgentRunAbortPlanResult {
+  mode: "agent-run-abort-plan";
   activation: "none";
   authorization: "none" | "explicit-human";
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: boolean;
-  decision: OneSliceAgentAbortDecision;
+  decision: AgentRunAbortDecision;
   recommendationCode:
-    | "one-slice-agent-abort-dry-run"
-    | "one-slice-agent-abort-ready"
-    | "one-slice-agent-abort-blocked-missing-run"
-    | "one-slice-agent-abort-blocked-not-running"
-    | "one-slice-agent-abort-blocked-missing-pid"
-    | "one-slice-agent-abort-blocked-cwd-mismatch"
-    | "one-slice-agent-abort-blocked-human-confirmation";
+    | "agent-run-abort-dry-run"
+    | "agent-run-abort-ready"
+    | "agent-run-abort-blocked-missing-run"
+    | "agent-run-abort-blocked-not-running"
+    | "agent-run-abort-blocked-missing-pid"
+    | "agent-run-abort-blocked-cwd-mismatch"
+    | "agent-run-abort-blocked-human-confirmation";
   blockers: string[];
   runId: string;
   pid?: number;
@@ -168,7 +168,7 @@ function normalizeFiles(value: unknown): string[] {
   return value.filter((entry): entry is string => typeof entry === "string").map((entry) => entry.trim()).filter(Boolean);
 }
 
-function normalizeState(value: unknown): OneSliceAgentRunState {
+function normalizeState(value: unknown): AgentRunState {
   return value === "planned" || value === "running" || value === "completed" || value === "failed" || value === "timed-out" || value === "aborted" ? value : "unknown";
 }
 
@@ -178,7 +178,7 @@ function parseIsoMs(value: unknown): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-export function buildOneSliceAgentRunRegistryUpsertPacket(input: OneSliceAgentRunRegistryUpsertInput = {}): OneSliceAgentRunRegistryUpsertResult {
+export function buildAgentRunRegistryUpsertPacket(input: AgentRunRegistryUpsertInput = {}): AgentRunRegistryUpsertResult {
   const existing = input.existingEntry;
   const runId = normalizeText(input.runId ?? existing?.runId);
   const cwd = normalizeText(input.cwd ?? existing?.cwd);
@@ -189,19 +189,19 @@ export function buildOneSliceAgentRunRegistryUpsertPacket(input: OneSliceAgentRu
   const timeoutMs = typeof input.timeoutMs === "number" && Number.isFinite(input.timeoutMs) && input.timeoutMs > 0 ? Math.floor(input.timeoutMs) : existing?.timeoutMs;
   const nowIso = normalizeText(input.nowIso) || new Date().toISOString();
   const blockers: string[] = [];
-  let recommendationCode: OneSliceAgentRunRegistryUpsertResult["recommendationCode"] = input.dryRun === false ? "one-slice-agent-registry-upsert-write-ready" : "one-slice-agent-registry-upsert-dry-run";
+  let recommendationCode: AgentRunRegistryUpsertResult["recommendationCode"] = input.dryRun === false ? "agent-run-registry-upsert-write-ready" : "agent-run-registry-upsert-dry-run";
 
-  const block = (code: OneSliceAgentRunRegistryUpsertResult["recommendationCode"], blocker: string) => {
+  const block = (code: AgentRunRegistryUpsertResult["recommendationCode"], blocker: string) => {
     if (blockers.length === 0) recommendationCode = code;
     blockers.push(blocker);
   };
 
-  if (!runId) block("one-slice-agent-registry-upsert-blocked-run-id", "run-id-missing");
-  if (!cwd) block("one-slice-agent-registry-upsert-blocked-cwd", "cwd-missing");
-  if (declaredFiles.length === 0) block("one-slice-agent-registry-upsert-blocked-files", "declared-files-missing");
-  if (state === "unknown") block("one-slice-agent-registry-upsert-blocked-state", "state-unknown");
+  if (!runId) block("agent-run-registry-upsert-blocked-run-id", "run-id-missing");
+  if (!cwd) block("agent-run-registry-upsert-blocked-cwd", "cwd-missing");
+  if (declaredFiles.length === 0) block("agent-run-registry-upsert-blocked-files", "declared-files-missing");
+  if (state === "unknown") block("agent-run-registry-upsert-blocked-state", "state-unknown");
 
-  const entry: OneSliceAgentRunRegistryEntry = {
+  const entry: AgentRunRegistryEntry = {
     ...(existing ?? {}),
     runId,
     state,
@@ -215,9 +215,9 @@ export function buildOneSliceAgentRunRegistryUpsertPacket(input: OneSliceAgentRu
   };
 
   const writeAllowed = blockers.length === 0 && input.dryRun === false;
-  const decision: OneSliceAgentRunRegistryUpsertDecision = blockers.length > 0 ? "blocked" : writeAllowed ? "write-ready" : "dry-run";
+  const decision: AgentRunRegistryUpsertDecision = blockers.length > 0 ? "blocked" : writeAllowed ? "write-ready" : "dry-run";
   const summary = [
-    "one-slice-agent-registry-upsert:",
+    "agent-run-registry-upsert:",
     `decision=${decision}`,
     `runId=${runId || "unknown"}`,
     `state=${state}`,
@@ -229,7 +229,7 @@ export function buildOneSliceAgentRunRegistryUpsertPacket(input: OneSliceAgentRu
   ].filter(Boolean).join(" ");
 
   return {
-    mode: "one-slice-agent-run-registry-upsert",
+    mode: "agent-run-registry-upsert",
     activation: "none",
     authorization: writeAllowed ? "explicit-apply" : "none",
     dispatchAllowed: false,
@@ -245,7 +245,7 @@ export function buildOneSliceAgentRunRegistryUpsertPacket(input: OneSliceAgentRu
   };
 }
 
-export function buildOneSliceAgentRunStatus(runId: string, entry?: OneSliceAgentRunRegistryEntry, nowMs = Date.now()): OneSliceAgentRunStatusResult {
+export function buildAgentRunStatus(runId: string, entry?: AgentRunRegistryEntry, nowMs = Date.now()): AgentRunStatusResult {
   const cleanRunId = normalizeText(runId);
   const found = !!entry;
   const state = normalizeState(entry?.state);
@@ -261,7 +261,7 @@ export function buildOneSliceAgentRunStatus(runId: string, entry?: OneSliceAgent
   if (stale) warnings.push("heartbeat-stale");
 
   const summary = [
-    "one-slice-agent-run-status:",
+    "agent-run-status:",
     `runId=${cleanRunId || "unknown"}`,
     `found=${found ? "yes" : "no"}`,
     `state=${state}`,
@@ -273,7 +273,7 @@ export function buildOneSliceAgentRunStatus(runId: string, entry?: OneSliceAgent
   ].filter(Boolean).join(" ");
 
   return {
-    mode: "one-slice-agent-run-status",
+    mode: "agent-run-status",
     activation: "none",
     authorization: "none",
     dispatchAllowed: false,
@@ -297,7 +297,7 @@ export function buildOneSliceAgentRunStatus(runId: string, entry?: OneSliceAgent
   };
 }
 
-export function buildOneSliceAgentRunOutcomePacket(input: OneSliceAgentRunOutcomeInput = {}): OneSliceAgentRunOutcomeResult {
+export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): AgentRunOutcomeResult {
   const runId = normalizeText(input.runId ?? input.entry?.runId);
   const found = !!input.entry;
   const processState = normalizeState(input.entry?.state);
@@ -319,40 +319,40 @@ export function buildOneSliceAgentRunOutcomePacket(input: OneSliceAgentRunOutcom
   if (touchedFiles.length > 0 && missingDeclaredFiles.length > 0) blockers.push("declared-files-missing");
   if (markerFailures.length > 0) blockers.push("marker-failures");
 
-  let contractDecision: OneSliceAgentRunContractDecision = "pass";
-  let recommendation: OneSliceAgentRunOutcomeRecommendation = "stop";
-  let recommendationCode: OneSliceAgentRunOutcomeResult["recommendationCode"] = "one-slice-agent-outcome-pass";
+  let contractDecision: AgentRunContractDecision = "pass";
+  let recommendation: AgentRunOutcomeRecommendation = "stop";
+  let recommendationCode: AgentRunOutcomeResult["recommendationCode"] = "agent-run-outcome-pass";
 
   if (!found) {
     contractDecision = "fail";
     recommendation = "ask-human";
-    recommendationCode = "one-slice-agent-outcome-fail-missing-run";
+    recommendationCode = "agent-run-outcome-fail-missing-run";
   } else if (processState !== "completed") {
     contractDecision = "fail";
     recommendation = processState === "timed-out" ? "retry-once" : "ask-human";
-    recommendationCode = "one-slice-agent-outcome-fail-process-state";
+    recommendationCode = "agent-run-outcome-fail-process-state";
   } else if (unexpectedFiles.length > 0) {
     contractDecision = "fail";
     recommendation = "ask-human";
-    recommendationCode = "one-slice-agent-outcome-fail-unexpected-files";
+    recommendationCode = "agent-run-outcome-fail-unexpected-files";
   } else if (touchedFiles.length > 0 && missingDeclaredFiles.length > 0) {
     contractDecision = "fail";
     recommendation = "ask-human";
-    recommendationCode = "one-slice-agent-outcome-fail-missing-declared-files";
+    recommendationCode = "agent-run-outcome-fail-missing-declared-files";
   } else if (markerFailures.length > 0) {
     contractDecision = "fail";
     recommendation = "ask-human";
-    recommendationCode = "one-slice-agent-outcome-fail-marker";
+    recommendationCode = "agent-run-outcome-fail-marker";
   } else if (touchedFiles.length === 0) {
     contractDecision = "partial";
     recommendation = "ask-human";
-    recommendationCode = "one-slice-agent-outcome-partial-no-touched-files";
+    recommendationCode = "agent-run-outcome-partial-no-touched-files";
     blockers.push("touched-files-not-provided");
   }
 
   const rollbackFiles = [...new Set([...unexpectedFiles, ...touchedFiles.filter((file) => declaredSet.has(file) && contractDecision === "fail")])];
   const summary = [
-    "one-slice-agent-run-outcome:",
+    "agent-run-outcome:",
     `contract=${contractDecision}`,
     `process=${processState}`,
     `recommendation=${recommendation}`,
@@ -367,7 +367,7 @@ export function buildOneSliceAgentRunOutcomePacket(input: OneSliceAgentRunOutcom
   ].filter(Boolean).join(" ");
 
   return {
-    mode: "one-slice-agent-run-outcome-packet",
+    mode: "agent-run-outcome-packet",
     activation: "none",
     authorization: "none",
     dispatchAllowed: false,
@@ -390,7 +390,7 @@ export function buildOneSliceAgentRunOutcomePacket(input: OneSliceAgentRunOutcom
   };
 }
 
-export function buildOneSliceAgentAbortPlan(input: OneSliceAgentAbortPlanInput = {}): OneSliceAgentAbortPlanResult {
+export function buildAgentRunAbortPlan(input: AgentRunAbortPlanInput = {}): AgentRunAbortPlanResult {
   const runId = normalizeText(input.runId ?? input.entry?.runId);
   const entry = input.entry;
   const pid = normalizePid(entry?.pid);
@@ -398,23 +398,23 @@ export function buildOneSliceAgentAbortPlan(input: OneSliceAgentAbortPlanInput =
   const operatorConfirmed = input.operatorConfirmed === true;
   const cwdExpected = normalizeText(input.cwdExpected);
   const blockers: string[] = [];
-  let recommendationCode: OneSliceAgentAbortPlanResult["recommendationCode"] = execute ? "one-slice-agent-abort-ready" : "one-slice-agent-abort-dry-run";
+  let recommendationCode: AgentRunAbortPlanResult["recommendationCode"] = execute ? "agent-run-abort-ready" : "agent-run-abort-dry-run";
 
-  const block = (code: OneSliceAgentAbortPlanResult["recommendationCode"], blocker: string) => {
+  const block = (code: AgentRunAbortPlanResult["recommendationCode"], blocker: string) => {
     if (blockers.length === 0) recommendationCode = code;
     blockers.push(blocker);
   };
 
-  if (!entry) block("one-slice-agent-abort-blocked-missing-run", "run-not-found");
-  if (entry && normalizeState(entry.state) !== "running") block("one-slice-agent-abort-blocked-not-running", "run-not-running");
-  if (entry && !pid) block("one-slice-agent-abort-blocked-missing-pid", "pid-missing");
-  if (entry && cwdExpected && normalizeText(entry.cwd) !== cwdExpected) block("one-slice-agent-abort-blocked-cwd-mismatch", "cwd-mismatch");
-  if (execute && !operatorConfirmed) block("one-slice-agent-abort-blocked-human-confirmation", "human-confirmation-missing");
+  if (!entry) block("agent-run-abort-blocked-missing-run", "run-not-found");
+  if (entry && normalizeState(entry.state) !== "running") block("agent-run-abort-blocked-not-running", "run-not-running");
+  if (entry && !pid) block("agent-run-abort-blocked-missing-pid", "pid-missing");
+  if (entry && cwdExpected && normalizeText(entry.cwd) !== cwdExpected) block("agent-run-abort-blocked-cwd-mismatch", "cwd-mismatch");
+  if (execute && !operatorConfirmed) block("agent-run-abort-blocked-human-confirmation", "human-confirmation-missing");
 
-  const decision: OneSliceAgentAbortDecision = blockers.length > 0 ? "blocked" : execute ? "abort-ready" : "dry-run";
+  const decision: AgentRunAbortDecision = blockers.length > 0 ? "blocked" : execute ? "abort-ready" : "dry-run";
   const processStopAllowed = decision === "abort-ready";
   const summary = [
-    "one-slice-agent-abort-plan:",
+    "agent-run-abort-plan:",
     `decision=${decision}`,
     `code=${recommendationCode}`,
     `runId=${runId || "unknown"}`,
@@ -425,7 +425,7 @@ export function buildOneSliceAgentAbortPlan(input: OneSliceAgentAbortPlanInput =
   ].filter(Boolean).join(" ");
 
   return {
-    mode: "one-slice-agent-abort-plan",
+    mode: "agent-run-abort-plan",
     activation: "none",
     authorization: processStopAllowed ? "explicit-human" : "none",
     dispatchAllowed: false,
