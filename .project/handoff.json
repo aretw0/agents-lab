@@ -1,56 +1,55 @@
 {
-  "timestamp": "2026-05-07T12:15:52.072Z",
-  "context": "AFK continuation focused on semantic cohesion, treating the stack as pre-release: no legado/backcompat framing for names we are still shaping [snip] ing/settings/CI/publish scopes touched. [truncated:+415 chars]",
+  "timestamp": "2026-05-07T13:23:24.639Z",
+  "context": "Completed local-safe semantic convergence from one-slice public runtime namespace to local slice/singleSliceOnly. Committed ae4ef35a refactor [snip] guidance after reload is already done. [truncated:+139 chars]",
   "next_actions": [
-    "Run /reload before trusting live tool surface names; expected delegation tools now include del [snip] tools remain agent_run_*. [truncated:+79 chars]",
-    "If continuing local-safe, review remaining one-slice usages only where they are not strict sto [snip] ocs without a scoped task. [truncated:+54 chars]",
-    "Do not dispatch agent/provider canaries without explicit human decision."
+    "Run /reload before trusting renamed live tool surfaces: local_slice_backlog_gate, local_slice_ [snip] e_operator_packet_preview. [truncated:+82 chars]",
+    "Then consider TASK-BUD-985 to reconcile auto-resume handoff blockers with live reload state be [snip] playing operator guidance. [truncated:+8 chars]",
+    "Do not dispatch agent/provider canaries without explicit human confirmation."
   ],
   "blockers": [
-    "Live runtime still needs reload after extension surface rename.",
-    "docs/primitives/README.md line endings were normalized to LF to satisfy git di [snip] anging two index rows. [truncated:+19 chars]"
+    "Live runtime needs reload after extension surface rename before using new tool names.",
+    "TASK-BUD-985 planned: stale auto-resume reload guidance observed; fix later."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-sta [snip] -> 3 files/92 tests passed [truncated:+99 chars]",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts -> 1 file/23 te [snip] ts passed after regression [truncated:+1 chars]",
-    "rg focal found no simple_delegate/simple-delegate/ready-simple-delegate/mix_simple_delegate_ev [snip] c-consolidation-2026-05.md [truncated:+84 chars]"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts package [snip] > 7 files/140 tests passed [truncated:+392 chars]",
+    "git diff --check -> passed",
+    "git grep focal: remaining one-slice only in semantic note/regression guard, not local-slice runtime public names"
   ],
   "recent_commits": [
-    "0f89cbd9 refactor(delegation): converge delegation rehearsal naming",
-    "f838ab4c test(delegation): guard rehearsal naming"
+    "ae4ef35a refactor(context): rename one-slice to local slice"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-981",
+    "focus": "TASK-BUD-984",
     "canonical_links": [
-      "task:TASK-BUD-981",
-      "task:TASK-BUD-979",
-      "task:TASK-BUD-980",
-      "commit:0f89cbd9"
+      "task:TASK-BUD-984",
+      "task:TASK-BUD-985",
+      "commit:ae4ef35a"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T12:15:52.072Z",
-    "level": "checkpoint",
-    "action": "checkpoint-refresh",
-    "recommendation": "continue-local-safe-after-reload-or-review-one-slice-stop-condition-boundaries",
+    "generatedAtIso": "2026-05-07T13:23:24.639Z",
+    "level": "ok",
+    "percent": 29,
+    "action": "continue",
+    "recommendation": "checkpoint",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T12:15:52.072Z",
+      "atIso": "2026-05-07T13:23:24.639Z",
       "reason": "manual_checkpoint",
-      "level": "checkpoint",
-      "percent": 0,
+      "level": "ok",
+      "percent": 29,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-local-safe-after-reload-or-review-one-slice-stop-condition-boundaries"
+      "recommendation": "checkpoint"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-981"
+    "TASK-BUD-984"
   ]
 }
