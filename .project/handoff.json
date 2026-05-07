@@ -1,33 +1,36 @@
 {
-  "timestamp": "2026-05-07T23:04:49.986Z",
-  "context": "Continued bounded local-first hardening toward safer agent autonomy. Since delegation readiness still deferred on parked TASK-BUD-968 dirty s [snip] han ambiguous monitor classifier spend. [truncated:+372 chars]",
+  "timestamp": "2026-05-07T23:05:59.131Z",
+  "context": "Completed and committed two bounded local-first slices after reload: TASK-BUD-999 auto-resume stop-state evidence, TASK-BUD-986/TASK-BUD-989 [snip] load confirms new monitor tool surface. [truncated:+386 chars]",
   "next_actions": [
-    "Commit TASK-BUD-988 code/board/handoff evidence, excluding parked TASK-BUD-968 WIP.",
-    "After reload, smoke monitor_empty_response_evidence with worker_log_file if desired.",
-    "Prepare explicit promotion decision packet for next bounded agent takeover step; do not dispat [snip] colonies without approval. [truncated:+11 chars]"
+    "Run /reload before relying on new monitor_empty_response_evidence worker_log_file surface.",
+    "Decide how to handle parked TASK-BUD-968 dirty WIP: resume, commit as WIP, move aside, or keep [snip] l-execute-first readiness. [truncated:+23 chars]",
+    "If promotion is desired after reload, prepare explicit one-worker promotion decision packet before any dispatch."
   ],
   "blockers": [
     "TASK-BUD-968 quota/footer WIP remains parked and dirty.",
-    "Runtime /reload required before live monitor_empty_response_evidence accepts worker_log_file.",
-    "No multi-worker/background/colony promotion without explicit human decision."
+    "No multi-worker/background/colony promotion without explicit human decision.",
+    "Disk remains tight; bounded work only."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/monitor-summary.test.ts --reporter=dot -> 1 file, 14 tests passed",
-    "board_task_complete TASK-BUD-988 -> completed"
+    "commit 7d47d87a feat(context): surface auto-resume stop state",
+    "commit 502ea2d6 chore(board): close agent-run calibration tasks",
+    "commit 7945ed57 fix(monitors): classify empty-response targets"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-988",
     "canonical_links": [
       "task:TASK-BUD-988",
-      "task:TASK-BUD-968"
+      "task:TASK-BUD-999",
+      "task:TASK-BUD-986",
+      "commit:7d47d87a"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T23:04:49.986Z",
+    "generatedAtIso": "2026-05-07T23:05:59.131Z",
     "level": "ok",
-    "percent": 33,
+    "percent": 34,
     "action": "continue",
-    "recommendation": "commit-task-bud-988-then-promotion-packet",
+    "recommendation": "reload-then-decide-task-bud-968-or-promotion-packet",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
@@ -35,17 +38,17 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T23:04:49.986Z",
+      "atIso": "2026-05-07T23:05:59.131Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 33,
+      "percent": 34,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-988-then-promotion-packet"
+      "recommendation": "reload-then-decide-task-bud-968-or-promotion-packet"
     }
   ],
   "completed_tasks": [
