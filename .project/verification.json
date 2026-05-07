@@ -14543,6 +14543,15 @@
       "method": "refactor+smoke+diff-check",
       "timestamp": "2026-05-07T13:21:49.340Z",
       "evidence": "Convergência `one-slice` -> `local slice` concluída sem aliases nos namespaces públicos de runtime: arquivo movido para `guardrails-core-local-slice-contracts.ts`, types/funções/tools passaram para `LocalSlice*`, `local_slice_backlog_gate`, `local_slice_human_contract_review`, `context_watch_local_slice_preview`, `context_watch_local_slice_operator_packet_preview`; contrato de parada exposto como `singleSliceOnly`. Docs/primitives atualizadas para `protected-canary-local-slice`. Validação: `git grep` focal mostra `one-slice` restante apenas em nota semântica/guard de regressão agent-run, não em runtime público local-slice; `npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts` -> 7 files/140 tests passed; `git diff --check` passou."
+    },
+    {
+      "id": "VERIF-TASK-BUD-985-STALE-RELOAD-GUIDANCE",
+      "target": "TASK-BUD-985",
+      "target_type": "task",
+      "status": "passed",
+      "method": "regression+smoke+diff-check",
+      "timestamp": "2026-05-07T13:36:14.668Z",
+      "evidence": "Auto-resume agora recebe `reloadRequired` como sinal runtime ao montar o prompt e filtra blockers/next_actions antigos de reload quando o estado atual está clear (`reloadRequired=false`). Coberto em preview (`context_watch_auto_resume_preview`), surfaces de continuation/local-slice e dispatch post-reload. Regressões adicionadas: prompt post-reload com blocker antigo `still needs reload` e next `Run /reload` preserva blockers/next reais mas remove reload obsoleto; unidade direta de envelope filtra reload stale quando reload está clear. Validação: `npx vitest run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 3 files/70 tests passed; `git diff --check` passou."
     }
   ]
 }

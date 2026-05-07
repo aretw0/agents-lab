@@ -181,6 +181,8 @@ describe("context-watchdog", () => {
 			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
 				timestamp: new Date().toISOString(),
 				current_tasks: ["TASK-BUD-745"],
+				blockers: ["Live runtime still needs reload after extension surface rename.", "keep real blocker"],
+				next_actions: ["Run /reload before trusting live tool surface names.", "continue TASK-BUD-745"],
 				context_watch: {
 					auto_resume_after_reload: {
 						pending: true,
@@ -227,6 +229,11 @@ describe("context-watchdog", () => {
 				compact() {},
 			} as any);
 			expect((pi.sendUserMessage as ReturnType<typeof vi.fn>).mock.calls.length).toBe(1);
+			const resumePrompt = String((pi.sendUserMessage as ReturnType<typeof vi.fn>).mock.calls[0]?.[0] ?? "");
+			expect(resumePrompt).toContain("keep real blocker");
+			expect(resumePrompt).toContain("continue TASK-BUD-745");
+			expect(resumePrompt).not.toContain("/reload");
+			expect(resumePrompt).not.toContain("still needs reload");
 			expect((pi.appendEntry as ReturnType<typeof vi.fn>).mock.calls.some(([type]) => type === "context-watchdog.auto-resume-post-reload-dispatch"))
 				.toBe(true);
 			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as Record<string, unknown>;
@@ -234,6 +241,23 @@ describe("context-watchdog", () => {
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
+	});
+
+	it("filters stale reload guidance from auto-resume prompt when reload is clear", () => {
+		const envelope = buildAutoResumePromptEnvelopeFromHandoff({
+			timestamp: new Date().toISOString(),
+			current_tasks: ["TASK-BUD-746"],
+			blockers: ["Live runtime needs reload before trusting tools.", "preserve non-reload blocker"],
+			next_actions: ["Run /reload before trusting renamed live tool surfaces.", "continue local validation"],
+		}, 30 * 60 * 1000, Date.now(), {
+			taskStatusById: { "TASK-BUD-746": "planned" },
+			reloadRequired: false,
+		});
+
+		expect(envelope.prompt).toContain("preserve non-reload blocker");
+		expect(envelope.prompt).toContain("continue local validation");
+		expect(envelope.prompt).not.toContain("/reload");
+		expect(envelope.prompt).not.toContain("needs reload");
 	});
 
 	it("keeps deferred post-reload intent when dispatch is blocked by pending messages or lane queue", async () => {

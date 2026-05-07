@@ -467,11 +467,12 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 			"Read-only preview of the auto-resume prompt from .project/handoff.json and .project/tasks.json. Never dispatches resume, compact, scheduler, remote, or automation.",
 		parameters: Type.Object({}),
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+			const reloadRequired = runtime.isReloadRequiredForSourceUpdate();
 			const envelope = buildAutoResumePromptEnvelopeFromHandoff(
 				readHandoffJson(ctx.cwd),
 				runtime.getConfig().handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd) },
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), reloadRequired },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(envelope.diagnostics);
 			const focusTaskIds = Array.isArray(envelope.diagnostics.focusTasksListed)
@@ -487,7 +488,6 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 			);
 			const staleFocus = extractAutoResumePromptValue(envelope.prompt, "staleFocus", "none");
 			const staleFocusCount = envelope.diagnostics.staleFocusTasks?.length ?? 0;
-			const reloadRequired = runtime.isReloadRequiredForSourceUpdate();
 			const reloadHint = reloadRequired ? formatAutoResumeReloadHintShort() : undefined;
 			const summary = formatContextWatchAutoResumePreviewSummary({
 				focusTasks,
@@ -522,6 +522,7 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 
 	registerContextWatchdogContinuationSurface(pi, {
 		getConfig: () => runtime.getConfig(),
+		isReloadRequiredForSourceUpdate: runtime.isReloadRequiredForSourceUpdate,
 	});
 
 	registerContextWatchdogCheckpointBootstrapSurface(pi, {

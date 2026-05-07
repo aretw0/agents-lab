@@ -21928,7 +21928,7 @@
     {
       "id": "TASK-BUD-985",
       "description": "[P1/local-safe] Corrigir auto-resume para não emitir blockers/next steps de reload obsoletos após reload já realizado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog-auto-resume.ts",
@@ -21945,7 +21945,8 @@
         "Rodar smoke focal de context-watch post-reload/resume e `git diff --check`."
       ],
       "milestone": "agent-quality-calibration-lane",
-      "notes": "[rationale:stale-operator-guidance] Feedback humano: o auto-resume foi suprimido corretamente até o reload, mas depois reapareceu com mensagem antiga dizendo que ainda precisava reload. O preview/resume deve reconciliar handoff antigo com estado runtime atual antes de orientar o operador.\n[provenance:human] source_task=TASK-BUD-984 reason=Feedback de stale auto-resume observado durante continuidade pós-reload; ajustar depois sem desviar a fatia atual."
+      "notes": "[rationale:stale-operator-guidance] Feedback humano: o auto-resume foi suprimido corretamente até o reload, mas depois reapareceu com mensagem antiga dizendo que ainda precisava reload. O preview/resume deve reconciliar handoff antigo com estado runtime atual antes de orientar o operador.\n[provenance:human] source_task=TASK-BUD-984 reason=Feedback de stale auto-resume observado durante continuidade pós-reload; ajustar depois sem desviar a fatia atual.\n[slice] Implementando reconciliação de auto-resume: filtrar guidance antigo de reload quando o runtime atual informa reload claro; cobrir preview/dispatch pós-reload e regressão focal.\n[slice] Auto-resume reconciliado com estado runtime atual de reload antes de exibir guidance de handoff; reload obsoleto é filtrado quando clear.\n[validation] context-watch post-reload/resume/base -> 70 passed; `git diff --check` passou.",
+      "verification": "VERIF-TASK-BUD-985-STALE-RELOAD-GUIDANCE"
     }
   ]
 }

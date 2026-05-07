@@ -257,6 +257,7 @@ export type AutoResumePromptOptions = {
 	taskStatusById?: Record<string, string | undefined>;
 	preferredTaskIds?: string[];
 	excludedTaskIds?: string[];
+	reloadRequired?: boolean;
 };
 
 export type HandoffBoardReconciliationReason = "fresh" | "stale-hand-off" | "missing-task" | "completed-focus" | "board-handoff-divergence";
@@ -529,6 +530,28 @@ function containsExcludedAutoResumeTaskId(value: string, excludedIds: Set<string
 	return [...excludedIds].some((id) => id === id.toUpperCase() && normalized.includes(id));
 }
 
+function isStaleReloadGuidance(value: string, options?: AutoResumePromptOptions): boolean {
+	if (options?.reloadRequired !== false) return false;
+	const normalized = normalizePromptSegment(value).toLowerCase();
+	if (!normalized.includes("reload")) return false;
+	return normalized.includes("/reload")
+		|| normalized.includes("reload-required")
+		|| normalized.includes("reload required")
+		|| normalized.includes("needs reload")
+		|| normalized.includes("precisa reload")
+		|| normalized.includes("precisa fazer reload")
+		|| normalized.includes("before trusting")
+		|| normalized.includes("antes de confiar")
+		|| normalized.includes("live runtime")
+		|| normalized.includes("runtime still needs reload")
+		|| normalized.includes("tool surface")
+		|| normalized.includes("surface rename");
+}
+
+function filterAutoResumeHandoffGuidance(values: string[], options?: AutoResumePromptOptions): string[] {
+	return values.filter((value) => !isStaleReloadGuidance(value, options));
+}
+
 function filterAutoResumeFocusTasks(rawTasks: string[], completedTasks: string[] = [], options?: AutoResumePromptOptions): { active: string[]; stale: string[]; staleIds: Set<string>; excludedIds: Set<string> } {
 	const statuses = options?.taskStatusById ?? {};
 	const excludedIds = new Set(normalizeStringArray(options?.excludedTaskIds).flatMap((id) => [id, id.toUpperCase()]));
@@ -587,14 +610,14 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 		limit: 3,
 	});
 	const blockersPrepared = preparePromptCollection({
-		values: normalizeStringArray(handoff.blockers)
+		values: filterAutoResumeHandoffGuidance(normalizeStringArray(handoff.blockers), options)
 			.filter((b) => !b.startsWith("context-watch-"))
 			.filter((b) => !containsExcludedAutoResumeTaskId(b, filteredCurrentTasks.excludedIds)),
 		maxChars: 80,
 		limit: 2,
 	});
 	const nextPrepared = preparePromptCollection({
-		values: normalizeStringArray(handoff.next_actions)
+		values: filterAutoResumeHandoffGuidance(normalizeStringArray(handoff.next_actions), options)
 			.filter((line) => !line.startsWith(CONTEXT_WATCH_ACTION_PREFIX))
 			.filter((line) => !containsExcludedAutoResumeTaskId(line, filteredCurrentTasks.excludedIds)),
 		maxChars: 140,
