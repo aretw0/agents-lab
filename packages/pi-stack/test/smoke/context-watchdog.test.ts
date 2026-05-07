@@ -26,8 +26,8 @@ import contextWatchdogExtension, {
 	formatContextWatchContinuationReadinessSummary,
 	consumeContextPreloadPack,
 	resolveContextWatchContinuationRecommendation,
-	formatContextWatchOneSliceCanaryPreviewSummary,
-	formatContextWatchOneSliceOperatorPacketPreviewSummary,
+	formatContextWatchLocalSlicePreviewSummary,
+	formatContextWatchLocalSliceOperatorPacketPreviewSummary,
 	formatContextWatchCommandStatusSummary,
 	formatContextWatchDeterministicStopSummary,
 	formatContextWatchSteeringStatus,
@@ -2693,8 +2693,8 @@ describe("context-watchdog", () => {
 		}
 	});
 
-	it("context_watch_one_slice_canary_preview composes readiness without activation", async () => {
-		const cwd = mkdtempSync(join(tmpdir(), "ctx-one-slice-preview-"));
+	it("context_watch_local_slice_preview composes readiness without activation", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-local-slice-preview-"));
 		try {
 			execFileSync("git", ["init"], { cwd, stdio: "ignore" });
 			execFileSync("git", ["config", "user.email", "test@example.com"], { cwd, stdio: "ignore" });
@@ -2708,7 +2708,7 @@ describe("context-watchdog", () => {
 			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
 				id: "TASK-BUD-340",
 				status: "in-progress",
-				description: "One-slice preview smoke",
+				description: "Local-slice preview smoke",
 				files: [".project/tasks.json"],
 				acceptance_criteria: ["Smoke principal permanece verde."],
 			}] }));
@@ -2722,26 +2722,26 @@ describe("context-watchdog", () => {
 			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
 				id: "TASK-BUD-340",
 				status: "in-progress",
-				description: "One-slice preview smoke",
+				description: "Local-slice preview smoke",
 				files: [".project/tasks.json"],
 				acceptance_criteria: ["Smoke principal permanece verde."],
 				notes: "preview changed",
 			}] }));
 			const pi = makeMockPi();
 			contextWatchdogExtension(pi);
-			const tool = getTool(pi, "context_watch_one_slice_canary_preview");
-			const schemaText = JSON.stringify((pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([registered]) => registered?.name === "context_watch_one_slice_canary_preview")?.[0]?.parameters ?? {});
+			const tool = getTool(pi, "context_watch_local_slice_preview");
+			const schemaText = JSON.stringify((pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([registered]) => registered?.name === "context_watch_local_slice_preview")?.[0]?.parameters ?? {});
 			expect(schemaText).not.toContain("execute");
 			expect(schemaText).not.toContain("dispatch");
-			const result = await tool.execute("tc-one-slice-preview", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+			const result = await tool.execute("tc-local-slice-preview", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 
-			const operatorTool = getTool(pi, "context_watch_one_slice_operator_packet_preview");
-			const operatorSchemaText = JSON.stringify((pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([registered]) => registered?.name === "context_watch_one_slice_operator_packet_preview")?.[0]?.parameters ?? {});
+			const operatorTool = getTool(pi, "context_watch_local_slice_operator_packet_preview");
+			const operatorSchemaText = JSON.stringify((pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([registered]) => registered?.name === "context_watch_local_slice_operator_packet_preview")?.[0]?.parameters ?? {});
 			expect(operatorSchemaText).not.toContain("execute");
 			expect(operatorSchemaText).not.toContain("dispatch");
-			const operatorResult = await operatorTool.execute("tc-one-slice-operator-packet", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+			const operatorResult = await operatorTool.execute("tc-local-slice-operator-packet", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 
-			expect(result.content?.[0]?.text).toBe("context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no reasons=readiness-green|one-slice-only authorization=none");
+			expect(result.content?.[0]?.text).toBe("context-watch-local-slice-canary-preview: decision=prepare-local-slice prepare=yes stop=yes singleSliceOnly=yes packet=ready-for-human-decision dispatch=no reasons=readiness-green|single-slice-only authorization=none");
 			expect(result.content?.[0]?.text).not.toContain("postReloadResume=");
 			expect(result.content?.[0]?.text).not.toContain("packetReasons=");
 			expect(result.details).toMatchObject({
@@ -2753,8 +2753,8 @@ describe("context-watchdog", () => {
 				plan: {
 					activation: "none",
 					authorization: "none",
-					oneSliceOnly: true,
-					decision: "prepare-one-slice",
+					singleSliceOnly: true,
+					decision: "prepare-local-slice",
 					canPrepareSlice: true,
 					mustStopAfterSlice: true,
 				},
@@ -2764,11 +2764,11 @@ describe("context-watchdog", () => {
 					authorization: "none",
 					dispatchAllowed: false,
 					requiresHumanDecision: true,
-					oneSliceOnly: true,
+					singleSliceOnly: true,
 					decision: "ready-for-human-decision",
 				},
 			});
-			expect(operatorResult.content?.[0]?.text).toBe("context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none");
+			expect(operatorResult.content?.[0]?.text).toBe("context-watch-local-slice-operator-packet: readiness=yes preview=prepare-local-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none");
 			expect(operatorResult.details).toMatchObject({
 				effect: "none",
 				mode: "read-only-operator-packet",
@@ -2791,44 +2791,44 @@ describe("context-watchdog", () => {
 			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
 				id: "TASK-BUD-340",
 				status: "in-progress",
-				description: "One-slice preview smoke without declared files",
+				description: "Local-slice preview smoke without declared files",
 				acceptance_criteria: ["Smoke principal permanece verde."],
 				notes: "preview changed without files",
 			}] }));
-			const missingFilesOperatorResult = await operatorTool.execute("tc-one-slice-operator-packet-missing-files", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
-			expect(missingFilesOperatorResult.content?.[0]?.text).toBe("context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing|declared-files-missing authorization=none");
+			const missingFilesOperatorResult = await operatorTool.execute("tc-local-slice-operator-packet-missing-files", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+			expect(missingFilesOperatorResult.content?.[0]?.text).toBe("context-watch-local-slice-operator-packet: readiness=yes preview=prepare-local-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing|declared-files-missing authorization=none");
 			expect(missingFilesOperatorResult.details.contractReview).toMatchObject({
 				decision: "blocked",
 				dispatchAllowed: false,
 				executorApproved: false,
 				reasons: ["human-confirmation-missing", "declared-files-missing"],
 			});
-			expect(formatContextWatchOneSliceCanaryPreviewSummary({
+			expect(formatContextWatchLocalSlicePreviewSummary({
 				decision: "blocked",
 				canPrepareSlice: false,
 				mustStopAfterSlice: true,
-				oneSliceOnly: true,
+				singleSliceOnly: true,
 				reasons: ["protected-scope"],
 				decisionPacketDecision: "blocked",
 				dispatchAllowed: false,
 				decisionPacketReasons: ["preview-not-ready", "rollback-plan-missing"],
-			})).toBe("context-watch-one-slice-canary-preview: decision=blocked prepare=no stop=yes oneSliceOnly=yes packet=blocked dispatch=no reasons=protected-scope packetReasons=preview-not-ready|rollback-plan-missing authorization=none");
-			expect(formatContextWatchOneSliceOperatorPacketPreviewSummary({
+			})).toBe("context-watch-local-slice-canary-preview: decision=blocked prepare=no stop=yes singleSliceOnly=yes packet=blocked dispatch=no reasons=protected-scope packetReasons=preview-not-ready|rollback-plan-missing authorization=none");
+			expect(formatContextWatchLocalSliceOperatorPacketPreviewSummary({
 				readinessReady: true,
-				previewDecision: "prepare-one-slice",
+				previewDecision: "prepare-local-slice",
 				packetDecision: "ready-for-human-decision",
 				contractDecision: "blocked",
 				dispatchAllowed: false,
 				executorApproved: false,
 				contractReasons: ["human-confirmation-missing"],
-			})).toBe("context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none");
+			})).toBe("context-watch-local-slice-operator-packet: readiness=yes preview=prepare-local-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
 	});
 
-	it("context_watch_one_slice_canary_preview includes postReloadResume cue when defer intent is pending", async () => {
-		const cwd = mkdtempSync(join(tmpdir(), "ctx-one-slice-preview-post-reload-"));
+	it("context_watch_local_slice_preview includes postReloadResume cue when defer intent is pending", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-local-slice-preview-post-reload-"));
 		try {
 			execFileSync("git", ["init"], { cwd, stdio: "ignore" });
 			execFileSync("git", ["config", "user.email", "test@example.com"], { cwd, stdio: "ignore" });
@@ -2837,7 +2837,7 @@ describe("context-watchdog", () => {
 			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
 				id: "TASK-BUD-751",
 				status: "in-progress",
-				description: "One-slice preview with deferred post-reload intent",
+				description: "Local-slice preview with deferred post-reload intent",
 				files: [".project/tasks.json"],
 				acceptance_criteria: ["Smoke principal permanece verde."],
 			}] }));
@@ -2857,8 +2857,8 @@ describe("context-watchdog", () => {
 			}));
 			const pi = makeMockPi();
 			contextWatchdogExtension(pi);
-			const tool = getTool(pi, "context_watch_one_slice_canary_preview");
-			const result = await tool.execute("tc-one-slice-preview-post-reload", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+			const tool = getTool(pi, "context_watch_local_slice_preview");
+			const result = await tool.execute("tc-local-slice-preview-post-reload", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 			expect(result.content?.[0]?.text).toContain("postReloadResume=pending");
 			expect((result.details as { postReloadResumePending?: boolean; postReloadResumeReason?: string } | undefined)?.postReloadResumePending).toBe(true);
 			expect((result.details as { postReloadResumePending?: boolean; postReloadResumeReason?: string } | undefined)?.postReloadResumeReason).toBe("reload-required-after-compact");

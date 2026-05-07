@@ -3,7 +3,7 @@ import {
   buildLocalMeasuredNudgeFreeLoopAuditEnvelope,
   buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts,
   buildLocalMeasuredNudgeFreeLoopCanaryPacket,
-  buildOneSliceLocalCanaryDispatchDecisionPacket,
+  buildLocalSliceCanaryDispatchDecisionPacket,
   NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
   resolveCheckpointFreshCollectorResult,
   resolveCheckpointFreshMeasuredSignal,
@@ -22,8 +22,8 @@ import {
   resolveNextLocalSafeMeasuredSignal,
   resolveNudgeFreeLoopCanaryGate,
   resolveSelfReloadAutoresumeCanaryPlan,
-  resolveOneSliceExecutorBacklogGate,
-  resolveOneSliceLocalCanaryPlan,
+  resolveLocalSliceBacklogGate,
+  resolveLocalSliceCanaryPlan,
   resolveProtectedScopesCollectorResult,
   resolveProtectedScopesMeasuredSignal,
   resolveStopConditionsClearCollectorResult,
@@ -31,7 +31,7 @@ import {
   resolveUnattendedContinuationPlan,
   resolveValidationKnownCollectorResult,
   resolveValidationKnownMeasuredSignal,
-  reviewOneSliceLocalHumanConfirmedContract,
+  reviewLocalSliceHumanConfirmedContract,
 } from "../../extensions/guardrails-core-unattended-continuation";
 
 const completeMeasuredEvidence = [
@@ -129,8 +129,8 @@ describe("guardrails unattended continuation", () => {
     expect(notNeeded.requiresHumanDecision).toBe(false);
   });
 
-  it("builds a no-execution decision packet for one-slice dispatch", () => {
-    const readyPlan = resolveOneSliceLocalCanaryPlan(greenInput());
+  it("builds a no-execution decision packet for local-slice dispatch", () => {
+    const readyPlan = resolveLocalSliceCanaryPlan(greenInput());
     const baseInput = {
       plan: readyPlan,
       rollbackPlanKnown: true,
@@ -140,18 +140,18 @@ describe("guardrails unattended continuation", () => {
       checkpointPlanned: true,
       stopContractKnown: true,
     };
-    const readyPacket = buildOneSliceLocalCanaryDispatchDecisionPacket(baseInput);
-    const blockedByPreview = buildOneSliceLocalCanaryDispatchDecisionPacket({
+    const readyPacket = buildLocalSliceCanaryDispatchDecisionPacket(baseInput);
+    const blockedByPreview = buildLocalSliceCanaryDispatchDecisionPacket({
       ...baseInput,
-      plan: resolveOneSliceLocalCanaryPlan({ ...greenInput(), protectedScopesClear: false }),
+      plan: resolveLocalSliceCanaryPlan({ ...greenInput(), protectedScopesClear: false }),
     });
-    const blockedByContract = buildOneSliceLocalCanaryDispatchDecisionPacket({
+    const blockedByContract = buildLocalSliceCanaryDispatchDecisionPacket({
       ...baseInput,
       rollbackPlanKnown: false,
     });
-    const executeIntent = buildOneSliceLocalCanaryDispatchDecisionPacket({
+    const executeIntent = buildLocalSliceCanaryDispatchDecisionPacket({
       ...baseInput,
-      operatorIntent: "execute-one-slice",
+      operatorIntent: "execute-local-slice",
     });
 
     expect(readyPacket).toMatchObject({
@@ -161,9 +161,9 @@ describe("guardrails unattended continuation", () => {
       authorization: "none",
       dispatchAllowed: false,
       requiresHumanDecision: true,
-      oneSliceOnly: true,
+      singleSliceOnly: true,
       decision: "ready-for-human-decision",
-      summary: "one-slice-dispatch-decision-packet: decision=ready-for-human-decision dispatch=no reasons=preview-ready,contracts-present,human-decision-required authorization=none",
+      summary: "local-slice-dispatch-decision-packet: decision=ready-for-human-decision dispatch=no reasons=preview-ready,contracts-present,human-decision-required authorization=none",
     });
     expect(blockedByPreview).toMatchObject({
       decision: "blocked",
@@ -176,7 +176,7 @@ describe("guardrails unattended continuation", () => {
     expect(executeIntent.dispatchAllowed).toBe(false);
   });
 
-  it("gates one-slice executor backlog without authorizing implementation", () => {
+  it("gates local-slice executor backlog without authorizing implementation", () => {
     const readyInput = {
       projectStrategyResolved: true,
       operatorPacketGreenValidated: true,
@@ -196,8 +196,8 @@ describe("guardrails unattended continuation", () => {
       separateTaskRequired: true,
       startsDisabledOrDryRun: true,
     };
-    const ready = resolveOneSliceExecutorBacklogGate(readyInput);
-    const blocked = resolveOneSliceExecutorBacklogGate({
+    const ready = resolveLocalSliceBacklogGate(readyInput);
+    const blocked = resolveLocalSliceBacklogGate({
       ...readyInput,
       projectStrategyResolved: false,
       operatorPacketMissingFilesValidated: false,
@@ -220,10 +220,10 @@ describe("guardrails unattended continuation", () => {
       dispatchAllowed: false,
       executorApproved: false,
       implementationAllowed: false,
-      oneSliceOnly: true,
+      singleSliceOnly: true,
       decision: "ready-for-separate-task",
       reasons: ["criteria-present", "separate-task-required", "implementation-still-not-authorized"],
-      summary: "one-slice-executor-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none",
+      summary: "local-slice-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none",
     });
     expect(blocked).toMatchObject({
       decision: "blocked",
@@ -244,9 +244,9 @@ describe("guardrails unattended continuation", () => {
     ]));
   });
 
-  it("reviews a human-confirmed one-slice contract without approving an executor", () => {
-    const readyPlan = resolveOneSliceLocalCanaryPlan(greenInput());
-    const readyPacket = buildOneSliceLocalCanaryDispatchDecisionPacket({
+  it("reviews a human-confirmed local-slice contract without approving an executor", () => {
+    const readyPlan = resolveLocalSliceCanaryPlan(greenInput());
+    const readyPacket = buildLocalSliceCanaryDispatchDecisionPacket({
       plan: readyPlan,
       rollbackPlanKnown: true,
       validationGateKnown: true,
@@ -255,7 +255,7 @@ describe("guardrails unattended continuation", () => {
       checkpointPlanned: true,
       stopContractKnown: true,
     });
-    const readyReview = reviewOneSliceLocalHumanConfirmedContract({
+    const readyReview = reviewLocalSliceHumanConfirmedContract({
       decisionPacket: readyPacket,
       humanConfirmation: "explicit-task-action",
       singleFocus: true,
@@ -269,7 +269,7 @@ describe("guardrails unattended continuation", () => {
       checkpointPlanned: true,
       stopContractKnown: true,
     });
-    const genericConfirmation = reviewOneSliceLocalHumanConfirmedContract({
+    const genericConfirmation = reviewLocalSliceHumanConfirmedContract({
       decisionPacket: readyPacket,
       humanConfirmation: "generic",
       singleFocus: true,
@@ -283,7 +283,7 @@ describe("guardrails unattended continuation", () => {
       checkpointPlanned: true,
       stopContractKnown: true,
     });
-    const protectedRepeat = reviewOneSliceLocalHumanConfirmedContract({
+    const protectedRepeat = reviewLocalSliceHumanConfirmedContract({
       decisionPacket: readyPacket,
       humanConfirmation: "explicit-task-action",
       singleFocus: true,
@@ -311,10 +311,10 @@ describe("guardrails unattended continuation", () => {
       authorization: "none",
       dispatchAllowed: false,
       executorApproved: false,
-      oneSliceOnly: true,
+      singleSliceOnly: true,
       decision: "contract-ready-no-executor",
       reasons: ["contract-valid", "human-confirmation-explicit", "executor-not-approved"],
-      summary: "one-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none",
+      summary: "local-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none",
     });
     expect(readyReview.summary).not.toContain("blockedRequests=");
     expect(genericConfirmation).toMatchObject({
@@ -337,8 +337,8 @@ describe("guardrails unattended continuation", () => {
     ]));
   });
 
-  it("plans one-slice local canary without activation or repetition", () => {
-    const green = resolveOneSliceLocalCanaryPlan({
+  it("plans local-slice local canary without activation or repetition", () => {
+    const green = resolveLocalSliceCanaryPlan({
       readinessReady: true,
       authorization: "none",
       checkpointFresh: true,
@@ -350,15 +350,15 @@ describe("guardrails unattended continuation", () => {
       risk: false,
       ambiguous: false,
     });
-    const protectedBlocked = resolveOneSliceLocalCanaryPlan({
+    const protectedBlocked = resolveLocalSliceCanaryPlan({
       ...greenInput(),
       protectedScopesClear: false,
     });
-    const repeatBlocked = resolveOneSliceLocalCanaryPlan({
+    const repeatBlocked = resolveLocalSliceCanaryPlan({
       ...greenInput(),
       repeatRequested: true,
     });
-    const stopped = resolveOneSliceLocalCanaryPlan({
+    const stopped = resolveLocalSliceCanaryPlan({
       ...greenInput(),
       sliceAlreadyCompleted: true,
     });
@@ -367,11 +367,11 @@ describe("guardrails unattended continuation", () => {
       effect: "none",
       activation: "none",
       authorization: "none",
-      oneSliceOnly: true,
-      decision: "prepare-one-slice",
+      singleSliceOnly: true,
+      decision: "prepare-local-slice",
       canPrepareSlice: true,
       mustStopAfterSlice: true,
-      summary: "one-slice-local-canary: decision=prepare-one-slice prepare=yes stop=yes reasons=readiness-green,one-slice-only authorization=none",
+      summary: "local-slice-canary: decision=prepare-local-slice prepare=yes stop=yes reasons=readiness-green,single-slice-only authorization=none",
     });
     expect(protectedBlocked).toMatchObject({
       decision: "blocked",
@@ -385,7 +385,7 @@ describe("guardrails unattended continuation", () => {
       decision: "stop-after-slice",
       canPrepareSlice: false,
       mustStopAfterSlice: true,
-      reasons: ["slice-complete", "one-slice-limit"],
+      reasons: ["slice-complete", "single-slice-limit"],
     });
   });
 

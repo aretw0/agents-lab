@@ -3,7 +3,7 @@ import {
   buildLocalMeasuredNudgeFreeLoopAuditEnvelope,
   buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts,
   buildLocalMeasuredNudgeFreeLoopCanaryPacket,
-  buildOneSliceLocalCanaryDispatchDecisionPacket,
+  buildLocalSliceCanaryDispatchDecisionPacket,
   commandSensitiveShellMarkerCheckReason,
   detectShellInlineCommandSensitiveMarkerCheck,
   evaluateGitMaintenanceSignal,
@@ -19,14 +19,14 @@ import {
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredPacketTrust,
   resolveNextLocalSafeCollectorResult,
-  resolveOneSliceExecutorBacklogGate,
-  resolveOneSliceLocalCanaryPlan,
+  resolveLocalSliceBacklogGate,
+  resolveLocalSliceCanaryPlan,
   resolveProtectedScopesCollectorResult,
   resolveStopConditionsClearCollectorResult,
   resolveRecurringFailureHardening,
   resolveValidationKnownCollectorResult,
   resolveValidationMethodPlan,
-  reviewOneSliceLocalHumanConfirmedContract,
+  reviewLocalSliceHumanConfirmedContract,
 } from "../../extensions/guardrails-core";
 
 describe("guardrails-core hardening re-exports", () => {
@@ -73,7 +73,7 @@ describe("guardrails-core hardening re-exports", () => {
       canValidate: true,
     });
 
-    const oneSlicePlan = resolveOneSliceLocalCanaryPlan({
+    const localSlicePlan = resolveLocalSliceCanaryPlan({
       readinessReady: true,
       authorization: "none",
       checkpointFresh: true,
@@ -85,15 +85,15 @@ describe("guardrails-core hardening re-exports", () => {
       risk: false,
       ambiguous: false,
     });
-    expect(oneSlicePlan).toMatchObject({
+    expect(localSlicePlan).toMatchObject({
       effect: "none",
       activation: "none",
       authorization: "none",
-      oneSliceOnly: true,
-      decision: "prepare-one-slice",
+      singleSliceOnly: true,
+      decision: "prepare-local-slice",
     });
-    const oneSlicePacket = buildOneSliceLocalCanaryDispatchDecisionPacket({
-      plan: oneSlicePlan,
+    const localSlicePacket = buildLocalSliceCanaryDispatchDecisionPacket({
+      plan: localSlicePlan,
       rollbackPlanKnown: true,
       validationGateKnown: true,
       stagingScopeKnown: true,
@@ -101,15 +101,15 @@ describe("guardrails-core hardening re-exports", () => {
       checkpointPlanned: true,
       stopContractKnown: true,
     });
-    expect(oneSlicePacket).toMatchObject({
+    expect(localSlicePacket).toMatchObject({
       mode: "decision-packet",
       activation: "none",
       authorization: "none",
       dispatchAllowed: false,
       decision: "ready-for-human-decision",
     });
-    expect(reviewOneSliceLocalHumanConfirmedContract({
-      decisionPacket: oneSlicePacket,
+    expect(reviewLocalSliceHumanConfirmedContract({
+      decisionPacket: localSlicePacket,
       humanConfirmation: "explicit-task-action",
       singleFocus: true,
       localSafeScope: true,
@@ -129,7 +129,7 @@ describe("guardrails-core hardening re-exports", () => {
       executorApproved: false,
       decision: "contract-ready-no-executor",
     });
-    expect(resolveOneSliceExecutorBacklogGate({
+    expect(resolveLocalSliceBacklogGate({
       projectStrategyResolved: true,
       operatorPacketGreenValidated: true,
       operatorPacketFailClosedValidated: true,

@@ -21895,6 +21895,57 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:semantic-debt] Após convergir para `delegate`/`delegation rehearsal`, o parser ainda incentivava ou aceitava vocabulário `simple`; manter parser coeso evita reaparecimento do termo.\n[provenance:human] source_task=TASK-BUD-979 reason=Evitar nomes provisórios e bloat semântico em superfícies de telemetry.\n[slice] Parser de delegation mix alinhado a `delegation rehearsal`/`delegate`, sem vocabulário `simple`.\n[validation] rg focal limpo; smoke session analytics -> 26 passed; `git diff --check` passou.",
       "verification": "VERIF-TASK-BUD-983-SESSION-ANALYTICS-NAMING"
+    },
+    {
+      "id": "TASK-BUD-984",
+      "description": "[P1/local-safe] Convergir `one-slice` local canary para `local slice` sem aliases.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-one-slice-contracts.ts",
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Renomear superfície local `one-slice` para `local slice`/`singleSliceOnly` sem aliases.",
+        "Manter `agent run` separado de local slice; local slice não autoriza dispatch/executor.",
+        "Atualizar nomes de tools/summary/testes focais.",
+        "Rodar smoke focal de unattended/context-watch/reexport e `git diff --check`; não tocar settings/routing/CI/publish/credenciais."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:semantic-debt] `one-slice` é contrato de parada, não deve virar namespace público paralelo; `local slice` comunica a unidade de continuidade sem sobrepor `agent run`.\n[provenance:human] source_task=TASK-BUD-974 reason=Questionar nomes antigos/novos e remover overlap semântico antes de publicar.\n[slice] Runtime público de continuidade convergiu para `local slice`/`singleSliceOnly`, sem alias `one_slice`.\n[validation] smoke unattended/context-watch/reexport -> 140 passed; `git diff --check` passou.\n[follow-up] TASK-BUD-985 criado para stale auto-resume de reload observado pelo operador.",
+      "verification": "VERIF-TASK-BUD-984-LOCAL-SLICE"
+    },
+    {
+      "id": "TASK-BUD-985",
+      "description": "[P1/local-safe] Corrigir auto-resume para não emitir blockers/next steps de reload obsoletos após reload já realizado.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-auto-resume.ts",
+        "packages/pi-stack/extensions/context-watchdog-reload-intent.ts",
+        "packages/pi-stack/extensions/context-watchdog-post-reload-runtime.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-resume.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Auto-resume deve revalidar o estado atual de reload antes de exibir blockers/next steps derivados do handoff.",
+        "Mensagens de handoff antigas sobre reload devem ser suprimidas ou marcadas como stale quando `reloadGate=reload-not-required`/post-reload estiver fresco.",
+        "Adicionar regressão cobrindo handoff com blocker antigo de reload e runtime atual sem reload pendente.",
+        "Rodar smoke focal de context-watch post-reload/resume e `git diff --check`."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:stale-operator-guidance] Feedback humano: o auto-resume foi suprimido corretamente até o reload, mas depois reapareceu com mensagem antiga dizendo que ainda precisava reload. O preview/resume deve reconciliar handoff antigo com estado runtime atual antes de orientar o operador.\n[provenance:human] source_task=TASK-BUD-984 reason=Feedback de stale auto-resume observado durante continuidade pós-reload; ajustar depois sem desviar a fatia atual."
     }
   ]
 }

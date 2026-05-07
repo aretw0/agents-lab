@@ -1,8 +1,8 @@
-# Protected Canary One-Slice Contract (primitive)
+# Protected Canary Local Slice Contract (primitive)
 
 ## Objetivo
 
-Definir um contrato mínimo para executar **uma única fatia protected** com risco controlado, sem abrir caminho para execução ampla automática.
+Definir um contrato mínimo para executar **uma única fatia local protected** com risco controlado, sem abrir caminho para execução ampla automática.
 
 ## Entradas obrigatórias
 

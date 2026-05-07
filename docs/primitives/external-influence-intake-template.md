@@ -29,7 +29,7 @@ Use quando uma influência externa (repo, artigo, framework, referência) surgir
 ## Alinhamento com primitives existentes
 
 - `autonomy_lane_protected_focus_packet`: usa `promote|skip|defer` e sinaliza valor/risco/esforço.
-- `protected-canary-one-slice`: usa `declaredFiles`, `validationGate`, `rollbackPlan` e stop conditions.
+- `protected-canary-local-slice`: usa `declaredFiles`, `validationGate`, `rollbackPlan` e stop conditions.
 
 ## Invariantes
 

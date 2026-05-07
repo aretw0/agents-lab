@@ -4,7 +4,7 @@
 
 Use **agent run** para a família de primitives que controla uma execução concreta de worker/subagente: plan, registry, status, log tail, outcome e abort.
 
-Não usar `simple` como qualidade pública dessa família. Não usar `one-slice` no namespace público dessa família; o limite de uma execução deve aparecer como contrato (`singleRunOnly`, declared files, timeout, abort, validation), não como jargão do nome.
+Não usar `simple` como qualidade pública dessa família. Não usar `one-slice` no namespace público; o limite de uma execução deve aparecer como contrato (`singleRunOnly`, declared files, timeout, abort, validation), não como jargão do nome.
 
 ## Por que `agent run`
 
@@ -15,19 +15,19 @@ Não usar `simple` como qualidade pública dessa família. Não usar `one-slice`
 - registro local em `.pi/reports/agent-runs.json`;
 - futura comparação entre providers sem criar outra família conceitual.
 
-`one-slice` continua útil como regra de segurança em contextos de continuidade local, mas não agrega como prefixo da família de execução. `simple` é ambíguo: pode sugerir simplicidade de implementação, baixa criticidade ou baixa governança, quando o contrato real é **bounded single-agent run**.
+`local slice` nomeia a unidade local de continuidade sem sugerir subagente; `singleSliceOnly` expressa a regra de parada. `simple` é ambíguo: pode sugerir simplicidade de implementação, baixa criticidade ou baixa governança, quando o contrato real é **bounded single-agent run**.
 
 ## Inventário bounded
 
 Com grep bounded em `packages/pi-stack/extensions`, `docs/primitives` e `docs/research` após a renomeação da família agent-run:
 
 - O adjetivo `simple` foi identificado como ambíguo na runway de delegation.
-- `one-slice` ainda aparece fora da família agent-run como stop condition/local canary.
+- `one-slice` foi removido de namespaces públicos de runtime; o contrato de parada agora aparece como `singleSliceOnly`.
 
 Classificação atual:
 
 1. **Família agent-run recém-consolidada** — deve ficar sem `simple`/`one-slice` no namespace público. Feito em `TASK-BUD-973`.
-2. **Continuidade local / canary de uma fatia** — `one-slice` ainda comunica um contrato de parada local; questionar em uma fatia própria antes de renomear.
+2. **Continuidade local / canary de uma fatia** — usar `local slice` para a unidade de trabalho e `singleSliceOnly` para o limite de repetição. Feito em `TASK-BUD-984`.
 3. **Delegation runway/rehearsal** — usar `delegate` como opção de decisão e `delegation_rehearsal_*` como packet report-only quando o foco é preparar uma delegação humana.
 
 ## Regra de nomenclatura daqui para frente
@@ -35,13 +35,13 @@ Classificação atual:
 - **agent run**: execução concreta de worker, com registry/status/log/outcome/abort.
 - **local slice**: fatia de trabalho executada pelo control-plane local, sem implicar subagente.
 - **delegation runway**: decisão de quando delegar ou executar localmente; evitar novos nomes `simple-*`.
-- **one-slice**: permitido apenas onde a palavra é uma stop condition explícita; não usar como prefixo de novas tools.
+- **singleSliceOnly**: contrato explícito de parada/repetição; não usar como prefixo de novas tools.
 
 ## Plano sem overlap
 
 1. Não criar aliases `one_slice_agent_run_*` para `agent_run_*`; aliases aumentariam a duplicidade que queremos evitar.
 2. Não criar novos nomes `simple-*`; quando a superfície estiver em lapidação, renomear direto para a forma coesa.
-3. Em novas docs, preferir `agent run` e explicar o limite via campos de contrato, não via novo termo.
+3. Em novas docs, preferir `agent run` ou `local slice` conforme o executor real e explicar limites via campos de contrato, não via novo termo.
 4. Usar `delegation runway` para decisão e `delegation rehearsal` para packet report-only pré-dispatch.
 
 ## Evidência de validação

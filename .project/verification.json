@@ -14534,6 +14534,15 @@
       "method": "refactor+smoke+diff-check",
       "timestamp": "2026-05-07T13:08:39.396Z",
       "evidence": "`session-analytics-parsers.ts` não usa mais `simple delegate` como marcador textual e substituiu recomendação `local/simple` por `local`. Detecção agora aceita `delegation rehearsal`/`delegat*` como vocabulário final. Validação: rg focal não encontrou `simple`, `simple delegate` ou `local/simple` em session-analytics parser/test; `npx vitest run packages/pi-stack/test/smoke/session-analytics.test.ts` -> 1 file/26 tests passed; `git diff --check` passou."
+    },
+    {
+      "id": "VERIF-TASK-BUD-984-LOCAL-SLICE",
+      "target": "TASK-BUD-984",
+      "target_type": "task",
+      "status": "passed",
+      "method": "refactor+smoke+diff-check",
+      "timestamp": "2026-05-07T13:21:49.340Z",
+      "evidence": "Convergência `one-slice` -> `local slice` concluída sem aliases nos namespaces públicos de runtime: arquivo movido para `guardrails-core-local-slice-contracts.ts`, types/funções/tools passaram para `LocalSlice*`, `local_slice_backlog_gate`, `local_slice_human_contract_review`, `context_watch_local_slice_preview`, `context_watch_local_slice_operator_packet_preview`; contrato de parada exposto como `singleSliceOnly`. Docs/primitives atualizadas para `protected-canary-local-slice`. Validação: `git grep` focal mostra `one-slice` restante apenas em nota semântica/guard de regressão agent-run, não em runtime público local-slice; `npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts` -> 7 files/140 tests passed; `git diff --check` passou."
     }
   ]
 }

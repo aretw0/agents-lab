@@ -7,14 +7,14 @@ import {
   buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts,
   resolveNudgeFreeLoopCanaryGate,
   resolveSelfReloadAutoresumeCanaryPlan,
-  resolveOneSliceExecutorBacklogGate,
+  resolveLocalSliceBacklogGate,
   resolveUnattendedContinuationPlan,
-  reviewOneSliceLocalHumanConfirmedContract,
+  reviewLocalSliceHumanConfirmedContract,
   type NudgeFreeLoopLocalCandidate,
   type NudgeFreeLoopLocalReadStatus,
   type NudgeFreeLoopValidationKind,
-  type OneSliceLocalCanaryDispatchPacketDecision,
-  type OneSliceLocalHumanConfirmationKind,
+  type LocalSliceCanaryDispatchPacketDecision,
+  type LocalSliceHumanConfirmationKind,
   type UnattendedContinuationContextLevel,
 } from "./guardrails-core-unattended-continuation";
 
@@ -26,11 +26,11 @@ function normalizeContextLevel(value: unknown): UnattendedContinuationContextLev
   return value === "warn" || value === "checkpoint" || value === "compact" || value === "ok" ? value : "ok";
 }
 
-function normalizePacketDecision(value: unknown): OneSliceLocalCanaryDispatchPacketDecision {
+function normalizePacketDecision(value: unknown): LocalSliceCanaryDispatchPacketDecision {
   return value === "ready-for-human-decision" ? "ready-for-human-decision" : "blocked";
 }
 
-function normalizeHumanConfirmation(value: unknown): OneSliceLocalHumanConfirmationKind {
+function normalizeHumanConfirmation(value: unknown): LocalSliceHumanConfirmationKind {
   return value === "explicit-task-action" || value === "generic" || value === "missing" ? value : "missing";
 }
 
@@ -367,9 +367,9 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
   });
 
   pi.registerTool({
-    name: "one_slice_executor_backlog_gate",
+    name: "local_slice_backlog_gate",
     label: "One-Slice Executor Backlog Gate",
-    description: "Read-only gate for whether a future one-slice executor idea may become a separate design/backlog task. Never approves implementation or dispatch.",
+    description: "Read-only gate for whether a future local-slice executor idea may become a separate design/backlog task. Never approves implementation or dispatch.",
     parameters: Type.Object({
       project_strategy_resolved: Type.Boolean({ description: "Whether .project adapter/canonicality strategy is resolved for this lane." }),
       operator_packet_green_validated: Type.Boolean({ description: "Whether operator packet green path was live-validated." }),
@@ -385,7 +385,7 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
       cost_budget_known: Type.Boolean({ description: "Whether cost budget is defined." }),
       cancellation_known: Type.Boolean({ description: "Whether safe cancellation/abort is defined." }),
       checkpoint_planned: Type.Boolean({ description: "Whether post-slice checkpoint is planned." }),
-      stop_contract_known: Type.Boolean({ description: "Whether mandatory stop after one slice is defined." }),
+      stop_contract_known: Type.Boolean({ description: "Whether mandatory stop after local slice is defined." }),
       separate_task_required: Type.Boolean({ description: "Whether implementation would require a separate task." }),
       starts_disabled_or_dry_run: Type.Boolean({ description: "Whether first implementation would start disabled or dry-run/report-only." }),
       repeat_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
@@ -398,7 +398,7 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
     }),
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const result = resolveOneSliceExecutorBacklogGate({
+      const result = resolveLocalSliceBacklogGate({
         projectStrategyResolved: asBool(p.project_strategy_resolved, false),
         operatorPacketGreenValidated: asBool(p.operator_packet_green_validated, false),
         operatorPacketFailClosedValidated: asBool(p.operator_packet_fail_closed_validated, false),
@@ -432,14 +432,14 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
   });
 
   pi.registerTool({
-    name: "one_slice_human_contract_review",
+    name: "local_slice_human_contract_review",
     label: "One-Slice Human Contract Review",
-    description: "Read-only review for a proposed human-confirmed one-slice local execution contract. Never dispatches execution; always keeps dispatchAllowed=false and executorApproved=false.",
+    description: "Read-only review for a proposed human-confirmed local-slice local execution contract. Never dispatches execution; always keeps dispatchAllowed=false and executorApproved=false.",
     parameters: Type.Object({
-      packet_decision: Type.String({ description: "Decision from one-slice decision packet: ready-for-human-decision | blocked." }),
+      packet_decision: Type.String({ description: "Decision from local-slice decision packet: ready-for-human-decision | blocked." }),
       packet_dispatch_allowed: Type.Boolean({ description: "Must be false; packet evidence never authorizes dispatch." }),
       packet_requires_human_decision: Type.Boolean({ description: "Must be true." }),
-      packet_one_slice_only: Type.Boolean({ description: "Must be true." }),
+      packet_single_slice_only: Type.Boolean({ description: "Must be true." }),
       packet_activation: Type.Optional(Type.String({ description: "Expected none." })),
       packet_authorization: Type.Optional(Type.String({ description: "Expected none." })),
       human_confirmation: Type.String({ description: "missing | generic | explicit-task-action." }),
@@ -452,7 +452,7 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
       staging_scope_known: Type.Boolean({ description: "Whether staging scope is intentional and bounded." }),
       commit_scope_known: Type.Boolean({ description: "Whether commit scope is intentional and bounded." }),
       checkpoint_planned: Type.Boolean({ description: "Whether a post-slice checkpoint is planned." }),
-      stop_contract_known: Type.Boolean({ description: "Whether stop after one slice is explicit." }),
+      stop_contract_known: Type.Boolean({ description: "Whether stop after local slice is explicit." }),
       repeat_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
       scheduler_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
       self_reload_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
@@ -462,12 +462,12 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
     }),
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const result = reviewOneSliceLocalHumanConfirmedContract({
+      const result = reviewLocalSliceHumanConfirmedContract({
         decisionPacket: {
           decision: normalizePacketDecision(p.packet_decision),
           dispatchAllowed: asBool(p.packet_dispatch_allowed, false) as false,
           requiresHumanDecision: asBool(p.packet_requires_human_decision, false),
-          oneSliceOnly: asBool(p.packet_one_slice_only, false),
+          singleSliceOnly: asBool(p.packet_single_slice_only, false),
           activation: (p.packet_activation === "none" ? "none" : String(p.packet_activation ?? "unknown")) as "none",
           authorization: (p.packet_authorization === "none" ? "none" : String(p.packet_authorization ?? "unknown")) as "none",
         },

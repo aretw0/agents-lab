@@ -37,7 +37,7 @@ Campos principais:
 
 ## Contrato complementar de agent run
 
-Nota semântica: `agent run` é o nome canônico da execução concreta de worker; `one-slice` fica como stop condition quando necessário, não como namespace público. Ver `docs/research/agent-run-semantic-consolidation-2026-05.md`.
+Nota semântica: `agent run` é o nome canônico da execução concreta de worker; `local slice` nomeia a unidade local de continuidade, enquanto `singleSliceOnly` fica como contrato de parada quando necessário. Ver `docs/research/agent-run-semantic-consolidation-2026-05.md`.
 
 A primitive `evaluateAgentSpawnReadiness` (exposta no runtime como `agent_spawn_readiness_gate`) cobre o próximo passo após calibração geral e exige, em modo report-only:
 

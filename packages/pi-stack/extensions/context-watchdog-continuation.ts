@@ -235,22 +235,22 @@ export function formatContextWatchContinuationReadinessSummary(input: {
   ].filter(Boolean).join(" ");
 }
 
-export function formatContextWatchOneSliceCanaryPreviewSummary(input: {
+export function formatContextWatchLocalSlicePreviewSummary(input: {
   decision: string;
   canPrepareSlice: boolean;
   mustStopAfterSlice: boolean;
-  oneSliceOnly: boolean;
+  singleSliceOnly: boolean;
   reasons: string[];
   decisionPacketDecision?: string;
   dispatchAllowed?: boolean;
   decisionPacketReasons?: string[];
 }): string {
   return [
-    "context-watch-one-slice-canary-preview:",
+    "context-watch-local-slice-canary-preview:",
     `decision=${input.decision}`,
     `prepare=${input.canPrepareSlice ? "yes" : "no"}`,
     `stop=${input.mustStopAfterSlice ? "yes" : "no"}`,
-    `oneSliceOnly=${input.oneSliceOnly ? "yes" : "no"}`,
+    `singleSliceOnly=${input.singleSliceOnly ? "yes" : "no"}`,
     input.decisionPacketDecision ? `packet=${input.decisionPacketDecision}` : undefined,
     input.dispatchAllowed !== undefined ? `dispatch=${input.dispatchAllowed ? "yes" : "no"}` : undefined,
     input.reasons.length > 0 ? `reasons=${input.reasons.slice(0, 3).join("|")}` : undefined,
@@ -259,7 +259,7 @@ export function formatContextWatchOneSliceCanaryPreviewSummary(input: {
   ].filter(Boolean).join(" ");
 }
 
-export function formatContextWatchOneSliceOperatorPacketPreviewSummary(input: {
+export function formatContextWatchLocalSliceOperatorPacketPreviewSummary(input: {
   readinessReady: boolean;
   previewDecision: string;
   packetDecision: string;
@@ -269,7 +269,7 @@ export function formatContextWatchOneSliceOperatorPacketPreviewSummary(input: {
   contractReasons: string[];
 }): string {
   return [
-    "context-watch-one-slice-operator-packet:",
+    "context-watch-local-slice-operator-packet:",
     `readiness=${input.readinessReady ? "yes" : "no"}`,
     `preview=${input.previewDecision}`,
     `packet=${input.packetDecision}`,

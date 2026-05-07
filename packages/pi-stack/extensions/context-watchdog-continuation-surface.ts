@@ -5,8 +5,8 @@ import {
 	buildTurnBoundaryDecisionPacket,
 	consumeContextPreloadPack,
 	formatContextWatchContinuationReadinessSummary,
-	formatContextWatchOneSliceCanaryPreviewSummary,
-	formatContextWatchOneSliceOperatorPacketPreviewSummary,
+	formatContextWatchLocalSlicePreviewSummary,
+	formatContextWatchLocalSliceOperatorPacketPreviewSummary,
 	resolveContextWatchContinuationRecommendation,
 	TURN_BOUNDARY_DIRECTION_PROMPT,
 } from "./context-watchdog-continuation";
@@ -31,9 +31,9 @@ import {
 } from "./context-watchdog-operator-brief";
 import { readHandoffJson } from "./context-watchdog-storage";
 import {
-	buildOneSliceLocalCanaryDispatchDecisionPacket,
-	resolveOneSliceLocalCanaryPlan,
-	reviewOneSliceLocalHumanConfirmedContract,
+	buildLocalSliceCanaryDispatchDecisionPacket,
+	resolveLocalSliceCanaryPlan,
+	reviewLocalSliceHumanConfirmedContract,
 } from "./guardrails-core-unattended-continuation";
 import {
 	buildLocalContinuityAudit,
@@ -321,10 +321,10 @@ export function registerContextWatchdogContinuationSurface(
 	});
 
 	pi.registerTool({
-		name: "context_watch_one_slice_canary_preview",
+		name: "context_watch_local_slice_preview",
 		label: "Context Watch One-Slice Canary Preview",
 		description:
-			"Read-only preview that composes continuation readiness with the one-slice local canary plan. Never dispatches automation, staging, commits, checkpoints, remote, or scheduler work.",
+			"Read-only preview that composes continuation readiness with the local-slice local canary plan. Never dispatches automation, staging, commits, checkpoints, remote, or scheduler work.",
 		parameters: Type.Object({}),
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const config = runtime.getConfig();
@@ -352,7 +352,7 @@ export function registerContextWatchdogContinuationSurface(
 			const validationKnown = collectorStatus(localAudit, "validation") === "observed";
 			const stopConditionsClear = collectorStatus(localAudit, "stop-conditions") === "observed";
 			const singleFocus = focusTasks !== "none-listed" && !focusTasks.includes(",");
-			const plan = resolveOneSliceLocalCanaryPlan({
+			const plan = resolveLocalSliceCanaryPlan({
 				readinessReady,
 				authorization: "none",
 				checkpointFresh,
@@ -366,17 +366,17 @@ export function registerContextWatchdogContinuationSurface(
 				repeatRequested: false,
 				sliceAlreadyCompleted: focusStatus === "completed",
 			});
-			const decisionPacket = buildOneSliceLocalCanaryDispatchDecisionPacket({
+			const decisionPacket = buildLocalSliceCanaryDispatchDecisionPacket({
 				plan,
 				rollbackPlanKnown: gitStateExpected,
 				validationGateKnown: validationKnown,
 				stagingScopeKnown: singleFocus && protectedScopesClear,
 				commitScopeKnown: singleFocus && gitStateExpected,
 				checkpointPlanned: checkpointFresh && handoffBudgetOk,
-				stopContractKnown: plan.mustStopAfterSlice && plan.oneSliceOnly,
+				stopContractKnown: plan.mustStopAfterSlice && plan.singleSliceOnly,
 			});
 			const summary = [
-				formatContextWatchOneSliceCanaryPreviewSummary({
+				formatContextWatchLocalSlicePreviewSummary({
 					...plan,
 					decisionPacketDecision: decisionPacket.decision,
 					dispatchAllowed: decisionPacket.dispatchAllowed,
@@ -410,10 +410,10 @@ export function registerContextWatchdogContinuationSurface(
 	});
 
 	pi.registerTool({
-		name: "context_watch_one_slice_operator_packet_preview",
+		name: "context_watch_local_slice_operator_packet_preview",
 		label: "Context Watch One-Slice Operator Packet Preview",
 		description:
-			"Read-only operator packet composing continuation readiness, one-slice preview, decision packet, and human contract review. Never dispatches execution and defaults human confirmation to missing.",
+			"Read-only operator packet composing continuation readiness, local-slice preview, decision packet, and human contract review. Never dispatches execution and defaults human confirmation to missing.",
 		parameters: Type.Object({}),
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const config = runtime.getConfig();
@@ -439,7 +439,7 @@ export function registerContextWatchdogContinuationSurface(
 			const validationKnown = collectorStatus(localAudit, "validation") === "observed";
 			const stopConditionsClear = collectorStatus(localAudit, "stop-conditions") === "observed";
 			const singleFocus = focusTasks !== "none-listed" && !focusTasks.includes(",");
-			const plan = resolveOneSliceLocalCanaryPlan({
+			const plan = resolveLocalSliceCanaryPlan({
 				readinessReady,
 				authorization: "none",
 				checkpointFresh,
@@ -453,17 +453,17 @@ export function registerContextWatchdogContinuationSurface(
 				repeatRequested: false,
 				sliceAlreadyCompleted: focusStatus === "completed",
 			});
-			const decisionPacket = buildOneSliceLocalCanaryDispatchDecisionPacket({
+			const decisionPacket = buildLocalSliceCanaryDispatchDecisionPacket({
 				plan,
 				rollbackPlanKnown: gitStateExpected,
 				validationGateKnown: validationKnown,
 				stagingScopeKnown: singleFocus && protectedScopesClear,
 				commitScopeKnown: singleFocus && gitStateExpected,
 				checkpointPlanned: checkpointFresh && handoffBudgetOk,
-				stopContractKnown: plan.mustStopAfterSlice && plan.oneSliceOnly,
+				stopContractKnown: plan.mustStopAfterSlice && plan.singleSliceOnly,
 			});
 			const declaredFilesKnown = Number(localAudit.packetInput?.candidate?.estimatedFiles ?? 0) > 0;
-			const contractReview = reviewOneSliceLocalHumanConfirmedContract({
+			const contractReview = reviewLocalSliceHumanConfirmedContract({
 				decisionPacket,
 				humanConfirmation: "missing",
 				singleFocus,
@@ -475,9 +475,9 @@ export function registerContextWatchdogContinuationSurface(
 				stagingScopeKnown: singleFocus && protectedScopesClear,
 				commitScopeKnown: singleFocus && gitStateExpected,
 				checkpointPlanned: checkpointFresh && handoffBudgetOk,
-				stopContractKnown: plan.mustStopAfterSlice && plan.oneSliceOnly,
+				stopContractKnown: plan.mustStopAfterSlice && plan.singleSliceOnly,
 			});
-			const summary = formatContextWatchOneSliceOperatorPacketPreviewSummary({
+			const summary = formatContextWatchLocalSliceOperatorPacketPreviewSummary({
 				readinessReady,
 				previewDecision: plan.decision,
 				packetDecision: decisionPacket.decision,

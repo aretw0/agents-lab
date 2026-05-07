@@ -383,13 +383,13 @@ describe("guardrails unattended continuation surface", () => {
     expect(result?.details.summary).toBe("unattended-continuation: decision=continue-local continue=yes reasons=local-safe-next-step,checkpoint-progress-saved");
   });
 
-  it("registers read-only one-slice executor backlog gate tool", () => {
+  it("registers read-only local-slice executor backlog gate tool", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsUnattendedContinuationSurface({
       registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
     } as never);
 
-    const gateTool = tools.find((tool) => tool.name === "one_slice_executor_backlog_gate");
+    const gateTool = tools.find((tool) => tool.name === "local_slice_backlog_gate");
     const ready = gateTool?.execute("call-ready", {
       project_strategy_resolved: true,
       operator_packet_green_validated: true,
@@ -436,7 +436,7 @@ describe("guardrails unattended continuation surface", () => {
       destructive_maintenance_requested: true,
     });
 
-    expect(ready?.content?.[0]?.text).toBe("one-slice-executor-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none");
+    expect(ready?.content?.[0]?.text).toBe("local-slice-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none");
     expect(ready?.details).toMatchObject({
       effect: "none",
       mode: "backlog-gate",
@@ -447,7 +447,7 @@ describe("guardrails unattended continuation surface", () => {
       implementationAllowed: false,
       decision: "ready-for-separate-task",
     });
-    expect(blocked?.content?.[0]?.text).toContain("one-slice-executor-backlog-gate: decision=blocked implementation=no dispatch=no executor=no");
+    expect(blocked?.content?.[0]?.text).toContain("local-slice-backlog-gate: decision=blocked implementation=no dispatch=no executor=no");
     expect(blocked?.content?.[0]?.text).toContain("blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope|destructive-maintenance");
     expect(blocked?.details).toMatchObject({
       dispatchAllowed: false,
@@ -457,18 +457,18 @@ describe("guardrails unattended continuation surface", () => {
     });
   });
 
-  it("registers read-only human-confirmed one-slice contract review tool", () => {
+  it("registers read-only human-confirmed local-slice contract review tool", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsUnattendedContinuationSurface({
       registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
     } as never);
 
-    const reviewTool = tools.find((tool) => tool.name === "one_slice_human_contract_review");
+    const reviewTool = tools.find((tool) => tool.name === "local_slice_human_contract_review");
     const ready = reviewTool?.execute("call-ready", {
       packet_decision: "ready-for-human-decision",
       packet_dispatch_allowed: false,
       packet_requires_human_decision: true,
-      packet_one_slice_only: true,
+      packet_single_slice_only: true,
       packet_activation: "none",
       packet_authorization: "none",
       human_confirmation: "explicit-task-action",
@@ -487,7 +487,7 @@ describe("guardrails unattended continuation surface", () => {
       packet_decision: "ready-for-human-decision",
       packet_dispatch_allowed: true,
       packet_requires_human_decision: true,
-      packet_one_slice_only: true,
+      packet_single_slice_only: true,
       packet_activation: "none",
       packet_authorization: "none",
       human_confirmation: "generic",
@@ -506,7 +506,7 @@ describe("guardrails unattended continuation surface", () => {
       github_actions_requested: true,
     });
 
-    expect(ready?.content?.[0]?.text).toBe("one-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none");
+    expect(ready?.content?.[0]?.text).toBe("local-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none");
     expect(ready?.details).toMatchObject({
       effect: "none",
       mode: "contract-review",
@@ -516,7 +516,7 @@ describe("guardrails unattended continuation surface", () => {
       executorApproved: false,
       decision: "contract-ready-no-executor",
     });
-    expect(blocked?.content?.[0]?.text).toContain("one-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no");
+    expect(blocked?.content?.[0]?.text).toContain("local-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no");
     expect(blocked?.content?.[0]?.text).toContain("blockedRequests=scheduler|remote-or-offload|github-actions");
     expect(blocked?.details.dispatchAllowed).toBe(false);
     expect(blocked?.details.executorApproved).toBe(false);

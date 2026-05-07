@@ -1,6 +1,6 @@
-export type OneSliceLocalCanaryDecision = "prepare-one-slice" | "stop-after-slice" | "blocked";
+export type LocalSliceCanaryDecision = "prepare-local-slice" | "stop-after-slice" | "blocked";
 
-export interface OneSliceLocalCanaryInput {
+export interface LocalSliceCanaryInput {
   readinessReady: boolean;
   authorization: "none" | "operator" | "unknown";
   checkpointFresh: boolean;
@@ -15,13 +15,13 @@ export interface OneSliceLocalCanaryInput {
   sliceAlreadyCompleted?: boolean;
 }
 
-export interface OneSliceLocalCanaryPlan {
+export interface LocalSliceCanaryPlan {
   effect: "none";
   mode: "advisory";
   activation: "none";
   authorization: "none";
-  oneSliceOnly: true;
-  decision: OneSliceLocalCanaryDecision;
+  singleSliceOnly: true;
+  decision: LocalSliceCanaryDecision;
   canPrepareSlice: boolean;
   mustStopAfterSlice: boolean;
   reasons: string[];
@@ -29,14 +29,14 @@ export interface OneSliceLocalCanaryPlan {
   recommendation: string;
 }
 
-export type OneSliceLocalCanaryDispatchPacketDecision = "ready-for-human-decision" | "blocked";
-export type OneSliceLocalCanaryOperatorIntent = "none" | "review" | "execute-one-slice";
-export type OneSliceLocalHumanConfirmationKind = "missing" | "generic" | "explicit-task-action";
-export type OneSliceLocalHumanConfirmedContractDecision = "contract-ready-no-executor" | "blocked";
-export type OneSliceExecutorBacklogGateDecision = "ready-for-separate-task" | "blocked";
+export type LocalSliceCanaryDispatchPacketDecision = "ready-for-human-decision" | "blocked";
+export type LocalSliceCanaryOperatorIntent = "none" | "review" | "execute-local-slice";
+export type LocalSliceHumanConfirmationKind = "missing" | "generic" | "explicit-task-action";
+export type LocalSliceHumanConfirmedContractDecision = "contract-ready-no-executor" | "blocked";
+export type LocalSliceBacklogGateDecision = "ready-for-separate-task" | "blocked";
 
-export interface OneSliceLocalCanaryDispatchPacketInput {
-  plan: Pick<OneSliceLocalCanaryPlan, "decision" | "canPrepareSlice" | "mustStopAfterSlice" | "oneSliceOnly" | "authorization">;
+export interface LocalSliceCanaryDispatchPacketInput {
+  plan: Pick<LocalSliceCanaryPlan, "decision" | "canPrepareSlice" | "mustStopAfterSlice" | "singleSliceOnly" | "authorization">;
   rollbackPlanKnown: boolean;
   validationGateKnown: boolean;
   stagingScopeKnown: boolean;
@@ -44,26 +44,26 @@ export interface OneSliceLocalCanaryDispatchPacketInput {
   checkpointPlanned: boolean;
   stopContractKnown: boolean;
   repeatRequested?: boolean;
-  operatorIntent?: OneSliceLocalCanaryOperatorIntent;
+  operatorIntent?: LocalSliceCanaryOperatorIntent;
 }
 
-export interface OneSliceLocalCanaryDispatchDecisionPacket {
+export interface LocalSliceCanaryDispatchDecisionPacket {
   effect: "none";
   mode: "decision-packet";
   activation: "none";
   authorization: "none";
   dispatchAllowed: false;
   requiresHumanDecision: true;
-  oneSliceOnly: true;
-  decision: OneSliceLocalCanaryDispatchPacketDecision;
+  singleSliceOnly: true;
+  decision: LocalSliceCanaryDispatchPacketDecision;
   reasons: string[];
   summary: string;
   recommendation: string;
 }
 
-export interface OneSliceLocalHumanConfirmedContractInput {
-  decisionPacket: Pick<OneSliceLocalCanaryDispatchDecisionPacket, "decision" | "dispatchAllowed" | "requiresHumanDecision" | "oneSliceOnly" | "activation" | "authorization">;
-  humanConfirmation: OneSliceLocalHumanConfirmationKind;
+export interface LocalSliceHumanConfirmedContractInput {
+  decisionPacket: Pick<LocalSliceCanaryDispatchDecisionPacket, "decision" | "dispatchAllowed" | "requiresHumanDecision" | "singleSliceOnly" | "activation" | "authorization">;
+  humanConfirmation: LocalSliceHumanConfirmationKind;
   singleFocus: boolean;
   localSafeScope: boolean;
   declaredFilesKnown: boolean;
@@ -82,21 +82,21 @@ export interface OneSliceLocalHumanConfirmedContractInput {
   protectedScopeRequested?: boolean;
 }
 
-export interface OneSliceLocalHumanConfirmedContractReview {
+export interface LocalSliceHumanConfirmedContractReview {
   effect: "none";
   mode: "contract-review";
   activation: "none";
   authorization: "none";
   dispatchAllowed: false;
   executorApproved: false;
-  oneSliceOnly: true;
-  decision: OneSliceLocalHumanConfirmedContractDecision;
+  singleSliceOnly: true;
+  decision: LocalSliceHumanConfirmedContractDecision;
   reasons: string[];
   summary: string;
   recommendation: string;
 }
 
-export interface OneSliceExecutorBacklogGateInput {
+export interface LocalSliceBacklogGateInput {
   projectStrategyResolved: boolean;
   operatorPacketGreenValidated: boolean;
   operatorPacketFailClosedValidated: boolean;
@@ -123,7 +123,7 @@ export interface OneSliceExecutorBacklogGateInput {
   destructiveMaintenanceRequested?: boolean;
 }
 
-export interface OneSliceExecutorBacklogGate {
+export interface LocalSliceBacklogGate {
   effect: "none";
   mode: "backlog-gate";
   activation: "none";
@@ -131,14 +131,14 @@ export interface OneSliceExecutorBacklogGate {
   dispatchAllowed: false;
   executorApproved: false;
   implementationAllowed: false;
-  oneSliceOnly: true;
-  decision: OneSliceExecutorBacklogGateDecision;
+  singleSliceOnly: true;
+  decision: LocalSliceBacklogGateDecision;
   reasons: string[];
   summary: string;
   recommendation: string;
 }
 
-export function resolveOneSliceLocalCanaryPlan(input: OneSliceLocalCanaryInput): OneSliceLocalCanaryPlan {
+export function resolveLocalSliceCanaryPlan(input: LocalSliceCanaryInput): LocalSliceCanaryPlan {
   const reasons: string[] = [];
 
   if (input.sliceAlreadyCompleted) {
@@ -147,12 +147,12 @@ export function resolveOneSliceLocalCanaryPlan(input: OneSliceLocalCanaryInput):
       mode: "advisory",
       activation: "none",
       authorization: "none",
-      oneSliceOnly: true,
+      singleSliceOnly: true,
       decision: "stop-after-slice",
       canPrepareSlice: false,
       mustStopAfterSlice: true,
-      reasons: ["slice-complete", "one-slice-limit"],
-      summary: "one-slice-local-canary: decision=stop-after-slice prepare=no stop=yes reasons=slice-complete,one-slice-limit authorization=none",
+      reasons: ["slice-complete", "single-slice-limit"],
+      summary: "local-slice-canary: decision=stop-after-slice prepare=no stop=yes reasons=slice-complete,single-slice-limit authorization=none",
       recommendation: "Stop after this slice; any repetition needs a separate cooldown/iteration contract and operator authorization.",
     };
   }
@@ -175,12 +175,12 @@ export function resolveOneSliceLocalCanaryPlan(input: OneSliceLocalCanaryInput):
       mode: "advisory",
       activation: "none",
       authorization: "none",
-      oneSliceOnly: true,
+      singleSliceOnly: true,
       decision: "blocked",
       canPrepareSlice: false,
       mustStopAfterSlice: true,
       reasons,
-      summary: `one-slice-local-canary: decision=blocked prepare=no stop=yes reasons=${reasons.slice(0, 4).join(",")} authorization=none`,
+      summary: `local-slice-canary: decision=blocked prepare=no stop=yes reasons=${reasons.slice(0, 4).join(",")} authorization=none`,
       recommendation: "Do not prepare the canary slice; resolve blockers or ask the operator before any local unattended dispatch.",
     };
   }
@@ -190,22 +190,22 @@ export function resolveOneSliceLocalCanaryPlan(input: OneSliceLocalCanaryInput):
     mode: "advisory",
     activation: "none",
     authorization: "none",
-    oneSliceOnly: true,
-    decision: "prepare-one-slice",
+    singleSliceOnly: true,
+    decision: "prepare-local-slice",
     canPrepareSlice: true,
     mustStopAfterSlice: true,
-    reasons: ["readiness-green", "one-slice-only"],
-    summary: "one-slice-local-canary: decision=prepare-one-slice prepare=yes stop=yes reasons=readiness-green,one-slice-only authorization=none",
+    reasons: ["readiness-green", "single-slice-only"],
+    summary: "local-slice-canary: decision=prepare-local-slice prepare=yes stop=yes reasons=readiness-green,single-slice-only authorization=none",
     recommendation: "Prepare at most one local-safe slice, then validate, commit, checkpoint, and stop.",
   };
 }
 
-export function buildOneSliceLocalCanaryDispatchDecisionPacket(input: OneSliceLocalCanaryDispatchPacketInput): OneSliceLocalCanaryDispatchDecisionPacket {
+export function buildLocalSliceCanaryDispatchDecisionPacket(input: LocalSliceCanaryDispatchPacketInput): LocalSliceCanaryDispatchDecisionPacket {
   const reasons: string[] = [];
 
-  if (input.plan.decision !== "prepare-one-slice" || !input.plan.canPrepareSlice) reasons.push("preview-not-ready");
+  if (input.plan.decision !== "prepare-local-slice" || !input.plan.canPrepareSlice) reasons.push("preview-not-ready");
   if (!input.plan.mustStopAfterSlice) reasons.push("stop-after-slice-missing");
-  if (!input.plan.oneSliceOnly) reasons.push("one-slice-contract-missing");
+  if (!input.plan.singleSliceOnly) reasons.push("single-slice-contract-missing");
   if (input.plan.authorization !== "none") reasons.push(`plan-authorization-${input.plan.authorization}`);
   if (!input.rollbackPlanKnown) reasons.push("rollback-plan-missing");
   if (!input.validationGateKnown) reasons.push("validation-gate-missing");
@@ -214,7 +214,7 @@ export function buildOneSliceLocalCanaryDispatchDecisionPacket(input: OneSliceLo
   if (!input.checkpointPlanned) reasons.push("checkpoint-plan-missing");
   if (!input.stopContractKnown) reasons.push("stop-contract-missing");
   if (input.repeatRequested) reasons.push("repeat-requested");
-  if (input.operatorIntent === "execute-one-slice") reasons.push("execute-intent-recorded-not-authorization");
+  if (input.operatorIntent === "execute-local-slice") reasons.push("execute-intent-recorded-not-authorization");
 
   if (reasons.length > 0) {
     return {
@@ -224,10 +224,10 @@ export function buildOneSliceLocalCanaryDispatchDecisionPacket(input: OneSliceLo
       authorization: "none",
       dispatchAllowed: false,
       requiresHumanDecision: true,
-      oneSliceOnly: true,
+      singleSliceOnly: true,
       decision: "blocked",
       reasons,
-      summary: `one-slice-dispatch-decision-packet: decision=blocked dispatch=no reasons=${reasons.slice(0, 4).join(",")} authorization=none`,
+      summary: `local-slice-dispatch-decision-packet: decision=blocked dispatch=no reasons=${reasons.slice(0, 4).join(",")} authorization=none`,
       recommendation: "Do not dispatch; complete the missing contracts and ask for an explicit human decision first.",
     };
   }
@@ -239,15 +239,15 @@ export function buildOneSliceLocalCanaryDispatchDecisionPacket(input: OneSliceLo
     authorization: "none",
     dispatchAllowed: false,
     requiresHumanDecision: true,
-    oneSliceOnly: true,
+    singleSliceOnly: true,
     decision: "ready-for-human-decision",
     reasons: ["preview-ready", "contracts-present", "human-decision-required"],
-    summary: "one-slice-dispatch-decision-packet: decision=ready-for-human-decision dispatch=no reasons=preview-ready,contracts-present,human-decision-required authorization=none",
+    summary: "local-slice-dispatch-decision-packet: decision=ready-for-human-decision dispatch=no reasons=preview-ready,contracts-present,human-decision-required authorization=none",
     recommendation: "Present this packet to the operator; do not dispatch until a separate execution path is explicitly authorized.",
   };
 }
 
-export function resolveOneSliceExecutorBacklogGate(input: OneSliceExecutorBacklogGateInput): OneSliceExecutorBacklogGate {
+export function resolveLocalSliceBacklogGate(input: LocalSliceBacklogGateInput): LocalSliceBacklogGate {
   const reasons: string[] = [];
   const blockedRequests: string[] = [];
 
@@ -307,10 +307,10 @@ export function resolveOneSliceExecutorBacklogGate(input: OneSliceExecutorBacklo
       dispatchAllowed: false,
       executorApproved: false,
       implementationAllowed: false,
-      oneSliceOnly: true,
+      singleSliceOnly: true,
       decision: "blocked",
       reasons,
-      summary: `one-slice-executor-backlog-gate: decision=blocked implementation=no dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")}${blockedRequestsSummary} authorization=none`,
+      summary: `local-slice-backlog-gate: decision=blocked implementation=no dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")}${blockedRequestsSummary} authorization=none`,
       recommendation: "Do not implement or use an executor; resolve the backlog-gate blockers in a separate design task first.",
     };
   }
@@ -323,22 +323,22 @@ export function resolveOneSliceExecutorBacklogGate(input: OneSliceExecutorBacklo
     dispatchAllowed: false,
     executorApproved: false,
     implementationAllowed: false,
-    oneSliceOnly: true,
+    singleSliceOnly: true,
     decision: "ready-for-separate-task",
     reasons: ["criteria-present", "separate-task-required", "implementation-still-not-authorized"],
-    summary: "one-slice-executor-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none",
+    summary: "local-slice-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none",
     recommendation: "The executor idea is eligible for a separate design/backlog task only; implementation and dispatch remain unauthorized.",
   };
 }
 
-export function reviewOneSliceLocalHumanConfirmedContract(input: OneSliceLocalHumanConfirmedContractInput): OneSliceLocalHumanConfirmedContractReview {
+export function reviewLocalSliceHumanConfirmedContract(input: LocalSliceHumanConfirmedContractInput): LocalSliceHumanConfirmedContractReview {
   const reasons: string[] = [];
   const blockedRequests: string[] = [];
 
   if (input.decisionPacket.decision !== "ready-for-human-decision") reasons.push("packet-not-ready");
   if (input.decisionPacket.dispatchAllowed !== false) reasons.push("packet-dispatch-not-false");
   if (!input.decisionPacket.requiresHumanDecision) reasons.push("human-decision-not-required");
-  if (!input.decisionPacket.oneSliceOnly) reasons.push("one-slice-contract-missing");
+  if (!input.decisionPacket.singleSliceOnly) reasons.push("single-slice-contract-missing");
   if (input.decisionPacket.activation !== "none") reasons.push(`packet-activation-${input.decisionPacket.activation}`);
   if (input.decisionPacket.authorization !== "none") reasons.push(`packet-authorization-${input.decisionPacket.authorization}`);
   if (input.humanConfirmation === "missing") reasons.push("human-confirmation-missing");
@@ -387,10 +387,10 @@ export function reviewOneSliceLocalHumanConfirmedContract(input: OneSliceLocalHu
       authorization: "none",
       dispatchAllowed: false,
       executorApproved: false,
-      oneSliceOnly: true,
+      singleSliceOnly: true,
       decision: "blocked",
       reasons,
-      summary: `one-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")}${blockedRequestsSummary} authorization=none`,
+      summary: `local-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")}${blockedRequestsSummary} authorization=none`,
       recommendation: "Do not execute; resolve the contract blockers and keep using preview/readiness evidence until an approved executor exists.",
     };
   }
@@ -402,10 +402,10 @@ export function reviewOneSliceLocalHumanConfirmedContract(input: OneSliceLocalHu
     authorization: "none",
     dispatchAllowed: false,
     executorApproved: false,
-    oneSliceOnly: true,
+    singleSliceOnly: true,
     decision: "contract-ready-no-executor",
     reasons: ["contract-valid", "human-confirmation-explicit", "executor-not-approved"],
-    summary: "one-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none",
-    recommendation: "The proposed one-slice local contract is review-ready, but no executor is approved; keep dispatch disabled until a separate execution primitive is authorized.",
+    summary: "local-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none",
+    recommendation: "The proposed local-slice local contract is review-ready, but no executor is approved; keep dispatch disabled until a separate execution primitive is authorized.",
   };
 }

@@ -2,28 +2,28 @@ import type { UnattendedContinuationContextLevel, UnattendedContinuationDecision
 export type * from "./guardrails-core-unattended-continuation-types";
 
 export {
-  buildOneSliceLocalCanaryDispatchDecisionPacket,
-  resolveOneSliceExecutorBacklogGate,
-  resolveOneSliceLocalCanaryPlan,
-  reviewOneSliceLocalHumanConfirmedContract,
-} from "./guardrails-core-one-slice-contracts";
+  buildLocalSliceCanaryDispatchDecisionPacket,
+  resolveLocalSliceBacklogGate,
+  resolveLocalSliceCanaryPlan,
+  reviewLocalSliceHumanConfirmedContract,
+} from "./guardrails-core-local-slice-contracts";
 
 export type {
-  OneSliceExecutorBacklogGate,
-  OneSliceExecutorBacklogGateDecision,
-  OneSliceExecutorBacklogGateInput,
-  OneSliceLocalCanaryDecision,
-  OneSliceLocalCanaryDispatchDecisionPacket,
-  OneSliceLocalCanaryDispatchPacketDecision,
-  OneSliceLocalCanaryDispatchPacketInput,
-  OneSliceLocalCanaryInput,
-  OneSliceLocalCanaryOperatorIntent,
-  OneSliceLocalCanaryPlan,
-  OneSliceLocalHumanConfirmationKind,
-  OneSliceLocalHumanConfirmedContractDecision,
-  OneSliceLocalHumanConfirmedContractInput,
-  OneSliceLocalHumanConfirmedContractReview,
-} from "./guardrails-core-one-slice-contracts";
+  LocalSliceBacklogGate,
+  LocalSliceBacklogGateDecision,
+  LocalSliceBacklogGateInput,
+  LocalSliceCanaryDecision,
+  LocalSliceCanaryDispatchDecisionPacket,
+  LocalSliceCanaryDispatchPacketDecision,
+  LocalSliceCanaryDispatchPacketInput,
+  LocalSliceCanaryInput,
+  LocalSliceCanaryOperatorIntent,
+  LocalSliceCanaryPlan,
+  LocalSliceHumanConfirmationKind,
+  LocalSliceHumanConfirmedContractDecision,
+  LocalSliceHumanConfirmedContractInput,
+  LocalSliceHumanConfirmedContractReview,
+} from "./guardrails-core-local-slice-contracts";
 
 function normalizeContextLevel(value: unknown): UnattendedContinuationContextLevel {
   return value === "warn" || value === "checkpoint" || value === "compact" || value === "ok" ? value : "ok";
