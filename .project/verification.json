@@ -14597,6 +14597,15 @@
       "method": "focal-vitest",
       "timestamp": "2026-05-07T16:43:26.198Z",
       "evidence": "Hardened provider-native agent_run_start_packet so a future worker start packet must carry explicit provider/model budget evidence. New fields: budget_decision/budgetDecision (ok|warn|blocked|unknown) and budget_evidence/budgetEvidence. Missing budget decision or blocked budget keeps the packet blocked; ok/warn remains report-only and still requires human confirmation. Surface schema updated. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 16 passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-989-GENERIC-BUDGET-EVIDENCE",
+      "target": "TASK-BUD-989",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-vitest",
+      "timestamp": "2026-05-07T16:53:21.498Z",
+      "evidence": "Generalized the provider/model budget evidence gate out of agent-run-start into guardrails-core-provider-budget-evidence so the same concept can be reused by control-plane provider decisions without duplicating agent-only semantics. agent_run_start_packet now consumes the shared resolver. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 17 passed."
     }
   ]
 }

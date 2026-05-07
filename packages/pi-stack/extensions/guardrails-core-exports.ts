@@ -95,6 +95,8 @@ export { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background
 export { evaluateColonyPromotionGate } from "./guardrails-core-colony-promotion-gate";
 export { buildOpsCalibrationDecisionPacket } from "./guardrails-core-ops-calibration";
 export { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
+export { normalizeProviderExecutionBudgetDecision, resolveProviderExecutionBudgetEvidence } from "./guardrails-core-provider-budget-evidence";
+export type { ProviderExecutionBudgetDecision, ProviderExecutionBudgetEvidence, ProviderExecutionBudgetEvidenceInput } from "./guardrails-core-provider-budget-evidence";
 export { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 export { buildAgentRunStartPacket } from "./guardrails-core-agent-run-start";
 export { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";

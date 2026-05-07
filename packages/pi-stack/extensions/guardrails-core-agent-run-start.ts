@@ -1,6 +1,8 @@
+import { resolveProviderExecutionBudgetEvidence, type ProviderExecutionBudgetDecision } from "./guardrails-core-provider-budget-evidence";
+
 export type AgentRunExecutorKind = "pi-print-subprocess";
 export type AgentRunStartDecision = "ready-for-human-decision" | "blocked";
-export type AgentRunBudgetDecision = "ok" | "warn" | "blocked" | "unknown";
+export type AgentRunBudgetDecision = ProviderExecutionBudgetDecision;
 
 export interface AgentRunStartPacketInput {
   runId?: string;
@@ -95,10 +97,6 @@ function normalizeSessionIsolation(value: unknown): "no-session" | "run-session-
   return value === "no-session" || value === "run-session-dir" ? value : "unknown";
 }
 
-function normalizeBudgetDecision(value: unknown): AgentRunBudgetDecision {
-  return value === "ok" || value === "warn" || value === "blocked" ? value : "unknown";
-}
-
 export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): AgentRunStartPacketResult {
   const runId = normalizeText(input.runId);
   const executorKind = input.executorKind === "pi-print-subprocess" || !input.executorKind ? "pi-print-subprocess" : "unknown";
@@ -110,8 +108,9 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   const toolAllowlist = normalizeToolAllowlist(input.toolAllowlist);
   const sessionIsolation = normalizeSessionIsolation(input.sessionIsolation ?? "no-session");
   const logPath = normalizeText(input.logPath);
-  const budgetDecision = normalizeBudgetDecision(input.budgetDecision);
-  const budgetEvidence = normalizeText(input.budgetEvidence);
+  const budget = resolveProviderExecutionBudgetEvidence({ budgetDecision: input.budgetDecision, budgetEvidence: input.budgetEvidence });
+  const budgetDecision = budget.decision;
+  const budgetEvidence = budget.evidence;
   const protectedScopeRequested = input.protectedScopeRequested === true;
   const blockers: string[] = [];
   let recommendationCode: AgentRunStartPacketResult["recommendationCode"] = "agent-run-start-ready-for-human-decision";
@@ -133,8 +132,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   if (unsupportedTools.length > 0) block("agent-run-start-blocked-tools", `non-read-only-tools:${unsupportedTools.join(",")}`);
   if (sessionIsolation === "unknown") block("agent-run-start-blocked-session-isolation", "session-isolation-missing");
   if (!logPath) block("agent-run-start-blocked-log-path", "log-path-missing");
-  if (budgetDecision === "unknown") block("agent-run-start-blocked-budget", "budget-decision-missing");
-  if (budgetDecision === "blocked") block("agent-run-start-blocked-budget", "budget-blocked");
+  for (const budgetBlocker of budget.blockers) block("agent-run-start-blocked-budget", budgetBlocker);
 
   const commandArgs = [
     ...(sessionIsolation === "no-session" ? ["--no-session"] : ["--session-dir", `.pi/agent-runs/${runId || "unknown"}`]),

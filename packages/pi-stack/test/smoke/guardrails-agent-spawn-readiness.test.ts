@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentRunPlan, buildAgentRunStartPacket, evaluateAgentSpawnReadiness } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentRunPlan, buildAgentRunStartPacket, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -13,6 +13,7 @@ describe("agent spawn readiness contract", () => {
       "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
       "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
       "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+      "packages/pi-stack/extensions/guardrails-core-provider-budget-evidence.ts",
     ];
     const supersededMarkers = [
       "one_slice_agent_run",
@@ -110,6 +111,25 @@ describe("agent spawn readiness contract", () => {
       decision: "ready-for-human-decision",
       recommendationCode: "agent-run-ready-for-human-decision",
       blockers: [],
+    });
+  });
+
+  it("keeps provider execution budget evidence generic for control-plane and agent starts", () => {
+    expect(resolveProviderExecutionBudgetEvidence({ budgetDecision: "ok", budgetEvidence: "dashscope ok" })).toMatchObject({
+      decision: "ok",
+      evidence: "dashscope ok",
+      readyForExecution: true,
+      blockers: [],
+    });
+    expect(resolveProviderExecutionBudgetEvidence({ budgetDecision: "blocked", budgetEvidence: "aggregate policy blocked" })).toMatchObject({
+      decision: "blocked",
+      readyForExecution: false,
+      blockers: ["budget-blocked"],
+    });
+    expect(resolveProviderExecutionBudgetEvidence({})).toMatchObject({
+      decision: "unknown",
+      readyForExecution: false,
+      blockers: ["budget-decision-missing"],
     });
   });
 
