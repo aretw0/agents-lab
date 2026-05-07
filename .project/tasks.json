@@ -21550,6 +21550,24 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "Pesquisa local/comunidade encontrou `@ifi/oh-pi-extensions` usage-tracker: usa pi-managed auth e `GET /backend-api/wham/usage`, parseia 5h/weekly windows e `additional_rate_limits` com percent-left/reset. Próximo hardening deve adaptar/importar esse padrão para quota-visibility com testes e fail-soft.\n[provenance:human] source_task=TASK-BUD-962 reason=Operador autorizou pesquisa web/comunidade se necessário e perguntou se precisamos de hardening focado em quotas.\n[start] Implementação local-first: parsing/testes locais para OpenAI WHAM usage e provider/model quota windows; sem chamada de rede real, sem settings/routing ativo.\n[progress] Slice parsing/testes locais concluída: parseOpenAIWhamUsage, provider/model budget key, model-specific filtering e testes smoke verdes. Próximo sub-slice: probe/cache fail-soft read-only usando pi-managed auth; ainda sem mexer em .pi/settings.json/routing ativo.\n[continue] Sub-slice iniciado: probe/cache fail-soft read-only para OpenAI WHAM usando pi-managed auth quando disponível; testes sem chamada de rede real; sem alterar settings/routing.\n[done] TASK-BUD-963 concluída: parsing/testes, provider/model budgets, probe/cache fail-soft read-only e reconciliação live-dashboard vs projeção local implementados sem settings/routing/probe real.",
       "verification": "VERIF-BUD-963-WHAM-PROBE-LOCAL"
+    },
+    {
+      "id": "TASK-BUD-967",
+      "description": "[P1/local-safe] Canary de delegação agêntica com providers operacionais (Dashscope/OpenAI Codex Spark), deixando Claude Code em backlog.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "docs/research/provider-canary-scorecard-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Executar no máximo um canary por vez, com provider/model declarado antes do start.",
+        "Começar por tarefa docs-only/local-safe e arquivo único declarado.",
+        "Registrar qualidade, escopo, latência, quota/custo, rollback e validação em scorecard.",
+        "Não alterar .pi/settings.json, routing, CI, publish, credenciais ou provider config.",
+        "Parar após uma fatia e pedir decisão antes de próximo provider."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Direção do operador: não insistir no Claude Code adapter agora; priorizar providers já disponíveis para aprender delegação agêntica e produzir valor."
     }
   ]
 }
