@@ -1,54 +1,52 @@
 {
-  "timestamp": "2026-05-07T00:43:43.811Z",
-  "context": "TASK-BUD-961 completed and committed locally. claude_code_execute now accepts permissionMode/permission_mode, allowedTools/allowed_tools, and [snip] routing change, CI, or protected scope. [truncated:+158 chars]",
+  "timestamp": "2026-05-07T00:47:52.255Z",
+  "context": "TASK-BUD-959 completed as no-code/documentation slice after reload. Live worktree status/list output now includes useful operator-visible fie [snip] untime-owned and no patch required now. [truncated:+95 chars]",
   "next_actions": [
-    "run /reload before trusting live claude_code_execute schema",
-    "after /reload, run claude_code_execute dry_run=true with permissionMode/allowedTools/tools to validate live tool schema",
-    "prepare next simple-delegate canary contract before any worker dispatch"
+    "commit TASK-BUD-959 documentation + board verification as new commit",
+    "continue local-safe ladder with TASK-BUD-960 unless a delegation gate becomes ready",
+    "do not dispatch worker until simple_delegate_rehearsal_start_packet is ready-for-human-decisio [snip] an approves exact contract [truncated:+9 chars]"
   ],
   "blockers": [
+    "simple-delegate rehearsal remains blocked: rehearsal-not-ready, auto-advance t [snip] t ready, focus missing [truncated:+11 chars]",
     "routing/settings remain protected",
-    "live external probes remain opt-in",
-    "runtime extension changes require /reload before trusting live tool output"
+    "live external probes remain opt-in"
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/claude-code-adapter-parsers.test.ts -> 27 passed",
-    "git diff --check -> clean",
-    "project-validate -> clean"
-  ],
-  "recent_commits": [
-    "feat(claude-code): expose execution tool flags"
+    "worktree status/list live smoke produced repo/root/branch/current/pi-owned/path/purpose evidence",
+    "safe_marker_check docs/research/worktree-status-operator-output-2026-05.md -> ok",
+    "git diff --check -> clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-961",
+    "focus": "TASK-BUD-959",
     "canonical_links": [
-      "task:TASK-BUD-961"
+      "task:TASK-BUD-959",
+      "task:TASK-BUD-960"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T00:43:43.811Z",
+    "generatedAtIso": "2026-05-07T00:47:52.255Z",
     "level": "ok",
-    "percent": 24,
+    "percent": 34,
     "action": "continue",
-    "recommendation": "Continue agentic evolution in bounded ladder: reload, validate adapter dry-run, then prepare o [snip] it simple-delegate canary. [truncated:+9 chars]",
+    "recommendation": "Commit current no-code worktree output closure, then continue local-safe evidence with TASK-BU [snip] 960 before agent dispatch. [truncated:+2 chars]",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T00:43:43.811Z",
+      "atIso": "2026-05-07T00:47:52.255Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 24,
+      "percent": 34,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Continue agentic evolution in bounded ladder: reload, validate adapter dry-run, then prepare o [snip] it simple-delegate canary. [truncated:+9 chars]"
+      "recommendation": "Commit current no-code worktree output closure, then continue local-safe evidence with TASK-BU [snip] 960 before agent dispatch. [truncated:+2 chars]"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-961"
+    "TASK-BUD-959"
   ]
 }

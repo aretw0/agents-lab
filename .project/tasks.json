@@ -21434,7 +21434,7 @@
     {
       "id": "TASK-BUD-959",
       "description": "[P2/local-safe] Melhorar output operator-visible do `worktree status/list` para não aparecer como bloco vazio/pouco informativo.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-958"
@@ -21451,7 +21451,8 @@
         "Validar com teste/marker check local-safe; não tocar settings, CI, publish ou provider config."
       ],
       "milestone": "agent-quality-calibration-lane",
-      "notes": "Feedback do operador durante TASK-BUD-958: o bloco visual `⌥ worktree status` / `✓ # Worktree status` não comunica nada útil. Feedback adicional: `⌥ worktree list` / `✓ # Worktree list` sofre do mesmo problema. Isso deve virar melhoria de UX/operator-visible output, mas não interromper o canary atual.\n[provenance:human] source_task=TASK-BUD-958 reason=Operador apontou output pobre do worktree status/list como problema de observabilidade durante o canary."
+      "notes": "Feedback do operador durante TASK-BUD-958: o bloco visual `⌥ worktree status` / `✓ # Worktree status` não comunica nada útil. Feedback adicional: `⌥ worktree list` / `✓ # Worktree list` sofre do mesmo problema. Isso deve virar melhoria de UX/operator-visible output, mas não interromper o canary atual.\n[provenance:human] source_task=TASK-BUD-958 reason=Operador apontou output pobre do worktree status/list como problema de observabilidade durante o canary.\n[start] Pós-/reload, executar fatia local-safe de observabilidade: verificar output atual de worktree status/list, documentar owner/scope e decidir se há necessidade de patch. Sem dispatch, settings, routing ou escopo protegido.\n[complete] Pós-/reload, output atual de worktree status/list já é informativo. Documentado owner como harness/runtime e definido gatilho para reabrir se bloco vazio reaparecer.",
+      "verification": "VERIF-BUD-959-WORKTREE-OUTPUT"
     },
     {
       "id": "TASK-BUD-960",
