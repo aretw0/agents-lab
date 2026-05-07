@@ -1,41 +1,43 @@
 {
-  "timestamp": "2026-05-07T03:41:50.671Z",
-  "context": "AFK lane avançou coesão semântica da execução agêntica. Consolidado namespace público recém-criado de one_slice_agent_run_* para agent_run_* [snip] der/routing/settings/CI/publish tocado. [truncated:+360 chars]",
+  "timestamp": "2026-05-07T12:15:52.072Z",
+  "context": "AFK continuation focused on semantic cohesion, treating the stack as pre-release: no legado/backcompat framing for names we are still shaping [snip] ing/settings/CI/publish scopes touched. [truncated:+415 chars]",
   "next_actions": [
-    "Run /reload before trusting live tool surface names; expected new tools are agent_run_plan/sta [snip] ket/registry_upsert/abort. [truncated:+24 chars]",
-    "If continuing local-safe, avoid broad simple_delegate rename until a compatibility/backcompat [snip] 26-05.md as naming source. [truncated:+70 chars]",
-    "Consider a future bounded task to migrate delegation runway wording, but do not add aliases or [snip] t explicit human decision. [truncated:+23 chars]"
+    "Run /reload before trusting live tool surface names; expected delegation tools now include del [snip] tools remain agent_run_*. [truncated:+79 chars]",
+    "If continuing local-safe, review remaining one-slice usages only where they are not strict sto [snip] ocs without a scoped task. [truncated:+54 chars]",
+    "Do not dispatch agent/provider canaries without explicit human decision."
   ],
   "blockers": [
     "Live runtime still needs reload after extension surface rename.",
-    "Historical docs/board evidence still mention one_slice_agent_run_* and ready-f [snip] dit history wholesale. [truncated:+48 chars]"
+    "docs/primitives/README.md line endings were normalized to LF to satisfy git di [snip] anging two index rows. [truncated:+19 chars]"
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 11 passed",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-colony-promotion-gate.test.ts packages/ [snip] iness.test.ts -> 14 passed [truncated:+47 chars]",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts package [snip] -list.test.ts -> 59 passed [truncated:+85 chars]"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-sta [snip] -> 3 files/92 tests passed [truncated:+99 chars]",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts -> 1 file/23 te [snip] ts passed after regression [truncated:+1 chars]",
+    "rg focal found no simple_delegate/simple-delegate/ready-simple-delegate/mix_simple_delegate_ev [snip] c-consolidation-2026-05.md [truncated:+84 chars]"
   ],
   "recent_commits": [
-    "4fe6bb02 refactor(delegation): simplify agent run semantics",
-    "75f6dfbf docs(delegation): map agent run semantics"
+    "0f89cbd9 refactor(delegation): converge delegation rehearsal naming",
+    "f838ab4c test(delegation): guard rehearsal naming"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-976",
+    "focus": "TASK-BUD-981",
     "canonical_links": [
-      "task:TASK-BUD-976",
-      "commit:4fe6bb02"
+      "task:TASK-BUD-981",
+      "task:TASK-BUD-979",
+      "task:TASK-BUD-980",
+      "commit:0f89cbd9"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T03:41:50.671Z",
+    "generatedAtIso": "2026-05-07T12:15:52.072Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "pause-after-checkpoint-until-reload-or-next-local-safe-doc-task",
+    "recommendation": "continue-local-safe-after-reload-or-review-one-slice-stop-condition-boundaries",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T03:41:50.671Z",
+      "atIso": "2026-05-07T12:15:52.072Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 0,
@@ -45,10 +47,10 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "pause-after-checkpoint-until-reload-or-next-local-safe-doc-task"
+      "recommendation": "continue-local-safe-after-reload-or-review-one-slice-stop-condition-boundaries"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-976"
+    "TASK-BUD-981"
   ]
 }
