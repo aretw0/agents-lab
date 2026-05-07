@@ -1,52 +1,48 @@
 {
-  "timestamp": "2026-05-07T22:06:59.760Z",
-  "context": "After recording canary 4 pass, attempted optional third pass for higher confidence. Canary 5 used minimal no-extensions isolation with declar [snip] isk; better next slice is TASK-BUD-997. [truncated:+709 chars]",
+  "timestamp": "2026-05-07T22:08:24.181Z",
+  "context": "Human steering: current provider-native agent invocation is too convoluted; expected a better API. Agreed. The long argv exists because we ar [snip] is hardened before ergonomic promotion. [truncated:+532 chars]",
   "current_tasks": [
-    "TASK-BUD-989"
+    "TASK-BUD-998"
   ],
   "next_actions": [
-    "Commit board/verification/handoff evidence for canary 5 and TASK-BUD-997.",
-    "Prefer implementing TASK-BUD-997 before provider-native delegation promotion.",
-    "If human accepts the risk explicitly, TASK-BUD-989 has minimum 2 valid passes; otherwise keep in-progress."
+    "Commit TASK-BUD-998 board/handoff evidence.",
+    "Prefer implementing TASK-BUD-997 first, then TASK-BUD-998 wrapper/API.",
+    "When implementing TASK-BUD-998, use agents/canaries to review community-inspired ergonomics but keep dispatch gated."
   ],
   "blockers": [
-    "Optional third canary found route/start budget evidence handoff risk.",
-    "Machine disk threshold remains tactical local override; avoid broad scans/builds.",
-    "TASK-BUD-968 quota/footer WIP remains parked and dirty."
+    "TASK-BUD-997 route-to-agent-run budget evidence handoff risk remains open.",
+    "TASK-BUD-989 has two valid canary passes but should not promote until risk accepted or hardened."
   ],
   "recent_validation": [
-    "canary 5: exit 0, output_bytes=1187, stale_count=0, worker FAIL",
-    "agent_run_outcome_packet canary 5 file_contract=read-only -> contract=fail marker worker-verdict-pass=false",
-    "VERIF-TASK-BUD-989-DASHSCOPE-CANARY-5-FAIL appended"
+    "TASK-BUD-998 created as planned backlog item"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-989",
+    "focus": "TASK-BUD-998",
     "canonical_links": [
-      "task:TASK-BUD-989",
-      "task:TASK-BUD-997",
-      "task:TASK-BUD-989-DASHSCOPE-CANARY-5-FAIL"
+      "task:TASK-BUD-998",
+      "task:TASK-BUD-997"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T22:06:59.760Z",
+    "generatedAtIso": "2026-05-07T22:08:24.181Z",
     "level": "warn",
-    "percent": 54,
+    "percent": 55,
     "action": "continue",
-    "recommendation": "commit-risk-evidence-then-harden-TASK-BUD-997-before-promotion"
+    "recommendation": "commit-backlog-and-continue-budget-handoff-hardening"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T22:06:59.760Z",
+      "atIso": "2026-05-07T22:08:24.181Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 54,
+      "percent": 55,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-risk-evidence-then-harden-TASK-BUD-997-before-promotion"
+      "recommendation": "commit-backlog-and-continue-budget-handoff-hardening"
     }
   ]
 }

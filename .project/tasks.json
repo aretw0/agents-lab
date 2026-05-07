@@ -22228,6 +22228,32 @@
       ],
       "milestone": "subagent-sovereignty-lane-2026-05",
       "notes": "Created from canary 5: worker found operational risk that route advisory budget evidence and start-packet budget evidence are supplied separately, relying on caller/operator consistency. This should be hardened before stronger delegation promotion."
+    },
+    {
+      "id": "TASK-BUD-998",
+      "description": "Create ergonomic provider-native agent-run wrapper/API inspired by community subagent patterns",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-997",
+        "TASK-BUD-989"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/research/agent-run-provider-native-runner-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Expose a simpler first-party operator/API surface for one bounded provider-native agent run without requiring humans to manually assemble long pi subprocess argv.",
+        "Preserve existing safety gates: report-only packet, explicit human confirmation, budget evidence, protected-scope block, minimal-no-extensions default, registry/status/log/outcome/abort, and read-only file contract.",
+        "Support attached-file/read-only canary defaults so workers reliably see declared files without ad-hoc @file command construction.",
+        "Document pragmatic community-inspired patterns and why we keep explicit boundedness instead of opaque background dispatch.",
+        "Validate with smoke tests and at least one bounded canary after TASK-BUD-997 budget handoff hardening."
+      ],
+      "milestone": "subagent-sovereignty-lane-2026-05",
+      "notes": "Created from human steering: current provider-native canary command is too convoluted. We need an ergonomic wrapper/API that captures the safe defaults and boilerplate while preserving governance. Implementation should be inspired by community subagent ergonomics but remain pragmatic and local-first."
     }
   ]
 }
