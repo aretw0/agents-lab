@@ -1,23 +1,20 @@
 {
-  "timestamp": "2026-05-07T00:08:25.915Z",
-  "context": "TASK-BUD-963 parsing/test slice concluída. Implementado parser local parseOpenAIWhamUsage para OpenAI WHAM payload (rate_limit, code_review_r [snip] em alteração .pi/settings.json/routing. [truncated:+278 chars]",
-  "current_tasks": [
-    "TASK-BUD-963"
-  ],
+  "timestamp": "2026-05-07T00:16:40.394Z",
+  "context": "TASK-BUD-963 concluída. Implementado hardening OpenAI Codex dual quota: parseOpenAIWhamUsage para WHAM payload; provider/model budgets para o [snip] settings.json/routing e sem probe real. [truncated:+449 chars]",
   "next_actions": [
-    "commit slice parsing/testes locais",
-    "próximo sub-slice TASK-BUD-963: probe/cache fail-soft read-only para WHAM usando pi-managed auth quando disponível",
-    "depois integrar live dashboard windows à avaliação sem deixar projeção local bloquear pool live isoladamente"
+    "commit code slice and board completion",
+    "após /reload, ferramenta nova quota_visibility_openai_wham_probe ficará disponível; usar prime [snip] probe=true para readiness [truncated:+7 chars]",
+    "se operador autorizar, executar probe=true para calibrar dashboard real sem alterar routing"
   ],
   "blockers": [
+    "runtime extension changes require /reload before trusting new tool",
     "não alterar .pi/settings.json/routing ativo sem decisão explícita",
-    "live WHAM probe deve ser read-only, timeout/cache/fail-soft",
-    "não executar probe real sem gate/opt-in apropriado"
+    "live probe real ainda requer opt-in explícito"
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts: 40 passed",
+    "npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts: 44 passed",
     "git diff --check: clean",
-    "safe_marker_check quota parser tests: 5/5"
+    "project-validate: clean"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-963",
@@ -26,25 +23,29 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T00:08:25.915Z",
+    "generatedAtIso": "2026-05-07T00:16:40.394Z",
     "level": "ok",
-    "percent": 33,
+    "percent": 47,
     "action": "continue",
-    "recommendation": "Commitar slice local e continuar para probe/cache em sub-slice separado."
+    "recommendation": "Commitar e aguardar /reload antes de usar a nova tool em runtime.",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T00:08:25.915Z",
+      "atIso": "2026-05-07T00:16:40.394Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 33,
+      "percent": 47,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar slice local e continuar para probe/cache em sub-slice separado."
+      "recommendation": "Commitar e aguardar /reload antes de usar a nova tool em runtime."
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-963"
   ]
 }

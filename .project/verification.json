@@ -14336,6 +14336,15 @@
       "method": "local test",
       "timestamp": "2026-05-07T00:07:56.085Z",
       "evidence": "Parsing/test slice implemented without network or protected settings changes. Added OpenAI WHAM parser for rate_limit/code_review_rate_limit/additional_rate_limits, provider/model budget key support for openai-codex/gpt-5.3-codex-spark, and model-specific budget filtering. Validation: npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts => 40 tests passed; git diff --check clean; safe_marker_check 5/5; project-validate clean."
+    },
+    {
+      "id": "VERIF-BUD-963-WHAM-PROBE-LOCAL",
+      "target": "TASK-BUD-963",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local test",
+      "timestamp": "2026-05-07T00:16:27.622Z",
+      "evidence": "Implemented OpenAI Codex quota hardening with local-only validation: parseOpenAIWhamUsage handles rate_limit/code_review_rate_limit/additional_rate_limits; provider/model budgets support openai-codex/gpt-5.3-codex-spark; probeOpenAIWhamUsage reads pi-managed auth from auth.json, sends read-only GET /backend-api/wham/usage with timeout and chatgpt-account-id when available, writes best-effort cache, and fail-softs to stale cache when allowed; applyOpenAIWhamUsageToBudgets separates live dashboard window fields from local projections so model-specific projected overrun does not become live exhaustion when WHAM reports remaining quota. Validation: npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts => 44 passed; git diff --check clean; project-validate clean; safe_marker_check WHAM probe 5/5 and live-window reconciliation 3/3."
     }
   ]
 }

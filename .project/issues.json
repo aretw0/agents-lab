@@ -1039,6 +1039,17 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mouqawpn",
+      "title": "The agent responded with no substantive content to the action-oriented request, leaving the task unresolved without acknowledging the blockage.",
+      "body": "The agent responded with no substantive content to the action-oriented request, leaving the task unresolved without acknowledging the blockage.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }
