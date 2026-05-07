@@ -22207,11 +22207,9 @@
     {
       "id": "TASK-BUD-997",
       "description": "Tighten route-to-agent-run budget evidence handoff",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
-      "depends_on": [
-        "TASK-BUD-989"
-      ],
+      "depends_on": [],
       "files": [
         "packages/pi-stack/extensions/quota-visibility.ts",
         "packages/pi-stack/extensions/quota-visibility-formatting.ts",
@@ -22227,7 +22225,8 @@
         "Regression tests cover consistent route-to-start budget evidence and mismatch/freshness failure modes."
       ],
       "milestone": "subagent-sovereignty-lane-2026-05",
-      "notes": "Created from canary 5: worker found operational risk that route advisory budget evidence and start-packet budget evidence are supplied separately, relying on caller/operator consistency. This should be hardened before stronger delegation promotion."
+      "notes": "Created from canary 5: worker found operational risk that route advisory budget evidence and start-packet budget evidence are supplied separately, relying on caller/operator consistency. This should be hardened before stronger delegation promotion.\n[rationale:risk-control] Tightening the route-to-start budget handoff is a risk-control change because canary 5 showed the old path depended on free-form caller consistency between quota route evidence and provider-native start packets; structured source/provider/timestamp checks reduce accidental over-…\nCompleted route-to-agent-run budget evidence hardening. Structured route-advisory evidence now carries source/provider/generatedAt, and start packets validate freshness and provider consistency instead of relying only on free-form caller text. Runtime `/reload` required before live tool surface reflects this code.",
+      "verification": "VERIF-TASK-BUD-997-BUDGET-HANDOFF-HARDENED"
     },
     {
       "id": "TASK-BUD-998",

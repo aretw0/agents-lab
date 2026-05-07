@@ -18,6 +18,10 @@ export interface AgentRunStartPacketInput {
   logPath?: string;
   budgetDecision?: AgentRunBudgetDecision | string;
   budgetEvidence?: string;
+  budgetEvidenceSource?: "route-advisory" | "provider-budget-snapshot" | "manual" | "unknown" | string;
+  budgetEvidenceProvider?: string;
+  budgetEvidenceGeneratedAtIso?: string;
+  budgetEvidenceMaxAgeMs?: number;
   protectedScopeRequested?: boolean;
 }
 
@@ -61,6 +65,12 @@ export interface AgentRunStartPacketResult {
     logPath: string;
     budgetDecision: AgentRunBudgetDecision;
     budgetEvidence: string;
+    budgetEvidenceSource: "route-advisory" | "provider-budget-snapshot" | "manual" | "unknown";
+    budgetEvidenceProvider?: string;
+    budgetEvidenceGeneratedAtIso?: string;
+    budgetEvidenceFreshness: "fresh" | "stale" | "missing" | "not-required";
+    budgetEvidenceConsistency: "consistent" | "mismatch" | "needs-human-review";
+    budgetEvidenceHumanReviewRequired: boolean;
     protectedScopeRequested: boolean;
   };
   commandPreview: {
@@ -116,7 +126,15 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   const sessionIsolation = normalizeSessionIsolation(input.sessionIsolation ?? "no-session");
   const extensionIsolation = normalizeExtensionIsolation(input.extensionIsolation ?? "minimal-no-extensions");
   const logPath = normalizeText(input.logPath);
-  const budget = resolveProviderExecutionBudgetEvidence({ budgetDecision: input.budgetDecision, budgetEvidence: input.budgetEvidence });
+  const budget = resolveProviderExecutionBudgetEvidence({
+    budgetDecision: input.budgetDecision,
+    budgetEvidence: input.budgetEvidence,
+    budgetEvidenceSource: input.budgetEvidenceSource,
+    budgetEvidenceProvider: input.budgetEvidenceProvider,
+    budgetEvidenceGeneratedAtIso: input.budgetEvidenceGeneratedAtIso,
+    providerModelRef,
+    maxAgeMs: input.budgetEvidenceMaxAgeMs,
+  });
   const budgetDecision = budget.decision;
   const budgetEvidence = budget.evidence;
   const protectedScopeRequested = input.protectedScopeRequested === true;
@@ -182,6 +200,12 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       logPath,
       budgetDecision,
       budgetEvidence,
+      budgetEvidenceSource: budget.source,
+      ...(budget.provider ? { budgetEvidenceProvider: budget.provider } : {}),
+      ...(budget.generatedAtIso ? { budgetEvidenceGeneratedAtIso: budget.generatedAtIso } : {}),
+      budgetEvidenceFreshness: budget.freshness,
+      budgetEvidenceConsistency: budget.consistency,
+      budgetEvidenceHumanReviewRequired: budget.humanReviewRequired,
       protectedScopeRequested,
     },
     commandPreview: {
@@ -194,7 +218,9 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       ? [
           "ask the human/operator for the exact confirmation phrase before starting any worker",
           "if confirmed, registry-upsert planned->running with pid/log/status before invoking the command preview as argv",
-          "preserve provider/model budget evidence with the run record before invocation",
+          budget.humanReviewRequired
+            ? "budget evidence is manual/unknown; get explicit human review or prefer a fresh route-advisory/provider-budget snapshot before invocation"
+            : "preserve fresh structured provider/model budget evidence with the run record before invocation",
           "prefer minimal-no-extensions isolation for provider-native workers unless a custom provider requires inherited extensions",
           "after exit, update registry and run parent-side outcome packet; empty output is a contract failure",
         ]
@@ -212,6 +238,9 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       `tools=${toolAllowlist.join(",") || "none"}`,
       `ext=${extensionIsolation}`,
       `budget=${budgetDecision}`,
+      `budgetSource=${budget.source}`,
+      `budgetFreshness=${budget.freshness}`,
+      `budgetConsistency=${budget.consistency}`,
       `dispatch=no`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),

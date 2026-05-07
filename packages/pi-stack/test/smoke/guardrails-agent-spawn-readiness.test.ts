@@ -182,6 +182,47 @@ describe("agent spawn readiness contract", () => {
     expect(inherited.commandPreview.args).not.toContain("--no-extensions");
   });
 
+  it("accepts fresh structured budget evidence and blocks stale or mismatched route evidence", () => {
+    const generatedAtIso = new Date().toISOString();
+    const ready = buildAgentRunStartPacket({
+      runId: "run-budget-structured",
+      goal: "review one local file",
+      providerModelRef: "dashscope/qwen3-coder-plus",
+      cwd: process.cwd(),
+      declaredFiles: ["docs/research/provider-canary-scorecard-2026-05.md"],
+      timeoutMs: 90_000,
+      logPath: ".pi/reports/run-budget-structured.log",
+      budgetDecision: "ok",
+      budgetEvidence: "dashscope ok generatedAt=now",
+      budgetEvidenceSource: "route-advisory",
+      budgetEvidenceProvider: "dashscope",
+      budgetEvidenceGeneratedAtIso: generatedAtIso,
+    });
+    expect(ready.decision).toBe("ready-for-human-decision");
+    expect(ready.runSpec).toMatchObject({
+      budgetEvidenceSource: "route-advisory",
+      budgetEvidenceFreshness: "fresh",
+      budgetEvidenceConsistency: "consistent",
+      budgetEvidenceHumanReviewRequired: false,
+    });
+
+    const stale = buildAgentRunStartPacket({
+      ...ready.runSpec,
+      budgetEvidenceGeneratedAtIso: "2026-01-01T00:00:00.000Z",
+      budgetEvidenceMaxAgeMs: 1,
+    });
+    expect(stale.decision).toBe("blocked");
+    expect(stale.blockers).toContain("budget-evidence-stale");
+
+    const mismatch = buildAgentRunStartPacket({
+      ...ready.runSpec,
+      budgetEvidenceProvider: "openai-codex",
+      budgetEvidenceGeneratedAtIso: generatedAtIso,
+    });
+    expect(mismatch.decision).toBe("blocked");
+    expect(mismatch.blockers).toContain("budget-evidence-provider-mismatch");
+  });
+
   it("blocks provider-native start packets without explicit non-blocked budget evidence", () => {
     const missing = buildAgentRunStartPacket({
       runId: "run-budget-missing",

@@ -932,7 +932,11 @@ describe("quota-visibility parsers", () => {
     expect(advisory.consideredProviders.find((p) => p.provider === "github-copilot")).toMatchObject({
       executionBudgetDecision: "ok",
       executionBudgetReady: true,
+      executionBudgetEvidenceSource: "route-advisory",
+      executionBudgetEvidenceProvider: "github-copilot",
+      executionBudgetEvidenceGeneratedAtIso: "2026-04-15T00:00:00.000Z",
     });
+    expect(advisory.consideredProviders.find((p) => p.provider === "github-copilot")?.executionBudgetEvidence).toContain("generatedAt=2026-04-15T00:00:00.000Z");
     expect(advisory.consideredProviders.find((p) => p.provider === "openai-codex")).toMatchObject({
       executionBudgetDecision: "warn",
       executionBudgetReady: true,

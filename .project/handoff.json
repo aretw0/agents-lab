@@ -1,48 +1,51 @@
 {
-  "timestamp": "2026-05-07T22:08:24.181Z",
-  "context": "Human steering: current provider-native agent invocation is too convoluted; expected a better API. Agreed. The long argv exists because we ar [snip] is hardened before ergonomic promotion. [truncated:+532 chars]",
-  "current_tasks": [
-    "TASK-BUD-998"
-  ],
+  "timestamp": "2026-05-07T22:26:52.166Z",
+  "context": "Human approved order: implement TASK-BUD-997 before TASK-BUD-998. Implemented structured route-to-agent-run budget evidence handoff. Route ad [snip] live tool output reflects code changes. [truncated:+700 chars]",
   "next_actions": [
-    "Commit TASK-BUD-998 board/handoff evidence.",
-    "Prefer implementing TASK-BUD-997 first, then TASK-BUD-998 wrapper/API.",
-    "When implementing TASK-BUD-998, use agents/canaries to review community-inspired ergonomics but keep dispatch gated."
+    "Commit TASK-BUD-997 code/board/handoff evidence without staging parked TASK-BUD-968 quota/footer WIP.",
+    "After commit and reload, continue TASK-BUD-998 ergonomic provider-native agent-run wrapper/API.",
+    "When TASK-BUD-998 starts, use structured budget evidence from route advisory instead of manual budget text."
   ],
   "blockers": [
-    "TASK-BUD-997 route-to-agent-run budget evidence handoff risk remains open.",
-    "TASK-BUD-989 has two valid canary passes but should not promote until risk accepted or hardened."
+    "Runtime /reload required before trusting live agent_run_start_packet/quota route surfaces.",
+    "TASK-BUD-998 remains planned.",
+    "TASK-BUD-968 quota/footer WIP remains parked and dirty."
   ],
   "recent_validation": [
-    "TASK-BUD-998 created as planned backlog item"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/ [snip] > 2 files, 63 tests passed [truncated:+69 chars]",
+    "board_task_complete TASK-BUD-997 -> completed"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-998",
+    "focus": "TASK-BUD-997",
     "canonical_links": [
-      "task:TASK-BUD-998",
-      "task:TASK-BUD-997"
+      "task:TASK-BUD-997",
+      "task:TASK-BUD-998"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T22:08:24.181Z",
-    "level": "warn",
-    "percent": 55,
+    "generatedAtIso": "2026-05-07T22:26:52.166Z",
+    "level": "ok",
+    "percent": 33,
     "action": "continue",
-    "recommendation": "commit-backlog-and-continue-budget-handoff-hardening"
+    "recommendation": "commit-TASK-BUD-997-then-reload-before-live-smoke",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T22:08:24.181Z",
+      "atIso": "2026-05-07T22:26:52.166Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 55,
+      "level": "ok",
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-backlog-and-continue-budget-handoff-hardening"
+      "recommendation": "commit-TASK-BUD-997-then-reload-before-live-smoke"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-997"
   ]
 }

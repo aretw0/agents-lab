@@ -183,6 +183,10 @@ export interface RouteAdvisory {
 		projectedPressurePct: number;
 		executionBudgetDecision: "ok" | "warn" | "blocked";
 		executionBudgetReady: boolean;
+		executionBudgetEvidence: string;
+		executionBudgetEvidenceSource: "route-advisory";
+		executionBudgetEvidenceProvider: string;
+		executionBudgetEvidenceGeneratedAtIso: string;
 	}>;
 	noAutoSwitch: true;
 }

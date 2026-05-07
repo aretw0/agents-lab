@@ -14714,6 +14714,15 @@
       "method": "provider-native-canary",
       "timestamp": "2026-05-07T22:05:56.481Z",
       "evidence": "Executed optional third bounded minimal-no-extensions DashScope read-only canary with declared files attached: run_id=task-bud-989-dashscope-readonly-canary-5. Process exited 0; output_bytes=1187; stale_count=0; worker returned FAIL. Parent outcome with file_contract=read-only returned contract=fail due marker `worker-verdict-pass=false`. Worker identified a route/start budget evidence handoff risk: route advisory computes/recommends provider budget state, but agent_run_start_packet receives budget_decision/evidence separately, relying on operator/tool caller to keep evidence consistent. Log: .pi/reports/task-bud-989-dashscope-readonly-canary-5.log. Not promotion evidence; consider follow-up hardening before delegation promotion."
+    },
+    {
+      "id": "VERIF-TASK-BUD-997-BUDGET-HANDOFF-HARDENED",
+      "target": "TASK-BUD-997",
+      "target_type": "task",
+      "status": "passed",
+      "method": "targeted-vitest",
+      "timestamp": "2026-05-07T22:26:24.426Z",
+      "evidence": "Implemented structured route-to-agent-run budget evidence handoff. `buildRouteAdvisory` now emits structured execution budget evidence fields (source=route-advisory, provider, generatedAtIso, evidence text) for each considered provider. `resolveProviderExecutionBudgetEvidence` now tracks source/freshness/consistency/humanReviewRequired and blocks stale structured evidence, missing structured timestamps, blocked budgets, unknown decisions, and provider mismatches. `buildAgentRunStartPacket` now accepts/preserves structured budget evidence fields and exposes freshness/consistency/human-review state in runSpec/summary/next actions. Tool schema accepts budget_evidence_source/provider/generated_at/max_age. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts --reporter=dot` -> 2 files, 63 tests passed. [rationale:risk-control] Structured evidence reduces wrong-provider/stale-budget dispatch risk without enabling auto-switch or dispatch. Runtime reload is required before trusting the live tool surface."
     }
   ]
 }

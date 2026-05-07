@@ -148,6 +148,10 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       log_path: Type.Optional(Type.String({ description: "Bounded log path for stdout/stderr metadata." })),
       budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision for this run: ok, warn, blocked, or unknown. Missing/blocked keeps packet blocked." })),
       budget_evidence: Type.Optional(Type.String({ description: "Short provider/model budget evidence, e.g. dashscope ok or openai-codex spark pool evidence." })),
+      budget_evidence_source: Type.Optional(Type.String({ description: "Budget evidence source: route-advisory, provider-budget-snapshot, manual, or unknown." })),
+      budget_evidence_provider: Type.Optional(Type.String({ description: "Provider named by the budget evidence, used to detect route/start mismatches." })),
+      budget_evidence_generated_at_iso: Type.Optional(Type.String({ description: "ISO timestamp for structured budget evidence freshness checks." })),
+      budget_evidence_max_age_ms: Type.Optional(Type.Number({ description: "Optional max age for structured budget evidence freshness." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -166,6 +170,10 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         logPath: typeof p.log_path === "string" ? p.log_path : undefined,
         budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
         budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
+        budgetEvidenceSource: typeof p.budget_evidence_source === "string" ? p.budget_evidence_source : undefined,
+        budgetEvidenceProvider: typeof p.budget_evidence_provider === "string" ? p.budget_evidence_provider : undefined,
+        budgetEvidenceGeneratedAtIso: typeof p.budget_evidence_generated_at_iso === "string" ? p.budget_evidence_generated_at_iso : undefined,
+        budgetEvidenceMaxAgeMs: typeof p.budget_evidence_max_age_ms === "number" ? p.budget_evidence_max_age_ms : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       return buildOperatorVisibleToolResponse({

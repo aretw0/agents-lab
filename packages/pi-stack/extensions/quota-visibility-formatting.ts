@@ -139,9 +139,14 @@ export function buildRouteAdvisory(
 	const considered = status.providerBudgets
 		.map((b) => {
 			const budgetDecision = b.state === "warning" ? "warn" : b.state;
+			const budgetEvidence = `${b.provider}${b.model ? `/${b.model}` : ""} ${b.state} generatedAt=${status.source.generatedAtIso}`;
 			const executionBudget = resolveProviderExecutionBudgetEvidence({
 				budgetDecision,
-				budgetEvidence: `${b.provider}${b.model ? `/${b.model}` : ""} ${b.state}`,
+				budgetEvidence,
+				budgetEvidenceSource: "route-advisory",
+				budgetEvidenceProvider: b.provider,
+				budgetEvidenceGeneratedAtIso: status.source.generatedAtIso,
+				nowMs: Date.parse(status.source.generatedAtIso),
 			});
 			return {
 				provider: b.provider,
@@ -150,6 +155,10 @@ export function buildRouteAdvisory(
 				projectedPressurePct: maxPressurePct(b),
 				executionBudgetDecision: executionBudget.decision,
 				executionBudgetReady: executionBudget.readyForExecution,
+				executionBudgetEvidence: executionBudget.evidence,
+				executionBudgetEvidenceSource: "route-advisory" as const,
+				executionBudgetEvidenceProvider: b.provider,
+				executionBudgetEvidenceGeneratedAtIso: status.source.generatedAtIso,
 				_sortScore: routePriority(b, profile),
 			};
 		})
