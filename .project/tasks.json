@@ -22119,7 +22119,7 @@
     {
       "id": "TASK-BUD-993",
       "description": "Avaliar e empacotar suporte opcional a Bun para agentes pi-stack",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-992"
@@ -22135,7 +22135,8 @@
         "Adicionar orientação para agentes escolherem `bun` apenas quando compatível com o projeto."
       ],
       "milestone": "tooling-acceleration-roadmap-2026-05",
-      "notes": "Backlog: Bun como acelerador opcional/pronto para uso na pi-stack, sem substituir Node quando Node for mais correto."
+      "notes": "Backlog: Bun como acelerador opcional/pronto para uso na pi-stack, sem substituir Node quando Node for mais correto.\n[rationale:risk-control] Bun support must be optional and evidence-based because installing or switching JS tooling in a pnpm/Node monorepo can create compatibility, disk, cache, and PATH risk. This slice records read-only detection and opt-in policy only.\nCompleted optional Bun support evaluation as report-only packaging guidance. Bun is absent locally, so current state is needs-opt-in-install; agents should keep Node/pnpm as default here unless a future explicit opt-in canary changes that.",
+      "verification": "VERIF-TASK-BUD-993-BUN-OPTIONAL-PACKET"
     },
     {
       "id": "TASK-BUD-994",

@@ -14786,6 +14786,15 @@
       "method": "doc-marker-and-i18n-lint",
       "timestamp": "2026-05-07T23:26:02.029Z",
       "evidence": "Created `docs/research/tooling-acceleration-roadmap-2026-05.md` and linked it from `packages/pi-stack/README.md`. The roadmap maps candidate accelerators (`bun`, `uv`, ripgrep/fd, tsx/esbuild), separates report-only inventory, local canary, opt-in wrapper, and package adoption phases, defines decision criteria (speed, compatibility, safety, offline/cache, maintenance, cognitive cost), and preserves policy that agents should use Node/Python directly when project conventions make them the right choice. Validation: safe_marker_check on roadmap markers -> pass; safe_marker_check on README link -> pass; i18n_lint_text pt-BR excerpt -> pass. [rationale:risk-control] This is documentation/planning only and explicitly blocks install/bootstrap until future opt-in canaries."
+    },
+    {
+      "id": "VERIF-TASK-BUD-993-BUN-OPTIONAL-PACKET",
+      "target": "TASK-BUD-993",
+      "target_type": "task",
+      "status": "passed",
+      "method": "read-only-detection-and-doc-markers",
+      "timestamp": "2026-05-07T23:28:40.857Z",
+      "evidence": "Evaluated optional Bun support without installation. Read-only detection: `bun` not found in PATH; `node v24.6.0` and `pnpm 10.33.0` are available. Updated `docs/research/tooling-acceleration-roadmap-2026-05.md` with a Bun package section: current decision `needs-opt-in-install`, use cases where Bun can accelerate, cases where Node/pnpm remain preferred, and an opt-in bootstrap sequence that detects first, emits a report-only packet if absent, and only uses Bun after a local canary. Updated `packages/pi-stack/README.md` to state the `use-if-available` policy. Validation: safe_marker_check roadmap Bun markers -> pass; safe_marker_check README opt-in policy -> pass; board_task_quality_gate TASK-BUD-993 -> closeAllowed=yes. [rationale:risk-control] No install/bootstrap/global PATH change was performed."
     }
   ]
 }

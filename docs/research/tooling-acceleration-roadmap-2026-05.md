@@ -56,9 +56,39 @@ Tornar a pi-stack pronta para usar ferramentas rápidas quando elas ajudam, sem 
 - Manutenção: reduz complexidade operacional em vez de criar bifurcação de tooling.
 - Custo cognitivo: agente consegue explicar por que escolheu a ferramenta.
 
+## Pacote inicial: Bun (`TASK-BUD-993`)
+
+### Detecção read-only local
+
+- `bun`: não encontrado no PATH deste ambiente.
+- `node`: disponível (`v24.6.0`).
+- `pnpm`: disponível (`10.33.0`).
+
+### Decisão atual
+
+`bun` fica em estado `needs-opt-in-install`. A pi-stack pode orientar agentes a usá-lo quando já estiver presente, mas não deve instalar nem trocar comandos oficiais automaticamente.
+
+### Quando Bun pode acelerar
+
+- Scripts JS/TS isolados sem dependência de semântica específica do `pnpm`.
+- Testes pequenos em projetos que já declaram suporte a Bun.
+- Canaries onde a saída é comparada com o comando oficial do projeto.
+
+### Quando manter Node/pnpm
+
+- Monorepos com `pnpm-workspace.yaml` e scripts já validados via `pnpm`.
+- Testes Vitest/TS que dependem da configuração atual do projeto.
+- Qualquer tarefa em que instalar Bun aumentaria risco de disco, cache ou PATH global.
+
+### Bootstrap opt-in proposto
+
+1. Detectar `bun --version` sem instalar.
+2. Se ausente, emitir pacote report-only com instruções e rollback; não executar install.
+3. Se presente, rodar canary pequeno comparando comando Bun com comando oficial.
+4. Só documentar `use-if-available` após canary passar.
+
 ## Próximas tarefas
 
-- `TASK-BUD-993`: avaliar suporte opcional a Bun.
 - `TASK-BUD-994`: avaliar suporte opcional a uv.
 
 ## Rollback padrão

@@ -135,7 +135,7 @@ Ativar: `/settings` → selecionar `agents-lab`
 >
 > Guia de governança provider/model para colônia e multi-agentes: [`docs/guides/colony-provider-model-governance.md`](docs/guides/colony-provider-model-governance.md)
 >
-> Roadmap de tooling rápido para agentes (`bun`, `uv` e similares): [`docs/research/tooling-acceleration-roadmap-2026-05.md`](docs/research/tooling-acceleration-roadmap-2026-05.md)
+> Roadmap de tooling rápido para agentes (`bun`, `uv` e similares): [`docs/research/tooling-acceleration-roadmap-2026-05.md`](docs/research/tooling-acceleration-roadmap-2026-05.md). A política atual é `use-if-available`: detectar de forma read-only, validar com canary local e nunca instalar/substituir Node/Python sem opt-in explícito.
 >
 > Guia de governança forte do scheduler: [`docs/guides/scheduler-governance.md`](docs/guides/scheduler-governance.md)
 >
