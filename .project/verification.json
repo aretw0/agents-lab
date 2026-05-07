@@ -14723,6 +14723,15 @@
       "method": "targeted-vitest",
       "timestamp": "2026-05-07T22:26:24.426Z",
       "evidence": "Implemented structured route-to-agent-run budget evidence handoff. `buildRouteAdvisory` now emits structured execution budget evidence fields (source=route-advisory, provider, generatedAtIso, evidence text) for each considered provider. `resolveProviderExecutionBudgetEvidence` now tracks source/freshness/consistency/humanReviewRequired and blocks stale structured evidence, missing structured timestamps, blocked budgets, unknown decisions, and provider mismatches. `buildAgentRunStartPacket` now accepts/preserves structured budget evidence fields and exposes freshness/consistency/human-review state in runSpec/summary/next actions. Tool schema accepts budget_evidence_source/provider/generated_at/max_age. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts --reporter=dot` -> 2 files, 63 tests passed. [rationale:risk-control] Structured evidence reduces wrong-provider/stale-budget dispatch risk without enabling auto-switch or dispatch. Runtime reload is required before trusting the live tool surface."
+    },
+    {
+      "id": "VERIF-TASK-BUD-998-OPERATOR-PACKET-LIVE-SMOKE",
+      "target": "TASK-BUD-998",
+      "target_type": "task",
+      "status": "passed",
+      "method": "targeted-vitest-and-provider-native-canary",
+      "timestamp": "2026-05-07T22:40:44.901Z",
+      "evidence": "Implemented ergonomic provider-native agent-run wrapper/API. Added report-only `agent_run_operator_packet` builder/tool that derives stable runId/logPath from task_id+purpose, defaults to no-session/minimal-no-extensions/read-only tools/read-only file contract, attaches declared files in the command preview, preserves structured budget evidence, and emits validation checklist plus rollback hint without dispatch authority. Updated `agent_run_start_packet` preview to use `--print @declared_files <goal>`, matching the canary path that avoids missing-file failures. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 1 file, 20 tests passed. After reload, live `agent_run_operator_packet` returned ready-for-human-decision for run_id=task-bud-998-live-smoke with route-advisory budget evidence. Bounded DashScope read-only canary executed using the new packet pattern: exit_code=0, output_bytes=849, stale_count=0, PASS, safe_marker_check PASS+EXIT_CODE=0 ok, `agent_run_outcome_packet file_contract=read-only` -> contract=pass/process=completed/recommendation=stop. Log: .pi/reports/task-bud-998-live-smoke.log. [rationale:risk-control] The new wrapper reduces manual command assembly risk while preserving report-only governance and explicit human/operator gates."
     }
   ]
 }

@@ -1,50 +1,51 @@
 {
-  "timestamp": "2026-05-07T22:34:06.175Z",
-  "context": "Human noted auto-resume should distinguish graceful pre-compact stop vs interrupted/unknown stop; created TASK-BUD-999 to add bounded stopSou [snip] trusted, as user said they will reload. [truncated:+848 chars]",
-  "current_tasks": [
-    "TASK-BUD-998"
-  ],
+  "timestamp": "2026-05-07T22:41:12.654Z",
+  "context": "Reload completed by user; continued TASK-BUD-998. Gates ok: context ok, machine ok for bounded work despite tight disk, route advisory recomm [snip] nt; final positive marker check passed. [truncated:+806 chars]",
   "next_actions": [
-    "Commit TASK-BUD-999 backlog plus TASK-BUD-998 ergonomic slice, excluding parked TASK-BUD-968 WIP.",
-    "After user reloads, live-smoke agent_run_operator_packet and structured budget evidence.",
-    "Run one bounded provider-native canary through the new operator packet before completing TASK-BUD-998."
+    "Commit TASK-BUD-998 board/handoff evidence and any intended registry/log evidence if tracked or appropriate.",
+    "Keep TASK-BUD-999 planned for graceful-vs-interrupted auto-resume evidence.",
+    "Continue next conservative lane only after checking dirty state; do not touch parked TASK-BUD-968 WIP."
   ],
   "blockers": [
-    "Runtime /reload required before trusting new live tool surface.",
-    "TASK-BUD-998 not complete until live smoke/canary through new packet.",
-    "TASK-BUD-968 quota/footer WIP remains parked and dirty."
+    "TASK-BUD-968 quota/footer WIP remains parked and dirty.",
+    "Disk remains tight; continue only bounded work."
   ],
   "recent_validation": [
-    "TASK-BUD-999 created for graceful-vs-interrupted auto-resume evidence",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporte [snip] -> 1 file, 20 tests passed [truncated:+6 chars]"
+    "quota_visibility_route balanced -> dashscope ok with route-advisory structured budget evidence",
+    "agent_run_operator_packet live smoke -> ready-for-human-decision runId=task-bud-998-live-smoke dispatch=no",
+    "bounded DashScope canary task-bud-998-live-smoke -> exit_code=0 output_bytes=849 stale_count=0 PASS"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-998",
     "canonical_links": [
       "task:TASK-BUD-998",
-      "task:TASK-BUD-999"
+      "task:TASK-BUD-998-LIVE-SMOKE"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T22:34:06.175Z",
+    "generatedAtIso": "2026-05-07T22:41:12.654Z",
     "level": "ok",
-    "percent": 42,
+    "percent": 43,
     "action": "continue",
-    "recommendation": "commit-ergonomic-slice-then-await-reload-for-live-smoke"
+    "recommendation": "commit-TASK-BUD-998-evidence",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T22:34:06.175Z",
+      "atIso": "2026-05-07T22:41:12.654Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 42,
+      "percent": 43,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-ergonomic-slice-then-await-reload-for-live-smoke"
+      "recommendation": "commit-TASK-BUD-998-evidence"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-998"
   ]
 }
