@@ -1,48 +1,47 @@
 {
-  "timestamp": "2026-05-07T20:28:45.148Z",
-  "context": "Operator explicitly confirmed destructive cleanup: delete other pi sessions and keep only current session. Deleted 15 non-current session fil [snip] reshold, so worker/canary remains held. [truncated:+281 chars]",
+  "timestamp": "2026-05-07T20:34:31.488Z",
+  "context": "Operator asked whether we can lower the disk threshold to around 1GB to allow attempting a bounded ~500MB operation. Applied explicit .pi/set [snip] rity=ok / longRun=allow at ~1.8GB free. [truncated:+293 chars]",
   "next_actions": [
-    "Do not start worker/canary while machine gate remains pause.",
-    "Need ~500MB more free to pass the 2GB disk pause threshold; safest remaining option is externa [snip] emains insufficient alone. [truncated:+112 chars]",
-    "Commit board/handoff evidence if desired."
+    "Commit settings/board/handoff threshold adjustment if appropriate.",
+    "Proceed only with one bounded provider-native canary; avoid broad scans, installs, builds, or large logs.",
+    "Monitor disk after canary; if free approaches 1GB, stop and checkpoint."
   ],
   "blockers": [
-    "Machine maintenance gate remains pause (<2GB free).",
+    "Threshold override is intentionally more permissive; do not treat as general long-run capacity.",
     "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated."
   ],
   "recent_validation": [
-    "Keep-file existed before and after deletion: .sandbox/pi-agent/sessions/--C--Users-aretw-Docum [snip] bc-b1df-30391c64023e.jsonl [truncated:+66 chars]",
-    "Deleted 15 other bounded session files only under .sandbox/pi-agent/sessions",
-    "machine_maintenance_status after cleanup -> pause, disk free≈1526MB"
+    "structured_io_json dryRun for .pi/settings piStack.machineMaintenance -> ok-preview",
+    "structured_io_json apply -> ok-applied",
+    "machine_maintenance_status after override -> severity=ok action=continue longRun=allow disk free≈1816MB"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-991",
     "canonical_links": [
-      "task:TASK-BUD-991",
-      "commit:30391c64023e"
+      "task:TASK-BUD-991"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T20:28:45.148Z",
+    "generatedAtIso": "2026-05-07T20:34:31.488Z",
     "level": "ok",
-    "percent": 49,
+    "percent": 51,
     "action": "continue",
-    "recommendation": "external-cleanup-or-explicit-cache-removal-before-canary",
+    "recommendation": "commit-threshold-override-then-one-bounded-canary",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T20:28:45.148Z",
+      "atIso": "2026-05-07T20:34:31.488Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 49,
+      "percent": 51,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "external-cleanup-or-explicit-cache-removal-before-canary"
+      "recommendation": "commit-threshold-override-then-one-bounded-canary"
     }
   ],
   "completed_tasks": [

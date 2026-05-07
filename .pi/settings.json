@@ -214,6 +214,11 @@
     },
     "governanceProfile": {
       "active": "conservative"
+    },
+    "machineMaintenance": {
+      "diskWarnFreeMb": 1024,
+      "diskPauseFreeMb": 768,
+      "diskBlockFreeMb": 512
     }
   }
 }
