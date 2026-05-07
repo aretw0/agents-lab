@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentRunPlan, evaluateAgentSpawnReadiness } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentRunPlan, buildAgentRunStartPacket, evaluateAgentSpawnReadiness } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -11,6 +11,7 @@ describe("agent spawn readiness contract", () => {
       "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness.ts",
       "packages/pi-stack/extensions/guardrails-core-agent-run-plan.ts",
       "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+      "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
       "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
     ];
     const supersededMarkers = [
@@ -110,6 +111,60 @@ describe("agent spawn readiness contract", () => {
       recommendationCode: "agent-run-ready-for-human-decision",
       blockers: [],
     });
+  });
+
+  it("builds a report-only provider-native agent run start packet", () => {
+    const result = buildAgentRunStartPacket({
+      runId: "task-bud-990-stale-resume-review",
+      goal: "Review TASK-BUD-990 stale resume guidance fix and return a bounded note.",
+      providerModelRef: "dashscope/qwen3-coder-plus",
+      cwd: process.cwd(),
+      declaredFiles: ["packages/pi-stack/extensions/context-watchdog-auto-resume.ts"],
+      timeoutMs: 90_000,
+      logPath: ".pi/reports/task-bud-990-stale-resume-review.log",
+    });
+
+    expect(result).toMatchObject({
+      mode: "agent-run-start-packet",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      processStopAllowed: false,
+      requiresHumanDecision: true,
+      singleRunOnly: true,
+      decision: "ready-for-human-decision",
+      recommendationCode: "agent-run-start-ready-for-human-decision",
+      blockers: [],
+      commandPreview: {
+        command: "pi",
+        shellInterpolationAllowed: false,
+      },
+      humanConfirmationPhrase: "execute o worker task-bud-990-stale-resume-review",
+    });
+    expect(result.commandPreview.args).toContain("--model");
+    expect(result.commandPreview.args).toContain("dashscope/qwen3-coder-plus");
+    expect(result.commandPreview.args).toContain("read,grep,find,ls");
+  });
+
+  it("blocks provider-native start packets that request write tools or protected scope", () => {
+    const result = buildAgentRunStartPacket({
+      runId: "run-write-blocked",
+      goal: "edit protected settings",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: [".pi/settings.json"],
+      timeoutMs: 90_000,
+      toolAllowlist: ["read", "edit", "bash"],
+      logPath: ".pi/reports/run-write-blocked.log",
+      protectedScopeRequested: true,
+    });
+
+    expect(result.decision).toBe("blocked");
+    expect(result.recommendationCode).toBe("agent-run-start-blocked-protected-scope");
+    expect(result.blockers).toContain("protected-scope-requested");
+    expect(result.blockers).toContain("non-read-only-tools:edit,bash");
+    expect(result.processStartAllowed).toBe(false);
   });
 
   it("blocks agent run plans without abort and bounded logs", () => {
@@ -293,6 +348,51 @@ describe("agent spawn readiness contract", () => {
     expect(result.content?.[0]?.text).toContain("agent-spawn-readiness: decision=ready-for-agent-run");
     expect(result.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(result.content?.[0]?.text).not.toContain('\"decision\"');
+  });
+
+  it("exposes provider-native agent_run_start_packet as report-only tool", async () => {
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    guardrailsCore(pi);
+
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_start_packet");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+
+    const result = await tool.execute(
+      "tc-agent-run-start-packet",
+      {
+        run_id: "run-provider-native",
+        goal: "return a bounded review note",
+        provider_model_ref: "dashscope/qwen3-coder-plus",
+        declared_files: ["docs/research/agent-run-provider-native-runner-2026-05.md"],
+        timeout_ms: 90000,
+        log_path: ".pi/reports/run-provider-native.log",
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+
+    expect(result.details?.mode).toBe("agent-run-start-packet");
+    expect(result.details?.dispatchAllowed).toBe(false);
+    expect(result.details?.processStartAllowed).toBe(false);
+    expect(result.details?.decision).toBe("ready-for-human-decision");
+    expect(result.content?.[0]?.text).toContain("agent-run-start-packet: decision=ready-for-human-decision");
+    expect(result.content?.[0]?.text).not.toContain('"commandPreview"');
   });
 
   it("exposes agent run status, log tail, and abort surfaces", async () => {

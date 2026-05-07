@@ -96,6 +96,7 @@ export { evaluateColonyPromotionGate } from "./guardrails-core-colony-promotion-
 export { buildOpsCalibrationDecisionPacket } from "./guardrails-core-ops-calibration";
 export { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
 export { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
+export { buildAgentRunStartPacket } from "./guardrails-core-agent-run-start";
 export { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
 export { buildTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationEvidence, extractTrustedHumanConfirmationEvidenceFromEnvelope, recordTrustedHumanConfirmationUiDecision, resolveHumanConfirmationAuditPlan, resolveHumanConfirmationEvidenceMatch, resolveHumanConfirmationImplementationChannelPlan, resolveHumanConfirmationRuntimeConsumptionPlan, resolveHumanConfirmationSignalSourcePlan } from "./guardrails-core-human-confirmation";
 export { resolveMonitorClassifyFailureReadiness } from "./monitor-observability";

@@ -5,6 +5,7 @@ import { Type } from "@sinclair/typebox";
 import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
 import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunRegistryEntry, type AgentRunState } from "./guardrails-core-agent-run-runtime";
+import { buildAgentRunStartPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
@@ -123,6 +124,46 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_plan",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_start_packet",
+    label: "Agent Run Start Packet",
+    description: "Report-only provider-native agent-run start packet with exact pi subprocess argv preview. Never dispatches execution and always requires explicit human confirmation.",
+    parameters: Type.Object({
+      run_id: Type.Optional(Type.String({ description: "Agent run id for the future worker." })),
+      executor_kind: Type.Optional(Type.String({ description: "Executor kind. Initial supported value: pi-print-subprocess." })),
+      goal: Type.Optional(Type.String({ description: "Run goal/prompt for the future worker." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. dashscope/qwen3-coder-plus." })),
+      cwd: Type.Optional(Type.String({ description: "Explicit worker cwd." })),
+      declared_files: Type.Optional(Type.Array(Type.String(), { description: "Exact file scope for the future worker." })),
+      timeout_ms: Type.Optional(Type.Number({ description: "Short bounded timeout in milliseconds." })),
+      tool_allowlist: Type.Optional(Type.Array(Type.String(), { description: "Read-only tool allowlist for first provider-native canaries." })),
+      session_isolation: Type.Optional(Type.String({ description: "Session isolation mode: no-session or run-session-dir." })),
+      log_path: Type.Optional(Type.String({ description: "Bounded log path for stdout/stderr metadata." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = buildAgentRunStartPacket({
+        runId: typeof p.run_id === "string" ? p.run_id : undefined,
+        executorKind: typeof p.executor_kind === "string" ? p.executor_kind : undefined,
+        goal: typeof p.goal === "string" ? p.goal : undefined,
+        providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
+        cwd: typeof p.cwd === "string" ? p.cwd : ctx?.cwd,
+        declaredFiles: asOptionalStringArray(p.declared_files),
+        timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
+        toolAllowlist: asOptionalStringArray(p.tool_allowlist),
+        sessionIsolation: typeof p.session_isolation === "string" ? p.session_isolation : undefined,
+        logPath: typeof p.log_path === "string" ? p.log_path : undefined,
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_start_packet",
         summary: result.summary,
         details: result,
       });

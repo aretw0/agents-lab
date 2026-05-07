@@ -22024,7 +22024,7 @@
     {
       "id": "TASK-BUD-989",
       "description": "[P1/design-first] Projetar executor agent-run provider-native usando providers pi (openai-codex/dashscope) antes de novos canaries, evitando depender do claude_code_execute como caminho principal.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-986",
@@ -22044,7 +22044,8 @@
         "Especificar requisitos mínimos: prompt, provider/model, cwd, declared files, timeout, log stream, abort, status, outcome e empty-output hard fail."
       ],
       "milestone": "subagent-sovereignty-lane-2026-05",
-      "notes": "Criada por steering humano: evitar insistir em Claude Code adapter e cultivar subagentes com providers openai-codex/dashscope, especialmente a cota separada gpt-5.3-codex-spark.\n[provenance:human] source_task=TASK-BUD-986 reason=Primeiro rehearsal via claude_code_execute retornou output vazio; usuário pediu avaliar ROI/ecossistema e usar providers próprios para subagents.\n[steer] Humble alignment: objetivo não é blog/newsletter nem curadoria infinita; esses são consequências possíveis. Meta operacional imediata é galvanizar o laboratório para trabalhar continuamente com subagentes úteis, provider-native runner, evidência e limpeza/organização no processo. Critério de ROI: reduzir carga do control plane e transformar padrões repetitivos em hard pathways reutilizáveis sem fingir maturidade antes dos gates."
+      "notes": "Criada por steering humano: evitar insistir em Claude Code adapter e cultivar subagentes com providers openai-codex/dashscope, especialmente a cota separada gpt-5.3-codex-spark.\n[provenance:human] source_task=TASK-BUD-986 reason=Primeiro rehearsal via claude_code_execute retornou output vazio; usuário pediu avaliar ROI/ecossistema e usar providers próprios para subagents.\n[steer] Humble alignment: objetivo não é blog/newsletter nem curadoria infinita; esses são consequências possíveis. Meta operacional imediata é galvanizar o laboratório para trabalhar continuamente com subagentes úteis, provider-native runner, evidência e limpeza/organização no processo. Critério de ROI: reduzir carga do control plane e transformar padrões repetitivos em hard pathways reutilizáveis sem fingir maturidade antes dos gates.\n[slice] Provider-native runner design seeded in docs/research/agent-run-provider-native-runner-2026-05.md. Direction: first implementation candidate is `pi -p --model provider/model` subprocess with explicit model, read-only tool allowlist, registry/log/abort/outcome; Claude Code remains old-path/diagnostic. Budget posture observed: openai-codex local budget blocked, dashscope ok; quality still requires canaries.\n[validation] VERIF-TASK-BUD-989-PROVIDER-NATIVE-START-PACKET linked. Implemented report-only `agent_run_start_packet`/`buildAgentRunStartPacket`: exact pi argv preview, read-only allowlist, session isolation, log path, explicit confirmation phrase, dispatch/processStart false. Focal vitest 15/15 passed. Open question before completion: reconcile original openai-first AC with live budget posture (openai-codex blocked, dashscope ok) and choose first human-confirmed canary accordingly.",
+      "verification": "VERIF-TASK-BUD-989-PROVIDER-NATIVE-START-PACKET"
     },
     {
       "id": "TASK-BUD-990",
