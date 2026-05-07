@@ -1,51 +1,55 @@
 {
-  "timestamp": "2026-05-07T22:48:38.996Z",
-  "context": "Continued toward stronger agent takeover. Implemented TASK-BUD-999: handoff checkpoints now carry bounded stopStatus/stopSource evidence and [snip] whether pre-compact stop was graceful. [truncated:+419 chars]",
+  "timestamp": "2026-05-07T22:59:08.359Z",
+  "context": "After reload and user confirmation to continue, resumed bounded local-first lane. Confirmed machine/context gates are ok. Completed TASK-BUD- [snip] promotion remains explicitly separate. [truncated:+335 chars]",
   "next_actions": [
-    "Commit TASK-BUD-999 code/board/handoff evidence, excluding parked TASK-BUD-968 WIP.",
-    "After reload, smoke context_watch_checkpoint/auto-resume prompt if desired.",
-    "Continue delegation promotion runway: reassess TASK-BUD-989 with evidence from TASK-BUD-998 an [snip] ed agent assumption slice. [truncated:+19 chars]"
+    "Commit board/handoff evidence for TASK-BUD-986/TASK-BUD-989, excluding parked TASK-BUD-968 WIP.",
+    "Prepare a promotion decision packet for the next bounded step toward agents assuming more work [snip] without explicit approval. [truncated:+35 chars]",
+    "Keep TASK-BUD-968 quota/footer WIP parked unless explicitly resumed."
   ],
   "blockers": [
-    "Runtime /reload required before live context_watch_checkpoint includes stop_status/stop_source.",
     "TASK-BUD-968 quota/footer WIP remains parked and dirty.",
-    "Disk remains tight; continue bounded work only."
+    "Disk remains tight; bounded work only.",
+    "No multi-worker/background/colony promotion without explicit human decision."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-st [snip] > 2 files, 19 tests passed [truncated:+63 chars]",
-    "board_task_complete TASK-BUD-999 -> completed"
+    "machine_maintenance_status -> severity=ok longRun=allow disk still tight",
+    "context_watch_status -> level=ok reload-not-required handoff=fresh",
+    "board_task_quality_gate TASK-BUD-989 -> closeAllowed=yes"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-999",
+    "focus": "TASK-BUD-989",
     "canonical_links": [
-      "task:TASK-BUD-999",
-      "task:TASK-BUD-968"
+      "task:TASK-BUD-989",
+      "task:TASK-BUD-998"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T22:48:38.996Z",
+    "generatedAtIso": "2026-05-07T22:59:08.359Z",
     "level": "ok",
-    "percent": 53,
+    "percent": 22,
     "action": "continue",
-    "recommendation": "commit-TASK-BUD-999-then-continue-delegation-runway",
+    "recommendation": "commit-board-evidence-then-prepare-promotion-packet",
+    "stopStatus": "graceful",
+    "stopSource": "agent",
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T22:48:38.996Z",
+      "atIso": "2026-05-07T22:59:08.359Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 53,
+      "percent": 22,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-TASK-BUD-999-then-continue-delegation-runway"
+      "recommendation": "commit-board-evidence-then-prepare-promotion-packet"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-999"
+    "TASK-BUD-989"
   ]
 }

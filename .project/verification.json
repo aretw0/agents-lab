@@ -14741,6 +14741,24 @@
       "method": "targeted-vitest",
       "timestamp": "2026-05-07T22:48:25.195Z",
       "evidence": "Implemented bounded graceful-vs-interrupted auto-resume stop evidence. `LocalSliceHandoffCheckpointInput` now accepts `stopStatus` and `stopSource`; checkpoints default to `stopStatus=graceful` and `stopSource=agent`, persist `context_watch.stopStatus/stopSource/stopSummary`, and `buildAutoResumePromptFromHandoff` emits a `previousStop:` line. Interrupted and unknown states warn that the prior slice may be half-finished and should be verified before continuing. `context_watch_checkpoint` tool accepts `stop_status` and `stop_source`. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts --reporter=dot` -> 2 files, 19 tests passed. [rationale:risk-control] This makes takeover after compaction/reload safer for future agents/operators by making incomplete-slice risk explicit."
+    },
+    {
+      "id": "VERIF-TASK-BUD-986-GOVERNED-REHEARSAL-RECORDED",
+      "target": "TASK-BUD-986",
+      "target_type": "task",
+      "status": "passed",
+      "method": "rehearsal-evidence-review",
+      "timestamp": "2026-05-07T22:51:18.427Z",
+      "evidence": "Governed one-worker rehearsal was executed and recorded without promotion. The user-confirmed run `task-bud-986-quota-ui-review-rehearsal` used bounded scope/status/log/outcome practices and exited with processState=completed but output_bytes=0; parent outcome contractDecision=fail due missing non-empty worker review note. This validated the process/contract separation and recorded real gaps before any multi-worker/colony promotion. Follow-up tasks addressed gaps: TASK-BUD-989 provider-native design/calibration, TASK-BUD-995 minimal-no-extensions isolation, TASK-BUD-996 read-only outcomes, TASK-BUD-997 structured budget evidence handoff, TASK-BUD-998 ergonomic operator packet. [rationale:risk-control] Completion records the governed rehearsal and its failure evidence; it is not counted as delegation promotion evidence."
+    },
+    {
+      "id": "VERIF-TASK-BUD-989-PROVIDER-NATIVE-RUNNER-CALIBRATED",
+      "target": "TASK-BUD-989",
+      "target_type": "task",
+      "status": "passed",
+      "method": "evidence-review-and-targeted-tests",
+      "timestamp": "2026-05-07T22:58:48.974Z",
+      "evidence": "Provider-native agent-run path is calibrated enough to close the design/calibration task without promoting multi-worker/background/colony execution. Evidence already recorded on this task includes: report-only `agent_run_start_packet`; hard fail for empty output; shared provider/model budget evidence; quota route reuse while preserving no-auto-switch; DashScope canary 2 pass; DashScope canary 4 pass with declared files attached; canary 5 finding route/start budget handoff risk; TASK-BUD-997 hardening structured budget evidence handoff; TASK-BUD-998 ergonomic operator packet and live smoke pass. Current gate: `board_task_quality_gate TASK-BUD-989` returned closeAllowed=yes. [rationale:risk-control] Completion means the single-worker provider-native runner contract is designed/calibrated; it does not authorize multi-worker/background/colony promotion, which still requires explicit human decision."
     }
   ]
 }
