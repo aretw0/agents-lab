@@ -1,54 +1,55 @@
 {
-  "timestamp": "2026-05-07T23:35:39.762Z",
-  "context": "Human steering corrected direction: control plane has been doing too much direct work. New north star is agent-first/control-plane-minimal. C [snip] spatched and no implementation started. [truncated:+246 chars]",
+  "timestamp": "2026-05-07T23:43:10.666Z",
+  "context": "Switched to agent-first execution per human steering. Prepared and executed one read-only worker, task-bud-1000-agent-first-invocation-design [snip] until implementation path is validated. [truncated:+483 chars]",
   "current_tasks": [
     "TASK-BUD-1000"
   ],
   "next_actions": [
-    "Make TASK-BUD-1000 the next focus and use a worker-first approach: prepare a read-only/authori [snip] plane writing it manually. [truncated:+54 chars]",
-    "After TASK-BUD-1000 defines policy, run TASK-BUD-1001 as the first mutation canary with explicit worker confirmation.",
-    "Control plane should not implement ordinary tasks directly unless improving agent infrastructu [snip] ering from worker failure. [truncated:+17 chars]"
+    "Commit agent-first doc, TASK-BUD-1000 update, TASK-BUD-1002 seed, and handoff.",
+    "Next focus should be TASK-BUD-1002: implement report-only AgentInvocationSpec packet so contro [snip] onger hand-assembles argv. [truncated:+12 chars]",
+    "Do not run mutation canary TASK-BUD-1001 until TASK-BUD-1002 exists and is validated."
   ],
   "blockers": [
-    "Need explicit agent-first policy before mutation canary.",
-    "No worker dispatch without explicit confirmation.",
-    "Background/multi-worker still blocked by process lifecycle/port lease capabilities."
+    "Current worker execution still required manual argv because TASK-BUD-1002 is not implemented yet.",
+    "No mutation canary until typed invocation packet exists.",
+    "Background/multi-worker still needs process lifecycle/port lease capabilities."
   ],
   "recent_validation": [
-    "board_task_create TASK-BUD-1000 -> planned",
-    "board_task_create TASK-BUD-1001 -> planned",
-    "board_task_quality_gate TASK-BUD-1000 -> needs-decomposition/macro missing deps"
+    "agent_run_operator_packet TASK-BUD-1000 -> ready-for-human-decision dispatch=no",
+    "worker task-bud-1000-agent-first-invocation-design-review -> exit_code=0 output_bytes=2451 PASS",
+    "safe_marker_check worker log -> pass"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1000",
     "canonical_links": [
       "task:TASK-BUD-1000",
-      "task:TASK-BUD-1001"
+      "task:TASK-BUD-1000-AGENT-FIRST-INVOCATION-DESIGN-REVIEW",
+      "task:TASK-BUD-1002"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T23:35:39.762Z",
+    "generatedAtIso": "2026-05-07T23:43:10.666Z",
     "level": "ok",
-    "percent": 46,
+    "percent": 50,
     "action": "continue",
-    "recommendation": "switch-to-agent-first-mode",
+    "recommendation": "commit-worker-derived-agent-first-plan-then-implement-task-bud-1002",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T23:35:39.762Z",
+      "atIso": "2026-05-07T23:43:10.666Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 46,
+      "percent": 50,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "switch-to-agent-first-mode"
+      "recommendation": "commit-worker-derived-agent-first-plan-then-implement-task-bud-1002"
     }
   ]
 }
