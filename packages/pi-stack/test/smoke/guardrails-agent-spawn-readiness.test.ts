@@ -1,3 +1,6 @@
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import guardrailsCore, { buildOneSliceAgentRunPlan, evaluateAgentSpawnReadiness } from "../../extensions/guardrails-core";
 import { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunStatus } from "../../extensions/guardrails-core-one-slice-agent-run-runtime";
@@ -189,6 +192,74 @@ describe("agent spawn readiness contract", () => {
     expect(result.content?.[0]?.text).toContain("agent-spawn-readiness: decision=ready-for-simple-spawn");
     expect(result.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(result.content?.[0]?.text).not.toContain('\"decision\"');
+  });
+
+  it("exposes one-slice agent status, log tail, and abort surfaces", async () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "one-slice-agent-run-"));
+    const reportsDir = path.join(cwd, ".pi", "reports");
+    mkdirSync(reportsDir, { recursive: true });
+    const logPath = path.join(reportsDir, "run-1.log");
+    writeFileSync(logPath, "line-1\nline-2\nline-3\n", "utf8");
+    writeFileSync(path.join(reportsDir, "one-slice-agent-runs.json"), JSON.stringify({
+      runs: [{
+        runId: "run-1",
+        pid: 12345,
+        state: "running",
+        providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+        cwd,
+        declaredFiles: ["docs/research/provider-canary-scorecard-2026-05.md"],
+        logPath,
+        startedAtIso: "2026-05-07T00:00:00.000Z",
+        lastEventAtIso: "2026-05-07T00:00:30.000Z",
+      }],
+    }), "utf8");
+
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    guardrailsCore(pi);
+
+    const getTool = (name: string) => {
+      const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === name);
+      return toolCall?.[0] as {
+        execute: (
+          toolCallId: string,
+          params: Record<string, unknown>,
+          signal: AbortSignal,
+          onUpdate: (update: unknown) => void,
+          ctx: { cwd: string },
+        ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+      };
+    };
+
+    const status = await getTool("one_slice_agent_run_status").execute("tc-status", { run_id: "run-1" }, undefined as unknown as AbortSignal, () => {}, { cwd });
+    expect(status.details?.mode).toBe("one-slice-agent-run-status");
+    expect(status.details?.processStopAllowed).toBe(false);
+    expect(status.content?.[0]?.text).toContain("state=running");
+
+    const tail = await getTool("one_slice_agent_run_log_tail").execute("tc-tail", { run_id: "run-1", max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });
+    expect(tail.details?.mode).toBe("one-slice-agent-run-log-tail");
+    expect(tail.details?.lines).toEqual(["line-3", ""]);
+
+    const killSpy = vi.spyOn(process, "kill").mockImplementation(() => true);
+    try {
+      const dryAbort = await getTool("one_slice_agent_run_abort").execute("tc-abort-dry", { run_id: "run-1" }, undefined as unknown as AbortSignal, () => {}, { cwd });
+      expect(dryAbort.details?.decision).toBe("dry-run");
+      expect(dryAbort.details?.processStopAllowed).toBe(false);
+      expect(killSpy).not.toHaveBeenCalled();
+
+      const confirmedAbort = await getTool("one_slice_agent_run_abort").execute("tc-abort", { run_id: "run-1", execute: true, operator_confirmed: true }, undefined as unknown as AbortSignal, () => {}, { cwd });
+      expect(confirmedAbort.details?.decision).toBe("abort-ready");
+      expect(confirmedAbort.details?.processStopAllowed).toBe(true);
+      expect(killSpy).toHaveBeenCalledWith(12345, "SIGTERM");
+    } finally {
+      killSpy.mockRestore();
+    }
   });
 
   it("exposes one_slice_agent_run_plan as report-only tool", async () => {
