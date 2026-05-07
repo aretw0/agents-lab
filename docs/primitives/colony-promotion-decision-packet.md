@@ -113,10 +113,10 @@ Mantém o candidate sem decisão de promoção. Use quando faltam arquivos decla
 Antes de considerar uma decisão de promotion, a primitiva `evaluateColonyPromotionGate` deve indicar sinais mínimos verdes:
 
 - readiness de background process forte (`background-process-readiness-strong` com score >= 80);
-- simple spawn readiness em `ready-for-simple-spawn`;
+- agent-run readiness em `ready-for-agent-run`;
 - reload confirmado (`liveReloadCompleted=true`).
 
-Sem esses sinais, a decisão deve permanecer `keep-report-only` com blocker explícito da lacuna (`background-readiness-signal-missing` ou `simple-spawn-readiness-signal-missing`).
+Sem esses sinais, a decisão deve permanecer `keep-report-only` com blocker explícito da lacuna (`background-readiness-signal-missing` ou `agent-run-readiness-signal-missing`).
 
 ## Relação com nudge-free/local continuity
 

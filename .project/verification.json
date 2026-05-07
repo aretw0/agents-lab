@@ -14453,6 +14453,15 @@
       "method": "bounded-grep+documentation",
       "timestamp": "2026-05-07T03:31:48.354Z",
       "evidence": "Criado docs/research/agent-run-semantic-consolidation-2026-05.md com decisão canônica: `agent run` para execução concreta de worker; `one-slice` apenas como stop condition quando necessário; não criar aliases one_slice_agent_run_*; não renomear simple_delegate_* em massa sem canary/backcompat. Inventário bounded: simple-delegate em 21 arquivos; one-slice em 19 arquivos. `docs/primitives/agents-as-tools-calibration-score.md` referencia a nota semântica. Validação: git diff --check passou; grep focal confirmou agent_run_* e ausência de ready-for-simple-spawn/agent-spawn-ready-simple nos arquivos focais."
+    },
+    {
+      "id": "VERIF-TASK-BUD-975-COLONY-AGENT-RUN",
+      "target": "TASK-BUD-975",
+      "target_type": "task",
+      "status": "passed",
+      "method": "refactor+smoke",
+      "timestamp": "2026-05-07T03:36:12.060Z",
+      "evidence": "Colony promotion gate alinhado ao readiness canônico `ready-for-agent-run`: input local `agentRunDecision`, signal `agentRunReady`, recommendationCode `colony-gate-keep-report-only-agent-run`, blocker `agent-run-readiness-signal-missing`. Teste e doc atualizados. Validação: rg focal não encontrou simpleSpawn/simple-spawn/ready-for-simple-spawn nos arquivos focais; `npx vitest run packages/pi-stack/test/smoke/guardrails-colony-promotion-gate.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` -> 2 files/14 tests passed; `git diff --check` passou."
     }
   ]
 }

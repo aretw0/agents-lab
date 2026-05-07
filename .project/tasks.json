@@ -21719,6 +21719,26 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:semantic-debt] Após remover `simple`/`one-slice` da família agent-run, ainda existem termos próximos em delegação/local canary; antes de renomear código legado, precisamos de mapa de overlap para evitar criar mais aliases ou jargão.\n[provenance:human] source_task=TASK-BUD-973 reason=Operador pediu coesão sem jargão e cuidado com primitivas overlapping enquanto fica AFK.\n[slice] Documentado mapa semântico para evitar overlap: `agent run` cobre execução concreta de worker; `one-slice` permanece só como stop condition local quando necessário; `simple-delegate` fica legado/migração futura, sem aliases novos.\n[validation] `git diff --check` passou; grep bounded inventariou 21 arquivos com `simple-delegate` e 19 com `one-slice` fora da família agent-run.",
       "verification": "VERIF-TASK-BUD-974-SEMANTIC-AUDIT"
+    },
+    {
+      "id": "TASK-BUD-975",
+      "description": "[P1/local-safe] Atualizar colony promotion gate para readiness `agent-run` sem `simple-spawn`.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-colony-promotion-gate.ts",
+        "packages/pi-stack/test/smoke/guardrails-colony-promotion-gate.test.ts",
+        "docs/primitives/colony-promotion-decision-packet.md"
+      ],
+      "acceptance_criteria": [
+        "Substituir precondition `ready-for-simple-spawn` por `ready-for-agent-run`.",
+        "Renomear campos/recommendation text de simpleSpawn para agentRun onde for local e seguro.",
+        "Atualizar teste focal e doc de primitive.",
+        "Rodar smoke focal de colony promotion e `git diff --check`; não tocar settings/routing/CI/publish/credenciais."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:semantic-debt] Mudança canônica para `agent-run` deixou gate de colony ainda preso a `simple-spawn`; alinhar dependência evita drift e teste quebrado sem renomear lanes grandes.\n[provenance:human] source_task=TASK-BUD-973 reason=Pedido para remover semântica desnecessária e manter coesão sem conceitos repetidos.\n[slice] Atualizado gate de promotion de colônia para consumir `ready-for-agent-run`, removendo `simple-spawn` do contrato focal.\n[validation] Focal grep sem `simpleSpawn|simple-spawn|ready-for-simple-spawn`; smoke colony+agent readiness -> 14 passed; `git diff --check` passou.",
+      "verification": "VERIF-TASK-BUD-975-COLONY-AGENT-RUN"
     }
   ]
 }

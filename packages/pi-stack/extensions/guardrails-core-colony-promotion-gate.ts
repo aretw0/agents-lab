@@ -3,7 +3,7 @@ export type ColonyPromotionGateDecision = "keep-report-only" | "ready-for-colony
 export interface ColonyPromotionGateInput {
   backgroundReadinessScore?: number;
   backgroundReadinessCode?: string;
-  simpleSpawnDecision?: string;
+  agentRunDecision?: string;
   liveReloadCompleted?: boolean;
   protectedScopeRequested?: boolean;
 }
@@ -18,19 +18,19 @@ export interface ColonyPromotionGateResult {
   recommendationCode:
     | "colony-gate-ready"
     | "colony-gate-keep-report-only-background"
-    | "colony-gate-keep-report-only-simple-spawn"
+    | "colony-gate-keep-report-only-agent-run"
     | "colony-gate-keep-report-only-reload"
     | "colony-gate-keep-report-only-protected";
   recommendation: string;
   blockers: string[];
   signals: {
     backgroundReady: boolean;
-    simpleSpawnReady: boolean;
+    agentRunReady: boolean;
     liveReloadCompleted: boolean;
     protectedScopeRequested: boolean;
     backgroundReadinessScore: number;
     backgroundReadinessCode: string;
-    simpleSpawnDecision: string;
+    agentRunDecision: string;
   };
   summary: string;
 }
@@ -45,18 +45,18 @@ export function evaluateColonyPromotionGate(input: ColonyPromotionGateInput = {}
   const backgroundReadinessCode = typeof input.backgroundReadinessCode === "string" && input.backgroundReadinessCode.trim().length > 0
     ? input.backgroundReadinessCode.trim()
     : "unknown";
-  const simpleSpawnDecision = typeof input.simpleSpawnDecision === "string" && input.simpleSpawnDecision.trim().length > 0
-    ? input.simpleSpawnDecision.trim()
+  const agentRunDecision = typeof input.agentRunDecision === "string" && input.agentRunDecision.trim().length > 0
+    ? input.agentRunDecision.trim()
     : "unknown";
   const liveReloadCompleted = input.liveReloadCompleted === true;
   const protectedScopeRequested = input.protectedScopeRequested === true;
 
   const backgroundReady = backgroundReadinessScore >= 80 && backgroundReadinessCode === "background-process-readiness-strong";
-  const simpleSpawnReady = simpleSpawnDecision === "ready-for-simple-spawn";
+  const agentRunReady = agentRunDecision === "ready-for-agent-run";
 
   const blockers: string[] = [];
   let recommendationCode: ColonyPromotionGateResult["recommendationCode"] = "colony-gate-ready";
-  let recommendation = "background and simple spawn gates are green; colony discussion can proceed as human decision packet only.";
+  let recommendation = "background and agent-run gates are green; colony discussion can proceed as human decision packet only.";
 
   if (!liveReloadCompleted) {
     blockers.push("reload-not-confirmed");
@@ -70,10 +70,10 @@ export function evaluateColonyPromotionGate(input: ColonyPromotionGateInput = {}
     blockers.push("background-readiness-signal-missing");
     recommendationCode = "colony-gate-keep-report-only-background";
     recommendation = "background readiness is not strong enough; close background gaps before considering colony promotion.";
-  } else if (!simpleSpawnReady) {
-    blockers.push("simple-spawn-readiness-signal-missing");
-    recommendationCode = "colony-gate-keep-report-only-simple-spawn";
-    recommendation = "simple spawn readiness is not green; validate single-agent bounded spawn before colony promotion.";
+  } else if (!agentRunReady) {
+    blockers.push("agent-run-readiness-signal-missing");
+    recommendationCode = "colony-gate-keep-report-only-agent-run";
+    recommendation = "agent-run readiness is not green; validate single-agent bounded run before colony promotion.";
   }
 
   const decision: ColonyPromotionGateDecision = blockers.length > 0 ? "keep-report-only" : "ready-for-colony-gate";
@@ -90,19 +90,19 @@ export function evaluateColonyPromotionGate(input: ColonyPromotionGateInput = {}
     blockers,
     signals: {
       backgroundReady,
-      simpleSpawnReady,
+      agentRunReady,
       liveReloadCompleted,
       protectedScopeRequested,
       backgroundReadinessScore,
       backgroundReadinessCode,
-      simpleSpawnDecision,
+      agentRunDecision,
     },
     summary: [
       "colony-promotion-gate:",
       `decision=${decision}`,
       `code=${recommendationCode}`,
       `backgroundReady=${backgroundReady ? "yes" : "no"}`,
-      `simpleSpawnReady=${simpleSpawnReady ? "yes" : "no"}`,
+      `agentRunReady=${agentRunReady ? "yes" : "no"}`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),
   };
