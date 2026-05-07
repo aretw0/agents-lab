@@ -22001,7 +22001,7 @@
     {
       "id": "TASK-BUD-988",
       "description": "[P1/local-safe] Hardening determinístico de feedback de monitores: distinguir empty-response real do control plane, worker vazio e stale/context divergence antes de gastar classifier token.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-777",
@@ -22020,7 +22020,8 @@
         "Validar com fixture/regressão local-safe reproduzindo empty worker output versus empty assistant turn."
       ],
       "milestone": "subagent-sovereignty-lane-2026-05",
-      "notes": "Criada por feedback humano: não assumir que monitor está vendo worker; validar deterministicamente e evitar token spend com falso positivo/negativo recorrente.\n[provenance:human] source_task=TASK-BUD-986 reason=Monitor fragility/commit feedback durante first worker rehearsal levantou risco de engenharia de contexto dos monitores; recurring_failure_hardening_plan indicou block-old-path pa…"
+      "notes": "Criada por feedback humano: não assumir que monitor está vendo worker; validar deterministicamente e evitar token spend com falso positivo/negativo recorrente.\n[provenance:human] source_task=TASK-BUD-986 reason=Monitor fragility/commit feedback durante first worker rehearsal levantou risco de engenharia de contexto dos monitores; recurring_failure_hardening_plan indicou block-old-path pa…\n[rationale:risk-control] Monitor empty-response hardening reduces false positives and token spend by using deterministic evidence to identify whether an alert is about the control-plane assistant final, a worker/subprocess output, or monitor classifier feedback before invoking classifiers.\nCompleted deterministic empty-response target hardening for control-plane assistant, worker/subprocess, and monitor-classifier cases. Added worker_log_file evidence path and regression tests.",
+      "verification": "VERIF-TASK-BUD-988-MONITOR-EMPTY-TARGETS"
     },
     {
       "id": "TASK-BUD-989",

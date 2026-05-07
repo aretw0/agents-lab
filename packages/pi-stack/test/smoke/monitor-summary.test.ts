@@ -215,6 +215,54 @@ describe("monitor-summary", () => {
 		expect(String(result.content?.[0]?.text ?? "")).toContain("assistantFinalChars=");
 	});
 
+	it("classifica feedback de classifier como alvo monitor-classifier", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "monitor-empty-response-classifier-target-"));
+		const sessionFile = join(cwd, "session.jsonl");
+		writeFileSync(
+			sessionFile,
+			`${JSON.stringify({ timestamp: "2026-05-05T02:00:30.000Z", message: { role: "assistant", content: [{ type: "text", text: "Warning: [fragility] classify failed: No tool call in response" }] } })}\n`,
+			"utf8",
+		);
+
+		const pi = makeMockPi();
+		monitorSummaryExtension(pi as any);
+		const tool = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls
+			.map(([def]) => def)
+			.find((def) => def?.name === "monitor_empty_response_evidence");
+
+		const result = await tool.execute("tc-empty-classifier-target", { session_file: sessionFile }, undefined, undefined, { cwd });
+		expect(result.details.decision).toBe("monitor-context-divergence");
+		expect(result.details.target).toBe("monitor-classifier");
+		expect(result.details.reasons).toContain("classifier-feedback-visible");
+		expect(String(result.content?.[0]?.text ?? "")).toContain("target=monitor-classifier");
+	});
+
+	it("distingue worker vazio de final vazio do control plane", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "monitor-empty-response-worker-target-"));
+		const sessionFile = join(cwd, "session.jsonl");
+		const workerLogFile = join(cwd, "worker.log");
+		writeFileSync(
+			sessionFile,
+			`${JSON.stringify({ timestamp: "2026-05-05T02:00:45.000Z", message: { role: "assistant", content: [{ type: "text", text: "control plane visible response" }] } })}\n`,
+			"utf8",
+		);
+		writeFileSync(workerLogFile, "   \n", "utf8");
+
+		const pi = makeMockPi();
+		monitorSummaryExtension(pi as any);
+		const tool = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls
+			.map(([def]) => def)
+			.find((def) => def?.name === "monitor_empty_response_evidence");
+
+		const result = await tool.execute("tc-empty-worker-target", { session_file: sessionFile, worker_log_file: workerLogFile }, undefined, undefined, { cwd });
+		expect(result.details.decision).toBe("empty-response");
+		expect(result.details.target).toBe("worker-subprocess-output");
+		expect(result.details.recommendationCode).toBe("monitor-worker-empty-output");
+		expect(result.details.evidenceSource).toBe("worker-log");
+		expect(result.details.nextActions).toContain("use-agent-run-outcome-packet");
+		expect(String(result.content?.[0]?.text ?? "")).toContain("target=worker-subprocess-output");
+	});
+
 	it("preserva empty-response quando o JSONL comprova final vazio", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "monitor-empty-response-real-"));
 		const sessionFile = join(cwd, "session.jsonl");
@@ -233,6 +281,7 @@ describe("monitor-summary", () => {
 		const result = await tool.execute("tc-empty-real", { session_file: sessionFile }, undefined, undefined, { cwd });
 		expect(result.details.decision).toBe("empty-response");
 		expect(result.details.recommendationCode).toBe("monitor-empty-response-real");
+		expect(result.details.target).toBe("control-plane-assistant-turn");
 		expect(result.details.assistantFinalChars).toBe(0);
 		expect(result.details.evidenceSource).toBe("jsonl");
 	});

@@ -14759,6 +14759,15 @@
       "method": "evidence-review-and-targeted-tests",
       "timestamp": "2026-05-07T22:58:48.974Z",
       "evidence": "Provider-native agent-run path is calibrated enough to close the design/calibration task without promoting multi-worker/background/colony execution. Evidence already recorded on this task includes: report-only `agent_run_start_packet`; hard fail for empty output; shared provider/model budget evidence; quota route reuse while preserving no-auto-switch; DashScope canary 2 pass; DashScope canary 4 pass with declared files attached; canary 5 finding route/start budget handoff risk; TASK-BUD-997 hardening structured budget evidence handoff; TASK-BUD-998 ergonomic operator packet and live smoke pass. Current gate: `board_task_quality_gate TASK-BUD-989` returned closeAllowed=yes. [rationale:risk-control] Completion means the single-worker provider-native runner contract is designed/calibrated; it does not authorize multi-worker/background/colony promotion, which still requires explicit human decision."
+    },
+    {
+      "id": "VERIF-TASK-BUD-988-MONITOR-EMPTY-TARGETS",
+      "target": "TASK-BUD-988",
+      "target_type": "task",
+      "status": "passed",
+      "method": "targeted-vitest",
+      "timestamp": "2026-05-07T23:04:36.999Z",
+      "evidence": "Added deterministic empty-response target classification. `monitor_empty_response_evidence` now reports `target=control-plane-assistant-turn|worker-subprocess-output|monitor-classifier|unknown`, accepts optional `worker_log_file`, classifies empty worker logs as `recommendationCode=monitor-worker-empty-output` with next action `use-agent-run-outcome-packet`, and labels visible classifier warning text as `target=monitor-classifier`/context divergence. Validation: `npx vitest run packages/pi-stack/test/smoke/monitor-summary.test.ts --reporter=dot` -> 1 file, 14 tests passed. [rationale:risk-control] This blocks the old ambiguous path where monitor feedback could be mistaken for worker or control-plane evidence and reduces unnecessary classifier spend."
     }
   ]
 }

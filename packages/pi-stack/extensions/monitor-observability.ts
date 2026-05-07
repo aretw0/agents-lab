@@ -28,7 +28,8 @@ export interface ClassifyFailureScanState {
 
 export type MonitorClassifyFailureDecision = "ok" | "warn" | "degrade" | "block";
 export type MonitorEmptyResponseDecision = "empty-response" | "monitor-context-divergence" | "insufficient-evidence";
-export type MonitorEmptyResponseEvidenceSource = "jsonl" | "missing-session" | "unreadable-session" | "classifier-only";
+export type MonitorEmptyResponseEvidenceSource = "jsonl" | "worker-log" | "missing-session" | "unreadable-session" | "classifier-only";
+export type MonitorEmptyResponseTarget = "control-plane-assistant-turn" | "worker-subprocess-output" | "monitor-classifier" | "unknown";
 
 export interface MonitorClassifyFailureReadinessOptions {
 	warnAfter?: number;
@@ -61,11 +62,15 @@ export interface MonitorEmptyResponseEvidence {
 	decision: MonitorEmptyResponseDecision;
 	recommendationCode:
 		| "monitor-empty-response-real"
+		| "monitor-worker-empty-output"
 		| "monitor-context-divergence"
 		| "monitor-empty-response-insufficient-evidence";
 	evidenceSource: MonitorEmptyResponseEvidenceSource;
+	target: MonitorEmptyResponseTarget;
 	assistantFinalChars: number;
+	workerOutputChars?: number;
 	sessionFile?: string;
+	workerLogFile?: string;
 	turnTimestamp?: string;
 	reasons: string[];
 	nextActions: string[];
@@ -317,15 +322,43 @@ function findAssistantFinalCandidates(
 	}
 }
 
+function isMonitorClassifierText(value: string): boolean {
+	const normalized = value.toLowerCase();
+	return normalized.includes("classify failed") || normalized.includes("monitor classifier") || normalized.includes("no tool call in response");
+}
+
 export function buildMonitorEmptyResponseEvidence(input: {
 	sessionFile?: string;
+	workerLogFile?: string;
 	maxScanBytes?: number;
 }): MonitorEmptyResponseEvidence {
+	const workerLogFile = input.workerLogFile;
+	if (workerLogFile && existsSync(workerLogFile)) {
+		try {
+			const workerChunk = readTail(workerLogFile, input.maxScanBytes ?? DEFAULT_CLASSIFY_SCAN_BYTES);
+			const workerOutputChars = normalizeTextLength(workerChunk);
+			if (workerOutputChars <= 0) {
+				return buildMonitorEmptyResponseEvidenceResult({
+					decision: "empty-response",
+					evidenceSource: "worker-log",
+					target: "worker-subprocess-output",
+					assistantFinalChars: 0,
+					workerOutputChars,
+					workerLogFile,
+					reasons: ["worker-log-empty", "defer-to-agent-run-outcome-packet"],
+				});
+			}
+		} catch {
+			// Fall back to session evidence below; unreadable worker logs should not hide session facts.
+		}
+	}
+
 	const sessionFile = input.sessionFile;
 	if (!sessionFile) {
 		return buildMonitorEmptyResponseEvidenceResult({
 			decision: "insufficient-evidence",
 			evidenceSource: "missing-session",
+			target: "unknown",
 			assistantFinalChars: 0,
 			reasons: ["session-file-missing"],
 		});
@@ -334,6 +367,7 @@ export function buildMonitorEmptyResponseEvidence(input: {
 		return buildMonitorEmptyResponseEvidenceResult({
 			decision: "insufficient-evidence",
 			evidenceSource: "missing-session",
+			target: "unknown",
 			assistantFinalChars: 0,
 			sessionFile,
 			reasons: ["session-file-not-found"],
@@ -347,6 +381,7 @@ export function buildMonitorEmptyResponseEvidence(input: {
 		return buildMonitorEmptyResponseEvidenceResult({
 			decision: "insufficient-evidence",
 			evidenceSource: "unreadable-session",
+			target: "unknown",
 			assistantFinalChars: 0,
 			sessionFile,
 			reasons: ["session-file-unreadable"],
@@ -373,6 +408,7 @@ export function buildMonitorEmptyResponseEvidence(input: {
 		return buildMonitorEmptyResponseEvidenceResult({
 			decision: "insufficient-evidence",
 			evidenceSource: "jsonl",
+			target: "unknown",
 			assistantFinalChars: 0,
 			sessionFile,
 			reasons: ["assistant-final-not-found"],
@@ -380,14 +416,20 @@ export function buildMonitorEmptyResponseEvidence(input: {
 	}
 
 	const assistantFinalChars = normalizeTextLength(last.text);
+	const target: MonitorEmptyResponseTarget = assistantFinalChars <= 0
+		? "control-plane-assistant-turn"
+		: isMonitorClassifierText(last.text)
+			? "monitor-classifier"
+			: "control-plane-assistant-turn";
 	return buildMonitorEmptyResponseEvidenceResult({
 		decision: assistantFinalChars > 0 ? "monitor-context-divergence" : "empty-response",
 		evidenceSource: "jsonl",
+		target,
 		assistantFinalChars,
 		sessionFile,
 		turnTimestamp: last.timestamp,
 		reasons: assistantFinalChars > 0
-			? ["assistant-final-has-visible-content", "classifier-empty-response-should-downgrade"]
+			? [target === "monitor-classifier" ? "classifier-feedback-visible" : "assistant-final-has-visible-content", "classifier-empty-response-should-downgrade"]
 			: ["assistant-final-empty"],
 	});
 }
@@ -395,18 +437,25 @@ export function buildMonitorEmptyResponseEvidence(input: {
 function buildMonitorEmptyResponseEvidenceResult(input: {
 	decision: MonitorEmptyResponseDecision;
 	evidenceSource: MonitorEmptyResponseEvidenceSource;
+	target: MonitorEmptyResponseTarget;
 	assistantFinalChars: number;
+	workerOutputChars?: number;
 	sessionFile?: string;
+	workerLogFile?: string;
 	turnTimestamp?: string;
 	reasons: string[];
 }): MonitorEmptyResponseEvidence {
-	const recommendationCode = input.decision === "empty-response"
-		? "monitor-empty-response-real"
+	const recommendationCode = input.decision === "empty-response" && input.target === "worker-subprocess-output"
+		? "monitor-worker-empty-output"
+		: input.decision === "empty-response"
+			? "monitor-empty-response-real"
 		: input.decision === "monitor-context-divergence"
 			? "monitor-context-divergence"
 			: "monitor-empty-response-insufficient-evidence";
-	const nextActions = input.decision === "empty-response"
-		? ["treat-as-real-empty-response", "inspect-rendering-and-final-message-path"]
+	const nextActions = input.decision === "empty-response" && input.target === "worker-subprocess-output"
+		? ["treat-as-worker-empty-output", "use-agent-run-outcome-packet", "skip-monitor-classifier-spend"]
+		: input.decision === "empty-response"
+			? ["treat-as-real-empty-response", "inspect-rendering-and-final-message-path"]
 		: input.decision === "monitor-context-divergence"
 			? ["downgrade-monitor-alert", "inspect-provider-context-envelope", "continue-local-safe-work"]
 			: ["collect-session-jsonl-evidence", "keep-monitor-alert-advisory"];
@@ -414,7 +463,9 @@ function buildMonitorEmptyResponseEvidenceResult(input: {
 		"monitor-empty-response-evidence:",
 		`decision=${input.decision}`,
 		`source=${input.evidenceSource}`,
+		`target=${input.target}`,
 		`assistantFinalChars=${Math.max(0, Math.floor(input.assistantFinalChars))}`,
+		input.workerOutputChars !== undefined ? `workerOutputChars=${Math.max(0, Math.floor(input.workerOutputChars))}` : undefined,
 		input.turnTimestamp ? `turnTimestamp=${input.turnTimestamp}` : undefined,
 		"authorization=none",
 	].filter(Boolean).join(" ");
@@ -427,8 +478,11 @@ function buildMonitorEmptyResponseEvidenceResult(input: {
 		decision: input.decision,
 		recommendationCode,
 		evidenceSource: input.evidenceSource,
+		target: input.target,
 		assistantFinalChars: Math.max(0, Math.floor(input.assistantFinalChars)),
+		workerOutputChars: input.workerOutputChars !== undefined ? Math.max(0, Math.floor(input.workerOutputChars)) : undefined,
 		sessionFile: input.sessionFile,
+		workerLogFile: input.workerLogFile,
 		turnTimestamp: input.turnTimestamp,
 		reasons: input.reasons,
 		nextActions,

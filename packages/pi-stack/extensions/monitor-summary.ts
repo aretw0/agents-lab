@@ -244,12 +244,14 @@ export default function monitorSummaryExtension(pi: ExtensionAPI) {
 			"Read-only deterministic JSONL evidence for empty-response vs monitor-context-divergence alerts. Never blocks execution.",
 		parameters: Type.Object({
 			session_file: Type.Optional(Type.String({ description: "Optional session JSONL path. Defaults to current session file when available." })),
+			worker_log_file: Type.Optional(Type.String({ description: "Optional worker/subprocess output log to distinguish worker-empty-output from control-plane empty final." })),
 			max_scan_bytes: Type.Optional(Type.Number({ description: "Max tail bytes to scan. Default 512KB." })),
 		}),
 		execute(_id, params, _signal, _onUpdate, ctx) {
 			const p = (params ?? {}) as Record<string, unknown>;
 			const result = buildMonitorEmptyResponseEvidence({
 				sessionFile: typeof p.session_file === "string" ? p.session_file : ctx?.sessionManager?.getSessionFile?.(),
+				workerLogFile: typeof p.worker_log_file === "string" ? p.worker_log_file : undefined,
 				maxScanBytes: typeof p.max_scan_bytes === "number" ? p.max_scan_bytes : undefined,
 			});
 			return {
