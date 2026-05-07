@@ -1,52 +1,49 @@
 {
-  "timestamp": "2026-05-07T13:36:38.196Z",
-  "context": "Completed stale auto-resume reload guidance fix. Auto-resume prompt construction now accepts current reloadRequired runtime signal and filter [snip] lso cleaned from old one-slice wording. [truncated:+227 chars]",
+  "timestamp": "2026-05-07T14:22:16.004Z",
+  "context": "Subagent sovereignty steering slice is ready to checkpoint/commit separately from parked TASK-BUD-968 UI quota patch. TASK-BUD-968 remains pl [snip] ert dry-run only; no worker dispatched. [truncated:+150 chars]",
+  "current_tasks": [
+    "TASK-BUD-986"
+  ],
   "next_actions": [
-    "Run /reload before trusting the newly changed live context-watch surfaces.",
-    "After reload, use context_watch_auto_resume_preview to confirm reload=clear and no stale /relo [snip] tains old reload guidance. [truncated:+35 chars]",
-    "Continue with local-safe semantic cleanup only if a scoped task exists; avoid provider/agent c [snip] out explicit confirmation. [truncated:+12 chars]"
+    "If committing now, stage only .project/tasks.json, .project/handoff.json, and docs/research/su [snip] md for the steering slice. [truncated:+37 chars]",
+    "Keep parked TASK-BUD-968 quota/footer implementation changes uncommitted until TUI/WEB review is intentionally resumed.",
+    "Before any worker real dispatch, require explicit human confirmation for run_id task-bud-986-q [snip] status/log/abort/outcome. [truncated:+64 chars]"
   ],
   "blockers": [
-    "Runtime reload required after this extension code change before live tool behavior reflects the fix."
+    "Parked quota/footer patch remains in working tree and is intentionally not par [snip] agent steering commit. [truncated:+12 chars]",
+    "Delegation readiness still needs real rehearsal evidence before multiple workers/background/colony."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-s [snip] -> 3 files/70 tests passed [truncated:+102 chars]",
-    "git diff --check -> passed"
-  ],
-  "recent_commits": [
-    "5b0c8176 fix(context): suppress stale reload resume guidance"
+    "npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack [snip] tion.test.ts -> 100 passed [truncated:+83 chars]",
+    "safe_marker_check docs/research/subagent-sovereignty-rehearsal-2026-05.md -> ok",
+    "git diff --check -> ok"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-985",
+    "focus": "TASK-BUD-986",
     "canonical_links": [
-      "task:TASK-BUD-985",
-      "commit:5b0c8176"
+      "task:TASK-BUD-986",
+      "task:TASK-BUD-968"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T13:36:38.196Z",
+    "generatedAtIso": "2026-05-07T14:22:16.004Z",
     "level": "ok",
-    "percent": 44,
     "action": "continue",
-    "recommendation": "checkpoint",
-    "focus_task_status": "completed"
+    "recommendation": "commit-subagent-steering-slice-only"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T13:36:38.196Z",
+      "atIso": "2026-05-07T14:22:16.004Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 44,
+      "percent": 0,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "checkpoint"
+      "recommendation": "commit-subagent-steering-slice-only"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-985"
   ]
 }

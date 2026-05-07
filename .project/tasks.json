@@ -21588,7 +21588,7 @@
         "Validar com teste/marker local-safe antes de concluir."
       ],
       "milestone": "ui-operator-surface",
-      "notes": "Feedback do operador: footer mostra `✓dashscope:13% ✗codex:72%`; precisa esclarecer o significado de símbolos e percentuais.\n[evidence] Implementação atual: `formatBudgetStatusParts` usa ✓=ok, !=warning, ✗=blocked; percentual é max(usedPctTokens, usedPctCost, usedPctRequests), arredondado. A revisão deve deixar isso explícito para evitar confusão com quota restante/live WHAM."
+      "notes": "Feedback do operador: footer mostra `✓dashscope:13% ✗codex:72%`; precisa esclarecer o significado de símbolos e percentuais.\n[evidence] Implementação atual: `formatBudgetStatusParts` usa ✓=ok, !=warning, ✗=blocked; percentual é max(usedPctTokens, usedPctCost, usedPctRequests), arredondado. A revisão deve deixar isso explícito para evitar confusão com quota restante/live WHAM.\n[slice] Iniciando revisão local-safe da legenda do quota footer/panel: esclarecer símbolos OK/WARN/BLOCK e que o percentual do token compacto é pressão local usada (máximo entre tokens/cost/requests), não WHAM restante/dashboard.\n[steer] Pausado sem fechamento por direção humana: UI TUI/WEB continua desejada, mas agora fica parked para não competir com a lane estratégica de subagentes. Estado atual: implementação parcial de legenda quota/footer com testes focais verdes; não marcar completed até revisar WEB/TUI e decidir acabamento."
     },
     {
       "id": "TASK-BUD-969",
@@ -21947,6 +21947,33 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:stale-operator-guidance] Feedback humano: o auto-resume foi suprimido corretamente até o reload, mas depois reapareceu com mensagem antiga dizendo que ainda precisava reload. O preview/resume deve reconciliar handoff antigo com estado runtime atual antes de orientar o operador.\n[provenance:human] source_task=TASK-BUD-984 reason=Feedback de stale auto-resume observado durante continuidade pós-reload; ajustar depois sem desviar a fatia atual.\n[slice] Implementando reconciliação de auto-resume: filtrar guidance antigo de reload quando o runtime atual informa reload claro; cobrir preview/dispatch pós-reload e regressão focal.\n[slice] Auto-resume reconciliado com estado runtime atual de reload antes de exibir guidance de handoff; reload obsoleto é filtrado quando clear.\n[validation] context-watch post-reload/resume/base -> 70 passed; `git diff --check` passou.",
       "verification": "VERIF-TASK-BUD-985-STALE-RELOAD-GUIDANCE"
+    },
+    {
+      "id": "TASK-BUD-986",
+      "description": "[P1/local-safe] Maturar base de subagentes com rehearsal de agent-run governado: pacote mínimo status/log/abort/outcome, escopo declarado e evidência antes de escalar para múltiplos workers/colônia.",
+      "status": "in-progress",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-969",
+        "TASK-BUD-972",
+        "TASK-BUD-973",
+        "TASK-BUD-979"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-plan.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-run*.test.ts",
+        "docs/primitives/agents-as-tools-calibration-score.md",
+        "docs/research/agent-run-semantic-consolidation-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Produzir plano de rehearsal report-only para 1 worker com timeout, budget, cwd, arquivos declarados, validação, rollback, abort e log tail.",
+        "Não despachar worker/colônia sem confirmação humana explícita separada.",
+        "Registrar gaps reais antes de promover para múltiplos workers/background/colônia guiada.",
+        "Validar com teste/marker local-safe e deixar TASK-BUD-968 apenas parked, não completed."
+      ],
+      "milestone": "subagent-sovereignty-lane-2026-05",
+      "notes": "Criada por steering humano: priorizar base dos subagentes para descarregar o control plane; começar do mais simples e maturar até colônia, sem frear ou fechar tasks não prontas.\n[provenance:human] source_task=TASK-BUD-968 reason=Pivot estratégico confirmado pelo usuário: UI quota permanece desejada, mas subagent base é mais prioritária para soberania operacional.\n[evidence] Steering aplicado sem dispatch: TASK-BUD-968 foi parked sem completed; criado doc docs/research/subagent-sovereignty-rehearsal-2026-05.md com escada de maturidade, primeiro candidate run_id=task-bud-986-quota-ui-review-rehearsal e regra de confirmação humana explícita. Packets: agent_run_plan ready-for-human-decision; registry_upsert dry-run writeAllowed=no. Validação: safe_marker_check ok; vitest quota/footer focal 100 passed; git diff --check ok."
     }
   ]
 }
