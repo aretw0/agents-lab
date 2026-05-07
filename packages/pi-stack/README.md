@@ -45,7 +45,7 @@ pi install https://github.com/aretw0/agents-lab
 | `guardrails-core` | Guardrail unificado first-party: proteção de paths sensíveis + roteamento web determinístico por escopo + bloqueio de conflito de porta reservada pelo session-web + bloqueio de scans de conteúdo em `~/.pi/agent/sessions` e scans recursivos de conteúdo na raiz `.pi` (evita explosão de saída/stack overflow no TUI) |
 | `colony-pilot` | Primitiva de orquestração/visibilidade: prepara runbooks manuais para pilot (monitors/remote/colony) e mantém snapshot de colonies em background |
 | `web-session-gateway` | Gateway web first-party para observabilidade local da sessão (URL determinística, `/api/health` e painel web local) |
-| `quota-visibility` | Observabilidade de consumo/cota a partir de `~/.pi/agent/sessions` (burn rate, janelas de 5h/peak hours por provider, export de evidências) |
+| `quota-visibility` | Observabilidade de consumo/cota a partir de `~/.pi/agent/sessions` (burn rate, janelas de 5h/peak hours por provider, budgets provider/model, OpenAI Codex WHAM probe read-only, export de evidências) |
 
 #### Defaults do `monitor-provider-patch`
 
@@ -123,13 +123,15 @@ Ativar: `/settings` → selecionar `agents-lab`
 | `/colony-pilot` | Guia pilot (`hatch/check/models/preflight/baseline/run/status/stop/web/monitors/tui/artifacts`), incluindo `hatch doctor` plugin-aware com quick-recovery e hard-gates para `ant_colony` |
 | `/session-web` | Controla gateway web first-party (`start/status/open/stop`) para inspeção local da sessão sem UI hospedada externa |
 | `/monitor-provider` | Diagnostica e sincroniza modelos dos classifiers dos monitors por provider (`status/apply/template`) |
-| `/quota-visibility` | Mostra consumo estimado da janela, projeção semanal, janelas/peak hours, budgets por provider e `route` advisory determinístico (`cheap|balanced|reliable`, `--execute` opt-in) |
+| `/quota-visibility` | Mostra consumo estimado da janela, projeção semanal, janelas/peak hours, budgets por provider/model e `route` advisory determinístico (`cheap|balanced|reliable`, `--execute` opt-in) |
 | `/session-analytics` | Analytics de sessões (`signals|timeline|model-usage|summary|outliers`) para triagem sem grep recursivo em `~/.pi` |
 | `/scheduler-governance` | Governança de scheduler lease/ownership (`status/policy/apply`) com confirmações fortes para ações destrutivas |
 | `/stack-status` | Diagnóstico de soberania da stack: owners por capability, risco de overlap e postura de governança em runtime |
 | `/claude-code` | Bridge experimental para Claude Code CLI (status/login/auth-status) |
 
 > Convenção: `/doctor` permanece o diagnóstico global de ambiente/runtime. Comandos verticais como `/monitor-provider`, `/colony-pilot` e `/scheduler-governance` fazem diagnóstico/controle de domínio.
+>
+> Guia de quota visibility para usuários finais: [`docs/guides/quota-visibility.md`](docs/guides/quota-visibility.md). Inclui OpenAI Codex WHAM probe read-only (`quota_visibility_openai_wham_probe`), cache fail-soft e interpretação de pools separados como `gpt-5.3-codex-spark`.
 >
 > Guia de governança provider/model para colônia e multi-agentes: [`docs/guides/colony-provider-model-governance.md`](docs/guides/colony-provider-model-governance.md)
 >
