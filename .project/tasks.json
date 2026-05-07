@@ -22100,7 +22100,7 @@
     {
       "id": "TASK-BUD-992",
       "description": "Criar roadmap de adoção de ferramentas rápidas para agentes na pi-stack",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "docs/research/tooling-acceleration-roadmap-2026-05.md",
@@ -22113,7 +22113,8 @@
         "Definir política: ferramentas como `bun` e `uv` devem ser prontas para uso quando disponíveis, mas agentes continuam usando Node/Python diretamente quando convém."
       ],
       "milestone": "tooling-acceleration-roadmap-2026-05",
-      "notes": "Backlog criado por steering humano: facilitar que agentes tenham `bun` e `uv` instalados/prontos na pi-stack e cultivar um roadmap contínuo para ferramentas que tornam o trabalho mais rápido."
+      "notes": "Backlog criado por steering humano: facilitar que agentes tenham `bun` e `uv` instalados/prontos na pi-stack e cultivar um roadmap contínuo para ferramentas que tornam o trabalho mais rápido.\n[rationale:risk-control] A roadmap de tooling rápido precisa ficar report-only e faseado para evitar que agentes instalem ou substituam ferramentas de projeto por conveniência; a política preserva Node/Python quando forem a escolha correta e coloca Bun/uv atrás de detecção, canary e rollback.\nCompleted tooling acceleration roadmap. Next tasks remain TASK-BUD-993 for Bun and TASK-BUD-994 for uv; both should start with read-only detection and local canary planning, not installation.",
+      "verification": "VERIF-TASK-BUD-992-TOOLING-ROADMAP"
     },
     {
       "id": "TASK-BUD-993",

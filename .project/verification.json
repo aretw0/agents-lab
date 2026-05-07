@@ -14777,6 +14777,15 @@
       "method": "worker-review-and-targeted-vitest",
       "timestamp": "2026-05-07T23:19:42.894Z",
       "evidence": "Executed explicitly confirmed provider-native read-only worker `task-bud-968-quota-footer-wip-review` with DashScope qwen3-coder-plus over 8 declared WIP files. Process exit_code=0, output_bytes=981, worker verdict PASS, markers PASS/internal-consistency/next-validation all passed, and corrected read-only outcome packet with touched_files=[] returned contract=pass/process=completed/recommendation=stop. Worker found quota/footer WIP internally consistent with the research doc. Parent focal validation: `npx vitest run packages/pi-stack/test/smoke/custom-footer-registration.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts --reporter=dot` -> 3 files, 100 tests passed. `board_task_quality_gate TASK-BUD-968` -> closeAllowed=yes. [rationale:risk-control] Completion is justified because the previously parked WIP now has independent read-only worker review plus focal tests; no multi-worker/colony promotion is implied."
+    },
+    {
+      "id": "VERIF-TASK-BUD-992-TOOLING-ROADMAP",
+      "target": "TASK-BUD-992",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-marker-and-i18n-lint",
+      "timestamp": "2026-05-07T23:26:02.029Z",
+      "evidence": "Created `docs/research/tooling-acceleration-roadmap-2026-05.md` and linked it from `packages/pi-stack/README.md`. The roadmap maps candidate accelerators (`bun`, `uv`, ripgrep/fd, tsx/esbuild), separates report-only inventory, local canary, opt-in wrapper, and package adoption phases, defines decision criteria (speed, compatibility, safety, offline/cache, maintenance, cognitive cost), and preserves policy that agents should use Node/Python directly when project conventions make them the right choice. Validation: safe_marker_check on roadmap markers -> pass; safe_marker_check on README link -> pass; i18n_lint_text pt-BR excerpt -> pass. [rationale:risk-control] This is documentation/planning only and explicitly blocks install/bootstrap until future opt-in canaries."
     }
   ]
 }
