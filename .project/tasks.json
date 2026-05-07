@@ -21739,6 +21739,26 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:semantic-debt] Mudança canônica para `agent-run` deixou gate de colony ainda preso a `simple-spawn`; alinhar dependência evita drift e teste quebrado sem renomear lanes grandes.\n[provenance:human] source_task=TASK-BUD-973 reason=Pedido para remover semântica desnecessária e manter coesão sem conceitos repetidos.\n[slice] Atualizado gate de promotion de colônia para consumir `ready-for-agent-run`, removendo `simple-spawn` do contrato focal.\n[validation] Focal grep sem `simpleSpawn|simple-spawn|ready-for-simple-spawn`; smoke colony+agent readiness -> 14 passed; `git diff --check` passou.",
       "verification": "VERIF-TASK-BUD-975-COLONY-AGENT-RUN"
+    },
+    {
+      "id": "TASK-BUD-976",
+      "description": "[P2/local-safe] Anotar docs recentes com naming superseded `agent_run_*`.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "docs/research/simple-delegate-workflow-observability-gap-2026-05.md",
+        "docs/research/one-slice-control-plane-ergonomics-2026-05.md",
+        "docs/research/simple-delegate-orchestration-primitive-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Adicionar nota curta em docs recentes que ainda citam `one_slice_agent_run_*`, apontando para `agent_run_*`.",
+        "Preservar evidência histórica de canaries/runs sem reescrever fatos passados.",
+        "Não mexer em docs históricas de scorecard salvo se necessário.",
+        "Rodar `git diff --check`; não tocar settings/routing/CI/publish/credenciais."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:semantic-debt] Após consolidar tool/runtime para `agent_run_*`, docs recentes ainda podem induzir uso do nome antigo; anotação curta evita overlap sem reescrever histórico.\n[provenance:human] source_task=TASK-BUD-974 reason=Pedido de coesão sem jargão e sem conceitos repetidos.\n[slice] Adicionadas notas de naming superseded em docs recentes para orientar novo uso para `agent_run_*` sem reescrever fatos históricos.\n[validation] `git diff --check` passou; grep focal confirmou notas nos três docs.",
+      "verification": "VERIF-TASK-BUD-976-NAMING-NOTES"
     }
   ]
 }

@@ -14462,6 +14462,15 @@
       "method": "refactor+smoke",
       "timestamp": "2026-05-07T03:36:12.060Z",
       "evidence": "Colony promotion gate alinhado ao readiness canônico `ready-for-agent-run`: input local `agentRunDecision`, signal `agentRunReady`, recommendationCode `colony-gate-keep-report-only-agent-run`, blocker `agent-run-readiness-signal-missing`. Teste e doc atualizados. Validação: rg focal não encontrou simpleSpawn/simple-spawn/ready-for-simple-spawn nos arquivos focais; `npx vitest run packages/pi-stack/test/smoke/guardrails-colony-promotion-gate.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` -> 2 files/14 tests passed; `git diff --check` passou."
+    },
+    {
+      "id": "VERIF-TASK-BUD-976-NAMING-NOTES",
+      "target": "TASK-BUD-976",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+diff-check",
+      "timestamp": "2026-05-07T03:40:37.283Z",
+      "evidence": "Adicionadas notas curtas de naming em três docs recentes que ainda citam one_slice_agent_run_* ou simple como contexto histórico: workflow observability gap, ergonomia do control-plane e orchestration primitive. As notas apontam para agent_run_* / agent run como nome canônico e preservam evidência histórica sem aliases. Validação: git diff --check passou; rg focal confirmou as notas."
     }
   ]
 }

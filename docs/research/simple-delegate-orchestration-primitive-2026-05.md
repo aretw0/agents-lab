@@ -1,5 +1,7 @@
 # Primitiva de orquestração agêntica simples→complexa
 
+> Naming update: o degrau L1 operacional foi consolidado como `agent run` / `agent_run_*`. Este documento mantém os nomes antigos (`simple`, `one_slice_agent_run_*`) como trilha histórica do cultivo; novas primitives não devem criar aliases para esses nomes.
+
 ## Incidente que motivou a primitiva
 
 Durante o canary `provider-canary-spark`, a execução via `pi-workflows` ficou presa na etapa `implement` por mais de 10 minutos para uma tarefa docs-only. O operador precisou sair do pi inteiro para encerrar o processo.

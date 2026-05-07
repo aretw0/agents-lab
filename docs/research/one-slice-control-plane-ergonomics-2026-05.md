@@ -1,4 +1,6 @@
-# Ergonomia do control-plane para one-slice agent runs — 2026-05
+# Ergonomia do control-plane para agent runs — 2026-05
+
+> Naming update: `agent_run_*` é o nome canônico da família de execução concreta de worker. As referências a `one_slice_agent_run_*` neste documento são evidência histórica dos canaries Spark/Dashscope antes da consolidação semântica.
 
 ## Contexto
 

@@ -1,5 +1,7 @@
 # Simple-delegate workflow observability gap — 2026-05
 
+> Naming update: a família operacional antes chamada `one_slice_agent_run_*` foi consolidada como `agent_run_*` em `docs/research/agent-run-semantic-consolidation-2026-05.md`. As referências antigas abaixo preservam o contexto histórico do incidente.
+
 ## Contexto
 
 Durante o canary `provider-canary-spark`, o runner de workflow mostrou uma etapa `implement` em andamento, mas o control-plane não tinha uma superfície suficiente para distinguir:
