@@ -165,9 +165,21 @@ describe("agent spawn readiness contract", () => {
       humanConfirmationPhrase: "execute o worker task-bud-990-stale-resume-review",
     });
     expect(result.runSpec.budgetDecision).toBe("ok");
+    expect(result.runSpec.extensionIsolation).toBe("minimal-no-extensions");
+    expect(result.commandPreview.args).toContain("--no-extensions");
+    expect(result.commandPreview.args).toContain("--no-skills");
+    expect(result.commandPreview.args).toContain("--no-prompt-templates");
+    expect(result.commandPreview.args).toContain("--no-themes");
+    expect(result.commandPreview.args).toContain("--no-context-files");
     expect(result.commandPreview.args).toContain("--model");
     expect(result.commandPreview.args).toContain("dashscope/qwen3-coder-plus");
     expect(result.commandPreview.args).toContain("read,grep,find,ls");
+
+    const inherited = buildAgentRunStartPacket({
+      ...result.runSpec,
+      extensionIsolation: "inherit",
+    });
+    expect(inherited.commandPreview.args).not.toContain("--no-extensions");
   });
 
   it("blocks provider-native start packets without explicit non-blocked budget evidence", () => {
@@ -448,6 +460,7 @@ describe("agent spawn readiness contract", () => {
         declared_files: ["docs/research/agent-run-provider-native-runner-2026-05.md"],
         timeout_ms: 90000,
         log_path: ".pi/reports/run-provider-native.log",
+        extension_isolation: "minimal-no-extensions",
         budget_decision: "ok",
         budget_evidence: "dashscope provider budget ok",
       },

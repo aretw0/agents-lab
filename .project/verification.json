@@ -14660,6 +14660,15 @@
       "method": "provider-native-canary",
       "timestamp": "2026-05-07T20:41:23.753Z",
       "evidence": "Executed one explicitly-confirmed bounded DashScope provider-native read-only canary: run_id=task-bud-989-dashscope-readonly-canary-1, model=dashscope/qwen3-coder-plus, pi --no-session --tools read,grep,find,ls --print, timeout 90s. Process exited 0 and worker output was non-empty with PASS verdict. Parent-side outcome still contract=fail because log contained repeated nested pi stale extension ctx errors; this is not promotion evidence. Log: .pi/reports/task-bud-989-dashscope-readonly-canary-1.log. agent_run_outcome_packet: process=completed, contract=fail, marker failure nested-pi-log-free-of-stale-extension-errors=false."
+    },
+    {
+      "id": "VERIF-TASK-BUD-995-NO-EXTENSIONS-MITIGATION",
+      "target": "TASK-BUD-995",
+      "target_type": "task",
+      "status": "passed",
+      "method": "bounded-runtime-probe+vitest",
+      "timestamp": "2026-05-07T21:13:06.040Z",
+      "evidence": "[rationale:risk-control] Mitigation changes only report-only agent-run start packet preview/schema and preserves human-confirmation, budget, and protected-scope gates. Investigation: full-extension nested pi print canary failed contract due repeated `stale after session replacement or reload` extension errors. Bounded probe with `pi --no-session --no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files --model dashscope/qwen3-coder-plus --print` returned exit_code=0, non-empty output, stale_count=0 (`.pi/reports/task-bud-995-no-extensions-dashscope-probe.log`; full probe `.pi/reports/task-bud-995-no-extensions-full-canary.log`). Implemented agent_run_start_packet extensionIsolation default `minimal-no-extensions`, with opt-in `inherit`, adding argv flags `--no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files`. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 1 file / 17 tests passed. Requires `/reload` before live tool surface exposes new parameter/default."
     }
   ]
 }

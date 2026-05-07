@@ -1,52 +1,52 @@
 {
-  "timestamp": "2026-05-07T20:42:35.540Z",
-  "context": "Executed first bounded provider-native canary after reload and explicit prior confirmation. Gates: context warn but continue-bounded, machine [snip] ries against stale extension ctx noise. [truncated:+545 chars]",
-  "current_tasks": [
-    "TASK-BUD-989"
-  ],
+  "timestamp": "2026-05-07T21:13:19.976Z",
+  "context": "Investigated why provider-native subagent/canary failed. Finding: the issue is not that subagents cannot work; our first nested pi worker inh [snip] SK-BUD-995 completed with verification. [truncated:+596 chars]",
   "next_actions": [
-    "Commit board/verification/handoff evidence for the failed canary.",
-    "Do not count canary as promotion evidence despite worker PASS; fix or isolate stale extension ctx noise first.",
-    "Investigate TASK-BUD-995 with a bounded local slice; candidate mitigation may be a provider-na [snip] rst-party stale ctx fixes. [truncated:+86 chars]"
+    "Commit TASK-BUD-995 code/board/handoff evidence.",
+    "Reload before trusting live agent_run_start_packet output, because extension surface code changed.",
+    "After reload, rerun exactly one bounded DashScope provider-native canary using the new minimal [snip] t outcome contract passes. [truncated:+57 chars]"
   ],
   "blockers": [
-    "Provider-native canary contract failed due stale extension ctx errors in nested pi log.",
-    "Machine disk threshold is a tactical local override; avoid broad scans/builds.",
-    "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated."
+    "Live tool surface requires reload after code changes.",
+    "Machine disk threshold remains a tactical local override; avoid broad scans/builds.",
+    "TASK-BUD-968 quota/footer WIP remains parked and dirty."
   ],
   "recent_validation": [
-    "agent_run_start_packet task-bud-989-dashscope-readonly-canary-1 -> ready-for-human-decision dispatch=no budget=ok",
-    "bash provider-native canary -> exit_code=0 output_bytes=6007 log=.pi/reports/task-bud-989-dash [snip] cope-readonly-canary-1.log [truncated:+1 chars]",
-    "agent_run_outcome_packet -> process=completed contract=fail markerFailure nested-pi-log-free-of-stale-extension-errors"
+    "Probe .pi/reports/task-bud-995-no-extensions-dashscope-probe.log: exit_code=0, stale_count=0, PASS no-extensions probe",
+    "Probe .pi/reports/task-bud-995-no-extensions-full-canary.log: exit_code=0, bytes=1474, stale_count=0",
+    "Vitest: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts - [snip] > 1 file / 17 tests passed [truncated:+15 chars]"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-989",
+    "focus": "TASK-BUD-995",
     "canonical_links": [
-      "task:TASK-BUD-989",
       "task:TASK-BUD-995",
-      "task:TASK-BUD-989-DASHSCOPE-READONLY-CANARY-1"
+      "task:TASK-BUD-995-NO-EXTENSIONS-DASHSCOPE-PROBE"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T20:42:35.540Z",
-    "level": "warn",
-    "percent": 54,
+    "generatedAtIso": "2026-05-07T21:13:19.976Z",
+    "level": "ok",
+    "percent": 44,
     "action": "continue",
-    "recommendation": "commit-failed-canary-evidence-then-harden-nested-pi-runtime"
+    "recommendation": "commit-then-reload-then-one-minimal-worker-canary",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T20:42:35.540Z",
+      "atIso": "2026-05-07T21:13:19.976Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 54,
+      "level": "ok",
+      "percent": 44,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-failed-canary-evidence-then-harden-nested-pi-runtime"
+      "recommendation": "commit-then-reload-then-one-minimal-worker-canary"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-995"
   ]
 }

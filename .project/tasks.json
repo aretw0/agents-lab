@@ -22157,7 +22157,7 @@
     {
       "id": "TASK-BUD-995",
       "description": "Harden provider-native canary against nested pi stale extension ctx noise",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-989"
@@ -22177,7 +22177,8 @@
         "Validate with a bounded provider-native canary log free of stale ctx errors before counting it as promotion evidence."
       ],
       "milestone": "subagent-sovereignty-lane-2026-05",
-      "notes": "Created from first provider-native DashScope canary: process/output succeeded but contract failed because log contained repeated stale extension ctx errors from nested pi after reload. This is a hardening blocker before delegation promotion."
+      "notes": "Created from first provider-native DashScope canary: process/output succeeded but contract failed because log contained repeated stale extension ctx errors from nested pi after reload. This is a hardening blocker before delegation promotion.\n[rationale:risk-control] This is safe to complete because the mitigation changes only the report-only start packet preview and schema, never dispatches a worker, and keeps human confirmation plus budget/protected-scope gates intact. The behavior is explainable to operators: nested provider-native worker…\n[completed] Root cause is not that subagents are impossible; our first provider-native worker inherited the full interactive extension stack inside nested print mode. Print mode can dispose the runtime while extension lifecycle handlers are still emitting, producing stale ctx noise. Minimal no-extensions worker mode avoids that noise and is now encoded in the start packet preview by default, with explicit inherit available for custom-provider cases.",
+      "verification": "VERIF-TASK-BUD-995-NO-EXTENSIONS-MITIGATION"
     }
   ]
 }

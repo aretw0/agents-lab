@@ -14,6 +14,7 @@ export interface AgentRunStartPacketInput {
   timeoutMs?: number;
   toolAllowlist?: string[];
   sessionIsolation?: "no-session" | "run-session-dir" | string;
+  extensionIsolation?: "minimal-no-extensions" | "inherit" | string;
   logPath?: string;
   budgetDecision?: AgentRunBudgetDecision | string;
   budgetEvidence?: string;
@@ -41,6 +42,7 @@ export interface AgentRunStartPacketResult {
     | "agent-run-start-blocked-timeout"
     | "agent-run-start-blocked-tools"
     | "agent-run-start-blocked-session-isolation"
+    | "agent-run-start-blocked-extension-isolation"
     | "agent-run-start-blocked-log-path"
     | "agent-run-start-blocked-budget"
     | "agent-run-start-blocked-protected-scope";
@@ -55,6 +57,7 @@ export interface AgentRunStartPacketResult {
     timeoutMs: number;
     toolAllowlist: string[];
     sessionIsolation: "no-session" | "run-session-dir" | "unknown";
+    extensionIsolation: "minimal-no-extensions" | "inherit" | "unknown";
     logPath: string;
     budgetDecision: AgentRunBudgetDecision;
     budgetEvidence: string;
@@ -97,6 +100,10 @@ function normalizeSessionIsolation(value: unknown): "no-session" | "run-session-
   return value === "no-session" || value === "run-session-dir" ? value : "unknown";
 }
 
+function normalizeExtensionIsolation(value: unknown): "minimal-no-extensions" | "inherit" | "unknown" {
+  return value === "minimal-no-extensions" || value === "inherit" ? value : "unknown";
+}
+
 export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): AgentRunStartPacketResult {
   const runId = normalizeText(input.runId);
   const executorKind = input.executorKind === "pi-print-subprocess" || !input.executorKind ? "pi-print-subprocess" : "unknown";
@@ -107,6 +114,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   const timeoutMs = normalizePositiveInt(input.timeoutMs, 0);
   const toolAllowlist = normalizeToolAllowlist(input.toolAllowlist);
   const sessionIsolation = normalizeSessionIsolation(input.sessionIsolation ?? "no-session");
+  const extensionIsolation = normalizeExtensionIsolation(input.extensionIsolation ?? "minimal-no-extensions");
   const logPath = normalizeText(input.logPath);
   const budget = resolveProviderExecutionBudgetEvidence({ budgetDecision: input.budgetDecision, budgetEvidence: input.budgetEvidence });
   const budgetDecision = budget.decision;
@@ -131,11 +139,13 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   const unsupportedTools = toolAllowlist.filter((tool) => !READ_ONLY_TOOL_ALLOWLIST.includes(tool));
   if (unsupportedTools.length > 0) block("agent-run-start-blocked-tools", `non-read-only-tools:${unsupportedTools.join(",")}`);
   if (sessionIsolation === "unknown") block("agent-run-start-blocked-session-isolation", "session-isolation-missing");
+  if (extensionIsolation === "unknown") block("agent-run-start-blocked-extension-isolation", "extension-isolation-missing");
   if (!logPath) block("agent-run-start-blocked-log-path", "log-path-missing");
   for (const budgetBlocker of budget.blockers) block("agent-run-start-blocked-budget", budgetBlocker);
 
   const commandArgs = [
     ...(sessionIsolation === "no-session" ? ["--no-session"] : ["--session-dir", `.pi/agent-runs/${runId || "unknown"}`]),
+    ...(extensionIsolation === "minimal-no-extensions" ? ["--no-extensions", "--no-skills", "--no-prompt-templates", "--no-themes", "--no-context-files"] : []),
     "--model",
     providerModelRef || "provider/model-required",
     "--tools",
@@ -168,6 +178,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       timeoutMs,
       toolAllowlist,
       sessionIsolation,
+      extensionIsolation,
       logPath,
       budgetDecision,
       budgetEvidence,
@@ -184,6 +195,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
           "ask the human/operator for the exact confirmation phrase before starting any worker",
           "if confirmed, registry-upsert planned->running with pid/log/status before invoking the command preview as argv",
           "preserve provider/model budget evidence with the run record before invocation",
+          "prefer minimal-no-extensions isolation for provider-native workers unless a custom provider requires inherited extensions",
           "after exit, update registry and run parent-side outcome packet; empty output is a contract failure",
         ]
       : [
@@ -198,6 +210,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       providerModelRef ? `model=${providerModelRef}` : undefined,
       `executor=${executorKind}`,
       `tools=${toolAllowlist.join(",") || "none"}`,
+      `ext=${extensionIsolation}`,
       `budget=${budgetDecision}`,
       `dispatch=no`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
