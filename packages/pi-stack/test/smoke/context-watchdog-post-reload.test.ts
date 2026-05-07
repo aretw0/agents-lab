@@ -247,7 +247,7 @@ describe("context-watchdog", () => {
 		const envelope = buildAutoResumePromptEnvelopeFromHandoff({
 			timestamp: new Date().toISOString(),
 			current_tasks: ["TASK-BUD-746"],
-			blockers: ["Live runtime needs reload before trusting tools.", "preserve non-reload blocker"],
+			blockers: ["Live runtime needs reload before trusting tools.", "Context-watch is ok but operator=reload because runtime extension changed.", "preserve non-reload blocker"],
 			next_actions: ["Run /reload before trusting renamed live tool surfaces.", "continue local validation"],
 		}, 30 * 60 * 1000, Date.now(), {
 			taskStatusById: { "TASK-BUD-746": "planned" },
@@ -258,6 +258,25 @@ describe("context-watchdog", () => {
 		expect(envelope.prompt).toContain("continue local validation");
 		expect(envelope.prompt).not.toContain("/reload");
 		expect(envelope.prompt).not.toContain("needs reload");
+		expect(envelope.prompt).not.toContain("operator=reload");
+	});
+
+	it("filters stale context-watch pressure guidance from auto-resume prompt when context is ok", () => {
+		const envelope = buildAutoResumePromptEnvelopeFromHandoff({
+			timestamp: new Date().toISOString(),
+			current_tasks: ["TASK-BUD-990"],
+			blockers: ["context-watch: operator=checkpoint because pre-compact checkpoint required", "preserve real blocker"],
+			next_actions: ["context-watch pre-compact checkpoint required before continuing", "continue TASK-BUD-990"],
+		}, 30 * 60 * 1000, Date.now(), {
+			taskStatusById: { "TASK-BUD-990": "planned" },
+			reloadRequired: false,
+			contextPressureActive: false,
+		});
+
+		expect(envelope.prompt).toContain("preserve real blocker");
+		expect(envelope.prompt).toContain("continue TASK-BUD-990");
+		expect(envelope.prompt).not.toContain("operator=checkpoint");
+		expect(envelope.prompt).not.toContain("pre-compact checkpoint required");
 	});
 
 	it("keeps deferred post-reload intent when dispatch is blocked by pending messages or lane queue", async () => {

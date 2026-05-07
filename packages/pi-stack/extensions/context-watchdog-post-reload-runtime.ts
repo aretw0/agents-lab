@@ -140,7 +140,7 @@ export function handlePostReloadAutoResume(params: {
 			handoffForDispatch,
 			config.handoffFreshMaxAgeMs,
 			nowMs,
-			{ taskStatusById, preferredTaskIds: preferredTaskIds.slice(0, 1), excludedTaskIds, reloadRequired: false },
+			{ taskStatusById, preferredTaskIds: preferredTaskIds.slice(0, 1), excludedTaskIds, reloadRequired: false, contextPressureActive: false },
 		);
 		autoResumeSnapshot.promptDiagnostics = resumeEnvelope.diagnostics;
 		const clearedHandoff = clearAutoResumeAfterReloadIntent(handoffForDispatch);

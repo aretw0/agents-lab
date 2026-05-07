@@ -258,6 +258,7 @@ export type AutoResumePromptOptions = {
 	preferredTaskIds?: string[];
 	excludedTaskIds?: string[];
 	reloadRequired?: boolean;
+	contextPressureActive?: boolean;
 };
 
 export type HandoffBoardReconciliationReason = "fresh" | "stale-hand-off" | "missing-task" | "completed-focus" | "board-handoff-divergence";
@@ -538,6 +539,11 @@ function isStaleReloadGuidance(value: string, options?: AutoResumePromptOptions)
 		|| normalized.includes("reload-required")
 		|| normalized.includes("reload required")
 		|| normalized.includes("needs reload")
+		|| normalized.includes("reload recommended")
+		|| normalized.includes("reload recomendado")
+		|| normalized.includes("reload recomendada")
+		|| normalized.includes("operator=reload")
+		|| normalized.includes("operador=reload")
 		|| normalized.includes("precisa reload")
 		|| normalized.includes("precisa fazer reload")
 		|| normalized.includes("before trusting")
@@ -548,8 +554,23 @@ function isStaleReloadGuidance(value: string, options?: AutoResumePromptOptions)
 		|| normalized.includes("surface rename");
 }
 
+function isStaleContextPressureGuidance(value: string, options?: AutoResumePromptOptions): boolean {
+	if (options?.contextPressureActive !== false) return false;
+	const normalized = normalizePromptSegment(value).toLowerCase();
+	const mentionsContextWatch = normalized.includes("context-watch") || normalized.includes("context watchdog");
+	const mentionsPressure = normalized.includes("operator=checkpoint")
+		|| normalized.includes("operator=compact")
+		|| normalized.includes("context-watch-checkpoint-required")
+		|| normalized.includes("context-watch-compact-required")
+		|| normalized.includes("checkpoint required")
+		|| normalized.includes("compact required")
+		|| normalized.includes("pre-compact")
+		|| normalized.includes("pré-compact");
+	return mentionsContextWatch && mentionsPressure;
+}
+
 function filterAutoResumeHandoffGuidance(values: string[], options?: AutoResumePromptOptions): string[] {
-	return values.filter((value) => !isStaleReloadGuidance(value, options));
+	return values.filter((value) => !isStaleReloadGuidance(value, options) && !isStaleContextPressureGuidance(value, options));
 }
 
 function filterAutoResumeFocusTasks(rawTasks: string[], completedTasks: string[] = [], options?: AutoResumePromptOptions): { active: string[]; stale: string[]; staleIds: Set<string>; excludedIds: Set<string> } {

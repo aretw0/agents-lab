@@ -1,56 +1,50 @@
 {
-  "timestamp": "2026-05-07T16:08:43.241Z",
-  "context": "After reload, continued provider-native agent lane with cadence focus. Live agent_run_start_packet worked for candidate task-bud-990-stale-re [snip] ting live outcome/start surfaces again. [truncated:+352 chars]",
+  "timestamp": "2026-05-07T16:37:40.155Z",
+  "context": "Continued subagent/provider quality calibration. Completed TASK-BUD-990 as a local-safe slice: stale auto-resume prompt filtering now suppres [snip] l + codex-spark) before worker routing. [truncated:+336 chars]",
   "current_tasks": [
     "TASK-BUD-989"
   ],
   "next_actions": [
-    "/reload before using changed agent_run_outcome_packet live behavior.",
-    "If human confirms, first provider-native worker candidate is task-bud-990-stale-resume-guidanc [snip] exact confirmation phrase. [truncated:+54 chars]",
-    "Alternatively continue hardening actual runner/registry around argv execution, but keep proces [snip] tion contract is stronger. [truncated:+36 chars]"
+    "Commit scoped TASK-BUD-990 files only, preserving parked TASK-BUD-968 quota/footer WIP as dirty.",
+    "Continue TASK-BUD-989 by calibrating provider-native canary routing across dashscope and opena [snip] rk quotas before dispatch. [truncated:+24 chars]",
+    "Do not promote multi-worker/colony until 2-3 bounded provider-native agent runs pass contractDecision=pass."
   ],
   "blockers": [
     "Parked TASK-BUD-968 quota/footer WIP remains dirty and must stay isolated.",
-    "Context-watch is ok but operator=reload because runtime extension changed.",
-    "No multi-worker/colony promotion until repeated provider-native one-worker contract passes."
+    "No provider-native worker dispatch without explicit confirmation or a later explicit policy change."
   ],
   "recent_validation": [
-    "agent_run_start_packet live returned ready-for-human-decision dispatch=no for TASK-BUD-990 candidate",
-    "agent_run_registry_upsert dry_run returned writeAllowed=no dispatch=no",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 15 passed"
-  ],
-  "recent_commits": [
-    "be25a9ce fix(delegation): fail empty agent output"
+    "npx vitest run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-s [snip] > 2 files, 68 tests passed [truncated:+42 chars]",
+    "git diff --check scoped context-watch files -> passed"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-989",
     "canonical_links": [
       "task:TASK-BUD-989",
-      "task:TASK-BUD-990-STALE-RESUME-GUIDANCE-REVIEW",
       "task:TASK-BUD-990",
-      "commit:be25a9ce"
+      "task:TASK-BUD-968"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T16:08:43.241Z",
+    "generatedAtIso": "2026-05-07T16:37:40.155Z",
     "level": "ok",
-    "percent": 48,
+    "percent": 28,
     "action": "continue",
-    "recommendation": "reload-before-live-agent-outcome-or-explicit-canary"
+    "recommendation": "commit-task-bud-990-then-calibrate-provider-canary-routing"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T16:08:43.241Z",
+      "atIso": "2026-05-07T16:37:40.155Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 48,
+      "percent": 28,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-before-live-agent-outcome-or-explicit-canary"
+      "recommendation": "commit-task-bud-990-then-calibrate-provider-canary-routing"
     }
   ]
 }

@@ -14579,6 +14579,15 @@
       "method": "focal-vitest",
       "timestamp": "2026-05-07T16:07:15.392Z",
       "evidence": "Hardened agent_run_outcome_packet with optional output_bytes/outputBytes. Completed process with outputBytes=0 now fails contract with recommendationCode=agent-run-outcome-fail-empty-output and blocker empty-output, instead of relying only on ad-hoc marker_results. Surface accepts output_bytes. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 15 passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-990-STALE-RESUME-FILTERS",
+      "target": "TASK-BUD-990",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-07T16:25:45.424Z",
+      "evidence": "Implemented stale auto-resume guidance reconciliation: when reloadRequired=false, stale reload guidance also filters operator=reload/reload-recommended variants; when contextPressureActive=false, context-watch checkpoint/compact pressure guidance is filtered from auto-resume prompts while preserving real blockers/next actions. Validation passed: npx vitest run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts -> 2 files, 68 tests passed. git diff --check scoped to changed context-watch files passed."
     }
   ]
 }

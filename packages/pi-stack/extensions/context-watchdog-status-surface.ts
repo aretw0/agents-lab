@@ -468,11 +468,14 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 		parameters: Type.Object({}),
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const reloadRequired = runtime.isReloadRequiredForSourceUpdate();
+			const contextPressureActive = typeof (ctx as { getContextUsage?: unknown }).getContextUsage === "function"
+				? runtime.buildAssessment(ctx).level !== "ok"
+				: false;
 			const envelope = buildAutoResumePromptEnvelopeFromHandoff(
 				readHandoffJson(ctx.cwd),
 				runtime.getConfig().handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), reloadRequired },
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), reloadRequired, contextPressureActive },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(envelope.diagnostics);
 			const focusTaskIds = Array.isArray(envelope.diagnostics.focusTasksListed)
