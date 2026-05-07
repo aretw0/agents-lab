@@ -1,56 +1,54 @@
 {
-  "timestamp": "2026-05-07T16:44:31.999Z",
-  "context": "Continued agent quality calibration after TASK-BUD-990. Committed stale auto-resume fix, then hardened provider-native agent start packets so [snip] but must be explicit in the run packet. [truncated:+470 chars]",
+  "timestamp": "2026-05-07T16:54:33.539Z",
+  "context": "After reload and operator steer, live agent_run_start_packet accepted the new budget_decision/budget_evidence fields and remained report-only [snip] del execution budget evidence resolver. [truncated:+304 chars]",
   "current_tasks": [
     "TASK-BUD-989"
   ],
   "next_actions": [
-    "Reload before trusting live agent_run_start_packet because runtime extension surface changed.",
-    "After reload, prepare exactly one provider-native canary packet with budget_decision/budget_ev [snip] r-level blocked aggregate. [truncated:+156 chars]",
-    "Keep worker execution gated on explicit confirmation until a later policy explicitly grants autonomous agent dispatch."
+    "Reload before trusting live agent_run_start_packet again because extension code changed.",
+    "Continue TASK-BUD-989 by using the shared budget evidence gate in one bounded provider-native [snip] licit confirmation/policy. [truncated:+38 chars]",
+    "Consider future control-plane reuse in quota route/advisor surfaces only when it reduces dupli [snip] eport-only/no-auto-switch. [truncated:+28 chars]"
   ],
   "blockers": [
-    "Parked TASK-BUD-968 quota/footer WIP remains dirty and must stay isolated.",
-    "No multi-worker/colony promotion until repeated provider-native one-worker contracts pass.",
-    "OpenAI Codex provider-level local budget is blocked; model-specific Codex Spar [snip] t before selecting it. [truncated:+26 chars]"
+    "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated.",
+    "OpenAI Codex provider-level local projection remains blocked; Codex Spark need [snip] ence before selection. [truncated:+35 chars]",
+    "No multi-worker/colony promotion until repeated provider-native one-worker contract passes."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 16 passed",
-    "npx vitest run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-s [snip] sed before commit 0b3c4987 [truncated:+50 chars]",
-    "git diff --check scoped agent-start files -> passed"
+    "Live agent_run_start_packet report-only packet with dashscope budget_decision=ok returned read [snip] n-decision and dispatch=no [truncated:+10 chars]",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 17 passed",
+    "git diff --check scoped shared budget evidence files -> passed"
   ],
   "recent_commits": [
-    "0b3c4987 fix(resume): suppress stale auto-resume guidance",
-    "c37c45bd fix(delegation): require budget evidence for agent starts"
+    "a9e711af refactor(delegation): share provider budget evidence gate"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-989",
     "canonical_links": [
       "task:TASK-BUD-989",
-      "task:TASK-BUD-990",
-      "commit:0b3c4987"
+      "commit:a9e711af"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T16:44:31.999Z",
+    "generatedAtIso": "2026-05-07T16:54:33.539Z",
     "level": "ok",
-    "percent": 42,
+    "percent": 44,
     "action": "continue",
-    "recommendation": "reload-then-run-one-budget-evidenced-provider-native-canary"
+    "recommendation": "reload-then-budget-evidenced-single-canary"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T16:44:31.999Z",
+      "atIso": "2026-05-07T16:54:33.539Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 42,
+      "percent": 44,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-run-one-budget-evidenced-provider-native-canary"
+      "recommendation": "reload-then-budget-evidenced-single-canary"
     }
   ]
 }
