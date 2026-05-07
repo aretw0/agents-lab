@@ -51,6 +51,23 @@ Decisão canônica:
 - `ready-for-simple-spawn`
 - `keep-report-only`
 
+## Contrato complementar de simple agent run plan
+
+A primitive `buildSimpleAgentRunPlan` (exposta no runtime como `simple_agent_run_plan`) é o degrau L1 report-only antes de qualquer novo worker simples. Ela bloqueia quando faltam:
+
+- objetivo de uma fatia;
+- provider/model completo;
+- cwd explícito;
+- arquivos declarados;
+- timeout curto e bounded;
+- validação parent-side;
+- rollback não destrutivo;
+- budget;
+- abort seguro;
+- log/status bounded.
+
+Mesmo no caminho verde, ela apenas retorna `ready-for-human-decision`; não autoriza dispatch.
+
 ## Invariantes
 
 - report-only

@@ -16,6 +16,15 @@ Conclusão: o runner atual serviu como descoberta, mas não é aceitável como e
 
 Delegação agêntica precisa evoluir em degraus. Cada degrau só promove para o próximo depois de provar controle operacional: escopo declarado, processo observável, timeout, abort seguro, validação focal, rollback e checkpoint.
 
+## Influências reaproveitadas (“roubar como artista”)
+
+Esta primitiva não deve nascer do zero. Ela reaproveita padrões que já estamos curando em outras frentes:
+
+- **Background process control**: registry, `pid`, owner/workspace/session, tail bounded, graceful stop then kill, cleanup em reload/handoff e lifecycle classificado antes de qualquer launch/stop operacional.
+- **Agents-as-tools calibration**: separar calibração/readiness de dispatch, preservar `dispatchAllowed=false` nos packets e exigir boundedness/observability antes de promover execução.
+- **OpenAI Symphony influence**: orquestrador como autoridade única, workspaces por item, status surface como observabilidade e não fonte de verdade, preflight por tick e reload fail-closed/last-known-good.
+- **Incidente `provider-canary-spark`**: a UI enxergar “running” não basta; o parent precisa de estado queryável, log/status e abort seguro por run id.
+
 ## Escada de maturidade
 
 ### L0 — execução direta pelo control-plane
@@ -95,6 +104,8 @@ Requisitos adicionais:
 
 Forma: extensão/tool first-party, não apenas documentação.
 
+Primeira fatia implementada após o incidente: `simple_agent_run_plan`, um packet report-only que não despacha, mas normaliza o contrato L1 antes de qualquer novo worker. Ele herda explicitamente os invariantes das primitivas acima: `activation=none`, `authorization=none`, `dispatchAllowed=false`, `executorApproved=false`, `requiresHumanDecision=true`.
+
 Entrada mínima:
 
 - `goal` ou `prompt`;
@@ -119,7 +130,7 @@ Saída mínima:
 - `validationResult`;
 - `rollbackHint`.
 
-Ferramentas complementares:
+Ferramentas complementares futuras:
 
 - `simple_agent_status(runId)`;
 - `simple_agent_abort(runId)`;
