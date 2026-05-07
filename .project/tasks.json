@@ -21820,6 +21820,23 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:semantic-debt] Como a stack ainda está em lapidação e não lançada, não há legado a preservar; nomes devem convergir direto para a forma coesa.\n[provenance:human] source_task=TASK-BUD-974 reason=Usuário corrigiu explicitamente: não anunciar legado/backcompat; deixar como deveria ser.\n[slice] Tratado como pre-release: sem linguagem de legado/backcompat; `simple-delegate` substituído por `delegate`/`delegation rehearsal` nas superfícies focais.\n[validation] smoke ops/autonomy/session-analytics -> 92 passed; rg focal limpo para nomes antigos; `git diff --check` passou.",
       "verification": "VERIF-TASK-BUD-979-DELEGATION-REHEARSAL"
+    },
+    {
+      "id": "TASK-BUD-980",
+      "description": "[P2/local-safe] Adicionar regressão contra retorno de `simple-delegate` na runway de delegation.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Teste deve inspecionar arquivos focais de ops/delegation runway e bloquear `simple_delegate`, `simple-delegate`, `ready-simple-delegate`, `SimpleDelegate`, `simpleDelegate`, `mix_simple_delegate_events`, `mixSimpleDelegateEvents`.",
+        "Teste deve confirmar superfície final por smoke: `delegation_rehearsal_packet`, `delegation_rehearsal_start_packet`, `delegate`, `ready-delegation-rehearsal`.",
+        "Rodar smoke focal e `git diff --check`; não tocar settings/routing/CI/publish/credenciais."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:regression] Após renomear em pre-release para delegation rehearsal, precisamos bloquear retorno do termo ambíguo sem criar aliases.\n[provenance:human] source_task=TASK-BUD-979 reason=Manter coesão sem bloat semântico e sem nomes provisórios reaparecendo.\n[slice] Regressão adicionada contra retorno de naming superseded na runway de delegation.\n[validation] smoke focal -> 23 passed; `git diff --check` passou.",
+      "verification": "VERIF-TASK-BUD-980-DELEGATION-NAMING-REGRESSION"
     }
   ]
 }

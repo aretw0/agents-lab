@@ -14498,6 +14498,15 @@
       "method": "refactor+smoke+diff-check",
       "timestamp": "2026-05-07T12:11:13.871Z",
       "evidence": "Removido enquadramento de legado/backcompat nos docs recentes e renomeada a runway de `simple-delegate` para `delegate`/`delegation rehearsal` nas superfícies focais: tool `delegation_rehearsal_packet`, tool `delegation_rehearsal_start_packet`, parâmetros `mix_delegation_events`, decision `ready-delegation-rehearsal`, recommendation codes `delegation-rehearsal-*` e session analytics `local/manual/delegate/swarm`. Mantido `agent run` como execução concreta de worker. Não foram criados aliases para nomes antigos. Validação: rg focal não encontrou `simple_delegate|simple-delegate|ready-simple-delegate|SimpleDelegate|simpleDelegate|mix_simple_delegate_events|mixSimpleDelegateEvents|Simple-Delegate|totals.delegationRehearsal|DelegationRehearsalRehearsal|mixDelegationRehearsalEvents|delegate rehearsal|\\blegado\\b|backcompat`; `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts` -> 3 files/92 tests passed; `git diff --check` passou."
+    },
+    {
+      "id": "VERIF-TASK-BUD-980-DELEGATION-NAMING-REGRESSION",
+      "target": "TASK-BUD-980",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke+diff-check",
+      "timestamp": "2026-05-07T12:12:56.542Z",
+      "evidence": "Adicionada regressão em guardrails-ops-calibration.test.ts que inspeciona arquivos focais de ops/delegation runway e bloqueia retorno de `simple_delegate`, `simple-delegate`, `ready-simple-delegate`, `SimpleDelegate`, `simpleDelegate`, `mix_simple_delegate_events`, `mixSimpleDelegateEvents`. Validação: `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` -> 1 file/23 tests passed; `git diff --check` passou."
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -12,6 +12,33 @@ import {
 import { registerGuardrailsOpsCalibrationSurface } from "../../extensions/guardrails-core-ops-calibration-surface";
 
 describe("ops calibration decision packet", () => {
+  it("keeps delegation runway free of superseded simple-delegate naming", () => {
+    const focalFiles = [
+      "packages/pi-stack/extensions/guardrails-core-ops-calibration.ts",
+      "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+      "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface-helpers.ts",
+      "packages/pi-stack/extensions/guardrails-core-autonomy-lane-runway.ts",
+      "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+      "packages/pi-stack/extensions/session-analytics-parsers.ts",
+    ];
+    const supersededMarkers = [
+      "simple_delegate",
+      "simple-delegate",
+      "ready-simple-delegate",
+      "SimpleDelegate",
+      "simpleDelegate",
+      "mix_simple_delegate_events",
+      "mixSimpleDelegateEvents",
+    ];
+
+    for (const file of focalFiles) {
+      const text = readFileSync(join(process.cwd(), file), "utf8");
+      for (const marker of supersededMarkers) {
+        expect(text, `${file} should not contain ${marker}`).not.toContain(marker);
+      }
+    }
+  });
+
   it("recommends delegate when capability/mix signals are strong", () => {
     const packet = buildDelegateOrExecuteDecisionPacket({
       capabilityDecision: "ready",
