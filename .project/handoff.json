@@ -1,51 +1,55 @@
 {
-  "timestamp": "2026-05-07T18:01:26.086Z",
-  "context": "Human confirmed proceeding to one bounded provider-native canary. Prepared DashScope read-only canary packet task-bud-989-dashscope-readonly- [snip] dispatch until machine pressure clears. [truncated:+392 chars]",
-  "current_tasks": [
-    "TASK-BUD-989"
-  ],
+  "timestamp": "2026-05-07T18:24:58.719Z",
+  "context": "User steered recurring disk-pressure/troubleshooting into reusable tools/skills for easier control. Implemented first maintenance primitive: [snip] eload is required before live tool use. [truncated:+375 chars]",
   "next_actions": [
-    "Free disk / reduce machine pressure through explicit operator-approved cleanup or outside-pi m [snip] achine_maintenance_status. [truncated:+27 chars]",
-    "Once severity is no longer pause/block, execute exactly one bounded canary using the prepared [snip] et or refresh it if stale. [truncated:+14 chars]",
-    "After worker exit, update registry/status/log/outcome; empty output remains a hard contract failure."
+    "Reload before using live workspace_storage_pressure_report.",
+    "After reload, run workspace_storage_pressure_report to produce a bounded cleanup candidate packet.",
+    "If operator confirms, compress only low-risk old pi session backups/temps with gzip; do not to [snip] rrent active session file. [truncated:+10 chars]"
   ],
   "blockers": [
-    "Machine maintenance gate: disk pressure 99.71% used, longRun=hold.",
-    "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated.",
-    "No multi-worker/background/colony promotion until repeated one-worker contracts pass."
+    "Machine maintenance gate still indicates disk pressure; worker canary remains [snip] until pressure clears. [truncated:+9 chars]",
+    "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated."
   ],
   "recent_validation": [
-    "agent_run_start_packet task-bud-989-dashscope-readonly-canary-1 -> ready-for-human-decision dispatch=no budget=ok",
-    "machine_maintenance_status -> severity=pause action=pause-long-runs longRun=hold disk used=99.71% free≈1415.82MB",
-    "unattended_continuation_plan -> blocked due to risk"
+    "npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts -> 1 file, 12 tests passed",
+    "git diff --check scoped machine-maintenance/task/verification files -> passed",
+    "VERIF-TASK-BUD-991-STORAGE-PRESSURE-REPORT linked"
+  ],
+  "recent_commits": [
+    "ca788ad2 feat(maintenance): report storage pressure cleanup candidates"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-989",
+    "focus": "TASK-BUD-991",
     "canonical_links": [
-      "task:TASK-BUD-989",
-      "task:TASK-BUD-989-DASHSCOPE-READONLY-CANARY-1"
+      "task:TASK-BUD-991",
+      "task:TASK-BUD-991-STORAGE-PRESSURE-REPORT",
+      "commit:ca788ad2"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T18:01:26.086Z",
+    "generatedAtIso": "2026-05-07T18:24:58.719Z",
     "level": "ok",
-    "percent": 24,
+    "percent": 37,
     "action": "continue",
-    "recommendation": "pause-worker-dispatch-until-disk-pressure-clears"
+    "recommendation": "reload-then-run-storage-pressure-report",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T18:01:26.086Z",
+      "atIso": "2026-05-07T18:24:58.719Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 24,
+      "percent": 37,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "pause-worker-dispatch-until-disk-pressure-clears"
+      "recommendation": "reload-then-run-storage-pressure-report"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-991"
   ]
 }
