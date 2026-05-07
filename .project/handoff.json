@@ -1,51 +1,51 @@
 {
-  "timestamp": "2026-05-07T22:41:12.654Z",
-  "context": "Reload completed by user; continued TASK-BUD-998. Gates ok: context ok, machine ok for bounded work despite tight disk, route advisory recomm [snip] nt; final positive marker check passed. [truncated:+806 chars]",
+  "timestamp": "2026-05-07T22:48:38.996Z",
+  "context": "Continued toward stronger agent takeover. Implemented TASK-BUD-999: handoff checkpoints now carry bounded stopStatus/stopSource evidence and [snip] whether pre-compact stop was graceful. [truncated:+419 chars]",
   "next_actions": [
-    "Commit TASK-BUD-998 board/handoff evidence and any intended registry/log evidence if tracked or appropriate.",
-    "Keep TASK-BUD-999 planned for graceful-vs-interrupted auto-resume evidence.",
-    "Continue next conservative lane only after checking dirty state; do not touch parked TASK-BUD-968 WIP."
+    "Commit TASK-BUD-999 code/board/handoff evidence, excluding parked TASK-BUD-968 WIP.",
+    "After reload, smoke context_watch_checkpoint/auto-resume prompt if desired.",
+    "Continue delegation promotion runway: reassess TASK-BUD-989 with evidence from TASK-BUD-998 an [snip] ed agent assumption slice. [truncated:+19 chars]"
   ],
   "blockers": [
+    "Runtime /reload required before live context_watch_checkpoint includes stop_status/stop_source.",
     "TASK-BUD-968 quota/footer WIP remains parked and dirty.",
-    "Disk remains tight; continue only bounded work."
+    "Disk remains tight; continue bounded work only."
   ],
   "recent_validation": [
-    "quota_visibility_route balanced -> dashscope ok with route-advisory structured budget evidence",
-    "agent_run_operator_packet live smoke -> ready-for-human-decision runId=task-bud-998-live-smoke dispatch=no",
-    "bounded DashScope canary task-bud-998-live-smoke -> exit_code=0 output_bytes=849 stale_count=0 PASS"
+    "npx vitest run packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-st [snip] > 2 files, 19 tests passed [truncated:+63 chars]",
+    "board_task_complete TASK-BUD-999 -> completed"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-998",
+    "focus": "TASK-BUD-999",
     "canonical_links": [
-      "task:TASK-BUD-998",
-      "task:TASK-BUD-998-LIVE-SMOKE"
+      "task:TASK-BUD-999",
+      "task:TASK-BUD-968"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T22:41:12.654Z",
+    "generatedAtIso": "2026-05-07T22:48:38.996Z",
     "level": "ok",
-    "percent": 43,
+    "percent": 53,
     "action": "continue",
-    "recommendation": "commit-TASK-BUD-998-evidence",
+    "recommendation": "commit-TASK-BUD-999-then-continue-delegation-runway",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T22:41:12.654Z",
+      "atIso": "2026-05-07T22:48:38.996Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 43,
+      "percent": 53,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-TASK-BUD-998-evidence"
+      "recommendation": "commit-TASK-BUD-999-then-continue-delegation-runway"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-998"
+    "TASK-BUD-999"
   ]
 }

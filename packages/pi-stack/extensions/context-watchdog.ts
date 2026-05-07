@@ -155,10 +155,13 @@ import {
 	resolveHandoffBoardReconciliation,
 	resolveHandoffFreshness,
 	summarizeAutoResumePromptDiagnostics,
+	summarizeHandoffStopState,
 	toAgeSec,
 	type AutoResumePromptDiagnostics,
 	type HandoffFreshnessLabel,
 	type HandoffRefreshMode,
+	type HandoffStopSource,
+	type HandoffStopStatus,
 } from "./context-watchdog-handoff";
 import { formatContextWatchAutoResumePreviewSummary } from "./context-watchdog-continuation";
 export {
@@ -230,6 +233,7 @@ export {
 	formatAutoResumeReloadHintShort,
 	resolveHandoffBoardReconciliation,
 	summarizeAutoResumePromptDiagnostics,
+	summarizeHandoffStopState,
 	latestContextWatchEvent,
 	resolveCompactCheckpointPersistence,
 	normalizeContextWatchdogConfig,
@@ -268,6 +272,8 @@ export type {
 	HandoffFreshnessLabel,
 	HandoffPrepReason,
 	HandoffRefreshMode,
+	HandoffStopSource,
+	HandoffStopStatus,
 	PreCompactReloadSignal,
 };
 

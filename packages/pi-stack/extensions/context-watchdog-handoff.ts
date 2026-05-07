@@ -1,5 +1,7 @@
 export type HandoffFreshnessLabel = "fresh" | "stale" | "unknown";
 export type HandoffRefreshMode = "none" | "auto-on-compact" | "manual" | "unknown";
+export type HandoffStopStatus = "graceful" | "interrupted" | "unknown";
+export type HandoffStopSource = "human" | "agent" | "timeout" | "compact" | "unknown";
 
 const CONTEXT_WATCH_ACTION_PREFIX = "Context-watch action:";
 const DEFAULT_CONTEXT_WATCH_THRESHOLDS = {
@@ -68,6 +70,8 @@ export type LocalSliceHandoffCheckpointInput = {
 	growthDecision?: "go" | "hold" | "needs-evidence";
 	growthScore?: number;
 	growthRecommendationCode?: string;
+	stopStatus?: HandoffStopStatus | string;
+	stopSource?: HandoffStopSource | string;
 };
 
 export type LocalSliceHandoffBudgetAssessment = {
@@ -95,6 +99,24 @@ function compactHandoffList(values: string[] | undefined, limit: number, maxChar
 		maxChars,
 	});
 	return prepared.values.length > 0 ? prepared.values : undefined;
+}
+
+function normalizeStopStatus(value: unknown): HandoffStopStatus {
+	return value === "graceful" || value === "interrupted" ? value : "unknown";
+}
+
+function normalizeStopSource(value: unknown): HandoffStopSource {
+	return value === "human" || value === "agent" || value === "timeout" || value === "compact" ? value : "unknown";
+}
+
+export function summarizeHandoffStopState(handoffInput: Record<string, unknown> | undefined): string {
+	const handoff = handoffInput && typeof handoffInput === "object" ? handoffInput : {};
+	const contextWatch = handoff.context_watch && typeof handoff.context_watch === "object" ? handoff.context_watch as Record<string, unknown> : {};
+	const stopStatus = normalizeStopStatus(contextWatch.stopStatus);
+	const stopSource = normalizeStopSource(contextWatch.stopSource);
+	if (stopStatus === "graceful") return `graceful source=${stopSource}; prior slice reported a bounded checkpoint.`;
+	if (stopStatus === "interrupted") return `interrupted source=${stopSource}; prior slice may be half-finished, verify dirty state and focal evidence before continuing.`;
+	return "unknown; assume prior slice may be half-finished until dirty state and focal evidence are checked.";
 }
 
 function trimSliceMemoryForBudget(checkpoint: Record<string, unknown>): Record<string, unknown> {
@@ -146,6 +168,8 @@ export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpo
 			...(growthRecommendationCode ? { recommendationCode: growthRecommendationCode } : {}),
 		}
 		: undefined;
+	const stopStatus = normalizeStopStatus(input.stopStatus ?? "graceful");
+	const stopSource = normalizeStopSource(input.stopSource ?? "agent");
 	const canonicalLinks = buildLocalSliceCanonicalLinks({
 		taskId: input.taskId,
 		context: input.context,
@@ -172,6 +196,9 @@ export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpo
 			...(contextPercent !== undefined ? { percent: contextPercent } : {}),
 			action: contextLevel === "ok" || contextLevel === "warn" ? "continue" : "checkpoint-refresh",
 			recommendation: truncateForPrompt(input.recommendation ?? "Progress saved; continue bounded local hardening.", 120),
+			stopStatus,
+			stopSource,
+			stopSummary: summarizeHandoffStopState({ context_watch: { stopStatus, stopSource } }),
 			...(growthSnapshot ? { growth_maturity: growthSnapshot } : {}),
 		},
 		context_watch_events: [{
@@ -662,6 +689,7 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 	});
 	const lines = [
 		`auto-resume: continue from .project/handoff.json${timestamp ? ` (ts=${timestamp})` : ""}.`,
+		`previousStop: ${summarizeHandoffStopState(handoff)}`,
 		`focusTasks: ${formatPromptList(tasksPrepared.values, tasksPrepared.diagnostics.droppedByLimitCount, "none-listed", ", ")}`,
 	];
 	if (filteredCurrentTasks.stale.length > 0) {

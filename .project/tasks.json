@@ -22258,7 +22258,7 @@
     {
       "id": "TASK-BUD-999",
       "description": "Expose graceful-stop vs interrupted evidence in auto-resume handoff",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog-handoff.ts",
@@ -22274,7 +22274,8 @@
         "Regression tests cover graceful, interrupted, and unknown stop states."
       ],
       "milestone": "context-watchdog-lane-2026-05",
-      "notes": "Created from human steering: future auto-resume should tell the next operator whether the previous agent stopped gracefully before compaction/checkpoint; this helps judge whether work may be half-finished."
+      "notes": "Created from human steering: future auto-resume should tell the next operator whether the previous agent stopped gracefully before compaction/checkpoint; this helps judge whether work may be half-finished.\n[rationale:risk-control] Auto-resume needs explicit graceful/interrupted/unknown stop evidence because the next operator or agent must know whether the previous slice checkpoint was calm and bounded or may have stopped mid-slice; this reduces accidental continuation from half-finished state.\nCompleted graceful/interrupted/unknown stop evidence in checkpoint + auto-resume prompt. Auto-resume now includes `previousStop:` and interrupted/unknown states warn to verify dirty state/focal evidence before continuation.",
+      "verification": "VERIF-TASK-BUD-999-AUTO-RESUME-STOP-EVIDENCE"
     }
   ]
 }

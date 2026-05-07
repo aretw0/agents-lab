@@ -47,6 +47,18 @@ export function registerContextWatchdogCheckpointBootstrapSurface(
 			])),
 			growth_score: Type.Optional(Type.Number()),
 			growth_code: Type.Optional(Type.String()),
+			stop_status: Type.Optional(Type.Union([
+				Type.Literal("graceful"),
+				Type.Literal("interrupted"),
+				Type.Literal("unknown"),
+			])),
+			stop_source: Type.Optional(Type.Union([
+				Type.Literal("human"),
+				Type.Literal("agent"),
+				Type.Literal("timeout"),
+				Type.Literal("compact"),
+				Type.Literal("unknown"),
+			])),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
 			const p = params as {
@@ -62,6 +74,8 @@ export function registerContextWatchdogCheckpointBootstrapSurface(
 				growth_decision?: "go" | "hold" | "needs-evidence";
 				growth_score?: number;
 				growth_code?: string;
+				stop_status?: "graceful" | "interrupted" | "unknown";
+				stop_source?: "human" | "agent" | "timeout" | "compact" | "unknown";
 			};
 			const result = writeLocalSliceHandoffCheckpoint(ctx.cwd, {
 				timestampIso: new Date().toISOString(),
@@ -77,6 +91,8 @@ export function registerContextWatchdogCheckpointBootstrapSurface(
 				growthDecision: p.growth_decision,
 				growthScore: p.growth_score,
 				growthRecommendationCode: p.growth_code,
+				stopStatus: p.stop_status,
+				stopSource: p.stop_source,
 			});
 			const reloadRequired = runtime.isReloadRequiredForSourceUpdate();
 			const details = {

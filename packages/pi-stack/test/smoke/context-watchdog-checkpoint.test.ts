@@ -175,6 +175,32 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("auto-resume prompt distinguishes graceful, interrupted, and unknown prior stops", () => {
+		const graceful = buildLocalSliceHandoffCheckpoint({
+			timestampIso: "2026-05-07T12:00:00.000Z",
+			taskId: "TASK-BUD-999",
+			context: "Graceful checkpoint before compact.",
+			stopStatus: "graceful",
+			stopSource: "agent",
+		});
+		expect(graceful.context_watch).toMatchObject({
+			stopStatus: "graceful",
+			stopSource: "agent",
+		});
+		expect(buildAutoResumePromptFromHandoff(graceful)).toContain("previousStop: graceful source=agent");
+
+		const interrupted = buildLocalSliceHandoffCheckpoint({
+			timestampIso: "2026-05-07T12:00:00.000Z",
+			taskId: "TASK-BUD-999",
+			context: "Interrupted checkpoint evidence.",
+			stopStatus: "interrupted",
+			stopSource: "timeout",
+		});
+		expect(buildAutoResumePromptFromHandoff(interrupted)).toContain("prior slice may be half-finished");
+
+		expect(buildAutoResumePromptFromHandoff({ timestamp: "2026-05-07T12:00:00.000Z" })).toContain("previousStop: unknown; assume prior slice may be half-finished");
+	});
+
 	it("context_watch_checkpoint persists optional growth maturity snapshot and compact summary markers", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-growth-"));
 		try {
@@ -237,6 +263,35 @@ describe("context-watchdog", () => {
 			expect(written.current_tasks).toBeUndefined();
 			expect(written.completed_tasks).toEqual(["TASK-BUD-DONE"]);
 			expect(written.context_watch.focus_task_status).toBe("completed");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_watch_checkpoint tool persists explicit interrupted stop evidence", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-stop-"));
+		try {
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_checkpoint");
+			await tool.execute(
+				"tc-context-watch-checkpoint-stop",
+				{
+					task_id: "TASK-BUD-999",
+					context: "interrupted stop evidence checkpoint",
+					stop_status: "interrupted",
+					stop_source: "timeout",
+				},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd },
+			);
+			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as any;
+			expect(written.context_watch).toMatchObject({
+				stopStatus: "interrupted",
+				stopSource: "timeout",
+			});
+			expect(buildAutoResumePromptFromHandoff(written)).toContain("prior slice may be half-finished");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

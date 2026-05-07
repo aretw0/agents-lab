@@ -14732,6 +14732,15 @@
       "method": "targeted-vitest-and-provider-native-canary",
       "timestamp": "2026-05-07T22:40:44.901Z",
       "evidence": "Implemented ergonomic provider-native agent-run wrapper/API. Added report-only `agent_run_operator_packet` builder/tool that derives stable runId/logPath from task_id+purpose, defaults to no-session/minimal-no-extensions/read-only tools/read-only file contract, attaches declared files in the command preview, preserves structured budget evidence, and emits validation checklist plus rollback hint without dispatch authority. Updated `agent_run_start_packet` preview to use `--print @declared_files <goal>`, matching the canary path that avoids missing-file failures. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 1 file, 20 tests passed. After reload, live `agent_run_operator_packet` returned ready-for-human-decision for run_id=task-bud-998-live-smoke with route-advisory budget evidence. Bounded DashScope read-only canary executed using the new packet pattern: exit_code=0, output_bytes=849, stale_count=0, PASS, safe_marker_check PASS+EXIT_CODE=0 ok, `agent_run_outcome_packet file_contract=read-only` -> contract=pass/process=completed/recommendation=stop. Log: .pi/reports/task-bud-998-live-smoke.log. [rationale:risk-control] The new wrapper reduces manual command assembly risk while preserving report-only governance and explicit human/operator gates."
+    },
+    {
+      "id": "VERIF-TASK-BUD-999-AUTO-RESUME-STOP-EVIDENCE",
+      "target": "TASK-BUD-999",
+      "target_type": "task",
+      "status": "passed",
+      "method": "targeted-vitest",
+      "timestamp": "2026-05-07T22:48:25.195Z",
+      "evidence": "Implemented bounded graceful-vs-interrupted auto-resume stop evidence. `LocalSliceHandoffCheckpointInput` now accepts `stopStatus` and `stopSource`; checkpoints default to `stopStatus=graceful` and `stopSource=agent`, persist `context_watch.stopStatus/stopSource/stopSummary`, and `buildAutoResumePromptFromHandoff` emits a `previousStop:` line. Interrupted and unknown states warn that the prior slice may be half-finished and should be verified before continuing. `context_watch_checkpoint` tool accepts `stop_status` and `stop_source`. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts --reporter=dot` -> 2 files, 19 tests passed. [rationale:risk-control] This makes takeover after compaction/reload safer for future agents/operators by making incomplete-slice risk explicit."
     }
   ]
 }
