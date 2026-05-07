@@ -21652,6 +21652,28 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:risk-control] Criada após canary Dashscope mostrar que process completed não equivale a contrato cumprido; escopo é report-only/local-safe.\n[provenance:human] source_task=TASK-BUD-970 reason=Operador pediu para prosseguir cultivando primitivas do control-plane após explicar falha Dashscope.\n[slice] Implementado `buildOneSliceAgentRunOutcomePacket` e tool `one_slice_agent_run_outcome_packet`: separa `processState` de `contractDecision`, compara arquivos declarados no registry com `touched_files`, incorpora `marker_results`, retorna arquivos inesperados/ausentes, rollback sugerido e recomendação stop/retry-once/ask-human. Teste focal: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` → 10 passed; `git diff --check` passou.\n[rationale:risk-control] A primitive é segura porque é report-only, não despacha nem interrompe processos, e torna explícita a diferença entre término do subprocesso e cumprimento do contrato; isso reduz risco antes de novos canaries.\n[complete] Outcome packet primitive added and documented. Requires reload before trusting live tool surface.",
       "verification": "VERIF-TASK-BUD-971-OUTCOME-PACKET"
+    },
+    {
+      "id": "TASK-BUD-972",
+      "description": "[P1/local-safe] Adicionar registry upsert first-party para one-slice agent runs, reduzindo scripts ad hoc.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-one-slice-agent-run-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/primitives/agents-as-tools-calibration-score.md"
+      ],
+      "acceptance_criteria": [
+        "Expor tool local-safe/dry-first para criar/atualizar entrada em `.pi/reports/one-slice-agent-runs.json`.",
+        "Default dry-run não deve escrever arquivo; apply explícito deve apenas upsert registry, sem iniciar/parar processo.",
+        "Registrar provider/model, cwd, arquivos declarados, log path, state, timestamps e timeout quando informados.",
+        "Adicionar smoke test cobrindo dry-run sem escrita e apply com upsert em cwd temporário.",
+        "Não alterar settings/routing/CI/publish/credenciais nem despachar agentes."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:risk-control] Próxima primitive após outcome packet live validar falha Dashscope: remover scripts ad hoc de registry mantendo operação local-safe/dry-first.\n[provenance:human] source_task=TASK-BUD-971 reason=Operador pediu continuar cultivando ergonomia/visão do control-plane após reload.\n[slice] Implementado `buildOneSliceAgentRunRegistryUpsertPacket` e tool `one_slice_agent_run_registry_upsert`: default dry-run, `dry_run=false` permite apenas upsert em `.pi/reports/one-slice-agent-runs.json`, sem start/stop/dispatch. Smoke test cobre dry-run sem escrita e apply com upsert em cwd temporário. Validação: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` → 11 passed; `git diff --check` passou; marker check doc passou; line budget segue watch sem extract/critical.\n[rationale:risk-control] A mudança reduz scripts ad hoc sem aumentar autonomia: por padrão não escreve, apply explícito só altera registry local e nunca inicia/para processo nem toca escopos protegidos.\n[complete] Registry upsert primitive added and documented. Requires reload before trusting live tool surface.",
+      "verification": "VERIF-TASK-BUD-972-REGISTRY-UPSERT"
     }
   ]
 }

@@ -1,9 +1,9 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import guardrailsCore, { buildOneSliceAgentRunPlan, evaluateAgentSpawnReadiness } from "../../extensions/guardrails-core";
-import { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunOutcomePacket, buildOneSliceAgentRunStatus } from "../../extensions/guardrails-core-one-slice-agent-run-runtime";
+import { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunOutcomePacket, buildOneSliceAgentRunRegistryUpsertPacket, buildOneSliceAgentRunStatus } from "../../extensions/guardrails-core-one-slice-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
   it("returns ready-for-simple-spawn for single agent with explicit bounded controls", () => {
@@ -106,6 +106,44 @@ describe("agent spawn readiness contract", () => {
     expect(result.recommendationCode).toBe("one-slice-agent-run-blocked-abort");
     expect(result.blockers).toContain("abort-contract-missing");
     expect(result.blockers).toContain("bounded-log-tail-missing");
+  });
+
+  it("builds dry-first registry upsert packets without dispatch", () => {
+    const dryRun = buildOneSliceAgentRunRegistryUpsertPacket({
+      runId: "run-upsert",
+      state: "planned",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: ["docs/research/provider-canary-scorecard-2026-05.md"],
+      logPath: ".pi/reports/run-upsert.log",
+      timeoutMs: 90_000,
+    });
+
+    expect(dryRun).toMatchObject({
+      mode: "one-slice-agent-run-registry-upsert",
+      decision: "dry-run",
+      writeAllowed: false,
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      processStopAllowed: false,
+      authorization: "none",
+    });
+
+    const apply = buildOneSliceAgentRunRegistryUpsertPacket({
+      ...dryRun.entry,
+      dryRun: false,
+      nowIso: "2026-05-07T00:00:00.000Z",
+    });
+    expect(apply).toMatchObject({
+      decision: "write-ready",
+      writeAllowed: true,
+      authorization: "explicit-apply",
+      entry: {
+        runId: "run-upsert",
+        state: "planned",
+        declaredFiles: ["docs/research/provider-canary-scorecard-2026-05.md"],
+      },
+    });
   });
 
   it("reports one-slice agent run status and dry-first abort plans", () => {
@@ -284,6 +322,43 @@ describe("agent spawn readiness contract", () => {
         ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
       };
     };
+
+    const registryFile = path.join(reportsDir, "one-slice-agent-runs.json");
+    const upsertDry = await getTool("one_slice_agent_run_registry_upsert").execute(
+      "tc-upsert-dry",
+      {
+        run_id: "run-dry",
+        state: "planned",
+        provider_model_ref: "dashscope/qwen-plus",
+        declared_files: ["docs/research/provider-canary-scorecard-dashscope-2026-05.md"],
+        log_path: path.join(reportsDir, "run-dry.log"),
+        timeout_ms: 90000,
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+    expect(upsertDry.details?.decision).toBe("dry-run");
+    expect(readFileSync(registryFile, "utf8")).not.toContain("run-dry");
+
+    const upsertApply = await getTool("one_slice_agent_run_registry_upsert").execute(
+      "tc-upsert-apply",
+      {
+        run_id: "run-apply",
+        state: "planned",
+        provider_model_ref: "dashscope/qwen-plus",
+        declared_files: ["docs/research/provider-canary-scorecard-dashscope-2026-05.md"],
+        log_path: path.join(reportsDir, "run-apply.log"),
+        timeout_ms: 90000,
+        dry_run: false,
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+    expect(upsertApply.details?.decision).toBe("write-ready");
+    expect(existsSync(registryFile)).toBe(true);
+    expect(readFileSync(registryFile, "utf8")).toContain("run-apply");
 
     const status = await getTool("one_slice_agent_run_status").execute("tc-status", { run_id: "run-1" }, undefined as unknown as AbortSignal, () => {}, { cwd });
     expect(status.details?.mode).toBe("one-slice-agent-run-status");

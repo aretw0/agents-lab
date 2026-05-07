@@ -14426,6 +14426,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-07T02:40:49.449Z",
       "evidence": "Implemented report-only `one_slice_agent_run_outcome_packet` backed by `buildOneSliceAgentRunOutcomePacket`. It separates `processState` from `contractDecision`, compares registry declared files with parent-provided touched files, accepts marker results, returns unexpected/missing files, marker failures, rollback files, and stop/retry-once/ask-human recommendation. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` → 10 passed; `git diff --check` passed; marker check passed for docs primitive markers. [rationale:risk-control] report-only outcome gate prevents treating completed subprocesses as contract success."
+    },
+    {
+      "id": "VERIF-TASK-BUD-972-REGISTRY-UPSERT",
+      "target": "TASK-BUD-972",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-07T02:58:19.742Z",
+      "evidence": "Implemented dry-first `one_slice_agent_run_registry_upsert` backed by `buildOneSliceAgentRunRegistryUpsertPacket`. Default dry-run does not write; `dry_run=false` only upserts `.pi/reports/one-slice-agent-runs.json`, preserving no dispatch/start/stop. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` → 11 passed; `git diff --check` passed; safe_marker_check passed for `one_slice_agent_run_registry_upsert` docs; line budget remains watch with no extract/critical. [rationale:risk-control] first-party registry upsert reduces ad hoc scripts while remaining local-safe and dry-first."
     }
   ]
 }

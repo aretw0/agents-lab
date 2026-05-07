@@ -1,9 +1,9 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Type } from "@sinclair/typebox";
 import { buildOneSliceAgentRunPlan, evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
-import { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunOutcomePacket, buildOneSliceAgentRunStatus, type OneSliceAgentRunMarkerResult, type OneSliceAgentRunRegistryEntry } from "./guardrails-core-one-slice-agent-run-runtime";
+import { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunOutcomePacket, buildOneSliceAgentRunRegistryUpsertPacket, buildOneSliceAgentRunStatus, type OneSliceAgentRunMarkerResult, type OneSliceAgentRunRegistryEntry, type OneSliceAgentRunState } from "./guardrails-core-one-slice-agent-run-runtime";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
@@ -30,12 +30,23 @@ function registryPath(cwd: string): string {
   return path.join(cwd, ".pi", "reports", "one-slice-agent-runs.json");
 }
 
-function readRegistryEntry(cwd: string, runId: string): OneSliceAgentRunRegistryEntry | undefined {
+function readRegistryRows(cwd: string): OneSliceAgentRunRegistryEntry[] {
   const filePath = registryPath(cwd);
-  if (!existsSync(filePath)) return undefined;
+  if (!existsSync(filePath)) return [];
   const parsed = JSON.parse(readFileSync(filePath, "utf8")) as { runs?: OneSliceAgentRunRegistryEntry[] } | OneSliceAgentRunRegistryEntry[];
-  const rows = Array.isArray(parsed) ? parsed : Array.isArray(parsed.runs) ? parsed.runs : [];
-  return rows.find((row) => row?.runId === runId);
+  return Array.isArray(parsed) ? parsed : Array.isArray(parsed.runs) ? parsed.runs : [];
+}
+
+function readRegistryEntry(cwd: string, runId: string): OneSliceAgentRunRegistryEntry | undefined {
+  return readRegistryRows(cwd).find((row) => row?.runId === runId);
+}
+
+function writeRegistryEntry(cwd: string, entry: OneSliceAgentRunRegistryEntry): void {
+  const filePath = registryPath(cwd);
+  const rows = readRegistryRows(cwd).filter((row) => row?.runId !== entry.runId);
+  rows.push(entry);
+  mkdirSync(path.dirname(filePath), { recursive: true });
+  writeFileSync(filePath, JSON.stringify({ runs: rows }, null, 2), "utf8");
 }
 
 function readLogTail(logPath: string, maxLines: number): string[] {
@@ -111,6 +122,45 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
       return buildOperatorVisibleToolResponse({
         label: "one_slice_agent_run_plan",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "one_slice_agent_run_registry_upsert",
+    label: "One-Slice Agent Run Registry Upsert",
+    description: "Dry-first local registry upsert for one-slice agent runs under .pi/reports. apply=true writes only registry state; it never starts, stops, or dispatches execution.",
+    parameters: Type.Object({
+      run_id: Type.String({ description: "One-slice agent run id." }),
+      state: Type.Optional(Type.String({ description: "Run state: planned, running, completed, failed, timed-out, aborted, or unknown." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Provider/model reference used by the run." })),
+      cwd: Type.Optional(Type.String({ description: "Run cwd. Defaults to current tool cwd." })),
+      declared_files: Type.Optional(Type.Array(Type.String(), { description: "Declared file scope for the run." })),
+      log_path: Type.Optional(Type.String({ description: "Optional bounded log path." })),
+      timeout_ms: Type.Optional(Type.Number({ description: "Optional bounded timeout in milliseconds." })),
+      dry_run: Type.Optional(Type.Boolean({ description: "Preview only by default; set false to apply registry upsert." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const runId = typeof p.run_id === "string" ? p.run_id : "";
+      const cwd = typeof p.cwd === "string" ? p.cwd : ctx.cwd;
+      const entry = readRegistryEntry(ctx.cwd, runId);
+      const result = buildOneSliceAgentRunRegistryUpsertPacket({
+        runId,
+        existingEntry: entry,
+        state: typeof p.state === "string" ? p.state as OneSliceAgentRunState : undefined,
+        providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
+        cwd,
+        declaredFiles: asOptionalStringArray(p.declared_files),
+        logPath: typeof p.log_path === "string" ? p.log_path : undefined,
+        timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
+        dryRun: p.dry_run !== false,
+      });
+      if (result.writeAllowed) writeRegistryEntry(ctx.cwd, result.entry);
+      return buildOperatorVisibleToolResponse({
+        label: "one_slice_agent_run_registry_upsert",
         summary: result.summary,
         details: result,
       });

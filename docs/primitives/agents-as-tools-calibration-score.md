@@ -68,6 +68,17 @@ A primitive `buildOneSliceAgentRunPlan` (exposta no runtime como `one_slice_agen
 
 Mesmo no caminho verde, ela apenas retorna `ready-for-human-decision`; não autoriza dispatch.
 
+## Registry upsert dry-first
+
+A primitive `buildOneSliceAgentRunRegistryUpsertPacket` (exposta como `one_slice_agent_run_registry_upsert`) reduz scripts ad hoc para criar/atualizar `.pi/reports/one-slice-agent-runs.json`.
+
+Contrato:
+
+- default `dry-run`, sem escrita;
+- `dry_run=false` permite apenas upsert do registry;
+- nunca inicia, para ou despacha processo;
+- registra `runId`, `providerModelRef`, `cwd`, arquivos declarados, `logPath`, `state`, timestamps e `timeoutMs` quando informado.
+
 ## Outcome packet pós-run
 
 A primitive `buildOneSliceAgentRunOutcomePacket` (exposta como `one_slice_agent_run_outcome_packet`) separa `processState` de `contractDecision` depois da run. Ela é report-only e compara:

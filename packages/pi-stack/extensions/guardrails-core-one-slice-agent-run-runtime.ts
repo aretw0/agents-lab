@@ -2,6 +2,7 @@ export type OneSliceAgentRunState = "planned" | "running" | "completed" | "faile
 export type OneSliceAgentAbortDecision = "dry-run" | "abort-ready" | "blocked";
 export type OneSliceAgentRunContractDecision = "pass" | "partial" | "fail";
 export type OneSliceAgentRunOutcomeRecommendation = "stop" | "retry-once" | "ask-human";
+export type OneSliceAgentRunRegistryUpsertDecision = "dry-run" | "write-ready" | "blocked";
 
 export interface OneSliceAgentRunRegistryEntry {
   runId?: string;
@@ -40,6 +41,41 @@ export interface OneSliceAgentRunStatusResult {
   elapsedMs?: number;
   stale: boolean;
   warnings: string[];
+  summary: string;
+}
+
+export interface OneSliceAgentRunRegistryUpsertInput {
+  runId?: string;
+  existingEntry?: OneSliceAgentRunRegistryEntry;
+  state?: OneSliceAgentRunState;
+  providerModelRef?: string;
+  cwd?: string;
+  declaredFiles?: string[];
+  logPath?: string;
+  timeoutMs?: number;
+  dryRun?: boolean;
+  nowIso?: string;
+}
+
+export interface OneSliceAgentRunRegistryUpsertResult {
+  mode: "one-slice-agent-run-registry-upsert";
+  activation: "none";
+  authorization: "none" | "explicit-apply";
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  processStopAllowed: false;
+  writeAllowed: boolean;
+  decision: OneSliceAgentRunRegistryUpsertDecision;
+  recommendationCode:
+    | "one-slice-agent-registry-upsert-dry-run"
+    | "one-slice-agent-registry-upsert-write-ready"
+    | "one-slice-agent-registry-upsert-blocked-run-id"
+    | "one-slice-agent-registry-upsert-blocked-cwd"
+    | "one-slice-agent-registry-upsert-blocked-files"
+    | "one-slice-agent-registry-upsert-blocked-state";
+  blockers: string[];
+  runId: string;
+  entry: OneSliceAgentRunRegistryEntry;
   summary: string;
 }
 
@@ -140,6 +176,73 @@ function parseIsoMs(value: unknown): number | undefined {
   if (typeof value !== "string" || !value.trim()) return undefined;
   const parsed = Date.parse(value);
   return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+export function buildOneSliceAgentRunRegistryUpsertPacket(input: OneSliceAgentRunRegistryUpsertInput = {}): OneSliceAgentRunRegistryUpsertResult {
+  const existing = input.existingEntry;
+  const runId = normalizeText(input.runId ?? existing?.runId);
+  const cwd = normalizeText(input.cwd ?? existing?.cwd);
+  const state = normalizeState(input.state ?? existing?.state ?? "planned");
+  const declaredFiles = normalizeFiles(input.declaredFiles).length > 0 ? normalizeFiles(input.declaredFiles) : normalizeFiles(existing?.declaredFiles);
+  const providerModelRef = normalizeText(input.providerModelRef ?? existing?.providerModelRef);
+  const logPath = normalizeText(input.logPath ?? existing?.logPath);
+  const timeoutMs = typeof input.timeoutMs === "number" && Number.isFinite(input.timeoutMs) && input.timeoutMs > 0 ? Math.floor(input.timeoutMs) : existing?.timeoutMs;
+  const nowIso = normalizeText(input.nowIso) || new Date().toISOString();
+  const blockers: string[] = [];
+  let recommendationCode: OneSliceAgentRunRegistryUpsertResult["recommendationCode"] = input.dryRun === false ? "one-slice-agent-registry-upsert-write-ready" : "one-slice-agent-registry-upsert-dry-run";
+
+  const block = (code: OneSliceAgentRunRegistryUpsertResult["recommendationCode"], blocker: string) => {
+    if (blockers.length === 0) recommendationCode = code;
+    blockers.push(blocker);
+  };
+
+  if (!runId) block("one-slice-agent-registry-upsert-blocked-run-id", "run-id-missing");
+  if (!cwd) block("one-slice-agent-registry-upsert-blocked-cwd", "cwd-missing");
+  if (declaredFiles.length === 0) block("one-slice-agent-registry-upsert-blocked-files", "declared-files-missing");
+  if (state === "unknown") block("one-slice-agent-registry-upsert-blocked-state", "state-unknown");
+
+  const entry: OneSliceAgentRunRegistryEntry = {
+    ...(existing ?? {}),
+    runId,
+    state,
+    ...(providerModelRef ? { providerModelRef } : {}),
+    cwd,
+    declaredFiles,
+    ...(logPath ? { logPath } : {}),
+    ...(timeoutMs ? { timeoutMs } : {}),
+    startedAtIso: existing?.startedAtIso ?? nowIso,
+    lastEventAtIso: nowIso,
+  };
+
+  const writeAllowed = blockers.length === 0 && input.dryRun === false;
+  const decision: OneSliceAgentRunRegistryUpsertDecision = blockers.length > 0 ? "blocked" : writeAllowed ? "write-ready" : "dry-run";
+  const summary = [
+    "one-slice-agent-registry-upsert:",
+    `decision=${decision}`,
+    `runId=${runId || "unknown"}`,
+    `state=${state}`,
+    `files=${declaredFiles.length}`,
+    `writeAllowed=${writeAllowed ? "yes" : "no"}`,
+    blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+    `authorization=${writeAllowed ? "explicit-apply" : "none"}`,
+    "dispatch=no",
+  ].filter(Boolean).join(" ");
+
+  return {
+    mode: "one-slice-agent-run-registry-upsert",
+    activation: "none",
+    authorization: writeAllowed ? "explicit-apply" : "none",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    writeAllowed,
+    decision,
+    recommendationCode,
+    blockers,
+    runId,
+    entry,
+    summary,
+  };
 }
 
 export function buildOneSliceAgentRunStatus(runId: string, entry?: OneSliceAgentRunRegistryEntry, nowMs = Date.now()): OneSliceAgentRunStatusResult {
