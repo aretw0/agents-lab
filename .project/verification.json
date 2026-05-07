@@ -14480,6 +14480,15 @@
       "method": "smoke+diff-check",
       "timestamp": "2026-05-07T12:00:38.660Z",
       "evidence": "Adicionada regressão focal em guardrails-agent-spawn-readiness.test.ts para impedir retorno de marcadores superseded na família agent-run: `one_slice_agent_run`, `one-slice-agent-run`, `buildOneSliceAgentRun`, `ready-for-simple-spawn`, `agent-spawn-ready-simple`, `simpleSpawn`. O teste inspeciona apenas arquivos focais da família agent-run, sem bloquear usos legítimos de one-slice fora dela. Validação: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` -> 1 file/12 tests passed; `git diff --check` passou."
+    },
+    {
+      "id": "VERIF-TASK-BUD-978-OPS-CALIBRATION-NAMING",
+      "target": "TASK-BUD-978",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+diff-check",
+      "timestamp": "2026-05-07T12:02:42.548Z",
+      "evidence": "`docs/primitives/ops-calibration-decision-packet.md` agora distingue `agent run` (execução concreta de worker/readiness `ready-for-agent-run`) de `delegation runway`; `simple_delegate_*` foi mantido apenas como nome de tool legado, sem aliases novos. Validação: `git diff --check` passou; rg focal não encontrou `simple spawn` e confirmou `ready-for-agent-run` + boundary semântico."
     }
   ]
 }

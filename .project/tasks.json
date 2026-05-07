@@ -21776,6 +21776,24 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:regression] Depois da consolidação semântica, um teste pequeno evita regressão local na família agent-run sem tentar renomear conceitos legados em massa.\n[provenance:human] source_task=TASK-BUD-974 reason=Pedido de coesão sem jargão e sem conceitos sobrepostos.\n[slice] Regressão local adicionada para evitar retorno de naming superseded na família agent-run.\n[validation] smoke focal -> 12 passed; `git diff --check` passou.",
       "verification": "VERIF-TASK-BUD-977-REGRESSION"
+    },
+    {
+      "id": "TASK-BUD-978",
+      "description": "[P2/local-safe] Corrigir primitive ops-calibration para distinguir `agent run` de `simple-delegate` legado.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "docs/primitives/ops-calibration-decision-packet.md"
+      ],
+      "acceptance_criteria": [
+        "Trocar menção incorreta a `simple spawn` por readiness `agent run`/`ready-for-agent-run`.",
+        "Adicionar nota curta de boundary: `simple_delegate_*` permanece nome de tool legado; novos conceitos devem usar `delegation runway`/`agent run` conforme escopo.",
+        "Preservar nomes reais de tools existentes sem criar aliases.",
+        "Rodar `git diff --check`; não tocar settings/routing/CI/publish/credenciais."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:semantic-debt] `ops-calibration-decision-packet` ainda mistura `simple spawn` com readiness de agent run; ajustar texto reduz overlap sem migration grande.\n[provenance:human] source_task=TASK-BUD-974 reason=Pedido de coesão sem bloat verboso e questionar nomes antigos/novos.\n[slice] Corrigido overlap textual entre `simple spawn`, `agent run` e `simple_delegate_*` legado em ops-calibration.\n[validation] `git diff --check` passou; grep focal confirmou ausência de `simple spawn`.",
+      "verification": "VERIF-TASK-BUD-978-OPS-CALIBRATION-NAMING"
     }
   ]
 }
