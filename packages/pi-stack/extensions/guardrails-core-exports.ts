@@ -98,7 +98,7 @@ export { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readi
 export { normalizeProviderExecutionBudgetDecision, resolveProviderExecutionBudgetEvidence } from "./guardrails-core-provider-budget-evidence";
 export type { ProviderExecutionBudgetDecision, ProviderExecutionBudgetEvidence, ProviderExecutionBudgetEvidenceInput } from "./guardrails-core-provider-budget-evidence";
 export { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
-export { buildAgentRunStartPacket } from "./guardrails-core-agent-run-start";
+export { buildAgentRunOperatorPacket, buildAgentRunStartPacket } from "./guardrails-core-agent-run-start";
 export { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
 export { buildTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationEvidence, extractTrustedHumanConfirmationEvidenceFromEnvelope, recordTrustedHumanConfirmationUiDecision, resolveHumanConfirmationAuditPlan, resolveHumanConfirmationEvidenceMatch, resolveHumanConfirmationImplementationChannelPlan, resolveHumanConfirmationRuntimeConsumptionPlan, resolveHumanConfirmationSignalSourcePlan } from "./guardrails-core-human-confirmation";
 export { resolveMonitorClassifyFailureReadiness } from "./monitor-observability";

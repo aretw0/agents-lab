@@ -22231,7 +22231,7 @@
     {
       "id": "TASK-BUD-998",
       "description": "Create ergonomic provider-native agent-run wrapper/API inspired by community subagent patterns",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-997",
@@ -22252,7 +22252,28 @@
         "Validate with smoke tests and at least one bounded canary after TASK-BUD-997 budget handoff hardening."
       ],
       "milestone": "subagent-sovereignty-lane-2026-05",
-      "notes": "Created from human steering: current provider-native canary command is too convoluted. We need an ergonomic wrapper/API that captures the safe defaults and boilerplate while preserving governance. Implementation should be inspired by community subagent ergonomics but remain pragmatic and local-first."
+      "notes": "Created from human steering: current provider-native canary command is too convoluted. We need an ergonomic wrapper/API that captures the safe defaults and boilerplate while preserving governance. Implementation should be inspired by community subagent ergonomics but remain pragmatic and local-first.\n[progress] Implemented first ergonomic slice: added report-only `agent_run_operator_packet` builder/tool that derives runId/logPath from task+purpose, defaults to minimal-no-extensions/no-session/read-only tools, attaches declared files in command preview, preserves structured budget evidence, and emits validation checklist/rollback hint. Also fixed `agent_run_start_packet` command preview to use `--print @declared_files <goal>` instead of a raw prompt-only preview, matching the canary path that avoided missing-file failures. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 1 file, 20 tests passed. Remaining before completion: runtime `/reload`, live tool smoke, and preferably one bounded canary through the new operator packet."
+    },
+    {
+      "id": "TASK-BUD-999",
+      "description": "Expose graceful-stop vs interrupted evidence in auto-resume handoff",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/extensions/context-watchdog-auto-resume.ts",
+        "packages/pi-stack/extensions/context-watchdog-status-surface.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-resume.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Auto-resume preview distinguishes a graceful pre-compact/checkpoint stop from an interrupted/unknown stop.",
+        "Handoff/checkpoint evidence can carry a bounded stopSource/stopStatus signal without dispatching resume or automation.",
+        "Operator-facing auto-resume text clearly warns when prior work may have stopped mid-slice.",
+        "Regression tests cover graceful, interrupted, and unknown stop states."
+      ],
+      "milestone": "context-watchdog-lane-2026-05",
+      "notes": "Created from human steering: future auto-resume should tell the next operator whether the previous agent stopped gracefully before compaction/checkpoint; this helps judge whether work may be half-finished."
     }
   ]
 }

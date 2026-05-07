@@ -5,7 +5,7 @@ import { Type } from "@sinclair/typebox";
 import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
 import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunRegistryEntry, type AgentRunState } from "./guardrails-core-agent-run-runtime";
-import { buildAgentRunStartPacket } from "./guardrails-core-agent-run-start";
+import { buildAgentRunOperatorPacket, buildAgentRunStartPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
@@ -178,6 +178,56 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_start_packet",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_operator_packet",
+    label: "Agent Run Operator Packet",
+    description: "Report-only ergonomic provider-native agent-run packet with safe defaults, attached declared files, structured budget evidence, validation checklist, and exact argv preview. Never dispatches execution.",
+    parameters: Type.Object({
+      task_id: Type.Optional(Type.String({ description: "Focus task id for deriving a stable run id." })),
+      run_id: Type.Optional(Type.String({ description: "Optional explicit run id; defaults from task_id + purpose." })),
+      purpose: Type.Optional(Type.String({ description: "Short purpose slug/label for the run id." })),
+      goal: Type.Optional(Type.String({ description: "Run goal/prompt for the worker." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. dashscope/qwen3-coder-plus." })),
+      cwd: Type.Optional(Type.String({ description: "Worker cwd. Defaults to current cwd." })),
+      declared_files: Type.Optional(Type.Array(Type.String(), { description: "Exact file scope; these files are attached in the command preview." })),
+      timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds; defaults to 90000." })),
+      file_contract: Type.Optional(Type.String({ description: "read-only or mutation. Defaults to read-only." })),
+      budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision: ok, warn, blocked, or unknown." })),
+      budget_evidence: Type.Optional(Type.String({ description: "Budget evidence text from route/provider-budget snapshot." })),
+      budget_evidence_source: Type.Optional(Type.String({ description: "Budget evidence source: route-advisory, provider-budget-snapshot, manual, or unknown." })),
+      budget_evidence_provider: Type.Optional(Type.String({ description: "Provider named by the budget evidence." })),
+      budget_evidence_generated_at_iso: Type.Optional(Type.String({ description: "ISO timestamp for structured budget evidence freshness checks." })),
+      budget_evidence_max_age_ms: Type.Optional(Type.Number({ description: "Optional max age for structured budget evidence freshness." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = buildAgentRunOperatorPacket({
+        taskId: typeof p.task_id === "string" ? p.task_id : undefined,
+        runId: typeof p.run_id === "string" ? p.run_id : undefined,
+        purpose: typeof p.purpose === "string" ? p.purpose : undefined,
+        goal: typeof p.goal === "string" ? p.goal : undefined,
+        providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
+        cwd: typeof p.cwd === "string" ? p.cwd : ctx?.cwd,
+        declaredFiles: asOptionalStringArray(p.declared_files),
+        timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
+        fileContract: typeof p.file_contract === "string" ? p.file_contract : undefined,
+        budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
+        budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
+        budgetEvidenceSource: typeof p.budget_evidence_source === "string" ? p.budget_evidence_source : undefined,
+        budgetEvidenceProvider: typeof p.budget_evidence_provider === "string" ? p.budget_evidence_provider : undefined,
+        budgetEvidenceGeneratedAtIso: typeof p.budget_evidence_generated_at_iso === "string" ? p.budget_evidence_generated_at_iso : undefined,
+        budgetEvidenceMaxAgeMs: typeof p.budget_evidence_max_age_ms === "number" ? p.budget_evidence_max_age_ms : undefined,
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_operator_packet",
         summary: result.summary,
         details: result,
       });

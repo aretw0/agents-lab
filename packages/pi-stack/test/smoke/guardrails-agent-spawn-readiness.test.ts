@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentRunPlan, buildAgentRunStartPacket, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -174,12 +174,51 @@ describe("agent spawn readiness contract", () => {
     expect(result.commandPreview.args).toContain("--model");
     expect(result.commandPreview.args).toContain("dashscope/qwen3-coder-plus");
     expect(result.commandPreview.args).toContain("read,grep,find,ls");
+    expect(result.commandPreview.args).toContain("--print");
+    expect(result.commandPreview.args).toContain("@packages/pi-stack/extensions/context-watchdog-auto-resume.ts");
 
     const inherited = buildAgentRunStartPacket({
       ...result.runSpec,
       extensionIsolation: "inherit",
     });
     expect(inherited.commandPreview.args).not.toContain("--no-extensions");
+  });
+
+  it("builds an ergonomic provider-native operator packet with safe defaults", () => {
+    const generatedAtIso = new Date().toISOString();
+    const result = buildAgentRunOperatorPacket({
+      taskId: "TASK-BUD-998",
+      purpose: "ergonomic-wrapper-review",
+      goal: "Review the ergonomic wrapper and return PASS or FAIL.",
+      providerModelRef: "dashscope/qwen3-coder-plus",
+      cwd: process.cwd(),
+      declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+      budgetDecision: "ok",
+      budgetEvidence: "dashscope ok generatedAt=now",
+      budgetEvidenceSource: "route-advisory",
+      budgetEvidenceProvider: "dashscope",
+      budgetEvidenceGeneratedAtIso: generatedAtIso,
+    });
+
+    expect(result).toMatchObject({
+      mode: "agent-run-operator-packet",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      requiresHumanDecision: true,
+      singleRunOnly: true,
+      decision: "ready-for-human-decision",
+      blockers: [],
+    });
+    expect(result.runSpec.runId).toBe("task-bud-998-ergonomic-wrapper-review");
+    expect(result.runSpec.logPath).toBe(".pi/reports/task-bud-998-ergonomic-wrapper-review.log");
+    expect(result.runSpec.extensionIsolation).toBe("minimal-no-extensions");
+    expect(result.runSpec.fileContract).toBe("read-only");
+    expect(result.runSpec.attachmentMode).toBe("attach-declared-files");
+    expect(result.startPacket.commandPreview.args).toContain("--print");
+    expect(result.startPacket.commandPreview.args).toContain("@packages/pi-stack/extensions/guardrails-core-agent-run-start.ts");
+    expect(result.validationChecklist.join("\n")).toContain("file_contract=read-only");
   });
 
   it("accepts fresh structured budget evidence and blocks stale or mismatched route evidence", () => {
@@ -531,6 +570,56 @@ describe("agent spawn readiness contract", () => {
     expect(result.details?.processStartAllowed).toBe(false);
     expect(result.details?.decision).toBe("ready-for-human-decision");
     expect(result.content?.[0]?.text).toContain("agent-run-start-packet: decision=ready-for-human-decision");
+    expect(result.content?.[0]?.text).not.toContain('"commandPreview"');
+  });
+
+  it("exposes ergonomic agent_run_operator_packet as report-only tool", async () => {
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    guardrailsCore(pi);
+
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_operator_packet");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+
+    const generatedAtIso = new Date().toISOString();
+    const result = await tool.execute(
+      "tc-agent-run-operator-packet",
+      {
+        task_id: "TASK-BUD-998",
+        purpose: "operator-wrapper",
+        goal: "return a bounded review note",
+        provider_model_ref: "dashscope/qwen3-coder-plus",
+        declared_files: ["docs/research/agent-run-provider-native-runner-2026-05.md"],
+        budget_decision: "ok",
+        budget_evidence: "dashscope ok",
+        budget_evidence_source: "route-advisory",
+        budget_evidence_provider: "dashscope",
+        budget_evidence_generated_at_iso: generatedAtIso,
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+
+    expect(result.details?.mode).toBe("agent-run-operator-packet");
+    expect(result.details?.dispatchAllowed).toBe(false);
+    expect(result.details?.processStartAllowed).toBe(false);
+    expect(result.details?.decision).toBe("ready-for-human-decision");
+    expect(result.content?.[0]?.text).toContain("agent-run-operator-packet: decision=ready-for-human-decision");
     expect(result.content?.[0]?.text).not.toContain('"commandPreview"');
   });
 

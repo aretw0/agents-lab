@@ -3,6 +3,7 @@ import { resolveProviderExecutionBudgetEvidence, type ProviderExecutionBudgetDec
 export type AgentRunExecutorKind = "pi-print-subprocess";
 export type AgentRunStartDecision = "ready-for-human-decision" | "blocked";
 export type AgentRunBudgetDecision = ProviderExecutionBudgetDecision;
+export type AgentRunOperatorFileContract = "read-only" | "mutation";
 
 export interface AgentRunStartPacketInput {
   runId?: string;
@@ -83,6 +84,50 @@ export interface AgentRunStartPacketResult {
   summary: string;
 }
 
+export interface AgentRunOperatorPacketInput {
+  taskId?: string;
+  runId?: string;
+  purpose?: string;
+  goal?: string;
+  providerModelRef?: string;
+  cwd?: string;
+  declaredFiles?: string[];
+  timeoutMs?: number;
+  fileContract?: AgentRunOperatorFileContract | string;
+  budgetDecision?: AgentRunBudgetDecision | string;
+  budgetEvidence?: string;
+  budgetEvidenceSource?: "route-advisory" | "provider-budget-snapshot" | "manual" | "unknown" | string;
+  budgetEvidenceProvider?: string;
+  budgetEvidenceGeneratedAtIso?: string;
+  budgetEvidenceMaxAgeMs?: number;
+  protectedScopeRequested?: boolean;
+}
+
+export interface AgentRunOperatorPacketResult {
+  mode: "agent-run-operator-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  processStopAllowed: false;
+  requiresHumanDecision: true;
+  singleRunOnly: true;
+  decision: AgentRunStartDecision;
+  recommendationCode: AgentRunStartPacketResult["recommendationCode"];
+  blockers: string[];
+  runSpec: AgentRunStartPacketResult["runSpec"] & {
+    taskId: string;
+    purpose: string;
+    fileContract: AgentRunOperatorFileContract;
+    attachmentMode: "attach-declared-files";
+  };
+  startPacket: AgentRunStartPacketResult;
+  validationChecklist: string[];
+  rollbackHint: string;
+  humanConfirmationPhrase: string;
+  summary: string;
+}
+
 const AGENT_RUN_START_TIMEOUT_MIN_MS = 5_000;
 const AGENT_RUN_START_TIMEOUT_MAX_MS = 180_000;
 const READ_ONLY_TOOL_ALLOWLIST = ["read", "grep", "find", "ls"];
@@ -112,6 +157,14 @@ function normalizeSessionIsolation(value: unknown): "no-session" | "run-session-
 
 function normalizeExtensionIsolation(value: unknown): "minimal-no-extensions" | "inherit" | "unknown" {
   return value === "minimal-no-extensions" || value === "inherit" ? value : "unknown";
+}
+
+function normalizeFileContract(value: unknown): AgentRunOperatorFileContract {
+  return value === "mutation" ? "mutation" : "read-only";
+}
+
+function sanitizeRunIdPart(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
 }
 
 export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): AgentRunStartPacketResult {
@@ -168,7 +221,8 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
     providerModelRef || "provider/model-required",
     "--tools",
     toolAllowlist.join(","),
-    "-p",
+    "--print",
+    ...declaredFiles.map((file) => `@${file}`),
     goal || "goal-required",
   ];
   const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
@@ -243,6 +297,80 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       `budgetConsistency=${budget.consistency}`,
       `dispatch=no`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+    ].filter(Boolean).join(" "),
+  };
+}
+
+export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput = {}): AgentRunOperatorPacketResult {
+  const taskId = normalizeText(input.taskId);
+  const purpose = normalizeText(input.purpose) || "provider-native-run";
+  const derivedRunId = taskId ? sanitizeRunIdPart(`${taskId}-${purpose}`) : "";
+  const runId = normalizeText(input.runId) || derivedRunId;
+  const fileContract = normalizeFileContract(input.fileContract);
+  const logPath = runId ? `.pi/reports/${runId}.log` : "";
+  const startPacket = buildAgentRunStartPacket({
+    runId,
+    executorKind: "pi-print-subprocess",
+    goal: input.goal,
+    providerModelRef: input.providerModelRef,
+    cwd: input.cwd,
+    declaredFiles: input.declaredFiles,
+    timeoutMs: normalizePositiveInt(input.timeoutMs, 90_000),
+    toolAllowlist: READ_ONLY_TOOL_ALLOWLIST,
+    sessionIsolation: "no-session",
+    extensionIsolation: "minimal-no-extensions",
+    logPath,
+    budgetDecision: input.budgetDecision,
+    budgetEvidence: input.budgetEvidence,
+    budgetEvidenceSource: input.budgetEvidenceSource,
+    budgetEvidenceProvider: input.budgetEvidenceProvider,
+    budgetEvidenceGeneratedAtIso: input.budgetEvidenceGeneratedAtIso,
+    budgetEvidenceMaxAgeMs: input.budgetEvidenceMaxAgeMs,
+    protectedScopeRequested: input.protectedScopeRequested,
+  });
+
+  const validationChecklist = [
+    "registry-upsert planned->running before execution and completed/failed after exit",
+    "bounded log captured at runSpec.logPath",
+    "process exit state recorded separately from contractDecision",
+    "output_bytes must be greater than zero",
+    fileContract === "read-only" ? "agent_run_outcome_packet must use file_contract=read-only" : "mutation run must declare and validate touched files",
+    "parent markers should include PASS/FAIL verdict and stale-extension-error count",
+  ];
+
+  return {
+    mode: "agent-run-operator-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    requiresHumanDecision: true,
+    singleRunOnly: true,
+    decision: startPacket.decision,
+    recommendationCode: startPacket.recommendationCode,
+    blockers: startPacket.blockers,
+    runSpec: {
+      ...startPacket.runSpec,
+      taskId,
+      purpose,
+      fileContract,
+      attachmentMode: "attach-declared-files",
+    },
+    startPacket,
+    validationChecklist,
+    rollbackHint: fileContract === "read-only" ? "read-only run: rollback is registry/log cleanup only; no file mutations expected" : "mutation run: rollback only declared/touched files after parent-side review",
+    humanConfirmationPhrase: startPacket.humanConfirmationPhrase,
+    summary: [
+      "agent-run-operator-packet:",
+      `decision=${startPacket.decision}`,
+      `runId=${startPacket.runSpec.runId || "unknown"}`,
+      `files=${startPacket.runSpec.declaredFiles.length}`,
+      `fileContract=${fileContract}`,
+      "attachment=attach-declared-files",
+      `budget=${startPacket.runSpec.budgetDecision}`,
+      "dispatch=no",
+      startPacket.blockers.length > 0 ? `blockers=${startPacket.blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),
   };
 }
