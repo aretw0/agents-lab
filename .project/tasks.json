@@ -21837,6 +21837,23 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:regression] Após renomear em pre-release para delegation rehearsal, precisamos bloquear retorno do termo ambíguo sem criar aliases.\n[provenance:human] source_task=TASK-BUD-979 reason=Manter coesão sem bloat semântico e sem nomes provisórios reaparecendo.\n[slice] Regressão adicionada contra retorno de naming superseded na runway de delegation.\n[validation] smoke focal -> 23 passed; `git diff --check` passou.",
       "verification": "VERIF-TASK-BUD-980-DELEGATION-NAMING-REGRESSION"
+    },
+    {
+      "id": "TASK-BUD-981",
+      "description": "[P2/local-safe] Atualizar índice de primitives para delegation rehearsal/delegate.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "docs/primitives/README.md"
+      ],
+      "acceptance_criteria": [
+        "Trocar `simple-delegate` por `delegate` no índice das runtime primitives de delegation.",
+        "Normalizar apenas o necessário para `git diff --check` passar.",
+        "Rodar rg focal e `git diff --check`; não tocar settings/routing/CI/publish/credenciais."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:semantic-debt] O índice canônico de primitives ainda anuncia o nome ambíguo removido da superfície focal.\n[provenance:human] source_task=TASK-BUD-979 reason=Evitar anunciar nomes provisórios como se fossem legado; deixar como deveria ser.\n[slice] Índice canônico de primitives atualizado para `delegate`/`delegation` sem anúncio de nome antigo.\n[validation] safe_marker_check marcadores novos ok; rg focal limpo; `git diff --check` passou.",
+      "verification": "VERIF-TASK-BUD-981-PRIMITIVES-INDEX"
     }
   ]
 }

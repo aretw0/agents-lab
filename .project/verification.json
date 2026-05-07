@@ -14507,6 +14507,15 @@
       "method": "smoke+diff-check",
       "timestamp": "2026-05-07T12:12:56.542Z",
       "evidence": "Adicionada regressão em guardrails-ops-calibration.test.ts que inspeciona arquivos focais de ops/delegation runway e bloqueia retorno de `simple_delegate`, `simple-delegate`, `ready-simple-delegate`, `SimpleDelegate`, `simpleDelegate`, `mix_simple_delegate_events`, `mixSimpleDelegateEvents`. Validação: `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` -> 1 file/23 tests passed; `git diff --check` passou."
+    },
+    {
+      "id": "VERIF-TASK-BUD-981-PRIMITIVES-INDEX",
+      "target": "TASK-BUD-981",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+marker-check+diff-check",
+      "timestamp": "2026-05-07T12:15:04.886Z",
+      "evidence": "Atualizado `docs/primitives/README.md` para `local/manual/delegate/swarm` e `local-execute|delegate|defer`. A escrita normalizou line endings do arquivo para permitir `git diff --check` sem CR-at-EOL nas linhas alteradas. Validação: `safe_marker_check` encontrou os dois marcadores novos; rg focal não encontrou `simple-delegate|simple_delegate|ready-simple-delegate|mix_simple_delegate_events`; `git diff --check` passou."
     }
   ]
 }
