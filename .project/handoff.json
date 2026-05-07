@@ -1,12 +1,14 @@
 {
-  "timestamp": "2026-05-07T00:50:38.598Z",
+  "timestamp": "2026-05-07T01:16:44.052Z",
   "context": "TASK-BUD-960 completed as documentation/decision slice. Reproduced noisy workflow-agents default output (full JSON list, 31 agents) and confi [snip] r found. No node_modules patch applied. [truncated:+184 chars]",
   "next_actions": [
+    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
     "commit TASK-BUD-960 documentation + board verification as new commit",
     "autonomy lane has no remaining eligible local-safe tasks under default filters",
     "if continuing agentic journey, prepare a new explicit simple-delegate canary task/contract or human-focus next lane"
   ],
   "blockers": [
+    "context-watch-checkpoint-required",
     "simple-delegate rehearsal still blocked by rehearsal-not-ready, auto-advance t [snip] t ready, focus missing [truncated:+11 chars]",
     "routing/settings remain protected",
     "live external probes remain opt-in"
@@ -43,6 +45,19 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "Commit current slice, then ask/decide explicit next canary focus because default local-safe qu [snip] egation gate is not ready. [truncated:+20 chars]"
+    },
+    {
+      "atIso": "2026-05-07T01:16:44.052Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ],
   "completed_tasks": [

@@ -21554,7 +21554,7 @@
     {
       "id": "TASK-BUD-967",
       "description": "[P1/local-safe] Canary de delegação agêntica com providers operacionais (Dashscope/OpenAI Codex Spark), deixando Claude Code em backlog.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "files": [
         "docs/research/provider-canary-scorecard-2026-05.md"
@@ -21567,7 +21567,47 @@
         "Parar após uma fatia e pedir decisão antes de próximo provider."
       ],
       "milestone": "agent-quality-calibration-lane",
-      "notes": "Direção do operador: não insistir no Claude Code adapter agora; priorizar providers já disponíveis para aprender delegação agêntica e produzir valor."
+      "notes": "Direção do operador: não insistir no Claude Code adapter agora; priorizar providers já disponíveis para aprender delegação agêntica e produzir valor.\n[start] Operador escolheu começar com gpt-5.3-codex-spark. Caminho escolhido: workflow local-safe com agent spec project-level em .project/agents usando model openai-codex/gpt-5.3-codex-spark; sem alterar .pi/settings.json/routing.\n[stall] provider-canary-spark passou de ~10min na etapa implement sem artefato alvo visível; tratar como canary stalled/observability gap, não como sucesso. Próxima ação recomendada: pausar/abortar pelo controle do workflow/TUI e registrar evidência antes de retry."
+    },
+    {
+      "id": "TASK-BUD-968",
+      "description": "[P2/UI] Revisar legenda do quota panel no footer TUI/WEB para esclarecer símbolos e porcentagens de provider budget.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility-formatting.ts",
+        "packages/pi-stack/extensions/custom-footer.ts",
+        "docs/research/quota-panel-footer-legend-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Explicar no footer ou tooltip/guia que ✓/⚠/✗ representam OK/WARN/BLOCK do budget local.",
+        "Distinguir percentual usado/projetado de quota restante/live WHAM.",
+        "Evitar que ✗ Codex pareça necessariamente exaustão do dashboard quando WHAM model-specific tem headroom.",
+        "Cobrir TUI e plano WEB quando aplicável.",
+        "Validar com teste/marker local-safe antes de concluir."
+      ],
+      "milestone": "ui-operator-surface",
+      "notes": "Feedback do operador: footer mostra `✓dashscope:13% ✗codex:72%`; precisa esclarecer o significado de símbolos e percentuais.\n[evidence] Implementação atual: `formatBudgetStatusParts` usa ✓=ok, !=warning, ✗=blocked; percentual é max(usedPctTokens, usedPctCost, usedPctRequests), arredondado. A revisão deve deixar isso explícito para evitar confusão com quota restante/live WHAM."
+    },
+    {
+      "id": "TASK-BUD-969",
+      "description": "[P1/control-plane] Adicionar observabilidade e controle explícitos para delegações simples/workflow-agent durante canaries.",
+      "status": "in-progress",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "docs/research/simple-delegate-workflow-observability-gap-2026-05.md",
+        ".workflows/provider-canary-spark.workflow.yaml"
+      ],
+      "acceptance_criteria": [
+        "Expor status de run workflow-agent simples: run id, etapa atual, duração, modelo/provider, arquivo alvo e último checkpoint persistido.",
+        "Distinguir clearly `in-flight LLM call` de progresso persistido em `.workflows/runs`.",
+        "Fornecer plano local-safe para pause/abort sem matar processos indevidamente.",
+        "Registrar timeout/cooldown recomendado para canaries de provider.",
+        "Documentar que docs/tasks não autorizam dispatch e que primeira execução precisa de observabilidade mínima."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "Feedback do operador durante provider-canary-spark: TUI mostra etapa implement rodando, mas o control-plane ainda só vê sinais parciais; precisa de troubleshooting/peek/abort melhores para saber quando agente saiu dos trilhos.\n[start] Após reinício/reload, operador confirmou que precisou sair do pi inteiro para encerrar workflow-agent travado. Foco agora: curar o incidente e cultivar uma escada de orquestração agêntica simples→complexa com controle/observabilidade/abort antes de novos canaries.\n[artifact] Criado `docs/research/simple-delegate-orchestration-primitive-2026-05.md` com incidente, escada L0-L4 e proposta `simple_agent_run`. Artefatos experimentais de `.pi/agents`, `.pi/templates/provider-canary`, `.workflows/provider-canary-spark.workflow.yaml` e run preso foram removidos por rollback local-safe."
     }
   ]
 }
