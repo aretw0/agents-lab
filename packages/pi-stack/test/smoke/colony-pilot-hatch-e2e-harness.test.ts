@@ -135,7 +135,7 @@ describe("colony-pilot hatch e2e (pi-test-harness)", () => {
     expect(String(editorCalls[editorCalls.length - 1]?.args?.[0] ?? "")).toBe("/doctor hatch");
   });
 
-  it("hatch check default usa modo simples sem CTA direta de swarm", async () => {
+  it("hatch check default usa modo guided sem CTA direta de swarm", async () => {
     const cwd = tempCwdWithHatchSettings();
 
     t = await createTestSession({
@@ -148,11 +148,11 @@ describe("colony-pilot hatch e2e (pi-test-harness)", () => {
 
     const msg = lastNotifyMessage(t);
     expect(msg).toContain("colony-pilot hatch");
-    expect(msg).toContain("mode: simple");
+    expect(msg).toContain("mode: guided");
     expect(msg).toContain("[PASS] runtime capabilities");
     expect(msg).toContain("[PASS] preflight executáveis");
     expect(msg).toContain("ready: yes");
-    expect(msg).toContain("simple lane (default):");
+    expect(msg).toContain("guided lane (default):");
     expect(msg).toContain("/colony-pilot hatch check --advanced");
     expect(msg).not.toContain("/colony <goal>");
   });

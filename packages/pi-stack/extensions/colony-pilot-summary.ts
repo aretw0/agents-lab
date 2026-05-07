@@ -19,7 +19,7 @@ export function formatColonyPilotHelp(): string {
 		"  tui                           Mostra como entrar/retomar sessão no TUI",
 		"  status                        Snapshot consolidado",
 		"  check                         Diagnóstico de capacidades + readiness de provider/model/budget para ant_colony",
-		"  hatch [check|doctor|apply] [default|phase2] [--advanced]  Onboarding progressivo (simple-first; escala avançada opt-in)",
+		"  hatch [check|doctor|apply] [default|phase2] [--advanced]  Onboarding guiado (default; escala avançada opt-in)",
 		"  models <status|template|apply> [copilot|codex|hybrid|factory-strict|factory-strict-copilot|factory-strict-hybrid]  Política granular de modelos por classe",
 		"  preflight                     Executa gates duros (capabilities + executáveis) antes da colony",
 		"  baseline [show|apply] [default|phase2]  Baseline de .pi/settings.json (phase2 = mais estrito)",
@@ -54,19 +54,19 @@ export function collectColonyPilotCheckModelIssues(input: {
 }
 
 export function buildColonyPilotHatchLines(input: {
-	mode: "simple" | "advanced";
+	mode: "guided" | "advanced";
 	ready: boolean;
 	readinessLines: string[];
 	runbookLines: string[];
 }): string[] {
 	const lines = [
 		"colony-pilot hatch",
-		`mode: ${input.mode} ${input.mode === "simple" ? "(default simple-first, no swarm CTA)" : "(explicit opt-in for swarm/delegation)"}`,
+		`mode: ${input.mode} ${input.mode === "guided" ? "(default guided, no swarm CTA)" : "(explicit opt-in for swarm/delegation)"}`,
 		...input.readinessLines,
 		"",
 		...input.runbookLines,
 	];
-	if (input.mode === "simple") lines.push("", "scale opt-in: /colony-pilot hatch check --advanced");
+	if (input.mode === "guided") lines.push("", "scale opt-in: /colony-pilot hatch check --advanced");
 	if (!input.ready) lines.push("", "ação sugerida: /colony-pilot hatch apply default");
 	return lines;
 }

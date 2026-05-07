@@ -21854,6 +21854,28 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:semantic-debt] O índice canônico de primitives ainda anuncia o nome ambíguo removido da superfície focal.\n[provenance:human] source_task=TASK-BUD-979 reason=Evitar anunciar nomes provisórios como se fossem legado; deixar como deveria ser.\n[slice] Índice canônico de primitives atualizado para `delegate`/`delegation` sem anúncio de nome antigo.\n[validation] safe_marker_check marcadores novos ok; rg focal limpo; `git diff --check` passou.",
       "verification": "VERIF-TASK-BUD-981-PRIMITIVES-INDEX"
+    },
+    {
+      "id": "TASK-BUD-982",
+      "description": "[P2/local-safe] Renomear modo `simple` do colony hatch para `guided` sem aliases.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot-hatch.ts",
+        "packages/pi-stack/extensions/colony-pilot-main-command.ts",
+        "packages/pi-stack/extensions/colony-pilot-summary.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Trocar o modo público `simple` por `guided` no hatch/check/runbook/summary.",
+        "Remover linguagem `simple-first`/`simple lane` dessa superfície; usar guided/default sem aliases.",
+        "Atualizar testes focais e rodar smoke de colony-pilot parsers/hatch.",
+        "Rodar `git diff --check`; não tocar settings/routing/CI/publish/credenciais."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:semantic-debt] O adjetivo `simple` reaparece como modo público de hatch; `guided` comunica onboarding/default sem sugerir baixa governança.\n[provenance:human] source_task=TASK-BUD-974 reason=Pedido explícito para questionar nomes antigos/novos e evitar conceitos repetidos por semântica.\n[slice] Hatch default convergiu de `simple` para `guided`, preservando advanced como opt-in e sem alias de nome antigo.\n[validation] rg focal limpo; smoke colony-pilot parsers+hatch -> 86 passed; `git diff --check` passou.",
+      "verification": "VERIF-TASK-BUD-982-GUIDED-HATCH"
     }
   ]
 }

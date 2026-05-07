@@ -14516,6 +14516,15 @@
       "method": "docs+marker-check+diff-check",
       "timestamp": "2026-05-07T12:15:04.886Z",
       "evidence": "Atualizado `docs/primitives/README.md` para `local/manual/delegate/swarm` e `local-execute|delegate|defer`. A escrita normalizou line endings do arquivo para permitir `git diff --check` sem CR-at-EOL nas linhas alteradas. Validação: `safe_marker_check` encontrou os dois marcadores novos; rg focal não encontrou `simple-delegate|simple_delegate|ready-simple-delegate|mix_simple_delegate_events`; `git diff --check` passou."
+    },
+    {
+      "id": "VERIF-TASK-BUD-982-GUIDED-HATCH",
+      "target": "TASK-BUD-982",
+      "target_type": "task",
+      "status": "passed",
+      "method": "refactor+smoke+diff-check",
+      "timestamp": "2026-05-07T13:07:18.492Z",
+      "evidence": "Colony hatch default renomeado de `simple` para `guided` sem aliases: `HatchExperienceMode` agora é `guided|advanced`, default do comando hatch é `guided`, help/summary/runbook usam `guided lane (default)` e `default guided`. Validação: rg focal não encontrou `simple`/`simple-first`/`simple lane`/`mode: simple` nos arquivos tocados; `npx vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts` -> 2 files/86 tests passed; `git diff --check` passou."
     }
   ]
 }

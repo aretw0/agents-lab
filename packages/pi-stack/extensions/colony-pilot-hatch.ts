@@ -95,7 +95,7 @@ export function formatHatchReadiness(readiness: HatchReadiness): string[] {
 	];
 }
 
-export type HatchExperienceMode = "simple" | "advanced";
+export type HatchExperienceMode = "guided" | "advanced";
 
 export function formatHatchRunbook(mode: HatchExperienceMode): string[] {
 	if (mode === "advanced") {
@@ -110,7 +110,7 @@ export function formatHatchRunbook(mode: HatchExperienceMode): string[] {
 	}
 
 	return [
-		"simple lane (default):",
+		"guided lane (default):",
 		"  - /status",
 		"  - /doctor",
 		"  - /colony-pilot check",

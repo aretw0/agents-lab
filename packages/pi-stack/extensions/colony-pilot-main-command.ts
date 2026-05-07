@@ -153,7 +153,7 @@ export function registerColonyPilotMainCommand(pi: ExtensionAPI, runtime: Colony
 					return normalized === "--advanced" || normalized === "advanced";
 				})
 					? "advanced"
-					: "simple";
+					: "guided";
 
 				if (action === "doctor") {
 					ctx.ui.notify(
