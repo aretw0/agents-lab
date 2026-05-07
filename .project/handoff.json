@@ -1,51 +1,50 @@
 {
-  "timestamp": "2026-05-06T23:52:10.938Z",
-  "context": "TASK-BUD-962 concluída e pesquisa assimilada: problema de quota é real. Local gate usa monthly aggregate projection para openai-codex, mas op [snip] om WHAM probe e provider/model budgets. [truncated:+426 chars]",
+  "timestamp": "2026-05-07T00:08:25.915Z",
+  "context": "TASK-BUD-963 parsing/test slice concluída. Implementado parser local parseOpenAIWhamUsage para OpenAI WHAM payload (rate_limit, code_review_r [snip] em alteração .pi/settings.json/routing. [truncated:+278 chars]",
+  "current_tasks": [
+    "TASK-BUD-963"
+  ],
   "next_actions": [
-    "commit quota diagnosis doc + board",
-    "próximo: TASK-BUD-963 implementar parsing/probe fail-soft sem rede real nos testes",
-    "depois recalibrar roteamento para provider/model candidates"
+    "commit slice parsing/testes locais",
+    "próximo sub-slice TASK-BUD-963: probe/cache fail-soft read-only para WHAM usando pi-managed auth quando disponível",
+    "depois integrar live dashboard windows à avaliação sem deixar projeção local bloquear pool live isoladamente"
   ],
   "blockers": [
     "não alterar .pi/settings.json/routing ativo sem decisão explícita",
-    "live WHAM probe deve ser read-only, timeout/cache/fail-soft"
+    "live WHAM probe deve ser read-only, timeout/cache/fail-soft",
+    "não executar probe real sem gate/opt-in apropriado"
   ],
   "recent_validation": [
-    "safe_marker_check quota doc: 6/6",
-    "project-validate: clean",
-    "git diff --check: clean"
+    "npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts: 40 passed",
+    "git diff --check: clean",
+    "safe_marker_check quota parser tests: 5/5"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-962",
+    "focus": "TASK-BUD-963",
     "canonical_links": [
-      "task:TASK-BUD-962",
       "task:TASK-BUD-963"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T23:52:10.938Z",
+    "generatedAtIso": "2026-05-07T00:08:25.915Z",
     "level": "ok",
-    "percent": 54,
+    "percent": 33,
     "action": "continue",
-    "recommendation": "Commitar e seguir para hardening de quotas antes de confiar no bloqueio agregado do openai-codex.",
-    "focus_task_status": "completed"
+    "recommendation": "Commitar slice local e continuar para probe/cache em sub-slice separado."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T23:52:10.938Z",
+      "atIso": "2026-05-07T00:08:25.915Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 54,
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar e seguir para hardening de quotas antes de confiar no bloqueio agregado do openai-codex."
+      "recommendation": "Commitar slice local e continuar para probe/cache em sub-slice separado."
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-962"
   ]
 }

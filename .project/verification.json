@@ -14327,6 +14327,15 @@
       "method": "diagnostic document + local validation",
       "timestamp": "2026-05-06T23:47:14.607Z",
       "evidence": "Created `docs/research/openai-codex-dual-quota-calibration-2026-05.md` documenting the quota tracking gap: local gate models `openai-codex` as monthly aggregate tokens/cost with projection, while operator evidence says real dashboard has separate weekly general Codex quota (~50% available) and `gpt-5.3-codex-spark` pool (~83% available) with separate reset dates (general around 2026-05-11, spark 2026-05-13). Document defines hardening requirements: provider/model budgets, reset anchors, dashboard evidence fields, used vs projected separation, and route advisory over provider/model candidates. Validation: safe_marker_check -> 4/4; `project-validate` clean; `git diff --check` clean."
+    },
+    {
+      "id": "VERIF-BUD-963-PARSE-LOCAL",
+      "target": "TASK-BUD-963",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local test",
+      "timestamp": "2026-05-07T00:07:56.085Z",
+      "evidence": "Parsing/test slice implemented without network or protected settings changes. Added OpenAI WHAM parser for rate_limit/code_review_rate_limit/additional_rate_limits, provider/model budget key support for openai-codex/gpt-5.3-codex-spark, and model-specific budget filtering. Validation: npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts => 40 tests passed; git diff --check clean; safe_marker_check 5/5; project-validate clean."
     }
   ]
 }

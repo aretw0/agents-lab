@@ -1028,6 +1028,17 @@
       "package": "pi-stack",
       "source": "monitor",
       "resolved_by": "TASK-BUD-957"
+    },
+    {
+      "id": "fragility-fragility-moupq12h",
+      "title": "The agent gave no substantive response, leaving the user's request unresolved without acknowledging any blockage.",
+      "body": "The agent gave no substantive response, leaving the user's request unresolved without acknowledging any blockage.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }
