@@ -14381,6 +14381,15 @@
       "method": "live smoke + documentation",
       "timestamp": "2026-05-07T00:50:15.455Z",
       "evidence": "Reproduced workflow-agents without name returning a full JSON list (31 agents) and workflow-agents {name:'task-worker'} returning focused detail. Located owner as external @davidorex pi-workflows/pi-project-workflows skill surface; no first-party pi-stack source owner found for safe local patch. Documented compact summary contract, no-node_modules-patch decision, and wrapper/upstream options in docs/research/workflow-agents-compact-output-2026-05.md. Validation: safe_marker_check passed, git diff --check clean, project-validate clean."
+    },
+    {
+      "id": "VERIF-BUD-961-VARIADIC-PROMPT-DELIMITER",
+      "target": "TASK-BUD-961",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-07T00:59:23.477Z",
+      "evidence": "Fixed Claude CLI arg construction so final prompt is separated from variadic --allowedTools/--tools using `--` delimiter. This addresses canary failure: 'Input must be provided either through stdin or as a prompt argument when using --print'. Validation: npx vitest run packages/pi-stack/test/smoke/claude-code-adapter-parsers.test.ts -> 27 passed; git diff --check -> clean; safe_marker_check adapter markers -> ok. No provider retry during this fix."
     }
   ]
 }

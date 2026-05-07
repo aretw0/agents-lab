@@ -238,7 +238,10 @@ export function buildClaudePrintArgs(goal: string, options: ClaudeCodeExecuteOpt
   if (options.permissionMode) args.push("--permission-mode", options.permissionMode);
   if (options.allowedTools && options.allowedTools.length > 0) args.push("--allowedTools", options.allowedTools.join(","));
   if (options.tools && options.tools.length > 0) args.push("--tools", options.tools.join(","));
-  args.push(goal);
+  // Claude CLI exposes --allowedTools/--tools as variadic options. Use `--`
+  // so the prompt remains the positional prompt instead of being consumed as
+  // another tool name.
+  args.push("--", goal);
   return args;
 }
 

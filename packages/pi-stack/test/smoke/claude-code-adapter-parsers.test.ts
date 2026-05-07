@@ -160,6 +160,7 @@ describe("claude-code adapter — execute options", () => {
       "Write,Read",
       "--tools",
       "Write,Read",
+      "--",
       "do work",
     ]);
   });
@@ -247,6 +248,7 @@ describe("claude-code adapter — execute signature", () => {
       "Write,Read",
       "--tools",
       "Write,Read",
+      "--",
       "hello",
     ]);
     expect(output?.details.executeOptions).toEqual({
