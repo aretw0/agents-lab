@@ -1,50 +1,55 @@
 {
-  "timestamp": "2026-05-07T15:44:56.742Z",
-  "context": "Post-reload recalibration: previous handoff blocker about context warn/reload was transient pressure from pre-compact window, not a live bloc [snip] laude Code as primary path without ROI. [truncated:+326 chars]",
+  "timestamp": "2026-05-07T15:55:45.540Z",
+  "context": "Continued subagent/operator focus after human steering. Added provider-native runner design doc and first report-only start packet primitive. [snip] uires /reload before live availability. [truncated:+297 chars]",
   "current_tasks": [
     "TASK-BUD-989"
   ],
   "next_actions": [
-    "Investigate/fix auto-resume handoff filtering so transient context pressure/reload blockers ar [snip] text level before display. [truncated:+43 chars]",
-    "Continue TASK-BUD-989: provider-native agent-run path with status/log/abort/outcome; no worker [snip] out explicit confirmation. [truncated:+14 chars]",
-    "Keep TASK-BUD-988 for deterministic monitor/context-divergence hardening."
+    "/reload before trusting live agent_run_start_packet tool.",
+    "Reconcile first canary provider choice with live budget posture: dashscope ok, openai-codex cu [snip] assumption as hard truth. [truncated:+62 chars]",
+    "Use TASK-BUD-990/TASK-BUD-988/TASK-BUD-968 as candidate bounded agent tests, but execute exact [snip] plicit human confirmation. [truncated:+27 chars]"
   ],
   "blockers": [
-    "Claude Code adapter should remain diagnostic/old-path unless ROI changes.",
-    "Monitor feedback can be stale/context-divergent; validate deterministically be [snip] fier tokens or acting. [truncated:+20 chars]"
+    "Existing parked TASK-BUD-968 quota/footer WIP remains dirty and should not be [snip] ith agent-run commits. [truncated:+7 chars]",
+    "Claude Code adapter remains diagnostic/old-path unless ROI changes.",
+    "No multiple workers/colony until 2-3 provider-native one-worker runs pass contract."
   ],
   "recent_validation": [
-    "context_watch_status: level=ok percent≈22 reloadGate=reload-not-required",
-    "context_watch_compact_stage_status: normal-window/continue_bounded_work",
-    "monitor_stale_feedback_prefilter classified previous context-watch/reload blocker as suppress- [snip] t-watch-transient-resolved [truncated:+19 chars]"
+    "safe_marker_check doc markers passed",
+    "i18n lint doc snippet passed",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 15 passed"
+  ],
+  "recent_commits": [
+    "33858240 feat(delegation): add provider-native start packet"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-989",
     "canonical_links": [
       "task:TASK-BUD-989",
-      "task:TASK-BUD-988"
+      "task:TASK-BUD-989-PROVIDER-NATIVE-START-PACKET",
+      "task:TASK-BUD-990",
+      "commit:33858240"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T15:44:56.742Z",
+    "generatedAtIso": "2026-05-07T15:55:45.540Z",
     "level": "ok",
-    "percent": 22,
     "action": "continue",
-    "recommendation": "continue-provider-native-runner-and-clean-stale-resume-guidance"
+    "recommendation": "reload-then-human-confirm-one-provider-native-canary"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T15:44:56.742Z",
+      "atIso": "2026-05-07T15:55:45.540Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 22,
+      "percent": 0,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-provider-native-runner-and-clean-stale-resume-guidance"
+      "recommendation": "reload-then-human-confirm-one-provider-native-canary"
     }
   ]
 }
