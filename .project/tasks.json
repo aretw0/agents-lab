@@ -21759,6 +21759,23 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:semantic-debt] Após consolidar tool/runtime para `agent_run_*`, docs recentes ainda podem induzir uso do nome antigo; anotação curta evita overlap sem reescrever histórico.\n[provenance:human] source_task=TASK-BUD-974 reason=Pedido de coesão sem jargão e sem conceitos repetidos.\n[slice] Adicionadas notas de naming superseded em docs recentes para orientar novo uso para `agent_run_*` sem reescrever fatos históricos.\n[validation] `git diff --check` passou; grep focal confirmou notas nos três docs.",
       "verification": "VERIF-TASK-BUD-976-NAMING-NOTES"
+    },
+    {
+      "id": "TASK-BUD-977",
+      "description": "[P2/local-safe] Adicionar regressão contra retorno de `simple`/`one_slice` na família agent-run.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Teste deve inspecionar arquivos focais da família agent-run e bloquear `one_slice_agent_run`, `one-slice-agent-run`, `buildOneSliceAgentRun`, `ready-for-simple-spawn`, `agent-spawn-ready-simple` e `simpleSpawn`.",
+        "Teste não deve bloquear usos legítimos de one-slice local canary fora da família agent-run.",
+        "Rodar smoke focal e `git diff --check`; não tocar settings/routing/CI/publish/credenciais."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:regression] Depois da consolidação semântica, um teste pequeno evita regressão local na família agent-run sem tentar renomear conceitos legados em massa.\n[provenance:human] source_task=TASK-BUD-974 reason=Pedido de coesão sem jargão e sem conceitos sobrepostos.\n[slice] Regressão local adicionada para evitar retorno de naming superseded na família agent-run.\n[validation] smoke focal -> 12 passed; `git diff --check` passou.",
+      "verification": "VERIF-TASK-BUD-977-REGRESSION"
     }
   ]
 }

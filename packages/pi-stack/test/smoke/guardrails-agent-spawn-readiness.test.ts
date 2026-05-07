@@ -6,6 +6,30 @@ import guardrailsCore, { buildAgentRunPlan, evaluateAgentSpawnReadiness } from "
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
+  it("keeps the agent-run family free of superseded naming", () => {
+    const focalFiles = [
+      "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness.ts",
+      "packages/pi-stack/extensions/guardrails-core-agent-run-plan.ts",
+      "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+      "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+    ];
+    const supersededMarkers = [
+      "one_slice_agent_run",
+      "one-slice-agent-run",
+      "buildOneSliceAgentRun",
+      "ready-for-simple-spawn",
+      "agent-spawn-ready-simple",
+      "simpleSpawn",
+    ];
+
+    for (const file of focalFiles) {
+      const text = readFileSync(path.join(process.cwd(), file), "utf8");
+      for (const marker of supersededMarkers) {
+        expect(text, `${file} should not contain ${marker}`).not.toContain(marker);
+      }
+    }
+  });
+
   it("returns ready-for-agent-run for single agent with explicit bounded controls", () => {
     const result = evaluateAgentSpawnReadiness({
       maxAgentsRequested: 1,
