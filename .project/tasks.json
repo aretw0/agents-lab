@@ -21974,6 +21974,28 @@
       ],
       "milestone": "subagent-sovereignty-lane-2026-05",
       "notes": "Criada por steering humano: priorizar base dos subagentes para descarregar o control plane; começar do mais simples e maturar até colônia, sem frear ou fechar tasks não prontas.\n[provenance:human] source_task=TASK-BUD-968 reason=Pivot estratégico confirmado pelo usuário: UI quota permanece desejada, mas subagent base é mais prioritária para soberania operacional.\n[evidence] Steering aplicado sem dispatch: TASK-BUD-968 foi parked sem completed; criado doc docs/research/subagent-sovereignty-rehearsal-2026-05.md com escada de maturidade, primeiro candidate run_id=task-bud-986-quota-ui-review-rehearsal e regra de confirmação humana explícita. Packets: agent_run_plan ready-for-human-decision; registry_upsert dry-run writeAllowed=no. Validação: safe_marker_check ok; vitest quota/footer focal 100 passed; git diff --check ok."
+    },
+    {
+      "id": "TASK-BUD-987",
+      "description": "[P1/local-safe] Registrar snapshot de quotas LLM DashScope e configurar shortlist de modelos Qwen para control plane/subagentes sem trocar default automaticamente.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-986"
+      ],
+      "files": [
+        "docs/research/dashscope-free-trial-llm-snapshot-2026-05.md",
+        ".sandbox/pi-agent/models.json"
+      ],
+      "acceptance_criteria": [
+        "Persistir snapshot de modelos LLM DashScope com remaining quota e expiração informados pelo operador.",
+        "Configurar modelos Qwen sugeridos para uso futuro em control plane/subagentes sem expor segredo e sem alterar defaultProvider/defaultModel.",
+        "Classificar candidatos por papel operacional: cockpit, subagente/coder, monitor/cheap, long-context/defer.",
+        "Validar JSON localmente e registrar que não houve chamada paga/API nem mudança de routing/default."
+      ],
+      "milestone": "subagent-sovereignty-lane-2026-05",
+      "notes": "Criada por steering humano: aproveitar free trial DashScope e evitar subutilização de modelos disponíveis antes de queimar cota OpenAI no control plane.\n[provenance:human] source_task=TASK-BUD-986 reason=Operador trouxe snapshot amplo de quotas LLM DashScope e pediu para salvar/configurar shortlist de modelos úteis.\n[validation] Snapshot/config complete. .sandbox/pi-agent/models.json is intentionally local/ignored, so commit will preserve docs/board evidence while runtime-local model availability remains configured in the sandbox.",
+      "verification": "VERIF-TASK-BUD-987-DASHSCOPE-SNAPSHOT-CONFIG"
     }
   ]
 }

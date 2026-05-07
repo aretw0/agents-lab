@@ -14552,6 +14552,15 @@
       "method": "regression+smoke+diff-check",
       "timestamp": "2026-05-07T13:36:14.668Z",
       "evidence": "Auto-resume agora recebe `reloadRequired` como sinal runtime ao montar o prompt e filtra blockers/next_actions antigos de reload quando o estado atual está clear (`reloadRequired=false`). Coberto em preview (`context_watch_auto_resume_preview`), surfaces de continuation/local-slice e dispatch post-reload. Regressões adicionadas: prompt post-reload com blocker antigo `still needs reload` e next `Run /reload` preserva blockers/next reais mas remove reload obsoleto; unidade direta de envelope filtra reload stale quando reload está clear. Validação: `npx vitest run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` -> 3 files/70 tests passed; `git diff --check` passou."
+    },
+    {
+      "id": "VERIF-TASK-BUD-987-DASHSCOPE-SNAPSHOT-CONFIG",
+      "target": "TASK-BUD-987",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection+marker+json-parse",
+      "timestamp": "2026-05-07T14:54:26.332Z",
+      "evidence": "Persisted operator-provided DashScope LLM quota snapshot in docs/research/dashscope-free-trial-llm-snapshot-2026-05.md with role shortlist. Upserted local ignored .sandbox/pi-agent/models.json with qwen3.6-plus, qwen3-coder-plus, qwen3-coder-next, qwen3-coder-flash, qwen3-coder-480b-a35b-instruct, qwen3-max, qwen-max, qwen3.6-max-preview; did not change defaultProvider/defaultModel or routeModelRefs and made no API/model calls. Validation: node JSON parse ok; safe_marker_check ok for doc and models; git diff --check ok."
     }
   ]
 }
