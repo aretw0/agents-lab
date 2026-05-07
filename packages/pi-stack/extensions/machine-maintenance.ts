@@ -117,6 +117,7 @@ export interface WorkspaceStoragePressureReport {
 	cleanupExecuted: false;
 	disk: ResourcePressureReading;
 	sessionRoot?: string;
+	sessionRoots?: string[];
 	totalCandidateSizeMb: number;
 	candidates: WorkspaceStorageCleanupCandidate[];
 	nextAction: "compress-old-session-artifacts" | "manual-review" | "none";
@@ -554,9 +555,25 @@ function encodeWorkspaceSessionDir(cwd: string): string {
 	return normalized.split("/").filter(Boolean).join("-");
 }
 
-function currentWorkspaceSessionRoot(cwd: string): string | undefined {
-	const root = join(cwd, ".sandbox", "pi-agent", "sessions", encodeWorkspaceSessionDir(cwd));
-	return existsSync(root) ? root : undefined;
+function discoverWorkspaceSessionRoots(cwd: string): string[] {
+	const base = join(cwd, ".sandbox", "pi-agent", "sessions");
+	const preferred = join(base, encodeWorkspaceSessionDir(cwd));
+	const roots: string[] = [];
+	if (existsSync(preferred)) roots.push(preferred);
+	try {
+		for (const entry of readdirSync(base).slice(0, 100)) {
+			const fullPath = join(base, entry);
+			if (fullPath === preferred) continue;
+			try {
+				if (statSync(fullPath).isDirectory()) roots.push(fullPath);
+			} catch {
+				// ignore unreadable session roots
+			}
+		}
+	} catch {
+		// no sandbox session root available
+	}
+	return roots;
 }
 
 export function buildWorkspaceStoragePressureReport(input: {
@@ -574,18 +591,19 @@ export function buildWorkspaceStoragePressureReport(input: {
 	const maxCandidates = Math.max(1, Math.min(50, Math.floor(input.maxCandidates ?? 10)));
 	const minCandidateSizeMb = Math.max(1, Number(input.minCandidateSizeMb ?? 10));
 	const minAgeHours = Math.max(0, Number(input.minAgeHours ?? 24));
-	const sessionRoot = currentWorkspaceSessionRoot(input.cwd);
+	const sessionRoots = discoverWorkspaceSessionRoots(input.cwd);
+	const sessionRoot = sessionRoots[0];
 	const rows: WorkspaceStorageCleanupCandidate[] = [];
 
-	if (sessionRoot) {
+	for (const root of sessionRoots) {
 		let entries: string[] = [];
 		try {
-			entries = readdirSync(sessionRoot).slice(0, 500);
+			entries = readdirSync(root).slice(0, 500);
 		} catch {
 			entries = [];
 		}
 		for (const entry of entries) {
-			const fullPath = join(sessionRoot, entry);
+			const fullPath = join(root, entry);
 			let st: ReturnType<typeof statSync>;
 			try {
 				st = statSync(fullPath);
@@ -648,6 +666,7 @@ export function buildWorkspaceStoragePressureReport(input: {
 		cleanupExecuted: false,
 		disk,
 		sessionRoot,
+		sessionRoots,
 		totalCandidateSizeMb,
 		candidates,
 		nextAction,

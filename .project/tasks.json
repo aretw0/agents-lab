@@ -22091,8 +22091,8 @@
         "Document next-step guidance for compressing old pi session artifacts safely."
       ],
       "milestone": "subagent-sovereignty-lane-2026-05",
-      "notes": "Created from human steer: recurring disk pressure should become reusable tools/skills/troubleshooting primitives for easier control-plane maintenance.\n[implementation] Added `workspace_storage_pressure_report` as a report-only machine-maintenance tool. It targets recurring disk-pressure troubleshooting by listing bounded, reversible gzip candidates in the workspace pi session directory and refuses to execute cleanup. Focal vitest passed; runtime reload required before live use.",
-      "verification": "VERIF-TASK-BUD-991-STORAGE-PRESSURE-REPORT"
+      "notes": "Created from human steer: recurring disk pressure should become reusable tools/skills/troubleshooting primitives for easier control-plane maintenance.\n[implementation] Added `workspace_storage_pressure_report` as a report-only machine-maintenance tool. It targets recurring disk-pressure troubleshooting by listing bounded, reversible gzip candidates in the workspace pi session directory and refuses to execute cleanup. Focal vitest passed; runtime reload required before live use.\n[live-fix] After reload, live storage report returned zero candidates because runtime cwd/session-root variants can differ (`--mnt-c...` vs `--C--...`). Hardened discovery to scan bounded session roots under `.sandbox/pi-agent/sessions` rather than only one encoded cwd root. Focal vitest still 12/12 passed. During recovery, compressed old inactive pi session artifacts with gzip only; current active session was not touched.",
+      "verification": "VERIF-TASK-BUD-991-SESSION-ROOT-FALLBACK"
     },
     {
       "id": "TASK-BUD-992",

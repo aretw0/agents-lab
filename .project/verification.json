@@ -14633,6 +14633,15 @@
       "method": "focal-vitest",
       "timestamp": "2026-05-07T18:24:03.509Z",
       "evidence": "Implemented report-only workspace_storage_pressure_report inside machine-maintenance. It scans only the workspace's known pi session directory, reports old .bak-large-output/.tmp/old-session JSONL candidates for reversible gzip compression, exposes dispatchAllowed=false and cleanupExecuted=false, and previews commands without running them. Validation: npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts -> 1 file, 12 tests passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-991-SESSION-ROOT-FALLBACK",
+      "target": "TASK-BUD-991",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-vitest",
+      "timestamp": "2026-05-07T18:54:38.347Z",
+      "evidence": "Hardened workspace_storage_pressure_report session-root discovery to inspect bounded roots under .sandbox/pi-agent/sessions, covering runtime cwd/session-root variants. Validation: npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts -> 1 file, 12 tests passed. Operational recovery also gzip-compressed old inactive pi session artifacts only; current active session file was not touched."
     }
   ]
 }

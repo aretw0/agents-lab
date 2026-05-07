@@ -1,52 +1,49 @@
 {
-  "timestamp": "2026-05-07T18:24:58.719Z",
-  "context": "User steered recurring disk-pressure/troubleshooting into reusable tools/skills for easier control. Implemented first maintenance primitive: [snip] eload is required before live tool use. [truncated:+375 chars]",
+  "timestamp": "2026-05-07T18:55:01.464Z",
+  "context": "After reload, ran live storage/machine recovery. machine_maintenance_status was block with only ~276MB free. workspace_storage_pressure_repor [snip] WSL root variants. Focal vitest passed. [truncated:+515 chars]",
   "next_actions": [
-    "Reload before using live workspace_storage_pressure_report.",
-    "After reload, run workspace_storage_pressure_report to produce a bounded cleanup candidate packet.",
-    "If operator confirms, compress only low-risk old pi session backups/temps with gzip; do not to [snip] rrent active session file. [truncated:+10 chars]"
+    "Commit the storage report session-root fallback fix and board evidence.",
+    "Reload before using the updated live workspace_storage_pressure_report fallback.",
+    "Disk is still pause (<2GB free); consider explicit git maintenance (git gc --prune=never/safe [snip] anup before worker canary. [truncated:+35 chars]"
   ],
   "blockers": [
-    "Machine maintenance gate still indicates disk pressure; worker canary remains [snip] until pressure clears. [truncated:+9 chars]",
+    "Machine maintenance gate remains pause due disk free≈1.2GB (<2GB pause thresho [snip] ker canary still held. [truncated:+18 chars]",
     "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts -> 1 file, 12 tests passed",
-    "git diff --check scoped machine-maintenance/task/verification files -> passed",
-    "VERIF-TASK-BUD-991-STORAGE-PRESSURE-REPORT linked"
-  ],
-  "recent_commits": [
-    "ca788ad2 feat(maintenance): report storage pressure cleanup candidates"
+    "gzip compressed old .bak-large-output/.tmp artifacts and one old inactive 2026-04-23 session; [snip] and reversible with gunzip [truncated:+16 chars]",
+    "machine_maintenance_status improved: block/free≈276MB -> pause/free≈1178MB",
+    "npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts -> 12 passed"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-991",
     "canonical_links": [
       "task:TASK-BUD-991",
-      "task:TASK-BUD-991-STORAGE-PRESSURE-REPORT",
-      "commit:ca788ad2"
+      "task:TASK-BUD-991-SESSION-ROOT-FALLBACK",
+      "commit:30391c64023e"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T18:24:58.719Z",
+    "generatedAtIso": "2026-05-07T18:55:01.464Z",
     "level": "ok",
-    "percent": 37,
+    "percent": 44,
     "action": "continue",
-    "recommendation": "reload-then-run-storage-pressure-report",
+    "recommendation": "commit-tool-fix-then-reload-before-next-live-report",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T18:24:58.719Z",
+      "atIso": "2026-05-07T18:55:01.464Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 37,
+      "percent": 44,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-run-storage-pressure-report"
+      "recommendation": "commit-tool-fix-then-reload-before-next-live-report"
     }
   ],
   "completed_tasks": [
