@@ -25,6 +25,7 @@ import {
 	type QuotaStatus,
 	safeNum,
 	shortProviderLabel,
+	formatBudgetStatusLegend,
 } from "./quota-visibility";
 
 // ---------------------------------------------------------------------------
@@ -175,6 +176,7 @@ export function buildPanelLines(
 	const lines: string[] = [];
 	if (status.providerBudgets.length > 0) {
 		lines.push(panelDivider("Provider Budgets", width));
+		for (const line of formatBudgetStatusLegend().slice(0, 2)) lines.push(`  ${line}`);
 		for (const b of status.providerBudgets) lines.push(budgetRow(b));
 	}
 	const windows = status.providerWindows.filter((w) => w.observedMessages > 0);

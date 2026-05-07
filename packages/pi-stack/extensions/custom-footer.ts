@@ -28,6 +28,7 @@ import {
   getCachedStatus,
   buildPanelLines as buildQuotaPanelLines,
 } from "./quota-panel";
+import { formatBudgetStatusLegend } from "./quota-visibility";
 import {
   shouldShowColonyPanel,
   getColonyPanelSnapshot,
@@ -157,6 +158,11 @@ function compactBudgetStatus(status: string | undefined, density: FooterDensity)
   const maxTokens = density === "wide" ? 99 : density === "medium" ? 2 : 1;
   if (tokens.length <= maxTokens) return status;
   return `${tokens.slice(0, maxTokens).join(" ")} +${tokens.length - maxTokens}`;
+}
+
+export function formatFooterBudgetLegend(status: string | undefined): string[] {
+  if (!status) return [];
+  return formatBudgetStatusLegend();
 }
 
 function compactPilotStatus(status: string | undefined, density: FooterDensity): string | undefined {
@@ -550,6 +556,11 @@ export default function customFooterExtension(pi: ExtensionAPI) {
       lines.push("");
       for (const [key, value] of statuses) {
         lines.push(`  ${theme.fg("dim", key.padEnd(24))}${value}`);
+      }
+      const budgetLegend = formatFooterBudgetLegend(statuses.get("quota-budgets"));
+      if (budgetLegend.length > 0) {
+        lines.push("");
+        for (const line of budgetLegend) lines.push(`  ${theme.fg("dim", line)}`);
       }
       lines.push("");
     }

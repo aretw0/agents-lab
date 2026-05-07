@@ -17,6 +17,7 @@ import quotaVisibilityExtension, {
   buildProviderBudgetStatuses,
   buildRouteAdvisory,
   shortProviderLabel,
+  formatBudgetStatusLegend,
   formatBudgetStatusParts,
   resolveQuotaToolOutputPolicy,
   formatQuotaToolJsonOutput,
@@ -1113,9 +1114,9 @@ describe("quota-visibility — TUI footer formatters", () => {
       expect(parts).toEqual(["✓codex:12%"]);
     });
 
-    it("usa ! para estado warning", () => {
+    it("usa ⚠ para estado warning", () => {
       const parts = formatBudgetStatusParts([makeBudgetStatus("github-copilot", "warning", 78)]);
-      expect(parts).toEqual(["!copilot:78%"]);
+      expect(parts).toEqual(["⚠copilot:78%"]);
     });
 
     it("usa ✗ para estado blocked", () => {
@@ -1158,5 +1159,12 @@ describe("quota-visibility — TUI footer formatters", () => {
       expect(part).toBe("✓codex:0%");
     });
 
+    it("explica símbolos, percentual local usado e diferença de WHAM", () => {
+      const legend = formatBudgetStatusLegend().join("\n");
+      expect(legend).toContain("✓=OK, ⚠=WARN, ✗=BLOCK");
+      expect(legend).toContain("max local used pressure");
+      expect(legend).toContain("not remaining quota");
+      expect(legend).toContain("WHAM headroom");
+    });
   });
 });

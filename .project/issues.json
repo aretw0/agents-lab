@@ -1050,6 +1050,50 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-movma9ts",
+      "title": "The agent responded with an empty message to an action-oriented request, leaving the task unresolved without acknowledging any blockage.",
+      "body": "The agent responded with an empty message to an action-oriented request, leaving the task unresolved without acknowledging any blockage.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-movth3fr",
+      "title": "The agent produced an empty response to the user's request, leaving the task unresolved without acknowledging any blockage.",
+      "body": "The agent produced an empty response to the user's request, leaving the task unresolved without acknowledging any blockage.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-movzhewo",
+      "title": "The agent encountered a failed canary with stale extension ctx noise, but left it unresolved and deferred the fix/isolation to later instead of addressing the broken state.",
+      "body": "The agent encountered a failed canary with stale extension ctx noise, but left it unresolved and deferred the fix/isolation to later instead of addressing the broken state.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mow252l3",
+      "title": "The agent responded with no substantive content to an action-oriented request, leaving the task unresolved without acknowledging any blockage.",
+      "body": "The agent responded with no substantive content to an action-oriented request, leaving the task unresolved without acknowledging any blockage.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }

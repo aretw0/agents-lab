@@ -14768,6 +14768,15 @@
       "method": "targeted-vitest",
       "timestamp": "2026-05-07T23:04:36.999Z",
       "evidence": "Added deterministic empty-response target classification. `monitor_empty_response_evidence` now reports `target=control-plane-assistant-turn|worker-subprocess-output|monitor-classifier|unknown`, accepts optional `worker_log_file`, classifies empty worker logs as `recommendationCode=monitor-worker-empty-output` with next action `use-agent-run-outcome-packet`, and labels visible classifier warning text as `target=monitor-classifier`/context divergence. Validation: `npx vitest run packages/pi-stack/test/smoke/monitor-summary.test.ts --reporter=dot` -> 1 file, 14 tests passed. [rationale:risk-control] This blocks the old ambiguous path where monitor feedback could be mistaken for worker or control-plane evidence and reduces unnecessary classifier spend."
+    },
+    {
+      "id": "VERIF-TASK-BUD-968-QUOTA-FOOTER-WIP-VALIDATED",
+      "target": "TASK-BUD-968",
+      "target_type": "task",
+      "status": "passed",
+      "method": "worker-review-and-targeted-vitest",
+      "timestamp": "2026-05-07T23:19:42.894Z",
+      "evidence": "Executed explicitly confirmed provider-native read-only worker `task-bud-968-quota-footer-wip-review` with DashScope qwen3-coder-plus over 8 declared WIP files. Process exit_code=0, output_bytes=981, worker verdict PASS, markers PASS/internal-consistency/next-validation all passed, and corrected read-only outcome packet with touched_files=[] returned contract=pass/process=completed/recommendation=stop. Worker found quota/footer WIP internally consistent with the research doc. Parent focal validation: `npx vitest run packages/pi-stack/test/smoke/custom-footer-registration.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts --reporter=dot` -> 3 files, 100 tests passed. `board_task_quality_gate TASK-BUD-968` -> closeAllowed=yes. [rationale:risk-control] Completion is justified because the previously parked WIP now has independent read-only worker review plus focal tests; no multi-worker/colony promotion is implied."
     }
   ]
 }

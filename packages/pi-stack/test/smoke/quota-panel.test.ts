@@ -162,6 +162,14 @@ describe("quota-panel — buildPanelLines", () => {
     expect(lines.some((l) => l.includes("antigrav"))).toBe(true);
   });
 
+  it("inclui legenda de símbolos e percentual local usado", () => {
+    const status = makeMinimalQuotaStatus([makeMinimalBudgetStatus("openai-codex", "warning")]);
+    const lines = buildPanelLines(status, 80).join("\n");
+    expect(lines).toContain("✓=OK, ⚠=WARN, ✗=BLOCK");
+    expect(lines).toContain("max local used pressure");
+    expect(lines).toContain("not remaining quota");
+  });
+
   it("mostra ⚠ para provider em warning", () => {
     const status = makeMinimalQuotaStatus([
       makeMinimalBudgetStatus("openai-codex", "warning", { usedPctCost: 80 }),
