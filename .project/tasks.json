@@ -22044,7 +22044,7 @@
         "Especificar requisitos mínimos: prompt, provider/model, cwd, declared files, timeout, log stream, abort, status, outcome e empty-output hard fail."
       ],
       "milestone": "subagent-sovereignty-lane-2026-05",
-      "notes": "Criada por steering humano: evitar insistir em Claude Code adapter e cultivar subagentes com providers openai-codex/dashscope, especialmente a cota separada gpt-5.3-codex-spark.\n[provenance:human] source_task=TASK-BUD-986 reason=Primeiro rehearsal via claude_code_execute retornou output vazio; usuário pediu avaliar ROI/ecossistema e usar providers próprios para subagents."
+      "notes": "Criada por steering humano: evitar insistir em Claude Code adapter e cultivar subagentes com providers openai-codex/dashscope, especialmente a cota separada gpt-5.3-codex-spark.\n[provenance:human] source_task=TASK-BUD-986 reason=Primeiro rehearsal via claude_code_execute retornou output vazio; usuário pediu avaliar ROI/ecossistema e usar providers próprios para subagents.\n[steer] Humble alignment: objetivo não é blog/newsletter nem curadoria infinita; esses são consequências possíveis. Meta operacional imediata é galvanizar o laboratório para trabalhar continuamente com subagentes úteis, provider-native runner, evidência e limpeza/organização no processo. Critério de ROI: reduzir carga do control plane e transformar padrões repetitivos em hard pathways reutilizáveis sem fingir maturidade antes dos gates."
     }
   ]
 }
