@@ -14345,6 +14345,15 @@
       "method": "local test",
       "timestamp": "2026-05-07T00:16:27.622Z",
       "evidence": "Implemented OpenAI Codex quota hardening with local-only validation: parseOpenAIWhamUsage handles rate_limit/code_review_rate_limit/additional_rate_limits; provider/model budgets support openai-codex/gpt-5.3-codex-spark; probeOpenAIWhamUsage reads pi-managed auth from auth.json, sends read-only GET /backend-api/wham/usage with timeout and chatgpt-account-id when available, writes best-effort cache, and fail-softs to stale cache when allowed; applyOpenAIWhamUsageToBudgets separates live dashboard window fields from local projections so model-specific projected overrun does not become live exhaustion when WHAM reports remaining quota. Validation: npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts => 44 passed; git diff --check clean; project-validate clean; safe_marker_check WHAM probe 5/5 and live-window reconciliation 3/3."
+    },
+    {
+      "id": "VERIF-BUD-963-LIVE-WHAM-PROBE",
+      "target": "TASK-BUD-963",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live read-only probe",
+      "timestamp": "2026-05-07T00:24:53.517Z",
+      "evidence": "After /reload and explicit user authorization, quota_visibility_openai_wham_probe({probe:true, allowStaleCache:true}) returned ok=true status=200 and wrote .pi/reports/quota-openai-wham-cache.json. Live WHAM windows: Codex 5h 64% remaining reset ~2h17m; Codex 7d 50% remaining reset ~4d23h; GPT-5.3-Codex-Spark 5h 100% remaining reset ~5h; GPT-5.3-Codex-Spark 7d 83% remaining reset ~6d14h. No settings/routing changes."
     }
   ]
 }

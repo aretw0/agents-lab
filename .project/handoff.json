@@ -1,20 +1,19 @@
 {
-  "timestamp": "2026-05-07T00:16:40.394Z",
-  "context": "TASK-BUD-963 concluída. Implementado hardening OpenAI Codex dual quota: parseOpenAIWhamUsage para WHAM payload; provider/model budgets para o [snip] settings.json/routing e sem probe real. [truncated:+449 chars]",
+  "timestamp": "2026-05-07T00:25:03.198Z",
+  "context": "Live WHAM probe pós-/reload executado com autorização explícita. Resultado ok=true status=200 e cache escrito em .pi/reports/quota-openai-wha [snip] Nenhuma alteração em settings/routing. [truncated:+304 chars]",
   "next_actions": [
-    "commit code slice and board completion",
-    "após /reload, ferramenta nova quota_visibility_openai_wham_probe ficará disponível; usar prime [snip] probe=true para readiness [truncated:+7 chars]",
-    "se operador autorizar, executar probe=true para calibrar dashboard real sem alterar routing"
+    "commit board/handoff verification for live probe",
+    "se quiser usar OpenAI Codex agora, tratar como available com cautela: Spark tem maior headroom que pool Codex geral",
+    "não alterar roteamento automático sem decisão explícita"
   ],
   "blockers": [
-    "runtime extension changes require /reload before trusting new tool",
-    "não alterar .pi/settings.json/routing ativo sem decisão explícita",
-    "live probe real ainda requer opt-in explícito"
+    "routing/settings ainda protegidos",
+    "probes live devem continuar opt-in quando causarem request externo"
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts: 44 passed",
-    "git diff --check: clean",
-    "project-validate: clean"
+    "quota_visibility_openai_wham_probe probe=true: ok status=200",
+    "cache read .pi/reports/quota-openai-wham-cache.json: windows present",
+    "board verification VERIF-BUD-963-LIVE-WHAM-PROBE appended"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-963",
@@ -23,16 +22,16 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T00:16:40.394Z",
+    "generatedAtIso": "2026-05-07T00:25:03.198Z",
     "level": "ok",
     "percent": 47,
     "action": "continue",
-    "recommendation": "Commitar e aguardar /reload antes de usar a nova tool em runtime.",
+    "recommendation": "Pode considerar gpt-5.3-codex-spark disponível para canary local-safe; manter no-auto-switch.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T00:16:40.394Z",
+      "atIso": "2026-05-07T00:25:03.198Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 47,
@@ -42,7 +41,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar e aguardar /reload antes de usar a nova tool em runtime."
+      "recommendation": "Pode considerar gpt-5.3-codex-spark disponível para canary local-safe; manter no-auto-switch."
     }
   ],
   "completed_tasks": [
