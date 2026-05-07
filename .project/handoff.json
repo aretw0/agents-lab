@@ -1,50 +1,52 @@
 {
-  "timestamp": "2026-05-07T20:34:31.488Z",
-  "context": "Operator asked whether we can lower the disk threshold to around 1GB to allow attempting a bounded ~500MB operation. Applied explicit .pi/set [snip] rity=ok / longRun=allow at ~1.8GB free. [truncated:+293 chars]",
+  "timestamp": "2026-05-07T20:42:35.540Z",
+  "context": "Executed first bounded provider-native canary after reload and explicit prior confirmation. Gates: context warn but continue-bounded, machine [snip] ries against stale extension ctx noise. [truncated:+545 chars]",
+  "current_tasks": [
+    "TASK-BUD-989"
+  ],
   "next_actions": [
-    "Commit settings/board/handoff threshold adjustment if appropriate.",
-    "Proceed only with one bounded provider-native canary; avoid broad scans, installs, builds, or large logs.",
-    "Monitor disk after canary; if free approaches 1GB, stop and checkpoint."
+    "Commit board/verification/handoff evidence for the failed canary.",
+    "Do not count canary as promotion evidence despite worker PASS; fix or isolate stale extension ctx noise first.",
+    "Investigate TASK-BUD-995 with a bounded local slice; candidate mitigation may be a provider-na [snip] rst-party stale ctx fixes. [truncated:+86 chars]"
   ],
   "blockers": [
-    "Threshold override is intentionally more permissive; do not treat as general long-run capacity.",
+    "Provider-native canary contract failed due stale extension ctx errors in nested pi log.",
+    "Machine disk threshold is a tactical local override; avoid broad scans/builds.",
     "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated."
   ],
   "recent_validation": [
-    "structured_io_json dryRun for .pi/settings piStack.machineMaintenance -> ok-preview",
-    "structured_io_json apply -> ok-applied",
-    "machine_maintenance_status after override -> severity=ok action=continue longRun=allow disk free≈1816MB"
+    "agent_run_start_packet task-bud-989-dashscope-readonly-canary-1 -> ready-for-human-decision dispatch=no budget=ok",
+    "bash provider-native canary -> exit_code=0 output_bytes=6007 log=.pi/reports/task-bud-989-dash [snip] cope-readonly-canary-1.log [truncated:+1 chars]",
+    "agent_run_outcome_packet -> process=completed contract=fail markerFailure nested-pi-log-free-of-stale-extension-errors"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-991",
+    "focus": "TASK-BUD-989",
     "canonical_links": [
-      "task:TASK-BUD-991"
+      "task:TASK-BUD-989",
+      "task:TASK-BUD-995",
+      "task:TASK-BUD-989-DASHSCOPE-READONLY-CANARY-1"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T20:34:31.488Z",
-    "level": "ok",
-    "percent": 51,
+    "generatedAtIso": "2026-05-07T20:42:35.540Z",
+    "level": "warn",
+    "percent": 54,
     "action": "continue",
-    "recommendation": "commit-threshold-override-then-one-bounded-canary",
-    "focus_task_status": "completed"
+    "recommendation": "commit-failed-canary-evidence-then-harden-nested-pi-runtime"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T20:34:31.488Z",
+      "atIso": "2026-05-07T20:42:35.540Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 51,
+      "level": "warn",
+      "percent": 54,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-threshold-override-then-one-bounded-canary"
+      "recommendation": "commit-failed-canary-evidence-then-harden-nested-pi-runtime"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-991"
   ]
 }

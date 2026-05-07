@@ -14651,6 +14651,15 @@
       "method": "focal-vitest",
       "timestamp": "2026-05-07T19:03:25.036Z",
       "evidence": "Updated workspace_storage_pressure_report to exclude already-compressed .gz session artifacts from gzip candidate output. Added regression coverage that an old .jsonl backup is reported, active session is excluded, and .gz backup is excluded. Validation: npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts -> 1 file, 12 tests passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-989-DASHSCOPE-CANARY-1-FAIL",
+      "target": "TASK-BUD-989",
+      "target_type": "task",
+      "status": "failed",
+      "method": "provider-native-canary",
+      "timestamp": "2026-05-07T20:41:23.753Z",
+      "evidence": "Executed one explicitly-confirmed bounded DashScope provider-native read-only canary: run_id=task-bud-989-dashscope-readonly-canary-1, model=dashscope/qwen3-coder-plus, pi --no-session --tools read,grep,find,ls --print, timeout 90s. Process exited 0 and worker output was non-empty with PASS verdict. Parent-side outcome still contract=fail because log contained repeated nested pi stale extension ctx errors; this is not promotion evidence. Log: .pi/reports/task-bud-989-dashscope-readonly-canary-1.log. agent_run_outcome_packet: process=completed, contract=fail, marker failure nested-pi-log-free-of-stale-extension-errors=false."
     }
   ]
 }
