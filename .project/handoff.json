@@ -1,54 +1,54 @@
 {
-  "timestamp": "2026-05-07T16:54:33.539Z",
-  "context": "After reload and operator steer, live agent_run_start_packet accepted the new budget_decision/budget_evidence fields and remained report-only [snip] del execution budget evidence resolver. [truncated:+304 chars]",
+  "timestamp": "2026-05-07T17:01:35.628Z",
+  "context": "After reload, confirmed live agent_run_start_packet accepts budget evidence and remains report-only. Then applied the shared provider executi [snip] der/settings/routing changes were made. [truncated:+339 chars]",
   "current_tasks": [
     "TASK-BUD-989"
   ],
   "next_actions": [
-    "Reload before trusting live agent_run_start_packet again because extension code changed.",
-    "Continue TASK-BUD-989 by using the shared budget evidence gate in one bounded provider-native [snip] licit confirmation/policy. [truncated:+38 chars]",
-    "Consider future control-plane reuse in quota route/advisor surfaces only when it reduces dupli [snip] eport-only/no-auto-switch. [truncated:+28 chars]"
+    "Reload before trusting live quota_visibility_route and agent_run_start_packet because extension code changed.",
+    "After reload, run quota_visibility_route to verify live output includes executionBudgetDecisio [snip] ils; still no auto-switch. [truncated:+15 chars]",
+    "Prepare one provider-native canary only after choosing provider/model with explicit budget evi [snip] el-specific/WHAM evidence. [truncated:+60 chars]"
   ],
   "blockers": [
     "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated.",
-    "OpenAI Codex provider-level local projection remains blocked; Codex Spark need [snip] ence before selection. [truncated:+35 chars]",
-    "No multi-worker/colony promotion until repeated provider-native one-worker contract passes."
+    "OpenAI Codex provider-level local projection remains blocked; Codex Spark requ [snip] ence before selection. [truncated:+33 chars]",
+    "No multi-worker/colony promotion until repeated one-worker contracts pass."
   ],
   "recent_validation": [
-    "Live agent_run_start_packet report-only packet with dashscope budget_decision=ok returned read [snip] n-decision and dispatch=no [truncated:+10 chars]",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 17 passed",
-    "git diff --check scoped shared budget evidence files -> passed"
+    "Live agent_run_start_packet: ready-for-human-decision, budget=ok, dispatch=no",
+    "npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack [snip] > 2 files, 62 tests passed [truncated:+54 chars]",
+    "git diff --check scoped quota route/control-plane reuse files -> passed"
   ],
   "recent_commits": [
-    "a9e711af refactor(delegation): share provider budget evidence gate"
+    "7c227a54 refactor(quota): reuse provider budget evidence in route advisory"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-989",
     "canonical_links": [
       "task:TASK-BUD-989",
-      "commit:a9e711af"
+      "commit:7c227a54"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T16:54:33.539Z",
+    "generatedAtIso": "2026-05-07T17:01:35.628Z",
     "level": "ok",
-    "percent": 44,
+    "percent": 50,
     "action": "continue",
-    "recommendation": "reload-then-budget-evidenced-single-canary"
+    "recommendation": "reload-then-live-route-budget-evidence-smoke"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T16:54:33.539Z",
+      "atIso": "2026-05-07T17:01:35.628Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 44,
+      "percent": 50,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-budget-evidenced-single-canary"
+      "recommendation": "reload-then-live-route-budget-evidence-smoke"
     }
   ]
 }
