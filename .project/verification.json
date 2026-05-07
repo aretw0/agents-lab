@@ -14687,6 +14687,24 @@
       "method": "provider-native-canary",
       "timestamp": "2026-05-07T21:53:15.188Z",
       "evidence": "Executed bounded minimal-no-extensions DashScope provider-native read-only canary after reload: run_id=task-bud-989-dashscope-readonly-canary-2, model=dashscope/qwen3-coder-plus, command used `pi --no-session --no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files --model dashscope/qwen3-coder-plus --tools read,grep,find,ls --print`, timeout 90s. Process exited 0; output_bytes=665; worker output non-empty with PASS verdict; stale ctx count=0. safe_marker_check passed required markers. agent_run_outcome_packet with file_contract=read-only returned contract=pass, process=completed, recommendation=stop, touched=0. Log: .pi/reports/task-bud-989-dashscope-readonly-canary-2.log. This is one valid promotion evidence item; TASK-BUD-989 still needs 1-2 more bounded passes before promotion."
+    },
+    {
+      "id": "VERIF-TASK-BUD-989-DASHSCOPE-CANARY-3-FAIL",
+      "target": "TASK-BUD-989",
+      "target_type": "task",
+      "status": "failed",
+      "method": "provider-native-canary",
+      "timestamp": "2026-05-07T22:02:29.624Z",
+      "evidence": "Executed bounded minimal-no-extensions DashScope read-only canary: run_id=task-bud-989-dashscope-readonly-canary-3. Process exited 0; output_bytes=827; stale_count=0; worker returned FAIL because it did not read/find the declared files and claimed they were missing. agent_run_outcome_packet with file_contract=read-only returned contract=fail due marker `worker-verdict-pass=false`. This is not promotion evidence. Follow-up canary 4 attached declared files explicitly to avoid non-read hallucinated file-missing result. Log: .pi/reports/task-bud-989-dashscope-readonly-canary-3.log."
+    },
+    {
+      "id": "VERIF-TASK-BUD-989-DASHSCOPE-CANARY-4-PASS",
+      "target": "TASK-BUD-989",
+      "target_type": "task",
+      "status": "passed",
+      "method": "provider-native-canary",
+      "timestamp": "2026-05-07T22:02:42.776Z",
+      "evidence": "Executed bounded minimal-no-extensions DashScope provider-native read-only canary with declared files attached: run_id=task-bud-989-dashscope-readonly-canary-4, model=dashscope/qwen3-coder-plus, command used `pi --no-session --no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files --model dashscope/qwen3-coder-plus --tools read,grep,find,ls --print @packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts @packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts @packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts ...`, timeout 90s. Process exited 0; output_bytes=1644; worker output non-empty with PASS verdict; stale ctx count=0. safe_marker_check passed required markers. agent_run_outcome_packet with file_contract=read-only returned contract=pass, process=completed, recommendation=stop, touched=0. Log: .pi/reports/task-bud-989-dashscope-readonly-canary-4.log. This is the second valid bounded provider-native pass (canary 2 + canary 4), reaching the minimum calibration target; one additional pass remains optional for higher confidence before promotion."
     }
   ]
 }
