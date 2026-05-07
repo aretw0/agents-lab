@@ -21973,7 +21973,7 @@
         "Validar com teste/marker local-safe e deixar TASK-BUD-968 apenas parked, não completed."
       ],
       "milestone": "subagent-sovereignty-lane-2026-05",
-      "notes": "Criada por steering humano: priorizar base dos subagentes para descarregar o control plane; começar do mais simples e maturar até colônia, sem frear ou fechar tasks não prontas.\n[provenance:human] source_task=TASK-BUD-968 reason=Pivot estratégico confirmado pelo usuário: UI quota permanece desejada, mas subagent base é mais prioritária para soberania operacional.\n[evidence] Steering aplicado sem dispatch: TASK-BUD-968 foi parked sem completed; criado doc docs/research/subagent-sovereignty-rehearsal-2026-05.md com escada de maturidade, primeiro candidate run_id=task-bud-986-quota-ui-review-rehearsal e regra de confirmação humana explícita. Packets: agent_run_plan ready-for-human-decision; registry_upsert dry-run writeAllowed=no. Validação: safe_marker_check ok; vitest quota/footer focal 100 passed; git diff --check ok.\n[gate] Pós-desvio de modelos: retomado foco no rehearsal. agent_run_plan específico segue ready-for-human-decision para 1 worker; agent_run_status ainda found=no porque registry foi apenas dry-run. delegation_rehearsal_packet/start_packet geral permanece blocked por auto-advance/focus-not-complete/telemetry-not-ready; portanto próximo passo seguro é executar somente como agent-run manualmente confirmado, não como auto-advance/delegation lane automática.\n[agent-run] Executed user-confirmed worker run_id=task-bud-986-quota-ui-review-rehearsal via claude_code_execute with bounded prompt and read-only tools. Process exitCode=0 but output was empty (0 bytes); log written to .pi/reports/task-bud-986-quota-ui-review-rehearsal.log. Registry updated planned->completed. Outcome packet: processState=completed, contractDecision=fail due marker worker-output-nonempty-review-note=false; no unexpected files observed. This validates the process/contract separation and shows first real rehearsal did not produce usable review evidence; do not promote delegation yet."
+      "notes": "Criada por steering humano: priorizar base dos subagentes para descarregar o control plane; começar do mais simples e maturar até colônia, sem frear ou fechar tasks não prontas.\n[provenance:human] source_task=TASK-BUD-968 reason=Pivot estratégico confirmado pelo usuário: UI quota permanece desejada, mas subagent base é mais prioritária para soberania operacional.\n[evidence] Steering aplicado sem dispatch: TASK-BUD-968 foi parked sem completed; criado doc docs/research/subagent-sovereignty-rehearsal-2026-05.md com escada de maturidade, primeiro candidate run_id=task-bud-986-quota-ui-review-rehearsal e regra de confirmação humana explícita. Packets: agent_run_plan ready-for-human-decision; registry_upsert dry-run writeAllowed=no. Validação: safe_marker_check ok; vitest quota/footer focal 100 passed; git diff --check ok.\n[gate] Pós-desvio de modelos: retomado foco no rehearsal. agent_run_plan específico segue ready-for-human-decision para 1 worker; agent_run_status ainda found=no porque registry foi apenas dry-run. delegation_rehearsal_packet/start_packet geral permanece blocked por auto-advance/focus-not-complete/telemetry-not-ready; portanto próximo passo seguro é executar somente como agent-run manualmente confirmado, não como auto-advance/delegation lane automática.\n[agent-run] Executed user-confirmed worker run_id=task-bud-986-quota-ui-review-rehearsal via claude_code_execute with bounded prompt and read-only tools. Process exitCode=0 but output was empty (0 bytes); log written to .pi/reports/task-bud-986-quota-ui-review-rehearsal.log. Registry updated planned->completed. Outcome packet: processState=completed, contractDecision=fail due marker worker-output-nonempty-review-note=false; no unexpected files observed. This validates the process/contract separation and shows first real rehearsal did not produce usable review evidence; do not promote delegation yet.\n[correction] Não assumir que monitor fragility viu o worker. Validação determinística: monitor_empty_response_evidence apontou source=jsonl assistantFinalChars=0 em turno do control plane; log do worker confirma output_bytes=0, mas isso é evidência separada. Criadas TASK-BUD-988 para hardening monitor/context divergence e TASK-BUD-989 para design-first executor provider-native. Decisão: não insistir em claude_code_execute como caminho principal; tratar como old-path/diagnóstico até ROI justificar."
     },
     {
       "id": "TASK-BUD-987",
@@ -21996,6 +21996,55 @@
       "milestone": "subagent-sovereignty-lane-2026-05",
       "notes": "Criada por steering humano: aproveitar free trial DashScope e evitar subutilização de modelos disponíveis antes de queimar cota OpenAI no control plane.\n[provenance:human] source_task=TASK-BUD-986 reason=Operador trouxe snapshot amplo de quotas LLM DashScope e pediu para salvar/configurar shortlist de modelos úteis.\n[validation] Snapshot/config complete. .sandbox/pi-agent/models.json is intentionally local/ignored, so commit will preserve docs/board evidence while runtime-local model availability remains configured in the sandbox.",
       "verification": "VERIF-TASK-BUD-987-DASHSCOPE-SNAPSHOT-CONFIG"
+    },
+    {
+      "id": "TASK-BUD-988",
+      "description": "[P1/local-safe] Hardening determinístico de feedback de monitores: distinguir empty-response real do control plane, worker vazio e stale/context divergence antes de gastar classifier token.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-777",
+        "TASK-BUD-915"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-observability.ts",
+        "packages/pi-stack/extensions/monitor-summary.ts",
+        "packages/pi-stack/test/smoke/monitor-summary.test.ts",
+        "docs/research/monitor-stale-feedback-intake-template-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Adicionar evidência determinística que identifique o alvo do feedback: control-plane assistant turn, worker/subprocess output, monitor classifier, ou unknown.",
+        "Bloquear/rotular o caminho antigo quando empty-response já foi tratado por outcome packet ou quando o feedback é stale/context-divergent.",
+        "Reduzir gasto com classifier quando prefilter determinístico for suficiente para stale/duplicate/known false positive.",
+        "Validar com fixture/regressão local-safe reproduzindo empty worker output versus empty assistant turn."
+      ],
+      "milestone": "subagent-sovereignty-lane-2026-05",
+      "notes": "Criada por feedback humano: não assumir que monitor está vendo worker; validar deterministicamente e evitar token spend com falso positivo/negativo recorrente.\n[provenance:human] source_task=TASK-BUD-986 reason=Monitor fragility/commit feedback durante first worker rehearsal levantou risco de engenharia de contexto dos monitores; recurring_failure_hardening_plan indicou block-old-path pa…"
+    },
+    {
+      "id": "TASK-BUD-989",
+      "description": "[P1/design-first] Projetar executor agent-run provider-native usando providers pi (openai-codex/dashscope) antes de novos canaries, evitando depender do claude_code_execute como caminho principal.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-986",
+        "TASK-BUD-987"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-plan.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "docs/research/subagent-sovereignty-rehearsal-2026-05.md",
+        "docs/research/dashscope-free-trial-llm-snapshot-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Mapear opções de executor ao redor: provider-native pi SDK, workflows, ant_colony, claude_code_execute e extensões curadas, com ROI/risco/observabilidade.",
+        "Definir por que openai-codex/gpt-5.3-codex-spark deve ser primeiro provider-native candidate e onde DashScope entra depois.",
+        "Manter dispatch separado: design/packet não autoriza execução.",
+        "Especificar requisitos mínimos: prompt, provider/model, cwd, declared files, timeout, log stream, abort, status, outcome e empty-output hard fail."
+      ],
+      "milestone": "subagent-sovereignty-lane-2026-05",
+      "notes": "Criada por steering humano: evitar insistir em Claude Code adapter e cultivar subagentes com providers openai-codex/dashscope, especialmente a cota separada gpt-5.3-codex-spark.\n[provenance:human] source_task=TASK-BUD-986 reason=Primeiro rehearsal via claude_code_execute retornou output vazio; usuário pediu avaliar ROI/ecossistema e usar providers próprios para subagents."
     }
   ]
 }
