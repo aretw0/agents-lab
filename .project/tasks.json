@@ -21457,7 +21457,7 @@
     {
       "id": "TASK-BUD-960",
       "description": "[P2/local-safe] Compactar output operator-visible de `workflow-agents` para evitar despejo gigante na conversa.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-959"
@@ -21475,7 +21475,8 @@
         "Validar com marker check ou teste local-safe; não tocar settings, CI, publish ou provider config."
       ],
       "milestone": "agent-quality-calibration-lane",
-      "notes": "Feedback do operador: a chamada `workflow-agents` retornou JSON grande demais na sessão. Desejo: versão reduzida/colapsada para não poluir conversa.\n[provenance:human] source_task=TASK-BUD-959 reason=Observação de UX/operator-visible output durante exploração de delegação e providers."
+      "notes": "Feedback do operador: a chamada `workflow-agents` retornou JSON grande demais na sessão. Desejo: versão reduzida/colapsada para não poluir conversa.\n[provenance:human] source_task=TASK-BUD-959 reason=Observação de UX/operator-visible output durante exploração de delegação e providers.\n[start] Continuando escada local-safe pós-reload: diagnosticar output operator-visible de workflow-agents e localizar owner/superfície antes de qualquer patch. Sem dispatch, settings, routing ou escopo protegido.\n[complete] Documented noisy workflow-agents output and compact-output contract. No direct node_modules patch; future implementation should be upstream PR or first-party wrapper task.",
+      "verification": "VERIF-BUD-960-WORKFLOW-AGENTS-COMPACT"
     },
     {
       "id": "TASK-BUD-961",

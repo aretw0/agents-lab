@@ -14372,6 +14372,15 @@
       "method": "live smoke + documentation",
       "timestamp": "2026-05-07T00:47:27.491Z",
       "evidence": "After /reload, worktree status/list produced operator-visible summaries with repo, root, branch/kind, current marker, pi-owned marker, path and purpose. Local search did not find a first-party pi-stack extension owner for the worktree tool, so behavior was documented as harness/runtime-owned in docs/research/worktree-status-operator-output-2026-05.md. Validation: safe_marker_check passed, git diff --check clean, project-validate clean."
+    },
+    {
+      "id": "VERIF-BUD-960-WORKFLOW-AGENTS-COMPACT",
+      "target": "TASK-BUD-960",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live smoke + documentation",
+      "timestamp": "2026-05-07T00:50:15.455Z",
+      "evidence": "Reproduced workflow-agents without name returning a full JSON list (31 agents) and workflow-agents {name:'task-worker'} returning focused detail. Located owner as external @davidorex pi-workflows/pi-project-workflows skill surface; no first-party pi-stack source owner found for safe local patch. Documented compact summary contract, no-node_modules-patch decision, and wrapper/upstream options in docs/research/workflow-agents-compact-output-2026-05.md. Validation: safe_marker_check passed, git diff --check clean, project-validate clean."
     }
   ]
 }

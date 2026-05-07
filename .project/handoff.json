@@ -1,52 +1,51 @@
 {
-  "timestamp": "2026-05-07T00:47:52.255Z",
-  "context": "TASK-BUD-959 completed as no-code/documentation slice after reload. Live worktree status/list output now includes useful operator-visible fie [snip] untime-owned and no patch required now. [truncated:+95 chars]",
+  "timestamp": "2026-05-07T00:50:38.598Z",
+  "context": "TASK-BUD-960 completed as documentation/decision slice. Reproduced noisy workflow-agents default output (full JSON list, 31 agents) and confi [snip] r found. No node_modules patch applied. [truncated:+184 chars]",
   "next_actions": [
-    "commit TASK-BUD-959 documentation + board verification as new commit",
-    "continue local-safe ladder with TASK-BUD-960 unless a delegation gate becomes ready",
-    "do not dispatch worker until simple_delegate_rehearsal_start_packet is ready-for-human-decisio [snip] an approves exact contract [truncated:+9 chars]"
+    "commit TASK-BUD-960 documentation + board verification as new commit",
+    "autonomy lane has no remaining eligible local-safe tasks under default filters",
+    "if continuing agentic journey, prepare a new explicit simple-delegate canary task/contract or human-focus next lane"
   ],
   "blockers": [
-    "simple-delegate rehearsal remains blocked: rehearsal-not-ready, auto-advance t [snip] t ready, focus missing [truncated:+11 chars]",
+    "simple-delegate rehearsal still blocked by rehearsal-not-ready, auto-advance t [snip] t ready, focus missing [truncated:+11 chars]",
     "routing/settings remain protected",
     "live external probes remain opt-in"
   ],
   "recent_validation": [
-    "worktree status/list live smoke produced repo/root/branch/current/pi-owned/path/purpose evidence",
-    "safe_marker_check docs/research/worktree-status-operator-output-2026-05.md -> ok",
-    "git diff --check -> clean"
+    "workflow-agents {} live smoke -> full JSON list with 31 agents",
+    "workflow-agents {name: task-worker} -> focused detail",
+    "safe_marker_check docs/research/workflow-agents-compact-output-2026-05.md -> ok"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-959",
+    "focus": "TASK-BUD-960",
     "canonical_links": [
-      "task:TASK-BUD-959",
       "task:TASK-BUD-960"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T00:47:52.255Z",
+    "generatedAtIso": "2026-05-07T00:50:38.598Z",
     "level": "ok",
-    "percent": 34,
+    "percent": 38,
     "action": "continue",
-    "recommendation": "Commit current no-code worktree output closure, then continue local-safe evidence with TASK-BU [snip] 960 before agent dispatch. [truncated:+2 chars]",
+    "recommendation": "Commit current slice, then ask/decide explicit next canary focus because default local-safe qu [snip] egation gate is not ready. [truncated:+20 chars]",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T00:47:52.255Z",
+      "atIso": "2026-05-07T00:50:38.598Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 34,
+      "percent": 38,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commit current no-code worktree output closure, then continue local-safe evidence with TASK-BU [snip] 960 before agent dispatch. [truncated:+2 chars]"
+      "recommendation": "Commit current slice, then ask/decide explicit next canary focus because default local-safe qu [snip] egation gate is not ready. [truncated:+20 chars]"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-959"
+    "TASK-BUD-960"
   ]
 }
