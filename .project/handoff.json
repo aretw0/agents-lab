@@ -1,49 +1,48 @@
 {
-  "timestamp": "2026-05-07T18:55:01.464Z",
-  "context": "After reload, ran live storage/machine recovery. machine_maintenance_status was block with only ~276MB free. workspace_storage_pressure_repor [snip] WSL root variants. Focal vitest passed. [truncated:+515 chars]",
+  "timestamp": "2026-05-07T19:03:49.673Z",
+  "context": "After reload, ran updated storage report. It now finds session-root variants, but live output also revealed a quality gap: already-compressed [snip] so provider-native canary remains held. [truncated:+304 chars]",
   "next_actions": [
-    "Commit the storage report session-root fallback fix and board evidence.",
-    "Reload before using the updated live workspace_storage_pressure_report fallback.",
-    "Disk is still pause (<2GB free); consider explicit git maintenance (git gc --prune=never/safe [snip] anup before worker canary. [truncated:+35 chars]"
+    "Commit .gz exclusion fix and board evidence.",
+    "Reload before trusting live workspace_storage_pressure_report .gz exclusion.",
+    "Disk remains below 2GB pause threshold; next safe options require explicit operator choice: gi [snip] disk cleanup outside repo. [truncated:+93 chars]"
   ],
   "blockers": [
-    "Machine maintenance gate remains pause due disk free≈1.2GB (<2GB pause thresho [snip] ker canary still held. [truncated:+18 chars]",
+    "Machine maintenance gate remains pause (~1.2GB free); long-runs/worker canary held.",
     "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated."
   ],
   "recent_validation": [
-    "gzip compressed old .bak-large-output/.tmp artifacts and one old inactive 2026-04-23 session; [snip] and reversible with gunzip [truncated:+16 chars]",
-    "machine_maintenance_status improved: block/free≈276MB -> pause/free≈1178MB",
+    "workspace_storage_pressure_report live before source fix: found session roots and candidates but included .gz artifacts",
+    "gzip-compressed only old inactive uncompressed session JSONL files; no deletion and active session untouched",
     "npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts -> 12 passed"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-991",
     "canonical_links": [
       "task:TASK-BUD-991",
-      "task:TASK-BUD-991-SESSION-ROOT-FALLBACK",
-      "commit:30391c64023e"
+      "task:TASK-BUD-991-EXCLUDE-GZ-CANDIDATES"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T18:55:01.464Z",
+    "generatedAtIso": "2026-05-07T19:03:49.673Z",
     "level": "ok",
-    "percent": 44,
+    "percent": 46,
     "action": "continue",
-    "recommendation": "commit-tool-fix-then-reload-before-next-live-report",
+    "recommendation": "commit-gz-exclusion-then-ask-operator-for-next-cleanup-scope",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T18:55:01.464Z",
+      "atIso": "2026-05-07T19:03:49.673Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 44,
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-tool-fix-then-reload-before-next-live-report"
+      "recommendation": "commit-gz-exclusion-then-ask-operator-for-next-cleanup-scope"
     }
   ],
   "completed_tasks": [

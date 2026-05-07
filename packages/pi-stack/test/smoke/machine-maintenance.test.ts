@@ -174,11 +174,14 @@ describe("machine-maintenance gate", () => {
       const sessionRoot = join(cwd, ".sandbox", "pi-agent", "sessions", encoded);
       mkdirSync(sessionRoot, { recursive: true });
       const oldBackup = join(sessionRoot, "2026-04-01T00-00-00-000Z_old.jsonl.bak-large-output-2026-04-02T00-00-00-000Z");
+      const compressedBackup = `${oldBackup}.gz`;
       const activeSession = join(sessionRoot, "2026-05-07T00-00-00-000Z_current.jsonl");
       writeFileSync(oldBackup, Buffer.alloc(2 * 1024 * 1024, "a"));
+      writeFileSync(compressedBackup, Buffer.alloc(2 * 1024 * 1024, "z"));
       writeFileSync(activeSession, Buffer.alloc(2 * 1024 * 1024, "b"));
       const oldDate = new Date("2026-04-02T00:00:00.000Z");
       utimesSync(oldBackup, oldDate, oldDate);
+      utimesSync(compressedBackup, oldDate, oldDate);
       const report = buildWorkspaceStoragePressureReport({
         cwd,
         nowMs: Date.parse("2026-05-07T00:00:00.000Z"),
@@ -191,6 +194,7 @@ describe("machine-maintenance gate", () => {
       expect(report.cleanupExecuted).toBe(false);
       expect(report.candidates.some((row) => row.kind === "pi-session-backup")).toBe(true);
       expect(report.candidates.some((row) => row.path === activeSession)).toBe(false);
+      expect(report.candidates.some((row) => row.path === compressedBackup)).toBe(false);
       expect(report.candidates.every((row) => row.reversibleAction === "gzip-compress")).toBe(true);
       expect(formatWorkspaceStoragePressureReport(report)).toContain("report-only");
     } finally {

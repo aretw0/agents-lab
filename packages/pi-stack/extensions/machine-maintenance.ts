@@ -611,6 +611,7 @@ export function buildWorkspaceStoragePressureReport(input: {
 				continue;
 			}
 			if (!st.isFile()) continue;
+			if (entry.endsWith(".gz")) continue;
 			if (!/\.jsonl(\.|$)/.test(entry)) continue;
 			const sizeMb = roundMb(st.size);
 			const ageHours = Math.max(0, Math.round(((nowMs - st.mtimeMs) / 3_600_000) * 10) / 10);

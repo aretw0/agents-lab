@@ -14642,6 +14642,15 @@
       "method": "focal-vitest",
       "timestamp": "2026-05-07T18:54:38.347Z",
       "evidence": "Hardened workspace_storage_pressure_report session-root discovery to inspect bounded roots under .sandbox/pi-agent/sessions, covering runtime cwd/session-root variants. Validation: npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts -> 1 file, 12 tests passed. Operational recovery also gzip-compressed old inactive pi session artifacts only; current active session file was not touched."
+    },
+    {
+      "id": "VERIF-TASK-BUD-991-EXCLUDE-GZ-CANDIDATES",
+      "target": "TASK-BUD-991",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-vitest",
+      "timestamp": "2026-05-07T19:03:25.036Z",
+      "evidence": "Updated workspace_storage_pressure_report to exclude already-compressed .gz session artifacts from gzip candidate output. Added regression coverage that an old .jsonl backup is reported, active session is excluded, and .gz backup is excluded. Validation: npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts -> 1 file, 12 tests passed."
     }
   ]
 }
