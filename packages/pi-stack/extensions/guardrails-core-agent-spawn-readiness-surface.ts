@@ -276,6 +276,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         label: Type.Optional(Type.String({ description: "Marker/check label." })),
         ok: Type.Optional(Type.Boolean({ description: "Whether the marker/check passed." })),
       }), { description: "Optional parent-side validation marker/check results." })),
+      output_bytes: Type.Optional(Type.Number({ description: "Worker stdout/output byte count. Zero is a contract failure even when process exit succeeds." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -286,6 +287,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         entry,
         touchedFiles: asOptionalStringArray(p.touched_files),
         markerResults: asMarkerResults(p.marker_results),
+        outputBytes: typeof p.output_bytes === "number" ? p.output_bytes : undefined,
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_outcome_packet",

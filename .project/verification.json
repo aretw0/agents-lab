@@ -14570,6 +14570,15 @@
       "method": "doc+focal-vitest",
       "timestamp": "2026-05-07T15:54:41.717Z",
       "evidence": "Created docs/research/agent-run-provider-native-runner-2026-05.md mapping provider-native execution paths and minimum runner contract. Added report-only buildAgentRunStartPacket plus agent_run_start_packet surface for pi-print-subprocess command preview; dispatchAllowed=false/processStartAllowed=false, explicit human confirmation required. Focal validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 15 passed. Note: provider order is budget-aware; openai-codex currently local-budget blocked while dashscope is ok, so first canary candidate should be chosen by current budget/readiness rather than old assumption."
+    },
+    {
+      "id": "VERIF-TASK-BUD-989-EMPTY-OUTPUT-HARD-FAIL",
+      "target": "TASK-BUD-989",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-vitest",
+      "timestamp": "2026-05-07T16:07:15.392Z",
+      "evidence": "Hardened agent_run_outcome_packet with optional output_bytes/outputBytes. Completed process with outputBytes=0 now fails contract with recommendationCode=agent-run-outcome-fail-empty-output and blocker empty-output, instead of relying only on ad-hoc marker_results. Surface accepts output_bytes. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 15 passed."
     }
   ]
 }

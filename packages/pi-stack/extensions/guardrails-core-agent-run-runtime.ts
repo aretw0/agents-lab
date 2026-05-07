@@ -89,6 +89,7 @@ export interface AgentRunOutcomeInput {
   entry?: AgentRunRegistryEntry;
   touchedFiles?: string[];
   markerResults?: AgentRunMarkerResult[];
+  outputBytes?: number;
 }
 
 export interface AgentRunOutcomeResult {
@@ -108,6 +109,7 @@ export interface AgentRunOutcomeResult {
     | "agent-run-outcome-partial-no-touched-files"
     | "agent-run-outcome-fail-missing-run"
     | "agent-run-outcome-fail-process-state"
+    | "agent-run-outcome-fail-empty-output"
     | "agent-run-outcome-fail-unexpected-files"
     | "agent-run-outcome-fail-missing-declared-files"
     | "agent-run-outcome-fail-marker";
@@ -116,6 +118,7 @@ export interface AgentRunOutcomeResult {
   missingDeclaredFiles: string[];
   unexpectedFiles: string[];
   markerFailures: string[];
+  outputBytes?: number;
   rollbackFiles: string[];
   blockers: string[];
   summary: string;
@@ -303,6 +306,7 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
   const processState = normalizeState(input.entry?.state);
   const declaredFiles = normalizeFiles(input.entry?.declaredFiles);
   const touchedFiles = normalizeFiles(input.touchedFiles);
+  const outputBytes = typeof input.outputBytes === "number" && Number.isFinite(input.outputBytes) && input.outputBytes >= 0 ? Math.floor(input.outputBytes) : undefined;
   const declaredSet = new Set(declaredFiles);
   const touchedSet = new Set(touchedFiles);
   const missingDeclaredFiles = declaredFiles.filter((file) => !touchedSet.has(file));
@@ -315,6 +319,7 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
   const blockers: string[] = [];
   if (!found) blockers.push("run-not-found");
   if (found && processState !== "completed") blockers.push(`process-state-${processState}`);
+  if (found && processState === "completed" && outputBytes === 0) blockers.push("empty-output");
   if (unexpectedFiles.length > 0) blockers.push("unexpected-files");
   if (touchedFiles.length > 0 && missingDeclaredFiles.length > 0) blockers.push("declared-files-missing");
   if (markerFailures.length > 0) blockers.push("marker-failures");
@@ -331,6 +336,10 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
     contractDecision = "fail";
     recommendation = processState === "timed-out" ? "retry-once" : "ask-human";
     recommendationCode = "agent-run-outcome-fail-process-state";
+  } else if (outputBytes === 0) {
+    contractDecision = "fail";
+    recommendation = "ask-human";
+    recommendationCode = "agent-run-outcome-fail-empty-output";
   } else if (unexpectedFiles.length > 0) {
     contractDecision = "fail";
     recommendation = "ask-human";
@@ -362,6 +371,7 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
     unexpectedFiles.length > 0 ? `unexpected=${unexpectedFiles.length}` : undefined,
     missingDeclaredFiles.length > 0 && touchedFiles.length > 0 ? `missing=${missingDeclaredFiles.length}` : undefined,
     markerFailures.length > 0 ? `markerFailures=${markerFailures.length}` : undefined,
+    outputBytes !== undefined ? `outputBytes=${outputBytes}` : undefined,
     "dispatch=no",
     "authorization=none",
   ].filter(Boolean).join(" ");
@@ -384,6 +394,7 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
     missingDeclaredFiles: touchedFiles.length > 0 ? missingDeclaredFiles : [],
     unexpectedFiles,
     markerFailures,
+    ...(outputBytes !== undefined ? { outputBytes } : {}),
     rollbackFiles,
     blockers,
     summary,

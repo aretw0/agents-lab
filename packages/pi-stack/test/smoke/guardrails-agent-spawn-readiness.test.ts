@@ -288,6 +288,21 @@ describe("agent spawn readiness contract", () => {
       rollbackFiles: [],
     });
 
+    const emptyOutput = buildAgentRunOutcomePacket({
+      runId: "run-outcome",
+      entry,
+      touchedFiles: ["docs/research/provider-canary-scorecard-dashscope-2026-05.md"],
+      markerResults: [{ label: "provider-marker", ok: true }],
+      outputBytes: 0,
+    });
+    expect(emptyOutput).toMatchObject({
+      processState: "completed",
+      contractDecision: "fail",
+      recommendationCode: "agent-run-outcome-fail-empty-output",
+      blockers: ["empty-output"],
+      outputBytes: 0,
+    });
+
     const failed = buildAgentRunOutcomePacket({
       runId: "run-outcome",
       entry,
@@ -495,6 +510,7 @@ describe("agent spawn readiness contract", () => {
         run_id: "run-outcome",
         touched_files: ["docs/research/provider-canary-scorecard-2026-05.md"],
         marker_results: [{ label: "scorecard-marker", ok: true }],
+        output_bytes: 128,
       },
       undefined as unknown as AbortSignal,
       () => {},
@@ -502,6 +518,7 @@ describe("agent spawn readiness contract", () => {
     );
     expect(outcome.details?.mode).toBe("agent-run-outcome-packet");
     expect(outcome.details?.contractDecision).toBe("pass");
+    expect(outcome.details?.outputBytes).toBe(128);
     expect(outcome.content?.[0]?.text).toContain("contract=pass");
 
     const tail = await getTool("agent_run_log_tail").execute("tc-tail", { run_id: "run-1", max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });
