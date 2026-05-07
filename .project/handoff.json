@@ -1,52 +1,51 @@
 {
-  "timestamp": "2026-05-07T21:13:19.976Z",
-  "context": "Investigated why provider-native subagent/canary failed. Finding: the issue is not that subagents cannot work; our first nested pi worker inh [snip] SK-BUD-995 completed with verification. [truncated:+596 chars]",
+  "timestamp": "2026-05-07T21:34:19.940Z",
+  "context": "After reload, continuing TASK-BUD-989 revealed one more contract issue before counting read-only canaries: agent_run_outcome_packet previousl [snip] before live tool accepts file_contract. [truncated:+447 chars]",
   "next_actions": [
-    "Commit TASK-BUD-995 code/board/handoff evidence.",
-    "Reload before trusting live agent_run_start_packet output, because extension surface code changed.",
-    "After reload, rerun exactly one bounded DashScope provider-native canary using the new minimal [snip] t outcome contract passes. [truncated:+57 chars]"
+    "Commit TASK-BUD-996 code/board/handoff evidence.",
+    "Ask/reload before using live agent_run_outcome_packet file_contract=read-only.",
+    "After reload, run exactly one bounded minimal-no-extensions DashScope canary and evaluate outc [snip] h file_contract=read-only. [truncated:+7 chars]"
   ],
   "blockers": [
-    "Live tool surface requires reload after code changes.",
-    "Machine disk threshold remains a tactical local override; avoid broad scans/builds.",
-    "TASK-BUD-968 quota/footer WIP remains parked and dirty."
+    "Runtime reload required for live outcome tool schema/code.",
+    "Machine disk threshold remains tactical local override; avoid broad scans/builds.",
+    "TASK-BUD-968 parked WIP remains dirty."
   ],
   "recent_validation": [
-    "Probe .pi/reports/task-bud-995-no-extensions-dashscope-probe.log: exit_code=0, stale_count=0, PASS no-extensions probe",
-    "Probe .pi/reports/task-bud-995-no-extensions-full-canary.log: exit_code=0, bytes=1474, stale_count=0",
-    "Vitest: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts - [snip] > 1 file / 17 tests passed [truncated:+15 chars]"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporte [snip] > 1 file / 17 tests passed [truncated:+7 chars]",
+    "TASK-BUD-996 completed via VERIF-TASK-BUD-996-READ-ONLY-OUTCOME"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-995",
+    "focus": "TASK-BUD-996",
     "canonical_links": [
-      "task:TASK-BUD-995",
-      "task:TASK-BUD-995-NO-EXTENSIONS-DASHSCOPE-PROBE"
+      "task:TASK-BUD-996",
+      "task:TASK-BUD-989"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T21:13:19.976Z",
+    "generatedAtIso": "2026-05-07T21:34:19.940Z",
     "level": "ok",
-    "percent": 44,
+    "percent": 48,
     "action": "continue",
-    "recommendation": "commit-then-reload-then-one-minimal-worker-canary",
+    "recommendation": "commit-then-reload-before-next-canary",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T21:13:19.976Z",
+      "atIso": "2026-05-07T21:34:19.940Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 44,
+      "percent": 48,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-then-one-minimal-worker-canary"
+      "recommendation": "commit-then-reload-before-next-canary"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-995"
+    "TASK-BUD-996"
   ]
 }

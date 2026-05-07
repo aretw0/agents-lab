@@ -84,12 +84,15 @@ export interface AgentRunMarkerResult {
   ok?: boolean;
 }
 
+export type AgentRunFileContract = "mutation" | "read-only";
+
 export interface AgentRunOutcomeInput {
   runId?: string;
   entry?: AgentRunRegistryEntry;
   touchedFiles?: string[];
   markerResults?: AgentRunMarkerResult[];
   outputBytes?: number;
+  fileContract?: AgentRunFileContract | string;
 }
 
 export interface AgentRunOutcomeResult {
@@ -119,6 +122,7 @@ export interface AgentRunOutcomeResult {
   unexpectedFiles: string[];
   markerFailures: string[];
   outputBytes?: number;
+  fileContract: AgentRunFileContract;
   rollbackFiles: string[];
   blockers: string[];
   summary: string;
@@ -307,6 +311,7 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
   const declaredFiles = normalizeFiles(input.entry?.declaredFiles);
   const touchedFiles = normalizeFiles(input.touchedFiles);
   const outputBytes = typeof input.outputBytes === "number" && Number.isFinite(input.outputBytes) && input.outputBytes >= 0 ? Math.floor(input.outputBytes) : undefined;
+  const fileContract: AgentRunFileContract = input.fileContract === "read-only" ? "read-only" : "mutation";
   const declaredSet = new Set(declaredFiles);
   const touchedSet = new Set(touchedFiles);
   const missingDeclaredFiles = declaredFiles.filter((file) => !touchedSet.has(file));
@@ -352,7 +357,7 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
     contractDecision = "fail";
     recommendation = "ask-human";
     recommendationCode = "agent-run-outcome-fail-marker";
-  } else if (touchedFiles.length === 0) {
+  } else if (fileContract === "mutation" && touchedFiles.length === 0) {
     contractDecision = "partial";
     recommendation = "ask-human";
     recommendationCode = "agent-run-outcome-partial-no-touched-files";
@@ -395,6 +400,7 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
     unexpectedFiles,
     markerFailures,
     ...(outputBytes !== undefined ? { outputBytes } : {}),
+    fileContract,
     rollbackFiles,
     blockers,
     summary,

@@ -14669,6 +14669,15 @@
       "method": "bounded-runtime-probe+vitest",
       "timestamp": "2026-05-07T21:13:06.040Z",
       "evidence": "[rationale:risk-control] Mitigation changes only report-only agent-run start packet preview/schema and preserves human-confirmation, budget, and protected-scope gates. Investigation: full-extension nested pi print canary failed contract due repeated `stale after session replacement or reload` extension errors. Bounded probe with `pi --no-session --no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files --model dashscope/qwen3-coder-plus --print` returned exit_code=0, non-empty output, stale_count=0 (`.pi/reports/task-bud-995-no-extensions-dashscope-probe.log`; full probe `.pi/reports/task-bud-995-no-extensions-full-canary.log`). Implemented agent_run_start_packet extensionIsolation default `minimal-no-extensions`, with opt-in `inherit`, adding argv flags `--no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files`. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 1 file / 17 tests passed. Requires `/reload` before live tool surface exposes new parameter/default."
+    },
+    {
+      "id": "VERIF-TASK-BUD-996-READ-ONLY-OUTCOME",
+      "target": "TASK-BUD-996",
+      "target_type": "task",
+      "status": "passed",
+      "method": "vitest",
+      "timestamp": "2026-05-07T21:33:54.486Z",
+      "evidence": "[rationale:risk-control] Added `fileContract`/`file_contract` support to agent-run outcome packets so read-only workers can pass with no touched files when process completed, output is non-empty, no unexpected files are reported, and markers pass. Mutation contract remains unchanged: no touched files still yields partial. Surface remains report-only and does not grant dispatch/start/stop authority. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 1 file / 17 tests passed."
     }
   ]
 }

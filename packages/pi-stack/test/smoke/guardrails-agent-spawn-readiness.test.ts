@@ -352,6 +352,22 @@ describe("agent spawn readiness contract", () => {
       rollbackFiles: [],
     });
 
+    const readOnlyPassed = buildAgentRunOutcomePacket({
+      runId: "run-outcome",
+      entry,
+      touchedFiles: [],
+      markerResults: [{ label: "provider-marker", ok: true }],
+      outputBytes: 128,
+      fileContract: "read-only",
+    });
+    expect(readOnlyPassed).toMatchObject({
+      processState: "completed",
+      contractDecision: "pass",
+      fileContract: "read-only",
+      recommendationCode: "agent-run-outcome-pass",
+      touchedFiles: [],
+    });
+
     const emptyOutput = buildAgentRunOutcomePacket({
       runId: "run-outcome",
       entry,
@@ -578,6 +594,7 @@ describe("agent spawn readiness contract", () => {
         touched_files: ["docs/research/provider-canary-scorecard-2026-05.md"],
         marker_results: [{ label: "scorecard-marker", ok: true }],
         output_bytes: 128,
+        file_contract: "mutation",
       },
       undefined as unknown as AbortSignal,
       () => {},
