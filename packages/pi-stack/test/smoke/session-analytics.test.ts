@@ -332,7 +332,7 @@ describe("session-analytics — galvanization discovery", () => {
 });
 
 describe("session-analytics — delegation mix score", () => {
-  it("classifica mix local/manual/simple-delegate/swarm e retorna decisão ready quando há diversidade", () => {
+  it("classifica mix local/manual/delegate/swarm e retorna decisão ready quando há diversidade", () => {
     const records = [
       { type: "message", timestamp: "2026-05-03T01:00:00Z", message: { role: "user", content: "seguir local-safe e checkpoint" } },
       { type: "message", timestamp: "2026-05-03T01:01:00Z", message: { role: "user", content: "delegar para subagent com slice pequeno" } },
@@ -345,7 +345,7 @@ describe("session-analytics — delegation mix score", () => {
     expect(score.decision).toBe("ready");
     expect(score.recommendationCode).toBe("delegation-mix-ready-diverse");
     expect(score.totals.diversityModes).toBeGreaterThanOrEqual(3);
-    expect(score.totals.simpleDelegate).toBeGreaterThan(0);
+    expect(score.totals.delegate).toBeGreaterThan(0);
     expect(score.totals.swarm).toBeGreaterThan(0);
     expect(score.dispatchAllowed).toBe(false);
     expect(score.authorization).toBe("none");

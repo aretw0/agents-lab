@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { evaluateDelegationLaneCapabilitySnapshot } from "./guardrails-core-autonomy-lane";
-import { buildDelegateOrExecuteDecisionPacket, buildSimpleDelegateRehearsalDecisionPacket } from "./guardrails-core-ops-calibration";
+import { buildDelegateOrExecuteDecisionPacket, buildDelegationRehearsalDecisionPacket } from "./guardrails-core-ops-calibration";
 import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan } from "./guardrails-core-background-process";
 import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
 import { consumeContextPreloadPack } from "./context-watchdog-continuation";
@@ -56,9 +56,9 @@ export function readDelegationFreshnessSignals(cwd: string): {
 }
 
 export type DelegationRunwayCue = {
-  decision: "ready-simple-delegate" | "local-execute-first" | "defer";
+  decision: "ready-delegation-rehearsal" | "local-execute-first" | "defer";
   recommendationCode:
-    | "delegation-readiness-ready-simple-delegate"
+    | "delegation-readiness-ready-delegation-rehearsal"
     | "delegation-readiness-local-execute-first"
     | "delegation-readiness-defer-blocked";
   nextAction: string;
@@ -145,11 +145,11 @@ function buildDelegationRunwayCue(p: Record<string, unknown>, cwd: string): Dele
     mixDecision: pickEnumValue(p.delegation_mix_decision, ["ready", "needs-evidence"]) ?? "needs-evidence",
     mixScore: asOptionalNumber(p.delegation_mix_score) ?? 0,
     mixRecommendationCode: asOptionalString(p.delegation_mix_recommendation_code) ?? "delegation-mix-needs-evidence",
-    mixSimpleDelegateEvents: asOptionalNumber(p.delegation_mix_simple_delegate_events) ?? 0,
+    mixDelegationEvents: asOptionalNumber(p.delegation_mix_delegation_events) ?? 0,
     mixSwarmEvents: asOptionalNumber(p.delegation_mix_swarm_events) ?? 0,
   });
 
-  const rehearsalPacket = buildSimpleDelegateRehearsalDecisionPacket({
+  const rehearsalPacket = buildDelegationRehearsalDecisionPacket({
     capabilityDecision: pickEnumValue(p.delegation_capability_decision, ["ready", "needs-evidence", "blocked"]) ?? capability.decision,
     capabilityRecommendationCode: asOptionalString(p.delegation_capability_recommendation_code) ?? capability.recommendationCode,
     capabilityBlockers: asStringArray(p.delegation_capability_blockers).length > 0
@@ -157,7 +157,7 @@ function buildDelegationRunwayCue(p: Record<string, unknown>, cwd: string): Dele
       : capability.blockers,
     mixDecision: pickEnumValue(p.delegation_mix_decision, ["ready", "needs-evidence"]) ?? "needs-evidence",
     mixScore: asOptionalNumber(p.delegation_mix_score) ?? 0,
-    mixSimpleDelegateEvents: asOptionalNumber(p.delegation_mix_simple_delegate_events) ?? 0,
+    mixDelegationEvents: asOptionalNumber(p.delegation_mix_delegation_events) ?? 0,
     autoAdvanceDecision: pickEnumValue(p.delegation_auto_advance_decision, ["eligible", "blocked"]) ?? "blocked",
     autoAdvanceBlockedReasons: asStringArray(p.delegation_auto_advance_blocked_reasons),
     telemetryDecision: pickEnumValue(p.delegation_telemetry_decision, ["ready", "needs-evidence"]) ?? "needs-evidence",
@@ -167,11 +167,11 @@ function buildDelegationRunwayCue(p: Record<string, unknown>, cwd: string): Dele
 
   const blockers = [...new Set([...delegatePacket.blockers, ...rehearsalPacket.blockers])];
 
-  if (delegatePacket.recommendedOption === "simple-delegate" && rehearsalPacket.decision === "ready") {
+  if (delegatePacket.recommendedOption === "delegate" && rehearsalPacket.decision === "ready") {
     return {
-      decision: "ready-simple-delegate",
-      recommendationCode: "delegation-readiness-ready-simple-delegate",
-      nextAction: "run simple_delegate_rehearsal_start_packet and require explicit human start/defer decision.",
+      decision: "ready-delegation-rehearsal",
+      recommendationCode: "delegation-readiness-ready-delegation-rehearsal",
+      nextAction: "run delegation_rehearsal_start_packet and require explicit human start/defer decision.",
       blockers,
     };
   }
@@ -305,7 +305,7 @@ export function buildRunwayReadinessCue(
     };
   }
 
-  if (delegation.decision === "ready-simple-delegate" && background.decision === "ready-window") {
+  if (delegation.decision === "ready-delegation-rehearsal" && background.decision === "ready-window") {
     const summary = [
       "runway-readiness-cue:",
       "decision=ready-window",
@@ -318,7 +318,7 @@ export function buildRunwayReadinessCue(
       decision: "ready-window",
       recommendationCode: "runway-readiness-ready-window",
       recommendation: "delegation/background runway is ready for bounded promotion planning (still explicit human decision).",
-      nextAction: "choose one promotion lane (simple-delegate or background rehearsal) and keep explicit human start/defer.",
+      nextAction: "choose one promotion lane (delegate or background rehearsal) and keep explicit human start/defer.",
       blockers,
       delegation,
       background,
@@ -339,7 +339,7 @@ export function buildRunwayReadinessCue(
     decision: "needs-evidence",
     recommendationCode: "runway-readiness-needs-evidence",
     recommendation: "runway still needs evidence; continue local-safe slices while collecting readiness signals.",
-    nextAction: delegation.decision !== "ready-simple-delegate" ? delegation.nextAction : background.nextAction,
+    nextAction: delegation.decision !== "ready-delegation-rehearsal" ? delegation.nextAction : background.nextAction,
     blockers,
     delegation,
     background,

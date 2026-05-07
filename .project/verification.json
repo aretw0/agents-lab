@@ -14489,6 +14489,15 @@
       "method": "docs+diff-check",
       "timestamp": "2026-05-07T12:02:42.548Z",
       "evidence": "`docs/primitives/ops-calibration-decision-packet.md` agora distingue `agent run` (execução concreta de worker/readiness `ready-for-agent-run`) de `delegation runway`; `simple_delegate_*` foi mantido apenas como nome de tool legado, sem aliases novos. Validação: `git diff --check` passou; rg focal não encontrou `simple spawn` e confirmou `ready-for-agent-run` + boundary semântico."
+    },
+    {
+      "id": "VERIF-TASK-BUD-979-DELEGATION-REHEARSAL",
+      "target": "TASK-BUD-979",
+      "target_type": "task",
+      "status": "passed",
+      "method": "refactor+smoke+diff-check",
+      "timestamp": "2026-05-07T12:11:13.871Z",
+      "evidence": "Removido enquadramento de legado/backcompat nos docs recentes e renomeada a runway de `simple-delegate` para `delegate`/`delegation rehearsal` nas superfícies focais: tool `delegation_rehearsal_packet`, tool `delegation_rehearsal_start_packet`, parâmetros `mix_delegation_events`, decision `ready-delegation-rehearsal`, recommendation codes `delegation-rehearsal-*` e session analytics `local/manual/delegate/swarm`. Mantido `agent run` como execução concreta de worker. Não foram criados aliases para nomes antigos. Validação: rg focal não encontrou `simple_delegate|simple-delegate|ready-simple-delegate|SimpleDelegate|simpleDelegate|mix_simple_delegate_events|mixSimpleDelegateEvents|Simple-Delegate|totals.delegationRehearsal|DelegationRehearsalRehearsal|mixDelegationRehearsalEvents|delegate rehearsal|\\blegado\\b|backcompat`; `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts` -> 3 files/92 tests passed; `git diff --check` passou."
     }
   ]
 }

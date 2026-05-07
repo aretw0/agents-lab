@@ -48,7 +48,7 @@ export interface ContentOutlierEvent {
   excerpt: string;
 }
 
-export type DelegationMixMode = "local" | "manual" | "simple-delegate" | "swarm";
+export type DelegationMixMode = "local" | "manual" | "delegate" | "swarm";
 
 export interface DelegationMixBucket {
   mode: DelegationMixMode;
@@ -60,7 +60,7 @@ export interface DelegationMixBucket {
 export type DelegationMixRecommendationCode =
   | "delegation-mix-ready-diverse"
   | "delegation-mix-needs-evidence-no-data"
-  | "delegation-mix-needs-evidence-simple-delegate-missing"
+  | "delegation-mix-needs-evidence-delegate-missing"
   | "delegation-mix-needs-evidence-swarm-missing"
   | "delegation-mix-needs-evidence-low-diversity";
 
@@ -79,7 +79,7 @@ export interface DelegationMixScore {
     totalEvents: number;
     local: number;
     manual: number;
-    simpleDelegate: number;
+    delegate: number;
     swarm: number;
     diversityModes: number;
     delegatedSharePct: number;
@@ -180,7 +180,7 @@ function inferDelegationMixModeFromText(textRaw: string): DelegationMixMode | un
     || text.includes("agent spawn")
     || text.includes("agent_spawn")
   ) {
-    return "simple-delegate";
+    return "delegate";
   }
   if (
     text.includes("local-safe")
@@ -200,7 +200,7 @@ function inferDelegationMixModeFromTool(toolNameRaw: string): DelegationMixMode 
   if (!toolName.trim()) return undefined;
   if (toolName.includes("ant_colony") || toolName.includes("colony")) return "swarm";
   if (toolName.includes("subagent") || toolName.includes("claude_code_execute") || toolName.includes("agent_spawn")) {
-    return "simple-delegate";
+    return "delegate";
   }
   if (toolName.startsWith("context_watch") || toolName.startsWith("git_") || toolName.startsWith("board_")) {
     return "local";
@@ -216,13 +216,13 @@ export function parseDelegationMixScore(
   const counters: Record<DelegationMixMode, number> = {
     local: 0,
     manual: 0,
-    "simple-delegate": 0,
+    "delegate": 0,
     swarm: 0,
   };
   const examples: Record<DelegationMixMode, string[]> = {
     local: [],
     manual: [],
-    "simple-delegate": [],
+    "delegate": [],
     swarm: [],
   };
 
@@ -270,10 +270,10 @@ export function parseDelegationMixScore(
 
   const totalEvents = Object.values(counters).reduce((sum, value) => sum + value, 0);
   const diversityModes = Object.values(counters).filter((value) => value > 0).length;
-  const delegatedEvents = counters["simple-delegate"] + counters.swarm;
+  const delegatedEvents = counters["delegate"] + counters.swarm;
   const delegatedSharePct = totalEvents > 0 ? Math.round((delegatedEvents / totalEvents) * 100) : 0;
 
-  const buckets: DelegationMixBucket[] = (["local", "manual", "simple-delegate", "swarm"] as DelegationMixMode[])
+  const buckets: DelegationMixBucket[] = (["local", "manual", "delegate", "swarm"] as DelegationMixMode[])
     .map((mode) => ({
       mode,
       count: counters[mode],
@@ -289,10 +289,10 @@ export function parseDelegationMixScore(
     decision = "needs-evidence";
     recommendationCode = "delegation-mix-needs-evidence-no-data";
     recommendation = "no delegation evidence observed yet; collect local session evidence before promoting delegation decisions.";
-  } else if (counters["simple-delegate"] <= 0) {
+  } else if (counters["delegate"] <= 0) {
     decision = "needs-evidence";
-    recommendationCode = "delegation-mix-needs-evidence-simple-delegate-missing";
-    recommendation = "simple-delegate evidence missing; add bounded single-delegate slices before broader delegation.";
+    recommendationCode = "delegation-mix-needs-evidence-delegate-missing";
+    recommendation = "delegate evidence missing; add bounded single-delegation slices before broader delegation.";
   } else if (counters.swarm <= 0) {
     decision = "needs-evidence";
     recommendationCode = "delegation-mix-needs-evidence-swarm-missing";
@@ -300,7 +300,7 @@ export function parseDelegationMixScore(
   } else if (diversityModes < 3) {
     decision = "needs-evidence";
     recommendationCode = "delegation-mix-needs-evidence-low-diversity";
-    recommendation = "delegation diversity is low; balance local/manual/simple-delegate/swarm evidence before promotion.";
+    recommendation = "delegation diversity is low; balance local/manual/delegate/swarm evidence before promotion.";
   }
 
   const score = totalEvents <= 0
@@ -314,7 +314,7 @@ export function parseDelegationMixScore(
     `events=${totalEvents}`,
     `local=${counters.local}`,
     `manual=${counters.manual}`,
-    `simple=${counters["simple-delegate"]}`,
+    `delegate=${counters["delegate"]}`,
     `swarm=${counters.swarm}`,
     `code=${recommendationCode}`,
     "authorization=none",
@@ -335,7 +335,7 @@ export function parseDelegationMixScore(
       totalEvents,
       local: counters.local,
       manual: counters.manual,
-      simpleDelegate: counters["simple-delegate"],
+      delegate: counters["delegate"],
       swarm: counters.swarm,
       diversityModes,
       delegatedSharePct,

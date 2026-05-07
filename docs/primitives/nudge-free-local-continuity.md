@@ -20,7 +20,7 @@ A decisão canônica é **não criar uma família nova de loops**. O control-pla
 
 Portanto, “overnight”, “loop maior”, “deixa rodando” e “sem empurrão” devem mapear para o mesmo contrato: **nudge-free/local-continuity em batches pequenos**, não scheduler e não swarm.
 
-Quando houver intenção de testar delegação, a transição é via `simple_delegate_rehearsal_packet` (report-only). Sem `decision=ready`, não há promoção para rehearsal delegado.
+Quando houver intenção de testar delegação, a transição é via `delegation_rehearsal_packet` (report-only). Sem `decision=ready`, não há promoção para rehearsal delegado.
 
 Abastecimento mínimo para runs AFK:
 - manter 3–7 fatias local-safe prontas no board;

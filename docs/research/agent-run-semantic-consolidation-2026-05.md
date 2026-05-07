@@ -21,14 +21,14 @@ Não usar `simple` como qualidade pública dessa família. Não usar `one-slice`
 
 Com grep bounded em `packages/pi-stack/extensions`, `docs/primitives` e `docs/research` após a renomeação da família agent-run:
 
-- `simple-delegate` ainda aparece em 21 arquivos.
-- `one-slice` ainda aparece em 19 arquivos.
+- O adjetivo `simple` foi identificado como ambíguo na runway de delegation.
+- `one-slice` ainda aparece fora da família agent-run como stop condition/local canary.
 
-Isso não significa renomear tudo agora. Os usos restantes se dividem em três grupos:
+Classificação atual:
 
 1. **Família agent-run recém-consolidada** — deve ficar sem `simple`/`one-slice` no namespace público. Feito em `TASK-BUD-973`.
-2. **Continuidade local / canary de uma fatia** — `one-slice` ainda comunica um contrato de parada local e pode continuar até haver substituto mais claro.
-3. **Delegation runway legado** — `simple-delegate` é nome público e histórico de uma lane. Renomear em massa agora criaria aliases/migração sem benefício imediato.
+2. **Continuidade local / canary de uma fatia** — `one-slice` ainda comunica um contrato de parada local; questionar em uma fatia própria antes de renomear.
+3. **Delegation runway/rehearsal** — usar `delegate` como opção de decisão e `delegation_rehearsal_*` como packet report-only quando o foco é preparar uma delegação humana.
 
 ## Regra de nomenclatura daqui para frente
 
@@ -37,12 +37,12 @@ Isso não significa renomear tudo agora. Os usos restantes se dividem em três g
 - **delegation runway**: decisão de quando delegar ou executar localmente; evitar novos nomes `simple-*`.
 - **one-slice**: permitido apenas onde a palavra é uma stop condition explícita; não usar como prefixo de novas tools.
 
-## Plano de migração sem overlap
+## Plano sem overlap
 
 1. Não criar aliases `one_slice_agent_run_*` para `agent_run_*`; aliases aumentariam a duplicidade que queremos evitar.
-2. Antes de renomear `simple_delegate_*`, criar um canary separado de compatibilidade porque essas tools já têm histórico mais amplo.
+2. Não criar novos nomes `simple-*`; quando a superfície estiver em lapidação, renomear direto para a forma coesa.
 3. Em novas docs, preferir `agent run` e explicar o limite via campos de contrato, não via novo termo.
-4. Quando tocar docs antigas por outro motivo, substituir `simple-delegate` por linguagem de runway/delegation apenas se não quebrar referência a tool existente.
+4. Usar `delegation runway` para decisão e `delegation rehearsal` para packet report-only pré-dispatch.
 
 ## Evidência de validação
 

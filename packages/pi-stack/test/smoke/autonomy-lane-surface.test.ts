@@ -972,7 +972,7 @@ describe("autonomy lane surface", () => {
       delegation_dirty_signal: "clean",
       delegation_mix_decision: "ready",
       delegation_mix_score: 82,
-      delegation_mix_simple_delegate_events: 1,
+      delegation_mix_delegation_events: 1,
       delegation_mix_swarm_events: 1,
       delegation_auto_advance_decision: "eligible",
       delegation_telemetry_decision: "ready",
@@ -1004,7 +1004,7 @@ describe("autonomy lane surface", () => {
 
     expect(runwayCue?.decision).toBe("ready-window");
     expect(runwayCue?.recommendationCode).toBe("runway-readiness-ready-window");
-    expect(runwayCue?.delegation?.decision).toBe("ready-simple-delegate");
+    expect(runwayCue?.delegation?.decision).toBe("ready-delegation-rehearsal");
     expect(runwayCue?.background?.decision).toBe("ready-window");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("runway=ready-window");
   });

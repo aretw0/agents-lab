@@ -4,7 +4,7 @@ import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPl
 import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
 import {
   buildDelegateOrExecuteDecisionPacket,
-  buildSimpleDelegateRehearsalDecisionPacket,
+  buildDelegationRehearsalDecisionPacket,
 } from "./guardrails-core-ops-calibration";
 import { buildAgentsAsToolsCalibrationScore, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
 import { evaluateAutonomyLaneTaskSelection, readAutonomyHandoffFocusTaskIds } from "./guardrails-core-autonomy-task-selector";
@@ -206,7 +206,7 @@ export function resolveEffectiveTelemetrySignals(input: {
   };
 }
 
-export function buildSimpleDelegateResolutionSummary(input: {
+export function buildDelegationRehearsalResolutionSummary(input: {
   baseSummary: string;
   source: AutoAdvanceCompositeDecision["source"];
   liveDecision: "eligible" | "blocked";
@@ -222,15 +222,15 @@ export function buildSimpleDelegateResolutionSummary(input: {
   ].filter(Boolean).join(" ");
 }
 
-export type DelegationReadinessDecision = "ready-simple-delegate" | "local-execute-first" | "defer";
+export type DelegationReadinessDecision = "ready-delegation-rehearsal" | "local-execute-first" | "defer";
 export type DelegationReadinessCode =
-  | "delegation-readiness-ready-simple-delegate"
+  | "delegation-readiness-ready-delegation-rehearsal"
   | "delegation-readiness-local-execute-first"
   | "delegation-readiness-defer-blocked";
 
 export function buildDelegationReadinessStatus(input: {
   delegatePacket: ReturnType<typeof buildDelegateOrExecuteDecisionPacket>;
-  rehearsalPacket: ReturnType<typeof buildSimpleDelegateRehearsalDecisionPacket>;
+  rehearsalPacket: ReturnType<typeof buildDelegationRehearsalDecisionPacket>;
 }): {
   decision: DelegationReadinessDecision;
   recommendationCode: DelegationReadinessCode;
@@ -244,21 +244,21 @@ export function buildDelegationReadinessStatus(input: {
     ...input.rehearsalPacket.blockers,
   ])];
 
-  if (input.delegatePacket.recommendedOption === "simple-delegate" && input.rehearsalPacket.decision === "ready") {
+  if (input.delegatePacket.recommendedOption === "delegate" && input.rehearsalPacket.decision === "ready") {
     const summary = [
       "delegation-readiness-status:",
-      "decision=ready-simple-delegate",
-      "code=delegation-readiness-ready-simple-delegate",
+      "decision=ready-delegation-rehearsal",
+      "code=delegation-readiness-ready-delegation-rehearsal",
       `execute=${input.delegatePacket.recommendedOption}`,
       `rehearsal=${input.rehearsalPacket.decision}`,
-      "next=simple_delegate_rehearsal_start_packet",
+      "next=delegation_rehearsal_start_packet",
       "authorization=none",
     ].join(" ");
     return {
-      decision: "ready-simple-delegate",
-      recommendationCode: "delegation-readiness-ready-simple-delegate",
-      recommendation: "simple-delegate runway looks ready; keep one-task canary with explicit human start/defer decision.",
-      nextAction: "run simple_delegate_rehearsal_start_packet and apply explicit human start/defer decision.",
+      decision: "ready-delegation-rehearsal",
+      recommendationCode: "delegation-readiness-ready-delegation-rehearsal",
+      recommendation: "delegation runway looks ready; keep one-task canary with explicit human start/defer decision.",
+      nextAction: "run delegation_rehearsal_start_packet and apply explicit human start/defer decision.",
       blockers,
       summary,
     };
@@ -279,7 +279,7 @@ export function buildDelegationReadinessStatus(input: {
       decision: "local-execute-first",
       recommendationCode: "delegation-readiness-local-execute-first",
       recommendation: "continue local execution slices while collecting delegation evidence (mix + auto-advance telemetry).",
-      nextAction: "execute one bounded local-safe slice and refresh delegation/simple-delegate packets.",
+      nextAction: "execute one bounded local-safe slice and refresh delegation/delegate packets.",
       blockers,
       summary,
     };
@@ -299,16 +299,16 @@ export function buildDelegationReadinessStatus(input: {
   return {
     decision: "defer",
     recommendationCode: "delegation-readiness-defer-blocked",
-    recommendation: "delegation remains blocked; resolve hard blockers before attempting simple-delegate canary.",
+    recommendation: "delegation remains blocked; resolve hard blockers before attempting delegate canary.",
     nextAction: "resolve blockers and rerun readiness packets before delegation attempt.",
     blockers,
     summary,
   };
 }
 
-export type OperationalRunwayRecommendedOption = "local-execute" | "simple-delegate" | "defer";
+export type OperationalRunwayRecommendedOption = "local-execute" | "delegate" | "defer";
 export type OperationalRunwayRecommendationCode =
-  | "operational-runway-simple-delegate"
+  | "operational-runway-delegate"
   | "operational-runway-local-execute"
   | "operational-runway-defer-blocked";
 export type OperationalBackgroundDecision = "ready-window" | "needs-evidence" | "blocked";
@@ -383,20 +383,20 @@ export function buildOperationalRunwayPacket(input: {
     };
   }
 
-  if (input.delegation.decision === "ready-simple-delegate" && backgroundDecision === "ready-window") {
+  if (input.delegation.decision === "ready-delegation-rehearsal" && backgroundDecision === "ready-window") {
     const summary = [
       "operational-runway-packet:",
-      "option=simple-delegate",
-      "code=operational-runway-simple-delegate",
+      "option=delegate",
+      "code=operational-runway-delegate",
       `delegation=${input.delegation.decision}`,
       `background=${backgroundDecision}`,
       "authorization=none",
     ].join(" ");
     return {
-      recommendedOption: "simple-delegate",
-      recommendationCode: "operational-runway-simple-delegate",
-      recommendation: "delegation and background runway are mature; run bounded simple-delegate canary under explicit human start/defer decision.",
-      nextAction: "run simple_delegate_rehearsal_start_packet, then choose explicit start/defer; keep background packet as corroborating evidence.",
+      recommendedOption: "delegate",
+      recommendationCode: "operational-runway-delegate",
+      recommendation: "delegation and background runway are mature; run bounded delegation rehearsal under explicit human start/defer decision.",
+      nextAction: "run delegation_rehearsal_start_packet, then choose explicit start/defer; keep background packet as corroborating evidence.",
       blockers: normalizedBlockers,
       normalizedBlockers,
       summary,
@@ -440,12 +440,12 @@ export type UnlockChecklist = {
 };
 
 export function buildUnlockChecklist(input: {
-  option: "simple-delegate" | "local-execute" | "defer";
+  option: "delegate" | "local-execute" | "defer";
   blockers: string[];
   nextAction: string;
 }): UnlockChecklist {
   const topBlockers = [...new Set(input.blockers.filter((row) => typeof row === "string" && row.trim().length > 0))].slice(0, 3);
-  const decision = input.option === "simple-delegate" ? "ready" : "needs-action";
+  const decision = input.option === "delegate" ? "ready" : "needs-action";
   const items = [
     ...topBlockers.map((blocker, index) => `blocker:${index + 1}:${blocker}`),
     `next:${input.nextAction}`,
@@ -470,7 +470,7 @@ export type OperatorPauseOption = {
   impact: string;
 };
 
-export type SimpleDelegateOperatorPauseBrief = {
+export type DelegationRehearsalOperatorPauseBrief = {
   whyPaused: string;
   gate: "human-canary-decision" | "blocked-rehearsal-gate";
   focusTaskId?: string;
@@ -515,13 +515,13 @@ export function toTaskMnemonic(taskId?: string, description?: string): string | 
   return shortDescription.length > 0 ? `${taskId}:${shortDescription}` : taskId;
 }
 
-export function buildSimpleDelegateOperatorPauseBrief(input: {
+export function buildDelegationRehearsalOperatorPauseBrief(input: {
   cwd: string;
   startDecision: "ready-for-human-decision" | "blocked";
   blockers: string[];
   focusTaskId?: string;
   nextTaskId?: string;
-}): SimpleDelegateOperatorPauseBrief {
+}): DelegationRehearsalOperatorPauseBrief {
   const focusTaskId = input.focusTaskId;
   const nextTaskId = input.nextTaskId;
   const focusTaskMnemonic = toTaskMnemonic(focusTaskId, readTaskDescriptionById(input.cwd, focusTaskId));
@@ -560,7 +560,7 @@ export function buildSimpleDelegateOperatorPauseBrief(input: {
   };
 }
 
-export function formatSimpleDelegateOperatorPauseBriefSummary(brief: SimpleDelegateOperatorPauseBrief): string {
+export function formatDelegationRehearsalOperatorPauseBriefSummary(brief: DelegationRehearsalOperatorPauseBrief): string {
   return [
     `why=${brief.gate}`,
     brief.focusMnemonic ? `focus=${brief.focusMnemonic}` : undefined,

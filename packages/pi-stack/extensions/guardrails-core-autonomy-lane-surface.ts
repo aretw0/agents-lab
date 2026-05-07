@@ -118,7 +118,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       delegation_mix_decision: Type.Optional(Type.String({ description: "Override delegation mix decision (ready | needs-evidence)." })),
       delegation_mix_score: Type.Optional(Type.Number({ description: "Override delegation mix score (0..100)." })),
       delegation_mix_recommendation_code: Type.Optional(Type.String({ description: "Override delegation mix recommendation code." })),
-      delegation_mix_simple_delegate_events: Type.Optional(Type.Number({ description: "Override simple-delegate event count." })),
+      delegation_mix_delegation_events: Type.Optional(Type.Number({ description: "Override delegate event count." })),
       delegation_mix_swarm_events: Type.Optional(Type.Number({ description: "Override swarm event count." })),
       delegation_auto_advance_decision: Type.Optional(Type.String({ description: "Override auto-advance decision (eligible | blocked)." })),
       delegation_auto_advance_blocked_reasons: Type.Optional(Type.Array(Type.String())),

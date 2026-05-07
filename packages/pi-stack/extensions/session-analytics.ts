@@ -379,7 +379,7 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
     name: "delegation_mix_score",
     label: "Delegation Mix Score",
     description:
-      "Report-only delegation diversity score from local session evidence (local/manual/simple-delegate/swarm). Never dispatches execution.",
+      "Report-only delegation diversity score from local session evidence (local/manual/delegate/swarm). Never dispatches execution.",
     parameters: Type.Object({
       lookback_hours: Type.Optional(
         Type.Number({ description: "How many hours back to scan session files. Default: 24." }),

@@ -21794,6 +21794,32 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:semantic-debt] `ops-calibration-decision-packet` ainda mistura `simple spawn` com readiness de agent run; ajustar texto reduz overlap sem migration grande.\n[provenance:human] source_task=TASK-BUD-974 reason=Pedido de coesão sem bloat verboso e questionar nomes antigos/novos.\n[slice] Corrigido overlap textual entre `simple spawn`, `agent run` e `simple_delegate_*` legado em ops-calibration.\n[validation] `git diff --check` passou; grep focal confirmou ausência de `simple spawn`.",
       "verification": "VERIF-TASK-BUD-978-OPS-CALIBRATION-NAMING"
+    },
+    {
+      "id": "TASK-BUD-979",
+      "description": "[P1/local-safe] Remover enquadramento de legado e renomear runway `simple-delegate` para delegation rehearsal.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration.ts",
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-runway.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "docs/primitives/ops-calibration-decision-packet.md",
+        "docs/primitives/README.md",
+        "docs/research/agent-run-semantic-consolidation-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Remover linguagem `legado`/`backcompat` dos docs recentes.",
+        "Renomear a runway pública de `simple-delegate` para `delegation rehearsal`/`delegate` sem aliases de nome antigo.",
+        "Manter `agent run` como execução concreta de worker e `delegation runway/rehearsal` como decisão/preparação.",
+        "Rodar testes focais de ops-calibration/autonomy-lane e `git diff --check`; não tocar settings/routing/CI/publish/credenciais."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:semantic-debt] Como a stack ainda está em lapidação e não lançada, não há legado a preservar; nomes devem convergir direto para a forma coesa.\n[provenance:human] source_task=TASK-BUD-974 reason=Usuário corrigiu explicitamente: não anunciar legado/backcompat; deixar como deveria ser.\n[slice] Tratado como pre-release: sem linguagem de legado/backcompat; `simple-delegate` substituído por `delegate`/`delegation rehearsal` nas superfícies focais.\n[validation] smoke ops/autonomy/session-analytics -> 92 passed; rg focal limpo para nomes antigos; `git diff --check` passou.",
+      "verification": "VERIF-TASK-BUD-979-DELEGATION-REHEARSAL"
     }
   ]
 }

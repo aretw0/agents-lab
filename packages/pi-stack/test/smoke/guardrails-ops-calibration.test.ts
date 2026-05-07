@@ -6,13 +6,13 @@ import { describe, expect, it, vi } from "vitest";
 import {
   buildDelegateOrExecuteDecisionPacket,
   buildOpsCalibrationDecisionPacket,
-  buildSimpleDelegateRehearsalDecisionPacket,
-  buildSimpleDelegateRehearsalStartPacket,
+  buildDelegationRehearsalDecisionPacket,
+  buildDelegationRehearsalStartPacket,
 } from "../../extensions/guardrails-core-ops-calibration";
 import { registerGuardrailsOpsCalibrationSurface } from "../../extensions/guardrails-core-ops-calibration-surface";
 
 describe("ops calibration decision packet", () => {
-  it("recommends simple-delegate when capability/mix signals are strong", () => {
+  it("recommends delegate when capability/mix signals are strong", () => {
     const packet = buildDelegateOrExecuteDecisionPacket({
       capabilityDecision: "ready",
       capabilityRecommendationCode: "delegation-capability-ready",
@@ -21,12 +21,12 @@ describe("ops calibration decision packet", () => {
       mixDecision: "ready",
       mixScore: 82,
       mixRecommendationCode: "delegation-mix-ready-diverse",
-      mixSimpleDelegateEvents: 3,
+      mixDelegationEvents: 3,
       mixSwarmEvents: 2,
     });
 
-    expect(packet.recommendedOption).toBe("simple-delegate");
-    expect(packet.recommendationCode).toBe("delegate-execute-simple-delegate");
+    expect(packet.recommendedOption).toBe("delegate");
+    expect(packet.recommendationCode).toBe("delegate-execute-delegate");
     expect(packet.dispatchAllowed).toBe(false);
     expect(packet.authorization).toBe("none");
     expect(packet.mutationAllowed).toBe(false);
@@ -39,34 +39,34 @@ describe("ops calibration decision packet", () => {
     expect(packet.blockers).toContain("missing-capability-or-mix-signal");
   });
 
-  it("builds simple-delegate rehearsal packet as ready when composed signals are strong", () => {
-    const packet = buildSimpleDelegateRehearsalDecisionPacket({
+  it("builds delegation rehearsal packet as ready when composed signals are strong", () => {
+    const packet = buildDelegationRehearsalDecisionPacket({
       capabilityDecision: "ready",
       capabilityRecommendationCode: "delegation-capability-ready",
       capabilityBlockers: [],
       mixDecision: "ready",
       mixScore: 84,
-      mixSimpleDelegateEvents: 3,
+      mixDelegationEvents: 3,
       autoAdvanceDecision: "eligible",
       telemetryDecision: "ready",
       telemetryScore: 78,
       telemetryBlockedRatePct: 20,
     });
 
-    expect(packet.mode).toBe("simple-delegate-rehearsal-readiness-packet");
+    expect(packet.mode).toBe("delegation-rehearsal-readiness-packet");
     expect(packet.decision).toBe("ready");
-    expect(packet.recommendationCode).toBe("simple-delegate-rehearsal-ready");
+    expect(packet.recommendationCode).toBe("delegation-rehearsal-ready");
     expect(packet.dispatchAllowed).toBe(false);
     expect(packet.authorization).toBe("none");
     expect(packet.mutationAllowed).toBe(false);
   });
 
   it("fails closed when auto-advance decision is blocked", () => {
-    const packet = buildSimpleDelegateRehearsalDecisionPacket({
+    const packet = buildDelegationRehearsalDecisionPacket({
       capabilityDecision: "ready",
       mixDecision: "ready",
       mixScore: 82,
-      mixSimpleDelegateEvents: 2,
+      mixDelegationEvents: 2,
       autoAdvanceDecision: "blocked",
       autoAdvanceBlockedReasons: ["reload-required-or-dirty", "validation-gate-unknown"],
       telemetryDecision: "ready",
@@ -75,15 +75,15 @@ describe("ops calibration decision packet", () => {
     });
 
     expect(packet.decision).toBe("blocked");
-    expect(packet.recommendationCode).toBe("simple-delegate-rehearsal-blocked-auto-advance");
+    expect(packet.recommendationCode).toBe("delegation-rehearsal-blocked-auto-advance");
     expect(packet.blockers).toContain("auto-advance-blocked");
     expect(packet.blockers).toContain("reload-required-or-dirty");
   });
 
   it("builds start packet as ready-for-human-decision when rehearsal and gates are green", () => {
-    const packet = buildSimpleDelegateRehearsalStartPacket({
+    const packet = buildDelegationRehearsalStartPacket({
       rehearsalDecision: "ready",
-      rehearsalRecommendationCode: "simple-delegate-rehearsal-ready",
+      rehearsalRecommendationCode: "delegation-rehearsal-ready",
       rehearsalBlockers: [],
       protectedScopeRequested: false,
       declaredFilesKnown: true,
@@ -91,9 +91,9 @@ describe("ops calibration decision packet", () => {
       rollbackPlanKnown: true,
     });
 
-    expect(packet.mode).toBe("simple-delegate-rehearsal-start-packet");
+    expect(packet.mode).toBe("delegation-rehearsal-start-packet");
     expect(packet.decision).toBe("ready-for-human-decision");
-    expect(packet.recommendationCode).toBe("simple-delegate-start-ready-for-human-decision");
+    expect(packet.recommendationCode).toBe("delegation-rehearsal-start-ready-for-human-decision");
     expect(packet.dispatchAllowed).toBe(false);
     expect(packet.authorization).toBe("none");
     expect(packet.options).toEqual(["start", "abort", "defer"]);
@@ -101,9 +101,9 @@ describe("ops calibration decision packet", () => {
   });
 
   it("blocks start packet when rehearsal decision is not ready", () => {
-    const packet = buildSimpleDelegateRehearsalStartPacket({
+    const packet = buildDelegationRehearsalStartPacket({
       rehearsalDecision: "needs-evidence",
-      rehearsalRecommendationCode: "simple-delegate-rehearsal-needs-evidence-mix",
+      rehearsalRecommendationCode: "delegation-rehearsal-needs-evidence-mix",
       rehearsalBlockers: ["mix-needs-evidence"],
       protectedScopeRequested: false,
       declaredFilesKnown: true,
@@ -112,7 +112,7 @@ describe("ops calibration decision packet", () => {
     });
 
     expect(packet.decision).toBe("blocked");
-    expect(packet.recommendationCode).toBe("simple-delegate-start-blocked-rehearsal-not-ready");
+    expect(packet.recommendationCode).toBe("delegation-rehearsal-start-blocked-rehearsal-not-ready");
     expect(packet.blockers).toContain("rehearsal-not-ready");
     expect(packet.blockers).toContain("mix-needs-evidence");
   });
@@ -450,7 +450,7 @@ describe("ops calibration decision packet", () => {
         capability_recommendation_code: "delegation-capability-ready",
         mix_decision: "ready",
         mix_score: 81,
-        mix_simple_delegate_events: 2,
+        mix_delegation_events: 2,
         mix_swarm_events: 1,
       },
       undefined as unknown as AbortSignal,
@@ -462,7 +462,7 @@ describe("ops calibration decision packet", () => {
     expect(result.details.dispatchAllowed).toBe(false);
     expect(result.details.authorization).toBe("none");
     expect(result.details.mutationAllowed).toBe(false);
-    expect(result.details.recommendedOption).toBe("simple-delegate");
+    expect(result.details.recommendedOption).toBe("delegate");
     expect(String(result.details.summary)).toContain("delegate-or-execute-packet:");
   });
 
@@ -489,7 +489,7 @@ describe("ops calibration decision packet", () => {
           capability_decision: "ready",
           mix_decision: "ready",
           mix_score: 81,
-          mix_simple_delegate_events: 2,
+          mix_delegation_events: 2,
           mix_swarm_events: 1,
           auto_advance_decision: "eligible",
           telemetry_decision: "ready",
@@ -505,9 +505,9 @@ describe("ops calibration decision packet", () => {
       expect(result.details.dispatchAllowed).toBe(false);
       expect(result.details.authorization).toBe("none");
       expect(result.details.mutationAllowed).toBe(false);
-      expect(result.details.decision).toBe("ready-simple-delegate");
-      expect(result.details.recommendationCode).toBe("delegation-readiness-ready-simple-delegate");
-      expect(String(result.details.nextAction)).toContain("simple_delegate_rehearsal_start_packet");
+      expect(result.details.decision).toBe("ready-delegation-rehearsal");
+      expect(result.details.recommendationCode).toBe("delegation-readiness-ready-delegation-rehearsal");
+      expect(String(result.details.nextAction)).toContain("delegation_rehearsal_start_packet");
       expect(String(result.details.summary)).toContain("delegation-readiness-status:");
       expect(result.details.operationalRunway.recommendedOption).toBe("local-execute");
       expect(result.details.operationalRunway.recommendationCode).toBe("operational-runway-local-execute");
@@ -518,7 +518,7 @@ describe("ops calibration decision packet", () => {
     }
   });
 
-  it("delegation_readiness_status_packet promotes operational runway to simple-delegate when background evidence is ready", async () => {
+  it("delegation_readiness_status_packet promotes operational runway to delegate when background evidence is ready", async () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-delegation-readiness-runway-ready-"));
     try {
       const tools: any[] = [
@@ -543,7 +543,7 @@ describe("ops calibration decision packet", () => {
           capability_decision: "ready",
           mix_decision: "ready",
           mix_score: 85,
-          mix_simple_delegate_events: 3,
+          mix_delegation_events: 3,
           mix_swarm_events: 2,
           auto_advance_decision: "eligible",
           telemetry_decision: "ready",
@@ -571,8 +571,8 @@ describe("ops calibration decision packet", () => {
         { cwd },
       );
 
-      expect(result.details.operationalRunway.recommendedOption).toBe("simple-delegate");
-      expect(result.details.operationalRunway.recommendationCode).toBe("operational-runway-simple-delegate");
+      expect(result.details.operationalRunway.recommendedOption).toBe("delegate");
+      expect(result.details.operationalRunway.recommendationCode).toBe("operational-runway-delegate");
       expect(result.details.operationalRunway.decision.background).toBe("ready-window");
       expect(result.details.unlockChecklist.decision).toBe("ready");
       expect(String(result.details.unlockChecklist.summary)).toContain("topBlockers=none");
@@ -605,7 +605,7 @@ describe("ops calibration decision packet", () => {
           capability_blockers: ["subagents-not-ready"],
           mix_decision: "ready",
           mix_score: 80,
-          mix_simple_delegate_events: 2,
+          mix_delegation_events: 2,
           auto_advance_decision: "blocked",
           auto_advance_blocked_reasons: ["focus-not-complete"],
           telemetry_decision: "needs-evidence",
@@ -632,8 +632,8 @@ describe("ops calibration decision packet", () => {
     }
   });
 
-  it("registers simple_delegate_rehearsal_packet as read-only packet tool", async () => {
-    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-rehearsal-packet-"));
+  it("registers delegation_rehearsal_packet as read-only packet tool", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-delegation-rehearsal-packet-"));
     try {
       const tools: any[] = [
         { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
@@ -647,15 +647,15 @@ describe("ops calibration decision packet", () => {
       } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
 
       registerGuardrailsOpsCalibrationSurface(pi);
-      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_packet");
+      const tool = tools.find((row) => row?.name === "delegation_rehearsal_packet");
 
       const result = await tool.execute(
-        "tc-simple-delegate-rehearsal",
+        "tc-delegate-rehearsal",
         {
           capability_decision: "ready",
           mix_decision: "ready",
           mix_score: 80,
-          mix_simple_delegate_events: 2,
+          mix_delegation_events: 2,
           auto_advance_decision: "eligible",
           telemetry_decision: "ready",
           telemetry_score: 70,
@@ -666,18 +666,18 @@ describe("ops calibration decision packet", () => {
         { cwd },
       );
 
-      expect(result.details.mode).toBe("simple-delegate-rehearsal-readiness-packet");
+      expect(result.details.mode).toBe("delegation-rehearsal-readiness-packet");
       expect(result.details.dispatchAllowed).toBe(false);
       expect(result.details.authorization).toBe("none");
       expect(result.details.mutationAllowed).toBe(false);
-      expect(String(result.details.summary)).toContain("simple-delegate-rehearsal-packet:");
+      expect(String(result.details.summary)).toContain("delegation-rehearsal-packet:");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
   });
 
   it("falls back to live board auto-advance snapshot when telemetry lacks eligible events", async () => {
-    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-live-auto-advance-"));
+    const cwd = mkdtempSync(join(tmpdir(), "pi-delegate-live-auto-advance-"));
     try {
       mkdirSync(join(cwd, ".project"), { recursive: true });
       writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({
@@ -710,14 +710,14 @@ describe("ops calibration decision packet", () => {
       } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
 
       registerGuardrailsOpsCalibrationSurface(pi);
-      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_packet");
+      const tool = tools.find((row) => row?.name === "delegation_rehearsal_packet");
       const result = await tool.execute(
-        "tc-simple-delegate-live-auto-advance",
+        "tc-delegate-live-auto-advance",
         {
           capability_decision: "ready",
           mix_decision: "ready",
           mix_score: 80,
-          mix_simple_delegate_events: 2,
+          mix_delegation_events: 2,
         },
         undefined as unknown as AbortSignal,
         () => {},
@@ -725,7 +725,7 @@ describe("ops calibration decision packet", () => {
       );
 
       expect(result.details.decision).toBe("ready");
-      expect(result.details.recommendationCode).toBe("simple-delegate-rehearsal-ready");
+      expect(result.details.recommendationCode).toBe("delegation-rehearsal-ready");
       expect(result.details.autoAdvanceResolutionSource).toBe("live-board-fallback");
       expect(result.details.autoAdvanceLiveSnapshot.decision).toBe("eligible");
       expect(result.details.autoAdvanceLiveSnapshot.nextTaskId).toBe("TASK-NEXT");
@@ -743,7 +743,7 @@ describe("ops calibration decision packet", () => {
   });
 
   it("applies telemetry-equivalent normalization to start packet when live fallback is eligible", async () => {
-    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-start-live-auto-advance-"));
+    const cwd = mkdtempSync(join(tmpdir(), "pi-delegate-start-live-auto-advance-"));
     try {
       mkdirSync(join(cwd, ".project"), { recursive: true });
       writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({
@@ -776,14 +776,14 @@ describe("ops calibration decision packet", () => {
       } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
 
       registerGuardrailsOpsCalibrationSurface(pi);
-      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_start_packet");
+      const tool = tools.find((row) => row?.name === "delegation_rehearsal_start_packet");
       const result = await tool.execute(
-        "tc-simple-delegate-start-live-auto-advance",
+        "tc-delegate-start-live-auto-advance",
         {
           capability_decision: "ready",
           mix_decision: "ready",
           mix_score: 80,
-          mix_simple_delegate_events: 2,
+          mix_delegation_events: 2,
           declared_files_known: true,
           validation_gate_known: true,
           rollback_plan_known: true,
@@ -811,7 +811,7 @@ describe("ops calibration decision packet", () => {
   });
 
   it("drops unknown placeholder from blocked auto-advance reasons when explicit reasons exist", async () => {
-    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-filter-unknown-"));
+    const cwd = mkdtempSync(join(tmpdir(), "pi-delegate-filter-unknown-"));
     try {
       const tools: any[] = [
         { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
@@ -825,15 +825,15 @@ describe("ops calibration decision packet", () => {
       } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
 
       registerGuardrailsOpsCalibrationSurface(pi);
-      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_packet");
+      const tool = tools.find((row) => row?.name === "delegation_rehearsal_packet");
 
       const result = await tool.execute(
-        "tc-simple-delegate-filter-unknown",
+        "tc-delegate-filter-unknown",
         {
           capability_decision: "ready",
           mix_decision: "ready",
           mix_score: 80,
-          mix_simple_delegate_events: 2,
+          mix_delegation_events: 2,
           auto_advance_decision: "blocked",
           auto_advance_blocked_reasons: ["unknown", "focus-not-complete"],
           telemetry_decision: "ready",
@@ -855,7 +855,7 @@ describe("ops calibration decision packet", () => {
   });
 
   it("keeps blocked result when live fallback is not eligible", async () => {
-    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-live-blocked-"));
+    const cwd = mkdtempSync(join(tmpdir(), "pi-delegate-live-blocked-"));
     try {
       const tools: any[] = [
         { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
@@ -869,15 +869,15 @@ describe("ops calibration decision packet", () => {
       } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
 
       registerGuardrailsOpsCalibrationSurface(pi);
-      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_packet");
+      const tool = tools.find((row) => row?.name === "delegation_rehearsal_packet");
 
       const result = await tool.execute(
-        "tc-simple-delegate-live-blocked",
+        "tc-delegate-live-blocked",
         {
           capability_decision: "ready",
           mix_decision: "ready",
           mix_score: 80,
-          mix_simple_delegate_events: 2,
+          mix_delegation_events: 2,
         },
         undefined as unknown as AbortSignal,
         () => {},
@@ -885,7 +885,7 @@ describe("ops calibration decision packet", () => {
       );
 
       expect(result.details.decision).toBe("blocked");
-      expect(result.details.recommendationCode).toBe("simple-delegate-rehearsal-blocked-auto-advance");
+      expect(result.details.recommendationCode).toBe("delegation-rehearsal-blocked-auto-advance");
       expect(result.details.autoAdvanceResolutionSource).toBe("telemetry+live");
       expect(result.details.blockers).toContain("auto-advance-blocked");
       expect(result.details.blockers).toContain("focus-missing");
@@ -897,7 +897,7 @@ describe("ops calibration decision packet", () => {
   });
 
   it("infers capability defaults from workspace preload pack when params are omitted", async () => {
-    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-infer-capability-"));
+    const cwd = mkdtempSync(join(tmpdir(), "pi-delegate-infer-capability-"));
     try {
       mkdirSync(join(cwd, ".project"), { recursive: true });
       writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({ timestamp: new Date().toISOString(), context: "seed" }, null, 2));
@@ -942,14 +942,14 @@ describe("ops calibration decision packet", () => {
       } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
 
       registerGuardrailsOpsCalibrationSurface(pi);
-      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_packet");
+      const tool = tools.find((row) => row?.name === "delegation_rehearsal_packet");
       const result = await tool.execute(
-        "tc-simple-delegate-infer-capability",
+        "tc-delegate-infer-capability",
         {
           dirty_signal: "clean",
           mix_decision: "ready",
           mix_score: 80,
-          mix_simple_delegate_events: 2,
+          mix_delegation_events: 2,
           auto_advance_decision: "eligible",
           telemetry_decision: "ready",
           telemetry_score: 70,
@@ -968,8 +968,8 @@ describe("ops calibration decision packet", () => {
     }
   });
 
-  it("registers simple_delegate_rehearsal_start_packet as read-only start/abort packet", async () => {
-    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-start-packet-"));
+  it("registers delegation_rehearsal_start_packet as read-only start/abort packet", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-delegation-rehearsal-start-packet-"));
     try {
       const tools: any[] = [
         { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
@@ -983,15 +983,15 @@ describe("ops calibration decision packet", () => {
       } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
 
       registerGuardrailsOpsCalibrationSurface(pi);
-      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_start_packet");
+      const tool = tools.find((row) => row?.name === "delegation_rehearsal_start_packet");
 
       const result = await tool.execute(
-        "tc-simple-delegate-start",
+        "tc-delegate-start",
         {
           capability_decision: "ready",
           mix_decision: "ready",
           mix_score: 80,
-          mix_simple_delegate_events: 2,
+          mix_delegation_events: 2,
           auto_advance_decision: "eligible",
           telemetry_decision: "ready",
           telemetry_score: 70,
@@ -1005,12 +1005,12 @@ describe("ops calibration decision packet", () => {
         { cwd },
       );
 
-      expect(result.details.mode).toBe("simple-delegate-rehearsal-start-packet");
+      expect(result.details.mode).toBe("delegation-rehearsal-start-packet");
       expect(result.details.dispatchAllowed).toBe(false);
       expect(result.details.authorization).toBe("none");
       expect(result.details.mutationAllowed).toBe(false);
       expect(result.details.decision).toBe("ready-for-human-decision");
-      expect(String(result.details.summary)).toContain("simple-delegate-start-packet:");
+      expect(String(result.details.summary)).toContain("delegation-rehearsal-start-packet:");
       expect(String(result.details.summary)).toContain("contract=files=ok,validation=ok,rollback=ok");
       expect(result.details.operatorPauseBrief.whyPaused).toContain("explicit human");
       expect(result.details.operatorPauseBrief.recommendation).toBe("start");

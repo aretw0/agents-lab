@@ -129,10 +129,10 @@ export function buildOpsCalibrationDecisionPacket(input: OpsCalibrationDecisionI
   };
 }
 
-export type DelegateOrExecuteOption = "local-execute" | "simple-delegate" | "defer";
+export type DelegateOrExecuteOption = "local-execute" | "delegate" | "defer";
 
 export type DelegateOrExecuteRecommendationCode =
-  | "delegate-execute-simple-delegate"
+  | "delegate-execute-delegate"
   | "delegate-execute-local-execute"
   | "delegate-execute-defer-missing-signals"
   | "delegate-execute-defer-blocked";
@@ -145,7 +145,7 @@ export interface DelegateOrExecuteDecisionInput {
   mixDecision?: "ready" | "needs-evidence";
   mixScore?: number;
   mixRecommendationCode?: string;
-  mixSimpleDelegateEvents?: number;
+  mixDelegationEvents?: number;
   mixSwarmEvents?: number;
 }
 
@@ -166,7 +166,7 @@ export interface DelegateOrExecuteDecisionPacket {
     mixDecision: "ready" | "needs-evidence" | "missing";
     mixScore: number;
     mixRecommendationCode: string;
-    mixSimpleDelegateEvents: number;
+    mixDelegationEvents: number;
     mixSwarmEvents: number;
   };
   summary: string;
@@ -191,7 +191,7 @@ export function buildDelegateOrExecuteDecisionPacket(
 
   const mixScoreRaw = Number(input.mixScore);
   const mixScore = Number.isFinite(mixScoreRaw) ? Math.max(0, Math.min(100, Math.round(mixScoreRaw))) : 0;
-  const mixSimpleDelegateEvents = Math.max(0, Math.floor(Number(input.mixSimpleDelegateEvents ?? 0)));
+  const mixDelegationEvents = Math.max(0, Math.floor(Number(input.mixDelegationEvents ?? 0)));
   const mixSwarmEvents = Math.max(0, Math.floor(Number(input.mixSwarmEvents ?? 0)));
 
   const blockers: string[] = [];
@@ -210,16 +210,16 @@ export function buildDelegateOrExecuteDecisionPacket(
     blockers.push(...(Array.isArray(input.capabilityBlockers) ? input.capabilityBlockers : []));
     recommendationCode = "delegate-execute-defer-blocked";
     recommendation = "capability is blocked; defer and close hard blockers before executing/delegating.";
-  } else if (capabilityDecision === "ready" && mixDecision === "ready" && mixScore >= 70 && mixSimpleDelegateEvents > 0 && mixSwarmEvents > 0) {
-    recommendedOption = "simple-delegate";
-    recommendationCode = "delegate-execute-simple-delegate";
-    recommendation = "signals are strong; prefer bounded simple-delegate as next step (still no auto-dispatch).";
+  } else if (capabilityDecision === "ready" && mixDecision === "ready" && mixScore >= 70 && mixDelegationEvents > 0 && mixSwarmEvents > 0) {
+    recommendedOption = "delegate";
+    recommendationCode = "delegate-execute-delegate";
+    recommendation = "signals are strong; prefer bounded delegation rehearsal as next step (still no auto-dispatch).";
   } else {
     recommendedOption = "local-execute";
     recommendationCode = "delegate-execute-local-execute";
     recommendation = "signals are partial; prefer local execution slice to gather evidence before stronger delegation.";
     if (mixDecision !== "ready") evidenceGaps.push("mix-needs-evidence");
-    if (mixSimpleDelegateEvents <= 0) evidenceGaps.push("mix-simple-delegate-missing");
+    if (mixDelegationEvents <= 0) evidenceGaps.push("mix-delegation-missing");
     if (mixSwarmEvents <= 0) evidenceGaps.push("mix-swarm-missing");
   }
 
@@ -262,31 +262,31 @@ export function buildDelegateOrExecuteDecisionPacket(
       mixRecommendationCode: typeof input.mixRecommendationCode === "string"
         ? input.mixRecommendationCode
         : "missing",
-      mixSimpleDelegateEvents,
+      mixDelegationEvents,
       mixSwarmEvents,
     },
     summary,
   };
 }
 
-export type SimpleDelegateRehearsalDecision = "ready" | "needs-evidence" | "blocked";
+export type DelegationRehearsalDecision = "ready" | "needs-evidence" | "blocked";
 
-export type SimpleDelegateRehearsalRecommendationCode =
-  | "simple-delegate-rehearsal-ready"
-  | "simple-delegate-rehearsal-needs-evidence-capability"
-  | "simple-delegate-rehearsal-needs-evidence-mix"
-  | "simple-delegate-rehearsal-needs-evidence-auto-advance"
-  | "simple-delegate-rehearsal-blocked-capability"
-  | "simple-delegate-rehearsal-blocked-auto-advance"
-  | "simple-delegate-rehearsal-blocked-missing-signals";
+export type DelegationRehearsalRecommendationCode =
+  | "delegation-rehearsal-ready"
+  | "delegation-rehearsal-needs-evidence-capability"
+  | "delegation-rehearsal-needs-evidence-mix"
+  | "delegation-rehearsal-needs-evidence-auto-advance"
+  | "delegation-rehearsal-blocked-capability"
+  | "delegation-rehearsal-blocked-auto-advance"
+  | "delegation-rehearsal-blocked-missing-signals";
 
-export interface SimpleDelegateRehearsalDecisionInput {
+export interface DelegationRehearsalDecisionInput {
   capabilityDecision?: "ready" | "needs-evidence" | "blocked";
   capabilityRecommendationCode?: string;
   capabilityBlockers?: string[];
   mixDecision?: "ready" | "needs-evidence";
   mixScore?: number;
-  mixSimpleDelegateEvents?: number;
+  mixDelegationEvents?: number;
   autoAdvanceDecision?: "eligible" | "blocked";
   autoAdvanceBlockedReasons?: string[];
   telemetryDecision?: "ready" | "needs-evidence";
@@ -294,14 +294,14 @@ export interface SimpleDelegateRehearsalDecisionInput {
   telemetryBlockedRatePct?: number;
 }
 
-export interface SimpleDelegateRehearsalDecisionPacket {
-  mode: "simple-delegate-rehearsal-readiness-packet";
+export interface DelegationRehearsalDecisionPacket {
+  mode: "delegation-rehearsal-readiness-packet";
   activation: "none";
   authorization: "none";
   dispatchAllowed: false;
   mutationAllowed: false;
-  decision: SimpleDelegateRehearsalDecision;
-  recommendationCode: SimpleDelegateRehearsalRecommendationCode;
+  decision: DelegationRehearsalDecision;
+  recommendationCode: DelegationRehearsalRecommendationCode;
   recommendation: string;
   blockers: string[];
   evidenceGaps: string[];
@@ -310,7 +310,7 @@ export interface SimpleDelegateRehearsalDecisionPacket {
     capabilityRecommendationCode: string;
     mixDecision: "ready" | "needs-evidence" | "missing";
     mixScore: number;
-    mixSimpleDelegateEvents: number;
+    mixDelegationEvents: number;
     autoAdvanceDecision: "eligible" | "blocked" | "missing";
     autoAdvanceBlockedReasons: string[];
     telemetryDecision: "ready" | "needs-evidence" | "missing";
@@ -320,27 +320,27 @@ export interface SimpleDelegateRehearsalDecisionPacket {
   summary: string;
 }
 
-function normalizeSimpleDelegateDecision(value: unknown, allowed: string[]): string {
+function normalizeDelegationRehearsalDecision(value: unknown, allowed: string[]): string {
   return typeof value === "string" && allowed.includes(value) ? value : "missing";
 }
 
-export function buildSimpleDelegateRehearsalDecisionPacket(
-  input: SimpleDelegateRehearsalDecisionInput,
-): SimpleDelegateRehearsalDecisionPacket {
-  const capabilityDecision = normalizeSimpleDelegateDecision(input.capabilityDecision, ["ready", "needs-evidence", "blocked"]) as
+export function buildDelegationRehearsalDecisionPacket(
+  input: DelegationRehearsalDecisionInput,
+): DelegationRehearsalDecisionPacket {
+  const capabilityDecision = normalizeDelegationRehearsalDecision(input.capabilityDecision, ["ready", "needs-evidence", "blocked"]) as
     | "ready"
     | "needs-evidence"
     | "blocked"
     | "missing";
-  const mixDecision = normalizeSimpleDelegateDecision(input.mixDecision, ["ready", "needs-evidence"]) as
+  const mixDecision = normalizeDelegationRehearsalDecision(input.mixDecision, ["ready", "needs-evidence"]) as
     | "ready"
     | "needs-evidence"
     | "missing";
-  const autoAdvanceDecision = normalizeSimpleDelegateDecision(input.autoAdvanceDecision, ["eligible", "blocked"]) as
+  const autoAdvanceDecision = normalizeDelegationRehearsalDecision(input.autoAdvanceDecision, ["eligible", "blocked"]) as
     | "eligible"
     | "blocked"
     | "missing";
-  const telemetryDecision = normalizeSimpleDelegateDecision(input.telemetryDecision, ["ready", "needs-evidence"]) as
+  const telemetryDecision = normalizeDelegationRehearsalDecision(input.telemetryDecision, ["ready", "needs-evidence"]) as
     | "ready"
     | "needs-evidence"
     | "missing";
@@ -348,45 +348,45 @@ export function buildSimpleDelegateRehearsalDecisionPacket(
   const mixScore = Math.max(0, Math.min(100, Math.round(Number(input.mixScore ?? 0) || 0)));
   const telemetryScore = Math.max(0, Math.min(100, Math.round(Number(input.telemetryScore ?? 0) || 0)));
   const telemetryBlockedRatePct = Math.max(0, Math.min(100, Math.round(Number(input.telemetryBlockedRatePct ?? 0) || 0)));
-  const mixSimpleDelegateEvents = Math.max(0, Math.floor(Number(input.mixSimpleDelegateEvents ?? 0) || 0));
+  const mixDelegationEvents = Math.max(0, Math.floor(Number(input.mixDelegationEvents ?? 0) || 0));
 
   const blockers: string[] = [];
   const evidenceGaps: string[] = [];
 
-  let decision: SimpleDelegateRehearsalDecision = "ready";
-  let recommendationCode: SimpleDelegateRehearsalRecommendationCode = "simple-delegate-rehearsal-ready";
-  let recommendation = "simple-delegate rehearsal readiness looks strong; proceed only as bounded report-first rehearsal.";
+  let decision: DelegationRehearsalDecision = "ready";
+  let recommendationCode: DelegationRehearsalRecommendationCode = "delegation-rehearsal-ready";
+  let recommendation = "delegation rehearsal readiness looks strong; proceed only as bounded report-first rehearsal.";
 
   if (capabilityDecision === "missing" || mixDecision === "missing" || autoAdvanceDecision === "missing" || telemetryDecision === "missing") {
     decision = "blocked";
-    recommendationCode = "simple-delegate-rehearsal-blocked-missing-signals";
+    recommendationCode = "delegation-rehearsal-blocked-missing-signals";
     recommendation = "missing required signals; collect capability/mix/auto-advance telemetry before rehearsal decision.";
     blockers.push("missing-required-signals");
   } else if (capabilityDecision === "blocked") {
     decision = "blocked";
-    recommendationCode = "simple-delegate-rehearsal-blocked-capability";
+    recommendationCode = "delegation-rehearsal-blocked-capability";
     recommendation = "capability is blocked; defer rehearsal until hard blockers are resolved.";
     blockers.push("capability-blocked", ...(Array.isArray(input.capabilityBlockers) ? input.capabilityBlockers : []));
   } else if (autoAdvanceDecision === "blocked") {
     decision = "blocked";
-    recommendationCode = "simple-delegate-rehearsal-blocked-auto-advance";
-    recommendation = "auto-advance remains blocked; keep local-safe hardening before simple-delegate rehearsal.";
+    recommendationCode = "delegation-rehearsal-blocked-auto-advance";
+    recommendation = "auto-advance remains blocked; keep local-safe hardening before delegation rehearsal.";
     blockers.push("auto-advance-blocked", ...(Array.isArray(input.autoAdvanceBlockedReasons) ? input.autoAdvanceBlockedReasons : []));
   } else if (capabilityDecision !== "ready") {
     decision = "needs-evidence";
-    recommendationCode = "simple-delegate-rehearsal-needs-evidence-capability";
+    recommendationCode = "delegation-rehearsal-needs-evidence-capability";
     recommendation = "capability still needs evidence; keep collecting readiness signals before rehearsal promotion.";
     evidenceGaps.push("capability-needs-evidence");
-  } else if (mixDecision !== "ready" || mixScore < 70 || mixSimpleDelegateEvents <= 0) {
+  } else if (mixDecision !== "ready" || mixScore < 70 || mixDelegationEvents <= 0) {
     decision = "needs-evidence";
-    recommendationCode = "simple-delegate-rehearsal-needs-evidence-mix";
-    recommendation = "delegation mix evidence is still weak for simple-delegate rehearsal; keep local slices and telemetry collection.";
+    recommendationCode = "delegation-rehearsal-needs-evidence-mix";
+    recommendation = "delegation mix evidence is still weak for delegation rehearsal; keep local slices and telemetry collection.";
     if (mixDecision !== "ready") evidenceGaps.push("mix-needs-evidence");
     if (mixScore < 70) evidenceGaps.push("mix-score-below-threshold");
-    if (mixSimpleDelegateEvents <= 0) evidenceGaps.push("mix-simple-delegate-missing");
+    if (mixDelegationEvents <= 0) evidenceGaps.push("mix-delegation-missing");
   } else if (telemetryDecision !== "ready" || telemetryScore < 60 || telemetryBlockedRatePct > 60) {
     decision = "needs-evidence";
-    recommendationCode = "simple-delegate-rehearsal-needs-evidence-auto-advance";
+    recommendationCode = "delegation-rehearsal-needs-evidence-auto-advance";
     recommendation = "auto-advance telemetry still needs hardening; reduce blocked rate before rehearsal promotion.";
     if (telemetryDecision !== "ready") evidenceGaps.push("auto-advance-telemetry-needs-evidence");
     if (telemetryScore < 60) evidenceGaps.push("auto-advance-telemetry-score-below-threshold");
@@ -397,7 +397,7 @@ export function buildSimpleDelegateRehearsalDecisionPacket(
   const uniqueEvidenceGaps = [...new Set(evidenceGaps)];
 
   const summary = [
-    "simple-delegate-rehearsal-packet:",
+    "delegation-rehearsal-packet:",
     `decision=${decision}`,
     `code=${recommendationCode}`,
     `capability=${capabilityDecision}`,
@@ -410,7 +410,7 @@ export function buildSimpleDelegateRehearsalDecisionPacket(
   ].filter(Boolean).join(" ");
 
   return {
-    mode: "simple-delegate-rehearsal-readiness-packet",
+    mode: "delegation-rehearsal-readiness-packet",
     activation: "none",
     authorization: "none",
     dispatchAllowed: false,
@@ -427,7 +427,7 @@ export function buildSimpleDelegateRehearsalDecisionPacket(
         : "missing",
       mixDecision,
       mixScore,
-      mixSimpleDelegateEvents,
+      mixDelegationEvents,
       autoAdvanceDecision,
       autoAdvanceBlockedReasons: Array.isArray(input.autoAdvanceBlockedReasons)
         ? [...new Set(input.autoAdvanceBlockedReasons.filter((item): item is string => typeof item === "string" && item.trim().length > 0))]
@@ -440,17 +440,17 @@ export function buildSimpleDelegateRehearsalDecisionPacket(
   };
 }
 
-export type SimpleDelegateRehearsalStartDecision = "ready-for-human-decision" | "blocked";
+export type DelegationRehearsalStartDecision = "ready-for-human-decision" | "blocked";
 
-export type SimpleDelegateRehearsalStartRecommendationCode =
-  | "simple-delegate-start-ready-for-human-decision"
-  | "simple-delegate-start-blocked-rehearsal-not-ready"
-  | "simple-delegate-start-blocked-protected-scope"
-  | "simple-delegate-start-blocked-missing-declared-files"
-  | "simple-delegate-start-blocked-missing-validation-gate"
-  | "simple-delegate-start-blocked-missing-rollback-plan";
+export type DelegationRehearsalStartRecommendationCode =
+  | "delegation-rehearsal-start-ready-for-human-decision"
+  | "delegation-rehearsal-start-blocked-rehearsal-not-ready"
+  | "delegation-rehearsal-start-blocked-protected-scope"
+  | "delegation-rehearsal-start-blocked-missing-declared-files"
+  | "delegation-rehearsal-start-blocked-missing-validation-gate"
+  | "delegation-rehearsal-start-blocked-missing-rollback-plan";
 
-export interface SimpleDelegateRehearsalStartPacketInput {
+export interface DelegationRehearsalStartPacketInput {
   rehearsalDecision?: "ready" | "needs-evidence" | "blocked";
   rehearsalRecommendationCode?: string;
   rehearsalBlockers?: string[];
@@ -460,14 +460,14 @@ export interface SimpleDelegateRehearsalStartPacketInput {
   rollbackPlanKnown?: boolean;
 }
 
-export interface SimpleDelegateRehearsalStartPacket {
-  mode: "simple-delegate-rehearsal-start-packet";
+export interface DelegationRehearsalStartPacket {
+  mode: "delegation-rehearsal-start-packet";
   activation: "none";
   authorization: "none";
   dispatchAllowed: false;
   mutationAllowed: false;
-  decision: SimpleDelegateRehearsalStartDecision;
-  recommendationCode: SimpleDelegateRehearsalStartRecommendationCode;
+  decision: DelegationRehearsalStartDecision;
+  recommendationCode: DelegationRehearsalStartRecommendationCode;
   recommendation: string;
   blockers: string[];
   options: ["start", "abort", "defer"];
@@ -487,9 +487,9 @@ function normalizeRehearsalStartDecision(value: unknown): "ready" | "needs-evide
   return "missing";
 }
 
-export function buildSimpleDelegateRehearsalStartPacket(
-  input: SimpleDelegateRehearsalStartPacketInput,
-): SimpleDelegateRehearsalStartPacket {
+export function buildDelegationRehearsalStartPacket(
+  input: DelegationRehearsalStartPacketInput,
+): DelegationRehearsalStartPacket {
   const rehearsalDecision = normalizeRehearsalStartDecision(input.rehearsalDecision);
   const protectedScopeRequested = input.protectedScopeRequested === true;
   const declaredFilesKnown = input.declaredFilesKnown === true;
@@ -497,33 +497,33 @@ export function buildSimpleDelegateRehearsalStartPacket(
   const rollbackPlanKnown = input.rollbackPlanKnown === true;
 
   const blockers: string[] = [];
-  let decision: SimpleDelegateRehearsalStartDecision = "ready-for-human-decision";
-  let recommendationCode: SimpleDelegateRehearsalStartRecommendationCode = "simple-delegate-start-ready-for-human-decision";
+  let decision: DelegationRehearsalStartDecision = "ready-for-human-decision";
+  let recommendationCode: DelegationRehearsalStartRecommendationCode = "delegation-rehearsal-start-ready-for-human-decision";
   let recommendation = "start can proceed only after explicit human go/no-go confirmation for one bounded rehearsal task.";
 
   if (rehearsalDecision !== "ready") {
     decision = "blocked";
-    recommendationCode = "simple-delegate-start-blocked-rehearsal-not-ready";
+    recommendationCode = "delegation-rehearsal-start-blocked-rehearsal-not-ready";
     recommendation = "rehearsal readiness is not ready; keep report-only and close blockers/evidence gaps first.";
     blockers.push("rehearsal-not-ready", ...(Array.isArray(input.rehearsalBlockers) ? input.rehearsalBlockers : []));
   } else if (protectedScopeRequested) {
     decision = "blocked";
-    recommendationCode = "simple-delegate-start-blocked-protected-scope";
+    recommendationCode = "delegation-rehearsal-start-blocked-protected-scope";
     recommendation = "protected scope requested; require explicit human protected-focus decision before start.";
     blockers.push("protected-scope-requested");
   } else if (!declaredFilesKnown) {
     decision = "blocked";
-    recommendationCode = "simple-delegate-start-blocked-missing-declared-files";
+    recommendationCode = "delegation-rehearsal-start-blocked-missing-declared-files";
     recommendation = "declared files are missing; define bounded file scope before rehearsal start.";
     blockers.push("missing-declared-files");
   } else if (!validationGateKnown) {
     decision = "blocked";
-    recommendationCode = "simple-delegate-start-blocked-missing-validation-gate";
+    recommendationCode = "delegation-rehearsal-start-blocked-missing-validation-gate";
     recommendation = "validation gate is unknown; define focal validation before rehearsal start.";
     blockers.push("missing-validation-gate");
   } else if (!rollbackPlanKnown) {
     decision = "blocked";
-    recommendationCode = "simple-delegate-start-blocked-missing-rollback-plan";
+    recommendationCode = "delegation-rehearsal-start-blocked-missing-rollback-plan";
     recommendation = "rollback plan is missing; define non-destructive rollback before rehearsal start.";
     blockers.push("missing-rollback-plan");
   }
@@ -535,7 +535,7 @@ export function buildSimpleDelegateRehearsalStartPacket(
     rollbackPlanKnown ? "rollback=ok" : "rollback=missing",
   ].join(",");
   const summary = [
-    "simple-delegate-start-packet:",
+    "delegation-rehearsal-start-packet:",
     `decision=${decision}`,
     `code=${recommendationCode}`,
     `rehearsal=${rehearsalDecision}`,
@@ -545,7 +545,7 @@ export function buildSimpleDelegateRehearsalStartPacket(
   ].filter(Boolean).join(" ");
 
   return {
-    mode: "simple-delegate-rehearsal-start-packet",
+    mode: "delegation-rehearsal-start-packet",
     activation: "none",
     authorization: "none",
     dispatchAllowed: false,

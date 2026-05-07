@@ -7,8 +7,8 @@ import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background
 import {
   buildDelegateOrExecuteDecisionPacket,
   buildOpsCalibrationDecisionPacket,
-  buildSimpleDelegateRehearsalDecisionPacket,
-  buildSimpleDelegateRehearsalStartPacket,
+  buildDelegationRehearsalDecisionPacket,
+  buildDelegationRehearsalStartPacket,
 } from "./guardrails-core-ops-calibration";
 import { buildAgentsAsToolsCalibrationScore, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
 import { evaluateDelegationLaneCapabilitySnapshot } from "./guardrails-core-autonomy-lane";
@@ -29,10 +29,10 @@ import {
   asOptionalBoolean,
   buildDelegationReadinessStatus,
   buildOperationalRunwayPacket,
-  buildSimpleDelegateOperatorPauseBrief,
-  buildSimpleDelegateResolutionSummary,
+  buildDelegationRehearsalOperatorPauseBrief,
+  buildDelegationRehearsalResolutionSummary,
   buildUnlockChecklist,
-  formatSimpleDelegateOperatorPauseBriefSummary,
+  formatDelegationRehearsalOperatorPauseBriefSummary,
   inferBackgroundCapabilitySignals,
   inferDelegationCapabilityDefaults,
   inferLiveAutoAdvanceSnapshot,
@@ -45,7 +45,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
   pi.registerTool({
     name: "delegate_or_execute_decision_packet",
     label: "Delegate or Execute Decision Packet",
-    description: "Report-only packet recommending local-execute vs simple-delegate vs defer from delegation capability + mix signals. Never dispatches execution.",
+    description: "Report-only packet recommending local-execute vs delegate vs defer from delegation capability + mix signals. Never dispatches execution.",
     parameters: Type.Object({
       lookback_hours: Type.Optional(Type.Number({ description: "How many hours back to scan local session evidence for mix score. Default: 24." })),
       preload_decision: Type.Optional(Type.String({ description: "use-pack | fallback-canonical" })),
@@ -59,7 +59,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
       mix_decision: Type.Optional(Type.String({ description: "Override mix decision: ready | needs-evidence" })),
       mix_score: Type.Optional(Type.Number({ description: "Override mix score (0..100)." })),
       mix_recommendation_code: Type.Optional(Type.String({ description: "Optional mix recommendation code override." })),
-      mix_simple_delegate_events: Type.Optional(Type.Number({ description: "Override simple-delegate event count." })),
+      mix_delegation_events: Type.Optional(Type.Number({ description: "Override delegation event count." })),
       mix_swarm_events: Type.Optional(Type.Number({ description: "Override swarm event count." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -101,9 +101,9 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         mixRecommendationCode: typeof p.mix_recommendation_code === "string"
           ? p.mix_recommendation_code
           : mix.recommendationCode,
-        mixSimpleDelegateEvents: typeof p.mix_simple_delegate_events === "number"
-          ? p.mix_simple_delegate_events
-          : mix.totals.simpleDelegate,
+        mixDelegationEvents: typeof p.mix_delegation_events === "number"
+          ? p.mix_delegation_events
+          : mix.totals.delegate,
         mixSwarmEvents: typeof p.mix_swarm_events === "number"
           ? p.mix_swarm_events
           : mix.totals.swarm,
@@ -123,9 +123,9 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
   });
 
   pi.registerTool({
-    name: "simple_delegate_rehearsal_packet",
-    label: "Simple-Delegate Rehearsal Packet",
-    description: "Report-only readiness packet for bounded simple-delegate rehearsal from capability + mix + auto-advance telemetry signals.",
+    name: "delegation_rehearsal_packet",
+    label: "Delegation Rehearsal Packet",
+    description: "Report-only readiness packet for bounded delegation rehearsal from capability + mix + auto-advance telemetry signals.",
     parameters: Type.Object({
       lookback_hours: Type.Optional(Type.Number({ description: "How many hours back to scan local session evidence. Default: 24." })),
       preload_decision: Type.Optional(Type.String({ description: "use-pack | fallback-canonical" })),
@@ -137,7 +137,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
       capability_blockers: Type.Optional(Type.Array(Type.String())),
       mix_decision: Type.Optional(Type.String({ description: "Override mix decision: ready | needs-evidence" })),
       mix_score: Type.Optional(Type.Number({ description: "Override mix score (0..100)." })),
-      mix_simple_delegate_events: Type.Optional(Type.Number({ description: "Override simple-delegate event count." })),
+      mix_delegation_events: Type.Optional(Type.Number({ description: "Override delegation event count." })),
       auto_advance_decision: Type.Optional(Type.String({ description: "Override auto-advance decision: eligible | blocked" })),
       auto_advance_blocked_reasons: Type.Optional(Type.Array(Type.String())),
       telemetry_decision: Type.Optional(Type.String({ description: "Override telemetry decision: ready | needs-evidence" })),
@@ -189,7 +189,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         autoAdvanceComposite,
       });
 
-      const packet = buildSimpleDelegateRehearsalDecisionPacket({
+      const packet = buildDelegationRehearsalDecisionPacket({
         capabilityDecision: typeof p.capability_decision === "string"
           ? p.capability_decision as "ready" | "needs-evidence" | "blocked"
           : capability.decision,
@@ -201,9 +201,9 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           ? p.mix_decision as "ready" | "needs-evidence"
           : mix.decision,
         mixScore: typeof p.mix_score === "number" ? p.mix_score : mix.score,
-        mixSimpleDelegateEvents: typeof p.mix_simple_delegate_events === "number"
-          ? p.mix_simple_delegate_events
-          : mix.totals.simpleDelegate,
+        mixDelegationEvents: typeof p.mix_delegation_events === "number"
+          ? p.mix_delegation_events
+          : mix.totals.delegate,
         autoAdvanceDecision: autoAdvanceComposite.decision,
         autoAdvanceBlockedReasons: autoAdvanceComposite.blockedReasons,
         telemetryDecision: effectiveTelemetry.decision,
@@ -211,7 +211,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         telemetryBlockedRatePct: effectiveTelemetry.blockedRatePct,
       });
 
-      const summary = buildSimpleDelegateResolutionSummary({
+      const summary = buildDelegationRehearsalResolutionSummary({
         baseSummary: packet.summary,
         source: autoAdvanceComposite.source,
         liveDecision: liveAutoAdvanceSnapshot.decision,
@@ -240,7 +240,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
   pi.registerTool({
     name: "delegation_readiness_status_packet",
     label: "Delegation Readiness Status Packet",
-    description: "Report-only unified runway status composing delegation + background readiness with explicit options local-execute | simple-delegate | defer. Never dispatches execution.",
+    description: "Report-only unified runway status composing delegation + background readiness with explicit options local-execute | delegate | defer. Never dispatches execution.",
     parameters: Type.Object({
       lookback_hours: Type.Optional(Type.Number({ description: "How many hours back to scan local session evidence. Default: 24." })),
       preload_decision: Type.Optional(Type.String({ description: "use-pack | fallback-canonical" })),
@@ -254,7 +254,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
       mix_decision: Type.Optional(Type.String({ description: "Override mix decision: ready | needs-evidence" })),
       mix_score: Type.Optional(Type.Number({ description: "Override mix score (0..100)." })),
       mix_recommendation_code: Type.Optional(Type.String({ description: "Optional mix recommendation code override." })),
-      mix_simple_delegate_events: Type.Optional(Type.Number({ description: "Override simple-delegate event count." })),
+      mix_delegation_events: Type.Optional(Type.Number({ description: "Override delegation event count." })),
       mix_swarm_events: Type.Optional(Type.Number({ description: "Override swarm event count." })),
       auto_advance_decision: Type.Optional(Type.String({ description: "Override auto-advance decision: eligible | blocked" })),
       auto_advance_blocked_reasons: Type.Optional(Type.Array(Type.String())),
@@ -349,15 +349,15 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         mixRecommendationCode: typeof p.mix_recommendation_code === "string"
           ? p.mix_recommendation_code
           : mix.recommendationCode,
-        mixSimpleDelegateEvents: typeof p.mix_simple_delegate_events === "number"
-          ? p.mix_simple_delegate_events
-          : mix.totals.simpleDelegate,
+        mixDelegationEvents: typeof p.mix_delegation_events === "number"
+          ? p.mix_delegation_events
+          : mix.totals.delegate,
         mixSwarmEvents: typeof p.mix_swarm_events === "number"
           ? p.mix_swarm_events
           : mix.totals.swarm,
       });
 
-      const rehearsalPacket = buildSimpleDelegateRehearsalDecisionPacket({
+      const rehearsalPacket = buildDelegationRehearsalDecisionPacket({
         capabilityDecision: typeof p.capability_decision === "string"
           ? p.capability_decision as "ready" | "needs-evidence" | "blocked"
           : capability.decision,
@@ -369,9 +369,9 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           ? p.mix_decision as "ready" | "needs-evidence"
           : mix.decision,
         mixScore: typeof p.mix_score === "number" ? p.mix_score : mix.score,
-        mixSimpleDelegateEvents: typeof p.mix_simple_delegate_events === "number"
-          ? p.mix_simple_delegate_events
-          : mix.totals.simpleDelegate,
+        mixDelegationEvents: typeof p.mix_delegation_events === "number"
+          ? p.mix_delegation_events
+          : mix.totals.delegate,
         autoAdvanceDecision: autoAdvanceComposite.decision,
         autoAdvanceBlockedReasons: autoAdvanceComposite.blockedReasons,
         telemetryDecision: effectiveTelemetry.decision,
@@ -478,9 +478,9 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
   });
 
   pi.registerTool({
-    name: "simple_delegate_rehearsal_start_packet",
-    label: "Simple-Delegate Rehearsal Start Packet",
-    description: "Report-only start/abort packet for one-task simple-delegate rehearsal. Never dispatches execution and always requires explicit human decision.",
+    name: "delegation_rehearsal_start_packet",
+    label: "Delegation Rehearsal Start Packet",
+    description: "Report-only start/abort packet for one-task delegation rehearsal. Never dispatches execution and always requires explicit human decision.",
     parameters: Type.Object({
       lookback_hours: Type.Optional(Type.Number({ description: "How many hours back to scan local session evidence. Default: 24." })),
       preload_decision: Type.Optional(Type.String({ description: "use-pack | fallback-canonical" })),
@@ -492,7 +492,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
       capability_blockers: Type.Optional(Type.Array(Type.String())),
       mix_decision: Type.Optional(Type.String({ description: "Override mix decision: ready | needs-evidence" })),
       mix_score: Type.Optional(Type.Number({ description: "Override mix score (0..100)." })),
-      mix_simple_delegate_events: Type.Optional(Type.Number({ description: "Override simple-delegate event count." })),
+      mix_delegation_events: Type.Optional(Type.Number({ description: "Override delegation event count." })),
       auto_advance_decision: Type.Optional(Type.String({ description: "Override auto-advance decision: eligible | blocked" })),
       auto_advance_blocked_reasons: Type.Optional(Type.Array(Type.String())),
       telemetry_decision: Type.Optional(Type.String({ description: "Override telemetry decision: ready | needs-evidence" })),
@@ -548,7 +548,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         autoAdvanceComposite,
       });
 
-      const readiness = buildSimpleDelegateRehearsalDecisionPacket({
+      const readiness = buildDelegationRehearsalDecisionPacket({
         capabilityDecision: typeof p.capability_decision === "string"
           ? p.capability_decision as "ready" | "needs-evidence" | "blocked"
           : capability.decision,
@@ -560,9 +560,9 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           ? p.mix_decision as "ready" | "needs-evidence"
           : mix.decision,
         mixScore: typeof p.mix_score === "number" ? p.mix_score : mix.score,
-        mixSimpleDelegateEvents: typeof p.mix_simple_delegate_events === "number"
-          ? p.mix_simple_delegate_events
-          : mix.totals.simpleDelegate,
+        mixDelegationEvents: typeof p.mix_delegation_events === "number"
+          ? p.mix_delegation_events
+          : mix.totals.delegate,
         autoAdvanceDecision: autoAdvanceComposite.decision,
         autoAdvanceBlockedReasons: autoAdvanceComposite.blockedReasons,
         telemetryDecision: effectiveTelemetry.decision,
@@ -570,7 +570,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         telemetryBlockedRatePct: effectiveTelemetry.blockedRatePct,
       });
 
-      const startPacket = buildSimpleDelegateRehearsalStartPacket({
+      const startPacket = buildDelegationRehearsalStartPacket({
         rehearsalDecision: readiness.decision,
         rehearsalRecommendationCode: readiness.recommendationCode,
         rehearsalBlockers: readiness.blockers,
@@ -581,7 +581,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
       });
 
       const handoffFocusTaskId = readAutonomyHandoffFocusTaskIds(cwd)[0];
-      const operatorPauseBrief = buildSimpleDelegateOperatorPauseBrief({
+      const operatorPauseBrief = buildDelegationRehearsalOperatorPauseBrief({
         cwd,
         startDecision: startPacket.decision,
         blockers: startPacket.blockers,
@@ -590,7 +590,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
       });
       const enrichedSummary = [
         startPacket.summary,
-        formatSimpleDelegateOperatorPauseBriefSummary(operatorPauseBrief),
+        formatDelegationRehearsalOperatorPauseBriefSummary(operatorPauseBrief),
       ].join(" ");
 
       return {
