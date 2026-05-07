@@ -1,66 +1,56 @@
 {
-  "timestamp": "2026-05-07T01:16:44.052Z",
-  "context": "TASK-BUD-960 completed as documentation/decision slice. Reproduced noisy workflow-agents default output (full JSON list, 31 agents) and confi [snip] r found. No node_modules patch applied. [truncated:+184 chars]",
+  "timestamp": "2026-05-07T02:08:26.378Z",
+  "context": "TASK-BUD-969 completed after reload. One-slice agent run controls are live and documented: plan/status/log-tail/abort are report-only or dry- [snip] xecutor. No provider canary dispatched. [truncated:+74 chars]",
   "next_actions": [
-    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
-    "commit TASK-BUD-960 documentation + board verification as new commit",
-    "autonomy lane has no remaining eligible local-safe tasks under default filters",
-    "if continuing agentic journey, prepare a new explicit simple-delegate canary task/contract or human-focus next lane"
+    "Only after explicit human approval, prepare one one-slice provider canary to create docs/resea [snip] anary-scorecard-2026-05.md [truncated:+14 chars]",
+    "Use one_slice_agent_run_plan before any dispatch; check status/log/abort registry during run",
+    "Do not use pi-workflows as main canary executor until heartbeat/status/abort are sufficient"
   ],
   "blockers": [
-    "context-watch-checkpoint-required",
-    "simple-delegate rehearsal still blocked by rehearsal-not-ready, auto-advance t [snip] t ready, focus missing [truncated:+11 chars]",
+    "No agent dispatch authorized by this checkpoint",
     "routing/settings remain protected",
-    "live external probes remain opt-in"
+    "simple-delegate rehearsal auto readiness may still be blocked by broader telemetry gates"
   ],
   "recent_validation": [
-    "workflow-agents {} live smoke -> full JSON list with 31 agents",
-    "workflow-agents {name: task-worker} -> focused detail",
-    "safe_marker_check docs/research/workflow-agents-compact-output-2026-05.md -> ok"
+    "one_slice_agent_run_plan live returned ready-for-human-decision for Spark scorecard packet",
+    "one_slice_agent_run_status live returned safe not-found for missing run",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 9 passed"
+  ],
+  "recent_commits": [
+    "8c987311 feat(delegation): add one-slice agent run controls",
+    "ef5ed161 test(delegation): cover one-slice agent control tools"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-960",
+    "focus": "TASK-BUD-969",
     "canonical_links": [
-      "task:TASK-BUD-960"
+      "task:TASK-BUD-969",
+      "commit:8c987311"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T00:50:38.598Z",
-    "level": "ok",
-    "percent": 38,
-    "action": "continue",
-    "recommendation": "Commit current slice, then ask/decide explicit next canary focus because default local-safe qu [snip] egation gate is not ready. [truncated:+20 chars]",
+    "generatedAtIso": "2026-05-07T02:08:26.378Z",
+    "level": "checkpoint",
+    "percent": 56,
+    "action": "checkpoint-refresh",
+    "recommendation": "pause for explicit human decision before any provider canary dispatch",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T00:50:38.598Z",
+      "atIso": "2026-05-07T02:08:26.378Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 38,
+      "level": "checkpoint",
+      "percent": 56,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commit current slice, then ask/decide explicit next canary focus because default local-safe qu [snip] egation gate is not ready. [truncated:+20 chars]"
-    },
-    {
-      "atIso": "2026-05-07T01:16:44.052Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 55,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+      "recommendation": "pause for explicit human decision before any provider canary dispatch"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-960"
+    "TASK-BUD-969"
   ]
 }
