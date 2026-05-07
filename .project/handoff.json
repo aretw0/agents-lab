@@ -1,47 +1,48 @@
 {
-  "timestamp": "2026-05-07T20:06:00.312Z",
-  "context": "Post-reload recovery continued. Live storage report after .gz exclusion found no remaining uncompressed bounded pi session candidates. Ran sa [snip] ent session that should not be touched. [truncated:+428 chars]",
+  "timestamp": "2026-05-07T20:28:45.148Z",
+  "context": "Operator explicitly confirmed destructive cleanup: delete other pi sessions and keep only current session. Deleted 15 non-current session fil [snip] reshold, so worker/canary remains held. [truncated:+281 chars]",
   "next_actions": [
     "Do not start worker/canary while machine gate remains pause.",
-    "If operator wants repo-local cleanup, only .pi/npm (~163MB, reinstallable cache) remains as a [snip] r the 2GB threshold alone. [truncated:+30 chars]",
-    "Prefer external disk cleanup outside repo to free at least ~700MB more; then re-run machine_maintenance_status."
+    "Need ~500MB more free to pass the 2GB disk pause threshold; safest remaining option is externa [snip] emains insufficient alone. [truncated:+112 chars]",
+    "Commit board/handoff evidence if desired."
   ],
   "blockers": [
     "Machine maintenance gate remains pause (<2GB free).",
     "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated."
   ],
   "recent_validation": [
-    "workspace_storage_pressure_report -> 0 uncompressed bounded session candidates",
-    "git gc --prune=never completed; git count-objects loose count 10037 -> 16, loose size 186.63MiB -> ~0.06MiB",
-    "machine_maintenance_status -> still pause, disk free≈1395MB"
+    "Keep-file existed before and after deletion: .sandbox/pi-agent/sessions/--C--Users-aretw-Docum [snip] bc-b1df-30391c64023e.jsonl [truncated:+66 chars]",
+    "Deleted 15 other bounded session files only under .sandbox/pi-agent/sessions",
+    "machine_maintenance_status after cleanup -> pause, disk free≈1526MB"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-991",
     "canonical_links": [
-      "task:TASK-BUD-991"
+      "task:TASK-BUD-991",
+      "commit:30391c64023e"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T20:06:00.312Z",
+    "generatedAtIso": "2026-05-07T20:28:45.148Z",
     "level": "ok",
-    "percent": 48,
+    "percent": 49,
     "action": "continue",
-    "recommendation": "external-disk-cleanup-needed-before-worker-canary",
+    "recommendation": "external-cleanup-or-explicit-cache-removal-before-canary",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T20:06:00.312Z",
+      "atIso": "2026-05-07T20:28:45.148Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 48,
+      "percent": 49,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "external-disk-cleanup-needed-before-worker-canary"
+      "recommendation": "external-cleanup-or-explicit-cache-removal-before-canary"
     }
   ],
   "completed_tasks": [
