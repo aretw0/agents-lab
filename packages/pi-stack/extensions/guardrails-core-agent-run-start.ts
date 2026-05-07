@@ -1,5 +1,6 @@
 export type AgentRunExecutorKind = "pi-print-subprocess";
 export type AgentRunStartDecision = "ready-for-human-decision" | "blocked";
+export type AgentRunBudgetDecision = "ok" | "warn" | "blocked" | "unknown";
 
 export interface AgentRunStartPacketInput {
   runId?: string;
@@ -12,6 +13,8 @@ export interface AgentRunStartPacketInput {
   toolAllowlist?: string[];
   sessionIsolation?: "no-session" | "run-session-dir" | string;
   logPath?: string;
+  budgetDecision?: AgentRunBudgetDecision | string;
+  budgetEvidence?: string;
   protectedScopeRequested?: boolean;
 }
 
@@ -37,6 +40,7 @@ export interface AgentRunStartPacketResult {
     | "agent-run-start-blocked-tools"
     | "agent-run-start-blocked-session-isolation"
     | "agent-run-start-blocked-log-path"
+    | "agent-run-start-blocked-budget"
     | "agent-run-start-blocked-protected-scope";
   blockers: string[];
   runSpec: {
@@ -50,6 +54,8 @@ export interface AgentRunStartPacketResult {
     toolAllowlist: string[];
     sessionIsolation: "no-session" | "run-session-dir" | "unknown";
     logPath: string;
+    budgetDecision: AgentRunBudgetDecision;
+    budgetEvidence: string;
     protectedScopeRequested: boolean;
   };
   commandPreview: {
@@ -89,6 +95,10 @@ function normalizeSessionIsolation(value: unknown): "no-session" | "run-session-
   return value === "no-session" || value === "run-session-dir" ? value : "unknown";
 }
 
+function normalizeBudgetDecision(value: unknown): AgentRunBudgetDecision {
+  return value === "ok" || value === "warn" || value === "blocked" ? value : "unknown";
+}
+
 export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): AgentRunStartPacketResult {
   const runId = normalizeText(input.runId);
   const executorKind = input.executorKind === "pi-print-subprocess" || !input.executorKind ? "pi-print-subprocess" : "unknown";
@@ -100,6 +110,8 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   const toolAllowlist = normalizeToolAllowlist(input.toolAllowlist);
   const sessionIsolation = normalizeSessionIsolation(input.sessionIsolation ?? "no-session");
   const logPath = normalizeText(input.logPath);
+  const budgetDecision = normalizeBudgetDecision(input.budgetDecision);
+  const budgetEvidence = normalizeText(input.budgetEvidence);
   const protectedScopeRequested = input.protectedScopeRequested === true;
   const blockers: string[] = [];
   let recommendationCode: AgentRunStartPacketResult["recommendationCode"] = "agent-run-start-ready-for-human-decision";
@@ -121,6 +133,8 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   if (unsupportedTools.length > 0) block("agent-run-start-blocked-tools", `non-read-only-tools:${unsupportedTools.join(",")}`);
   if (sessionIsolation === "unknown") block("agent-run-start-blocked-session-isolation", "session-isolation-missing");
   if (!logPath) block("agent-run-start-blocked-log-path", "log-path-missing");
+  if (budgetDecision === "unknown") block("agent-run-start-blocked-budget", "budget-decision-missing");
+  if (budgetDecision === "blocked") block("agent-run-start-blocked-budget", "budget-blocked");
 
   const commandArgs = [
     ...(sessionIsolation === "no-session" ? ["--no-session"] : ["--session-dir", `.pi/agent-runs/${runId || "unknown"}`]),
@@ -157,6 +171,8 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       toolAllowlist,
       sessionIsolation,
       logPath,
+      budgetDecision,
+      budgetEvidence,
       protectedScopeRequested,
     },
     commandPreview: {
@@ -169,6 +185,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       ? [
           "ask the human/operator for the exact confirmation phrase before starting any worker",
           "if confirmed, registry-upsert planned->running with pid/log/status before invoking the command preview as argv",
+          "preserve provider/model budget evidence with the run record before invocation",
           "after exit, update registry and run parent-side outcome packet; empty output is a contract failure",
         ]
       : [
@@ -183,6 +200,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       providerModelRef ? `model=${providerModelRef}` : undefined,
       `executor=${executorKind}`,
       `tools=${toolAllowlist.join(",") || "none"}`,
+      `budget=${budgetDecision}`,
       `dispatch=no`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),

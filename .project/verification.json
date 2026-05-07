@@ -14588,6 +14588,15 @@
       "method": "test",
       "timestamp": "2026-05-07T16:25:45.424Z",
       "evidence": "Implemented stale auto-resume guidance reconciliation: when reloadRequired=false, stale reload guidance also filters operator=reload/reload-recommended variants; when contextPressureActive=false, context-watch checkpoint/compact pressure guidance is filtered from auto-resume prompts while preserving real blockers/next actions. Validation passed: npx vitest run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts -> 2 files, 68 tests passed. git diff --check scoped to changed context-watch files passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-989-START-PACKET-BUDGET-GATE",
+      "target": "TASK-BUD-989",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-vitest",
+      "timestamp": "2026-05-07T16:43:26.198Z",
+      "evidence": "Hardened provider-native agent_run_start_packet so a future worker start packet must carry explicit provider/model budget evidence. New fields: budget_decision/budgetDecision (ok|warn|blocked|unknown) and budget_evidence/budgetEvidence. Missing budget decision or blocked budget keeps the packet blocked; ok/warn remains report-only and still requires human confirmation. Surface schema updated. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 16 passed."
     }
   ]
 }

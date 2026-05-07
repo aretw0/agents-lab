@@ -145,6 +145,8 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       tool_allowlist: Type.Optional(Type.Array(Type.String(), { description: "Read-only tool allowlist for first provider-native canaries." })),
       session_isolation: Type.Optional(Type.String({ description: "Session isolation mode: no-session or run-session-dir." })),
       log_path: Type.Optional(Type.String({ description: "Bounded log path for stdout/stderr metadata." })),
+      budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision for this run: ok, warn, blocked, or unknown. Missing/blocked keeps packet blocked." })),
+      budget_evidence: Type.Optional(Type.String({ description: "Short provider/model budget evidence, e.g. dashscope ok or openai-codex spark pool evidence." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -160,6 +162,8 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         toolAllowlist: asOptionalStringArray(p.tool_allowlist),
         sessionIsolation: typeof p.session_isolation === "string" ? p.session_isolation : undefined,
         logPath: typeof p.log_path === "string" ? p.log_path : undefined,
+        budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
+        budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       return buildOperatorVisibleToolResponse({

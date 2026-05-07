@@ -122,6 +122,8 @@ describe("agent spawn readiness contract", () => {
       declaredFiles: ["packages/pi-stack/extensions/context-watchdog-auto-resume.ts"],
       timeoutMs: 90_000,
       logPath: ".pi/reports/task-bud-990-stale-resume-review.log",
+      budgetDecision: "ok",
+      budgetEvidence: "dashscope provider budget ok from quota_visibility_provider_budgets",
     });
 
     expect(result).toMatchObject({
@@ -142,9 +144,39 @@ describe("agent spawn readiness contract", () => {
       },
       humanConfirmationPhrase: "execute o worker task-bud-990-stale-resume-review",
     });
+    expect(result.runSpec.budgetDecision).toBe("ok");
     expect(result.commandPreview.args).toContain("--model");
     expect(result.commandPreview.args).toContain("dashscope/qwen3-coder-plus");
     expect(result.commandPreview.args).toContain("read,grep,find,ls");
+  });
+
+  it("blocks provider-native start packets without explicit non-blocked budget evidence", () => {
+    const missing = buildAgentRunStartPacket({
+      runId: "run-budget-missing",
+      goal: "review one local file",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: ["docs/research/provider-canary-scorecard-2026-05.md"],
+      timeoutMs: 90_000,
+      logPath: ".pi/reports/run-budget-missing.log",
+    });
+    expect(missing.decision).toBe("blocked");
+    expect(missing.blockers).toContain("budget-decision-missing");
+
+    const blocked = buildAgentRunStartPacket({
+      runId: "run-budget-blocked",
+      goal: "review one local file",
+      providerModelRef: "openai-codex/gpt-5.3-codex",
+      cwd: process.cwd(),
+      declaredFiles: ["docs/research/provider-canary-scorecard-2026-05.md"],
+      timeoutMs: 90_000,
+      logPath: ".pi/reports/run-budget-blocked.log",
+      budgetDecision: "blocked",
+      budgetEvidence: "provider-level local budget blocked",
+    });
+    expect(blocked.decision).toBe("blocked");
+    expect(blocked.recommendationCode).toBe("agent-run-start-blocked-budget");
+    expect(blocked.blockers).toContain("budget-blocked");
   });
 
   it("blocks provider-native start packets that request write tools or protected scope", () => {
@@ -396,6 +428,8 @@ describe("agent spawn readiness contract", () => {
         declared_files: ["docs/research/agent-run-provider-native-runner-2026-05.md"],
         timeout_ms: 90000,
         log_path: ".pi/reports/run-provider-native.log",
+        budget_decision: "ok",
+        budget_evidence: "dashscope provider budget ok",
       },
       undefined as unknown as AbortSignal,
       () => {},
