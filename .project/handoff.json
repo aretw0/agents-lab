@@ -1,48 +1,47 @@
 {
-  "timestamp": "2026-05-07T19:03:49.673Z",
-  "context": "After reload, ran updated storage report. It now finds session-root variants, but live output also revealed a quality gap: already-compressed [snip] so provider-native canary remains held. [truncated:+304 chars]",
+  "timestamp": "2026-05-07T20:06:00.312Z",
+  "context": "Post-reload recovery continued. Live storage report after .gz exclusion found no remaining uncompressed bounded pi session candidates. Ran sa [snip] ent session that should not be touched. [truncated:+428 chars]",
   "next_actions": [
-    "Commit .gz exclusion fix and board evidence.",
-    "Reload before trusting live workspace_storage_pressure_report .gz exclusion.",
-    "Disk remains below 2GB pause threshold; next safe options require explicit operator choice: gi [snip] disk cleanup outside repo. [truncated:+93 chars]"
+    "Do not start worker/canary while machine gate remains pause.",
+    "If operator wants repo-local cleanup, only .pi/npm (~163MB, reinstallable cache) remains as a [snip] r the 2GB threshold alone. [truncated:+30 chars]",
+    "Prefer external disk cleanup outside repo to free at least ~700MB more; then re-run machine_maintenance_status."
   ],
   "blockers": [
-    "Machine maintenance gate remains pause (~1.2GB free); long-runs/worker canary held.",
+    "Machine maintenance gate remains pause (<2GB free).",
     "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated."
   ],
   "recent_validation": [
-    "workspace_storage_pressure_report live before source fix: found session roots and candidates but included .gz artifacts",
-    "gzip-compressed only old inactive uncompressed session JSONL files; no deletion and active session untouched",
-    "npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts -> 12 passed"
+    "workspace_storage_pressure_report -> 0 uncompressed bounded session candidates",
+    "git gc --prune=never completed; git count-objects loose count 10037 -> 16, loose size 186.63MiB -> ~0.06MiB",
+    "machine_maintenance_status -> still pause, disk free≈1395MB"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-991",
     "canonical_links": [
-      "task:TASK-BUD-991",
-      "task:TASK-BUD-991-EXCLUDE-GZ-CANDIDATES"
+      "task:TASK-BUD-991"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T19:03:49.673Z",
+    "generatedAtIso": "2026-05-07T20:06:00.312Z",
     "level": "ok",
-    "percent": 46,
+    "percent": 48,
     "action": "continue",
-    "recommendation": "commit-gz-exclusion-then-ask-operator-for-next-cleanup-scope",
+    "recommendation": "external-disk-cleanup-needed-before-worker-canary",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T19:03:49.673Z",
+      "atIso": "2026-05-07T20:06:00.312Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 46,
+      "percent": 48,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-gz-exclusion-then-ask-operator-for-next-cleanup-scope"
+      "recommendation": "external-disk-cleanup-needed-before-worker-canary"
     }
   ],
   "completed_tasks": [
