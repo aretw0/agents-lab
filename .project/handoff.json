@@ -1,55 +1,56 @@
 {
-  "timestamp": "2026-05-07T15:55:45.540Z",
-  "context": "Continued subagent/operator focus after human steering. Added provider-native runner design doc and first report-only start packet primitive. [snip] uires /reload before live availability. [truncated:+297 chars]",
+  "timestamp": "2026-05-07T16:08:43.241Z",
+  "context": "After reload, continued provider-native agent lane with cadence focus. Live agent_run_start_packet worked for candidate task-bud-990-stale-re [snip] ting live outcome/start surfaces again. [truncated:+352 chars]",
   "current_tasks": [
     "TASK-BUD-989"
   ],
   "next_actions": [
-    "/reload before trusting live agent_run_start_packet tool.",
-    "Reconcile first canary provider choice with live budget posture: dashscope ok, openai-codex cu [snip] assumption as hard truth. [truncated:+62 chars]",
-    "Use TASK-BUD-990/TASK-BUD-988/TASK-BUD-968 as candidate bounded agent tests, but execute exact [snip] plicit human confirmation. [truncated:+27 chars]"
+    "/reload before using changed agent_run_outcome_packet live behavior.",
+    "If human confirms, first provider-native worker candidate is task-bud-990-stale-resume-guidanc [snip] exact confirmation phrase. [truncated:+54 chars]",
+    "Alternatively continue hardening actual runner/registry around argv execution, but keep proces [snip] tion contract is stronger. [truncated:+36 chars]"
   ],
   "blockers": [
-    "Existing parked TASK-BUD-968 quota/footer WIP remains dirty and should not be [snip] ith agent-run commits. [truncated:+7 chars]",
-    "Claude Code adapter remains diagnostic/old-path unless ROI changes.",
-    "No multiple workers/colony until 2-3 provider-native one-worker runs pass contract."
+    "Parked TASK-BUD-968 quota/footer WIP remains dirty and must stay isolated.",
+    "Context-watch is ok but operator=reload because runtime extension changed.",
+    "No multi-worker/colony promotion until repeated provider-native one-worker contract passes."
   ],
   "recent_validation": [
-    "safe_marker_check doc markers passed",
-    "i18n lint doc snippet passed",
+    "agent_run_start_packet live returned ready-for-human-decision dispatch=no for TASK-BUD-990 candidate",
+    "agent_run_registry_upsert dry_run returned writeAllowed=no dispatch=no",
     "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 15 passed"
   ],
   "recent_commits": [
-    "33858240 feat(delegation): add provider-native start packet"
+    "be25a9ce fix(delegation): fail empty agent output"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-989",
     "canonical_links": [
       "task:TASK-BUD-989",
-      "task:TASK-BUD-989-PROVIDER-NATIVE-START-PACKET",
+      "task:TASK-BUD-990-STALE-RESUME-GUIDANCE-REVIEW",
       "task:TASK-BUD-990",
-      "commit:33858240"
+      "commit:be25a9ce"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T15:55:45.540Z",
+    "generatedAtIso": "2026-05-07T16:08:43.241Z",
     "level": "ok",
+    "percent": 48,
     "action": "continue",
-    "recommendation": "reload-then-human-confirm-one-provider-native-canary"
+    "recommendation": "reload-before-live-agent-outcome-or-explicit-canary"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T15:55:45.540Z",
+      "atIso": "2026-05-07T16:08:43.241Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 0,
+      "percent": 48,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-human-confirm-one-provider-native-canary"
+      "recommendation": "reload-before-live-agent-outcome-or-explicit-canary"
     }
   ]
 }
