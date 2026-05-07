@@ -100,11 +100,11 @@ Requisitos adicionais:
 - reviewers/quality gate;
 - promoção manual dos resultados.
 
-## Primitiva proposta: `simple_agent_run`
+## Primitiva proposta: `one_slice_agent_run`
 
 Forma: extensão/tool first-party, não apenas documentação.
 
-Primeira fatia implementada após o incidente: `simple_agent_run_plan`, um packet report-only que não despacha, mas normaliza o contrato L1 antes de qualquer novo worker. Ele herda explicitamente os invariantes das primitivas acima: `activation=none`, `authorization=none`, `dispatchAllowed=false`, `executorApproved=false`, `requiresHumanDecision=true`.
+Primeira fatia implementada após o incidente: `one_slice_agent_run_plan`, um packet report-only que não despacha, mas normaliza o contrato L1 antes de qualquer novo worker. Ele herda explicitamente os invariantes das primitivas acima: `activation=none`, `authorization=none`, `dispatchAllowed=false`, `executorApproved=false`, `requiresHumanDecision=true`.
 
 Entrada mínima:
 
@@ -132,10 +132,10 @@ Saída mínima:
 
 Ferramentas complementares futuras:
 
-- `simple_agent_status(runId)`;
-- `simple_agent_abort(runId)`;
-- `simple_agent_log_tail(runId, maxLines)`;
-- `simple_agent_reap(runId)`.
+- `one_slice_agent_run_status(runId)`;
+- `one_slice_agent_run_abort(runId)`;
+- `one_slice_agent_run_log_tail(runId, maxLines)`;
+- `one_slice_agent_run_reap(runId)`.
 
 ## Guardrails obrigatórios
 
@@ -149,6 +149,6 @@ Ferramentas complementares futuras:
 ## Próximo passo local-safe
 
 1. Encerrar/limpar artefatos experimentais do caminho `pi-workflows` que não serão promovidos.
-2. Criar decision packet para `simple_agent_run` L1, começando report-only.
+2. Criar decision packet para `one_slice_agent_run` L1, começando report-only.
 3. Implementar apenas status/preview primeiro.
 4. Só depois permitir um novo canary com timeout e abort testados.

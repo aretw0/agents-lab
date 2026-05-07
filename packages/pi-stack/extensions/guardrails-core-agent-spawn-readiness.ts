@@ -41,9 +41,9 @@ export interface AgentSpawnReadinessResult {
   summary: string;
 }
 
-export type SimpleAgentRunPlanDecision = "ready-for-human-decision" | "blocked";
+export type OneSliceAgentRunPlanDecision = "ready-for-human-decision" | "blocked";
 
-export interface SimpleAgentRunPlanInput {
+export interface OneSliceAgentRunPlanInput {
   goal?: string;
   providerModelRef?: string;
   cwd?: string;
@@ -57,28 +57,28 @@ export interface SimpleAgentRunPlanInput {
   protectedScopeRequested?: boolean;
 }
 
-export interface SimpleAgentRunPlanResult {
-  mode: "simple-agent-run-plan";
+export interface OneSliceAgentRunPlanResult {
+  mode: "one-slice-agent-run-plan";
   activation: "none";
   authorization: "none";
   dispatchAllowed: false;
   executorApproved: false;
   requiresHumanDecision: true;
   oneSliceOnly: true;
-  decision: SimpleAgentRunPlanDecision;
+  decision: OneSliceAgentRunPlanDecision;
   recommendationCode:
-    | "simple-agent-run-ready-for-human-decision"
-    | "simple-agent-run-blocked-protected-scope"
-    | "simple-agent-run-blocked-goal"
-    | "simple-agent-run-blocked-provider-model"
-    | "simple-agent-run-blocked-cwd"
-    | "simple-agent-run-blocked-files"
-    | "simple-agent-run-blocked-timeout"
-    | "simple-agent-run-blocked-validation"
-    | "simple-agent-run-blocked-rollback"
-    | "simple-agent-run-blocked-budget"
-    | "simple-agent-run-blocked-abort"
-    | "simple-agent-run-blocked-log-tail";
+    | "one-slice-agent-run-ready-for-human-decision"
+    | "one-slice-agent-run-blocked-protected-scope"
+    | "one-slice-agent-run-blocked-goal"
+    | "one-slice-agent-run-blocked-provider-model"
+    | "one-slice-agent-run-blocked-cwd"
+    | "one-slice-agent-run-blocked-files"
+    | "one-slice-agent-run-blocked-timeout"
+    | "one-slice-agent-run-blocked-validation"
+    | "one-slice-agent-run-blocked-rollback"
+    | "one-slice-agent-run-blocked-budget"
+    | "one-slice-agent-run-blocked-abort"
+    | "one-slice-agent-run-blocked-log-tail";
   recommendation: string;
   blockers: string[];
   runSpec: {
@@ -199,7 +199,7 @@ export function evaluateAgentSpawnReadiness(input: AgentSpawnReadinessInput = {}
   };
 }
 
-export function buildSimpleAgentRunPlan(input: SimpleAgentRunPlanInput = {}): SimpleAgentRunPlanResult {
+export function buildOneSliceAgentRunPlan(input: OneSliceAgentRunPlanInput = {}): OneSliceAgentRunPlanResult {
   const goal = normalizeText(input.goal);
   const providerModelRef = normalizeText(input.providerModelRef);
   const cwd = normalizeText(input.cwd);
@@ -213,10 +213,10 @@ export function buildSimpleAgentRunPlan(input: SimpleAgentRunPlanInput = {}): Si
   const protectedScopeRequested = input.protectedScopeRequested === true;
 
   const blockers: string[] = [];
-  let recommendationCode: SimpleAgentRunPlanResult["recommendationCode"] = "simple-agent-run-ready-for-human-decision";
-  let recommendation = "simple agent run contract is bounded enough to ask for an explicit one-slice human decision.";
+  let recommendationCode: OneSliceAgentRunPlanResult["recommendationCode"] = "one-slice-agent-run-ready-for-human-decision";
+  let recommendation = "one-slice agent run contract is bounded enough to ask for an explicit one-slice human decision.";
 
-  const block = (code: SimpleAgentRunPlanResult["recommendationCode"], blocker: string, message: string) => {
+  const block = (code: OneSliceAgentRunPlanResult["recommendationCode"], blocker: string, message: string) => {
     if (blockers.length === 0) {
       recommendationCode = code;
       recommendation = message;
@@ -225,40 +225,40 @@ export function buildSimpleAgentRunPlan(input: SimpleAgentRunPlanInput = {}): Si
   };
 
   if (protectedScopeRequested) {
-    block("simple-agent-run-blocked-protected-scope", "protected-scope-requested", "protected scope requires a separate explicit protected-focus decision before any agent run.");
+    block("one-slice-agent-run-blocked-protected-scope", "protected-scope-requested", "protected scope requires a separate explicit protected-focus decision before any agent run.");
   }
   if (!goal) {
-    block("simple-agent-run-blocked-goal", "goal-missing", "declare the one-slice goal before preparing a simple agent run.");
+    block("one-slice-agent-run-blocked-goal", "goal-missing", "declare the one-slice goal before preparing a one-slice agent run.");
   }
   if (!providerModelRef || !providerModelRef.includes("/")) {
-    block("simple-agent-run-blocked-provider-model", "provider-model-ref-missing", "declare a full provider/model reference before preparing a simple agent run.");
+    block("one-slice-agent-run-blocked-provider-model", "provider-model-ref-missing", "declare a full provider/model reference before preparing a one-slice agent run.");
   }
   if (!cwd) {
-    block("simple-agent-run-blocked-cwd", "cwd-missing", "declare the worker cwd before preparing a simple agent run.");
+    block("one-slice-agent-run-blocked-cwd", "cwd-missing", "declare the worker cwd before preparing a one-slice agent run.");
   }
   if (declaredFiles.length === 0) {
-    block("simple-agent-run-blocked-files", "declared-files-missing", "declare the exact file scope before preparing a simple agent run.");
+    block("one-slice-agent-run-blocked-files", "declared-files-missing", "declare the exact file scope before preparing a one-slice agent run.");
   }
   if (timeoutMs < SIMPLE_AGENT_TIMEOUT_MIN_MS || timeoutMs > SIMPLE_AGENT_TIMEOUT_MAX_MS) {
-    block("simple-agent-run-blocked-timeout", "timeout-out-of-bounds", "declare a short bounded timeout before preparing a simple agent run.");
+    block("one-slice-agent-run-blocked-timeout", "timeout-out-of-bounds", "declare a short bounded timeout before preparing a one-slice agent run.");
   }
   if (!validationGateKnown) {
-    block("simple-agent-run-blocked-validation", "validation-gate-missing", "declare the parent-side validation gate before preparing a simple agent run.");
+    block("one-slice-agent-run-blocked-validation", "validation-gate-missing", "declare the parent-side validation gate before preparing a one-slice agent run.");
   }
   if (!rollbackPlanKnown) {
-    block("simple-agent-run-blocked-rollback", "rollback-plan-missing", "declare a non-destructive rollback plan before preparing a simple agent run.");
+    block("one-slice-agent-run-blocked-rollback", "rollback-plan-missing", "declare a non-destructive rollback plan before preparing a one-slice agent run.");
   }
   if (!budgetKnown) {
-    block("simple-agent-run-blocked-budget", "budget-missing", "declare a bounded provider/cost budget before preparing a simple agent run.");
+    block("one-slice-agent-run-blocked-budget", "budget-missing", "declare a bounded provider/cost budget before preparing a one-slice agent run.");
   }
   if (!abortKnown) {
-    block("simple-agent-run-blocked-abort", "abort-contract-missing", "prove a safe abort path before preparing a simple agent run.");
+    block("one-slice-agent-run-blocked-abort", "abort-contract-missing", "prove a safe abort path before preparing a one-slice agent run.");
   }
   if (!logTailKnown) {
-    block("simple-agent-run-blocked-log-tail", "bounded-log-tail-missing", "declare bounded log/status visibility before preparing a simple agent run.");
+    block("one-slice-agent-run-blocked-log-tail", "bounded-log-tail-missing", "declare bounded log/status visibility before preparing a one-slice agent run.");
   }
 
-  const decision: SimpleAgentRunPlanDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const decision: OneSliceAgentRunPlanDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
   const runSpec = {
     goal,
     providerModelRef,
@@ -287,7 +287,7 @@ export function buildSimpleAgentRunPlan(input: SimpleAgentRunPlanInput = {}): Si
       ];
 
   return {
-    mode: "simple-agent-run-plan",
+    mode: "one-slice-agent-run-plan",
     activation: "none",
     authorization: "none",
     dispatchAllowed: false,
@@ -304,7 +304,7 @@ export function buildSimpleAgentRunPlan(input: SimpleAgentRunPlanInput = {}): Si
       ? `restore/remove only declared files: ${declaredFiles.join(", ")}`
       : "no rollback target is safe until declaredFiles is provided",
     summary: [
-      "simple-agent-run-plan:",
+      "one-slice-agent-run-plan:",
       `decision=${decision}`,
       `code=${recommendationCode}`,
       providerModelRef ? `model=${providerModelRef}` : undefined,

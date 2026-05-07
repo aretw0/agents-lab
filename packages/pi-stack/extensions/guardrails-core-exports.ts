@@ -94,7 +94,8 @@ export { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPl
 export { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
 export { evaluateColonyPromotionGate } from "./guardrails-core-colony-promotion-gate";
 export { buildOpsCalibrationDecisionPacket } from "./guardrails-core-ops-calibration";
-export { buildSimpleAgentRunPlan, evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
+export { buildOneSliceAgentRunPlan, evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
+export { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunStatus } from "./guardrails-core-one-slice-agent-run-runtime";
 export { buildTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationEvidence, extractTrustedHumanConfirmationEvidenceFromEnvelope, recordTrustedHumanConfirmationUiDecision, resolveHumanConfirmationAuditPlan, resolveHumanConfirmationEvidenceMatch, resolveHumanConfirmationImplementationChannelPlan, resolveHumanConfirmationRuntimeConsumptionPlan, resolveHumanConfirmationSignalSourcePlan } from "./guardrails-core-human-confirmation";
 export { resolveMonitorClassifyFailureReadiness } from "./monitor-observability";
 export { evaluateUnattendedRehearsalGate, formatUnattendedRehearsalSliceEvidence, summarizeUnattendedRehearsalGate, validateUnattendedRehearsalSliceEvidence } from "./guardrails-core-unattended-rehearsal";

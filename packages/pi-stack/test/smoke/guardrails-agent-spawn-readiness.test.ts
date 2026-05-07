@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildSimpleAgentRunPlan, evaluateAgentSpawnReadiness } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildOneSliceAgentRunPlan, evaluateAgentSpawnReadiness } from "../../extensions/guardrails-core";
+import { buildOneSliceAgentAbortPlan, buildOneSliceAgentRunStatus } from "../../extensions/guardrails-core-one-slice-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
   it("returns ready-for-simple-spawn for single agent with explicit bounded controls", () => {
@@ -56,8 +57,8 @@ describe("agent spawn readiness contract", () => {
     expect(result.blockers).toContain("multi-agent-requested");
   });
 
-  it("builds a report-only simple agent run plan when all L1 controls are present", () => {
-    const result = buildSimpleAgentRunPlan({
+  it("builds a report-only one-slice agent run plan when all L1 controls are present", () => {
+    const result = buildOneSliceAgentRunPlan({
       goal: "create provider canary scorecard",
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
       cwd: process.cwd(),
@@ -71,7 +72,7 @@ describe("agent spawn readiness contract", () => {
     });
 
     expect(result).toMatchObject({
-      mode: "simple-agent-run-plan",
+      mode: "one-slice-agent-run-plan",
       activation: "none",
       authorization: "none",
       dispatchAllowed: false,
@@ -79,13 +80,13 @@ describe("agent spawn readiness contract", () => {
       requiresHumanDecision: true,
       oneSliceOnly: true,
       decision: "ready-for-human-decision",
-      recommendationCode: "simple-agent-run-ready-for-human-decision",
+      recommendationCode: "one-slice-agent-run-ready-for-human-decision",
       blockers: [],
     });
   });
 
-  it("blocks simple agent run plans without abort and bounded logs", () => {
-    const result = buildSimpleAgentRunPlan({
+  it("blocks one-slice agent run plans without abort and bounded logs", () => {
+    const result = buildOneSliceAgentRunPlan({
       goal: "create provider canary scorecard",
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
       cwd: process.cwd(),
@@ -99,9 +100,49 @@ describe("agent spawn readiness contract", () => {
     });
 
     expect(result.decision).toBe("blocked");
-    expect(result.recommendationCode).toBe("simple-agent-run-blocked-abort");
+    expect(result.recommendationCode).toBe("one-slice-agent-run-blocked-abort");
     expect(result.blockers).toContain("abort-contract-missing");
     expect(result.blockers).toContain("bounded-log-tail-missing");
+  });
+
+  it("reports one-slice agent run status and dry-first abort plans", () => {
+    const entry = {
+      runId: "run-1",
+      pid: 12345,
+      state: "running" as const,
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: ["docs/research/provider-canary-scorecard-2026-05.md"],
+      startedAtIso: "2026-05-07T00:00:00.000Z",
+      lastEventAtIso: "2026-05-07T00:00:30.000Z",
+    };
+
+    const status = buildOneSliceAgentRunStatus("run-1", entry, Date.parse("2026-05-07T00:00:45.000Z"));
+    expect(status).toMatchObject({
+      mode: "one-slice-agent-run-status",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      processStopAllowed: false,
+      found: true,
+      state: "running",
+      stale: false,
+    });
+
+    const dryRun = buildOneSliceAgentAbortPlan({ runId: "run-1", entry, cwdExpected: process.cwd() });
+    expect(dryRun).toMatchObject({
+      mode: "one-slice-agent-abort-plan",
+      decision: "dry-run",
+      processStopAllowed: false,
+      authorization: "none",
+    });
+
+    const confirmed = buildOneSliceAgentAbortPlan({ runId: "run-1", entry, execute: true, operatorConfirmed: true, cwdExpected: process.cwd() });
+    expect(confirmed).toMatchObject({
+      decision: "abort-ready",
+      processStopAllowed: true,
+      authorization: "explicit-human",
+      pid: 12345,
+    });
   });
 
   it("exposes agent_spawn_readiness_gate as read-only tool", async () => {
@@ -150,7 +191,7 @@ describe("agent spawn readiness contract", () => {
     expect(result.content?.[0]?.text).not.toContain('\"decision\"');
   });
 
-  it("exposes simple_agent_run_plan as report-only tool", async () => {
+  it("exposes one_slice_agent_run_plan as report-only tool", async () => {
     const rawPi = {
       on: vi.fn(),
       registerTool: vi.fn(),
@@ -161,7 +202,7 @@ describe("agent spawn readiness contract", () => {
     const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
 
     guardrailsCore(pi);
-    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "simple_agent_run_plan");
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "one_slice_agent_run_plan");
     const tool = toolCall?.[0] as {
       execute: (
         toolCallId: string,
@@ -173,7 +214,7 @@ describe("agent spawn readiness contract", () => {
     };
 
     const result = await tool.execute(
-      "tc-simple-agent-run-plan",
+      "tc-one-slice-agent-run-plan",
       {
         goal: "create provider canary scorecard",
         provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
@@ -190,11 +231,11 @@ describe("agent spawn readiness contract", () => {
       { cwd: process.cwd() },
     );
 
-    expect(result.details?.mode).toBe("simple-agent-run-plan");
+    expect(result.details?.mode).toBe("one-slice-agent-run-plan");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.executorApproved).toBe(false);
     expect(result.details?.decision).toBe("ready-for-human-decision");
-    expect(result.content?.[0]?.text).toContain("simple-agent-run-plan: decision=ready-for-human-decision");
+    expect(result.content?.[0]?.text).toContain("one-slice-agent-run-plan: decision=ready-for-human-decision");
     expect(result.content?.[0]?.text).not.toContain('"runSpec"');
   });
 });
