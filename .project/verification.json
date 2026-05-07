@@ -14624,6 +14624,15 @@
       "method": "live-readonly-tools",
       "timestamp": "2026-05-07T17:54:59.395Z",
       "evidence": "Post-reload live smoke: quota_visibility_route(profile=balanced, execute=false) returned noAutoSwitch=true, dashscope executionBudgetDecision=ok/ready=true, openai-codex provider-level executionBudgetDecision=blocked/ready=false. OpenAI WHAM read-only probe succeeded: Codex 5h left=98%, 7d left=38%; gpt-5.3-codex-spark 5h left=100%, 7d left=82%, allowed=true. agent_run_start_packet accepted both DashScope and Codex Spark report-only packets with explicit budget_evidence and dispatch=no. No worker execution, no settings/routing changes."
+    },
+    {
+      "id": "VERIF-TASK-BUD-991-STORAGE-PRESSURE-REPORT",
+      "target": "TASK-BUD-991",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-vitest",
+      "timestamp": "2026-05-07T18:24:03.509Z",
+      "evidence": "Implemented report-only workspace_storage_pressure_report inside machine-maintenance. It scans only the workspace's known pi session directory, reports old .bak-large-output/.tmp/old-session JSONL candidates for reversible gzip compression, exposes dispatchAllowed=false and cleanupExecuted=false, and previews commands without running them. Validation: npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts -> 1 file, 12 tests passed."
     }
   ]
 }

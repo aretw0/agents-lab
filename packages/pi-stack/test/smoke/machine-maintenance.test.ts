@@ -1,3 +1,6 @@
+import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import machineMaintenanceExtension, {
   classifyCpuPressure,
@@ -5,8 +8,10 @@ import machineMaintenanceExtension, {
   classifyGpuPressure,
   classifyMemoryPressure,
   classifySwapPressure,
+  buildWorkspaceStoragePressureReport,
   evaluateMachineMaintenanceGate,
   formatMachineMaintenanceGate,
+  formatWorkspaceStoragePressureReport,
   resolveMachineMaintenanceThresholds,
 } from "../../extensions/machine-maintenance";
 
@@ -158,7 +163,42 @@ describe("machine-maintenance gate", () => {
     expect(formatMachineMaintenanceGate(gate)).toContain("gpu unavailable");
   });
 
-  it("registers a pi tool with the canonical execute signature", async () => {
+  it("reports reversible old pi session cleanup candidates without mutating", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-storage-pressure-"));
+    try {
+      const normalizedCwd = cwd.replace(/\\/g, "/");
+      const driveMatch = normalizedCwd.match(/^([A-Za-z]):\/?(.*)$/);
+      const encoded = driveMatch
+        ? `--${driveMatch[1].toUpperCase()}--${driveMatch[2].split("/").filter(Boolean).join("-")}`
+        : normalizedCwd.split("/").filter(Boolean).join("-");
+      const sessionRoot = join(cwd, ".sandbox", "pi-agent", "sessions", encoded);
+      mkdirSync(sessionRoot, { recursive: true });
+      const oldBackup = join(sessionRoot, "2026-04-01T00-00-00-000Z_old.jsonl.bak-large-output-2026-04-02T00-00-00-000Z");
+      const activeSession = join(sessionRoot, "2026-05-07T00-00-00-000Z_current.jsonl");
+      writeFileSync(oldBackup, Buffer.alloc(2 * 1024 * 1024, "a"));
+      writeFileSync(activeSession, Buffer.alloc(2 * 1024 * 1024, "b"));
+      const oldDate = new Date("2026-04-02T00:00:00.000Z");
+      utimesSync(oldBackup, oldDate, oldDate);
+      const report = buildWorkspaceStoragePressureReport({
+        cwd,
+        nowMs: Date.parse("2026-05-07T00:00:00.000Z"),
+        minAgeHours: 24,
+        minCandidateSizeMb: 1,
+        maxCandidates: 5,
+      });
+
+      expect(report.dispatchAllowed).toBe(false);
+      expect(report.cleanupExecuted).toBe(false);
+      expect(report.candidates.some((row) => row.kind === "pi-session-backup")).toBe(true);
+      expect(report.candidates.some((row) => row.path === activeSession)).toBe(false);
+      expect(report.candidates.every((row) => row.reversibleAction === "gzip-compress")).toBe(true);
+      expect(formatWorkspaceStoragePressureReport(report)).toContain("report-only");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("registers pi tools with the canonical execute signature", async () => {
     const pi = makeMockPi();
     machineMaintenanceExtension(pi);
     const tool = getTool(pi, "machine_maintenance_status");
@@ -177,5 +217,18 @@ describe("machine-maintenance gate", () => {
     expect(result.details?.cpu).toBeDefined();
     expect(result.details?.swap).toBeDefined();
     expect(result.details?.gpu).toBeDefined();
+
+    const storageTool = getTool(pi, "workspace_storage_pressure_report");
+    const storageResult = await storageTool.execute(
+      "tc-storage-1",
+      { maxCandidates: 3 },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd(), ui: { setStatus: vi.fn() } },
+    );
+
+    expect(storageResult.content?.[0]?.text).toContain("workspace-storage-pressure-report");
+    expect(storageResult.details?.dispatchAllowed).toBe(false);
+    expect(storageResult.details?.cleanupExecuted).toBe(false);
   });
 });

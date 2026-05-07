@@ -9,8 +9,9 @@
  * filesystem walks, no cleanup mutation. It only reads OS memory and workspace
  * filesystem free space.
  */
-import { existsSync, readFileSync, statfsSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statfsSync, statSync } from "node:fs";
 import { cpus, freemem, loadavg, totalmem } from "node:os";
+import { basename, join } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { readSettingsJson, writeHandoffJson } from "./context-watchdog-storage";
@@ -96,6 +97,31 @@ export interface MachineMaintenanceGate {
 	thresholds: MachineMaintenanceThresholds;
 	blockers: string[];
 	recommendation: string;
+}
+
+export interface WorkspaceStorageCleanupCandidate {
+	path: string;
+	kind: "pi-session-backup" | "pi-session-temp" | "old-pi-session";
+	sizeMb: number;
+	modifiedAtIso: string;
+	ageHours: number;
+	reversibleAction: "gzip-compress";
+	risk: "low" | "medium";
+	reason: string;
+}
+
+export interface WorkspaceStoragePressureReport {
+	mode: "workspace-storage-pressure-report";
+	generatedAtIso: string;
+	dispatchAllowed: false;
+	cleanupExecuted: false;
+	disk: ResourcePressureReading;
+	sessionRoot?: string;
+	totalCandidateSizeMb: number;
+	candidates: WorkspaceStorageCleanupCandidate[];
+	nextAction: "compress-old-session-artifacts" | "manual-review" | "none";
+	commandsPreview: string[];
+	summary: string;
 }
 
 const DEFAULT_THRESHOLDS: MachineMaintenanceThresholds = {
@@ -506,6 +532,141 @@ export function readMachineMaintenanceGate(cwd: string): MachineMaintenanceGate 
 	});
 }
 
+function roundMb(bytes: number): number {
+	return Math.round((Math.max(0, bytes) / MB) * 10) / 10;
+}
+
+function toIso(ms: number): string {
+	return Number.isFinite(ms) && ms > 0 ? new Date(ms).toISOString() : new Date(0).toISOString();
+}
+
+function quotePathForPreview(pathValue: string): string {
+	return `'${pathValue.replace(/'/g, `'\\''`)}'`;
+}
+
+function encodeWorkspaceSessionDir(cwd: string): string {
+	const normalized = cwd.replace(/\\/g, "/");
+	const driveMatch = normalized.match(/^([A-Za-z]):\/?(.*)$/);
+	if (driveMatch) {
+		const rest = driveMatch[2].split("/").filter(Boolean).join("-");
+		return `--${driveMatch[1].toUpperCase()}--${rest}`;
+	}
+	return normalized.split("/").filter(Boolean).join("-");
+}
+
+function currentWorkspaceSessionRoot(cwd: string): string | undefined {
+	const root = join(cwd, ".sandbox", "pi-agent", "sessions", encodeWorkspaceSessionDir(cwd));
+	return existsSync(root) ? root : undefined;
+}
+
+export function buildWorkspaceStoragePressureReport(input: {
+	cwd: string;
+	thresholds?: MachineMaintenanceThresholds;
+	nowMs?: number;
+	maxCandidates?: number;
+	minCandidateSizeMb?: number;
+	minAgeHours?: number;
+	includeCurrentSession?: boolean;
+}): WorkspaceStoragePressureReport {
+	const thresholds = input.thresholds ?? resolveMachineMaintenanceThresholds(readSettingsJson(input.cwd));
+	const disk = readWorkspaceDiskPressure(input.cwd, thresholds);
+	const nowMs = input.nowMs ?? Date.now();
+	const maxCandidates = Math.max(1, Math.min(50, Math.floor(input.maxCandidates ?? 10)));
+	const minCandidateSizeMb = Math.max(1, Number(input.minCandidateSizeMb ?? 10));
+	const minAgeHours = Math.max(0, Number(input.minAgeHours ?? 24));
+	const sessionRoot = currentWorkspaceSessionRoot(input.cwd);
+	const rows: WorkspaceStorageCleanupCandidate[] = [];
+
+	if (sessionRoot) {
+		let entries: string[] = [];
+		try {
+			entries = readdirSync(sessionRoot).slice(0, 500);
+		} catch {
+			entries = [];
+		}
+		for (const entry of entries) {
+			const fullPath = join(sessionRoot, entry);
+			let st: ReturnType<typeof statSync>;
+			try {
+				st = statSync(fullPath);
+			} catch {
+				continue;
+			}
+			if (!st.isFile()) continue;
+			if (!/\.jsonl(\.|$)/.test(entry)) continue;
+			const sizeMb = roundMb(st.size);
+			const ageHours = Math.max(0, Math.round(((nowMs - st.mtimeMs) / 3_600_000) * 10) / 10);
+			if (sizeMb < minCandidateSizeMb) continue;
+			if (!input.includeCurrentSession && ageHours < minAgeHours) continue;
+			let kind: WorkspaceStorageCleanupCandidate["kind"] | undefined;
+			let risk: WorkspaceStorageCleanupCandidate["risk"] = "medium";
+			if (entry.includes(".bak-large-output-")) {
+				kind = "pi-session-backup";
+				risk = "low";
+			} else if (entry.includes(".tmp-")) {
+				kind = "pi-session-temp";
+				risk = "low";
+			} else if (ageHours >= minAgeHours * 3) {
+				kind = "old-pi-session";
+			}
+			if (!kind) continue;
+			rows.push({
+				path: fullPath,
+				kind,
+				sizeMb,
+				modifiedAtIso: toIso(st.mtimeMs),
+				ageHours,
+				reversibleAction: "gzip-compress",
+				risk,
+				reason: kind === "old-pi-session"
+					? "old inactive pi session; compress only after confirming it is not the active resume file"
+					: "old pi session artifact; gzip keeps recoverable content while reducing disk pressure",
+			});
+		}
+	}
+
+	const candidates = rows
+		.sort((a, b) => b.sizeMb - a.sizeMb || a.path.localeCompare(b.path))
+		.slice(0, maxCandidates);
+	const totalCandidateSizeMb = Math.round(candidates.reduce((sum, row) => sum + row.sizeMb, 0) * 10) / 10;
+	const lowRisk = candidates.filter((row) => row.risk === "low");
+	const commandsPreview = lowRisk.length > 0
+		? [
+			"# preview only; execute manually after confirmation",
+			...lowRisk.map((row) => `gzip -9 -- ${quotePathForPreview(row.path)}`),
+		]
+		: [];
+	const nextAction: WorkspaceStoragePressureReport["nextAction"] = lowRisk.length > 0
+		? "compress-old-session-artifacts"
+		: candidates.length > 0
+			? "manual-review"
+			: "none";
+	return {
+		mode: "workspace-storage-pressure-report",
+		generatedAtIso: new Date(nowMs).toISOString(),
+		dispatchAllowed: false,
+		cleanupExecuted: false,
+		disk,
+		sessionRoot,
+		totalCandidateSizeMb,
+		candidates,
+		nextAction,
+		commandsPreview,
+		summary: `workspace-storage-pressure-report: disk=${disk.severity} candidates=${candidates.length} candidateSize=${totalCandidateSizeMb}MB next=${nextAction}`,
+	};
+}
+
+export function formatWorkspaceStoragePressureReport(report: WorkspaceStoragePressureReport): string {
+	const lines = [report.summary, report.disk.reason];
+	if (report.sessionRoot) lines.push(`sessionRoot=${report.sessionRoot}`);
+	for (const row of report.candidates.slice(0, 8)) {
+		lines.push(`- ${row.kind} ${row.sizeMb}MB age=${row.ageHours}h risk=${row.risk} ${basename(row.path)}`);
+	}
+	if (report.candidates.length === 0) lines.push("no bounded cleanup candidates found");
+	lines.push("policy: report-only; no cleanup executed; compression requires explicit operator confirmation");
+	return lines.join("\n");
+}
+
 export function formatMachineMaintenanceGate(gate: MachineMaintenanceGate): string {
 	return [
 		"machine-maintenance",
@@ -589,6 +750,37 @@ export default function machineMaintenanceExtension(pi: ExtensionAPI) {
 			return {
 				content: [{ type: "text", text: formatMachineMaintenanceGate(gate) }],
 				details: { ...gate, persistedHandoff: params?.persistHandoff === true },
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "workspace_storage_pressure_report",
+		label: "Workspace Storage Pressure Report",
+		description: "Read-only bounded workspace storage pressure report with reversible cleanup candidates. Never compresses, deletes, prunes, or runs maintenance.",
+		parameters: Type.Object({
+			maxCandidates: Type.Optional(Type.Number({ minimum: 1, maximum: 50 })),
+			minCandidateSizeMb: Type.Optional(Type.Number({ minimum: 1, maximum: 1024 })),
+			minAgeHours: Type.Optional(Type.Number({ minimum: 0, maximum: 24 * 365 })),
+			includeCurrentSession: Type.Optional(Type.Boolean({ default: false })),
+		}),
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			const p = (params ?? {}) as {
+				maxCandidates?: number;
+				minCandidateSizeMb?: number;
+				minAgeHours?: number;
+				includeCurrentSession?: boolean;
+			};
+			const report = buildWorkspaceStoragePressureReport({
+				cwd: resolveContextCwd(ctx),
+				maxCandidates: p.maxCandidates,
+				minCandidateSizeMb: p.minCandidateSizeMb,
+				minAgeHours: p.minAgeHours,
+				includeCurrentSession: p.includeCurrentSession === true,
+			});
+			return {
+				content: [{ type: "text", text: formatWorkspaceStoragePressureReport(report) }],
+				details: report,
 			};
 		},
 	});

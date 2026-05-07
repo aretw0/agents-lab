@@ -22071,6 +22071,28 @@
       "milestone": "subagent-sovereignty-lane-2026-05",
       "notes": "Criada por feedback humano pós-reload: auto-resume ainda listou 'Contexto em warn; reload recomendado' apesar de contexto atual ok/reload clear. Diagnóstico live: monitor_stale_feedback_prefilter classificou como suppress-stale/context-watch-transient-resolved; lacuna provável é o filtro não reconciliar blockers arbitrários do handoff, apenas guidance/next_actions.\n[provenance:human] source_task=TASK-BUD-985 reason=Regressão/edge case da correção de stale reload guidance; economizar tokens e reduzir ruído de auto-resume.\nCompleted stale reload/context pressure auto-resume prompt reconciliation with regression coverage; runtime reload is recommended before trusting live extension surfaces because code changed.",
       "verification": "VERIF-TASK-BUD-990-STALE-RESUME-FILTERS"
+    },
+    {
+      "id": "TASK-BUD-991",
+      "description": "Cultivate workspace storage pressure maintenance primitive",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-989"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/machine-maintenance.ts",
+        "packages/pi-stack/test/smoke/machine-maintenance.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Expose a report-only tool that identifies bounded, reversible workspace storage cleanup candidates without deleting or compressing files.",
+        "Keep cleanup mutation behind explicit human/operator confirmation; no automatic maintenance.",
+        "Cover candidate detection and tool registration with focal tests.",
+        "Document next-step guidance for compressing old pi session artifacts safely."
+      ],
+      "milestone": "subagent-sovereignty-lane-2026-05",
+      "notes": "Created from human steer: recurring disk pressure should become reusable tools/skills/troubleshooting primitives for easier control-plane maintenance.\n[implementation] Added `workspace_storage_pressure_report` as a report-only machine-maintenance tool. It targets recurring disk-pressure troubleshooting by listing bounded, reversible gzip candidates in the workspace pi session directory and refuses to execute cleanup. Focal vitest passed; runtime reload required before live use.",
+      "verification": "VERIF-TASK-BUD-991-STORAGE-PRESSURE-REPORT"
     }
   ]
 }
