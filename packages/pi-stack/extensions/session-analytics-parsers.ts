@@ -175,7 +175,7 @@ function inferDelegationMixModeFromText(textRaw: string): DelegationMixMode | un
   if (
     text.includes("subagent")
     || text.includes("delegat")
-    || text.includes("simple delegate")
+    || text.includes("delegation rehearsal")
     || text.includes("claude_code_execute")
     || text.includes("agent spawn")
     || text.includes("agent_spawn")
@@ -296,7 +296,7 @@ export function parseDelegationMixScore(
   } else if (counters.swarm <= 0) {
     decision = "needs-evidence";
     recommendationCode = "delegation-mix-needs-evidence-swarm-missing";
-    recommendation = "swarm evidence missing; keep delegation local/simple and defer swarm promotion.";
+    recommendation = "swarm evidence missing; keep delegation local and defer swarm promotion.";
   } else if (diversityModes < 3) {
     decision = "needs-evidence";
     recommendationCode = "delegation-mix-needs-evidence-low-diversity";

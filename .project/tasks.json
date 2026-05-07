@@ -21876,6 +21876,25 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:semantic-debt] O adjetivo `simple` reaparece como modo público de hatch; `guided` comunica onboarding/default sem sugerir baixa governança.\n[provenance:human] source_task=TASK-BUD-974 reason=Pedido explícito para questionar nomes antigos/novos e evitar conceitos repetidos por semântica.\n[slice] Hatch default convergiu de `simple` para `guided`, preservando advanced como opt-in e sem alias de nome antigo.\n[validation] rg focal limpo; smoke colony-pilot parsers+hatch -> 86 passed; `git diff --check` passou.",
       "verification": "VERIF-TASK-BUD-982-GUIDED-HATCH"
+    },
+    {
+      "id": "TASK-BUD-983",
+      "description": "[P2/local-safe] Remover `simple` remanescente do parser de delegation mix.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/session-analytics-parsers.ts",
+        "packages/pi-stack/test/smoke/session-analytics.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Trocar detecção textual `simple delegate` por termos finais como `delegation rehearsal`.",
+        "Remover recomendação `local/simple` do delegation mix.",
+        "Atualizar/rodar smoke focal de session analytics e `git diff --check`.",
+        "Não tocar settings/routing/CI/publish/credenciais."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:semantic-debt] Após convergir para `delegate`/`delegation rehearsal`, o parser ainda incentivava ou aceitava vocabulário `simple`; manter parser coeso evita reaparecimento do termo.\n[provenance:human] source_task=TASK-BUD-979 reason=Evitar nomes provisórios e bloat semântico em superfícies de telemetry.\n[slice] Parser de delegation mix alinhado a `delegation rehearsal`/`delegate`, sem vocabulário `simple`.\n[validation] rg focal limpo; smoke session analytics -> 26 passed; `git diff --check` passou.",
+      "verification": "VERIF-TASK-BUD-983-SESSION-ANALYTICS-NAMING"
     }
   ]
 }
