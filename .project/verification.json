@@ -14444,6 +14444,15 @@
       "method": "refactor+smoke",
       "timestamp": "2026-05-07T03:26:08.634Z",
       "evidence": "Renomeado contrato recém-criado de one_slice_agent_run_* para agent_run_* sem aliases sobrepostos; removido uso de simple do gate focal. Plan extraído para guardrails-core-agent-run-plan.ts; runtime/control renomeado para guardrails-core-agent-run-runtime.ts; surface/exports/tests/docs atualizados. Validação: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 11 passed; git diff --check passou; line_budget_snapshot -> watch, aboveExtract=0, aboveCritical=0."
+    },
+    {
+      "id": "VERIF-TASK-BUD-974-SEMANTIC-AUDIT",
+      "target": "TASK-BUD-974",
+      "target_type": "task",
+      "status": "passed",
+      "method": "bounded-grep+documentation",
+      "timestamp": "2026-05-07T03:31:48.354Z",
+      "evidence": "Criado docs/research/agent-run-semantic-consolidation-2026-05.md com decisão canônica: `agent run` para execução concreta de worker; `one-slice` apenas como stop condition quando necessário; não criar aliases one_slice_agent_run_*; não renomear simple_delegate_* em massa sem canary/backcompat. Inventário bounded: simple-delegate em 21 arquivos; one-slice em 19 arquivos. `docs/primitives/agents-as-tools-calibration-score.md` referencia a nota semântica. Validação: git diff --check passou; grep focal confirmou agent_run_* e ausência de ready-for-simple-spawn/agent-spawn-ready-simple nos arquivos focais."
     }
   ]
 }

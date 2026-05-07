@@ -21698,6 +21698,27 @@
       "milestone": "agent-quality-calibration-lane",
       "notes": "[rationale:refactor] Operador apontou baixa coesão: plan ficou separado por histórico, não design; refatoração deve organizar fronteiras sem crescer arquivos demais nem criar overlap de conceitos.\n[provenance:human] source_task=TASK-BUD-972 reason=Pedido explícito para abraçar coesão mínima e evitar primitivas repetidas/overlapping na lane AFK.\n[slice] Consolidada semântica para `agent_run_*`: `one-slice` virou detalhe de contrato (`singleRunOnly`) em vez de namespace público, e `simple` saiu do gate focal. Sem aliases para evitar overlap; mudança exige reload antes de confiar na nova surface live.\n[validation] `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` -> 11 passed; `git diff --check` passou; `line_budget_snapshot` -> watch/0 extract/0 critical.",
       "verification": "VERIF-TASK-BUD-973-AGENT-RUN-SEMANTICS"
+    },
+    {
+      "id": "TASK-BUD-974",
+      "description": "[P1/local-safe] Auditar overlap semântico restante entre agent run, simple-delegate e one-slice local.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/research/agent-run-semantic-consolidation-2026-05.md",
+        "docs/primitives/agents-as-tools-calibration-score.md",
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration.ts",
+        "packages/pi-stack/extensions/guardrails-core-one-slice-contracts.ts"
+      ],
+      "acceptance_criteria": [
+        "Inventariar usos restantes de `simple-delegate` e `one-slice` fora da família agent-run recém-consolidada.",
+        "Definir regra curta: quando usar `agent run`, quando manter/migrar termos legados e quando não criar nova primitive.",
+        "Não renomear APIs antigas em massa sem canary/backcompat plan.",
+        "Validar com leitura/grep bounded e `git diff --check`; não tocar settings/routing/CI/publish/credenciais."
+      ],
+      "milestone": "agent-quality-calibration-lane",
+      "notes": "[rationale:semantic-debt] Após remover `simple`/`one-slice` da família agent-run, ainda existem termos próximos em delegação/local canary; antes de renomear código legado, precisamos de mapa de overlap para evitar criar mais aliases ou jargão.\n[provenance:human] source_task=TASK-BUD-973 reason=Operador pediu coesão sem jargão e cuidado com primitivas overlapping enquanto fica AFK.\n[slice] Documentado mapa semântico para evitar overlap: `agent run` cobre execução concreta de worker; `one-slice` permanece só como stop condition local quando necessário; `simple-delegate` fica legado/migração futura, sem aliases novos.\n[validation] `git diff --check` passou; grep bounded inventariou 21 arquivos com `simple-delegate` e 19 com `one-slice` fora da família agent-run.",
+      "verification": "VERIF-TASK-BUD-974-SEMANTIC-AUDIT"
     }
   ]
 }
