@@ -531,6 +531,48 @@ export function parseOpenAIWhamUsage(
 	return result;
 }
 
+export function applyOpenAIWhamUsageToBudgets(
+	budgets: ProviderBudgetStatus[],
+	wham: OpenAIWhamUsageParseResult | undefined,
+): ProviderBudgetStatus[] {
+	if (!wham || wham.provider !== "openai-codex" || wham.windows.length === 0) {
+		return budgets;
+	}
+	return budgets.map((budget) => {
+		if (normalizeProvider(budget.provider) !== "openai-codex") return budget;
+		const candidates = wham.windows.filter((window) => {
+			if (window.provider !== "openai-codex") return false;
+			if (budget.model) return normalizeModelId(window.model) === normalizeModelId(budget.model);
+			return !window.model && window.groupLabel.toLowerCase() === "codex";
+		});
+		if (candidates.length === 0) return budget;
+		const live = [...candidates].sort((a, b) => a.percentLeft - b.percentLeft)[0];
+		const notes = [...budget.notes];
+		notes.push(
+			`Live OpenAI WHAM window '${live.label}' reports ${live.percentLeft.toFixed(1)}% remaining${live.resetDescription ? `; reset ${live.resetDescription}` : ""}.`,
+		);
+		let state = budget.state;
+		if (live.allowed === false || live.limitReached === true || live.percentLeft <= 0) {
+			state = "blocked";
+		} else if (budget.model && budget.state === "blocked" && live.percentLeft > 0) {
+			state = "warning";
+			notes.push(
+				"Local projection exceeded configured budget, but live model-specific dashboard window still has remaining quota; do not treat projection alone as live exhaustion.",
+			);
+		}
+		return {
+			...budget,
+			state,
+			dashboardRemainingPct: live.percentLeft,
+			dashboardUsedPct: live.usedPercent,
+			dashboardWindowLabel: live.label,
+			dashboardResetDescription: live.resetDescription,
+			liveWindowSource: "openai-wham",
+			notes,
+		};
+	});
+}
+
 export function parseProviderBudgets(input: unknown): ProviderBudgetMap {
 	if (!input || typeof input !== "object") return {};
 	const out: ProviderBudgetMap = {};

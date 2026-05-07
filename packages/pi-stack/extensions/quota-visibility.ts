@@ -24,6 +24,12 @@ import { Type } from "@sinclair/typebox";
 import { extractCopilotBillingUsageEvents } from "./quota-visibility-billing";
 import { estimateHardPathwayMitigation } from "./quota-visibility-hard-pathway";
 import {
+	defaultOpenAIWhamCachePath,
+	findPiManagedOpenAIToken,
+	probeOpenAIWhamUsage,
+	readPiAuthFile,
+} from "./quota-visibility-openai-wham";
+import {
 	formatQuotaToolJsonOutput,
 	resolveQuotaToolOutputPolicy,
 	type QuotaVisibilitySettings,
@@ -32,6 +38,14 @@ import { parseSessionFile, walkJsonlFiles } from "./quota-visibility-session-rea
 
 export { extractCopilotBillingUsageEvents } from "./quota-visibility-billing";
 export { estimateHardPathwayMitigation } from "./quota-visibility-hard-pathway";
+export {
+	defaultOpenAIWhamCachePath,
+	extractOpenAIAccountIdFromToken,
+	findPiManagedOpenAIToken,
+	probeOpenAIWhamUsage,
+	readPiAuthFile,
+} from "./quota-visibility-openai-wham";
+export type { OpenAIWhamProbeOptions, OpenAIWhamProbeResult } from "./quota-visibility-openai-wham";
 export { formatQuotaToolJsonOutput, resolveQuotaToolOutputPolicy } from "./quota-visibility-output-policy";
 export type { QuotaToolOutputPolicy, QuotaVisibilitySettings } from "./quota-visibility-output-policy";
 
@@ -43,6 +57,7 @@ import {
 	SETTINGS_PATH,
 	buildProviderAccountKey,
 	buildProviderModelKey,
+	applyOpenAIWhamUsageToBudgets,
 	buildProviderBudgetStatuses,
 	buildProviderWindowInsight,
 	computeWindowStartScores,
@@ -70,6 +85,7 @@ import {
 	type DailyAggregate,
 	type ModelAggregate,
 	type ParsedSessionData,
+	type OpenAIWhamUsageParseResult,
 	type ProviderBudgetMap,
 	type ProviderBudgetStatus,
 	type ProviderWindowHours,
@@ -84,6 +100,7 @@ import {
 export {
 	buildProviderAccountKey,
 	buildProviderModelKey,
+	applyOpenAIWhamUsageToBudgets,
 	buildProviderBudgetStatuses,
 	buildProviderWindowInsight,
 	computeWindowStartScores,
@@ -215,6 +232,7 @@ export function buildQuotaStatus(
 		monthlyQuotaRequests?: number;
 		providerWindowHours: ProviderWindowHours;
 		providerBudgets: ProviderBudgetMap;
+		openAIWhamUsage?: OpenAIWhamUsageParseResult;
 	},
 ): QuotaStatus {
 	const totals = {
@@ -334,7 +352,7 @@ export function buildQuotaStatus(
 			configuredProviders: Object.keys(params.providerBudgets).length,
 			allocationWarnings: providerBudgetEval.allocationWarnings,
 		},
-		providerBudgets: providerBudgetEval.budgets,
+		providerBudgets: applyOpenAIWhamUsageToBudgets(providerBudgetEval.budgets, params.openAIWhamUsage),
 		daily: [...byDay.values()].sort((a, b) => a.day.localeCompare(b.day)),
 		models: [...byModel.entries()]
 			.map(([model, v]) => ({ model, ...v }))
@@ -402,6 +420,7 @@ export async function analyzeQuota(params: {
 	monthlyQuotaCostUsd?: number; monthlyQuotaRequests?: number;
 	providerWindowHours: ProviderWindowHours;
 	providerBudgets: ProviderBudgetMap;
+	openAIWhamUsage?: OpenAIWhamUsageParseResult;
 	cwd?: string; sessionRoots?: string[];
 }): Promise<QuotaStatus> {
 	const sessionRoots = params.sessionRoots ?? resolveQuotaSessionRoots(params.cwd);
@@ -442,6 +461,7 @@ export async function analyzeQuota(params: {
 		monthlyQuotaRequests: params.monthlyQuotaRequests,
 		providerWindowHours: params.providerWindowHours,
 		providerBudgets: params.providerBudgets,
+		openAIWhamUsage: params.openAIWhamUsage,
 	});
 	if (copilotBilling.events.length > 0) {
 		status.source.externalBillingEvents = copilotBilling.events.length;
@@ -714,6 +734,47 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 					allocationWarnings: status.providerBudgetPolicy.allocationWarnings,
 					data,
 				},
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "quota_visibility_openai_wham_probe",
+		label: "Quota Visibility OpenAI WHAM Probe",
+		description:
+			"Report-only OpenAI Codex WHAM quota probe. Defaults to cache/auth readiness only; set probe=true for one read-only live request.",
+		parameters: Type.Object({
+			probe: Type.Optional(Type.Boolean()),
+			allowStaleCache: Type.Optional(Type.Boolean()),
+		}),
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			const p = params as { probe?: boolean; allowStaleCache?: boolean };
+			const cachePath = defaultOpenAIWhamCachePath(ctx.cwd);
+			if (p.probe !== true) {
+				const token = findPiManagedOpenAIToken(readPiAuthFile());
+				const payload = {
+					mode: "readiness-only",
+					provider: "openai-codex",
+					source: "openai-wham",
+					authConfigured: Boolean(token),
+					authExpired: token?.expired,
+					cachePath,
+					note: "Set probe=true to perform one read-only WHAM usage request; no routing/settings changes are made.",
+				};
+				const outputPolicy = resolveQuotaToolOutputPolicy(readSettings(ctx.cwd));
+				return {
+					content: [{ type: "text", text: formatQuotaToolJsonOutput("quota_visibility_openai_wham_probe", payload, outputPolicy) }],
+					details: payload,
+				};
+			}
+			const result = await probeOpenAIWhamUsage({
+				cachePath,
+				allowStaleCache: p.allowStaleCache !== false,
+			});
+			const outputPolicy = resolveQuotaToolOutputPolicy(readSettings(ctx.cwd));
+			return {
+				content: [{ type: "text", text: formatQuotaToolJsonOutput("quota_visibility_openai_wham_probe", result, outputPolicy) }],
+				details: result,
 			};
 		},
 	});

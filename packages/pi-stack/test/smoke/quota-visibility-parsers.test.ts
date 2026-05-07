@@ -6,8 +6,11 @@ import quotaVisibilityExtension, {
   extractUsage,
   parseProviderWindowHours,
   parseOpenAIWhamUsage,
+  probeOpenAIWhamUsage,
+  findPiManagedOpenAIToken,
   parseProviderBudgets,
   buildProviderModelKey,
+  applyOpenAIWhamUsageToBudgets,
   computeWindowStartScores,
   extractCopilotBillingUsageEvents,
   buildProviderWindowInsight,
@@ -323,6 +326,16 @@ describe("quota-visibility parsers", () => {
     expect(scores[0]).toBe(0);
   });
 
+  it("findPiManagedOpenAIToken escolhe auth openai sem vazar token", () => {
+    const found = findPiManagedOpenAIToken({
+      anthropic: { access: "sk-ant" },
+      openai: { access: "secret-token", expires: Date.now() + 60_000 },
+    });
+
+    expect(found).toMatchObject({ authKey: "openai", expired: false });
+    expect(found?.token).toBe("secret-token");
+  });
+
   it("parseOpenAIWhamUsage extrai janelas Codex e additional_rate_limits model-specific", () => {
     const nowMs = Date.UTC(2026, 4, 6, 12, 0, 0);
     const parsed = parseOpenAIWhamUsage(
@@ -378,6 +391,89 @@ describe("quota-visibility parsers", () => {
     });
   });
 
+  it("probeOpenAIWhamUsage usa auth/cache/fetch fail-soft sem rede real", async () => {
+    const tmp = mkdtempSync(join(tmpdir(), "quota-wham-"));
+    try {
+      const nowMs = Date.UTC(2026, 4, 6, 12, 0, 0);
+      const payload = Buffer.from(JSON.stringify({
+        "https://api.openai.com/auth": { chatgpt_account_id: "acct_123" },
+      })).toString("base64url");
+      const token = `header.${payload}.sig`;
+      const authPath = join(tmp, "auth.json");
+      const cachePath = join(tmp, "cache.json");
+      writeFileSync(authPath, JSON.stringify({ openai: { access: token, expires: Date.now() + 60_000 } }), "utf8");
+
+      const fetchImpl = vi.fn(async (_url: string, init: { headers: Record<string, string> }) => {
+        expect(init.headers.authorization).toBe(`Bearer ${token}`);
+        expect(init.headers["chatgpt-account-id"]).toBe("acct_123");
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => null },
+          async json() {
+            return {
+              additional_rate_limits: [
+                {
+                  limit_name: "gpt-5.3-codex-spark",
+                  rate_limit: {
+                    primary_window: {
+                      used_percent: 17,
+                      limit_window_seconds: 7 * 24 * 60 * 60,
+                      reset_after_seconds: 7 * 24 * 60 * 60,
+                    },
+                  },
+                },
+              ],
+            };
+          },
+        };
+      });
+
+      const result = await probeOpenAIWhamUsage({ authPath, cachePath, fetchImpl, nowMs });
+      expect(result.ok).toBe(true);
+      expect(result.cache?.status).toBe("write");
+      expect(result.parsed?.windows[0]).toMatchObject({
+        model: "gpt-5.3-codex-spark",
+        percentLeft: 83,
+      });
+
+      const cached = await probeOpenAIWhamUsage({ authPath, cachePath, fetchImpl, nowMs: nowMs + 1000 });
+      expect(cached.cache?.status).toBe("hit");
+      expect(fetchImpl).toHaveBeenCalledTimes(1);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("probeOpenAIWhamUsage usa cache stale quando auth/probe falha e allowStaleCache", async () => {
+    const tmp = mkdtempSync(join(tmpdir(), "quota-wham-stale-"));
+    try {
+      const nowMs = Date.UTC(2026, 4, 6, 12, 0, 0);
+      const cachePath = join(tmp, "cache.json");
+      writeFileSync(cachePath, JSON.stringify({
+        cachedAtMs: nowMs - 3_600_000,
+        ok: true,
+        provider: "openai-codex",
+        source: "openai-wham",
+        parsed: { provider: "openai-codex", windows: [], notes: ["cached"] },
+      }), "utf8");
+
+      const result = await probeOpenAIWhamUsage({
+        authPath: join(tmp, "missing-auth.json"),
+        cachePath,
+        cacheMaxAgeMs: 1,
+        allowStaleCache: true,
+        nowMs,
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.cache?.status).toBe("stale");
+      expect(result.note).toContain("stale OpenAI WHAM cache");
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
   it("parseProviderBudgets aceita chave provider/model sem quebrar provider-only", () => {
     const budgets = parseProviderBudgets({
       "openai-codex": { weeklyQuotaCostUsd: 10 },
@@ -391,6 +487,57 @@ describe("quota-visibility parsers", () => {
     expect(budgets["openai-codex"]?.model).toBeUndefined();
     expect(budgets["openai-codex/gpt-5.3-codex-spark"]?.model).toBe("gpt-5.3-codex-spark");
     expect(buildProviderModelKey("openai-codex", "gpt-5.3-codex-spark")).toBe("openai-codex/gpt-5.3-codex-spark");
+  });
+
+  it("applyOpenAIWhamUsageToBudgets separa live dashboard de projeção local model-specific", () => {
+    const [budget] = applyOpenAIWhamUsageToBudgets([
+      {
+        provider: "openai-codex",
+        providerAccountKey: "openai-codex",
+        model: "gpt-5.3-codex-spark",
+        providerModelKey: "openai-codex/gpt-5.3-codex-spark",
+        period: "weekly",
+        unit: "requests",
+        periodDays: 7,
+        periodStartIso: "2026-05-01T00:00:00.000Z",
+        periodEndIso: "2026-05-07T23:59:59.999Z",
+        observedMessages: 10,
+        observedTokens: 0,
+        observedCostUsd: 0,
+        observedRequests: 10,
+        projectedTokensEndOfPeriod: 0,
+        projectedCostUsdEndOfPeriod: 0,
+        projectedRequestsEndOfPeriod: 200,
+        periodRequestsCap: 100,
+        usedPctRequests: 10,
+        projectedPctRequests: 200,
+        warnPct: 80,
+        hardPct: 100,
+        state: "blocked",
+        notes: [],
+      },
+    ], {
+      provider: "openai-codex",
+      notes: [],
+      windows: [
+        {
+          provider: "openai-codex",
+          source: "openai-wham",
+          label: "gpt-5.3-codex-spark (7d)",
+          groupLabel: "gpt-5.3-codex-spark",
+          windowLabel: "primary",
+          model: "gpt-5.3-codex-spark",
+          percentLeft: 83,
+          usedPercent: 17,
+          resetDescription: "7d",
+        },
+      ],
+    });
+
+    expect(budget?.state).toBe("warning");
+    expect(budget?.dashboardRemainingPct).toBe(83);
+    expect(budget?.liveWindowSource).toBe("openai-wham");
+    expect(budget?.notes.join("\n")).toContain("projection alone");
   });
 
   it("buildProviderBudgetStatuses filtra budget model-specific sem marcar provider geral", () => {
