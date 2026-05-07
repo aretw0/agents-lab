@@ -1,52 +1,52 @@
 {
-  "timestamp": "2026-05-07T22:03:24.242Z",
-  "context": "User asked to proceed. Ran additional bounded minimal-no-extensions DashScope canaries. Canary 3 exited 0, output non-empty, stale_count=0, b [snip] r increase confidence before promotion. [truncated:+607 chars]",
+  "timestamp": "2026-05-07T22:06:59.760Z",
+  "context": "After recording canary 4 pass, attempted optional third pass for higher confidence. Canary 5 used minimal no-extensions isolation with declar [snip] isk; better next slice is TASK-BUD-997. [truncated:+709 chars]",
   "current_tasks": [
     "TASK-BUD-989"
   ],
   "next_actions": [
-    "Commit board/verification/handoff evidence for canary 3 fail + canary 4 pass.",
-    "Decide whether to run one optional third valid canary or move to promotion decision packet for [snip] unner quality calibration. [truncated:+18 chars]",
-    "For future read-only canaries, attach declared files explicitly or otherwise require evidence [snip] worker actually read them. [truncated:+9 chars]"
+    "Commit board/verification/handoff evidence for canary 5 and TASK-BUD-997.",
+    "Prefer implementing TASK-BUD-997 before provider-native delegation promotion.",
+    "If human accepts the risk explicitly, TASK-BUD-989 has minimum 2 valid passes; otherwise keep in-progress."
   ],
   "blockers": [
-    "Only 2 valid passes so far; enough for minimum target but not maximum confidence.",
-    "Machine disk threshold remains a tactical local override; avoid broad scans/builds.",
+    "Optional third canary found route/start budget evidence handoff risk.",
+    "Machine disk threshold remains tactical local override; avoid broad scans/builds.",
     "TASK-BUD-968 quota/footer WIP remains parked and dirty."
   ],
   "recent_validation": [
-    "canary 3: process exit 0, output_bytes=827, stale_count=0, worker FAIL, outcome contract=fail; [snip] OPE-CANARY-3-FAIL appended [truncated:+26 chars]",
-    "canary 4: process exit 0, output_bytes=1644, PASS, stale_count=0",
-    "safe_marker_check canary 4 -> ok yes"
+    "canary 5: exit 0, output_bytes=1187, stale_count=0, worker FAIL",
+    "agent_run_outcome_packet canary 5 file_contract=read-only -> contract=fail marker worker-verdict-pass=false",
+    "VERIF-TASK-BUD-989-DASHSCOPE-CANARY-5-FAIL appended"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-989",
     "canonical_links": [
       "task:TASK-BUD-989",
-      "task:TASK-BUD-989-DASHSCOPE-CANARY-3-FAIL",
-      "task:TASK-BUD-989-DASHSCOPE-CANARY-4-PASS"
+      "task:TASK-BUD-997",
+      "task:TASK-BUD-989-DASHSCOPE-CANARY-5-FAIL"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T22:03:24.242Z",
-    "level": "ok",
-    "percent": 53,
+    "generatedAtIso": "2026-05-07T22:06:59.760Z",
+    "level": "warn",
+    "percent": 54,
     "action": "continue",
-    "recommendation": "commit-evidence-then-promotion-decision-or-one-more-canary"
+    "recommendation": "commit-risk-evidence-then-harden-TASK-BUD-997-before-promotion"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T22:03:24.242Z",
+      "atIso": "2026-05-07T22:06:59.760Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 53,
+      "level": "warn",
+      "percent": 54,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-evidence-then-promotion-decision-or-one-more-canary"
+      "recommendation": "commit-risk-evidence-then-harden-TASK-BUD-997-before-promotion"
     }
   ]
 }
