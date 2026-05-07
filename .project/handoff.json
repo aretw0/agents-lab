@@ -1,22 +1,23 @@
 {
-  "timestamp": "2026-05-07T17:04:32.868Z",
-  "context": "Continued after reload. Live start packet smoke succeeded with budget evidence and dispatch=no. Reused shared provider execution budget evide [snip] rty working tree, preserving isolation. [truncated:+324 chars]",
+  "timestamp": "2026-05-07T17:57:55.837Z",
+  "context": "Post-reload continuation completed the intended live smoke. quota_visibility_route(profile=balanced, execute=false) shows the shared provider [snip] der/settings/routing changes were made. [truncated:+408 chars]",
   "current_tasks": [
     "TASK-BUD-989"
   ],
   "next_actions": [
-    "Reload before trusting live quota_visibility_route or agent_run_start_packet because runtime extension code changed.",
-    "After reload, run live quota_visibility_route to confirm executionBudgetDecision/Ready appears [snip] tails without auto-switch. [truncated:+6 chars]",
-    "Only execute provider-native worker after explicit confirmation/policy; dashscope remains cons [snip] el-specific/WHAM evidence. [truncated:+44 chars]"
+    "Commit the live evidence board/handoff checkpoint while keeping parked TASK-BUD-968 WIP isolated.",
+    "Choose exactly one bounded provider-native canary only with explicit human confirmation/policy [snip] M model-specific evidence. [truncated:+97 chars]",
+    "After any worker exit, update registry and run parent-side outcome; empty output remains a har [snip] lure even with exitCode=0. [truncated:+14 chars]"
   ],
   "blockers": [
     "Parked TASK-BUD-968 quota/footer WIP remains dirty and isolated.",
-    "OpenAI Codex provider-level local projection remains blocked; Codex Spark requ [snip] ence before selection. [truncated:+33 chars]",
-    "No multi-worker/colony promotion until repeated one-worker contracts pass."
+    "OpenAI Codex provider-level local projection remains blocked; use Codex Spark [snip] dex provider evidence. [truncated:+64 chars]",
+    "No multi-worker/background/colony promotion until repeated one-worker contracts pass."
   ],
   "recent_validation": [
-    "Live agent_run_start_packet: ready-for-human-decision, budget=ok, dispatch=no",
-    "npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack [snip] after isolation correction [truncated:+81 chars]"
+    "quota_visibility_route days=7 profile=balanced execute=false -> dashscope executionBudgetDecis [snip] y=false; noAutoSwitch=true [truncated:+68 chars]",
+    "quota_visibility_openai_wham_probe probe=true allowStaleCache=true -> gpt-5.3-codex-spark 5h p [snip] rcentLeft=82, allowed=true [truncated:+24 chars]",
+    "agent_run_start_packet dashscope report-only -> ready-for-human-decision dispatch=no"
   ],
   "recent_commits": [
     "7c227a54 refactor(quota): reuse provider budget evidence in route advisory",
@@ -26,30 +27,30 @@
     "focus": "TASK-BUD-989",
     "canonical_links": [
       "task:TASK-BUD-989",
-      "task:TASK-BUD-968",
+      "task:TASK-BUD-989-LIVE-BUDGET-EVIDENCE-PACKETS",
       "commit:7c227a54"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T17:04:32.868Z",
-    "level": "warn",
-    "percent": 54,
+    "generatedAtIso": "2026-05-07T17:57:55.837Z",
+    "level": "ok",
+    "percent": 21,
     "action": "continue",
-    "recommendation": "reload-then-live-route-smoke-or-checkpoint"
+    "recommendation": "commit-live-evidence-then-await-explicit-worker-confirmation"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T17:04:32.868Z",
+      "atIso": "2026-05-07T17:57:55.837Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 54,
+      "level": "ok",
+      "percent": 21,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-live-route-smoke-or-checkpoint"
+      "recommendation": "commit-live-evidence-then-await-explicit-worker-confirmation"
     }
   ]
 }
