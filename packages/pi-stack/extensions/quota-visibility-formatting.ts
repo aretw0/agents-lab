@@ -54,7 +54,11 @@ function formatProviderBudgetLine(b: ProviderBudgetStatus): string {
 	const stateTag =
 		b.state === "blocked" ? "BLOCK" : b.state === "warning" ? "WARN" : "OK";
 	const owner = b.owner ? ` owner=${b.owner}` : "";
-	const target = b.account ? `${b.provider}/${b.account}` : b.provider;
+	const target = b.model
+		? `${b.provider}/${b.model}`
+		: b.account
+			? `${b.provider}/${b.account}`
+			: b.provider;
 	const capTok =
 		b.periodTokensCap !== undefined ? fmt(b.periodTokensCap) : "n/a";
 	const capUsd =

@@ -5,7 +5,9 @@ import { describe, it, expect, vi } from "vitest";
 import quotaVisibilityExtension, {
   extractUsage,
   parseProviderWindowHours,
+  parseOpenAIWhamUsage,
   parseProviderBudgets,
+  buildProviderModelKey,
   computeWindowStartScores,
   extractCopilotBillingUsageEvents,
   buildProviderWindowInsight,
@@ -319,6 +321,122 @@ describe("quota-visibility parsers", () => {
     expect(scores[11]).toBe(150); // 11..15
     expect(scores[10]).toBe(100); // 10..14
     expect(scores[0]).toBe(0);
+  });
+
+  it("parseOpenAIWhamUsage extrai janelas Codex e additional_rate_limits model-specific", () => {
+    const nowMs = Date.UTC(2026, 4, 6, 12, 0, 0);
+    const parsed = parseOpenAIWhamUsage(
+      {
+        plan_type: "plus",
+        email: "dev@example.test",
+        rate_limit: {
+          allowed: true,
+          primary_window: {
+            used_percent: 50,
+            limit_window_seconds: 7 * 24 * 60 * 60,
+            reset_after_seconds: 6 * 24 * 60 * 60,
+          },
+          secondary_window: {
+            used_percent: 80,
+            limit_window_seconds: 5 * 60 * 60,
+            reset_after_seconds: 2 * 60 * 60,
+          },
+        },
+        additional_rate_limits: [
+          {
+            limit_name: "gpt-5.3-codex-spark",
+            metered_feature: "gpt-5.3-codex-spark",
+            rate_limit: {
+              allowed: true,
+              primary_window: {
+                used_percent: 17,
+                limit_window_seconds: 7 * 24 * 60 * 60,
+                reset_at: nowMs / 1000 + 7 * 24 * 60 * 60,
+              },
+            },
+          },
+        ],
+      },
+      nowMs,
+    );
+
+    expect(parsed.provider).toBe("openai-codex");
+    expect(parsed.plan).toBe("plus");
+    expect(parsed.account).toBe("dev@example.test");
+    expect(parsed.windows.map((w) => w.label)).toEqual([
+      "Codex (7d)",
+      "Codex (5h)",
+      "gpt-5.3-codex-spark (7d)",
+    ]);
+    expect(parsed.windows[0]).toMatchObject({ percentLeft: 50, usedPercent: 50, windowMinutes: 10080 });
+    expect(parsed.windows[1]).toMatchObject({ percentLeft: 20, resetDescription: "2h" });
+    expect(parsed.windows[2]).toMatchObject({
+      model: "gpt-5.3-codex-spark",
+      meteredFeature: "gpt-5.3-codex-spark",
+      percentLeft: 83,
+      resetDescription: "7d",
+    });
+  });
+
+  it("parseProviderBudgets aceita chave provider/model sem quebrar provider-only", () => {
+    const budgets = parseProviderBudgets({
+      "openai-codex": { weeklyQuotaCostUsd: 10 },
+      "openai-codex/gpt-5.3-codex-spark": { weeklyQuotaRequests: 100, unit: "requests" },
+    });
+
+    expect(Object.keys(budgets).sort()).toEqual([
+      "openai-codex",
+      "openai-codex/gpt-5.3-codex-spark",
+    ]);
+    expect(budgets["openai-codex"]?.model).toBeUndefined();
+    expect(budgets["openai-codex/gpt-5.3-codex-spark"]?.model).toBe("gpt-5.3-codex-spark");
+    expect(buildProviderModelKey("openai-codex", "gpt-5.3-codex-spark")).toBe("openai-codex/gpt-5.3-codex-spark");
+  });
+
+  it("buildProviderBudgetStatuses filtra budget model-specific sem marcar provider geral", () => {
+    const now = Date.now();
+    const events: QuotaUsageEvent[] = [
+      {
+        timestampIso: new Date(now - 2 * 3600_000).toISOString(),
+        timestampMs: now - 2 * 3600_000,
+        dayLocal: "2026-05-06",
+        hourLocal: 1,
+        provider: "openai-codex",
+        model: "gpt-5.3-codex-spark",
+        tokens: 100,
+        costUsd: 0.01,
+        requests: 2,
+        sessionFile: "s1.jsonl",
+      },
+      {
+        timestampIso: new Date(now - 1 * 3600_000).toISOString(),
+        timestampMs: now - 1 * 3600_000,
+        dayLocal: "2026-05-06",
+        hourLocal: 2,
+        provider: "openai-codex",
+        model: "gpt-5",
+        tokens: 900,
+        costUsd: 0.09,
+        requests: 8,
+        sessionFile: "s1.jsonl",
+      },
+    ];
+
+    const evalResult = buildProviderBudgetStatuses(events, {
+      days: 7,
+      providerBudgets: parseProviderBudgets({
+        "openai-codex": { weeklyQuotaRequests: 1000, unit: "requests" },
+        "openai-codex/gpt-5.3-codex-spark": { weeklyQuotaRequests: 10, unit: "requests" },
+      }),
+    });
+
+    const providerBudget = evalResult.budgets.find((b) => b.providerAccountKey === "openai-codex");
+    const modelBudget = evalResult.budgets.find((b) => b.providerModelKey === "openai-codex/gpt-5.3-codex-spark");
+    expect(providerBudget?.observedRequests).toBe(10);
+    expect(providerBudget?.model).toBeUndefined();
+    expect(modelBudget?.model).toBe("gpt-5.3-codex-spark");
+    expect(modelBudget?.observedRequests).toBe(2);
+    expect(modelBudget?.usedPctRequests).toBe(20);
   });
 
   it("buildProviderBudgetStatuses alerta quando shares excedem 100%", () => {

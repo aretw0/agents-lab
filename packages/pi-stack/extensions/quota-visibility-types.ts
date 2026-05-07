@@ -78,11 +78,37 @@ export interface ProviderWindowInsight {
 	notes: string[];
 }
 
+export interface OpenAIWhamUsageWindow {
+	provider: "openai-codex";
+	source: "openai-wham";
+	label: string;
+	groupLabel: string;
+	windowLabel: string;
+	model?: string;
+	meteredFeature?: string;
+	percentLeft: number;
+	usedPercent: number;
+	resetDescription?: string;
+	windowMinutes?: number;
+	allowed?: boolean;
+	limitReached?: boolean;
+}
+
+export interface OpenAIWhamUsageParseResult {
+	provider: "openai-codex";
+	account?: string;
+	plan?: string;
+	credits?: number;
+	windows: OpenAIWhamUsageWindow[];
+	notes: string[];
+}
+
 export interface ProviderBudgetConfig {
 	owner?: string;
 	period?: "weekly" | "monthly";
 	unit?: "tokens-cost" | "requests";
 	requestSharePolicy?: "fixed" | "remaining";
+	model?: string;
 	weeklyQuotaTokens?: number;
 	weeklyQuotaCostUsd?: number;
 	weeklyQuotaRequests?: number;
@@ -105,6 +131,8 @@ export interface ProviderBudgetStatus {
 	provider: string;
 	account?: string;
 	providerAccountKey?: string;
+	model?: string;
+	providerModelKey?: string;
 	owner?: string;
 	period: "weekly" | "monthly";
 	unit: "tokens-cost" | "requests";
@@ -128,6 +156,11 @@ export interface ProviderBudgetStatus {
 	projectedPctTokens?: number;
 	projectedPctCost?: number;
 	projectedPctRequests?: number;
+	dashboardRemainingPct?: number;
+	dashboardUsedPct?: number;
+	dashboardWindowLabel?: string;
+	dashboardResetDescription?: string;
+	liveWindowSource?: "openai-wham";
 	warnPct: number;
 	hardPct: number;
 	state: "ok" | "warning" | "blocked";

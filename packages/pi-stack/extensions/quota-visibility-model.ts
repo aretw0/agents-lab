@@ -11,6 +11,8 @@ import type {
 	QuotaUsageEvent,
 	RollingWindowSnapshot,
 	ProviderWindowInsight,
+	OpenAIWhamUsageParseResult,
+	OpenAIWhamUsageWindow,
 	ProviderBudgetConfig,
 	ProviderBudgetMap,
 	ProviderBudgetStatus,
@@ -30,6 +32,8 @@ export type {
 	QuotaUsageEvent,
 	RollingWindowSnapshot,
 	ProviderWindowInsight,
+	OpenAIWhamUsageParseResult,
+	OpenAIWhamUsageWindow,
 	ProviderBudgetConfig,
 	ProviderBudgetMap,
 	ProviderBudgetStatus,
@@ -98,9 +102,11 @@ export function formatBudgetStatusParts(
 		);
 		const icon =
 			b.state === "blocked" ? "✗" : b.state === "warning" ? "!" : "✓";
-		const scope = b.account
-			? `${shortProviderLabel(b.provider)}@${b.account}`
-			: shortProviderLabel(b.provider);
+		const scope = b.model
+			? `${shortProviderLabel(b.provider)}/${b.model}`
+			: b.account
+				? `${shortProviderLabel(b.provider)}@${b.account}`
+				: shortProviderLabel(b.provider);
 		return `${icon}${scope}:${pct}%`;
 	});
 }
@@ -128,10 +134,28 @@ export function normalizeAccountId(input: unknown): string | undefined {
 	return value;
 }
 
+export function normalizeModelId(input: unknown): string | undefined {
+	if (typeof input !== "string") return undefined;
+	const value = input.trim().toLowerCase();
+	if (!value || value === "unknown") return undefined;
+	return value;
+}
+
+function looksLikeModelId(input: unknown): boolean {
+	const value = normalizeModelId(input);
+	if (!value) return false;
+	return /^(gpt|o\d|claude|gemini|qwen|deepseek|kimi|llama|mistral|codex)[-_.]/.test(value) || value.includes("codex");
+}
+
 export interface ProviderAccountRef {
 	provider: string;
 	account?: string;
 	key: string;
+}
+
+export interface ProviderBudgetRef extends ProviderAccountRef {
+	model?: string;
+	providerModelKey?: string;
 }
 
 export function buildProviderAccountKey(
@@ -142,6 +166,16 @@ export function buildProviderAccountKey(
 	const normalizedAccount = normalizeAccountId(account);
 	if (!normalizedAccount) return normalizedProvider;
 	return `${normalizedProvider}/${normalizedAccount}`;
+}
+
+export function buildProviderModelKey(
+	provider: string,
+	model?: string,
+): string {
+	const normalizedProvider = normalizeProvider(provider);
+	const normalizedModel = normalizeModelId(model);
+	if (!normalizedModel) return normalizedProvider;
+	return `${normalizedProvider}/${normalizedModel}`;
 }
 
 export function parseProviderAccountKey(
@@ -162,6 +196,35 @@ export function parseProviderAccountKey(
 		provider,
 		account,
 		key: buildProviderAccountKey(provider, account),
+	};
+}
+
+export function parseProviderBudgetRef(
+	input: unknown,
+	rule?: ProviderBudgetConfig,
+): ProviderBudgetRef | undefined {
+	if (typeof input !== "string") return undefined;
+	const raw = input.trim();
+	if (!raw) return undefined;
+
+	const slash = raw.indexOf("/");
+	const providerPart = slash === -1 ? raw : raw.slice(0, slash);
+	const suffixPart = slash === -1 ? undefined : raw.slice(slash + 1);
+	const provider = normalizeProvider(providerPart);
+	if (!provider || provider === "unknown") return undefined;
+
+	const explicitModel = normalizeModelId(rule?.model);
+	const suffixIsModel = !explicitModel && looksLikeModelId(suffixPart);
+	const model = explicitModel ?? (suffixIsModel ? normalizeModelId(suffixPart) : undefined);
+	const account = model ? undefined : normalizeAccountId(suffixPart);
+	const key = model ? buildProviderModelKey(provider, model) : buildProviderAccountKey(provider, account);
+
+	return {
+		provider,
+		account,
+		key,
+		model,
+		providerModelKey: model ? buildProviderModelKey(provider, model) : undefined,
 	};
 }
 
@@ -332,16 +395,153 @@ export function parseRouteModelRefs(input: unknown): Record<string, string> {
 	return out;
 }
 
+function clampPercent(value: number): number {
+	if (!Number.isFinite(value)) return 0;
+	return Math.max(0, Math.min(100, value));
+}
+
+function formatDurationMs(ms: number): string | undefined {
+	if (!Number.isFinite(ms)) return undefined;
+	const totalSeconds = Math.max(0, Math.round(ms / 1000));
+	if (totalSeconds <= 0) return "now";
+	const days = Math.floor(totalSeconds / 86_400);
+	const hours = Math.floor((totalSeconds % 86_400) / 3_600);
+	const minutes = Math.floor((totalSeconds % 3_600) / 60);
+	if (days > 0) return hours > 0 ? `${days}d ${hours}h` : `${days}d`;
+	if (hours > 0) return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+	return `${Math.max(1, minutes)}m`;
+}
+
+function formatOpenAIWindowLabel(seconds: number): string {
+	const rounded = Math.round(seconds);
+	if (rounded % 86_400 === 0) return `${rounded / 86_400}d`;
+	if (rounded % 3_600 === 0) return `${rounded / 3_600}h`;
+	return `${Math.max(1, Math.round(rounded / 60))}m`;
+}
+
+function parseOpenAIResetDescription(window: Record<string, unknown>, nowMs: number): string | undefined {
+	const resetAfterSeconds = safeNum(window.reset_after_seconds);
+	if (resetAfterSeconds > 0) return formatDurationMs(resetAfterSeconds * 1000);
+	const resetAtSeconds = safeNum(window.reset_at);
+	if (resetAtSeconds > 0) return formatDurationMs(resetAtSeconds * 1000 - nowMs);
+	return undefined;
+}
+
+function maybeOpenAIModelId(group: Record<string, unknown>, label: string): string | undefined {
+	return normalizeModelId(group.model ?? group.model_slug ?? group.model_id) ??
+		(looksLikeModelId(label) ? normalizeModelId(label) : undefined) ??
+		(looksLikeModelId(group.metered_feature) ? normalizeModelId(group.metered_feature) : undefined);
+}
+
+function addOpenAIWhamWindow(
+	out: OpenAIWhamUsageWindow[],
+	groupLabel: string,
+	group: Record<string, unknown>,
+	windowLabel: string,
+	window: unknown,
+	nowMs: number,
+): void {
+	if (!window || typeof window !== "object") return;
+	const typedWindow = window as Record<string, unknown>;
+	if (typedWindow.used_percent === undefined || typedWindow.used_percent === null) return;
+	const usedPercent = safeNum(typedWindow.used_percent);
+	if (!Number.isFinite(usedPercent)) return;
+	const windowSeconds = safeNum(typedWindow.limit_window_seconds);
+	const roundedSeconds = windowSeconds > 0 ? Math.round(windowSeconds) : undefined;
+	const suffix = roundedSeconds ? formatOpenAIWindowLabel(roundedSeconds) : windowLabel;
+	const label = `${groupLabel} (${suffix})`;
+	const model = maybeOpenAIModelId(group, groupLabel);
+	const meteredFeature = typeof group.metered_feature === "string" ? group.metered_feature : undefined;
+	out.push({
+		provider: "openai-codex",
+		source: "openai-wham",
+		label,
+		groupLabel,
+		windowLabel,
+		model,
+		meteredFeature,
+		percentLeft: clampPercent(100 - usedPercent),
+		usedPercent: clampPercent(usedPercent),
+		resetDescription: parseOpenAIResetDescription(typedWindow, nowMs),
+		windowMinutes: roundedSeconds ? Math.max(1, Math.round(roundedSeconds / 60)) : undefined,
+		allowed: typeof group.allowed === "boolean" ? group.allowed : undefined,
+		limitReached: typeof group.limit_reached === "boolean" ? group.limit_reached : undefined,
+	});
+}
+
+function addOpenAIWhamGroup(
+	result: OpenAIWhamUsageParseResult,
+	groupLabel: string,
+	group: unknown,
+	nowMs: number,
+): void {
+	if (!group || typeof group !== "object") return;
+	const typedGroup = group as Record<string, unknown>;
+	if (typedGroup.allowed === false) result.notes.push(`${groupLabel} currently blocked.`);
+	if (typedGroup.limit_reached === true) result.notes.push(`${groupLabel} limit reached.`);
+	addOpenAIWhamWindow(result.windows, groupLabel, typedGroup, "primary", typedGroup.primary_window, nowMs);
+	addOpenAIWhamWindow(result.windows, groupLabel, typedGroup, "secondary", typedGroup.secondary_window, nowMs);
+}
+
+export function parseOpenAIWhamUsage(
+	payload: unknown,
+	nowMs = Date.now(),
+): OpenAIWhamUsageParseResult {
+	const result: OpenAIWhamUsageParseResult = {
+		provider: "openai-codex",
+		windows: [],
+		notes: [],
+	};
+	if (!payload || typeof payload !== "object") {
+		result.notes.push("OpenAI WHAM usage payload was empty or malformed.");
+		return result;
+	}
+	const typedPayload = payload as Record<string, unknown>;
+	if (typeof typedPayload.plan_type === "string") result.plan = typedPayload.plan_type;
+	if (typeof typedPayload.email === "string") result.account = typedPayload.email;
+	const credits = typedPayload.credits;
+	if (credits && typeof credits === "object") {
+		const typedCredits = credits as Record<string, unknown>;
+		if (typedCredits.unlimited === true) result.notes.push("Credits are unlimited.");
+		const balance = safeNum(typedCredits.balance);
+		if (balance > 0) result.credits = balance;
+	}
+
+	addOpenAIWhamGroup(result, "Codex", typedPayload.rate_limit, nowMs);
+	addOpenAIWhamGroup(result, "Code Review", typedPayload.code_review_rate_limit, nowMs);
+	const additionalRateLimits = typedPayload.additional_rate_limits;
+	if (Array.isArray(additionalRateLimits)) {
+		for (const item of additionalRateLimits) {
+			if (!item || typeof item !== "object") continue;
+			const typedItem = item as Record<string, unknown>;
+			const label = typeof typedItem.limit_name === "string"
+				? typedItem.limit_name
+				: typeof typedItem.metered_feature === "string"
+					? typedItem.metered_feature
+					: "Additional";
+			const group = typedItem.rate_limit && typeof typedItem.rate_limit === "object"
+				? { ...(typedItem.rate_limit as Record<string, unknown>), ...typedItem }
+				: typedItem;
+			addOpenAIWhamGroup(result, label, group, nowMs);
+		}
+	}
+	if (result.windows.length === 0) {
+		result.notes.push("OpenAI WHAM usage response did not include window data.");
+	}
+	return result;
+}
+
 export function parseProviderBudgets(input: unknown): ProviderBudgetMap {
 	if (!input || typeof input !== "object") return {};
 	const out: ProviderBudgetMap = {};
 
 	for (const [k, rawRule] of Object.entries(input as Record<string, unknown>)) {
-		const key = parseProviderAccountKey(k);
-		if (!key) continue;
 		if (!rawRule || typeof rawRule !== "object") continue;
 
 		const ruleObj = rawRule as Record<string, unknown>;
+		const explicitModel = normalizeModelId(ruleObj.model);
+		const key = parseProviderBudgetRef(k, explicitModel ? { model: explicitModel } : undefined);
+		if (!key) continue;
 		const period = parseBudgetPeriod(ruleObj.period);
 		const unit = ruleObj.unit === "requests" ? "requests" : "tokens-cost";
 		const requestSharePolicy =
@@ -364,6 +564,7 @@ export function parseProviderBudgets(input: unknown): ProviderBudgetMap {
 			typeof ruleObj.owner === "string"
 				? ruleObj.owner.trim() || undefined
 				: undefined;
+		const model = key.model ?? explicitModel;
 
 		const hasAny =
 			period !== undefined ||
@@ -382,6 +583,7 @@ export function parseProviderBudgets(input: unknown): ProviderBudgetMap {
 			warnPct !== undefined ||
 			hardPct !== undefined ||
 			owner !== undefined ||
+			model !== undefined ||
 			unit === "requests";
 
 		if (!hasAny) continue;
@@ -391,6 +593,7 @@ export function parseProviderBudgets(input: unknown): ProviderBudgetMap {
 			period,
 			unit,
 			requestSharePolicy,
+			model,
 			weeklyQuotaTokens: weeklyQuotaTokens > 0 ? weeklyQuotaTokens : undefined,
 			weeklyQuotaCostUsd:
 				weeklyQuotaCostUsd > 0 ? weeklyQuotaCostUsd : undefined,
@@ -625,9 +828,9 @@ export function buildProviderBudgetStatuses(
 	},
 ): { allocationWarnings: string[]; budgets: ProviderBudgetStatus[] } {
 	const allocationWarnings: string[] = [];
-	const budgetRefs = Object.keys(params.providerBudgets)
-		.map((key) => parseProviderAccountKey(key))
-		.filter((row): row is ProviderAccountRef => Boolean(row));
+	const budgetRefs = Object.entries(params.providerBudgets)
+		.map(([key, rule]) => parseProviderBudgetRef(key, rule))
+		.filter((row): row is ProviderBudgetRef => Boolean(row));
 	if (budgetRefs.length === 0) return { allocationWarnings, budgets: [] };
 
 	const budgetKeys = budgetRefs.map((row) => row.key);
@@ -698,8 +901,10 @@ export function buildProviderBudgetStatuses(
 		.map((budgetRef) => {
 			const provider = budgetRef.provider;
 			const account = budgetRef.account;
-			const providerAccountKey = budgetRef.key;
-			const rule = params.providerBudgets[providerAccountKey] ?? {};
+			const model = budgetRef.model;
+			const providerAccountKey = account ? budgetRef.key : provider;
+			const providerModelKey = model ? buildProviderModelKey(provider, model) : undefined;
+			const rule = params.providerBudgets[budgetRef.key] ?? {};
 			const notes: string[] = [];
 
 			const inferredPeriod: "weekly" | "monthly" =
@@ -729,8 +934,9 @@ export function buildProviderBudgetStatuses(
 					e.timestampMs > nowMs
 				)
 					return false;
-				if (!account) return true;
-				return normalizeAccountId(e.account) === account;
+				if (account && normalizeAccountId(e.account) !== account) return false;
+				if (model && normalizeModelId(e.model) !== model) return false;
+				return true;
 			});
 
 			const observedMessages = providerEvents.length;
@@ -943,6 +1149,8 @@ export function buildProviderBudgetStatuses(
 				provider,
 				account,
 				providerAccountKey,
+				model,
+				providerModelKey,
 				owner: rule.owner,
 				period: inferredPeriod,
 				unit: rule.unit ?? "tokens-cost",
