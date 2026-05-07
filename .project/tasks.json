@@ -22282,6 +22282,47 @@
       "milestone": "context-watchdog-lane-2026-05",
       "notes": "Created from human steering: future auto-resume should tell the next operator whether the previous agent stopped gracefully before compaction/checkpoint; this helps judge whether work may be half-finished.\n[rationale:risk-control] Auto-resume needs explicit graceful/interrupted/unknown stop evidence because the next operator or agent must know whether the previous slice checkpoint was calm and bounded or may have stopped mid-slice; this reduces accidental continuation from half-finished state.\nCompleted graceful/interrupted/unknown stop evidence in checkpoint + auto-resume prompt. Auto-resume now includes `previousStop:` and interrupted/unknown states warn to verify dirty state/focal evidence before continuation.",
       "verification": "VERIF-TASK-BUD-999-AUTO-RESUME-STOP-EVIDENCE"
+    },
+    {
+      "id": "TASK-BUD-1001",
+      "description": "[P1/rehearsal] Executar primeiro canary agent-first de mutação pequena com worker: pacote explícito, escopo declarado, validação pai, rollback e commit pelo control plane apenas após revisão.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1000"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/research/agent-run-provider-native-runner-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Escolher uma tarefa pequena e reversível cujo patch possa ser produzido por worker em arquivos declarados.",
+        "Control plane não edita a solução antes do worker; só prepara packet, executa com confirmação, valida diff e registra outcome.",
+        "Outcome deve separar processState/contractDecision, output non-empty, arquivos tocados esperados e validação focal.",
+        "Registrar limites para promoção: quando repetir canary, quando permitir mutação maior, e quando recuar para read-only."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criada por steering humano para mudar de worker read-only para execução bounded real, mantendo control plane como validador.\n[provenance:human] source_task=TASK-BUD-1000 reason=Próximo passo prático para reduzir implementação manual do control plane."
+    },
+    {
+      "id": "TASK-BUD-1000",
+      "description": "[P1/agent-first] Formalizar modo operacional agent-first: control plane prepara pacote, delega a worker quando local-safe, valida resultado e só implementa manualmente infraestrutura/gates.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "docs/research/agent-first-operating-mode-2026-05.md",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts"
+      ],
+      "acceptance_criteria": [
+        "Definir política: toda tarefa local-safe deve tentar pacote single-worker antes de implementação manual pelo control plane.",
+        "Separar claramente papéis: control plane seleciona/packetiza/valida/checkpointa; worker executa análise/mutação bounded.",
+        "Definir exceções permitidas para implementação manual: infraestrutura de agentes, gates, rollback, validação, ou falha explícita de worker.",
+        "Incluir métrica simples de mix: trabalho feito por worker vs control plane e próximo limiar de promoção."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criada por steering humano: reduzir trabalho direto do control plane e focar em melhorar agentes para assumirem mais trabalho. Dependências conceituais já concluídas: TASK-BUD-989/TASK-BUD-998; não foram ligadas como depends_on para evitar coupling protegido no board.\n[provenance:human] source_task=none reason=Usuário observou que o control plane estava executando tarefas finais demais; objetivo é caminhar para control plane mínimo e agentes assumindo execução."
     }
   ]
 }
