@@ -1,4 +1,5 @@
 import path from "node:path";
+import { resolveProviderExecutionBudgetEvidence } from "./guardrails-core-provider-budget-evidence";
 import {
 	normalizeProvider,
 	parseProviderAccountKey,
@@ -136,13 +137,22 @@ export function buildRouteAdvisory(
 	profile: RoutingProfile = "balanced",
 ): RouteAdvisory {
 	const considered = status.providerBudgets
-		.map((b) => ({
-			provider: b.provider,
-			state: b.state,
-			unit: b.unit,
-			projectedPressurePct: maxPressurePct(b),
-			_sortScore: routePriority(b, profile),
-		}))
+		.map((b) => {
+			const budgetDecision = b.state === "warning" ? "warn" : b.state;
+			const executionBudget = resolveProviderExecutionBudgetEvidence({
+				budgetDecision,
+				budgetEvidence: `${b.provider}${b.model ? `/${b.model}` : ""} ${b.state}`,
+			});
+			return {
+				provider: b.provider,
+				state: b.state,
+				unit: b.unit,
+				projectedPressurePct: maxPressurePct(b),
+				executionBudgetDecision: executionBudget.decision,
+				executionBudgetReady: executionBudget.readyForExecution,
+				_sortScore: routePriority(b, profile),
+			};
+		})
 		.sort(
 			(a, b) =>
 				a._sortScore - b._sortScore || a.provider.localeCompare(b.provider),

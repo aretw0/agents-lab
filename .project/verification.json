@@ -14606,6 +14606,15 @@
       "method": "focal-vitest",
       "timestamp": "2026-05-07T16:53:21.498Z",
       "evidence": "Generalized the provider/model budget evidence gate out of agent-run-start into guardrails-core-provider-budget-evidence so the same concept can be reused by control-plane provider decisions without duplicating agent-only semantics. agent_run_start_packet now consumes the shared resolver. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 17 passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-989-CONTROL-PLANE-BUDGET-REUSE",
+      "target": "TASK-BUD-989",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-vitest",
+      "timestamp": "2026-05-07T17:00:45.919Z",
+      "evidence": "Reused the shared provider execution budget evidence resolver in quota route advisory consideredProviders. Route advisory now exposes executionBudgetDecision/executionBudgetReady alongside provider state, preserving no-auto-switch behavior and avoiding a separate agent-only budget concept. Validation: npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 2 files, 62 tests passed."
     }
   ]
 }

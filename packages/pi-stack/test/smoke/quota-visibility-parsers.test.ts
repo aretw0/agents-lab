@@ -17,6 +17,7 @@ import quotaVisibilityExtension, {
   buildProviderBudgetStatuses,
   buildRouteAdvisory,
   shortProviderLabel,
+  formatBudgetStatusLegend,
   formatBudgetStatusParts,
   resolveQuotaToolOutputPolicy,
   formatQuotaToolJsonOutput,
@@ -929,6 +930,14 @@ describe("quota-visibility parsers", () => {
     expect(advisory.recommendedProvider).toBe("github-copilot");
     expect(advisory.noAutoSwitch).toBe(true);
     expect(advisory.state).toBe("ok");
+    expect(advisory.consideredProviders.find((p) => p.provider === "github-copilot")).toMatchObject({
+      executionBudgetDecision: "ok",
+      executionBudgetReady: true,
+    });
+    expect(advisory.consideredProviders.find((p) => p.provider === "openai-codex")).toMatchObject({
+      executionBudgetDecision: "warn",
+      executionBudgetReady: true,
+    });
   });
 
   it("buildRouteAdvisory retorna BLOCKER quando todos estão bloqueados", () => {
@@ -988,6 +997,8 @@ describe("quota-visibility parsers", () => {
     expect(advisory.recommendedProvider).toBeUndefined();
     expect(advisory.state).toBe("blocked");
     expect(advisory.reason).toContain("BLOCKER");
+    expect(advisory.consideredProviders.every((p) => p.executionBudgetDecision === "blocked")).toBe(true);
+    expect(advisory.consideredProviders.every((p) => p.executionBudgetReady === false)).toBe(true);
   });
 
   it("buildProviderWindowInsight destaca pico e início antes do pico", () => {
@@ -1099,9 +1110,9 @@ describe("quota-visibility — TUI footer formatters", () => {
       expect(parts).toEqual(["✓codex:12%"]);
     });
 
-    it("usa ! para estado warning", () => {
+    it("usa ⚠ para estado warning", () => {
       const parts = formatBudgetStatusParts([makeBudgetStatus("github-copilot", "warning", 78)]);
-      expect(parts).toEqual(["!copilot:78%"]);
+      expect(parts).toEqual(["⚠copilot:78%"]);
     });
 
     it("usa ✗ para estado blocked", () => {
@@ -1142,6 +1153,14 @@ describe("quota-visibility — TUI footer formatters", () => {
       };
       const [part] = formatBudgetStatusParts([b]);
       expect(part).toBe("✓codex:0%");
+    });
+
+    it("explica símbolos, percentual local usado e diferença de WHAM", () => {
+      const legend = formatBudgetStatusLegend().join("\n");
+      expect(legend).toContain("✓=OK, ⚠=WARN, ✗=BLOCK");
+      expect(legend).toContain("max local used pressure");
+      expect(legend).toContain("not remaining quota");
+      expect(legend).toContain("WHAM headroom");
     });
   });
 });

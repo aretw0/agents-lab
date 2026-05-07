@@ -181,6 +181,8 @@ export interface RouteAdvisory {
 		state: "ok" | "warning" | "blocked";
 		unit: "tokens-cost" | "requests";
 		projectedPressurePct: number;
+		executionBudgetDecision: "ok" | "warn" | "blocked";
+		executionBudgetReady: boolean;
 	}>;
 	noAutoSwitch: true;
 }
