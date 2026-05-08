@@ -290,6 +290,9 @@ describe("agent spawn readiness contract", () => {
     });
     expect(mutationReady.decision).toBe("ready-for-human-decision");
     expect(mutationReady.invocationSpec.fileContract).toBe("mutation");
+    const mutationToolsIndex = mutationReady.invocationSpec.executionPreview.args.indexOf("--tools") + 1;
+    expect(mutationReady.invocationSpec.executionPreview.args[mutationToolsIndex]).toContain("edit");
+    expect(mutationReady.invocationSpec.executionPreview.args[mutationToolsIndex]).toContain("write");
   });
 
   it("derives a report-only agent invocation spec from a board task", () => {
@@ -829,7 +832,7 @@ describe("agent spawn readiness contract", () => {
     expect(blocked.blockers).toContain("budget-blocked");
   });
 
-  it("blocks provider-native start packets that request write tools or protected scope", () => {
+  it("blocks provider-native start packets that request unsupported tools or protected scope", () => {
     const result = buildAgentRunStartPacket({
       runId: "run-write-blocked",
       goal: "edit protected settings",
@@ -845,7 +848,7 @@ describe("agent spawn readiness contract", () => {
     expect(result.decision).toBe("blocked");
     expect(result.recommendationCode).toBe("agent-run-start-blocked-protected-scope");
     expect(result.blockers).toContain("protected-scope-requested");
-    expect(result.blockers).toContain("non-read-only-tools:edit,bash");
+    expect(result.blockers).toContain("unsupported-tools:bash");
     expect(result.processStartAllowed).toBe(false);
   });
 

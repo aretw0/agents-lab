@@ -22918,7 +22918,29 @@
         "Validação focal: `safe_marker_check` do marcador literal e `git diff --check`."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Tarefa preparada como próximo degrau após o runner read-only: small mutation mínima em um único arquivo doc. Não autoriza dispatch; exige frase exata por runId.\n[provenance:human] source_task=TASK-BUD-1026 reason=Checkpoint recomendou o próximo single-worker canary small-mutation com arquivo declarado, rollback e validação focal."
+      "notes": "Tarefa preparada como próximo degrau após o runner read-only: small mutation mínima em um único arquivo doc. Não autoriza dispatch; exige frase exata por runId.\n[provenance:human] source_task=TASK-BUD-1026 reason=Checkpoint recomendou o próximo single-worker canary small-mutation com arquivo declarado, rollback e validação focal.\nFirst exact-confirmed small-mutation dispatch exposed a packet/tooling bug. Run `task-bud-1027-small-mutation-doc-canary` completed with outputBytes=474 and worker self-reported PASS, but parent evidence failed: git remained clean, required markers `## Small-mutation canary target` and `small-mutation-runner-canary-target` were absent, and outcome was contract=fail process=completed recommendation=ask-human. Root cause: mutation profile still used read-only tool allowlist, preventing actual edits. Do not retry until TASK-BUD-1028 is committed and `/reload` is done."
+    },
+    {
+      "id": "TASK-BUD-1028",
+      "description": "[agent-first/bugfix] Corrigir packet/start de perfis mutation para não despachar worker com allowlist read-only que impossibilita editar arquivos.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1027"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Perfis `small-mutation`/`test-fix` recebem allowlist mínima de mutação contendo `edit`/`write` além das ferramentas read-only.",
+        "Start packet continua bloqueando ferramentas perigosas fora do conjunto suportado, como `bash`.",
+        "Teste focal confirma que invocation spec mutation-ready inclui `edit`/`write` na preview de tools.",
+        "Tentativa anterior de TASK-BUD-1027 é registrada como contract fail: processo completed, output não vazio, mas nenhum arquivo/marcador foi alterado."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Derivado do primeiro canary small-mutation: worker reportou PASS, mas git ficou limpo e marcador ausente porque o start packet usava allowlist read-only.\n[provenance:human] source_task=TASK-BUD-1027 reason=Canary small-mutation expôs mismatch entre perfil mutation e ferramentas permitidas do subprocesso.\nMutation tool allowlist corrected; requires `/reload` before retrying TASK-BUD-1027 with a new runId/purpose.",
+      "verification": "VERIF-TASK-BUD-1028-MUTATION-TOOLS"
     }
   ]
 }

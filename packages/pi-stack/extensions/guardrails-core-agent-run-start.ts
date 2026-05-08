@@ -274,6 +274,8 @@ export interface AgentRunTaskStartPacketResult {
 const AGENT_RUN_START_TIMEOUT_MIN_MS = 5_000;
 const AGENT_RUN_START_TIMEOUT_MAX_MS = 180_000;
 const READ_ONLY_TOOL_ALLOWLIST = ["read", "grep", "find", "ls"];
+const MUTATION_TOOL_ALLOWLIST = [...READ_ONLY_TOOL_ALLOWLIST, "edit", "write"];
+const SUPPORTED_AGENT_RUN_TOOL_ALLOWLIST = [...MUTATION_TOOL_ALLOWLIST];
 
 function normalizeText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -429,8 +431,8 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   if (!cwd) block("agent-run-start-blocked-cwd", "cwd-missing");
   if (declaredFiles.length === 0) block("agent-run-start-blocked-files", "declared-files-missing");
   if (timeoutMs < AGENT_RUN_START_TIMEOUT_MIN_MS || timeoutMs > AGENT_RUN_START_TIMEOUT_MAX_MS) block("agent-run-start-blocked-timeout", "timeout-out-of-bounds");
-  const unsupportedTools = toolAllowlist.filter((tool) => !READ_ONLY_TOOL_ALLOWLIST.includes(tool));
-  if (unsupportedTools.length > 0) block("agent-run-start-blocked-tools", `non-read-only-tools:${unsupportedTools.join(",")}`);
+  const unsupportedTools = toolAllowlist.filter((tool) => !SUPPORTED_AGENT_RUN_TOOL_ALLOWLIST.includes(tool));
+  if (unsupportedTools.length > 0) block("agent-run-start-blocked-tools", `unsupported-tools:${unsupportedTools.join(",")}`);
   if (sessionIsolation === "unknown") block("agent-run-start-blocked-session-isolation", "session-isolation-missing");
   if (extensionIsolation === "unknown") block("agent-run-start-blocked-extension-isolation", "extension-isolation-missing");
   if (!logPath) block("agent-run-start-blocked-log-path", "log-path-missing");
@@ -544,7 +546,7 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
     cwd: input.cwd,
     declaredFiles: input.declaredFiles,
     timeoutMs: normalizePositiveInt(input.timeoutMs, 90_000),
-    toolAllowlist: READ_ONLY_TOOL_ALLOWLIST,
+    toolAllowlist: fileContract === "mutation" ? MUTATION_TOOL_ALLOWLIST : READ_ONLY_TOOL_ALLOWLIST,
     sessionIsolation: "no-session",
     extensionIsolation: "minimal-no-extensions",
     logPath,

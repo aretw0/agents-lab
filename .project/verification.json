@@ -15038,6 +15038,15 @@
       "method": "doc-review+marker-check",
       "timestamp": "2026-05-08T05:13:00.271Z",
       "evidence": "Created `docs/research/agent-runner-maturity-checkpoint-2026-05.md`. It records the completed evidence for exact-confirmed dispatch, ENOENT crash hardening, bounded follow, read-only outcome fail-closed behavior, final evidence fields, separation of dispatch/process/contract/board/commit, and remaining blockers. It recommends the next rung: one small mutation runner canary with declared files, rollback, focal validation, follow, outcome, and parent-side completion. Marker check passed for required evidence markers."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1028-MUTATION-TOOLS",
+      "target": "TASK-BUD-1028",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-test+marker-check+failed-canary-analysis",
+      "timestamp": "2026-05-08T05:35:35.592Z",
+      "evidence": "Fixed mutation-profile tool allowlist after TASK-BUD-1027 dispatch completed but did not modify files. `buildAgentRunOperatorPacket` now uses `MUTATION_TOOL_ALLOWLIST=[read, grep, find, ls, edit, write]` when fileContract=mutation, while read-only profiles keep the read-only allowlist. Start packet now blocks unsupported tools outside the supported set, e.g. bash, instead of blocking edit/write. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 31 passed. Marker checks passed for runtime and tests. TASK-BUD-1027 attempt recorded as contract fail: process=completed outputBytes=474, git clean, marker missing."
     }
   ]
 }
