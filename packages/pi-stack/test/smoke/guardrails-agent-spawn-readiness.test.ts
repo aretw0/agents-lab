@@ -1220,7 +1220,7 @@ describe("agent spawn readiness contract", () => {
     expect(result.content?.[0]?.text).not.toContain('"executionPreview"');
   });
 
-  it("exposes agent run status, log tail, and abort surfaces", async () => {
+  it("exposes agent run status, follow, log tail, and abort surfaces", async () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "agent-run-"));
     const reportsDir = path.join(cwd, ".pi", "reports");
     mkdirSync(reportsDir, { recursive: true });
@@ -1335,6 +1335,23 @@ describe("agent spawn readiness contract", () => {
     const tail = await getTool("agent_run_log_tail").execute("tc-tail", { run_id: "run-1", max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });
     expect(tail.details?.mode).toBe("agent-run-log-tail");
     expect(tail.details?.lines).toEqual(["line-3", ""]);
+
+    const followCompleted = await getTool("agent_run_follow").execute("tc-follow-completed", { run_id: "run-outcome", max_wait_ms: 0, max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });
+    expect(followCompleted.details?.mode).toBe("agent-run-follow");
+    expect(followCompleted.details?.decision).toBe("terminal");
+    expect(followCompleted.details?.terminal).toBe(true);
+    expect(followCompleted.details?.outputBytes).toBe(21);
+    expect(followCompleted.content?.[0]?.text).toContain("dispatch=no");
+
+    const followStale = await getTool("agent_run_follow").execute("tc-follow-stale", { run_id: "run-1", max_wait_ms: 0 }, undefined as unknown as AbortSignal, () => {}, { cwd });
+    expect(followStale.details?.decision).toBe("running-stale");
+    expect(followStale.details?.terminal).toBe(false);
+    expect((followStale.details?.status as { stale?: boolean })?.stale).toBe(true);
+
+    const followMissing = await getTool("agent_run_follow").execute("tc-follow-missing", { run_id: "missing-run", max_wait_ms: 0 }, undefined as unknown as AbortSignal, () => {}, { cwd });
+    expect(followMissing.details?.decision).toBe("missing-run");
+    expect(followMissing.details?.processStartAllowed).toBe(false);
+    expect(followMissing.details?.processStopAllowed).toBe(false);
 
     const killSpy = vi.spyOn(process, "kill").mockImplementation(() => true);
     try {

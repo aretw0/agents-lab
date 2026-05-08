@@ -1,54 +1,53 @@
 {
-  "timestamp": "2026-05-08T03:58:46.218Z",
-  "context": "User provided exact confirmation for retry runId task-bud-1018-first-runner-readonly-canary-retry. Preflight clean/context ok and dispatch_ch [snip] e to replace manual bash sleep/polling. [truncated:+434 chars]",
-  "current_tasks": [
-    "TASK-BUD-1018"
-  ],
+  "timestamp": "2026-05-08T04:04:13.435Z",
+  "context": "Implemented native bounded read-only agent_run_follow surface to avoid manual bash sleep/polling. Tool waits up to a short max_wait_ms, polls [snip] ed, so reload required before live use. [truncated:+215 chars]",
   "next_actions": [
-    "Commit TASK-BUD-1018 note, TASK-BUD-1020 planned task, and handoff updates.",
-    "Do not mark TASK-BUD-1018 completed yet: first runner did not crash and process completed, but [snip] report/observability race. [truncated:+39 chars]",
-    "Next safe slice: implement TASK-BUD-1020 native bounded follow/await/status-finalizer before another runner attempt."
+    "Commit TASK-BUD-1020 code/test/board/verification/handoff changes.",
+    "Operator should run /reload before using live agent_run_follow.",
+    "After reload, live-canary agent_run_follow against task-bud-1018-first-runner-readonly-canary- [snip] runner attempt is needed. [truncated:+37 chars]"
   ],
   "blockers": [
-    "Runner follow/await is not native yet; manual sleep/polling was used and cause [snip] self-observation race. [truncated:+9 chars]",
-    "TASK-BUD-1018 contract not passed yet."
+    "Live reload required after adding agent_run_follow."
   ],
   "recent_validation": [
-    "dispatch_check retry -> confirmation=match wouldDispatchAfterExplicitExecute=yes",
-    "agent_run_task_dispatch retry -> decision=dispatched pid=56304 dispatch=yes",
-    "agent_run_status retry final -> completed stale=no"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 31 passed",
+    "safe_marker_check implementation -> pass",
+    "safe_marker_check tests -> pass"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1018",
+    "focus": "TASK-BUD-1020",
     "canonical_links": [
-      "task:TASK-BUD-1018",
-      "task:TASK-BUD-1018-FIRST-RUNNER-READONLY-CANARY-RETRY",
-      "task:TASK-BUD-1020"
+      "task:TASK-BUD-1020",
+      "task:TASK-BUD-1018-FIRST-RUNNER-READONLY-CANARY-RETRY"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T03:58:46.218Z",
+    "generatedAtIso": "2026-05-08T04:04:13.435Z",
     "level": "ok",
-    "percent": 30,
+    "percent": 34,
     "action": "continue",
-    "recommendation": "commit-outcome-and-build-native-follow-before-retry",
+    "recommendation": "commit-follow-surface-then-reload-before-live-use",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T03:58:46.218Z",
+      "atIso": "2026-05-08T04:04:13.435Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 30,
+      "percent": 34,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-outcome-and-build-native-follow-before-retry"
+      "recommendation": "commit-follow-surface-then-reload-before-live-use"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-1020"
   ]
 }

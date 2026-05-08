@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { spawn } from "node:child_process";
-import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createWriteStream, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Type } from "@sinclair/typebox";
 import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
@@ -57,6 +57,19 @@ function readLogTail(logPath: string, maxLines: number): string[] {
   if (!logPath || !existsSync(logPath)) return [];
   const text = readFileSync(logPath, "utf8");
   return text.split(/\r?\n/).slice(-Math.max(1, Math.min(500, Math.floor(maxLines))));
+}
+
+function readLogByteCount(logPath: string | undefined): number {
+  if (!logPath || !existsSync(logPath)) return 0;
+  return statSync(logPath).size;
+}
+
+function isTerminalAgentRunState(state: AgentRunState): boolean {
+  return state === "completed" || state === "failed" || state === "timed-out" || state === "aborted";
+}
+
+function sleepMs(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function resolvePiSubprocessInvocation(preview: { command: string; args: string[] }): { command: string; args: string[]; source: "current-node-entrypoint" | "preview-command" } {
@@ -797,6 +810,73 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       };
       return buildOperatorVisibleToolResponse({
         label: "agent_run_log_tail",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_follow",
+    label: "Agent Run Follow",
+    description: "Read-only bounded follow/finalizer for a registered agent run. Waits only up to a short timeout, returns final status/log/output bytes, and never starts, stops, or dispatches execution.",
+    parameters: Type.Object({
+      run_id: Type.String({ description: "Agent run id to follow." }),
+      max_wait_ms: Type.Optional(Type.Number({ description: "Maximum bounded wait in milliseconds. Clamped to 0..30000; default 5000." })),
+      poll_interval_ms: Type.Optional(Type.Number({ description: "Polling interval in milliseconds. Clamped to 100..5000; default 500." })),
+      max_lines: Type.Optional(Type.Number({ description: "Maximum log tail lines, clamped to 1..500; default 80." })),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const runId = typeof p.run_id === "string" ? p.run_id : "";
+      const maxWaitMs = Math.max(0, Math.min(30_000, Math.floor(typeof p.max_wait_ms === "number" ? p.max_wait_ms : 5_000)));
+      const pollIntervalMs = Math.max(100, Math.min(5_000, Math.floor(typeof p.poll_interval_ms === "number" ? p.poll_interval_ms : 500)));
+      const maxLines = Math.max(1, Math.min(500, Math.floor(typeof p.max_lines === "number" ? p.max_lines : 80)));
+      const deadline = Date.now() + maxWaitMs;
+      let entry = readRegistryEntry(ctx.cwd, runId);
+      let status = buildAgentRunStatus(runId, entry);
+      while (status.found && !isTerminalAgentRunState(status.state) && !status.stale && Date.now() < deadline) {
+        await sleepMs(Math.min(pollIntervalMs, Math.max(0, deadline - Date.now())));
+        entry = readRegistryEntry(ctx.cwd, runId);
+        status = buildAgentRunStatus(runId, entry);
+      }
+      const terminal = status.found && isTerminalAgentRunState(status.state);
+      const decision = !status.found ? "missing-run" : terminal ? "terminal" : status.stale ? "running-stale" : "timeout";
+      const logPath = entry?.logPath;
+      const lines = logPath ? readLogTail(logPath, maxLines) : [];
+      const outputBytes = readLogByteCount(logPath);
+      const result = {
+        mode: "agent-run-follow" as const,
+        activation: "none" as const,
+        authorization: "none" as const,
+        dispatchAllowed: false,
+        processStartAllowed: false,
+        processStopAllowed: false,
+        runId,
+        decision,
+        terminal,
+        status,
+        outputBytes,
+        logPath,
+        maxWaitMs,
+        pollIntervalMs,
+        maxLines,
+        lines,
+        recommendation: terminal ? "build-outcome-packet" : decision === "timeout" ? "poll-again-or-wait" : "ask-human",
+        summary: [
+          "agent-run-follow:",
+          `decision=${decision}`,
+          `runId=${runId || "unknown"}`,
+          `state=${status.state}`,
+          `terminal=${terminal ? "yes" : "no"}`,
+          `outputBytes=${outputBytes}`,
+          `lines=${lines.length}`,
+          "dispatch=no",
+          "authorization=none",
+        ].join(" "),
+      };
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_follow",
         summary: result.summary,
         details: result,
       });

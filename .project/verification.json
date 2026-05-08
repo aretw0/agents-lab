@@ -14966,6 +14966,15 @@
       "method": "focal-test+marker-check+registry-reconcile+outcome-packet",
       "timestamp": "2026-05-08T03:47:36.686Z",
       "evidence": "Fixed `agent_run_task_dispatch` spawn crash path after operator reported `spawn pi ENOENT` with unhandled child error. Implementation now resolves `pi` preview starts through current Node entrypoint when available, invokes `spawn(subprocess.command, subprocess.args)`, registers `child.on(\"error\", ...)`, logs `spawn error code=${code}`, and writes registry state=failed instead of allowing an unhandled error to crash the parent session. Reconciled stale run task-bud-1018-first-runner-readonly-canary from running/stale to failed. Outcome packet for TASK-BUD-1018 reports contract=fail process=failed recommendation=ask-human outputBytes=0. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 31 passed. Marker checks passed for implementation and test hardening markers."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1020-AGENT-RUN-FOLLOW",
+      "target": "TASK-BUD-1020",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-test+marker-check",
+      "timestamp": "2026-05-08T04:03:59.783Z",
+      "evidence": "Implemented read-only bounded `agent_run_follow` surface. It accepts run_id, max_wait_ms, poll_interval_ms, and max_lines; waits only up to a short bounded timeout; never starts/stops/dispatches; returns decision=terminal|missing-run|running-stale|timeout, final status, bounded log tail, outputBytes, and recommendation. Fails closed for missing runs and stale running state. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 31 passed. Marker checks passed for implementation and tests covering completed, running-stale, and missing-run."
     }
   ]
 }

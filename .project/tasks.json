@@ -22729,7 +22729,7 @@
     {
       "id": "TASK-BUD-1020",
       "description": "[agent-first/observability] Adicionar uma superfície nativa bounded para acompanhar/finalizar runs (`follow`/await status) sem polling manual por `setTimeout` em bash.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1019"
@@ -22747,7 +22747,8 @@
         "Teste focal cobre completed, running-stale e missing-run."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Criado após operador questionar o uso de `setTimeout` manual para acompanhar o worker. O caminho atual tem status/log/outcome, mas falta uma primitiva integrada de follow bounded.\n[provenance:human] source_task=TASK-BUD-1018 reason=Primeiro retry real expôs lacuna ergonômica/operacional: acompanhamento ainda foi feito por polling manual com sleep."
+      "notes": "Criado após operador questionar o uso de `setTimeout` manual para acompanhar o worker. O caminho atual tem status/log/outcome, mas falta uma primitiva integrada de follow bounded.\n[provenance:human] source_task=TASK-BUD-1018 reason=Primeiro retry real expôs lacuna ergonômica/operacional: acompanhamento ainda foi feito por polling manual com sleep.\nNative bounded follow surface added to replace manual sleep/polling for runner observation. Requires `/reload` before live tool use.",
+      "verification": "VERIF-TASK-BUD-1020-AGENT-RUN-FOLLOW"
     }
   ]
 }
