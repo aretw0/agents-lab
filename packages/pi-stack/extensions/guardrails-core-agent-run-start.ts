@@ -1,5 +1,6 @@
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunRegistryEntry } from "./guardrails-core-agent-run-runtime";
 import { resolveProviderExecutionBudgetEvidence, type ProviderExecutionBudgetDecision } from "./guardrails-core-provider-budget-evidence";
+import { buildToolkitContract, type ToolkitCapability, type ToolkitContractProfile, type ToolkitContractResult } from "./guardrails-core-toolkit-contract";
 
 export type AgentRunExecutorKind = "pi-print-subprocess";
 export type AgentRunStartDecision = "ready-for-human-decision" | "blocked";
@@ -27,6 +28,10 @@ export interface AgentRunStartPacketInput {
   budgetEvidenceGeneratedAtIso?: string;
   budgetEvidenceMaxAgeMs?: number;
   protectedScopeRequested?: boolean;
+  profile?: ToolkitContractProfile | string;
+  requiredCapabilities?: ToolkitCapability[];
+  availableTools?: string[];
+  validationGateKnown?: boolean;
 }
 
 export interface AgentRunStartPacketResult {
@@ -53,6 +58,7 @@ export interface AgentRunStartPacketResult {
     | "agent-run-start-blocked-extension-isolation"
     | "agent-run-start-blocked-log-path"
     | "agent-run-start-blocked-budget"
+    | "agent-run-start-blocked-toolkit"
     | "agent-run-start-blocked-protected-scope";
   blockers: string[];
   runSpec: {
@@ -76,6 +82,7 @@ export interface AgentRunStartPacketResult {
     budgetEvidenceConsistency: "consistent" | "mismatch" | "needs-human-review";
     budgetEvidenceHumanReviewRequired: boolean;
     protectedScopeRequested: boolean;
+    toolkitContract?: ToolkitContractResult["contract"] & { blockers: string[]; decision: ToolkitContractResult["decision"] };
   };
   commandPreview: {
     command: "pi";
@@ -154,7 +161,7 @@ export interface AgentInvocationSpecPacketResult {
   requiresHumanDecision: true;
   singleRunOnly: true;
   decision: AgentRunStartDecision;
-  recommendationCode: AgentRunStartPacketResult["recommendationCode"] | "agent-invocation-spec-blocked-profile" | "agent-invocation-spec-blocked-validation" | "agent-invocation-spec-blocked-rollback" | "agent-invocation-spec-blocked-economy";
+  recommendationCode: AgentRunStartPacketResult["recommendationCode"] | "agent-invocation-spec-blocked-profile" | "agent-invocation-spec-blocked-validation" | "agent-invocation-spec-blocked-rollback" | "agent-invocation-spec-blocked-economy" | "agent-invocation-spec-blocked-toolkit";
   blockers: string[];
   invocationSpec: AgentRunOperatorPacketResult["runSpec"] & {
     profile: AgentInvocationProfile | "unknown";
@@ -162,6 +169,7 @@ export interface AgentInvocationSpecPacketResult {
     rollback: string[];
     outputSchema?: string;
     outputContract: "non-empty-text" | "structured-schema";
+    toolkitContract: ToolkitContractResult["contract"] & { blockers: string[]; decision: ToolkitContractResult["decision"] };
     executionPreview: AgentRunStartPacketResult["commandPreview"];
   };
   operatorPacket: AgentRunOperatorPacketResult;
@@ -426,6 +434,21 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   const budgetDecision = budget.decision;
   const budgetEvidence = budget.evidence;
   const protectedScopeRequested = input.protectedScopeRequested === true;
+
+  // Build toolkit contract if profile or required capabilities are provided
+  const toolkitContract = input.profile || input.requiredCapabilities || input.availableTools
+    ? buildToolkitContract({
+        profile: input.profile as ToolkitContractProfile,
+        goal,
+        requiredCapabilities: input.requiredCapabilities,
+        availableTools: input.availableTools ?? toolAllowlist,
+        declaredFiles,
+        providerModelRef,
+        validationGateKnown: input.validationGateKnown,
+        purpose: "agent-run-start",
+      })
+    : undefined;
+
   const blockers: string[] = [];
   let recommendationCode: AgentRunStartPacketResult["recommendationCode"] = "agent-run-start-ready-for-human-decision";
 
@@ -448,6 +471,13 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   if (extensionIsolation === "unknown") block("agent-run-start-blocked-extension-isolation", "extension-isolation-missing");
   if (!logPath) block("agent-run-start-blocked-log-path", "log-path-missing");
   for (const budgetBlocker of budget.blockers) block("agent-run-start-blocked-budget", budgetBlocker);
+
+  // Add toolkit contract blockers if applicable
+  if (toolkitContract && toolkitContract.decision === "blocked") {
+    for (const blocker of toolkitContract.blockers) {
+      block("agent-run-start-blocked-toolkit", `toolkit-contract:${blocker}`);
+    }
+  }
 
   const commandArgs = [
     ...(sessionIsolation === "no-session" ? ["--no-session"] : ["--session-dir", `.pi/agent-runs/${runId || "unknown"}`]),
@@ -496,6 +526,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       budgetEvidenceConsistency: budget.consistency,
       budgetEvidenceHumanReviewRequired: budget.humanReviewRequired,
       protectedScopeRequested,
+      ...(toolkitContract ? { toolkitContract: { ...toolkitContract.contract, blockers: toolkitContract.blockers, decision: toolkitContract.decision } } : {}),
     },
     commandPreview: {
       command: "pi",
@@ -632,6 +663,15 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
     ...input,
     fileContract,
   });
+  const toolkitContract = buildToolkitContract({
+    profile,
+    goal: operatorPacket.runSpec.goal,
+    availableTools: operatorPacket.runSpec.toolAllowlist,
+    declaredFiles: operatorPacket.runSpec.declaredFiles,
+    providerModelRef: operatorPacket.runSpec.providerModelRef,
+    validationGateKnown: validation.length > 0,
+    purpose: normalizeText(input.purpose) || "agent-invocation-spec",
+  });
   const blockers = [...operatorPacket.blockers];
   let recommendationCode: AgentInvocationSpecPacketResult["recommendationCode"] = operatorPacket.recommendationCode;
   const block = (code: AgentInvocationSpecPacketResult["recommendationCode"], blocker: string) => {
@@ -643,6 +683,9 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
   if ((profile === "small-mutation" || profile === "test-fix") && validation.length === 0) block("agent-invocation-spec-blocked-validation", "validation-required-for-mutation-profile");
   if ((profile === "small-mutation" || profile === "test-fix") && rollback.length === 0) block("agent-invocation-spec-blocked-rollback", "rollback-required-for-mutation-profile");
   if (operatorPacket.runSpec.budgetDecision === "warn" && operatorPacket.runSpec.economyMode === "standard") block("agent-invocation-spec-blocked-economy", "economy-contract-required-for-warn-budget");
+  if (toolkitContract.decision === "blocked") {
+    for (const blocker of toolkitContract.blockers) block("agent-invocation-spec-blocked-toolkit", `toolkit-contract:${blocker}`);
+  }
 
   const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
   if (decision === "ready-for-human-decision") recommendationCode = "agent-run-start-ready-for-human-decision";
@@ -665,6 +708,7 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
       rollback,
       ...(outputSchema ? { outputSchema } : {}),
       outputContract: outputSchema ? "structured-schema" : "non-empty-text",
+      toolkitContract: { ...toolkitContract.contract, blockers: toolkitContract.blockers, decision: toolkitContract.decision },
       executionPreview: operatorPacket.startPacket.commandPreview,
     },
     operatorPacket,
@@ -687,6 +731,7 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
       `files=${operatorPacket.runSpec.declaredFiles.length}`,
       `budget=${operatorPacket.runSpec.budgetDecision}`,
       `economy=${operatorPacket.runSpec.economyMode}`,
+      `toolkit=${toolkitContract.decision}`,
       "dispatch=no",
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),

@@ -15227,6 +15227,15 @@
       "method": "doc-update+marker-check",
       "timestamp": "2026-05-08T14:05:27.593Z",
       "evidence": "Updated `docs/primitives/nudge-free-local-continuity.md`, `docs/primitives/project-intake.md`, and `docs/research/queen-continuous-improvement-lane-2026-05.md` to make `control-plane` / `control-plane profile` the operational vocabulary now. Reframed the lane title and marker to control-plane continuous improvement, updated first-hatch language from queen profile to control-plane profile, and added a terminology decision: keep `queen` parked for a future swarm/colony role delegated by the control-plane when that maturity exists, not as the name for today's local-safe profile. Marker checks passed for all updated docs."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1059-TOOLKIT-CONTRACT-2026-05-08",
+      "target": "TASK-BUD-1059",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused-test-and-marker-check",
+      "timestamp": "2026-05-08T15:04:57.543Z",
+      "evidence": "Implemented local-safe toolkit contract primitive after two worker/runner attempts failed. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 33 passed; git diff --check -> pass; safe_marker_check toolkit contract/start packet/tests -> pass. Board quality gate still blocks closure due unresolved dependencies TASK-BUD-1047/TASK-BUD-1050, so task remains planned with verification evidence."
     }
   ]
 }

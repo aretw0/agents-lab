@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildToolkitContract, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -182,6 +182,19 @@ describe("agent spawn readiness contract", () => {
       extensionIsolation: "inherit",
     });
     expect(inherited.commandPreview.args).not.toContain("--no-extensions");
+
+    const researchWithoutWeb = buildAgentRunStartPacket({
+      ...result.runSpec,
+      runId: "research-without-web-tool",
+      profile: "research",
+      goal: "Do web research and return citations.",
+      toolAllowlist: ["read", "grep", "find", "ls"],
+      availableTools: ["read", "grep", "find", "ls"],
+    });
+    expect(researchWithoutWeb.decision).toBe("blocked");
+    expect(researchWithoutWeb.recommendationCode).toBe("agent-run-start-blocked-toolkit");
+    expect(researchWithoutWeb.blockers).toContain("toolkit-contract:missing-required-capability:web-research");
+    expect(researchWithoutWeb.runSpec.toolkitContract?.satisfied).toBe(false);
   });
 
   it("builds an ergonomic provider-native operator packet with safe defaults", () => {
@@ -293,6 +306,64 @@ describe("agent spawn readiness contract", () => {
     const mutationToolsIndex = mutationReady.invocationSpec.executionPreview.args.indexOf("--tools") + 1;
     expect(mutationReady.invocationSpec.executionPreview.args[mutationToolsIndex]).toContain("edit");
     expect(mutationReady.invocationSpec.executionPreview.args[mutationToolsIndex]).toContain("write");
+    expect(mutationReady.invocationSpec.toolkitContract.satisfied).toBe(true);
+    expect(mutationReady.invocationSpec.toolkitContract.availableCapabilities).toContain("filesystem-write");
+  });
+
+  it("blocks worker packets when the toolkit contract is missing required capabilities", () => {
+    const researchBlocked = buildAgentInvocationSpecPacket({
+      taskId: "TASK-BUD-1059",
+      purpose: "web-research-gap",
+      profile: "research",
+      goal: "Do web research on prior art and summarize exact citations.",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: ["docs/research/provider-canary-scorecard-2026-05.md"],
+      budgetDecision: "ok",
+      budgetEvidence: "Spark model-specific budget ok",
+      budgetEvidenceSource: "manual",
+      budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
+      economyMode: "critical",
+    });
+
+    expect(researchBlocked.decision).toBe("blocked");
+    expect(researchBlocked.recommendationCode).toBe("agent-invocation-spec-blocked-toolkit");
+    expect(researchBlocked.blockers).toContain("toolkit-contract:missing-required-capability:web-research");
+    expect(researchBlocked.invocationSpec.toolkitContract.satisfied).toBe(false);
+    expect(researchBlocked.invocationSpec.toolkitContract.gapAnalysis.missingTools).toContain("web_search|browse_url|web-browser");
+
+    const testFixBlocked = buildAgentInvocationSpecPacket({
+      ...researchBlocked.invocationSpec,
+      profile: "test-fix",
+      fileContract: "mutation",
+      goal: "Fix the focal test failure.",
+      validation: [],
+      rollback: ["git restore packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+    });
+    expect(testFixBlocked.blockers).toContain("validation-required-for-mutation-profile");
+    expect(testFixBlocked.blockers).toContain("toolkit-contract:missing-required-capability:focal-validation");
+  });
+
+  it("builds a standalone toolkit contract with explicit capabilities", () => {
+    const contract = buildToolkitContract({
+      profile: "small-mutation",
+      goal: "Patch a bounded file",
+      availableTools: ["read", "grep", "find", "ls", "edit", "write"],
+      declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+    });
+
+    expect(contract).toMatchObject({
+      mode: "toolkit-contract",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      decision: "ready-for-human-decision",
+      blockers: [],
+    });
+    expect(contract.contract.availableCapabilities).toContain("filesystem-read");
+    expect(contract.contract.availableCapabilities).toContain("filesystem-write");
   });
 
   it("derives a report-only agent invocation spec from a board task", () => {
