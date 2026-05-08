@@ -1,53 +1,52 @@
 {
-  "timestamp": "2026-05-08T03:12:25.773Z",
-  "context": "After user confirmed reload, live-validated agent_run_task_dispatch_check. Created TASK-BUD-1017 and called the tool with missing, mismatch, [snip] ed TASK-BUD-1017. No worker dispatched. [truncated:+271 chars]",
+  "timestamp": "2026-05-08T03:14:17.643Z",
+  "context": "Prepared TASK-BUD-1018 as first possible real first-party runner canary, read-only-review only. Generated start packet: runId=task-bud-1018-f [snip] thorize dispatch. No worker dispatched. [truncated:+371 chars]",
+  "current_tasks": [
+    "TASK-BUD-1018"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-1017 board/verification/handoff changes plus existing monitor issue update.",
-    "Next decision point: real single-worker dispatch is now technically gated, but still requires [snip] sed on generic 'prossiga'. [truncated:+74 chars]",
-    "If continuing without dispatch, plan the next hardening slice: post-dispatch outcome automatio [snip] egistry status resilience. [truncated:+6 chars]"
+    "Commit TASK-BUD-1018 planned task and handoff changes.",
+    "If operator wants the first real runner canary, they must explicitly provide the exact phrase [snip] sk to dispatch that runId. [truncated:+65 chars]",
+    "If not dispatching, continue with non-execution hardening/documentation around outcome/status after dispatch."
   ],
   "blockers": [
-    "No live dispatch_check blocker. Actual dispatch remains untested and not authorized."
+    "Actual dispatch not authorized; exact runId confirmation required."
   ],
   "recent_validation": [
-    "agent_run_task_dispatch_check missing confirmation -> confirmation=missing dispatch=no",
-    "agent_run_task_dispatch_check wrong confirmation -> confirmation=mismatch dispatch=no",
-    "agent_run_task_dispatch_check exact phrase -> confirmation=match wouldDispatchAfterExplicitExecute=yes dispatch=no"
+    "agent_run_task_start_packet TASK-BUD-1018 -> ready-for-human-decision registry=dry-run dispatch=no",
+    "agent_run_task_dispatch_check TASK-BUD-1018 missing confirmation -> dispatch=no",
+    "No exact human confirmation received for runId, so no dispatch attempted"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1017",
+    "focus": "TASK-BUD-1018",
     "canonical_links": [
-      "task:TASK-BUD-1017",
-      "task:TASK-BUD-1017-LIVE-DISPATCH-CHECK-CANARY"
+      "task:TASK-BUD-1018",
+      "task:TASK-BUD-1018-FIRST-RUNNER-READONLY-CANARY"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T03:12:25.773Z",
+    "generatedAtIso": "2026-05-08T03:14:17.643Z",
     "level": "ok",
-    "percent": 50,
+    "percent": 51,
     "action": "continue",
-    "recommendation": "commit-dispatch-check-canary-then-request-explicit-runid-confirmation-before-any-dispatch",
+    "recommendation": "commit-prepared-runner-canary-and-wait-for-exact-confirmation",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
-    "focus_task_status": "completed"
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T03:12:25.773Z",
+      "atIso": "2026-05-08T03:14:17.643Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 50,
+      "percent": 51,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-dispatch-check-canary-then-request-explicit-runid-confirmation-before-any-dispatch"
+      "recommendation": "commit-prepared-runner-canary-and-wait-for-exact-confirmation"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-1017"
   ]
 }

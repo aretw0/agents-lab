@@ -22686,6 +22686,25 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criado após reload para validar ao vivo a primitiva report-only de confirmação sem acionar execute=true.\n[provenance:human] source_task=TASK-BUD-1016 reason=TASK-BUD-1016 implementou `agent_run_task_dispatch_check`; após reload precisamos validar a superfície viva sem dispatch.\nLive dispatch_check canary passed: missing/mismatch/match are observable report-only states; match indicates wouldDispatchAfterExplicitExecute=yes but still dispatch=no.",
       "verification": "VERIF-TASK-BUD-1017-LIVE-DISPATCH-CHECK-CANARY"
+    },
+    {
+      "id": "TASK-BUD-1018",
+      "description": "[agent-first/canary] Executar, somente com confirmação humana exata, o primeiro worker via `agent_run_task_dispatch` em modo read-only-review para validar o runner first-party de ponta a ponta sem mutação.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "docs/research/first-party-agent-lane-architecture-2026-05.md",
+        "docs/research/agent-run-provider-native-runner-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Antes de qualquer execução, `agent_run_task_dispatch_check` deve retornar confirmation=match e wouldDispatchAfterExplicitExecute=yes para o runId escolhido.",
+        "Dispatch só pode ocorrer se o operador enviar exatamente a frase `humanConfirmationPhrase` do packet e pedir execute para esse runId.",
+        "Worker deve ser read-only-review, minimal-no-extensions, declared-files only, maxOutputLines<=20.",
+        "Após execução, registry/status/log/outcome devem mostrar processo e contrato separados; empty output falha contrato.",
+        "Nenhum arquivo deve ser modificado pelo worker; se houver mudança, outcome deve falhar e rollback ser explícito."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Tarefa preparada após validar dispatch_check. Não autoriza execução por si só; exige confirmação humana exata para o runId.\n[provenance:human] source_task=TASK-BUD-1017 reason=TASK-BUD-1017 validou confirmação report-only; próximo passo é preparar o primeiro dispatch real, mas apenas com frase exata do operador."
     }
   ]
 }
