@@ -23816,7 +23816,8 @@
         "Teste cobre conflito aggregate-blocked vs model-specific-ok."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Criada após auditoria dos attempts: últimos workers de TASK-BUD-1063 usaram openai-codex/gpt-5.3-codex-spark; só um retry antigo de TASK-BUD-1059 usou dashscope/qwen3-coder-plus. Ferramenta atual ainda reporta openai-codex agregado blocked e dashscope local ok, o que conflita com intenção operacional de tratar Spark como cota separada e Qwen como possivelmente exaurido no ModelStudio.\n[provenance:human] source_task=TASK-BUD-1066 reason=Estabilização de workers depende de roteamento/budget model-specific confiável."
+      "notes": "Criada após auditoria dos attempts: últimos workers de TASK-BUD-1063 usaram openai-codex/gpt-5.3-codex-spark; só um retry antigo de TASK-BUD-1059 usou dashscope/qwen3-coder-plus. Ferramenta atual ainda reporta openai-codex agregado blocked e dashscope local ok, o que conflita com intenção operacional de tratar Spark como cota separada e Qwen como possivelmente exaurido no ModelStudio.\n[provenance:human] source_task=TASK-BUD-1066 reason=Estabilização de workers depende de roteamento/budget model-specific confiável.",
+      "verification": "VERIF-TASK-BUD-1067-SPARK-MODEL-SCOPE-2026-05-08"
     }
   ]
 }

@@ -19,6 +19,8 @@ export interface ProviderExecutionBudgetEvidence {
   evidence: string;
   source: ProviderExecutionBudgetEvidenceSource;
   provider?: string;
+  providerModelRef?: string;
+  scope: "provider" | "provider-model" | "unknown";
   generatedAtIso?: string;
   freshness: ProviderExecutionBudgetFreshness;
   consistency: ProviderExecutionBudgetConsistency;
@@ -45,6 +47,16 @@ function providerFromModelRef(value: unknown): string {
   return slash > 0 ? text.slice(0, slash) : text;
 }
 
+function providerModelRefFromEvidenceProvider(value: unknown): string {
+  const text = normalizeText(value);
+  return text.includes("/") ? text : "";
+}
+
+function resolveBudgetEvidenceScope(evidenceProvider: string): "provider" | "provider-model" | "unknown" {
+  if (!evidenceProvider) return "unknown";
+  return evidenceProvider.includes("/") ? "provider-model" : "provider";
+}
+
 function resolveFreshness(source: ProviderExecutionBudgetEvidenceSource, generatedAtIso: string, nowMs: number, maxAgeMs: number): ProviderExecutionBudgetFreshness {
   if (source === "manual" || source === "unknown") return "not-required";
   if (!generatedAtIso) return "missing";
@@ -58,16 +70,21 @@ export function resolveProviderExecutionBudgetEvidence(input: ProviderExecutionB
   const evidence = normalizeText(input.budgetEvidence);
   const source = normalizeProviderExecutionBudgetEvidenceSource(input.budgetEvidenceSource ?? (evidence ? "manual" : undefined));
   const provider = normalizeText(input.budgetEvidenceProvider);
+  const providerModelRef = normalizeText(input.providerModelRef);
+  const providerModelEvidenceRef = providerModelRefFromEvidenceProvider(provider);
+  const scope = resolveBudgetEvidenceScope(provider);
   const generatedAtIso = normalizeText(input.budgetEvidenceGeneratedAtIso);
-  const expectedProvider = providerFromModelRef(input.providerModelRef);
+  const expectedProvider = providerFromModelRef(providerModelRef);
   const maxAgeMs = typeof input.maxAgeMs === "number" && Number.isFinite(input.maxAgeMs) && input.maxAgeMs > 0 ? input.maxAgeMs : 30 * 60_000;
   const nowMs = typeof input.nowMs === "number" && Number.isFinite(input.nowMs) ? input.nowMs : Date.now();
   const freshness = resolveFreshness(source, generatedAtIso, nowMs, maxAgeMs);
   const hasStructuredSource = source === "route-advisory" || source === "provider-budget-snapshot";
   const consistency: ProviderExecutionBudgetConsistency = hasStructuredSource
-    ? provider && expectedProvider && provider !== expectedProvider
+    ? providerModelEvidenceRef && providerModelRef && providerModelEvidenceRef !== providerModelRef
       ? "mismatch"
-      : "consistent"
+      : provider && expectedProvider && providerFromModelRef(provider) !== expectedProvider
+        ? "mismatch"
+        : "consistent"
     : "needs-human-review";
   const humanReviewRequired = !hasStructuredSource;
   const blockers: string[] = [];
@@ -83,6 +100,8 @@ export function resolveProviderExecutionBudgetEvidence(input: ProviderExecutionB
     evidence,
     source,
     ...(provider ? { provider } : {}),
+    ...(providerModelRef ? { providerModelRef } : {}),
+    scope,
     ...(generatedAtIso ? { generatedAtIso } : {}),
     freshness,
     consistency,

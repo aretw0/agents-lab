@@ -1,45 +1,43 @@
 {
-  "timestamp": "2026-05-08T17:01:07.016Z",
-  "context": "Answered operator concern about worker model usage and quota visibility. Local registry shows recent failed attempts: TASK-BUD-1063 final-tur [snip] e blocking from masking Spark capacity. [truncated:+440 chars]",
+  "timestamp": "2026-05-08T17:08:27.529Z",
+  "context": "Implemented first TASK-BUD-1067 slice after operator clarified Spark has separate quota and Qwen likely exhausted. ProviderExecutionBudgetEvi [snip] cts with external ModelStudio evidence. [truncated:+449 chars]",
   "current_tasks": [
     "TASK-BUD-1067"
   ],
   "next_actions": [
-    "Treat Spark as intended worker provider for next runner stabilization attempts, but not retry [snip] ies silent-runner-failure. [truncated:+27 chars]",
-    "Implement TASK-BUD-1067 so packet budget evidence is provider/model scoped: Spark ok can overr [snip] external-evidence blocked. [truncated:+62 chars]",
-    "Do not use qwen3-coder-plus for worker retries unless fresh ModelStudio/quota evidence says available."
+    "Commit this model-scope budget evidence slice.",
+    "Next slice: update quota visibility provider budgets/output to list provider-model rows for Sp [snip] om openai-codex aggregate. [truncated:+17 chars]",
+    "Add conservative manual/external evidence override for DashScope/Qwen exhaustion so local tele [snip] ot mislead worker routing. [truncated:+13 chars]"
   ],
   "blockers": [
-    "Current quota tools are provider-aggregate and can mislead for Spark separate quota.",
-    "DashScope local session telemetry does not reflect ModelStudio free-trial exhaustion.",
-    "Worker runner still fails before useful output, independent of Spark quota."
+    "TASK-BUD-1067 not fully closed: quota provider-budget surface remains aggregat [snip] ation remains missing. [truncated:+43 chars]",
+    "Worker runner still blocked by TASK-BUD-1066 silent-runner root-cause classification."
   ],
   "recent_validation": [
-    "node parse .pi/reports/agent-runs.json for task-bud-1059/1063 -> Spark used for 4/5 listed att [snip] s; Qwen only one old retry [truncated:+4 chars]",
-    "provider_readiness_matrix(openai-codex,dashscope) -> ready=1 blocked=1 entries=2",
-    "quota_visibility_provider_budgets(openai-codex) -> aggregate blocked"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 35 passed",
+    "git diff --check -> pass",
+    "safe_marker_check provider budget scope markers -> pass"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1067",
     "canonical_links": [
       "task:TASK-BUD-1067",
-      "task:TASK-BUD-1063",
-      "task:TASK-BUD-1059"
+      "task:TASK-BUD-1067-SPARK-MODEL-SCOPE-2026-05-08"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T17:01:07.016Z",
+    "generatedAtIso": "2026-05-08T17:08:27.529Z",
     "level": "ok",
     "percent": 47,
     "action": "continue",
-    "recommendation": "fix-model-specific-budget-visibility",
+    "recommendation": "commit-model-scope-budget-slice",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T17:01:07.016Z",
+      "atIso": "2026-05-08T17:08:27.529Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 47,
@@ -49,7 +47,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "fix-model-specific-budget-visibility"
+      "recommendation": "commit-model-scope-budget-slice"
     }
   ]
 }

@@ -15263,6 +15263,15 @@
       "method": "focused-test-and-marker-check",
       "timestamp": "2026-05-08T16:37:15.921Z",
       "evidence": "Implemented a context-rich finalTurnBrief in buildTurnBoundaryDecisionPacket: option briefs include title/context/why/currentState/recommendedAction instead of ids-only, recommendedNextSteps include context-rich final response guidance, and reloadRitual triggers only for clean runtime changes while docs-only changes avoid reload. Validation: npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts --reporter=dot -> 14 passed; git diff --check -> pass; safe_marker_check for final brief and tests -> pass. Board quality gate still blocks closure due unresolved dependencies, so linked verification without completing."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1067-SPARK-MODEL-SCOPE-2026-05-08",
+      "target": "TASK-BUD-1067",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused-test-and-marker-check",
+      "timestamp": "2026-05-08T17:08:07.157Z",
+      "evidence": "Implemented first slice of model-specific budget evidence: ProviderExecutionBudgetEvidence now reports providerModelRef and scope provider/provider-model/unknown, accepts structured provider-budget evidence scoped to openai-codex/gpt-5.3-codex-spark as consistent/fresh/ready, and fails mismatch for another model. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 35 passed; git diff --check -> pass; safe_marker_check provider-budget implementation/test markers -> pass. Remaining TASK-BUD-1067 work: surface model-specific budgets in quota visibility provider budgets and reconcile external DashScope/Qwen exhaustion evidence."
     }
   ]
 }

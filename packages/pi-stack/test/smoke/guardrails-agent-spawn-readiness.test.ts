@@ -131,6 +131,40 @@ describe("agent spawn readiness contract", () => {
       readyForExecution: false,
       blockers: ["budget-decision-missing"],
     });
+
+    const generatedAtIso = new Date().toISOString();
+    const sparkScoped = resolveProviderExecutionBudgetEvidence({
+      budgetDecision: "ok",
+      budgetEvidence: "Spark model-specific capacity available",
+      budgetEvidenceSource: "provider-budget-snapshot",
+      budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
+      budgetEvidenceGeneratedAtIso: generatedAtIso,
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+    });
+    expect(sparkScoped).toMatchObject({
+      decision: "ok",
+      provider: "openai-codex/gpt-5.3-codex-spark",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      scope: "provider-model",
+      consistency: "consistent",
+      freshness: "fresh",
+      readyForExecution: true,
+      blockers: [],
+    });
+
+    const aggregateMismatch = resolveProviderExecutionBudgetEvidence({
+      budgetDecision: "ok",
+      budgetEvidence: "different model capacity",
+      budgetEvidenceSource: "provider-budget-snapshot",
+      budgetEvidenceProvider: "openai-codex/other-model",
+      budgetEvidenceGeneratedAtIso: generatedAtIso,
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+    });
+    expect(aggregateMismatch).toMatchObject({
+      consistency: "mismatch",
+      readyForExecution: false,
+      blockers: ["budget-evidence-provider-mismatch"],
+    });
   });
 
   it("builds a report-only provider-native agent run start packet", () => {
