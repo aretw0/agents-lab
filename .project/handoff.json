@@ -1,30 +1,32 @@
 {
-  "timestamp": "2026-05-08T02:32:40.759Z",
-  "context": "After user confirmed reload, live-validated newly implemented agent_run_task_packet. Created TASK-BUD-1011 and called live tool with read-onl [snip] ted. Runtime now trusted for this tool. [truncated:+277 chars]",
+  "timestamp": "2026-05-08T02:40:28.047Z",
+  "context": "Completed TASK-BUD-1012. Implemented buildAgentRunTaskStartPacket and agent_run_task_start_packet report-only bridge. It composes task packet [snip] iew has blockers. No worker dispatched. [truncated:+308 chars]",
   "next_actions": [
-    "Commit TASK-BUD-1011 board/verification/handoff plus monitor issue update if present.",
-    "Next logical slice: use board-to-agent packetizer to prepare a real implementation task, or im [snip] firmation before dispatch. [truncated:+98 chars]"
+    "Commit TASK-BUD-1012 implementation plus board/handoff changes.",
+    "After commit, /reload is required before trusting live agent_run_task_start_packet output beca [snip] extension source changed. [truncated:+3 chars]",
+    "Next possible slice after reload: live-canary agent_run_task_start_packet on a real planned ta [snip] k, still without dispatch. [truncated:+1 chars]"
   ],
   "blockers": [
-    "No live-tool blocker. No worker dispatch authorized."
+    "Reload required after commit before using new tool live.",
+    "No worker dispatch authorized."
   ],
   "recent_validation": [
-    "agent_run_task_packet TASK-BUD-1011 -> decision=ready-for-human-decision dispatch=no",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 28 passed",
     "safe_marker_check guardrails-core-agent-run-start.ts -> pass",
-    "safe_marker_check guardrails-agent-spawn-readiness.test.ts -> pass"
+    "safe_marker_check guardrails-core-agent-spawn-readiness-surface.ts -> pass"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1011",
+    "focus": "TASK-BUD-1012",
     "canonical_links": [
-      "task:TASK-BUD-1011"
+      "task:TASK-BUD-1012"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T02:32:40.759Z",
+    "generatedAtIso": "2026-05-08T02:40:28.047Z",
     "level": "ok",
-    "percent": 34,
+    "percent": 40,
     "action": "continue",
-    "recommendation": "commit-live-canary-then-plan-next-agent-bridge",
+    "recommendation": "commit-and-reload-before-live-start-packet-canary",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
@@ -32,20 +34,20 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T02:32:40.759Z",
+      "atIso": "2026-05-08T02:40:28.047Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 34,
+      "percent": 40,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-live-canary-then-plan-next-agent-bridge"
+      "recommendation": "commit-and-reload-before-live-start-packet-canary"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-1011"
+    "TASK-BUD-1012"
   ]
 }

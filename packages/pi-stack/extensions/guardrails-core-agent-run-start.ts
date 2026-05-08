@@ -1,3 +1,4 @@
+import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunRegistryEntry } from "./guardrails-core-agent-run-runtime";
 import { resolveProviderExecutionBudgetEvidence, type ProviderExecutionBudgetDecision } from "./guardrails-core-provider-budget-evidence";
 
 export type AgentRunExecutorKind = "pi-print-subprocess";
@@ -230,6 +231,41 @@ export interface AgentRunTaskPacketResult {
   invocationSpec: AgentInvocationSpecPacketResult["invocationSpec"];
   validationChecklist: string[];
   rollback: string[];
+  humanConfirmationPhrase: string;
+  nextActions: string[];
+  summary: string;
+}
+
+export interface AgentRunTaskStartPacketInput extends AgentRunTaskPacketInput {
+  existingEntry?: AgentRunRegistryEntry;
+}
+
+export interface AgentRunTaskStartPacketResult {
+  mode: "agent-run-task-start-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  processStopAllowed: false;
+  requiresHumanDecision: true;
+  singleRunOnly: true;
+  decision: AgentRunStartDecision;
+  recommendationCode:
+    | AgentRunTaskPacketResult["recommendationCode"]
+    | "agent-run-task-start-blocked-task-packet";
+  blockers: string[];
+  taskPacket: AgentRunTaskPacketResult;
+  registryPreview: ReturnType<typeof buildAgentRunRegistryUpsertPacket>;
+  startPreview: AgentRunStartPacketResult["commandPreview"];
+  statusPreview: ReturnType<typeof buildAgentRunStatus>;
+  logTailPreview: {
+    runId: string;
+    logPath?: string;
+    maxLines: number;
+    readOnly: true;
+  };
+  abortPreview: ReturnType<typeof buildAgentRunAbortPlan>;
+  outcomeChecklist: string[];
   humanConfirmationPhrase: string;
   nextActions: string[];
   summary: string;
@@ -741,6 +777,91 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
       `criteria=${acceptanceCriteria.length}`,
       `budget=${invocationSpecPacket.invocationSpec.budgetDecision}`,
       `economy=${invocationSpecPacket.invocationSpec.economyMode}`,
+      "dispatch=no",
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+    ].filter(Boolean).join(" "),
+  };
+}
+
+export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput = {}): AgentRunTaskStartPacketResult {
+  const taskPacket = buildAgentRunTaskPacket(input);
+  const spec = taskPacket.invocationSpec;
+  const registryPreview = buildAgentRunRegistryUpsertPacket({
+    runId: spec.runId,
+    existingEntry: input.existingEntry,
+    state: "planned",
+    providerModelRef: spec.providerModelRef,
+    cwd: spec.cwd,
+    declaredFiles: spec.declaredFiles,
+    logPath: spec.logPath,
+    timeoutMs: spec.timeoutMs,
+    dryRun: true,
+  });
+  const statusPreview = buildAgentRunStatus(spec.runId, input.existingEntry);
+  const abortPreview = buildAgentRunAbortPlan({ runId: spec.runId, entry: input.existingEntry, cwdExpected: spec.cwd });
+  const dryOutcomePreview = buildAgentRunOutcomePacket({
+    runId: spec.runId,
+    entry: input.existingEntry ?? registryPreview.entry,
+    touchedFiles: [],
+    markerResults: [],
+    fileContract: spec.fileContract,
+  });
+  const blockers = [...taskPacket.blockers, ...registryPreview.blockers];
+  let recommendationCode: AgentRunTaskStartPacketResult["recommendationCode"] = taskPacket.recommendationCode;
+  if (taskPacket.decision === "blocked" && !blockers.includes("task-packet-blocked")) {
+    recommendationCode = "agent-run-task-start-blocked-task-packet";
+    blockers.push("task-packet-blocked");
+  }
+  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  if (decision === "ready-for-human-decision") recommendationCode = "agent-run-start-ready-for-human-decision";
+
+  return {
+    mode: "agent-run-task-start-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    requiresHumanDecision: true,
+    singleRunOnly: true,
+    decision,
+    recommendationCode,
+    blockers,
+    taskPacket,
+    registryPreview,
+    startPreview: spec.executionPreview,
+    statusPreview,
+    logTailPreview: {
+      runId: spec.runId,
+      logPath: spec.logPath,
+      maxLines: 80,
+      readOnly: true,
+    },
+    abortPreview,
+    outcomeChecklist: [
+      `expected file contract: ${spec.fileContract}`,
+      "record processState separately from contractDecision",
+      "fail contract on empty output even when exit code is zero",
+      `touched files must be subset of: ${spec.declaredFiles.join(", ")}`,
+      `dry outcome preview: ${dryOutcomePreview.summary}`,
+    ],
+    humanConfirmationPhrase: taskPacket.humanConfirmationPhrase,
+    nextActions: decision === "ready-for-human-decision"
+      ? [
+          "show registry/start/status/log/abort/outcome previews to the operator",
+          "require exact human confirmation phrase before any dispatch",
+          "if confirmed later, write registry planned/running before subprocess start",
+          "after exit, run outcome packet before any board completion",
+        ]
+      : ["resolve task-start packet blockers before any worker dispatch"],
+    summary: [
+      "agent-run-task-start-packet:",
+      `decision=${decision}`,
+      `task=${taskPacket.task.id || "unknown"}`,
+      `runId=${spec.runId || "unknown"}`,
+      `registry=${registryPreview.decision}`,
+      `statusFound=${statusPreview.found ? "yes" : "no"}`,
+      `budget=${spec.budgetDecision}`,
       "dispatch=no",
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),

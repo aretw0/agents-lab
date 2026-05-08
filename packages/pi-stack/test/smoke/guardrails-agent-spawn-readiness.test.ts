@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunTaskPacket, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -398,6 +398,72 @@ describe("agent spawn readiness contract", () => {
     expect(completed.blockers).toContain("task-already-completed");
   });
 
+  it("composes task packets with registry/start/status/log/abort/outcome previews", () => {
+    const result = buildAgentRunTaskStartPacket({
+      taskId: "TASK-BUD-1012",
+      task: {
+        id: "TASK-BUD-1012",
+        description: "Implement report-only task start packet bridge.",
+        status: "planned",
+        files: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+        acceptance_criteria: ["includes registry preview", "keeps processStartAllowed=false"],
+      },
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      budgetDecision: "warn",
+      budgetEvidence: "Spark scoped budget usable",
+      budgetEvidenceSource: "manual",
+      budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
+    });
+
+    expect(result).toMatchObject({
+      mode: "agent-run-task-start-packet",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      processStopAllowed: false,
+      requiresHumanDecision: true,
+      decision: "ready-for-human-decision",
+      blockers: [],
+    });
+    expect(result.taskPacket.mode).toBe("agent-run-task-packet");
+    expect(result.registryPreview).toMatchObject({
+      mode: "agent-run-registry-upsert",
+      decision: "dry-run",
+      writeAllowed: false,
+      dispatchAllowed: false,
+    });
+    expect(result.startPreview.command).toBe("pi");
+    expect(result.statusPreview.processStartAllowed).toBe(false);
+    expect(result.logTailPreview.readOnly).toBe(true);
+    expect(result.abortPreview.processStopAllowed).toBe(false);
+    expect(result.outcomeChecklist.join("\n")).toContain("fail contract on empty output");
+    expect(result.summary).toContain("dispatch=no");
+  });
+
+  it("blocks task start packets when the underlying task packet is blocked", () => {
+    const result = buildAgentRunTaskStartPacket({
+      taskId: "TASK-PROTECTED",
+      task: {
+        id: "TASK-PROTECTED",
+        description: "Change CI settings.",
+        status: "planned",
+        files: [".github/workflows/ci.yml"],
+        acceptance_criteria: ["updates protected workflow"],
+      },
+      providerModelRef: "dashscope/qwen3-coder-plus",
+      cwd: process.cwd(),
+      budgetDecision: "ok",
+      budgetEvidence: "dashscope ok",
+    });
+
+    expect(result.decision).toBe("blocked");
+    expect(result.processStartAllowed).toBe(false);
+    expect(result.blockers).toContain("protected-scope-requested");
+    expect(result.blockers).toContain("task-packet-blocked");
+  });
+
   it("exposes agent_run_task_packet as a report-only board surface", async () => {
     const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-task-packet-"));
     mkdirSync(path.join(tmp, ".project"), { recursive: true });
@@ -454,6 +520,65 @@ describe("agent spawn readiness contract", () => {
     expect(result.details?.processStartAllowed).toBe(false);
     expect(result.details?.decision).toBe("ready-for-human-decision");
     expect(result.content?.[0]?.text).toContain("agent-run-task-packet: decision=ready-for-human-decision");
+    expect(result.content?.[0]?.text).toContain("dispatch=no");
+  });
+
+  it("exposes agent_run_task_start_packet as a report-only bridge surface", async () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-task-start-packet-"));
+    mkdirSync(path.join(tmp, ".project"), { recursive: true });
+    writeFileSync(path.join(tmp, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-BUD-1012",
+          description: "Implement report-only task start packet bridge.",
+          status: "planned",
+          files: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+          acceptance_criteria: ["includes registry preview"],
+        },
+      ],
+    }, null, 2), "utf8");
+
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    guardrailsCore(pi);
+
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_task_start_packet");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+
+    const result = await tool.execute(
+      "tc-agent-run-task-start-packet",
+      {
+        task_id: "TASK-BUD-1012",
+        provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+        budget_decision: "warn",
+        budget_evidence: "Spark scoped budget usable",
+        budget_evidence_source: "manual",
+        budget_evidence_provider: "openai-codex/gpt-5.3-codex-spark",
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: tmp },
+    );
+
+    expect(result.details?.mode).toBe("agent-run-task-start-packet");
+    expect(result.details?.dispatchAllowed).toBe(false);
+    expect(result.details?.processStartAllowed).toBe(false);
+    expect(result.details?.decision).toBe("ready-for-human-decision");
+    expect(result.content?.[0]?.text).toContain("agent-run-task-start-packet: decision=ready-for-human-decision");
     expect(result.content?.[0]?.text).toContain("dispatch=no");
   });
 

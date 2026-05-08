@@ -14903,6 +14903,15 @@
       "method": "live-tool-canary+marker-check",
       "timestamp": "2026-05-08T02:32:23.962Z",
       "evidence": "After reload, called live `agent_run_task_packet` on TASK-BUD-1011 with profile=read-only-review and provider_model_ref=openai-codex/gpt-5.3-codex-spark. Result summary: agent-run-task-packet decision=ready-for-human-decision task=TASK-BUD-1011 found=yes status=planned files=3 criteria=5 budget=warn economy=critical dispatch=no. This validates the new first-party board-to-agent packetizer in the live runtime: it read the board task, derived files/acceptance criteria, preserved scoped Spark budget evidence, produced a human-confirmed packet path, and kept dispatchAllowed=false/processStartAllowed=false. No worker was dispatched. Marker checks passed for builder and smoke test markers."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1012-TASK-START-PACKET",
+      "target": "TASK-BUD-1012",
+      "target_type": "task",
+      "status": "passed",
+      "method": "implementation+smoke-test+marker-check",
+      "timestamp": "2026-05-08T02:39:50.490Z",
+      "evidence": "Implemented report-only `agent_run_task_start_packet` bridge. Added buildAgentRunTaskStartPacket in packages/pi-stack/extensions/guardrails-core-agent-run-start.ts, exported it, and registered tool surface in guardrails-core-agent-spawn-readiness-surface.ts. It composes task packet -> registry dry-run preview -> start argv preview -> status/log/abort previews -> outcome checklist, while keeping dispatchAllowed=false/processStartAllowed=false/processStopAllowed=false and requiring exact human confirmation before any future dispatch. Blocks when the underlying task packet is blocked or registry preview has blockers. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 28 passed. safe_marker_check passed on builder, surface, and tests."
     }
   ]
 }

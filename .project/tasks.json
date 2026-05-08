@@ -22562,6 +22562,28 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criado após reload para validar a tool recém-implementada em runtime real antes de usá-la como caminho operacional.\n[provenance:human] source_task=TASK-BUD-1010 reason=TASK-BUD-1010 implementou a tool; após reload precisamos validar a superfície viva sem dispatch.\nLive canary after reload passed: `agent_run_task_packet` returned ready-for-human-decision for TASK-BUD-1011 with dispatch=no and no process start.",
       "verification": "VERIF-TASK-BUD-1011-LIVE-AGENT-RUN-TASK-PACKET"
+    },
+    {
+      "id": "TASK-BUD-1012",
+      "description": "[agent-first/code] Implementar uma ponte report-only `agent_run_task_start_packet` (ou nome equivalente) que compõe `agent_run_task_packet` com plano de registry/start/outcome para um task_id, sem executar worker.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Recebe `task_id` e deriva task packet usando a mesma lógica de `agent_run_task_packet`.",
+        "Inclui registry planned entry preview, start argv preview, expected status/log/outcome checks e abort contract.",
+        "Mantém dispatchAllowed=false/processStartAllowed=false até confirmação humana exata separada.",
+        "Falha fechado se task packet estiver blocked, se budget estiver missing/blocked, se log path/timeout/declared files estiverem ausentes.",
+        "Teste focal cobre ready path, task packet blocked path, e garantia de que nenhum processo/worker é iniciado."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Próximo passo após validar `task -> packet`: aproximar `packet -> registry/start/outcome` ainda report-only e sem dispatch.\n[provenance:human] source_task=TASK-BUD-1011 reason=TASK-BUD-1011 validou a tool viva; próximo elo first-party é compor packet com registry/start/outcome sem execução.\nImplemented report-only `agent_run_task_start_packet` bridge. It advances task->packet toward packet->registry/start/outcome without starting a worker.",
+      "verification": "VERIF-TASK-BUD-1012-TASK-START-PACKET"
     }
   ]
 }
