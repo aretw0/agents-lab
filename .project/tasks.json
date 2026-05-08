@@ -22523,7 +22523,7 @@
     {
       "id": "TASK-BUD-1010",
       "description": "[P1/agent-first/code] Implementar superfície first-party report-only `agent_run_task_packet` (ou nome equivalente) que deriva um AgentInvocationSpec a partir de uma task do board, com escopo, economia, budget provider/model e frase de confirmação, sem dispatch.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
@@ -22539,7 +22539,8 @@
         "Não executa worker, não muda settings, não faz auto-switch."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Derivado de TASK-BUD-1009: próximo passo para parar de invocar agentes na mão e conectar board/control-plane ao agent invocation packet. TASK-BUD-1009 é predecessor lógico, mas não foi declarado como depends_on porque o board bloqueou a dependência como protected-coupling.\n[provenance:human] source_task=TASK-BUD-1009 reason=Arquitetura first-party identificou board-to-agent packetizer como P1 para liberar agentes com governança."
+      "notes": "Derivado de TASK-BUD-1009: próximo passo para parar de invocar agentes na mão e conectar board/control-plane ao agent invocation packet. TASK-BUD-1009 é predecessor lógico, mas não foi declarado como depends_on porque o board bloqueou a dependência como protected-coupling.\n[provenance:human] source_task=TASK-BUD-1009 reason=Arquitetura first-party identificou board-to-agent packetizer como P1 para liberar agentes com governança.\nImplemented report-only `agent_run_task_packet` / `buildAgentRunTaskPacket`. Added focal tests for ready task, missing task/files, protected scope, completed task, and tool registration. Note: also touched guardrails-core-exports.ts to expose the builder publicly.",
+      "verification": "VERIF-TASK-BUD-1010-AGENT-RUN-TASK-PACKET"
     }
   ]
 }

@@ -1,34 +1,31 @@
 {
-  "timestamp": "2026-05-08T02:10:15.802Z",
-  "context": "After reload, completed TASK-BUD-1009 first-party agent lane architecture. Created docs/research/first-party-agent-lane-architecture-2026-05. [snip] UD-1009-FIRST-PARTY-AGENT-ARCHITECTURE. [truncated:+838 chars]",
+  "timestamp": "2026-05-08T02:24:01.937Z",
+  "context": "Completed TASK-BUD-1010 first-party report-only board-to-agent packetizer. Implemented buildAgentRunTaskPacket, exported it, and registered a [snip] vider/model/budget/invocation blockers. [truncated:+449 chars]",
   "next_actions": [
-    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
-    "Commit docs/board/handoff changes.",
-    "Next focus: TASK-BUD-1010 implement report-only board-to-agent packetizer; no worker dispatch [snip] for implementation canary. [truncated:+32 chars]",
-    "Keep multi-worker/background/colony blocked until first-party runner/packetizer gates exist."
+    "Commit TASK-BUD-1010 implementation and board/handoff changes.",
+    "After commit, reload is required before trusting live agent_run_task_packet tool output becaus [snip] extension source changed. [truncated:+1 chars]",
+    "Next possible slice: use the new tool after reload to packetize a real next task, but do not d [snip] an confirmation for runId. [truncated:+34 chars]"
   ],
   "blockers": [
-    "context-watch-checkpoint-required",
-    "None for design slice. TASK-BUD-1010 is code and should stay report-only/no-di [snip] the primitive itself. [truncated:+10 chars]"
+    "Runtime reload required after commit before using the new tool live."
   ],
   "recent_validation": [
-    "safe_marker_check first-party architecture doc -> pass",
-    "i18n_lint_text English excerpt -> pass",
-    "safe_marker_check Symphony source docs -> pass"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 25 passed",
+    "safe_marker_check guardrails-core-agent-run-start.ts -> pass",
+    "safe_marker_check guardrails-core-agent-spawn-readiness-surface.ts -> pass"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1009",
+    "focus": "TASK-BUD-1010",
     "canonical_links": [
-      "task:TASK-BUD-1009",
       "task:TASK-BUD-1010"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T02:09:16.399Z",
+    "generatedAtIso": "2026-05-08T02:24:01.937Z",
     "level": "ok",
-    "percent": 54,
+    "percent": 33,
     "action": "continue",
-    "recommendation": "commit-agent-architecture-and-start-task-packetizer-next",
+    "recommendation": "commit-and-reload-before-live-use",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
@@ -36,33 +33,20 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T02:09:16.399Z",
+      "atIso": "2026-05-08T02:24:01.937Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 54,
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-agent-architecture-and-start-task-packetizer-next"
-    },
-    {
-      "atIso": "2026-05-08T02:10:15.802Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 55,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+      "recommendation": "commit-and-reload-before-live-use"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-1009"
+    "TASK-BUD-1010"
   ]
 }

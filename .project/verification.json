@@ -14885,6 +14885,15 @@
       "method": "read-only-research+design-doc+marker-check+i18n-lint",
       "timestamp": "2026-05-08T02:09:02.652Z",
       "evidence": "After reload, completed read-only/design architecture for first-party agent lane in docs/research/first-party-agent-lane-architecture-2026-05.md. Evidence reviewed: pi-jit-agents README and agent-spec d.ts, pi-workflows README plus task-worker agent and execute-task workflow, ant-colony extension excerpt, OpenAI Symphony influence docs and matrix. The doc explicitly separates subagent/agent-execution influences (typed specs, schema output, task packetization, provider/model routing, outcome) from generic background/process influences (status UI, abort, logs, worktree, lifecycle). It defines missing layers: first-party runner contract, board-to-agent packetizer, outcome/verification bridge, status/log/abort, typed agent specs, workflow integration, and later multi-agent/background promotion. Created TASK-BUD-1010 as the next implementation slice for a report-only board-to-agent packet surface. Validation: safe_marker_check passed on architecture doc and Symphony source docs; i18n_lint_text passed English excerpt."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1010-AGENT-RUN-TASK-PACKET",
+      "target": "TASK-BUD-1010",
+      "target_type": "task",
+      "status": "passed",
+      "method": "implementation+smoke-test+marker-check",
+      "timestamp": "2026-05-08T02:23:44.225Z",
+      "evidence": "Implemented first-party report-only board-to-agent packetizer surface. Added buildAgentRunTaskPacket in packages/pi-stack/extensions/guardrails-core-agent-run-start.ts, exported it via guardrails-core-exports.ts, and registered tool agent_run_task_packet in packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts. The tool reads one .project task, derives declared files and acceptance criteria into a typed AgentInvocationSpec, defaults to critical economy/maxOutputLines 20, preserves scoped provider/model budget evidence, returns an exact human confirmation phrase, and keeps dispatchAllowed=false/processStartAllowed=false. It fails closed for missing task, completed task, missing files, missing acceptance criteria, protected scope, missing provider/model/budget blockers from the underlying invocation packet. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 25 passed. safe_marker_check passed for builder, surface, and tests."
     }
   ]
 }

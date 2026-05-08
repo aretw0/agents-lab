@@ -169,6 +169,72 @@ export interface AgentInvocationSpecPacketResult {
   summary: string;
 }
 
+export interface AgentRunTaskPacketTaskLike {
+  id?: string;
+  description?: string;
+  status?: string;
+  notes?: string;
+  files?: string[];
+  acceptance_criteria?: string[];
+}
+
+export interface AgentRunTaskPacketInput {
+  taskId?: string;
+  task?: AgentRunTaskPacketTaskLike;
+  purpose?: string;
+  profile?: AgentInvocationProfile | string;
+  providerModelRef?: string;
+  cwd?: string;
+  timeoutMs?: number;
+  budgetDecision?: AgentRunBudgetDecision | string;
+  budgetEvidence?: string;
+  budgetEvidenceSource?: "route-advisory" | "provider-budget-snapshot" | "manual" | "unknown" | string;
+  budgetEvidenceProvider?: string;
+  budgetEvidenceGeneratedAtIso?: string;
+  budgetEvidenceMaxAgeMs?: number;
+  economyMode?: AgentInvocationEconomyMode | string;
+  tokenBudgetEvidence?: string;
+  maxOutputLines?: number;
+  protectedScopeRequested?: boolean;
+}
+
+export interface AgentRunTaskPacketResult {
+  mode: "agent-run-task-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  processStopAllowed: false;
+  requiresHumanDecision: true;
+  singleRunOnly: true;
+  decision: AgentRunStartDecision;
+  recommendationCode:
+    | AgentInvocationSpecPacketResult["recommendationCode"]
+    | "agent-run-task-blocked-task-id"
+    | "agent-run-task-blocked-task-missing"
+    | "agent-run-task-blocked-task-completed"
+    | "agent-run-task-blocked-files"
+    | "agent-run-task-blocked-acceptance-criteria"
+    | "agent-run-task-blocked-protected-scope";
+  blockers: string[];
+  task: {
+    id: string;
+    found: boolean;
+    status: string;
+    description: string;
+    files: string[];
+    acceptanceCriteria: string[];
+    protectedScopeDetected: boolean;
+  };
+  invocationSpecPacket: AgentInvocationSpecPacketResult;
+  invocationSpec: AgentInvocationSpecPacketResult["invocationSpec"];
+  validationChecklist: string[];
+  rollback: string[];
+  humanConfirmationPhrase: string;
+  nextActions: string[];
+  summary: string;
+}
+
 const AGENT_RUN_START_TIMEOUT_MIN_MS = 5_000;
 const AGENT_RUN_START_TIMEOUT_MAX_MS = 180_000;
 const READ_ONLY_TOOL_ALLOWLIST = ["read", "grep", "find", "ls"];
@@ -236,6 +302,55 @@ function buildEconomyGoalPrefix(mode: AgentInvocationEconomyMode, maxOutputLines
 
 function sanitizeRunIdPart(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+}
+
+function detectProtectedAgentTaskScope(files: string[], description: string): boolean {
+  const protectedPrefixes = [
+    ".github/",
+    ".pi/settings.json",
+    ".sandbox/",
+    ".obsidian/",
+    "node_modules/",
+  ];
+  const protectedTextMarkers = [
+    " publish",
+    " release",
+    " ci",
+    " github actions",
+    " settings",
+    " credential",
+    " secret",
+    " remote ",
+  ];
+  const normalizedFiles = files.map((file) => file.replace(/\\/g, "/").toLowerCase());
+  if (normalizedFiles.some((file) => protectedPrefixes.some((prefix) => file === prefix.replace(/\/$/, "") || file.startsWith(prefix)))) return true;
+  const text = ` ${description.toLowerCase()} `;
+  return protectedTextMarkers.some((marker) => text.includes(marker));
+}
+
+function buildTaskPacketGoal(task: AgentRunTaskPacketTaskLike, acceptanceCriteria: string[]): string {
+  const description = normalizeText(task.description);
+  const criteria = acceptanceCriteria.map((criterion, index) => `${index + 1}. ${criterion}`).join("\n");
+  return [
+    `Implement board task ${normalizeText(task.id)} as one bounded first-party agent slice.`,
+    `Task description: ${description}`,
+    criteria ? `Acceptance criteria:\n${criteria}` : "Acceptance criteria: missing; stop and report blocker.",
+    "Stay within declared files. Do not dispatch other workers. Do not change settings, CI, publish, credentials, or remote state.",
+    "Return PASS/FAIL, files touched, validation evidence, and blockers only.",
+  ].join("\n\n");
+}
+
+function buildTaskValidationChecklist(taskId: string, acceptanceCriteria: string[], files: string[]): string[] {
+  return [
+    `board task ${taskId} remains the single focus`,
+    ...acceptanceCriteria.map((criterion) => `acceptance criterion: ${criterion}`),
+    `touched files must be a subset of: ${files.join(", ")}`,
+    "parent-side outcome packet must reject empty output even when process exit succeeds",
+  ];
+}
+
+function buildTaskRollback(files: string[]): string[] {
+  return files.length > 0 ? [`git restore ${files.join(" ")}`] : [];
 }
 
 export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): AgentRunStartPacketResult {
@@ -523,6 +638,109 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
       `files=${operatorPacket.runSpec.declaredFiles.length}`,
       `budget=${operatorPacket.runSpec.budgetDecision}`,
       `economy=${operatorPacket.runSpec.economyMode}`,
+      "dispatch=no",
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+    ].filter(Boolean).join(" "),
+  };
+}
+
+export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): AgentRunTaskPacketResult {
+  const taskId = normalizeText(input.taskId || input.task?.id);
+  const task = input.task;
+  const taskFound = !!task && normalizeText(task.id) === taskId;
+  const status = normalizeText(task?.status) || "unknown";
+  const description = normalizeText(task?.description);
+  const files = normalizeStringArray(task?.files);
+  const acceptanceCriteria = normalizeStringArray(task?.acceptance_criteria);
+  const protectedScopeDetected = input.protectedScopeRequested === true || detectProtectedAgentTaskScope(files, description);
+  const validationChecklist = buildTaskValidationChecklist(taskId || "<task-id>", acceptanceCriteria, files);
+  const rollback = buildTaskRollback(files);
+  const profile = normalizeInvocationProfile(input.profile ?? "small-mutation");
+  const invocationSpecPacket = buildAgentInvocationSpecPacket({
+    taskId,
+    purpose: normalizeText(input.purpose) || "task-packet",
+    profile,
+    goal: task ? buildTaskPacketGoal({ ...task, id: taskId }, acceptanceCriteria) : "Board task missing; do not execute.",
+    providerModelRef: input.providerModelRef,
+    cwd: input.cwd,
+    declaredFiles: files,
+    timeoutMs: input.timeoutMs,
+    fileContract: profile === "read-only-review" || profile === "research" ? "read-only" : "mutation",
+    validation: validationChecklist,
+    rollback,
+    outputSchema: "PASS|FAIL with filesTouched, validationEvidence, blockers",
+    budgetDecision: input.budgetDecision,
+    budgetEvidence: input.budgetEvidence,
+    budgetEvidenceSource: input.budgetEvidenceSource,
+    budgetEvidenceProvider: input.budgetEvidenceProvider,
+    budgetEvidenceGeneratedAtIso: input.budgetEvidenceGeneratedAtIso,
+    budgetEvidenceMaxAgeMs: input.budgetEvidenceMaxAgeMs,
+    economyMode: input.economyMode ?? "critical",
+    tokenBudgetEvidence: input.tokenBudgetEvidence || input.budgetEvidence,
+    maxOutputLines: input.maxOutputLines ?? 20,
+    protectedScopeRequested: protectedScopeDetected,
+  });
+  const blockers = [...invocationSpecPacket.blockers];
+  let recommendationCode: AgentRunTaskPacketResult["recommendationCode"] = invocationSpecPacket.recommendationCode;
+  const block = (code: AgentRunTaskPacketResult["recommendationCode"], blocker: string) => {
+    if (blockers.length === 0 || recommendationCode === invocationSpecPacket.recommendationCode) recommendationCode = code;
+    if (!blockers.includes(blocker)) blockers.push(blocker);
+  };
+
+  if (!taskId) block("agent-run-task-blocked-task-id", "task-id-missing");
+  if (!taskFound) block("agent-run-task-blocked-task-missing", "task-not-found");
+  if (status === "completed") block("agent-run-task-blocked-task-completed", "task-already-completed");
+  if (files.length === 0) block("agent-run-task-blocked-files", "task-files-missing");
+  if (acceptanceCriteria.length === 0) block("agent-run-task-blocked-acceptance-criteria", "task-acceptance-criteria-missing");
+  if (protectedScopeDetected) block("agent-run-task-blocked-protected-scope", "protected-scope-requested");
+
+  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  if (decision === "ready-for-human-decision") recommendationCode = "agent-run-start-ready-for-human-decision";
+
+  return {
+    mode: "agent-run-task-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    requiresHumanDecision: true,
+    singleRunOnly: true,
+    decision,
+    recommendationCode,
+    blockers,
+    task: {
+      id: taskId,
+      found: taskFound,
+      status,
+      description,
+      files,
+      acceptanceCriteria,
+      protectedScopeDetected,
+    },
+    invocationSpecPacket,
+    invocationSpec: invocationSpecPacket.invocationSpec,
+    validationChecklist,
+    rollback,
+    humanConfirmationPhrase: invocationSpecPacket.humanConfirmationPhrase,
+    nextActions: decision === "ready-for-human-decision"
+      ? [
+          "show the typed invocation spec to the operator",
+          "require the exact human confirmation phrase before any dispatch",
+          "if executed later, registry-upsert planned/running before subprocess start",
+          "after exit, validate touched files, non-empty output, and acceptance criteria before board completion",
+        ]
+      : ["resolve task packet blockers before any worker dispatch"],
+    summary: [
+      "agent-run-task-packet:",
+      `decision=${decision}`,
+      `task=${taskId || "unknown"}`,
+      `found=${taskFound ? "yes" : "no"}`,
+      `status=${status}`,
+      `files=${files.length}`,
+      `criteria=${acceptanceCriteria.length}`,
+      `budget=${invocationSpecPacket.invocationSpec.budgetDecision}`,
+      `economy=${invocationSpecPacket.invocationSpec.economyMode}`,
       "dispatch=no",
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),

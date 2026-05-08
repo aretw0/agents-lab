@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunTaskPacket, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -290,6 +290,171 @@ describe("agent spawn readiness contract", () => {
     });
     expect(mutationReady.decision).toBe("ready-for-human-decision");
     expect(mutationReady.invocationSpec.fileContract).toBe("mutation");
+  });
+
+  it("derives a report-only agent invocation spec from a board task", () => {
+    const result = buildAgentRunTaskPacket({
+      taskId: "TASK-BUD-1010",
+      task: {
+        id: "TASK-BUD-1010",
+        description: "Implement report-only board-to-agent packetizer.",
+        status: "planned",
+        files: [
+          "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+          "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        ],
+        acceptance_criteria: [
+          "returns typed invocation spec",
+          "keeps dispatchAllowed=false",
+        ],
+      },
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      budgetDecision: "warn",
+      budgetEvidence: "model-specific Spark budget usable while aggregate Codex may be pressured",
+      budgetEvidenceSource: "manual",
+      budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
+      tokenBudgetEvidence: "Spark scoped pool usable; conserve tokens",
+    });
+
+    expect(result).toMatchObject({
+      mode: "agent-run-task-packet",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      processStopAllowed: false,
+      requiresHumanDecision: true,
+      singleRunOnly: true,
+      decision: "ready-for-human-decision",
+      blockers: [],
+    });
+    expect(result.invocationSpec.runId).toBe("task-bud-1010-task-packet");
+    expect(result.invocationSpec.fileContract).toBe("mutation");
+    expect(result.invocationSpec.profile).toBe("small-mutation");
+    expect(result.invocationSpec.declaredFiles).toEqual([
+      "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+      "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+    ]);
+    expect(result.invocationSpec.validation.join("\n")).toContain("acceptance criterion: returns typed invocation spec");
+    expect(result.rollback.join("\n")).toContain("git restore packages/pi-stack/extensions/guardrails-core-agent-run-start.ts");
+    expect(result.invocationSpec.economyMode).toBe("critical");
+    expect(result.invocationSpec.maxOutputLines).toBe(20);
+    expect(result.invocationSpec.budgetEvidence).toContain("Spark budget usable");
+    expect(result.invocationSpec.budgetEvidenceProvider).toBe("openai-codex/gpt-5.3-codex-spark");
+    expect(result.humanConfirmationPhrase).toBe("execute o worker task-bud-1010-task-packet");
+  });
+
+  it("fails closed for unsafe or incomplete board-to-agent packets", () => {
+    const readyTask = {
+      id: "TASK-BUD-1010",
+      description: "Implement report-only board-to-agent packetizer.",
+      status: "planned",
+      files: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+      acceptance_criteria: ["returns typed invocation spec"],
+    };
+
+    const missingTask = buildAgentRunTaskPacket({
+      taskId: "TASK-MISSING",
+      providerModelRef: "dashscope/qwen3-coder-plus",
+      cwd: process.cwd(),
+      budgetDecision: "ok",
+      budgetEvidence: "dashscope ok",
+    });
+    expect(missingTask.decision).toBe("blocked");
+    expect(missingTask.blockers).toContain("task-not-found");
+
+    const missingFiles = buildAgentRunTaskPacket({
+      taskId: "TASK-NO-FILES",
+      task: { ...readyTask, id: "TASK-NO-FILES", files: [] },
+      providerModelRef: "dashscope/qwen3-coder-plus",
+      cwd: process.cwd(),
+      budgetDecision: "ok",
+      budgetEvidence: "dashscope ok",
+    });
+    expect(missingFiles.decision).toBe("blocked");
+    expect(missingFiles.blockers).toContain("task-files-missing");
+
+    const protectedScope = buildAgentRunTaskPacket({
+      taskId: "TASK-PROTECTED",
+      task: { ...readyTask, id: "TASK-PROTECTED", files: [".github/workflows/ci.yml"] },
+      providerModelRef: "dashscope/qwen3-coder-plus",
+      cwd: process.cwd(),
+      budgetDecision: "ok",
+      budgetEvidence: "dashscope ok",
+    });
+    expect(protectedScope.decision).toBe("blocked");
+    expect(protectedScope.blockers).toContain("protected-scope-requested");
+
+    const completed = buildAgentRunTaskPacket({
+      taskId: "TASK-DONE",
+      task: { ...readyTask, id: "TASK-DONE", status: "completed" },
+      providerModelRef: "dashscope/qwen3-coder-plus",
+      cwd: process.cwd(),
+      budgetDecision: "ok",
+      budgetEvidence: "dashscope ok",
+    });
+    expect(completed.decision).toBe("blocked");
+    expect(completed.blockers).toContain("task-already-completed");
+  });
+
+  it("exposes agent_run_task_packet as a report-only board surface", async () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-task-packet-"));
+    mkdirSync(path.join(tmp, ".project"), { recursive: true });
+    writeFileSync(path.join(tmp, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-BUD-1010",
+          description: "Implement report-only board-to-agent packetizer.",
+          status: "planned",
+          files: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+          acceptance_criteria: ["returns typed invocation spec"],
+        },
+      ],
+    }, null, 2), "utf8");
+
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    guardrailsCore(pi);
+
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_task_packet");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+
+    const result = await tool.execute(
+      "tc-agent-run-task-packet",
+      {
+        task_id: "TASK-BUD-1010",
+        provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+        budget_decision: "warn",
+        budget_evidence: "Spark scoped budget usable",
+        budget_evidence_source: "manual",
+        budget_evidence_provider: "openai-codex/gpt-5.3-codex-spark",
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: tmp },
+    );
+
+    expect(result.details?.mode).toBe("agent-run-task-packet");
+    expect(result.details?.dispatchAllowed).toBe(false);
+    expect(result.details?.processStartAllowed).toBe(false);
+    expect(result.details?.decision).toBe("ready-for-human-decision");
+    expect(result.content?.[0]?.text).toContain("agent-run-task-packet: decision=ready-for-human-decision");
+    expect(result.content?.[0]?.text).toContain("dispatch=no");
   });
 
   it("accepts fresh structured budget evidence and blocks stale or mismatched route evidence", () => {
