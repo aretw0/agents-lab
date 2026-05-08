@@ -39,6 +39,28 @@ Saída (determinística):
 3. executar só após decisão humana/local gate;
 4. manter checkpoint curto por fatia.
 
+## Primeiro hatch em contexto novo
+
+Quando a `pi-stack` é instalada ou invocada em um workspace novo, o primeiro hatch deve assumir pouco e descobrir rápido:
+
+- onde estamos: repositório, pasta solta, sandbox, worktree ou pasta vazia;
+- quais artefatos locais existem: README, manifests, testes, docs, configs, scripts, `.project`, `.pi`;
+- quais recursos da sandbox estão disponíveis: ferramentas locais, providers configurados, espaço/pressão de máquina, permissões e limites visíveis;
+- qual perfil queen parece aplicável: defaults da distro, contexto do projeto, recursos disponíveis e sinais do operador.
+
+Pasta vazia ou falta de diretrizes não é fracasso. É sinal de que o operador é o gargalo de contexto, então o control-plane deve entrevistar com poucas perguntas em vez de ficar passivo:
+
+```text
+Qual propósito você quer dar a este workspace?
+Quer explorar/mapear, criar estrutura mínima, ligar a um projeto existente ou só planejar?
+Posso fazer uma varredura local-safe da sandbox/workspace?
+Há algum limite além dos defaults?
+```
+
+Esse hatch continua report-only/local-safe por default. Ele pode propor o uso de workers ou outras capacidades quando houver ROI claro, mas não autoriza protected scope, remote/offload, scheduler, publish, settings ou execução irreversível.
+
+A evolução desse hatch pode aprender com o ecossistema pi, Claude Code e outras ferramentas, mas o default mínimo já é suficiente: descobrir contexto local, explicar oportunidades ao operador e pedir apenas o alinhamento que falta.
+
 ### Exemplo rápido (tool surface)
 
 ```json

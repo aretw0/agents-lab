@@ -23271,6 +23271,25 @@
       "milestone": "single-worker-board-driven-lane-2026-05",
       "notes": "Criado a partir do steer do operador: pi-stack é distro reutilizável; agents-lab é a casa onde o perfil queen atual é iteração contínua de melhoramento.\n[provenance:human] source_task=none reason=Evitar reduzir queen à vontade imediata do operador; registrar composição contextual e perfil agents-lab.\nClarified queen as distro/project/operator profile composition and recorded agents-lab profile as continuous improvement.",
       "verification": "VERIF-TASK-BUD-1044-QUEEN-CONTEXT-PROFILE"
+    },
+    {
+      "id": "TASK-BUD-1045",
+      "description": "[project-intake/queen] Registrar primeiro hatch/intake da pi-stack em contexto novo: descobrir projeto/sandbox e entrevistar operador quando faltar diretriz.",
+      "status": "completed",
+      "priority": "p0",
+      "files": [
+        "docs/primitives/project-intake.md"
+      ],
+      "acceptance_criteria": [
+        "Documento descreve o primeiro hatch/intake ao ser instalado/invocado em um workspace novo.",
+        "Documento inclui descoberta local-safe de projeto, artefatos e sandbox disponível sem assumir que há repositório.",
+        "Documento trata pasta vazia/falta de diretriz como sinal para entrevista curta do operador, não como bloqueio passivo.",
+        "Documento conecta esse intake ao perfil queen/contexto sem criar execução automática ou protected scope.",
+        "Documento registra que pesquisa de ecossistema pi/Claude Code/etc. pode informar evolução futura, mas não é pré-requisito para o hatch local-safe."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Criado a partir do steer do operador: pi-stack pode ser instalada em vários contextos; o primeiro hatch deve descobrir onde está e entrevistar o operador quando contexto estiver ausente.\n[provenance:human] source_task=none reason=Tornar discoverability inicial e UX de entrevista parte dos defaults de projeto novo/vazio.\nRegistered first-hatch intake: discover local context/sandbox, treat empty workspace as interview cue, and keep default report-only/local-safe.",
+      "verification": "VERIF-TASK-BUD-1045-FIRST-HATCH-INTAKE"
     }
   ]
 }

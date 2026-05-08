@@ -15200,6 +15200,15 @@
       "method": "doc-update+marker-check+i18n-lint",
       "timestamp": "2026-05-08T13:20:56.986Z",
       "evidence": "Updated `docs/primitives/nudge-free-local-continuity.md` to clarify queen as contextual composition, not only the operator's instant will. The section now states that in a reusable distro like `pi-stack`, queen is composed from operator, project/context, available resources, gate maturity, distro defaults, and persistent installation preferences; pi-stack should provide good defaults and discoverability, and each project can have its own queen profile. It records the current `agents-lab` queen profile as continuous improvement: proactively use local-safe resources to improve the stack, create evidence, close loops with validation/commit/checkpoint, and stop gracefully on real risk, protected scope, reload/compact, or product ambiguity. Marker check passed; i18n lint pt-BR passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1045-FIRST-HATCH-INTAKE",
+      "target": "TASK-BUD-1045",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-update+marker-check+i18n-lint+interview-plan",
+      "timestamp": "2026-05-08T13:30:18.061Z",
+      "evidence": "Updated `docs/primitives/project-intake.md` with `## Primeiro hatch em contexto novo`. It defines the first pi-stack hatch/intake for a new workspace: quickly discover whether we are in a repo, loose folder, sandbox, worktree, or empty folder; inspect local-safe artifacts/resources such as README/manifests/tests/docs/configs/scripts/.project/.pi, configured tools/providers, and machine pressure; infer the applicable queen profile from distro defaults, project context, resources, and operator signals. Empty folder or missing directions is treated as a cue to interview the operator with a few questions, not passive failure. The hatch remains report-only/local-safe by default and can propose workers/capabilities on clear ROI without authorizing protected/irreversible scopes. Marker check passed 5/5; i18n lint pt-BR passed; structured_interview_plan previewed the empty-context interview shape."
     }
   ]
 }
