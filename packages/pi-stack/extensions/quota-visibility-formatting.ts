@@ -38,6 +38,14 @@ function hourList(hours: number[]): string {
 	return hours.map(hh).join(", ");
 }
 
+function advisoryScopeKey(input: {
+	provider: string;
+	providerModelKey?: string;
+	providerAccountKey?: string;
+}): string {
+	return input.providerModelKey ?? input.providerAccountKey ?? input.provider;
+}
+
 function formatWindowInsightLine(w: ProviderWindowInsight): string {
 	if (w.observedMessages === 0) {
 		return `  - ${w.provider} (${w.windowHours}h): sem eventos no período (monitoramento ativo)`;
@@ -139,17 +147,30 @@ export function buildRouteAdvisory(
 	const considered = status.providerBudgets
 		.map((b) => {
 			const budgetDecision = b.state === "warning" ? "warn" : b.state;
-			const budgetEvidence = `${b.provider}${b.model ? `/${b.model}` : ""} ${b.state} generatedAt=${status.source.generatedAtIso}`;
+			const scopeKey = advisoryScopeKey(b);
+			const budgetEvidence = `${scopeKey} ${b.state} generatedAt=${status.source.generatedAtIso}${
+				b.liveWindowSource ? ` liveWindowSource=${b.liveWindowSource}` : ""
+			}${
+				b.dashboardRemainingPct !== undefined
+					? ` dashboardRemainingPct=${safeNum(b.dashboardRemainingPct).toFixed(1)}%`
+					: ""
+			}`;
 			const executionBudget = resolveProviderExecutionBudgetEvidence({
 				budgetDecision,
 				budgetEvidence,
 				budgetEvidenceSource: "route-advisory",
-				budgetEvidenceProvider: b.provider,
+				budgetEvidenceProvider: scopeKey,
+				providerModelRef: scopeKey,
 				budgetEvidenceGeneratedAtIso: status.source.generatedAtIso,
 				nowMs: Date.parse(status.source.generatedAtIso),
 			});
 			return {
 				provider: b.provider,
+				providerModelKey: b.providerModelKey,
+				providerAccountKey: b.providerAccountKey,
+				account: b.account,
+				model: b.model,
+				scopeKey,
 				state: b.state,
 				unit: b.unit,
 				projectedPressurePct: maxPressurePct(b),
@@ -157,14 +178,14 @@ export function buildRouteAdvisory(
 				executionBudgetReady: executionBudget.readyForExecution,
 				executionBudgetEvidence: executionBudget.evidence,
 				executionBudgetEvidenceSource: "route-advisory" as const,
-				executionBudgetEvidenceProvider: b.provider,
+				executionBudgetEvidenceProvider: scopeKey,
 				executionBudgetEvidenceGeneratedAtIso: status.source.generatedAtIso,
 				_sortScore: routePriority(b, profile),
 			};
 		})
 		.sort(
 			(a, b) =>
-				a._sortScore - b._sortScore || a.provider.localeCompare(b.provider),
+				a._sortScore - b._sortScore || advisoryScopeKey(a).localeCompare(advisoryScopeKey(b)) || a.provider.localeCompare(b.provider),
 		);
 
 	const blockedProviders = considered
@@ -207,8 +228,9 @@ export function formatRouteAdvisory(advisory: RouteAdvisory): string {
 	}
 	lines.push("candidates:");
 	for (const row of advisory.consideredProviders) {
+		const scope = advisoryScopeKey(row);
 		lines.push(
-			`  - ${row.provider} state=${row.state} unit=${row.unit} projectedPressure=${row.projectedPressurePct.toFixed(1)}%`,
+			`  - ${scope} state=${row.state} unit=${row.unit} projectedPressure=${row.projectedPressurePct.toFixed(1)}%`,
 		);
 	}
 	return lines.join("\n");

@@ -169,6 +169,24 @@ export interface ProviderBudgetStatus {
 
 export type RoutingProfile = "cheap" | "balanced" | "reliable";
 
+export interface RouteAdvisoryCandidate {
+	provider: string;
+	providerModelKey?: string;
+	providerAccountKey?: string;
+	account?: string;
+	model?: string;
+	scopeKey?: string;
+	state: "ok" | "warning" | "blocked";
+	unit: "tokens-cost" | "requests";
+	projectedPressurePct: number;
+	executionBudgetDecision: "ok" | "warn" | "blocked";
+	executionBudgetReady: boolean;
+	executionBudgetEvidence: string;
+	executionBudgetEvidenceSource: "route-advisory";
+	executionBudgetEvidenceProvider: string;
+	executionBudgetEvidenceGeneratedAtIso: string;
+}
+
 export interface RouteAdvisory {
 	profile: RoutingProfile;
 	generatedAtIso: string;
@@ -176,18 +194,7 @@ export interface RouteAdvisory {
 	state: "ok" | "warning" | "blocked";
 	reason: string;
 	blockedProviders: string[];
-	consideredProviders: Array<{
-		provider: string;
-		state: "ok" | "warning" | "blocked";
-		unit: "tokens-cost" | "requests";
-		projectedPressurePct: number;
-		executionBudgetDecision: "ok" | "warn" | "blocked";
-		executionBudgetReady: boolean;
-		executionBudgetEvidence: string;
-		executionBudgetEvidenceSource: "route-advisory";
-		executionBudgetEvidenceProvider: string;
-		executionBudgetEvidenceGeneratedAtIso: string;
-	}>;
+	consideredProviders: RouteAdvisoryCandidate[];
 	noAutoSwitch: true;
 }
 

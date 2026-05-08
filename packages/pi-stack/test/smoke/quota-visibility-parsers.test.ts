@@ -27,6 +27,7 @@ import quotaVisibilityExtension, {
   type QuotaUsageEvent,
   type ProviderBudgetStatus,
 } from "../../extensions/quota-visibility";
+import { formatRouteAdvisory } from "../../extensions/quota-visibility-formatting";
 
 /** Minimal ExtensionAPI mock — enough to register without crashing. */
 function makeMockPi() {
@@ -942,6 +943,107 @@ describe("quota-visibility parsers", () => {
       executionBudgetDecision: "warn",
       executionBudgetReady: true,
     });
+  });
+
+  it("buildRouteAdvisory diferencia escopo agregado Codex bloqueado vs pool codex-spark utilizável", () => {
+    const advisory = buildRouteAdvisory({
+      source: {
+        sessionsRoot: "x",
+        scannedFiles: 1,
+        parsedSessions: 1,
+        parsedEvents: 1,
+        windowDays: 30,
+        generatedAtIso: "2026-04-15T00:00:00.000Z",
+      },
+      totals: { sessions: 1, userMessages: 1, assistantMessages: 1, toolResultMessages: 0, tokens: 100, costUsd: 0 },
+      burn: {
+        activeDays: 1,
+        avgTokensPerActiveDay: 100,
+        avgTokensPerCalendarDay: 100,
+        projectedTokensNext7d: 700,
+        avgCostPerCalendarDay: 0,
+        projectedCostNext7dUsd: 0,
+      },
+      quota: {},
+      providerBudgetPolicy: { configuredProviders: 2, allocationWarnings: [] },
+      providerBudgets: [
+        {
+          provider: "openai-codex",
+          period: "weekly",
+          unit: "tokens-cost",
+          periodDays: 7,
+          periodStartIso: "2026-04-10T00:00:00.000Z",
+          periodEndIso: "2026-04-16T23:59:59.999Z",
+          observedMessages: 12,
+          observedTokens: 1200,
+          observedCostUsd: 5,
+          observedRequests: 0,
+          projectedTokensEndOfPeriod: 1400,
+          projectedCostUsdEndOfPeriod: 6,
+          projectedRequestsEndOfPeriod: 0,
+          periodTokensCap: 1000,
+          usedPctTokens: 120,
+          projectedPctTokens: 140,
+          warnPct: 80,
+          hardPct: 100,
+          state: "blocked",
+          notes: [],
+          liveWindowSource: "openai-wham",
+        },
+        {
+          provider: "openai-codex",
+          providerModelKey: "openai-codex/gpt-5.3-codex-spark",
+          model: "gpt-5.3-codex-spark",
+          period: "weekly",
+          unit: "tokens-cost",
+          periodDays: 7,
+          periodStartIso: "2026-04-10T00:00:00.000Z",
+          periodEndIso: "2026-04-16T23:59:59.999Z",
+          observedMessages: 1,
+          observedTokens: 200,
+          observedCostUsd: 1,
+          observedRequests: 0,
+          projectedTokensEndOfPeriod: 250,
+          projectedCostUsdEndOfPeriod: 1.5,
+          projectedRequestsEndOfPeriod: 0,
+          dashboardRemainingPct: 82,
+          dashboardUsedPct: 18,
+          dashboardWindowLabel: "7d",
+          liveWindowSource: "openai-wham",
+          usedPctTokens: 18,
+          projectedPctTokens: 25,
+          warnPct: 80,
+          hardPct: 100,
+          state: "warning",
+          notes: ["openai-wham live window evidence usable"],
+        },
+      ],
+      daily: [],
+      models: [],
+      providerWindows: [],
+      topSessionsByTokens: [],
+      topSessionsByCost: [],
+    });
+
+    const aggregateCandidate = advisory.consideredProviders.find(
+      (p) => p.provider === "openai-codex" && !p.providerModelKey,
+    );
+    const sparkCandidate = advisory.consideredProviders.find(
+      (p) => p.providerModelKey === "openai-codex/gpt-5.3-codex-spark",
+    );
+
+    expect(advisory.recommendedProvider).toBe("openai-codex");
+    expect(advisory.state).toBe("warning");
+    expect(aggregateCandidate).toMatchObject({ state: "blocked", provider: "openai-codex", providerModelKey: undefined });
+    expect(sparkCandidate).toMatchObject({
+      provider: "openai-codex",
+      providerModelKey: "openai-codex/gpt-5.3-codex-spark",
+      state: "warning",
+      executionBudgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
+      executionBudgetEvidence: expect.stringContaining("openai-codex/gpt-5.3-codex-spark"),
+      executionBudgetDecision: "warn",
+    });
+    expect(formatRouteAdvisory(advisory)).toContain("openai-codex/gpt-5.3-codex-spark");
   });
 
   it("buildRouteAdvisory retorna BLOCKER quando todos estão bloqueados", () => {

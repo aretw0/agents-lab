@@ -1,22 +1,19 @@
 {
-  "timestamp": "2026-05-08T01:47:34.502Z",
-  "context": "Assimilated user steering: do not rely only on DashScope; OpenAI Codex has a separate model-specific Spark quota. Operator evidence: general [snip] es and add focal test. No dispatch yet. [truncated:+676 chars]",
-  "current_tasks": [
-    "TASK-BUD-1008"
-  ],
+  "timestamp": "2026-05-08T01:59:23.212Z",
+  "context": "Completed TASK-BUD-1008: first small code mutation worker using OpenAI Codex Spark model-specific quota. Explicit confirmation received. Work [snip] rk around 82-83%. Board task completed. [truncated:+907 chars]",
   "next_actions": [
-    "Commit board/handoff planning evidence.",
-    "If operator confirms exact phrase, execute one worker only: execute o worker task-bud-1008-cod [snip] x-spark-model-budget-route [truncated:+1 chars]",
-    "After worker, run focal vitest for quota-visibility-parsers and outcome packet before commit."
+    "Commit code/docs/board/handoff changes.",
+    "Stop after this worker per outcome recommendation.",
+    "After reload, future agent packets may use openai-codex/gpt-5.3-codex-spark evidence explicitl [snip] codex block as exhaustive. [truncated:+39 chars]"
   ],
   "blockers": [
-    "No dispatch authorization yet for TASK-BUD-1008.",
-    "Budget evidence is manual/dashboard, so use warn+critical economy and stop after one worker."
+    "Runtime extension change requires /reload before trusting live route advisory/ [snip] rom the modified code. [truncated:+13 chars]",
+    "No parallel/background/colony promotion yet."
   ],
   "recent_validation": [
-    "git clean before prep",
-    "board_task_create TASK-BUD-1008 -> planned after omitting protected-coupled depends_on",
-    "agent_invocation_spec_packet -> ready-for-human-decision dispatch=no"
+    "worker log PASS and [worker-exit-code] 0",
+    "safe_marker_check type/formatting/test/log/doc markers -> pass",
+    "npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -t targeted -> 1 passed"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1008",
@@ -26,28 +23,32 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T01:47:34.502Z",
+    "generatedAtIso": "2026-05-08T01:59:23.212Z",
     "level": "ok",
-    "percent": 41,
+    "percent": 45,
     "action": "continue",
-    "recommendation": "await-explicit-codex-spark-worker-confirmation",
+    "recommendation": "commit-codex-spark-scope-hardening-and-reload-before-use",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T01:47:34.502Z",
+      "atIso": "2026-05-08T01:59:23.212Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 41,
+      "percent": 45,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "await-explicit-codex-spark-worker-confirmation"
+      "recommendation": "commit-codex-spark-scope-hardening-and-reload-before-use"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-1008"
   ]
 }

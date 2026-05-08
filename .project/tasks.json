@@ -22477,7 +22477,7 @@
     {
       "id": "TASK-BUD-1008",
       "description": "[P1/agent-first/code] Harden quota routing to represent OpenAI Codex model-specific Spark quota separately from aggregate OpenAI Codex pressure, so agent-run packets can choose `openai-codex/gpt-5.3-codex-spark` with explicit evidence when the provider aggregate is locally blocked.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/quota-visibility-types.ts",
@@ -22493,7 +22493,8 @@
         "No settings mutation, no auto-switch, no broad test suite."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Criada por steering humano: não depender só de DashScope; OpenAI Codex Spark tem cota separada da normal. O operador reportou que a cota normal pode estar ~30% restante enquanto `gpt-5.3-codex-spark` está ~82% restante, então o código precisa preservar essa distinção para liberar agentes no mesmo provider. TASK-BUD-1007 é predecessor lógico, mas não foi declarado como depends_on porque o board bloqueou a dependência como protected-coupling.\n[provenance:human] source_task=TASK-BUD-1007 reason=Após dois canaries docs com DashScope, o próximo desbloqueio de agentes deve registrar e usar corretamente a cota model-specific do OpenAI Codex Spark.\n[agent-invocation-spec] Prepared first small code mutation worker packet using OpenAI Codex Spark rather than DashScope. runId=task-bud-1008-codex-spark-model-budget-route, provider=openai-codex/gpt-5.3-codex-spark, declaredFiles=[quota-visibility-types.ts, quota-visibility-formatting.ts, quota-visibility-parsers.test.ts], fileContract=mutation, economyMode=critical, maxOutputLines=20, timeoutMs=90000, budget=warn from manual dashboard evidence: general Codex around 30% remaining while Spark model-specific pool around 82% remaining. Packet decision=ready-for-human-decision dispatch=no. Registry state=planned. Await exact runId confirmation before dispatch."
+      "notes": "Criada por steering humano: não depender só de DashScope; OpenAI Codex Spark tem cota separada da normal. O operador reportou que a cota normal pode estar ~30% restante enquanto `gpt-5.3-codex-spark` está ~82% restante, então o código precisa preservar essa distinção para liberar agentes no mesmo provider. TASK-BUD-1007 é predecessor lógico, mas não foi declarado como depends_on porque o board bloqueou a dependência como protected-coupling.\n[provenance:human] source_task=TASK-BUD-1007 reason=Após dois canaries docs com DashScope, o próximo desbloqueio de agentes deve registrar e usar corretamente a cota model-specific do OpenAI Codex Spark.\n[agent-invocation-spec] Prepared first small code mutation worker packet using OpenAI Codex Spark rather than DashScope. runId=task-bud-1008-codex-spark-model-budget-route, provider=openai-codex/gpt-5.3-codex-spark, declaredFiles=[quota-visibility-types.ts, quota-visibility-formatting.ts, quota-visibility-parsers.test.ts], fileContract=mutation, economyMode=critical, maxOutputLines=20, timeoutMs=90000, budget=warn from manual dashboard evidence: general Codex around 30% remaining while Spark model-specific pool around 82% remaining. Packet decision=ready-for-human-decision dispatch=no. Registry state=planned. Await exact runId confirmation before dispatch.\nCompleted first small code mutation worker using OpenAI Codex Spark. This hardens model-specific quota evidence in code so agent routing can consider Spark separately from aggregate openai-codex pressure. Stop after this worker; no parallel/background promotion yet.",
+      "verification": "VERIF-TASK-BUD-1008-CODEX-SPARK-SCOPE"
     }
   ]
 }

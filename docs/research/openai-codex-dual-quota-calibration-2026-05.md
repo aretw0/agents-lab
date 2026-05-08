@@ -6,8 +6,8 @@ Status: local-safe diagnostic and hardening plan. No provider/settings/routing c
 
 The operator reported that the OpenAI Codex dashboard shows two relevant quotas:
 
-- general OpenAI Codex weekly window: about 50% available;
-- `gpt-5.3-codex-spark` model-specific pool: about 83% available;
+- general OpenAI Codex weekly window: about 50% available; later operator evidence said the normal pool can be around 30% remaining;
+- `gpt-5.3-codex-spark` model-specific pool: about 82-83% available;
 - expected general reset: 2026-05-11, possibly one day earlier;
 - expected `gpt-5.3-codex-spark` reset: 2026-05-13.
 

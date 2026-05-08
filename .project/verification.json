@@ -14867,6 +14867,15 @@
       "method": "worker-canary+marker-check+i18n-lint+outcome-packet",
       "timestamp": "2026-05-08T01:40:08.110Z",
       "evidence": "Explicit human confirmation received for runId task-bud-1007-second-tiny-agent-canary. Worker launched through provider-native pi subprocess with minimal-no-extensions, provider=dashscope/qwen3-coder-plus, declared file docs/research/agent-run-provider-native-runner-2026-05.md only, economyMode=critical, maxOutputLines=20, timeout=60s. Worker output was non-empty (380 bytes), exitCode=0, PASS, touched declared file only. Diff added only the Second-canary rule under the subagent promotion ladder. safe_marker_check passed for doc markers and worker log markers; i18n_lint_text passed English excerpt; agent_run_outcome_packet returned contract=pass process=completed recommendation=stop."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1008-CODEX-SPARK-SCOPE",
+      "target": "TASK-BUD-1008",
+      "target_type": "task",
+      "status": "passed",
+      "method": "codex-spark-worker+focal-vitest+marker-check+outcome-packet",
+      "timestamp": "2026-05-08T01:59:06.783Z",
+      "evidence": "Explicit human confirmation received for runId task-bud-1008-codex-spark-model-budget-route. Worker launched through provider-native pi subprocess with minimal-no-extensions, provider=openai-codex/gpt-5.3-codex-spark, declared files quota-visibility-types.ts, quota-visibility-formatting.ts, quota-visibility-parsers.test.ts, economyMode=critical, maxOutputLines=20, timeout=90s. Worker output was non-empty (925 bytes), exitCode=0, PASS, and touched declared files only. Code now exposes RouteAdvisoryCandidate scope fields including providerModelKey/model/scopeKey; buildRouteAdvisory uses provider/model scope in executionBudgetEvidence, executionBudgetEvidenceProvider, providerModelRef, sorting and formatted candidates. Focal test proves aggregate openai-codex can be blocked while openai-codex/gpt-5.3-codex-spark remains a usable warning candidate with dashboardRemainingPct=82 and scope evidence. Validation: npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts --reporter=dot -> 46 passed; safe_marker_check passed for type/formatting/test/log/doc markers; agent_run_outcome_packet returned contract=pass process=completed recommendation=stop. Control plane also updated docs/research/openai-codex-dual-quota-calibration-2026-05.md with operator evidence that normal pool can be around 30% remaining while Spark pool is about 82-83% available."
     }
   ]
 }
