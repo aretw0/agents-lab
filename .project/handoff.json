@@ -1,53 +1,53 @@
 {
-  "timestamp": "2026-05-08T00:32:58.599Z",
-  "context": "Prepared first small-mutation worker canary but did not dispatch. Used live agent_invocation_spec_packet after reload. Packet: runId=task-bud [snip] until exact human confirmation phrase. [truncated:+529 chars]",
-  "current_tasks": [
-    "TASK-BUD-1001"
-  ],
+  "timestamp": "2026-05-08T00:57:42.142Z",
+  "context": "Recovered after compact/no-auto-resume. Reason auto-resume did not continue automatically: post-worker state was dirty and handoff still refl [snip] IF-TASK-BUD-1001-SMALL-MUTATION-CANARY. [truncated:+460 chars]",
   "next_actions": [
-    "Commit board/handoff/registry planning evidence if registry is tracked.",
-    "Ask operator for exact confirmation phrase before dispatch: execute o worker task-bud-1001-small-mutation-doc-canary",
-    "If confirmed later, run only that one worker, capture bounded log, then validate diff with saf [snip] agent_run_outcome_packet. [truncated:+18 chars]"
+    "Commit doc, board verification, and fresh handoff changes.",
+    "Do not auto-dispatch another worker; stop after this canary as outcome recommendation says stop.",
+    "Future promotion requires a separate human decision and should remain one tiny canary at a time."
   ],
   "blockers": [
-    "No worker dispatch authorization yet; 'prossigamos' was treated as authorizati [snip] t to start the worker. [truncated:+28 chars]",
-    "DashScope qwen3-coder-plus quota remains scarce; keep canary tiny."
+    "Auto-resume failed closed because workspace was dirty and previous handoff was [snip] ful nudge-free resume. [truncated:+92 chars]"
   ],
   "recent_validation": [
-    "git dirty was clean before packet prep",
-    "context_watch_status level=warn action=continue-bounded",
-    "machine_maintenance_status ok"
+    "worker log .pi/reports/task-bud-1001-small-mutation-doc-canary.log: PASS, declared file, exitCode=0",
+    "safe_marker_check doc markers: TASK-BUD-1001 small-mutation canary, economyMode=critical, declaredFiles-only -> pass",
+    "safe_marker_check worker log markers PASS/file/exit -> pass"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1001",
     "canonical_links": [
       "task:TASK-BUD-1001",
-      "task:TASK-BUD-1001-SMALL-MUTATION-DOC-CANARY"
+      "task:TASK-BUD-1001-SMALL-MUTATION-CANARY"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T00:32:58.599Z",
-    "level": "warn",
-    "percent": 54,
+    "generatedAtIso": "2026-05-08T00:57:42.142Z",
+    "level": "ok",
+    "percent": 21,
     "action": "continue",
-    "recommendation": "await-explicit-worker-confirmation-before-dispatch",
+    "recommendation": "commit-small-mutation-canary-and-stop",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T00:32:58.599Z",
+      "atIso": "2026-05-08T00:57:42.142Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 54,
+      "level": "ok",
+      "percent": 21,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "await-explicit-worker-confirmation-before-dispatch"
+      "recommendation": "commit-small-mutation-canary-and-stop"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-1001"
   ]
 }

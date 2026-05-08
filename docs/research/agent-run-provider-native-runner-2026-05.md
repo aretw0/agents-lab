@@ -63,3 +63,11 @@ Implement a report-only start packet or runner design helper before any dispatch
 - tests: model mismatch blocks, protected scope blocks, empty output marker is mandatory, read-only allowlist default.
 
 Only after that packet is tested should the operator be asked whether to execute exactly one worker.
+
+## TASK-BUD-1001 small-mutation canary
+
+First agent-first small-mutation protocol with economyMode=critical:
+
+- Goal: mutate exactly one declared file with minimal context restatement
+- Constraint: declaredFiles-only access, output <=20 lines, token conservation
+- Validation: exact file change verification, no auto-retry without human decision

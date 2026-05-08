@@ -14840,6 +14840,15 @@
       "method": "bounded-research+inspection+docs",
       "timestamp": "2026-05-08T00:28:19.168Z",
       "evidence": "Generalized token/context economy beyond subagents in docs/research/global-token-economy-audit-2026-05.md. Performed bounded fresh audit of https://github.com/claudioemmanuel/squeez via git-checkout-cache at C:/Users/aretw/.cache/checkouts/github.com/claudioemmanuel/squeez, reading README.md, CLAUDE.md, src/config.rs, and src/filter.rs. Captured patterns: host hook surfaces, compression pipeline, cross-call dedupe, adaptive intensity, dense summaries, agent cost/burn-rate, Read/Grep/Glob limits, terse persona, memory/doc compression, and protocol/MCP. Added explicit non-overclaim limit: not exhaustive; do not claim we learned everything. Linked global audit from agent-first doc. Validation: safe_marker_check passed on global audit and agent-first link; i18n_lint_text passed pt-BR excerpt."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1001-SMALL-MUTATION-CANARY",
+      "target": "TASK-BUD-1001",
+      "target_type": "task",
+      "status": "passed",
+      "method": "worker-canary+marker-check+outcome-packet",
+      "timestamp": "2026-05-08T00:57:27.220Z",
+      "evidence": "Explicit human confirmation received: execute o worker task-bud-1001-small-mutation-doc-canary. Worker was launched via provider-native pi subprocess with minimal-no-extensions against declared file docs/research/agent-run-provider-native-runner-2026-05.md only, economyMode=critical, maxOutputLines=20, timeout=60s, provider=dashscope/qwen3-coder-plus. Worker output was non-empty (302 bytes), exitCode=0, PASS, touched declared file only. safe_marker_check passed for TASK-BUD-1001 small-mutation canary, economyMode=critical, declaredFiles-only. agent_run_outcome_packet returned contract=pass process=completed recommendation=stop. No auto-retry or extra worker dispatch."
     }
   ]
 }
