@@ -14984,6 +14984,15 @@
       "method": "live-tool-canary+status-check",
       "timestamp": "2026-05-08T04:08:37.665Z",
       "evidence": "After reload, live-validated `agent_run_follow`. Existing real run `task-bud-1018-first-runner-readonly-canary-retry` returned decision=terminal, state=completed, terminal=yes, outputBytes=1396, lines=20, dispatch=no, authorization=none. Missing run canary `task-bud-1021-missing-follow-canary` returned decision=missing-run, state=unknown, terminal=no, outputBytes=0, lines=0, dispatch=no, authorization=none. No worker/process was started, stopped, or redispatched."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1022-READONLY-OUTCOME-HARDENING",
+      "target": "TASK-BUD-1022",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-test+marker-check",
+      "timestamp": "2026-05-08T04:13:32.109Z",
+      "evidence": "Hardened `buildAgentRunOutcomePacket` so `fileContract=read-only` with any non-empty touchedFiles fails with recommendationCode=agent-run-outcome-fail-read-only-touched-files, blocker read-only-touched-files, recommendation ask-human, and rollbackFiles including touched files. Preserved mutation missing-declared behavior by gating it to fileContract != read-only. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 31 passed. Marker checks passed for runtime and test coverage."
     }
   ]
 }

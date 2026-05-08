@@ -983,6 +983,23 @@ describe("agent spawn readiness contract", () => {
       touchedFiles: [],
     });
 
+    const readOnlyTouched = buildAgentRunOutcomePacket({
+      runId: "run-outcome",
+      entry,
+      touchedFiles: ["docs/research/provider-canary-scorecard-dashscope-2026-05.md"],
+      markerResults: [{ label: "provider-marker", ok: true }],
+      outputBytes: 128,
+      fileContract: "read-only",
+    });
+    expect(readOnlyTouched).toMatchObject({
+      processState: "completed",
+      contractDecision: "fail",
+      fileContract: "read-only",
+      recommendationCode: "agent-run-outcome-fail-read-only-touched-files",
+      blockers: ["read-only-touched-files"],
+      rollbackFiles: ["docs/research/provider-canary-scorecard-dashscope-2026-05.md"],
+    });
+
     const emptyOutput = buildAgentRunOutcomePacket({
       runId: "run-outcome",
       entry,

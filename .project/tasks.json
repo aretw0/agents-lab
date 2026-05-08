@@ -22772,6 +22772,29 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criado após reload para validar live a superfície `agent_run_follow` implementada em TASK-BUD-1020.\n[provenance:human] source_task=TASK-BUD-1020 reason=TASK-BUD-1020 adicionou a primitiva; após reload precisamos confirmar que a superfície viva funciona com runs reais/ausentes.\nLive follow canary passed: terminal and missing-run paths are observable without manual sleep/polling or process side effects.",
       "verification": "VERIF-TASK-BUD-1021-LIVE-FOLLOW-CANARY"
+    },
+    {
+      "id": "TASK-BUD-1022",
+      "description": "[agent-first/outcome-hardening] Fazer `agent_run_outcome_packet` falhar contrato `read-only` sempre que houver qualquer arquivo tocado, inclusive dentro do escopo declarado.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1020"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Para `file_contract=read-only`, qualquer `touched_files` não vazio resulta em contractDecision=fail.",
+        "A recomendação para read-only com arquivos tocados é ask-human e o recommendationCode é específico ou inequivocamente fail.",
+        "Rollback files incluem os arquivos tocados no contrato read-only.",
+        "Caminhos mutation existentes continuam preservados.",
+        "Teste focal cobre read-only sem toque passa e read-only com arquivo declarado tocado falha."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criado após o worker do TASK-BUD-1018 apontar lacuna: outcome atual não falha read-only quando alterações ocorrem dentro do escopo declarado.\n[provenance:human] source_task=TASK-BUD-1018 reason=Worker retry identificou que read-only contract deveria falhar em qualquer touchedFiles, não apenas unexpected files.\nRead-only outcome contract now fails on any touched file, including declared-scope files.",
+      "verification": "VERIF-TASK-BUD-1022-READONLY-OUTCOME-HARDENING"
     }
   ]
 }

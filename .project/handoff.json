@@ -1,32 +1,31 @@
 {
-  "timestamp": "2026-05-08T04:08:54.308Z",
-  "context": "After reload, live-validated new read-only bounded agent_run_follow surface. For real prior run task-bud-1018-first-runner-readonly-canary-re [snip] 021. No start/stop/redispatch occurred. [truncated:+277 chars]",
+  "timestamp": "2026-05-08T04:13:45.652Z",
+  "context": "Completed read-only outcome hardening. buildAgentRunOutcomePacket now fails fileContract=read-only whenever touchedFiles is non-empty, includ [snip] re live outcome tool uses new behavior. [truncated:+297 chars]",
   "next_actions": [
-    "Commit TASK-BUD-1021 board/verification/handoff changes.",
-    "Next safe slice: decide whether to rerun a read-only worker now that follow exists, or harden [snip] odifications before retry. [truncated:+43 chars]"
+    "Commit TASK-BUD-1022 code/test/board/verification/handoff changes.",
+    "Operator should run /reload before relying on live agent_run_outcome_packet read-only hardening.",
+    "After reload, live-canary outcome packet with read-only+touched file can validate fail-closed [snip] other runner pass attempt. [truncated:+27 chars]"
   ],
   "blockers": [
-    "No follow-surface blocker. TASK-BUD-1018 remains not completed because prior w [snip] ursuing pass evidence. [truncated:+74 chars]"
+    "Reload required after extension source change."
   ],
   "recent_validation": [
-    "agent_run_status prior run -> completed stale=no",
-    "agent_run_follow prior run max_wait_ms=0 -> terminal completed outputBytes=1396 lines=20 dispatch=no",
-    "agent_run_follow missing run -> missing-run outputBytes=0 lines=0 dispatch=no"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 31 passed",
+    "safe_marker_check runtime -> pass",
+    "safe_marker_check test -> pass"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1021",
+    "focus": "TASK-BUD-1022",
     "canonical_links": [
-      "task:TASK-BUD-1021",
-      "task:TASK-BUD-1018-FIRST-RUNNER-READONLY-CANARY-RETRY",
-      "task:TASK-BUD-1021-MISSING-FOLLOW-CANARY"
+      "task:TASK-BUD-1022"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T04:08:54.308Z",
+    "generatedAtIso": "2026-05-08T04:13:45.652Z",
     "level": "ok",
-    "percent": 35,
+    "percent": 37,
     "action": "continue",
-    "recommendation": "commit-live-follow-canary-then-plan-next-runner-evidence-slice",
+    "recommendation": "commit-readonly-outcome-hardening-then-reload-before-live-use",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
@@ -34,20 +33,20 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T04:08:54.308Z",
+      "atIso": "2026-05-08T04:13:45.652Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 35,
+      "percent": 37,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-live-follow-canary-then-plan-next-runner-evidence-slice"
+      "recommendation": "commit-readonly-outcome-hardening-then-reload-before-live-use"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-1021"
+    "TASK-BUD-1022"
   ]
 }

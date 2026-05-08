@@ -113,6 +113,7 @@ export interface AgentRunOutcomeResult {
     | "agent-run-outcome-fail-missing-run"
     | "agent-run-outcome-fail-process-state"
     | "agent-run-outcome-fail-empty-output"
+    | "agent-run-outcome-fail-read-only-touched-files"
     | "agent-run-outcome-fail-unexpected-files"
     | "agent-run-outcome-fail-missing-declared-files"
     | "agent-run-outcome-fail-marker";
@@ -325,8 +326,9 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
   if (!found) blockers.push("run-not-found");
   if (found && processState !== "completed") blockers.push(`process-state-${processState}`);
   if (found && processState === "completed" && outputBytes === 0) blockers.push("empty-output");
+  if (fileContract === "read-only" && touchedFiles.length > 0) blockers.push("read-only-touched-files");
   if (unexpectedFiles.length > 0) blockers.push("unexpected-files");
-  if (touchedFiles.length > 0 && missingDeclaredFiles.length > 0) blockers.push("declared-files-missing");
+  if (fileContract !== "read-only" && touchedFiles.length > 0 && missingDeclaredFiles.length > 0) blockers.push("declared-files-missing");
   if (markerFailures.length > 0) blockers.push("marker-failures");
 
   let contractDecision: AgentRunContractDecision = "pass";
@@ -345,6 +347,10 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
     contractDecision = "fail";
     recommendation = "ask-human";
     recommendationCode = "agent-run-outcome-fail-empty-output";
+  } else if (fileContract === "read-only" && touchedFiles.length > 0) {
+    contractDecision = "fail";
+    recommendation = "ask-human";
+    recommendationCode = "agent-run-outcome-fail-read-only-touched-files";
   } else if (unexpectedFiles.length > 0) {
     contractDecision = "fail";
     recommendation = "ask-human";
