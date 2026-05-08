@@ -1,54 +1,53 @@
 {
-  "timestamp": "2026-05-08T06:34:21.897Z",
-  "context": "Operator agreed to proceed with suggested next lane for more subagent/worker usage. Seeded single-worker board-driven lane tasks TASK-BUD-103 [snip] e; included in current checkpoint flow. [truncated:+274 chars]",
+  "timestamp": "2026-05-08T06:50:40.363Z",
+  "context": "Operator steered lane to be less timid: use agents earlier, control plane should do little and learn by dispatching agents for board work. Ad [snip] ing dispatch=no. No worker started yet. [truncated:+341 chars]",
+  "current_tasks": [
+    "TASK-BUD-1031"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-1030 lane seeding/doc/verification/handoff changes.",
-    "Next safe slice: TASK-BUD-1031 select 3 local-safe board candidates; no worker dispatch in that task.",
-    "After TASK-BUD-1031, prepare exact-confirmation packet for TASK-BUD-1032 read-only review only [snip] proves the specific runId. [truncated:+15 chars]"
+    "Commit TASK-BUD-1031 packet-prep/acceptance/handoff changes.",
+    "If operator wants immediate dispatch, exact phrase is: execute o worker task-bud-1031-worker-candidate-selection.",
+    "After dispatch, follow with agent_run_follow, assert git stays clean/read-only, capture output [snip] outcome packet read-only. [truncated:+38 chars]"
   ],
   "blockers": [
-    "No worker dispatch authorized by this slice.",
-    "Multi-worker/background/colony promotion remains blocked without explicit task and authorization."
+    "Worker dispatch still requires exact phrase for runId task-bud-1031-worker-candidate-selection.",
+    "Mutation workers remain blocked for TASK-BUD-1031."
   ],
   "recent_validation": [
-    "board_task_create TASK-BUD-1030..1034 -> ok",
-    "safe_marker_check single-worker lane doc -> pass",
-    "i18n_lint_text lane doc expected_language=en -> pass"
+    "git dirty before slice -> clean",
+    "structured_io_json dryRun+apply updated TASK-BUD-1031 acceptance",
+    "board_update TASK-BUD-1031 note -> ok"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1030",
+    "focus": "TASK-BUD-1031",
     "canonical_links": [
-      "task:TASK-BUD-1030",
-      "task:TASK-BUD-1031"
+      "task:TASK-BUD-1031",
+      "task:TASK-BUD-1031-WORKER-CANDIDATE-SELECTION"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T06:34:21.897Z",
+    "generatedAtIso": "2026-05-08T06:50:40.363Z",
     "level": "ok",
-    "percent": 25,
+    "percent": 26,
     "action": "continue",
-    "recommendation": "commit-lane-seeding-then-select-candidates",
+    "recommendation": "commit-prep-then-ask-exact-dispatch-phrase",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
-    "focus_task_status": "completed"
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T06:34:21.897Z",
+      "atIso": "2026-05-08T06:50:40.363Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 25,
+      "percent": 26,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-lane-seeding-then-select-candidates"
+      "recommendation": "commit-prep-then-ask-exact-dispatch-phrase"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-1030"
   ]
 }

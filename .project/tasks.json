@@ -23003,10 +23003,10 @@
         "Lista de 3 candidatos inclui task id, perfil sugerido, arquivos, validação e rollback.",
         "Candidatos excluem protected scope, CI/publish/settings/remote e mudanças destrutivas.",
         "Pelo menos um candidato é read-only-review e um candidato é small-mutation/test-fix.",
-        "Nenhum worker é despachado nesta tarefa."
+        "Seleção pode ser produzida por um worker `read-only-review` após frase exata do runId; nenhum worker de mutação é despachado nesta tarefa."
       ],
       "milestone": "single-worker-board-driven-lane-2026-05",
-      "notes": "Segundo passo: abastecer a lane com material real antes de dispatch.\n[provenance:human] source_task=TASK-BUD-1030 reason=Sequência da lane aprovada para aumentar uso de subagentes a partir do board."
+      "notes": "Segundo passo: abastecer a lane com material real antes de dispatch.\n[provenance:human] source_task=TASK-BUD-1030 reason=Sequência da lane aprovada para aumentar uso de subagentes a partir do board.\nOperator steer: be less timid and use agents earlier. TASK-BUD-1031 will now be fulfilled by a `read-only-review` worker candidate-selection run after exact runId confirmation; control plane only packetizes, follows, validates, and records the decision. Mutation remains blocked for this task."
     },
     {
       "id": "TASK-BUD-1032",
