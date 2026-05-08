@@ -22965,6 +22965,110 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criado após reload para validar que o fix de allowlist de mutação está pronto antes de qualquer retry real.\n[provenance:human] source_task=TASK-BUD-1028 reason=TASK-BUD-1028 mudou packetização de mutation tools; pós-reload precisa preview vivo antes de novo dispatch.\nLive retry preview passed. Exact phrase required for retry dispatch: `execute o worker task-bud-1027-small-mutation-doc-canary-retry`.",
       "verification": "VERIF-TASK-BUD-1029-LIVE-MUTATION-RETRY-PREVIEW"
+    },
+    {
+      "id": "TASK-BUD-1030",
+      "description": "[agent-first/lane] Documentar o contrato `agent-ready` para transformar demandas reais do board em pacotes single-worker seguros.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1027"
+      ],
+      "files": [
+        "docs/research/single-worker-board-driven-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Documento descreve objetivo da lane board-to-worker learning loop.",
+        "Documento define checklist agent-ready: files, acceptance criteria, validation, rollback, protected-scope, profile sugerido e stop condition.",
+        "Documento deixa explícito que single-worker frequente está permitido, mas multi-worker/colony continuam bloqueados sem tarefa/autorização explícita.",
+        "Documento inclui marcador `single-worker-board-driven-lane`."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Primeira micro-fatia da evolução pós-TASK-BUD-1027: transformar a sugestão aprovada pelo operador em lane auditável.\n[provenance:human] source_task=TASK-BUD-1027 reason=Operador concordou em avançar com a mini-lane single-worker board-driven escalation ladder.\nAgent-ready lane contract documented; next task is TASK-BUD-1031 to select 3 local-safe board candidates without worker dispatch.",
+      "verification": "VERIF-TASK-BUD-1030-AGENT-READY-LANE-DOC"
+    },
+    {
+      "id": "TASK-BUD-1031",
+      "description": "[agent-first/lane] Selecionar 3 candidatos locais-safe do board para execução single-worker real, priorizando baixo risco e validação focal.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1030"
+      ],
+      "files": [
+        ".project/tasks.json",
+        "docs/research/single-worker-board-driven-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Lista de 3 candidatos inclui task id, perfil sugerido, arquivos, validação e rollback.",
+        "Candidatos excluem protected scope, CI/publish/settings/remote e mudanças destrutivas.",
+        "Pelo menos um candidato é read-only-review e um candidato é small-mutation/test-fix.",
+        "Nenhum worker é despachado nesta tarefa."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Segundo passo: abastecer a lane com material real antes de dispatch.\n[provenance:human] source_task=TASK-BUD-1030 reason=Sequência da lane aprovada para aumentar uso de subagentes a partir do board."
+    },
+    {
+      "id": "TASK-BUD-1032",
+      "description": "[agent-first/lane] Rodar um worker `read-only-review` em uma tarefa real selecionada do board e validar output/contrato sem mutação.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1031"
+      ],
+      "files": [
+        ".project/tasks.json",
+        "docs/research/single-worker-board-driven-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Worker é despachado somente após frase exata para o runId específico.",
+        "Resultado tem output não vazio e outcome read-only passa sem touched files.",
+        "Evidência registra se a revisão gerou decisão útil para o board.",
+        "Falhas são classificadas na taxonomia da lane."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Primeiro uso real pós-lane: read-only antes de mutação.\n[provenance:human] source_task=TASK-BUD-1031 reason=Degrau read-only da escalation ladder single-worker."
+    },
+    {
+      "id": "TASK-BUD-1033",
+      "description": "[agent-first/lane] Rodar um worker `small-mutation` ou `test-fix` em tarefa real de baixa superfície com validação focal.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1032"
+      ],
+      "files": [
+        "docs/research/single-worker-board-driven-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Worker é despachado somente após frase exata para o runId específico.",
+        "Touched files são subconjunto exato dos arquivos declarados.",
+        "Validação focal e `git diff --check` passam.",
+        "Outcome mutation passa e evidência registra aprendizado de confiabilidade."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Degrau de mutação real após um read-only review bem-sucedido.\n[provenance:human] source_task=TASK-BUD-1032 reason=Escalar de read-only para mutação pequena mantendo single-worker."
+    },
+    {
+      "id": "TASK-BUD-1034",
+      "description": "[agent-first/lane] Sintetizar resultados da lane single-worker board-driven em maturity checkpoint e decidir próximo degrau.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1033"
+      ],
+      "files": [
+        "docs/research/agent-runner-maturity-checkpoint-2026-05.md",
+        "docs/research/single-worker-board-driven-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Checkpoint resume execuções, falhas, contratos pass/fail e ajustes necessários.",
+        "Documento recomenda explicitamente `continue single-worker`, `pause`, ou `consider bounded multi-worker design`.",
+        "Nenhuma promoção para multi-worker/colony é feita sem tarefa/autorização explícita.",
+        "Aprendizados são vinculados aos runIds e verifications relevantes."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Fechamento da primeira onda de uso maior de subagentes/worker.\n[provenance:human] source_task=TASK-BUD-1033 reason=Transformar uso real em decisão de maturidade antes de ampliar autonomia."
     }
   ]
 }

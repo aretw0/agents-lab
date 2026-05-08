@@ -15065,6 +15065,15 @@
       "method": "exact-confirmed-dispatch+follow+marker-check+diff-check+outcome",
       "timestamp": "2026-05-08T06:08:33.119Z",
       "evidence": "Exact-confirmed retry run `task-bud-1027-small-mutation-doc-canary-retry` executed after mutation tool allowlist fix. `agent_run_task_dispatch_check` returned confirmation=match, `agent_run_task_dispatch` returned decision=dispatched pid=21360, and `agent_run_follow` returned decision=terminal state=completed terminal=yes outputBytes=585. Worker modified only `docs/research/agent-runner-maturity-checkpoint-2026-05.md`, adding section `## Small-mutation canary target` and marker `small-mutation-runner-canary-target`. `safe_marker_check` matched both markers. `git diff --check` passed. `agent_run_outcome_packet` with file_contract=mutation, touched_files=[docs/research/agent-runner-maturity-checkpoint-2026-05.md], and pass markers returned contract=pass process=completed recommendation=stop outputBytes=585. Previous first attempt failure is superseded by this retry evidence."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1030-AGENT-READY-LANE-DOC",
+      "target": "TASK-BUD-1030",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-review+marker-check+i18n-lint+diff-check",
+      "timestamp": "2026-05-08T06:34:09.639Z",
+      "evidence": "Created `docs/research/single-worker-board-driven-lane-2026-05.md` documenting the board-to-worker learning loop and agent-ready checklist. Marker check passed for `single-worker-board-driven-lane`, `## Agent-ready checklist`, `## Current operating mode`, and the explicit multi-worker/background/colony block. i18n lint passed for English artifact. `git diff --check` passed."
     }
   ]
 }
