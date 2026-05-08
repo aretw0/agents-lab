@@ -22704,7 +22704,27 @@
         "Nenhum arquivo deve ser modificado pelo worker; se houver mudança, outcome deve falhar e rollback ser explícito."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Tarefa preparada após validar dispatch_check. Não autoriza execução por si só; exige confirmação humana exata para o runId.\n[provenance:human] source_task=TASK-BUD-1017 reason=TASK-BUD-1017 validou confirmação report-only; próximo passo é preparar o primeiro dispatch real, mas apenas com frase exata do operador."
+      "notes": "Tarefa preparada após validar dispatch_check. Não autoriza execução por si só; exige confirmação humana exata para o runId.\n[provenance:human] source_task=TASK-BUD-1017 reason=TASK-BUD-1017 validou confirmação report-only; próximo passo é preparar o primeiro dispatch real, mas apenas com frase exata do operador.\nFirst real dispatch attempt failed before worker execution: operator reported session crash from unhandled `spawn pi ENOENT`. Registry reconciled to state=failed; outcome packet reports process=failed contract=fail outputBytes=0. Do not retry until TASK-BUD-1019 is committed and `/reload` is done."
+    },
+    {
+      "id": "TASK-BUD-1019",
+      "description": "[agent-first/bugfix] Corrigir crash do `agent_run_task_dispatch` quando o subprocesso `pi` não é encontrado (`spawn pi ENOENT`), garantindo fail-closed com registry/log sem derrubar a sessão.",
+      "status": "completed",
+      "priority": "p0",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Dispatch não usa `spawn('pi')` cru quando houver entrypoint Node atual disponível; resolve um comando executável robusto para o subprocesso.",
+        "`child.on('error')` é sempre registrado e atualiza registry/log como failed em vez de deixar unhandled error derrubar a sessão.",
+        "Falha de spawn registra reason/code como ENOENT no log/registry quando disponível.",
+        "Registry stale do run `task-bud-1018-first-runner-readonly-canary` é reconciliado para failed/known crash, sem tentar novo dispatch.",
+        "Teste focal ou marker-check cobre handler de error e ausência de spawn cru sem error handler."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Derivado de crash real reportado pelo operador: `Error: spawn pi ENOENT` emitido sem handler após dispatch autorizado.\n[provenance:human] source_task=TASK-BUD-1018 reason=Primeira tentativa real do runner crashou a sessão por ENOENT não tratado; precisa hardening antes de nova tentativa.\nSpawn ENOENT hardening completed. Requires `/reload` before trusting live dispatch tool; do not retry TASK-BUD-1018 until after reload.",
+      "verification": "VERIF-TASK-BUD-1019-SPAWN-ERROR-HARDENING"
     }
   ]
 }

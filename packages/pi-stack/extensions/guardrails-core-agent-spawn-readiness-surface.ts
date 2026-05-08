@@ -59,6 +59,19 @@ function readLogTail(logPath: string, maxLines: number): string[] {
   return text.split(/\r?\n/).slice(-Math.max(1, Math.min(500, Math.floor(maxLines))));
 }
 
+function resolvePiSubprocessInvocation(preview: { command: string; args: string[] }): { command: string; args: string[]; source: "current-node-entrypoint" | "preview-command" } {
+  const currentEntrypoint = typeof process.argv[1] === "string" && process.argv[1].trim() ? process.argv[1] : "";
+  if (currentEntrypoint && preview.command === "pi") {
+    return { command: process.execPath, args: [currentEntrypoint, ...preview.args], source: "current-node-entrypoint" };
+  }
+  return { command: preview.command, args: preview.args, source: "preview-command" };
+}
+
+function appendAgentRunLogLine(logPath: string, line: string): void {
+  mkdirSync(path.dirname(logPath), { recursive: true });
+  writeFileSync(logPath, `${line}\n`, { flag: "a", encoding: "utf8" });
+}
+
 export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "agent_spawn_readiness_gate",
@@ -613,24 +626,42 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
           ? packet.taskPacket.invocationSpec.logPath
           : path.join(ctx.cwd, packet.taskPacket.invocationSpec.logPath);
         mkdirSync(path.dirname(logPath), { recursive: true });
+        const subprocess = resolvePiSubprocessInvocation(packet.startPreview);
+        appendAgentRunLogLine(logPath, `[agent-runner] starting command=${subprocess.command} source=${subprocess.source}`);
         const logStream = createWriteStream(logPath, { flags: "a" });
-        const child = spawn(packet.startPreview.command, packet.startPreview.args, { cwd: ctx.cwd, shell: false, stdio: ["ignore", "pipe", "pipe"] });
+        const child = spawn(subprocess.command, subprocess.args, { cwd: ctx.cwd, shell: false, stdio: ["ignore", "pipe", "pipe"] });
         pid = child.pid;
         child.stdout?.pipe(logStream, { end: false });
         child.stderr?.pipe(logStream, { end: false });
         registryEntry = {
           ...packet.registryPreview.entry,
-          pid,
+          ...(pid ? { pid } : {}),
           state: "running",
           startedAtIso: new Date().toISOString(),
           lastEventAtIso: new Date().toISOString(),
         };
         writeRegistryEntry(ctx.cwd, registryEntry);
         const timeoutMs = packet.taskPacket.invocationSpec.timeoutMs;
+        let settled = false;
         const timeout = setTimeout(() => {
           if (!child.killed) child.kill("SIGTERM");
         }, timeoutMs);
+        child.on("error", (error: NodeJS.ErrnoException) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timeout);
+          const code = error.code || "unknown";
+          const message = error.message || String(error);
+          logStream.write(`[agent-runner] spawn error code=${code} message=${message}\n`, () => logStream.end());
+          writeRegistryEntry(ctx.cwd, {
+            ...registryEntry,
+            state: "failed",
+            lastEventAtIso: new Date().toISOString(),
+          });
+        });
         child.on("close", (code) => {
+          if (settled) return;
+          settled = true;
           clearTimeout(timeout);
           logStream.end();
           writeRegistryEntry(ctx.cwd, {

@@ -1,52 +1,54 @@
 {
-  "timestamp": "2026-05-08T03:14:17.643Z",
-  "context": "Prepared TASK-BUD-1018 as first possible real first-party runner canary, read-only-review only. Generated start packet: runId=task-bud-1018-f [snip] thorize dispatch. No worker dispatched. [truncated:+371 chars]",
-  "current_tasks": [
-    "TASK-BUD-1018"
-  ],
+  "timestamp": "2026-05-08T03:47:48.574Z",
+  "context": "Handled operator-reported crash from first real dispatch attempt: spawn pi ENOENT emitted unhandled child error and crashed prior session. Im [snip] tension changed and reload is required. [truncated:+446 chars]",
   "next_actions": [
-    "Commit TASK-BUD-1018 planned task and handoff changes.",
-    "If operator wants the first real runner canary, they must explicitly provide the exact phrase [snip] sk to dispatch that runId. [truncated:+65 chars]",
-    "If not dispatching, continue with non-execution hardening/documentation around outcome/status after dispatch."
+    "Commit TASK-BUD-1019 code/test/board/verification/handoff changes.",
+    "Operator should run /reload before any live retry of agent_run_task_dispatch.",
+    "After reload, first validate dispatch preview/check again; only retry TASK-BUD-1018 with exact [snip] nd another runner attempt. [truncated:+43 chars]"
   ],
   "blockers": [
-    "Actual dispatch not authorized; exact runId confirmation required."
+    "Live tool reload required after extension source change.",
+    "TASK-BUD-1018 remains planned but previous attempt failed; do not auto-retry."
   ],
   "recent_validation": [
-    "agent_run_task_start_packet TASK-BUD-1018 -> ready-for-human-decision registry=dry-run dispatch=no",
-    "agent_run_task_dispatch_check TASK-BUD-1018 missing confirmation -> dispatch=no",
-    "No exact human confirmation received for runId, so no dispatch attempted"
+    "agent_run_status before reconcile -> running stale pid-missing/heartbeat-stale",
+    "agent_run_registry_upsert -> state=failed writeAllowed=yes",
+    "agent_run_status after reconcile -> failed stale=no"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1018",
+    "focus": "TASK-BUD-1019",
     "canonical_links": [
-      "task:TASK-BUD-1018",
+      "task:TASK-BUD-1019",
       "task:TASK-BUD-1018-FIRST-RUNNER-READONLY-CANARY"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T03:14:17.643Z",
+    "generatedAtIso": "2026-05-08T03:47:48.574Z",
     "level": "ok",
-    "percent": 51,
+    "percent": 26,
     "action": "continue",
-    "recommendation": "commit-prepared-runner-canary-and-wait-for-exact-confirmation",
+    "recommendation": "commit-bugfix-then-reload-before-dispatch-retry",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T03:14:17.643Z",
+      "atIso": "2026-05-08T03:47:48.574Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 51,
+      "percent": 26,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-prepared-runner-canary-and-wait-for-exact-confirmation"
+      "recommendation": "commit-bugfix-then-reload-before-dispatch-retry"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-1019"
   ]
 }

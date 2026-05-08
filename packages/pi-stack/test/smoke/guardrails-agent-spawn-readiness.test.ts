@@ -687,6 +687,16 @@ describe("agent spawn readiness contract", () => {
     expect((protectedScope.details?.blockers as string[])).toContain("protected-scope-requested");
   });
 
+  it("hardens agent_run_task_dispatch against subprocess spawn errors", () => {
+    const source = readFileSync(path.join(process.cwd(), "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts"), "utf8");
+    expect(source).toContain("resolvePiSubprocessInvocation(packet.startPreview)");
+    expect(source).toContain("spawn(subprocess.command, subprocess.args");
+    expect(source).toContain("child.on(\"error\", (error: NodeJS.ErrnoException)");
+    expect(source).toContain("spawn error code=${code}");
+    expect(source).toContain("state: \"failed\"");
+    expect(source).not.toContain("spawn(packet.startPreview.command, packet.startPreview.args");
+  });
+
   it("exposes agent_run_task_start_packet as a report-only bridge surface", async () => {
     const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-task-start-packet-"));
     mkdirSync(path.join(tmp, ".project"), { recursive: true });
