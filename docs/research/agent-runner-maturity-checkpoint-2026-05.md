@@ -51,3 +51,7 @@ Run one more single-worker canary, but only after preparing a small mutation tar
 - parent-side board completion only after process and contract both pass.
 
 This is the next safe rung before considering broader worker autonomy.
+
+## Small-mutation canary target
+
+small-mutation-runner-canary-target

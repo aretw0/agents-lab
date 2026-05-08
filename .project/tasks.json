@@ -22898,7 +22898,7 @@
     {
       "id": "TASK-BUD-1027",
       "description": "[agent-first/small-mutation-canary] Executar, somente com confirmação humana exata, um worker single-run small-mutation para adicionar uma seção curta de alvo no checkpoint do runner.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1018",
@@ -22918,7 +22918,8 @@
         "Validação focal: `safe_marker_check` do marcador literal e `git diff --check`."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Tarefa preparada como próximo degrau após o runner read-only: small mutation mínima em um único arquivo doc. Não autoriza dispatch; exige frase exata por runId.\n[provenance:human] source_task=TASK-BUD-1026 reason=Checkpoint recomendou o próximo single-worker canary small-mutation com arquivo declarado, rollback e validação focal.\nFirst exact-confirmed small-mutation dispatch exposed a packet/tooling bug. Run `task-bud-1027-small-mutation-doc-canary` completed with outputBytes=474 and worker self-reported PASS, but parent evidence failed: git remained clean, required markers `## Small-mutation canary target` and `small-mutation-runner-canary-target` were absent, and outcome was contract=fail process=completed recommendation=ask-human. Root cause: mutation profile still used read-only tool allowlist, preventing actual edits. Do not retry until TASK-BUD-1028 is committed and `/reload` is done."
+      "notes": "Tarefa preparada como próximo degrau após o runner read-only: small mutation mínima em um único arquivo doc. Não autoriza dispatch; exige frase exata por runId.\n[provenance:human] source_task=TASK-BUD-1026 reason=Checkpoint recomendou o próximo single-worker canary small-mutation com arquivo declarado, rollback e validação focal.\nFirst exact-confirmed small-mutation dispatch exposed a packet/tooling bug. Run `task-bud-1027-small-mutation-doc-canary` completed with outputBytes=474 and worker self-reported PASS, but parent evidence failed: git remained clean, required markers `## Small-mutation canary target` and `small-mutation-runner-canary-target` were absent, and outcome was contract=fail process=completed recommendation=ask-human. Root cause: mutation profile still used read-only tool allowlist, preventing actual edits. Do not retry until TASK-BUD-1028 is committed and `/reload` is done.\nSmall-mutation runner canary passed after mutation tool allowlist fix: exact-confirmed dispatch, terminal follow, declared-file-only doc edit, marker validation, diff check, and outcome pass.",
+      "verification": "VERIF-TASK-BUD-1027-SMALL-MUTATION-CANARY"
     },
     {
       "id": "TASK-BUD-1028",

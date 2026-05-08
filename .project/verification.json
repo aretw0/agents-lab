@@ -15056,6 +15056,15 @@
       "method": "live-tool-preview+status-check+marker-check",
       "timestamp": "2026-05-08T06:04:48.558Z",
       "evidence": "After reload, live-validated TASK-BUD-1027 retry packet without dispatch. `agent_run_task_start_packet` for purpose `small-mutation-doc-canary-retry` returned decision=ready-for-human-decision, runId=task-bud-1027-small-mutation-doc-canary-retry, registry=dry-run, statusFound=no, dispatch=no. `agent_run_task_dispatch_check` without operator confirmation returned confirmation=missing, wouldDispatchAfterExplicitExecute=no, dispatch=no. `agent_run_status` for retry runId returned found=no. Marker check confirmed mutation allowlist wiring with edit/write in `guardrails-core-agent-run-start.ts`. No worker/process was started, stopped, or redispatched."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1027-SMALL-MUTATION-CANARY",
+      "target": "TASK-BUD-1027",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-confirmed-dispatch+follow+marker-check+diff-check+outcome",
+      "timestamp": "2026-05-08T06:08:33.119Z",
+      "evidence": "Exact-confirmed retry run `task-bud-1027-small-mutation-doc-canary-retry` executed after mutation tool allowlist fix. `agent_run_task_dispatch_check` returned confirmation=match, `agent_run_task_dispatch` returned decision=dispatched pid=21360, and `agent_run_follow` returned decision=terminal state=completed terminal=yes outputBytes=585. Worker modified only `docs/research/agent-runner-maturity-checkpoint-2026-05.md`, adding section `## Small-mutation canary target` and marker `small-mutation-runner-canary-target`. `safe_marker_check` matched both markers. `git diff --check` passed. `agent_run_outcome_packet` with file_contract=mutation, touched_files=[docs/research/agent-runner-maturity-checkpoint-2026-05.md], and pass markers returned contract=pass process=completed recommendation=stop outputBytes=585. Previous first attempt failure is superseded by this retry evidence."
     }
   ]
 }
