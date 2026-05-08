@@ -1,12 +1,14 @@
 {
-  "timestamp": "2026-05-08T02:09:16.399Z",
+  "timestamp": "2026-05-08T02:10:15.802Z",
   "context": "After reload, completed TASK-BUD-1009 first-party agent lane architecture. Created docs/research/first-party-agent-lane-architecture-2026-05. [snip] UD-1009-FIRST-PARTY-AGENT-ARCHITECTURE. [truncated:+838 chars]",
   "next_actions": [
+    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
     "Commit docs/board/handoff changes.",
     "Next focus: TASK-BUD-1010 implement report-only board-to-agent packetizer; no worker dispatch [snip] for implementation canary. [truncated:+32 chars]",
     "Keep multi-worker/background/colony blocked until first-party runner/packetizer gates exist."
   ],
   "blockers": [
+    "context-watch-checkpoint-required",
     "None for design slice. TASK-BUD-1010 is code and should stay report-only/no-di [snip] the primitive itself. [truncated:+10 chars]"
   ],
   "recent_validation": [
@@ -45,6 +47,19 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "commit-agent-architecture-and-start-task-packetizer-next"
+    },
+    {
+      "atIso": "2026-05-08T02:10:15.802Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ],
   "completed_tasks": [
