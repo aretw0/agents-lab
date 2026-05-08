@@ -23792,6 +23792,31 @@
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
       "notes": "Criada após canary exact-confirmed `task-bud-1063-final-turn-brief-inherit-live-canary`: argv sem `--no-extensions`, mas exitCode=1, childOutputBytes=0, git clean. O problema deixou de ser isolamento por extensão e passou a ser root-cause do runner/pi print.\n[provenance:human] source_task=TASK-BUD-1063 reason=Estabilizar workers para uso normal exige diagnosticar a falha silenciosa residual antes de novos retries."
+    },
+    {
+      "id": "TASK-BUD-1067",
+      "description": "[hard-intent/quota-visibility] Separar explicitamente budget/capacidade por modelo para `openai-codex/gpt-5.3-codex-spark` e não deixar o agregado `openai-codex=blocked` mascarar cota Spark disponível; reconciliar também DashScope/Qwen com evidência externa do ModelStudio.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1008",
+        "TASK-BUD-1066"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "packages/pi-stack/extensions/guardrails-core-provider-budget-evidence.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Provider/model budget evidence expõe `openai-codex/gpt-5.3-codex-spark` separadamente do agregado `openai-codex`.",
+        "Agent-run packets mostram scoped budget evidence model-specific quando provider_model_ref inclui Spark.",
+        "Aggregate `openai-codex=blocked` não bloqueia Spark quando há evidência scoped fresh/ok.",
+        "DashScope/Qwen mostra estado conservador quando evidência externa/manual indica quota exhausted, mesmo se telemetry local parece ok.",
+        "Teste cobre conflito aggregate-blocked vs model-specific-ok."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Criada após auditoria dos attempts: últimos workers de TASK-BUD-1063 usaram openai-codex/gpt-5.3-codex-spark; só um retry antigo de TASK-BUD-1059 usou dashscope/qwen3-coder-plus. Ferramenta atual ainda reporta openai-codex agregado blocked e dashscope local ok, o que conflita com intenção operacional de tratar Spark como cota separada e Qwen como possivelmente exaurido no ModelStudio.\n[provenance:human] source_task=TASK-BUD-1066 reason=Estabilização de workers depende de roteamento/budget model-specific confiável."
     }
   ]
 }

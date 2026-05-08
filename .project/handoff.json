@@ -1,55 +1,55 @@
 {
-  "timestamp": "2026-05-08T16:51:08.218Z",
-  "context": "Exact-confirmed worker task-bud-1063-final-turn-brief-inherit-live-canary was dispatched after reload with extension_isolation=inherit. It st [snip] fication before further worker retries. [truncated:+369 chars]",
+  "timestamp": "2026-05-08T17:01:07.016Z",
+  "context": "Answered operator concern about worker model usage and quota visibility. Local registry shows recent failed attempts: TASK-BUD-1063 final-tur [snip] e blocking from masking Spark capacity. [truncated:+440 chars]",
   "current_tasks": [
-    "TASK-BUD-1066"
+    "TASK-BUD-1067"
   ],
   "next_actions": [
-    "Pause further worker dispatch retries for TASK-BUD-1063 until TASK-BUD-1066 isolates runner/pi print failure mode.",
-    "Implement a report-only preflight/capture slice that classifies CLI argv/provider/tool/extensi [snip] -call quota when possible. [truncated:+29 chars]",
-    "Once preflight produces actionable green path, run one read-only worker canary, then one tiny [snip] ing workers default again. [truncated:+33 chars]"
+    "Treat Spark as intended worker provider for next runner stabilization attempts, but not retry [snip] ies silent-runner-failure. [truncated:+27 chars]",
+    "Implement TASK-BUD-1067 so packet budget evidence is provider/model scoped: Spark ok can overr [snip] external-evidence blocked. [truncated:+62 chars]",
+    "Do not use qwen3-coder-plus for worker retries unless fresh ModelStudio/quota evidence says available."
   ],
   "blockers": [
-    "Workers are not abandoned, but are not stable enough for blind default use unt [snip] failure is classified. [truncated:+17 chars]",
-    "TASK-BUD-1063 implementation is already locally committed, but worker lane val [snip] dation remains failed. [truncated:+1 chars]",
-    "No further worker dispatch without exact confirmation and root-cause evidence."
+    "Current quota tools are provider-aggregate and can mislead for Spark separate quota.",
+    "DashScope local session telemetry does not reflect ModelStudio free-trial exhaustion.",
+    "Worker runner still fails before useful output, independent of Spark quota."
   ],
   "recent_validation": [
-    "agent_run_task_dispatch -> dispatched pid=58864",
-    "agent_run_follow/log/status -> failed, silent-runner-failure, childOutputBytes=0",
-    "agent_run_outcome_packet -> contract=fail, touched=0, git clean"
+    "node parse .pi/reports/agent-runs.json for task-bud-1059/1063 -> Spark used for 4/5 listed att [snip] s; Qwen only one old retry [truncated:+4 chars]",
+    "provider_readiness_matrix(openai-codex,dashscope) -> ready=1 blocked=1 entries=2",
+    "quota_visibility_provider_budgets(openai-codex) -> aggregate blocked"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1066",
+    "focus": "TASK-BUD-1067",
     "canonical_links": [
-      "task:TASK-BUD-1066",
-      "task:TASK-BUD-1063-FINAL-TURN-BRIEF-INHERIT-LIVE-CANARY",
-      "task:TASK-BUD-1065"
+      "task:TASK-BUD-1067",
+      "task:TASK-BUD-1063",
+      "task:TASK-BUD-1059"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T16:51:08.218Z",
+    "generatedAtIso": "2026-05-08T17:01:07.016Z",
     "level": "ok",
-    "percent": 46,
+    "percent": 47,
     "action": "continue",
-    "recommendation": "stabilize-runner-preflight-before-more-workers",
+    "recommendation": "fix-model-specific-budget-visibility",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T16:51:08.218Z",
+      "atIso": "2026-05-08T17:01:07.016Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 46,
+      "percent": 47,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "stabilize-runner-preflight-before-more-workers"
+      "recommendation": "fix-model-specific-budget-visibility"
     }
   ]
 }
