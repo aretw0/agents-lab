@@ -15173,6 +15173,24 @@
       "method": "doc-update+marker-check+i18n-lint+interview-plan",
       "timestamp": "2026-05-08T13:12:43.520Z",
       "evidence": "Updated `docs/primitives/nudge-free-local-continuity.md` defaults: when there is no explicit restriction, the control-plane should evaluate ROI/productivity and recommend workers when they reduce time, risk, or cognitive load. When scale requires human consent, it should use a short interview with the likely authorization instead of dumping implementation details; tools/workers are means to deliver work. This keeps lower gates/protected limits intact and does not create new vocabulary. Marker check passed 3/3; i18n lint pt-BR passed. Also previewed `structured_interview_plan` for the compact authorization shape: seed, allowed scale, optional limits/exceptions."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1042-CAPABILITY-DISCOVERABILITY",
+      "target": "TASK-BUD-1042",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-update+marker-check+i18n-lint+interview-plan",
+      "timestamp": "2026-05-08T13:15:56.683Z",
+      "evidence": "Updated `docs/primitives/nudge-free-local-continuity.md` to generalize proactive ROI defaults beyond workers: control-plane should reveal useful available capabilities, including but not limited to workers, when they reduce time/risk/cognitive load. Lack of explicitness should trigger discoverability and a short profile/limits interview rather than passivity: explain potential, suggest likely profile, and ask only for missing alignment. Tools/workers/other capabilities remain means to deliver work. Lower gates/protected limits preserved. Marker check passed 4/4; i18n lint pt-BR passed. Previewed structured interview shape for objective, preferred profile, capability comfort, and exceptions."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1043-QUEEN-HYPOTHESIS",
+      "target": "TASK-BUD-1043",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-update+marker-check+i18n-lint",
+      "timestamp": "2026-05-08T13:17:58.682Z",
+      "evidence": "Added `### Hipótese de guarda-chuva: queen` to `docs/primitives/nudge-free-local-continuity.md`. It frames `queen` as a semantic umbrella for operator + control-plane alignment: high-level intent, autonomy profile, resource strategy, ROI preferences, and stop conditions. It explicitly says queen is not a worker/swarm/scheduler/runtime executor and not a bypass of lower gates; it guides the control-plane to choose/propose capabilities through existing contracts. When explicitness is missing, the control-plane should discover the queen profile with a short interview covering objective, autonomy appetite, acceptable capabilities, limits, and exceptions. Marker check passed; i18n lint pt-BR passed."
     }
   ]
 }

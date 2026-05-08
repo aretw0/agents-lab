@@ -23217,6 +23217,42 @@
       "milestone": "single-worker-board-driven-lane-2026-05",
       "notes": "Criado a partir do steer do operador: se há recursos e ROI, o control-plane deve ser proativo em recomendar/usar workers, pedindo autorização curta apenas quando o contrato exigir.\n[provenance:human] source_task=none reason=Reduzir atrito: operador quer trabalho entregue e não microgerenciar detalhes de delegação.\nRegistered proactive ROI default: recommend workers/resources when useful; ask short authorization only when scale/contract requires it.",
       "verification": "VERIF-TASK-BUD-1041-PROACTIVE-ROI-DEFAULT"
+    },
+    {
+      "id": "TASK-BUD-1042",
+      "description": "[nudge-free/local-continuity] Generalizar default proativo de workers para discoverability de capacidades e entrevista curta de perfil do operador.",
+      "status": "completed",
+      "priority": "p0",
+      "files": [
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "Documento deixa claro que o control-plane deve perceber recursos/capacidades disponíveis em geral, não só workers.",
+        "Documento registra que falta de explicitude deve acionar entrevista curta de perfil/limites quando houver potencial de ROI, em vez de passividade.",
+        "Documento preserva transparência: o control-plane deve mostrar ao operador o potencial de aproveitamento sem despejar detalhes desnecessários.",
+        "Documento mantém gates inferiores/protected scopes e evita criar novo vocabulário."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Criado a partir do steer do operador: workers foram exemplo; o princípio é discoverability e entrevista curta de perfil para qualquer capacidade útil disponível.\n[provenance:human] source_task=none reason=Control-plane deve ser ligeiro em descobrir capacidades, propor ROI e alinhar autorização/perfil com o operador.\nGeneralized worker-specific wording to capability discoverability and short profile interview defaults.",
+      "verification": "VERIF-TASK-BUD-1042-CAPABILITY-DISCOVERABILITY"
+    },
+    {
+      "id": "TASK-BUD-1043",
+      "description": "[control-plane/queen] Registrar hipótese de guarda-chuva conceitual `queen` para intenção/perfil do operador sem criar gate paralelo.",
+      "status": "completed",
+      "priority": "p0",
+      "files": [
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "Documento explica `queen` como guarda-chuva semântico para intenção, perfil de autonomia, estratégia de recursos e stop conditions do operador.",
+        "Documento deixa claro que `queen` não substitui contratos existentes nem vira bypass de gates inferiores.",
+        "Documento diferencia queen de worker/swarm/runtime: é alinhamento operador/control-plane, não processo executor.",
+        "Documento mantém entrevista curta/discoverability como forma de aprender o perfil queen quando falta explicitude."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Criado a partir do steer do operador: talvez a ideia de queen esteja nascendo no relacionamento control-plane + operador.\n[provenance:human] source_task=none reason=Nomear um possível guarda-chuva conceitual útil sem sobrepor contratos já cultivados.\nRecorded queen as a possible umbrella concept, not a new execution gate or bypass.",
+      "verification": "VERIF-TASK-BUD-1043-QUEEN-HYPOTHESIS"
     }
   ]
 }

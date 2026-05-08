@@ -214,8 +214,9 @@ Defaults sane para `agents-lab` quando o operador não disser o contrário:
 - cada slice deve ter checkpoint/handoff curto, rollback não destrutivo conhecido e commit pequeno quando houver diff validado;
 - não pedir micro-autorização para commit/checkpoint/validação/rollback quando tudo está dentro do escopo local-safe;
 - quota é recurso de trabalho do projeto: consumir de forma econômica, mas usar as cotas disponíveis em vez de parar por micro-autorização;
-- na ausência de restrição explícita, o control-plane deve avaliar ROI/produtividade e recomendar workers quando eles reduzem tempo, risco ou carga cognitiva;
-- quando a escala exigir consentimento humano, usar entrevista curta com a autorização provável em vez de despejar detalhes de implementação; ferramentas e workers são meios para entregar trabalho;
+- na ausência de restrição explícita, o control-plane deve avaliar ROI/produtividade e revelar capacidades úteis disponíveis, incluindo mas não limitado a workers, quando elas reduzem tempo, risco ou carga cognitiva;
+- falta de explicitude deve acionar discoverability e entrevista curta de perfil/limites, não passividade: explicar o potencial de aproveitamento, sugerir o perfil provável e pedir só o alinhamento que falta;
+- quando a escala exigir consentimento humano, usar entrevista curta com a autorização provável em vez de despejar detalhes de implementação; ferramentas, workers e outras capacidades são meios para entregar trabalho;
 - DashScope deve ter rota/fallback por modelo quando uma cota específica saturar;
 - OpenAI Codex Spark é bom candidato para workers enquanto houver cota específica disponível;
 - OpenAI normal deve ser preservado para o control-plane quando fizer sentido, com fallback governado para Qwen/DashScope quando houver pressão;
@@ -228,3 +229,9 @@ Limites que continuam explícitos por default:
 - parar em protected scope, risco de dados/segurança/custo irreversível, dirty inesperado, outcome fail repetido, ambiguidade de produto real, reload necessário ou ausência de próxima task local-safe.
 
 Essa manifestação não substitui permissões protegidas nem autoriza execução irreversível. Ela reduz atrito porque o operador não precisa reafirmar práticas normais; só precisa declarar direção e exceções.
+
+### Hipótese de guarda-chuva: queen
+
+`queen` pode ser um bom nome para o guarda-chuva semântico que une operador e control-plane: intenção de alto nível, perfil de autonomia, estratégia de uso de recursos, preferências de ROI e stop conditions. Não é um worker, swarm, scheduler, runtime executor nem bypass de gate; é o perfil que orienta como o control-plane escolhe e propõe capacidades usando os contratos existentes.
+
+Quando falta explicitude, o control-plane deve tentar descobrir o perfil `queen` com entrevista curta: objetivo, apetite de autonomia, capacidades aceitáveis, limites e exceções. Depois disso, ele continua usando os mesmos mecanismos: board, nudge-free/local-continuity, checkpoints, gates de quota/máquina, dispatch/outcome de workers quando aplicável e paradas graciosas.
