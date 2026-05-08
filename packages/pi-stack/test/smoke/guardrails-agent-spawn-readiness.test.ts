@@ -1033,6 +1033,34 @@ describe("agent spawn readiness contract", () => {
       outputBytes: 0,
     });
 
+    const mutationWithReadOnlyPacket = buildAgentRunOutcomePacket({
+      runId: "run-outcome",
+      entry: {
+        ...entryWithOutput,
+        declaredFiles: [
+          "docs/research/task-bud-1033-small-mutation-worker-packet-2026-05.md",
+          "docs/research/control-plane-signal-integrity-audit-2026-05.md",
+        ],
+      },
+      touchedFiles: ["docs/research/control-plane-signal-integrity-audit-2026-05.md"],
+      mutationTargetFiles: ["docs/research/control-plane-signal-integrity-audit-2026-05.md"],
+      markerResults: [{ label: "triage-marker", ok: true }],
+      fileContract: "mutation",
+    });
+    expect(mutationWithReadOnlyPacket).toMatchObject({
+      processState: "completed",
+      contractDecision: "pass",
+      recommendationCode: "agent-run-outcome-pass",
+      declaredFiles: [
+        "docs/research/task-bud-1033-small-mutation-worker-packet-2026-05.md",
+        "docs/research/control-plane-signal-integrity-audit-2026-05.md",
+      ],
+      mutationTargetFiles: ["docs/research/control-plane-signal-integrity-audit-2026-05.md"],
+      touchedFiles: ["docs/research/control-plane-signal-integrity-audit-2026-05.md"],
+      missingDeclaredFiles: [],
+      unexpectedFiles: [],
+    });
+
     const failed = buildAgentRunOutcomePacket({
       runId: "run-outcome",
       entry,

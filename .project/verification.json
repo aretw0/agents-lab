@@ -15119,6 +15119,24 @@
       "method": "doc-update+marker-check",
       "timestamp": "2026-05-08T11:21:41.616Z",
       "evidence": "Updated `docs/research/agent-runner-maturity-checkpoint-2026-05.md` with `## Operational maturity posture`: single-worker delegation is now a normal controlled operating mode when bounded derived packet, exact runId confirmation, terminal follow, passing outcome, parent validation, and evidence-gated board completion are present. It instructs future sessions to use this mode more often for local-safe board work, reserve experimentation for profiles/tools/scopes/failure modes without tests/live evidence, and respect maturity after tests plus live pass evidence rather than recalibrating due compacted context. Updated `docs/research/single-worker-board-driven-lane-2026-05.md` so current mode says delegation is operational when gates pass, learn deliberately only when evidence is missing, and multi-worker/background/colony/protected scope remain blocked. Marker checks passed for both docs."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1038-MUTATION-TARGET-FILES",
+      "target": "TASK-BUD-1038",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+live-outcome",
+      "timestamp": "2026-05-08T12:09:43.510Z",
+      "evidence": "Separated mutation target semantics from read-only packet/input attachments in agent-run outcome contract. `AgentRunOutcomeInput` now accepts `mutationTargetFiles`; mutation outcomes use that set for unexpected/missing touched-file checks while preserving `declaredFiles` as full attachment scope. Tool surface exposes `mutation_target_files`. Regression covers TASK-BUD-1033 shape: derived packet + target doc declared, only target doc touched, outcome passes. Focal test `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` passed: 31 tests. Live outcome for `task-bud-1033-task-bud-946-triage-doc-mutation` with `mutation_target_files=[docs/research/control-plane-signal-integrity-audit-2026-05.md]` passed: contract=pass, process=completed, declared=2, touched=1, outputBytes=783."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1033-SMALL-MUTATION-WORKER",
+      "target": "TASK-BUD-1033",
+      "target_type": "task",
+      "status": "passed",
+      "method": "worker-run+marker-check+outcome+test",
+      "timestamp": "2026-05-08T12:10:14.684Z",
+      "evidence": "Exact-confirmed single-worker run `task-bud-1033-task-bud-946-triage-doc-mutation` dispatched after confirmation phrase matched. Process completed with exitCode=0 and outputBytes=783. Worker touched only `docs/research/control-plane-signal-integrity-audit-2026-05.md`, adding `## TASK-BUD-946 duplicate edit warning triage` and marker `task-bud-946-duplicate-edit-warning-triage`. Parent validation: safe_marker_check passed for heading+marker; `git diff --check` passed. Initial outcome exposed a contract-model gap because the derived packet input and target doc were both declared; TASK-BUD-1038 fixed this with `mutation_target_files`. Re-evaluated outcome passed with process=completed, contract=pass, declared=2, touched=1, mutation target exactly the target doc. Focal regression `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` passed: 31 tests."
     }
   ]
 }

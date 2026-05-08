@@ -76,3 +76,10 @@ A lane pode ser considerada madura quando houver:
 - policy explícita para sinais críticos não suprimíveis;
 - board/handoff limpos e commits pequenos por fatia.
 
+## TASK-BUD-946 duplicate edit warning triage
+- Hipótese read-only (`task-bud-1032-readonly-task-bud-946-review`): duplicidade de `duplicate-edit` vem mais provavelmente de fan-out de evento/TUI rendering do que de retry explícito de edição.
+- Próximo escopo recomendado: focar em `packages/pi-stack/extensions/monitor-summary.ts` e `packages/pi-stack/extensions/web-session-gateway.ts` para mapear publicação/consumo de eventos e pontos de re-render.
+- Incerteza/bloco atual: atribuição não provada sem transcript reproduzível; pode haver corrida entre event-loop do gateway e estado do monitor.
+- Ideia de validação futura (smoke): fixture sintética com emissão de evento idêntico repetida e assert único warning por chave/transação/`runId`.
+- `task-bud-946-duplicate-edit-warning-triage`
+

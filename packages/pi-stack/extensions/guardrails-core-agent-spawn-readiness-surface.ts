@@ -908,6 +908,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       }), { description: "Optional parent-side validation marker/check results." })),
       output_bytes: Type.Optional(Type.Number({ description: "Worker stdout/output byte count. Zero is a contract failure even when process exit succeeds." })),
       file_contract: Type.Optional(Type.String({ description: "Expected file contract: mutation (default) or read-only. Read-only can pass with no file changes when markers/output pass." })),
+      mutation_target_files: Type.Optional(Type.Array(Type.String(), { description: "For mutation runs with read-only packet/input attachments, files expected to be mutated. Touched files must be within this set." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -920,6 +921,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         markerResults: asMarkerResults(p.marker_results),
         outputBytes: typeof p.output_bytes === "number" ? p.output_bytes : undefined,
         fileContract: typeof p.file_contract === "string" ? p.file_contract : undefined,
+        mutationTargetFiles: asOptionalStringArray(p.mutation_target_files),
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_outcome_packet",

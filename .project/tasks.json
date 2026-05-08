@@ -23032,7 +23032,7 @@
     {
       "id": "TASK-BUD-1033",
       "description": "[agent-first/lane] Rodar um worker `small-mutation` ou `test-fix` em tarefa real de baixa superfície com validação focal.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1032"
@@ -23048,7 +23048,8 @@
         "Outcome mutation passa e evidência registra aprendizado de confiabilidade."
       ],
       "milestone": "single-worker-board-driven-lane-2026-05",
-      "notes": "Degrau de mutação real após um read-only review bem-sucedido.\n[provenance:human] source_task=TASK-BUD-1032 reason=Escalar de read-only para mutação pequena mantendo single-worker.\nPrepared as normal controlled single-worker small-mutation use, not novelty experimentation: derived packet `docs/research/task-bud-1033-small-mutation-worker-packet-2026-05.md` instructs worker to mutate only `docs/research/control-plane-signal-integrity-audit-2026-05.md` by recording TASK-BUD-946 triage and marker evidence from the TASK-BUD-1032 read-only worker."
+      "notes": "Degrau de mutação real após um read-only review bem-sucedido.\n[provenance:human] source_task=TASK-BUD-1032 reason=Escalar de read-only para mutação pequena mantendo single-worker.\nPrepared as normal controlled single-worker small-mutation use, not novelty experimentation: derived packet `docs/research/task-bud-1033-small-mutation-worker-packet-2026-05.md` instructs worker to mutate only `docs/research/control-plane-signal-integrity-audit-2026-05.md` by recording TASK-BUD-946 triage and marker evidence from the TASK-BUD-1032 read-only worker.\nExact-confirmed worker `task-bud-1033-task-bud-946-triage-doc-mutation` completed and correctly mutated only `docs/research/control-plane-signal-integrity-audit-2026-05.md`; marker checks and `git diff --check` passed. However `agent_run_outcome_packet` failed because registry declared files included both the derived packet input file and the mutable target doc, while only the target doc was touched (`declared=2 touched=1 missing=1`). Treating this as a contract-model gap, not as TASK-BUD-1033 complete: the runner lane needs to distinguish read-only input attachments from mutation target files.\nCompleted normal controlled small-mutation worker slice. The run also surfaced and fixed the input-vs-mutation-target contract gap in TASK-BUD-1038 before this task was closed.",
+      "verification": "VERIF-TASK-BUD-1033-SMALL-MUTATION-WORKER"
     },
     {
       "id": "TASK-BUD-1034",
@@ -23138,6 +23139,29 @@
       "milestone": "single-worker-board-driven-lane-2026-05",
       "notes": "Criado a partir do steer do operador: a maturidade deve ficar clara para que sessões futuras não tratem delegação agêntica como anormal depois que os gates estiverem comprovados.\n[provenance:human] source_task=TASK-BUD-1032 reason=Registrar estado de maturidade e postura operacional da delegação single-worker.\nDelegation maturity posture recorded for future sessions: single-worker is normal controlled operation when gates pass; experimentation should shrink as evidence/regressions accumulate.",
       "verification": "VERIF-TASK-BUD-1037-DELEGATION-MATURITY-POSTURE"
+    },
+    {
+      "id": "TASK-BUD-1038",
+      "description": "[agent-first/contract] Separar arquivos de input/packet read-only dos alvos mutáveis no contrato de worker mutation.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1033"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Contrato/documentação de runner distingue `declaredFiles`/attachments read-only de `mutationTargets` ou equivalente.",
+        "Outcome de mutation não falha quando um packet/input read-only declarado não é tocado, desde que os touched files sejam exatamente/subconjunto dos alvos mutáveis esperados.",
+        "Teste focal cobre o caso TASK-BUD-1033: packet input + target doc, só target doc tocado, outcome passa.",
+        "Sem afrouxar contrato read-only: qualquer touched file em read-only continua falhando."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Criado porque TASK-BUD-1033 mostrou contrato incompleto: worker precisa ler um derived packet e mutar um target, mas outcome atual trata todo declared file como esperado/obrigatório para mutation.\n[provenance:human] source_task=TASK-BUD-1033 reason=Outcome failed with declared=2 touched=1 because input packet and mutation target were conflated.\nCompleted contract fix: mutation targets are now distinct from read-only packet/input attachments; TASK-BUD-1033 outcome re-evaluates as pass with mutation_target_files.",
+      "verification": "VERIF-TASK-BUD-1038-MUTATION-TARGET-FILES"
     }
   ]
 }

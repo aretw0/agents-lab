@@ -101,6 +101,7 @@ export interface AgentRunOutcomeInput {
   markerResults?: AgentRunMarkerResult[];
   outputBytes?: number;
   fileContract?: AgentRunFileContract | string;
+  mutationTargetFiles?: string[];
 }
 
 export interface AgentRunOutcomeResult {
@@ -126,6 +127,7 @@ export interface AgentRunOutcomeResult {
     | "agent-run-outcome-fail-missing-declared-files"
     | "agent-run-outcome-fail-marker";
   declaredFiles: string[];
+  mutationTargetFiles: string[];
   touchedFiles: string[];
   missingDeclaredFiles: string[];
   unexpectedFiles: string[];
@@ -331,10 +333,12 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
   const touchedFiles = normalizeFiles(input.touchedFiles);
   const outputBytes = normalizeNonNegativeInteger(input.outputBytes) ?? normalizeNonNegativeInteger(input.entry?.outputBytes);
   const fileContract: AgentRunFileContract = input.fileContract === "read-only" ? "read-only" : "mutation";
+  const mutationTargetFiles = fileContract === "mutation" && normalizeFiles(input.mutationTargetFiles).length > 0 ? normalizeFiles(input.mutationTargetFiles) : declaredFiles;
   const declaredSet = new Set(declaredFiles);
+  const expectedTouchedSet = new Set(fileContract === "mutation" ? mutationTargetFiles : declaredFiles);
   const touchedSet = new Set(touchedFiles);
-  const missingDeclaredFiles = declaredFiles.filter((file) => !touchedSet.has(file));
-  const unexpectedFiles = touchedFiles.filter((file) => !declaredSet.has(file));
+  const missingDeclaredFiles = (fileContract === "mutation" ? mutationTargetFiles : declaredFiles).filter((file) => !touchedSet.has(file));
+  const unexpectedFiles = touchedFiles.filter((file) => !expectedTouchedSet.has(file));
   const markerFailures = Array.isArray(input.markerResults)
     ? input.markerResults
       .filter((marker) => marker?.ok === false)
@@ -419,6 +423,7 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
     recommendation,
     recommendationCode,
     declaredFiles,
+    mutationTargetFiles,
     touchedFiles,
     missingDeclaredFiles: touchedFiles.length > 0 ? missingDeclaredFiles : [],
     unexpectedFiles,
