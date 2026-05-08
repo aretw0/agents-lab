@@ -1,54 +1,53 @@
 {
-  "timestamp": "2026-05-08T07:22:26.424Z",
-  "context": "Operator generalized packetization rule further: not only workers or board files; no agent/control-plane should manually read known large/str [snip] eload required before live enforcement. [truncated:+479 chars]",
+  "timestamp": "2026-05-08T07:30:08.914Z",
+  "context": "Post-reload continuation. Operator clarified 'canivete suíço' was metaphor, not a new concept: prefer using existing primitives/surfaces bett [snip] sing dispatch=no. No worker dispatched. [truncated:+578 chars]",
+  "current_tasks": [
+    "TASK-BUD-1032"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-1035/TASK-BUD-1036/TASK-BUD-1031 completion evidence and code/test/doc changes.",
-    "Ask operator to /reload before relying on live structured-state read redirects.",
-    "After reload, continue with TASK-BUD-1032 using derived packets only; no raw structured state declared/read."
+    "Commit derived packet, TASK-BUD-1032 repacketization, handoff/board changes.",
+    "If operator wants immediate dispatch, exact phrase: execute o worker task-bud-1032-readonly-task-bud-946-review.",
+    "After dispatch: follow, require git clean, read log for useful decision, outcome read-only, th [snip] D-1032 if contract passes. [truncated:+19 chars]"
   ],
   "blockers": [
-    "Runtime reload required for new read/bash guard and task packet guard enforcement.",
-    "Future worker dispatches still require exact runId confirmation."
+    "Worker dispatch requires exact runId confirmation.",
+    "Continue using existing structured primitives; do not introduce 'canivete suiç [snip] rminology as doctrine. [truncated:+5 chars]"
   ],
   "recent_validation": [
-    "safe_marker_check guard runtime/test/doc -> pass",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/ [snip] -reporter=dot -> 32 passed [truncated:+74 chars]",
-    "board_task_complete TASK-BUD-1036 -> completed"
+    "git_dirty_snapshot -> clean at start",
+    "agent_run_task_start_packet TASK-BUD-1032 pre-repacketization -> blocked raw-board-state-file- [snip] d-use-derived-board-packet [truncated:+7 chars]",
+    "safe_marker_check derived packet -> pass"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1036",
+    "focus": "TASK-BUD-1032",
     "canonical_links": [
-      "task:TASK-BUD-1036",
-      "task:TASK-BUD-1035"
+      "task:TASK-BUD-1032",
+      "task:TASK-BUD-1032-READONLY-WORKER-PACKET-2026-05"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T07:22:26.424Z",
+    "generatedAtIso": "2026-05-08T07:30:08.914Z",
     "level": "ok",
-    "percent": 42,
+    "percent": 46,
     "action": "continue",
-    "recommendation": "commit-structured-state-guard-and-reload",
+    "recommendation": "commit-repacketization-and-request-exact-dispatch-phrase",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
-    "focus_task_status": "completed"
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T07:22:26.424Z",
+      "atIso": "2026-05-08T07:30:08.914Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 42,
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-structured-state-guard-and-reload"
+      "recommendation": "commit-repacketization-and-request-exact-dispatch-phrase"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-1036"
   ]
 }

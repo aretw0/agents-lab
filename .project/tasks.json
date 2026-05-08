@@ -23017,8 +23017,7 @@
         "TASK-BUD-1031"
       ],
       "files": [
-        ".project/tasks.json",
-        "docs/research/single-worker-board-driven-lane-2026-05.md"
+        "docs/research/task-bud-1032-readonly-worker-packet-2026-05.md"
       ],
       "acceptance_criteria": [
         "Worker é despachado somente após frase exata para o runId específico.",
@@ -23027,7 +23026,7 @@
         "Falhas são classificadas na taxonomia da lane."
       ],
       "milestone": "single-worker-board-driven-lane-2026-05",
-      "notes": "Primeiro uso real pós-lane: read-only antes de mutação.\n[provenance:human] source_task=TASK-BUD-1031 reason=Degrau read-only da escalation ladder single-worker."
+      "notes": "Primeiro uso real pós-lane: read-only antes de mutação.\n[provenance:human] source_task=TASK-BUD-1031 reason=Degrau read-only da escalation ladder single-worker.\nAfter reload and structured-state redirect validation, TASK-BUD-1032 was repacketized to use derived packet `docs/research/task-bud-1032-readonly-worker-packet-2026-05.md` instead of raw `.project/tasks.json`. This follows the operator steer: use existing primitives/surfaces better, avoid new terminology/bloat, and keep raw structured state as storage rather than working interface."
     },
     {
       "id": "TASK-BUD-1033",
