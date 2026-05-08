@@ -14831,6 +14831,15 @@
       "method": "implementation+test+inspection",
       "timestamp": "2026-05-08T00:18:00.546Z",
       "evidence": "Implemented explicit subagent economy inheritance contract. AgentRunOperatorPacket and AgentInvocationSpecPacket now carry economyMode/tokenBudgetEvidence/maxOutputLines/economyInstructions, inject a concise Worker economy contract into the worker prompt/command preview, default to conserve, and block warn-budget specs that explicitly request standard economy. Recorded manual DashScope qwen3-coder-plus quota evidence Remaining 246,289 / Total 1,000,000 in docs/research/agent-first-operating-mode-2026-05.md, with Squeez/MDT economy principles. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 1 file / 22 tests passed; safe_marker_check passed on implementation/surface/docs/tests; i18n_lint_text passed for pt-BR doc excerpt."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1004-GLOBAL-ECONOMY-AUDIT",
+      "target": "TASK-BUD-1004",
+      "target_type": "task",
+      "status": "passed",
+      "method": "bounded-research+inspection+docs",
+      "timestamp": "2026-05-08T00:28:19.168Z",
+      "evidence": "Generalized token/context economy beyond subagents in docs/research/global-token-economy-audit-2026-05.md. Performed bounded fresh audit of https://github.com/claudioemmanuel/squeez via git-checkout-cache at C:/Users/aretw/.cache/checkouts/github.com/claudioemmanuel/squeez, reading README.md, CLAUDE.md, src/config.rs, and src/filter.rs. Captured patterns: host hook surfaces, compression pipeline, cross-call dedupe, adaptive intensity, dense summaries, agent cost/burn-rate, Read/Grep/Glob limits, terse persona, memory/doc compression, and protocol/MCP. Added explicit non-overclaim limit: not exhaustive; do not claim we learned everything. Linked global audit from agent-first doc. Validation: safe_marker_check passed on global audit and agent-first link; i18n_lint_text passed pt-BR excerpt."
     }
   ]
 }

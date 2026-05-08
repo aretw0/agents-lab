@@ -22379,7 +22379,7 @@
     {
       "id": "TASK-BUD-1004",
       "description": "[P1/economia-global] Generalizar contrato de economia de tokens/contexto para toda a stack, não só subagentes, e auditar lacunas frente a Squeez e referências industriais.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1003"
@@ -22400,7 +22400,8 @@
         "Identificar gates concretos para reduzir gasto: leitura seletiva, saída curta, diffs focais, validação mínima suficiente, dedupe/stale suppression e routing por quota/custo."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Criada por steering humano: economia não deve ser só para subagentes; deve ser regra para toda a operação. Não afirmar que já aprendemos tudo de Squeez/indústria sem nova auditoria bounded e evidência.\n[provenance:human] source_task=none reason=Usuário perguntou se a economia é só para subagentes ou para todos, e se já aprendemos tudo de squeez/outros exemplos industriais."
+      "notes": "Criada por steering humano: economia não deve ser só para subagentes; deve ser regra para toda a operação. Não afirmar que já aprendemos tudo de Squeez/indústria sem nova auditoria bounded e evidência.\n[provenance:human] source_task=none reason=Usuário perguntou se a economia é só para subagentes ou para todos, e se já aprendemos tudo de squeez/outros exemplos industriais.\nCompleted global economy audit/documentation slice. Follow-up remains to implement a global_economy_contract primitive if/when useful; TASK-BUD-1001 should use this audit before any worker dispatch.",
+      "verification": "VERIF-TASK-BUD-1004-GLOBAL-ECONOMY-AUDIT"
     }
   ]
 }

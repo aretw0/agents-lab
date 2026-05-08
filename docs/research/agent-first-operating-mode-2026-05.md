@@ -54,6 +54,8 @@ Workers em `minimal-no-extensions` não herdam automaticamente todo o estado da 
 
 Influências Squeez/MDT já assimiladas entram aqui como regra prática: poda de gordura, leitura seletiva, saída curta, single-source/focal evidence e validação mínima suficiente. O uso intensivo de subagentes deve ficar bloqueado quando a spec não explicitar esse contrato.
 
+Essa regra não é exclusiva de subagentes: a auditoria global em `docs/research/global-token-economy-audit-2026-05.md` define economia para control plane, workers, monitores, handoff, validação, docs e routing.
+
 ## Regra padrão
 
 Toda tarefa local-safe deve tentar primeiro um pacote single-worker antes de implementação manual pelo control plane.
