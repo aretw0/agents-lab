@@ -1,54 +1,53 @@
 {
-  "timestamp": "2026-05-08T12:13:33.719Z",
-  "context": "After TASK-BUD-1033/TASK-BUD-1038 commit, continued to TASK-BUD-1034. Created docs/research/single-worker-board-driven-lane-maturity-2026-05. [snip] ASK-BUD-1034 with marker/i18n evidence. [truncated:+187 chars]",
+  "timestamp": "2026-05-08T12:43:13.971Z",
+  "context": "Reload completed per operator. Repo clean, context ok. Continuation readiness still had stale completed focus, so selected next local-safe bo [snip] orker dispatched from generic prossiga. [truncated:+324 chars]",
+  "current_tasks": [
+    "TASK-BUD-947"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-1034 maturity synthesis.",
-    "After commit, next normal-use lane step should be a useful real board-driven single-worker tas [snip] me, and parent validation. [truncated:+67 chars]"
+    "Commit TASK-BUD-947 packet-prep note/checkpoint, or dispatch only if operator provides exact p [snip] -monitor-noop-edit-review. [truncated:+36 chars]",
+    "After dispatch: agent_run_follow, verify read-only outcome with touched_files=[], inspect outp [snip] all mutation/test fixture. [truncated:+39 chars]"
   ],
   "blockers": [
-    "No multi-worker/background/colony/protected/unattended promotion without separ [snip] xplicit authorization. [truncated:+15 chars]",
-    "Reload runtime before relying on newly changed extension surfaces in a fresh session."
+    "Generic prossiga does not authorize worker dispatch.",
+    "TASK-BUD-1006 remains parked UI/footer tangent unless operator re-prioritizes it.",
+    "Multi-worker/background/colony/protected/unattended dispatch remain gated."
   ],
   "recent_validation": [
-    "safe_marker_check docs/research/single-worker-board-driven-lane-maturity-2026-05.md -> pass",
-    "i18n_lint_text -> warn only for intentional quoted Portuguese prossiga",
-    "board_task_complete TASK-BUD-1034 -> completed"
+    "git_dirty_snapshot -> clean before prep",
+    "agent_run_task_packet TASK-BUD-947 -> ready-for-human-decision",
+    "agent_run_task_start_packet TASK-BUD-947 -> ready-for-human-decision runId=task-bud-947-monito [snip] op-edit-review dispatch=no [truncated:+4 chars]"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1034",
+    "focus": "TASK-BUD-947",
     "canonical_links": [
-      "task:TASK-BUD-1034",
-      "task:TASK-BUD-1033",
-      "task:TASK-BUD-1038"
+      "task:TASK-BUD-947",
+      "task:TASK-BUD-1006"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T12:13:33.719Z",
+    "generatedAtIso": "2026-05-08T12:43:13.971Z",
     "level": "ok",
-    "percent": 26,
+    "percent": 31,
     "action": "continue",
-    "recommendation": "commit-task-bud-1034-maturity-synthesis",
+    "recommendation": "await-exact-confirmation-or-commit-packet-prep",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
-    "focus_task_status": "completed"
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T12:13:33.719Z",
+      "atIso": "2026-05-08T12:43:13.971Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 26,
+      "percent": 31,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-1034-maturity-synthesis"
+      "recommendation": "await-exact-confirmation-or-commit-packet-prep"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-1034"
   ]
 }

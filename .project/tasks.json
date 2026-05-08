@@ -21184,7 +21184,7 @@
         "Adicionar regressão/fixture se uma implementação for feita futuramente."
       ],
       "milestone": "operator-noise-backlog",
-      "notes": "[intake:user] Operador observou uma edição com diff aparentemente idêntico em `context-watchdog-handoff.ts` e pediu backlog sem prioridade. Análise inicial: no caso mostrado provavelmente havia remoção de whitespace invisível/trailing space, então não era necessariamente no-op real; o problema é medir frequência e ruído dessas operações, não bloquear a edição automaticamente.\n[provenance:human] source_task=none reason=Feedback explícito do operador sobre operação de edit visualmente sem sentido/no-op aparente."
+      "notes": "[intake:user] Operador observou uma edição com diff aparentemente idêntico em `context-watchdog-handoff.ts` e pediu backlog sem prioridade. Análise inicial: no caso mostrado provavelmente havia remoção de whitespace invisível/trailing space, então não era necessariamente no-op real; o problema é medir frequência e ruído dessas operações, não bloquear a edição automaticamente.\n[provenance:human] source_task=none reason=Feedback explícito do operador sobre operação de edit visualmente sem sentido/no-op aparente.\nPost-reload continuation selected TASK-BUD-947 as the next normal-use single-worker read-only candidate instead of parked TASK-BUD-1006 UI/footer tangent. Prepared board-derived start packet for runId `task-bud-947-monitor-noop-edit-review`; dispatch_check is confirmation=missing, so no worker was dispatched from generic `prossiga`."
     },
     {
       "id": "TASK-BUD-948",
