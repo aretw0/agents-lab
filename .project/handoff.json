@@ -1,53 +1,54 @@
 {
-  "timestamp": "2026-05-08T17:08:27.529Z",
-  "context": "Implemented first TASK-BUD-1067 slice after operator clarified Spark has separate quota and Qwen likely exhausted. ProviderExecutionBudgetEvi [snip] cts with external ModelStudio evidence. [truncated:+449 chars]",
+  "timestamp": "2026-05-08T17:29:21.767Z",
+  "context": "Exact-confirmed worker task-bud-1063-spark-model-scope-budget-post-reload dispatched after post-reload packet accepted Spark model-specific b [snip] until preflight/classification exists. [truncated:+450 chars]",
   "current_tasks": [
-    "TASK-BUD-1067"
+    "TASK-BUD-1066"
   ],
   "next_actions": [
-    "Commit this model-scope budget evidence slice.",
-    "Next slice: update quota visibility provider budgets/output to list provider-model rows for Sp [snip] om openai-codex aggregate. [truncated:+17 chars]",
-    "Add conservative manual/external evidence override for DashScope/Qwen exhaustion so local tele [snip] ot mislead worker routing. [truncated:+13 chars]"
+    "Implement TASK-BUD-1066 preflight/classifier locally: distinguish CLI argv invalid, provider u [snip] re before more dispatches. [truncated:+97 chars]",
+    "Avoid more worker retries until the classifier yields actionable evidence.",
+    "Keep Spark as preferred model once runner is healthy; avoid DashScope/Qwen until fresh externa [snip] a evidence says available. [truncated:+6 chars]"
   ],
   "blockers": [
-    "TASK-BUD-1067 not fully closed: quota provider-budget surface remains aggregat [snip] ation remains missing. [truncated:+43 chars]",
-    "Worker runner still blocked by TASK-BUD-1066 silent-runner root-cause classification."
+    "Worker runner still exits with no stdout/stderr after budget+extension fixes.",
+    "Context/handoff changed due control-plane evidence; commit checkpoint/board up [snip] rving this run record. [truncated:+13 chars]",
+    "No safe path to 'use workers by default' until TASK-BUD-1066 is implemented and canaries pass."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 35 passed",
-    "git diff --check -> pass",
-    "safe_marker_check provider budget scope markers -> pass"
+    "agent_run_task_dispatch -> dispatched pid=58380",
+    "agent_run_follow -> terminal failed outputBytes=2210",
+    "log shows argv without --no-extensions and silent-runner-failure childOutputBytes=0"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1067",
+    "focus": "TASK-BUD-1066",
     "canonical_links": [
-      "task:TASK-BUD-1067",
-      "task:TASK-BUD-1067-SPARK-MODEL-SCOPE-2026-05-08"
+      "task:TASK-BUD-1066",
+      "task:TASK-BUD-1063-SPARK-MODEL-SCOPE-BUDGET-POST-RELOAD"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T17:08:27.529Z",
-    "level": "ok",
-    "percent": 47,
+    "generatedAtIso": "2026-05-08T17:29:21.767Z",
+    "level": "warn",
+    "percent": 53,
     "action": "continue",
-    "recommendation": "commit-model-scope-budget-slice",
+    "recommendation": "stop-worker-retries-build-runner-preflight",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T17:08:27.529Z",
+      "atIso": "2026-05-08T17:29:21.767Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 47,
+      "level": "warn",
+      "percent": 53,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-model-scope-budget-slice"
+      "recommendation": "stop-worker-retries-build-runner-preflight"
     }
   ]
 }

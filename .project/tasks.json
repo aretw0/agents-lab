@@ -23791,7 +23791,7 @@
         "Não relaxa confirmação humana nem protected-scope gates."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Criada após canary exact-confirmed `task-bud-1063-final-turn-brief-inherit-live-canary`: argv sem `--no-extensions`, mas exitCode=1, childOutputBytes=0, git clean. O problema deixou de ser isolamento por extensão e passou a ser root-cause do runner/pi print.\n[provenance:human] source_task=TASK-BUD-1063 reason=Estabilizar workers para uso normal exige diagnosticar a falha silenciosa residual antes de novos retries."
+      "notes": "Criada após canary exact-confirmed `task-bud-1063-final-turn-brief-inherit-live-canary`: argv sem `--no-extensions`, mas exitCode=1, childOutputBytes=0, git clean. O problema deixou de ser isolamento por extensão e passou a ser root-cause do runner/pi print.\n[provenance:human] source_task=TASK-BUD-1063 reason=Estabilizar workers para uso normal exige diagnosticar a falha silenciosa residual antes de novos retries.\n[canary] Exact-confirmed Spark model-scoped + extension_inherit worker `task-bud-1063-spark-model-scope-budget-post-reload` still failed with `silent-runner-failure`: argv accepted model-specific budget and omitted `--no-extensions`, but childOutputBytes=0 and exitCode=1. This confirms remaining blocker is runner/pi --print startup/provider/tool/env classification, not Spark budget scope or extension isolation."
     },
     {
       "id": "TASK-BUD-1067",
