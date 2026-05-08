@@ -22286,7 +22286,7 @@
     {
       "id": "TASK-BUD-1001",
       "description": "[P1/rehearsal] Executar primeiro canary agent-first de mutação pequena com worker: pacote explícito, escopo declarado, validação pai, rollback e commit pelo control plane apenas após revisão.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1000"
@@ -22303,7 +22303,7 @@
         "Registrar limites para promoção: quando repetir canary, quando permitir mutação maior, e quando recuar para read-only."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Criada por steering humano para mudar de worker read-only para execução bounded real, mantendo control plane como validador.\n[provenance:human] source_task=TASK-BUD-1000 reason=Próximo passo prático para reduzir implementação manual do control plane.\n[quota/economia] Antes de executar o small-mutation worker canary, considerar evidência manual do operador: DashScope qwen3-coder-plus Remaining 246,289 / Total 1,000,000. Usar subagente só com escopo mínimo, prompt enxuto, declared files explícitos, validação focal e sem broad scans. TASK-BUD-1003 foi criado para auditar/propagar política de economia Squeez/MDT para specs de agente; não promover uso intensivo enquanto isso não estiver explícito."
+      "notes": "Criada por steering humano para mudar de worker read-only para execução bounded real, mantendo control plane como validador.\n[provenance:human] source_task=TASK-BUD-1000 reason=Próximo passo prático para reduzir implementação manual do control plane.\n[quota/economia] Antes de executar o small-mutation worker canary, considerar evidência manual do operador: DashScope qwen3-coder-plus Remaining 246,289 / Total 1,000,000. Usar subagente só com escopo mínimo, prompt enxuto, declared files explícitos, validação focal e sem broad scans. TASK-BUD-1003 foi criado para auditar/propagar política de economia Squeez/MDT para specs de agente; não promover uso intensivo enquanto isso não estiver explícito.\n[agent-invocation-spec] Prepared report-only small-mutation worker canary packet after reload: runId=task-bud-1001-small-mutation-doc-canary, provider=dashscope/qwen3-coder-plus, file=docs/research/agent-run-provider-native-runner-2026-05.md, fileContract=mutation, economyMode=critical, maxOutputLines=20, timeoutMs=60000, budget=warn from manual scarce quota evidence Remaining 246,289 / Total 1,000,000. Packet decision=ready-for-human-decision dispatch=no. Registry state recorded as planned. Do not execute until exact human confirmation phrase is provided."
     },
     {
       "id": "TASK-BUD-1000",
