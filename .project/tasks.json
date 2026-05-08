@@ -22666,6 +22666,26 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Derivado do canary TASK-BUD-1015: validar mismatch via execute=true é seguro/fail-closed, mas aciona guard de dispatch; precisamos de check report-only separado.\n[provenance:human] source_task=TASK-BUD-1015 reason=TASK-BUD-1015 mostrou que mismatch live deve ser verificado por superfície report-only, não por tentativa execute=true.\nImplemented `agent_run_task_dispatch_check`, a pure report-only confirmation checker to avoid using execute=true just to test mismatch behavior.",
       "verification": "VERIF-TASK-BUD-1016-DISPATCH-CHECK"
+    },
+    {
+      "id": "TASK-BUD-1017",
+      "description": "[agent-first/live-canary] Validar ao vivo, após reload, a nova superfície report-only `agent_run_task_dispatch_check` nos caminhos missing/mismatch/match sem execute e sem dispatch.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`agent_run_task_dispatch_check` retorna mode=agent-run-task-dispatch-check para TASK-BUD-1017.",
+        "Sem `operator_confirmation`, retorna confirmation=missing com dispatchAllowed=false e processStartAllowed=false.",
+        "Com confirmação incorreta, retorna confirmation=mismatch e wouldDispatchAfterExplicitExecute=false.",
+        "Com confirmação exata, retorna confirmation=match e wouldDispatchAfterExplicitExecute=true, mas ainda dispatchAllowed=false/processStartAllowed=false.",
+        "Nenhum registry running é criado e nenhum worker/processo é despachado."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criado após reload para validar ao vivo a primitiva report-only de confirmação sem acionar execute=true.\n[provenance:human] source_task=TASK-BUD-1016 reason=TASK-BUD-1016 implementou `agent_run_task_dispatch_check`; após reload precisamos validar a superfície viva sem dispatch.\nLive dispatch_check canary passed: missing/mismatch/match are observable report-only states; match indicates wouldDispatchAfterExplicitExecute=yes but still dispatch=no.",
+      "verification": "VERIF-TASK-BUD-1017-LIVE-DISPATCH-CHECK-CANARY"
     }
   ]
 }

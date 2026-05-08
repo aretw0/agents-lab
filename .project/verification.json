@@ -14948,6 +14948,15 @@
       "method": "implementation+smoke-test+marker-check",
       "timestamp": "2026-05-08T03:04:17.008Z",
       "evidence": "Implemented report-only `agent_run_task_dispatch_check` in packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts. The tool composes `agent_run_task_start_packet`, compares optional operator_confirmation to the packet humanConfirmationPhrase, returns confirmation=missing|mismatch|match, and reports wouldDispatchAfterExplicitExecute=true only when the packet is ready and the phrase matches. It never accepts execute, never calls spawn, and always keeps dispatchAllowed=false/processStartAllowed=false/processStopAllowed=false. Tests cover missing, mismatch, match, blocked protected task, and agent-runs.json remains absent. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 30 passed. safe_marker_check passed for tool and tests."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1017-LIVE-DISPATCH-CHECK-CANARY",
+      "target": "TASK-BUD-1017",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-canary+status-check+marker-check",
+      "timestamp": "2026-05-08T03:12:10.882Z",
+      "evidence": "After reload, live-validated `agent_run_task_dispatch_check` on TASK-BUD-1017. Missing confirmation result: agent-run-task-dispatch-check decision=checked runId=task-bud-1017-live-dispatch-check-canary confirmation=missing wouldDispatchAfterExplicitExecute=no dispatch=no. Mismatch result: confirmation=mismatch wouldDispatchAfterExplicitExecute=no dispatch=no. Exact phrase result: confirmation=match wouldDispatchAfterExplicitExecute=yes dispatch=no. agent_run_status for runId=task-bud-1017-live-dispatch-check-canary returned found=no state=unknown dispatch=no, confirming no registry/running process was created. Marker checks passed for dispatch_check implementation and smoke tests. No worker was dispatched."
     }
   ]
 }

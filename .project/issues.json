@@ -1127,6 +1127,17 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mowc3bii",
+      "title": "The agent replied with an empty message after the user's prompt, leaving the request unresolved without acknowledgment.",
+      "body": "The agent replied with an empty message after the user's prompt, leaving the request unresolved without acknowledgment.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }
