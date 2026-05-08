@@ -22996,7 +22996,6 @@
         "TASK-BUD-1030"
       ],
       "files": [
-        ".project/tasks.json",
         "docs/research/single-worker-board-driven-lane-2026-05.md"
       ],
       "acceptance_criteria": [
@@ -23006,7 +23005,7 @@
         "Seleção pode ser produzida por um worker `read-only-review` após frase exata do runId; nenhum worker de mutação é despachado nesta tarefa."
       ],
       "milestone": "single-worker-board-driven-lane-2026-05",
-      "notes": "Segundo passo: abastecer a lane com material real antes de dispatch.\n[provenance:human] source_task=TASK-BUD-1030 reason=Sequência da lane aprovada para aumentar uso de subagentes a partir do board.\nOperator steer: be less timid and use agents earlier. TASK-BUD-1031 will now be fulfilled by a `read-only-review` worker candidate-selection run after exact runId confirmation; control plane only packetizes, follows, validates, and records the decision. Mutation remains blocked for this task."
+      "notes": "Segundo passo: abastecer a lane com material real antes de dispatch.\n[provenance:human] source_task=TASK-BUD-1030 reason=Sequência da lane aprovada para aumentar uso de subagentes a partir do board.\nOperator steer: be less timid and use agents earlier. TASK-BUD-1031 will now be fulfilled by a `read-only-review` worker candidate-selection run after exact runId confirmation; control plane only packetizes, follows, validates, and records the decision. Mutation remains blocked for this task.\nFirst worker dispatch `task-bud-1031-worker-candidate-selection` completed and preserved read-only git cleanliness, but contract failed: output was only runner lifecycle logs (145 bytes) and did not include the required 3-candidate list. Control plane added a bounded candidate snapshot into the lane doc and narrowed declared files for a retry so the worker can judge a compact board-derived pool instead of loading the full board."
     },
     {
       "id": "TASK-BUD-1032",

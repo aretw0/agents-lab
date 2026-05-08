@@ -1,22 +1,22 @@
 {
-  "timestamp": "2026-05-08T06:50:40.363Z",
-  "context": "Operator steered lane to be less timid: use agents earlier, control plane should do little and learn by dispatching agents for board work. Ad [snip] ing dispatch=no. No worker started yet. [truncated:+341 chars]",
+  "timestamp": "2026-05-08T07:06:21.944Z",
+  "context": "Exact-confirmed worker dispatch for TASK-BUD-1031 ran as task-bud-1031-worker-candidate-selection. Dispatch check matched and dispatch starte [snip] no; dispatch_check missing dispatch=no. [truncated:+621 chars]",
   "current_tasks": [
     "TASK-BUD-1031"
   ],
   "next_actions": [
-    "Commit TASK-BUD-1031 packet-prep/acceptance/handoff changes.",
-    "If operator wants immediate dispatch, exact phrase is: execute o worker task-bud-1031-worker-candidate-selection.",
-    "After dispatch, follow with agent_run_follow, assert git stays clean/read-only, capture output [snip] outcome packet read-only. [truncated:+38 chars]"
+    "Commit first-run failure evidence, compact candidate snapshot, narrowed declared files, and retry packet prep.",
+    "If operator wants immediate retry, exact phrase is: execute o worker task-bud-1031-worker-candidate-selection-retry.",
+    "After retry, require useful candidate list before completing TASK-BUD-1031; read-only git must remain clean."
   ],
   "blockers": [
-    "Worker dispatch still requires exact phrase for runId task-bud-1031-worker-candidate-selection.",
-    "Mutation workers remain blocked for TASK-BUD-1031."
+    "TASK-BUD-1031 first worker run failed contract due missing useful output.",
+    "Retry requires exact runId confirmation."
   ],
   "recent_validation": [
-    "git dirty before slice -> clean",
-    "structured_io_json dryRun+apply updated TASK-BUD-1031 acceptance",
-    "board_update TASK-BUD-1031 note -> ok"
+    "dispatch_check first run -> confirmation=match",
+    "dispatch first run -> pid=56048",
+    "agent_run_follow first run -> completed outputBytes=145"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1031",
@@ -26,28 +26,28 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T06:50:40.363Z",
+    "generatedAtIso": "2026-05-08T07:06:21.944Z",
     "level": "ok",
-    "percent": 26,
+    "percent": 35,
     "action": "continue",
-    "recommendation": "commit-prep-then-ask-exact-dispatch-phrase",
+    "recommendation": "commit-retry-prep-and-request-exact-phrase",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T06:50:40.363Z",
+      "atIso": "2026-05-08T07:06:21.944Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 26,
+      "percent": 35,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-prep-then-ask-exact-dispatch-phrase"
+      "recommendation": "commit-retry-prep-and-request-exact-phrase"
     }
   ]
 }

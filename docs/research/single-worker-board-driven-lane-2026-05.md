@@ -40,3 +40,17 @@ Each run should classify the result:
 - timeout or abort.
 
 The lane should prefer learning from small real tasks over synthetic demos. After several successful single-worker runs, record a maturity decision before considering any broader delegation design.
+
+## Board candidate snapshot for TASK-BUD-1031 retry
+
+Source: deterministic control-plane extraction from planned board tasks, filtered to local-readable candidates and provided so the worker can do the judgment step without loading the full board file.
+
+Candidate pool:
+
+- `TASK-BUD-946` — P3 backlog; files: `packages/pi-stack/extensions`, `docs/research/control-plane-signal-integrity-audit-2026-05.md`; goal: investigate duplicated `edit oldText must match` warnings; likely profile: `read-only-review` first.
+- `TASK-BUD-947` — P3 backlog; files: `packages/pi-stack/extensions`, `packages/pi-stack/test/smoke`, `docs/research/control-plane-signal-integrity-audit-2026-05.md`; goal: monitor no-op/near-no-op edits; likely profile: `read-only-review` first, possible later `small-mutation` if a narrow fixture is chosen.
+- `TASK-BUD-1006` — P2 UI/docs ambiguity; files: quota footer docs/runtime surfaces; goal: revisit compact quota footer ambiguity; likely profile: `read-only-review`; note: UI tangent was parked, so only select if the worker judges it better than operator-noise tasks.
+- `TASK-BUD-1032` — lane follow-up; files: board and lane doc; goal: run one real read-only worker; likely profile: `read-only-review`; depends on `TASK-BUD-1031`, so classify as successor rather than candidate to execute immediately.
+- `TASK-BUD-1033` — lane follow-up; files: lane doc; goal: run one real small-mutation/test-fix worker; likely profile: `small-mutation` after `TASK-BUD-1032`.
+
+Worker retry instruction: select exactly 3 candidates, and for each return task id, suggested profile, declared files, validation, rollback, protected-scope verdict, and why it teaches the lane something.
