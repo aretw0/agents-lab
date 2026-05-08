@@ -1,34 +1,32 @@
 {
-  "timestamp": "2026-05-08T13:42:07.225Z",
-  "context": "Operator asked to materialize the full discussion into backlog and a focused lane. Created queen-continuous-improvement lane and backlog task [snip] TASK-BUD-1057. Completed TASK-BUD-1046. [truncated:+350 chars]",
+  "timestamp": "2026-05-08T14:06:32.513Z",
+  "context": "Operator decided to prefer control-plane now and reserve queen for future swarms/colonies, where control-plane may delegate colony coordinati [snip] resume TASK-BUD-1047 first-hatch tool. [truncated:+254 chars]",
   "next_actions": [
-    "Commit queen lane/backlog materialization.",
-    "Next best implementation slice: TASK-BUD-1047 first-hatch intake packet/tool or TASK-BUD-1048 [snip] profile discovery packet. [truncated:+5 chars]",
-    "Continue using mature resources proactively, but keep lower gates and graceful stop conditions."
+    "Commit TASK-BUD-1058 terminology update.",
+    "Resume TASK-BUD-1047 first-hatch intake packet/tool implementation after commit."
   ],
   "blockers": [
-    "No protected scope, remote/offload, scheduler, publish/settings, multi-worker/ [snip] thorized by this lane. [truncated:+29 chars]",
-    "Runtime implementation tasks remain planned; current slice materialized backlog/docs only."
+    "File path still contains historical queen-continuous-improvement-lane name; co [snip] ader board file churn. [truncated:+76 chars]",
+    "Queen remains parked for future swarm/colony role only."
   ],
   "recent_validation": [
-    "board_task_create TASK-BUD-1047..1057 -> planned backlog seeded",
-    "safe_marker_check docs/research/queen-continuous-improvement-lane-2026-05.md -> pass",
-    "i18n_lint_text en -> pass"
+    "safe_marker_check nudge-free-local-continuity control-plane profile -> pass",
+    "safe_marker_check project-intake control-plane profile -> pass",
+    "safe_marker_check continuous-improvement lane terminology -> pass"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1046",
+    "focus": "TASK-BUD-1058",
     "canonical_links": [
-      "task:TASK-BUD-1046",
-      "task:TASK-BUD-1047",
-      "task:TASK-BUD-1056"
+      "task:TASK-BUD-1058",
+      "task:TASK-BUD-1047"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T13:42:07.225Z",
+    "generatedAtIso": "2026-05-08T14:06:32.513Z",
     "level": "ok",
-    "percent": 47,
+    "percent": 52,
     "action": "continue",
-    "recommendation": "commit-queen-lane-backlog",
+    "recommendation": "commit-control-plane-terminology",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
@@ -36,20 +34,20 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T13:42:07.225Z",
+      "atIso": "2026-05-08T14:06:32.513Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 47,
+      "percent": 52,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-queen-lane-backlog"
+      "recommendation": "commit-control-plane-terminology"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-1046"
+    "TASK-BUD-1058"
   ]
 }

@@ -15218,6 +15218,15 @@
       "method": "backlog-seeding+doc-synthesis+marker-check+i18n-lint",
       "timestamp": "2026-05-08T13:41:48.910Z",
       "evidence": "Created `docs/research/queen-continuous-improvement-lane-2026-05.md` with marker `queen-continuous-improvement-lane`. It converges the operator/control-plane discussion into one lane and separates hard intent backlog (`TASK-BUD-1047` first hatch tool, `TASK-BUD-1048` queen profile packet, `TASK-BUD-1049` local batch manifestation, `TASK-BUD-1050` capability ROI packet, `TASK-BUD-1051` batch-dispatch dry-run bridge, `TASK-BUD-1052` bounded loop canary, `TASK-BUD-1056` reload-before-compact gate) from soft intent backlog (`TASK-BUD-1053` skill, `TASK-BUD-1054` prompt, `TASK-BUD-1055` prior-art research, `TASK-BUD-1057` assisted/self-critical semantics). It references existing contracts instead of creating an executor: project intake, structured interview, nudge-free/unattended continuation, context checkpoint, board, provider/quota/machine gates, and agent-run gates. It defines agents-lab queen as assisted continuous improvement, not blind automation. Marker checks and i18n lint passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1058-CONTROL-PLANE-TERMINOLOGY",
+      "target": "TASK-BUD-1058",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-update+marker-check",
+      "timestamp": "2026-05-08T14:05:27.593Z",
+      "evidence": "Updated `docs/primitives/nudge-free-local-continuity.md`, `docs/primitives/project-intake.md`, and `docs/research/queen-continuous-improvement-lane-2026-05.md` to make `control-plane` / `control-plane profile` the operational vocabulary now. Reframed the lane title and marker to control-plane continuous improvement, updated first-hatch language from queen profile to control-plane profile, and added a terminology decision: keep `queen` parked for a future swarm/colony role delegated by the control-plane when that maturity exists, not as the name for today's local-safe profile. Marker checks passed for all updated docs."
     }
   ]
 }

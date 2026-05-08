@@ -230,12 +230,14 @@ Limites que continuam explícitos por default:
 
 Essa manifestação não substitui permissões protegidas nem autoriza execução irreversível. Ela reduz atrito porque o operador não precisa reafirmar práticas normais; só precisa declarar direção e exceções.
 
-### Hipótese de guarda-chuva: queen
+### Perfil do control-plane
 
-`queen` pode ser um bom nome para o guarda-chuva semântico que une operador e control-plane: intenção de alto nível, perfil de autonomia, estratégia de uso de recursos, preferências de ROI e stop conditions. Não é um worker, swarm, scheduler, runtime executor nem bypass de gate; é o perfil que orienta como o control-plane escolhe e propõe capacidades usando os contratos existentes.
+O termo operacional atual é `control-plane profile`: intenção de alto nível, perfil de autonomia, estratégia de uso de recursos, preferências de ROI e stop conditions. Não é um worker, swarm, scheduler, runtime executor nem bypass de gate; é o perfil que orienta como o control-plane escolhe e propõe capacidades usando os contratos existentes.
 
-`queen` também não é só a vontade instantânea do operador. Em uma distro reutilizável como a `pi-stack`, o perfil nasce da composição entre operador, contexto/projeto, recursos disponíveis, maturidade dos gates, defaults da distribuição e preferências persistentes daquela instalação. A `pi-stack` deve oferecer bons defaults e discoverability; cada projeto pode ter um perfil queen próprio.
+Esse perfil não é só a vontade instantânea do operador. Em uma distro reutilizável como a `pi-stack`, ele nasce da composição entre operador, contexto/projeto, recursos disponíveis, maturidade dos gates, defaults da distribuição e preferências persistentes daquela instalação. A `pi-stack` deve oferecer bons defaults e discoverability; cada projeto pode ter seu próprio perfil de control-plane.
 
-Perfil queen atual do `agents-lab`: iteração contínua de melhoramento. Jogando em casa, o default é usar recursos local-safe de forma proativa para melhorar a própria stack, criar evidência, fechar loops com validação/commit/checkpoint e parar graciosamente quando aparecer risco real, protected scope, reload/compact ou ambiguidade de produto.
+Perfil atual do `agents-lab`: iteração contínua de melhoramento. Jogando em casa, o default é usar recursos local-safe de forma proativa para melhorar a própria stack, criar evidência, fechar loops com validação/commit/checkpoint e parar graciosamente quando aparecer risco real, protected scope, reload/compact ou ambiguidade de produto.
 
-Quando falta explicitude, o control-plane deve tentar descobrir o perfil `queen` com entrevista curta: objetivo, apetite de autonomia, capacidades aceitáveis, limites e exceções. Depois disso, ele continua usando os mesmos mecanismos: board, nudge-free/local-continuity, checkpoints, gates de quota/máquina, dispatch/outcome de workers quando aplicável e paradas graciosas.
+Quando falta explicitude, o control-plane deve tentar descobrir esse perfil com entrevista curta: objetivo, apetite de autonomia, capacidades aceitáveis, limites e exceções. Depois disso, ele continua usando os mesmos mecanismos: board, nudge-free/local-continuity, checkpoints, gates de quota/máquina, dispatch/outcome de workers quando aplicável e paradas graciosas.
+
+`queen` fica estacionado como hipótese futura para swarms/colônias: um papel delegado pelo control-plane para coordenar trabalho de colônia quando essa maturidade existir, não o nome do perfil operacional atual.

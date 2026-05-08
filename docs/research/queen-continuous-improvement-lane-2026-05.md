@@ -1,10 +1,10 @@
-# Queen continuous-improvement lane — 2026-05
+# Control-plane continuous-improvement lane — 2026-05
 
-Marker: `queen-continuous-improvement-lane`
+Marker: `control-plane-continuous-improvement-lane`
 
 ## Purpose
 
-Converge the recent operator/control-plane discussion into one focused backlog lane. The goal is to make the `agents-lab` queen profile operational: continuous improvement with proactive local-safe resource use, short operator interviews only when context or authorization is missing, and graceful stop conditions.
+Converge the recent operator/control-plane discussion into one focused backlog lane. The goal is to make the `agents-lab` control-plane profile operational: continuous improvement with proactive local-safe resource use, short operator interviews only when context or authorization is missing, and graceful stop conditions.
 
 This is not a new executor. It composes existing contracts:
 
@@ -16,7 +16,7 @@ This is not a new executor. It composes existing contracts:
 - provider/quota/machine readiness gates;
 - `agent_run_task_*`, `agent_run_follow`, and `agent_run_outcome_packet` when workers are useful.
 
-## Queen profile for agents-lab
+## Control-plane profile for agents-lab
 
 The current `agents-lab` profile is **assisted continuous improvement**:
 
@@ -46,10 +46,10 @@ Code/runtime/tooling work that should eventually be implemented with tests:
 
 Skills, prompts, docs and research that make the behavior discoverable and reusable:
 
-1. `TASK-BUD-1053` — lightweight queen/continuity skill.
-2. `TASK-BUD-1054` — hatch/queen prompt template for short operator manifestation.
+1. `TASK-BUD-1053` — lightweight control-plane continuity skill.
+2. `TASK-BUD-1054` — hatch/control-plane prompt template for short operator manifestation.
 3. `TASK-BUD-1055` — prior-art research across pi ecosystem, Claude Code and similar tools.
-4. `TASK-BUD-1057` — document assisted/self-critical queen loop semantics in docs/skill form.
+4. `TASK-BUD-1057` — document assisted/self-critical control-plane loop semantics in docs/skill form.
 
 ## Maturity order
 
@@ -70,6 +70,10 @@ Do not jump straight to open-ended automation. Mature in this order:
 - no scheduler or persistent unattended service by default;
 - no multi-worker/swarm/colony promotion without separate evidence gates;
 - no bypass of `agent_run_task_dispatch` or outcome contracts.
+
+## Terminology decision
+
+Use `control-plane` and `control-plane profile` for the current operational lane. Keep `queen` parked for a future swarm/colony role: something the control-plane may delegate colony coordination to when that maturity exists, not a name for today's local-safe profile.
 
 ## Next best slice
 

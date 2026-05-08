@@ -46,7 +46,7 @@ Quando a `pi-stack` é instalada ou invocada em um workspace novo, o primeiro ha
 - onde estamos: repositório, pasta solta, sandbox, worktree ou pasta vazia;
 - quais artefatos locais existem: README, manifests, testes, docs, configs, scripts, `.project`, `.pi`;
 - quais recursos da sandbox estão disponíveis: ferramentas locais, providers configurados, espaço/pressão de máquina, permissões e limites visíveis;
-- qual perfil queen parece aplicável: defaults da distro, contexto do projeto, recursos disponíveis e sinais do operador.
+- qual perfil de control-plane parece aplicável: defaults da distro, contexto do projeto, recursos disponíveis e sinais do operador.
 
 Pasta vazia ou falta de diretrizes não é fracasso. É sinal de que o operador é o gargalo de contexto, então o control-plane deve entrevistar com poucas perguntas em vez de ficar passivo:
 

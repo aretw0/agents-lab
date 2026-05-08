@@ -23566,6 +23566,26 @@
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
       "notes": "Soft intent: preservar nuance do operador — melhoria contínua não significa abandonar supervisão; significa reduzir micro-autorização e pedir ajuda quando realmente precisa.\n[provenance:human] source_task=none reason=Operador quer loop de melhoramento contínuo assistido por recursos, não desassistido."
+    },
+    {
+      "id": "TASK-BUD-1058",
+      "description": "[control-plane/terminology] Reenquadrar queen como conceito futuro de swarm/colony e usar control-plane profile como termo operacional atual.",
+      "status": "completed",
+      "priority": "p0",
+      "files": [
+        "docs/primitives/nudge-free-local-continuity.md",
+        "docs/primitives/project-intake.md",
+        "docs/research/queen-continuous-improvement-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Documentos deixam claro que o termo operacional atual é control-plane/profile, não queen.",
+        "Queen fica estacionado como possível papel futuro para coordenação de swarms/colônias delegada pelo control-plane.",
+        "A lane de melhoria contínua segue válida sem depender do termo queen.",
+        "Não altera gates, contratos ou autorização; é decisão de vocabulário/conceito."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Operador preferiu control-plane para agora; queen fica reservado para fase futura de swarms/colônias, quando o control-plane delegar coordenação.\n[provenance:human] source_task=none reason=Evitar metáfora prematura e manter vocabulário operacional claro.\nTerminology aligned: control-plane now, queen parked for future swarm/colony coordination role.",
+      "verification": "VERIF-TASK-BUD-1058-CONTROL-PLANE-TERMINOLOGY"
     }
   ]
 }
