@@ -1138,6 +1138,17 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mowhg9x6",
+      "title": "The agent responded with empty content after being asked to execute the worker task, leaving the request unresolved without any explanation or handoff.",
+      "body": "The agent responded with empty content after being asked to execute the worker task, leaving the request unresolved without any explanation or handoff.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }

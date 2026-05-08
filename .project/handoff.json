@@ -1,34 +1,34 @@
 {
-  "timestamp": "2026-05-08T05:35:48.750Z",
-  "context": "User exact-confirmed TASK-BUD-1027 small-mutation dispatch. Run task-bud-1027-small-mutation-doc-canary completed (pid=40776, outputBytes=474 [snip] changed; reload required before retry. [truncated:+503 chars]",
+  "timestamp": "2026-05-08T06:05:03.906Z",
+  "context": "After reload, live-validated the TASK-BUD-1027 small-mutation retry packet without dispatch. Retry runId is task-bud-1027-small-mutation-doc- [snip] sue is tracked in .project/issues.json. [truncated:+407 chars]",
   "next_actions": [
-    "Commit TASK-BUD-1028 code/test/board/verification/handoff changes.",
-    "Operator should run /reload before retrying small-mutation canary.",
-    "After reload, prepare a retry runId for TASK-BUD-1027 and require exact phrase before dispatch."
+    "Commit TASK-BUD-1029 board/verification/handoff changes plus monitor issue update.",
+    "If operator wants to retry the small-mutation worker, they must send exact phrase: execute o w [snip] mutation-doc-canary-retry. [truncated:+26 chars]",
+    "After retry dispatch, use agent_run_follow, git diff, safe_marker_check, git diff --check, and [snip] completing TASK-BUD-1027. [truncated:+22 chars]"
   ],
   "blockers": [
-    "TASK-BUD-1027 remains planned/not complete; first attempt contract failed.",
-    "Reload required after mutation tool allowlist fix."
+    "TASK-BUD-1027 still not complete; retry not authorized yet.",
+    "Generic 'prossiga' is not dispatch authorization."
   ],
   "recent_validation": [
-    "dispatch_check TASK-BUD-1027 -> confirmation=match",
-    "agent_run_task_dispatch TASK-BUD-1027 -> dispatched pid=40776",
-    "agent_run_follow -> terminal completed outputBytes=474"
+    "git_dirty_snapshot initially showed only monitor-added .project/issues.json",
+    "agent_run_task_start_packet retry -> ready-for-human-decision dispatch=no",
+    "agent_run_task_dispatch_check retry missing -> dispatch=no"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1028",
+    "focus": "TASK-BUD-1029",
     "canonical_links": [
-      "task:TASK-BUD-1028",
+      "task:TASK-BUD-1029",
       "task:TASK-BUD-1027",
-      "task:TASK-BUD-1027-SMALL-MUTATION-DOC-CANARY"
+      "task:TASK-BUD-1027-SMALL-MUTATION-DOC-CANARY-RETRY"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T05:35:48.750Z",
-    "level": "ok",
-    "percent": 52,
+    "generatedAtIso": "2026-05-08T06:05:03.906Z",
+    "level": "warn",
+    "percent": 54,
     "action": "continue",
-    "recommendation": "commit-mutation-tool-fix-then-reload-before-retry",
+    "recommendation": "commit-retry-preview-and-wait-for-exact-confirmation",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
@@ -36,20 +36,20 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T05:35:48.750Z",
+      "atIso": "2026-05-08T06:05:03.906Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 52,
+      "level": "warn",
+      "percent": 54,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-mutation-tool-fix-then-reload-before-retry"
+      "recommendation": "commit-retry-preview-and-wait-for-exact-confirmation"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-1028"
+    "TASK-BUD-1029"
   ]
 }

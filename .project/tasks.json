@@ -22941,6 +22941,29 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Derivado do primeiro canary small-mutation: worker reportou PASS, mas git ficou limpo e marcador ausente porque o start packet usava allowlist read-only.\n[provenance:human] source_task=TASK-BUD-1027 reason=Canary small-mutation expôs mismatch entre perfil mutation e ferramentas permitidas do subprocesso.\nMutation tool allowlist corrected; requires `/reload` before retrying TASK-BUD-1027 with a new runId/purpose.",
       "verification": "VERIF-TASK-BUD-1028-MUTATION-TOOLS"
+    },
+    {
+      "id": "TASK-BUD-1029",
+      "description": "[agent-first/live-canary] Validar ao vivo, após reload, que o retry small-mutation de `TASK-BUD-1027` está packetizado com allowlist de mutação e segue sem dispatch sem frase exata.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1028"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`agent_run_task_start_packet` para retry retorna ready-for-human-decision e dispatch=no.",
+        "`agent_run_task_dispatch_check` sem confirmação retorna confirmation=missing e dispatch=no.",
+        "Marker check confirma allowlist mutation com edit/write no runtime carregado em disco.",
+        "Nenhum registry/processo novo é criado para o retry.",
+        "Frase exata do retry é registrada para decisão humana separada."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criado após reload para validar que o fix de allowlist de mutação está pronto antes de qualquer retry real.\n[provenance:human] source_task=TASK-BUD-1028 reason=TASK-BUD-1028 mudou packetização de mutation tools; pós-reload precisa preview vivo antes de novo dispatch.\nLive retry preview passed. Exact phrase required for retry dispatch: `execute o worker task-bud-1027-small-mutation-doc-canary-retry`.",
+      "verification": "VERIF-TASK-BUD-1029-LIVE-MUTATION-RETRY-PREVIEW"
     }
   ]
 }

@@ -15047,6 +15047,15 @@
       "method": "focal-test+marker-check+failed-canary-analysis",
       "timestamp": "2026-05-08T05:35:35.592Z",
       "evidence": "Fixed mutation-profile tool allowlist after TASK-BUD-1027 dispatch completed but did not modify files. `buildAgentRunOperatorPacket` now uses `MUTATION_TOOL_ALLOWLIST=[read, grep, find, ls, edit, write]` when fileContract=mutation, while read-only profiles keep the read-only allowlist. Start packet now blocks unsupported tools outside the supported set, e.g. bash, instead of blocking edit/write. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 31 passed. Marker checks passed for runtime and tests. TASK-BUD-1027 attempt recorded as contract fail: process=completed outputBytes=474, git clean, marker missing."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1029-LIVE-MUTATION-RETRY-PREVIEW",
+      "target": "TASK-BUD-1029",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-preview+status-check+marker-check",
+      "timestamp": "2026-05-08T06:04:48.558Z",
+      "evidence": "After reload, live-validated TASK-BUD-1027 retry packet without dispatch. `agent_run_task_start_packet` for purpose `small-mutation-doc-canary-retry` returned decision=ready-for-human-decision, runId=task-bud-1027-small-mutation-doc-canary-retry, registry=dry-run, statusFound=no, dispatch=no. `agent_run_task_dispatch_check` without operator confirmation returned confirmation=missing, wouldDispatchAfterExplicitExecute=no, dispatch=no. `agent_run_status` for retry runId returned found=no. Marker check confirmed mutation allowlist wiring with edit/write in `guardrails-core-agent-run-start.ts`. No worker/process was started, stopped, or redispatched."
     }
   ]
 }
