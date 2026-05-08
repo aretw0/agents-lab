@@ -1,51 +1,53 @@
 {
-  "timestamp": "2026-05-08T05:13:17.304Z",
-  "context": "Documented agent runner maturity checkpoint in docs/research/agent-runner-maturity-checkpoint-2026-05.md. It consolidates exact-confirmed dis [snip] ollow/outcome. Completed TASK-BUD-1026. [truncated:+271 chars]",
+  "timestamp": "2026-05-08T05:18:26.197Z",
+  "context": "Prepared next runner rung: TASK-BUD-1027 small-mutation doc canary. Scope is one declared file: docs/research/agent-runner-maturity-checkpoin [snip] sing dispatch=no. No worker dispatched. [truncated:+453 chars]",
+  "current_tasks": [
+    "TASK-BUD-1027"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-1026 doc/board/verification/handoff changes.",
-    "Next safe slice: prepare a small-mutation runner canary task packet, but do not dispatch without exact runId phrase."
+    "Commit TASK-BUD-1027 planned task and handoff changes.",
+    "If operator wants to run this small-mutation worker, they must explicitly send: execute o work [snip] small-mutation-doc-canary. [truncated:+17 chars]",
+    "After exact-confirmed dispatch, use agent_run_follow, git diff/status, safe_marker_check, and [snip] t before board completion. [truncated:+23 chars]"
   ],
   "blockers": [
-    "Any future runner dispatch requires exact human confirmation for that runId.",
-    "No multi-worker/colony promotion yet."
+    "No dispatch authorization yet; generic 'prossiga' is not enough.",
+    "OpenAI Codex Spark budget warn; keep output bounded if authorized."
   ],
   "recent_validation": [
-    "safe_marker_check docs/research/agent-runner-maturity-checkpoint-2026-05.md -> pass",
-    "board_task_complete TASK-BUD-1026 -> completed"
+    "board_task_create TASK-BUD-1027 -> planned",
+    "agent_run_task_start_packet -> ready-for-human-decision runId=task-bud-1027-small-mutation-doc-canary dispatch=no",
+    "agent_run_task_dispatch_check missing -> dispatch=no"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1026",
+    "focus": "TASK-BUD-1027",
     "canonical_links": [
-      "task:TASK-BUD-1026"
+      "task:TASK-BUD-1027",
+      "task:TASK-BUD-1027-SMALL-MUTATION-DOC-CANARY"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T05:13:17.304Z",
+    "generatedAtIso": "2026-05-08T05:18:26.197Z",
     "level": "ok",
-    "percent": 45,
+    "percent": 46,
     "action": "continue",
-    "recommendation": "commit-runner-maturity-checkpoint",
+    "recommendation": "commit-prepared-small-mutation-canary-and-wait-for-exact-confirmation",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
-    "focus_task_status": "completed"
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T05:13:17.304Z",
+      "atIso": "2026-05-08T05:18:26.197Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 45,
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-runner-maturity-checkpoint"
+      "recommendation": "commit-prepared-small-mutation-canary-and-wait-for-exact-confirmation"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-1026"
   ]
 }

@@ -22894,6 +22894,31 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criado porque o milestone ficou sem planned tasks após TASK-BUD-1025; checkpoint consolida aprendizado antes do próximo runner.\n[provenance:human] source_task=TASK-BUD-1025 reason=Após validar evidência final ao vivo, precisamos consolidar o estado da lane antes de outro dispatch.\nRunner maturity checkpoint documented; next safe rung is a tightly scoped small-mutation runner canary, still exact-confirmation gated.",
       "verification": "VERIF-TASK-BUD-1026-RUNNER-MATURITY-CHECKPOINT"
+    },
+    {
+      "id": "TASK-BUD-1027",
+      "description": "[agent-first/small-mutation-canary] Executar, somente com confirmação humana exata, um worker single-run small-mutation para adicionar uma seção curta de alvo no checkpoint do runner.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1018",
+        "TASK-BUD-1020",
+        "TASK-BUD-1022",
+        "TASK-BUD-1024",
+        "TASK-BUD-1026"
+      ],
+      "files": [
+        "docs/research/agent-runner-maturity-checkpoint-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Adicionar ao final de `docs/research/agent-runner-maturity-checkpoint-2026-05.md` uma seção `## Small-mutation canary target`.",
+        "A seção deve conter o marcador literal `small-mutation-runner-canary-target`.",
+        "A alteração deve ficar restrita ao arquivo declarado.",
+        "Rollback não destrutivo: `git restore docs/research/agent-runner-maturity-checkpoint-2026-05.md`.",
+        "Validação focal: `safe_marker_check` do marcador literal e `git diff --check`."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Tarefa preparada como próximo degrau após o runner read-only: small mutation mínima em um único arquivo doc. Não autoriza dispatch; exige frase exata por runId.\n[provenance:human] source_task=TASK-BUD-1026 reason=Checkpoint recomendou o próximo single-worker canary small-mutation com arquivo declarado, rollback e validação focal."
     }
   ]
 }
