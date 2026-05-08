@@ -528,6 +528,32 @@ describe("agent spawn readiness contract", () => {
     expect(result.summary).toContain("dispatch=no");
   });
 
+  it("propagates inherited extension isolation for custom-provider task workers", () => {
+    const result = buildAgentRunTaskStartPacket({
+      taskId: "TASK-BUD-1065",
+      task: {
+        id: "TASK-BUD-1065",
+        description: "Allow custom provider workers to inherit extensions.",
+        status: "planned",
+        files: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+        acceptance_criteria: ["argv can omit no-extensions for inherit isolation"],
+      },
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      budgetDecision: "ok",
+      budgetEvidence: "Spark scoped budget usable",
+      budgetEvidenceSource: "manual",
+      budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
+      extensionIsolation: "inherit",
+    });
+
+    expect(result.decision).toBe("ready-for-human-decision");
+    expect(result.taskPacket.invocationSpec.extensionIsolation).toBe("inherit");
+    expect(result.startPreview.args).not.toContain("--no-extensions");
+    expect(result.startPreview.args).not.toContain("--no-skills");
+    expect(result.summary).toContain("dispatch=no");
+  });
+
   it("blocks task start packets when the underlying task packet is blocked", () => {
     const result = buildAgentRunTaskStartPacket({
       taskId: "TASK-PROTECTED",

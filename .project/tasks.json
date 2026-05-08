@@ -23715,7 +23715,7 @@
         "Teste cobre: ids-only proibido, rich option labels, reload-needed pós runtime commit, e docs-only sem reload."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Criada após auditoria do passado: TASK-BUD-583/585/586/955 implementaram turn-boundary/hard-intent, mas o gap atual é operator-facing final-turn: não despejar IDs nus e sim carregar contexto rico suficiente para o operador decidir sem perguntar de volta.\n[provenance:human] source_task=none reason=Operador lembrou que o assunto passado envolvia final de turno com contexto rico e evitar citar tasks apenas por ID.\n[agent-run] Exact-confirmed worker `task-bud-1063-final-turn-brief-implementation` dispatched after reload, but failed with exitCode=1 and no useful worker output; log only shows runner start/close, git stayed clean, outcome contract failed. Created TASK-BUD-1064 to harden silent runner failure feedback before more implementation dispatches."
+      "notes": "Criada após auditoria do passado: TASK-BUD-583/585/586/955 implementaram turn-boundary/hard-intent, mas o gap atual é operator-facing final-turn: não despejar IDs nus e sim carregar contexto rico suficiente para o operador decidir sem perguntar de volta.\n[provenance:human] source_task=none reason=Operador lembrou que o assunto passado envolvia final de turno com contexto rico e evitar citar tasks apenas por ID.\n[agent-run] Exact-confirmed worker `task-bud-1063-final-turn-brief-implementation` dispatched after reload, but failed with exitCode=1 and no useful worker output; log only shows runner start/close, git stayed clean, outcome contract failed. Created TASK-BUD-1064 to harden silent runner failure feedback before more implementation dispatches.\n[agent-run] Diagnostic retry `task-bud-1063-final-turn-brief-diagnostic-retry` failed, but new diagnostics worked: log captured cwd/source/argv and `childOutputBytes=0` with `silent-runner-failure`. The argv shows provider `openai-codex/gpt-5.3-codex-spark` launched with `--no-extensions`; likely root cause is custom/provider extension unavailable under minimal-no-extensions. Do not retry blindly; fix packet support for provider-required extension isolation/inherit first."
     },
     {
       "id": "TASK-BUD-1064",
@@ -23740,8 +23740,32 @@
         "Não muda o gate de confirmação nem faz auto-dispatch."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Criada após três workers first-party falharem com log apenas `[agent-runner] starting ...` e `close exitCode=1`, sem output útil nem arquivos tocados. Isso bloqueia agents-as-tools até o runner dar feedback acionável.\n[provenance:human] source_task=TASK-BUD-1063 reason=Worker exact-confirmed de TASK-BUD-1063 repetiu a falha silenciosa observada em TASK-BUD-1059.",
+      "notes": "Criada após três workers first-party falharem com log apenas `[agent-runner] starting ...` e `close exitCode=1`, sem output útil nem arquivos tocados. Isso bloqueia agents-as-tools até o runner dar feedback acionável.\n[provenance:human] source_task=TASK-BUD-1063 reason=Worker exact-confirmed de TASK-BUD-1063 repetiu a falha silenciosa observada em TASK-BUD-1059.\n[diagnostic-result] Retry `task-bud-1063-final-turn-brief-diagnostic-retry` confirmed the diagnostics are actionable: argv/cwd/source were captured and showed `--no-extensions` for `openai-codex/gpt-5.3-codex-spark`, with `childOutputBytes=0` and `silent-runner-failure`. Follow-up TASK-BUD-1065 now propagates `extensionIsolation=inherit` for custom-provider worker packets.",
       "verification": "VERIF-TASK-BUD-1064-SILENT-RUNNER-DIAGNOSTICS-2026-05-08"
+    },
+    {
+      "id": "TASK-BUD-1065",
+      "description": "[hard-intent/agent-runner] Propagar extension isolation nos task/dispatch packets para providers customizados: permitir `inherit` quando o provider/model depende de extensão, em vez de forçar minimal-no-extensions.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1064"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "agent_run_task_packet/start/dispatch aceitam extension_isolation ou derivam inherit quando provider exige extensão customizada.",
+        "OpenAI Codex Spark/DashScope packet pode gerar argv sem `--no-extensions` quando explicitamente `inherit`.",
+        "Default minimal-no-extensions continua para providers que não exigem extensão.",
+        "Teste cobre task dispatch/start packet com provider customizado + inherit e garante ausência de `--no-extensions`.",
+        "Não relaxa confirmação humana, protected-scope gate, budget gate ou single-run gate."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Criada após retry diagnosticável de TASK-BUD-1063 revelar argv com `--no-extensions` para openai-codex/gpt-5.3-codex-spark e childOutputBytes=0/silent-runner-failure. Provável root cause: provider customizado indisponível dentro de worker minimal-no-extensions.\n[provenance:human] source_task=TASK-BUD-1063 reason=Tornar workers realmente capazes de usar providers customizados sem perder governança.",
+      "verification": "VERIF-TASK-BUD-1065-EXTENSION-ISOLATION-2026-05-08"
     }
   ]
 }

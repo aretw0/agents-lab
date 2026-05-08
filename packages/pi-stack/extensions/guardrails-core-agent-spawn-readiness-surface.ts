@@ -240,6 +240,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       economy_mode: Type.Optional(Type.String({ description: "Worker token/context economy mode: standard, conserve, or critical. Defaults to conserve." })),
       token_budget_evidence: Type.Optional(Type.String({ description: "Short provider/model quota evidence to embed in the worker economy contract." })),
       max_output_lines: Type.Optional(Type.Number({ description: "Bounded worker output line target for economy contract." })),
+      extension_isolation: Type.Optional(Type.String({ description: "Extension isolation mode: minimal-no-extensions or inherit. Defaults to minimal-no-extensions unless a custom provider requires inherited extensions." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -263,6 +264,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         economyMode: typeof p.economy_mode === "string" ? p.economy_mode : undefined,
         tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
         maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
+        extensionIsolation: typeof p.extension_isolation === "string" ? p.extension_isolation : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       return buildOperatorVisibleToolResponse({
@@ -300,6 +302,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       economy_mode: Type.Optional(Type.String({ description: "Worker token/context economy mode: standard, conserve, or critical. Defaults to conserve." })),
       token_budget_evidence: Type.Optional(Type.String({ description: "Short provider/model quota evidence to embed in the worker economy contract." })),
       max_output_lines: Type.Optional(Type.Number({ description: "Bounded worker output line target for economy contract." })),
+      extension_isolation: Type.Optional(Type.String({ description: "Extension isolation mode: minimal-no-extensions or inherit. Defaults to minimal-no-extensions unless a custom provider requires inherited extensions." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -327,6 +330,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         economyMode: typeof p.economy_mode === "string" ? p.economy_mode : undefined,
         tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
         maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
+        extensionIsolation: typeof p.extension_isolation === "string" ? p.extension_isolation : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       return buildOperatorVisibleToolResponse({
@@ -357,6 +361,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       economy_mode: Type.Optional(Type.String({ description: "Worker token/context economy mode: standard, conserve, or critical. Defaults to critical." })),
       token_budget_evidence: Type.Optional(Type.String({ description: "Short provider/model quota evidence to embed in the worker economy contract." })),
       max_output_lines: Type.Optional(Type.Number({ description: "Bounded worker output line target for economy contract. Defaults to 20." })),
+      extension_isolation: Type.Optional(Type.String({ description: "Extension isolation mode: minimal-no-extensions or inherit. Defaults to minimal-no-extensions unless a custom provider requires inherited extensions." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -382,6 +387,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         economyMode: typeof p.economy_mode === "string" ? p.economy_mode : undefined,
         tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
         maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
+        extensionIsolation: typeof p.extension_isolation === "string" ? p.extension_isolation : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       return buildOperatorVisibleToolResponse({
@@ -412,6 +418,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       economy_mode: Type.Optional(Type.String({ description: "Worker token/context economy mode: standard, conserve, or critical. Defaults to critical." })),
       token_budget_evidence: Type.Optional(Type.String({ description: "Short provider/model quota evidence to embed in the worker economy contract." })),
       max_output_lines: Type.Optional(Type.Number({ description: "Bounded worker output line target for economy contract. Defaults to 20." })),
+      extension_isolation: Type.Optional(Type.String({ description: "Extension isolation mode: minimal-no-extensions or inherit. Defaults to minimal-no-extensions unless a custom provider requires inherited extensions." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -439,6 +446,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         economyMode: typeof p.economy_mode === "string" ? p.economy_mode : undefined,
         tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
         maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
+        extensionIsolation: typeof p.extension_isolation === "string" ? p.extension_isolation : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       return buildOperatorVisibleToolResponse({
@@ -469,6 +477,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       economy_mode: Type.Optional(Type.String({ description: "Worker token/context economy mode: standard, conserve, or critical. Defaults to critical." })),
       token_budget_evidence: Type.Optional(Type.String({ description: "Short provider/model quota evidence to embed in the worker economy contract." })),
       max_output_lines: Type.Optional(Type.Number({ description: "Bounded worker output line target for economy contract. Defaults to 20." })),
+      extension_isolation: Type.Optional(Type.String({ description: "Extension isolation mode: minimal-no-extensions or inherit. Defaults to minimal-no-extensions unless a custom provider requires inherited extensions." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
       operator_confirmation: Type.Optional(Type.String({ description: "Optional phrase to compare with the packet humanConfirmationPhrase. No execution is authorized by a match." })),
     }),
@@ -495,6 +504,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         economyMode: typeof p.economy_mode === "string" ? p.economy_mode : undefined,
         tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
         maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
+        extensionIsolation: typeof p.extension_isolation === "string" ? p.extension_isolation : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       const existingEntry = readRegistryEntry(ctx.cwd, basePacket.taskPacket.invocationSpec.runId);
@@ -516,6 +526,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         economyMode: typeof p.economy_mode === "string" ? p.economy_mode : undefined,
         tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
         maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
+        extensionIsolation: typeof p.extension_isolation === "string" ? p.extension_isolation : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       const operatorConfirmation = typeof p.operator_confirmation === "string" ? p.operator_confirmation : "";
@@ -578,6 +589,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       economy_mode: Type.Optional(Type.String({ description: "Worker token/context economy mode: standard, conserve, or critical. Defaults to critical." })),
       token_budget_evidence: Type.Optional(Type.String({ description: "Short provider/model quota evidence to embed in the worker economy contract." })),
       max_output_lines: Type.Optional(Type.Number({ description: "Bounded worker output line target for economy contract. Defaults to 20." })),
+      extension_isolation: Type.Optional(Type.String({ description: "Extension isolation mode: minimal-no-extensions or inherit. Defaults to minimal-no-extensions unless a custom provider requires inherited extensions." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
       execute: Type.Optional(Type.Boolean({ description: "When true, dispatch the subprocess only after all gates pass and operator_confirmation matches exactly." })),
       operator_confirmation: Type.Optional(Type.String({ description: "Must exactly equal the packet humanConfirmationPhrase for execute=true." })),
@@ -605,6 +617,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         economyMode: typeof p.economy_mode === "string" ? p.economy_mode : undefined,
         tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
         maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
+        extensionIsolation: typeof p.extension_isolation === "string" ? p.extension_isolation : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       const existingEntry = readRegistryEntry(ctx.cwd, basePacket.taskPacket.invocationSpec.runId);
@@ -626,6 +639,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         economyMode: typeof p.economy_mode === "string" ? p.economy_mode : undefined,
         tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
         maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
+        extensionIsolation: typeof p.extension_isolation === "string" ? p.extension_isolation : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       const executeRequested = p.execute === true;

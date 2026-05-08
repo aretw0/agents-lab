@@ -1,54 +1,54 @@
 {
-  "timestamp": "2026-05-08T15:57:55.660Z",
-  "context": "Exact-confirmed worker for TASK-BUD-1063 failed with the same silent runner pattern: exitCode=1, log only runner start/close, no useful worke [snip] y gate reports unresolved dependencies. [truncated:+415 chars]",
+  "timestamp": "2026-05-08T16:25:45.930Z",
+  "context": "After exact-confirmed diagnostic retry for TASK-BUD-1063 failed, new runner diagnostics identified likely root cause: argv used --no-extensio [snip] ion but not closed due dependency gate. [truncated:+442 chars]",
   "current_tasks": [
-    "TASK-BUD-1064"
+    "TASK-BUD-1065"
   ],
   "next_actions": [
-    "Commit runner diagnostics hardening.",
-    "Reload after commit because extension runtime changed.",
-    "After reload, canary a report-only surface; only then consider another worker retry so failure logs are actionable."
+    "Commit TASK-BUD-1065 extension-isolation propagation.",
+    "Reload after commit because runtime extension surfaces changed.",
+    "After reload, prepare a new report-only packet for TASK-BUD-1063 with extension_isolation=inhe [snip] sions before any dispatch. [truncated:+49 chars]"
   ],
   "blockers": [
     "Runtime will be stale after commit until /reload.",
-    "TASK-BUD-1064 closure blocked by unresolved dependencies per quality gate.",
-    "TASK-BUD-1063 implementation remains undone; worker dispatch failed."
+    "TASK-BUD-1065 closure blocked by dependency TASK-BUD-1064; TASK-BUD-1064 closu [snip] 63 dependency posture. [truncated:+44 chars]",
+    "No new worker dispatch without exact runId confirmation."
   ],
   "recent_validation": [
-    "agent_run_task_dispatch TASK-BUD-1063 -> dispatched pid=56260",
-    "agent_run_status/log/outcome -> failed, contract fail, no touched files",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 34 passed"
+    "agent_run_follow task-bud-1063-final-turn-brief-diagnostic-retry -> terminal failed with diagnostic log",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 35 passed",
+    "git diff --check -> pass"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1064",
+    "focus": "TASK-BUD-1065",
     "canonical_links": [
-      "task:TASK-BUD-1064",
+      "task:TASK-BUD-1065",
       "task:TASK-BUD-1063"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T15:57:55.660Z",
-    "level": "warn",
-    "percent": 53,
+    "generatedAtIso": "2026-05-08T16:25:45.930Z",
+    "level": "ok",
+    "percent": 22,
     "action": "continue",
-    "recommendation": "commit-runner-diagnostics-then-reload",
+    "recommendation": "commit-then-reload-before-next-worker",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T15:57:55.660Z",
+      "atIso": "2026-05-08T16:25:45.930Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 53,
+      "level": "ok",
+      "percent": 22,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-runner-diagnostics-then-reload"
+      "recommendation": "commit-then-reload-before-next-worker"
     }
   ]
 }

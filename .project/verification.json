@@ -15245,6 +15245,15 @@
       "method": "focused-test-and-marker-check",
       "timestamp": "2026-05-08T15:57:03.427Z",
       "evidence": "Hardened agent runner diagnostics for silent non-zero subprocess exits: logs cwd/source/argv, tracks childOutputBytes, records silent-runner-failure errorCode/errorMessage when exitCode !=0 without stdout/stderr. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 34 passed; git diff --check -> pass; safe_marker_check runner diagnostics and test markers -> pass. Board quality gate still blocks closure due unresolved dependencies, so verification is linked without completing the task."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1065-EXTENSION-ISOLATION-2026-05-08",
+      "target": "TASK-BUD-1065",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused-test-and-marker-check",
+      "timestamp": "2026-05-08T16:24:48.722Z",
+      "evidence": "Implemented source-level propagation for extension isolation across operator/invocation/task/start/check/dispatch packet surfaces. Task packets can pass extensionIsolation='inherit', which omits --no-extensions/--no-skills from command preview while preserving default minimal-no-extensions. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 35 passed; git diff --check -> pass; safe_marker_check for start builder, surface schema/mapping, and test markers -> pass. Board quality gate still blocks closure due unresolved dependency TASK-BUD-1064, so verification linked without completing."
     }
   ]
 }

@@ -113,6 +113,7 @@ export interface AgentRunOperatorPacketInput {
   economyMode?: AgentInvocationEconomyMode | string;
   tokenBudgetEvidence?: string;
   maxOutputLines?: number;
+  extensionIsolation?: "minimal-no-extensions" | "inherit" | string;
   protectedScopeRequested?: boolean;
 }
 
@@ -204,6 +205,7 @@ export interface AgentRunTaskPacketInput {
   economyMode?: AgentInvocationEconomyMode | string;
   tokenBudgetEvidence?: string;
   maxOutputLines?: number;
+  extensionIsolation?: "minimal-no-extensions" | "inherit" | string;
   protectedScopeRequested?: boolean;
 }
 
@@ -590,7 +592,7 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
     timeoutMs: normalizePositiveInt(input.timeoutMs, 90_000),
     toolAllowlist: fileContract === "mutation" ? MUTATION_TOOL_ALLOWLIST : READ_ONLY_TOOL_ALLOWLIST,
     sessionIsolation: "no-session",
-    extensionIsolation: "minimal-no-extensions",
+    extensionIsolation: input.extensionIsolation ?? "minimal-no-extensions",
     logPath,
     budgetDecision: input.budgetDecision,
     budgetEvidence: input.budgetEvidence,
@@ -773,6 +775,7 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
     economyMode: input.economyMode ?? "critical",
     tokenBudgetEvidence: input.tokenBudgetEvidence || input.budgetEvidence,
     maxOutputLines: input.maxOutputLines ?? 20,
+    extensionIsolation: input.extensionIsolation,
     protectedScopeRequested: protectedScopeDetected,
   });
   const blockers = [...invocationSpecPacket.blockers];
