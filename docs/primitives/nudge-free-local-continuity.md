@@ -194,3 +194,31 @@ Antes de usar colônias, subagentes ou swarms, o primeiro batch local sem empurr
 4. deixar o board pronto para decisões humanas, sem aplicar candidates.
 
 O sucesso desse cenário não é um nome novo nem uma automação nova: é o operador conseguir voltar depois de um período longo e escolher rapidamente entre decisões já preparadas, sem encontrar automação irreversível já executada.
+
+## Manifestação única do operador
+
+Não criar primitive nova para “autorização ampla”. A manifestação do operador deve preencher os contratos já existentes para um batch pequeno: `local_slice_human_contract_review`, `unattended_continuation_plan`, `nudge_free_loop_canary`, `context_watch_checkpoint`, gates de quota/máquina e, quando houver worker, `agent_run_task_dispatch` sem burlar o gate inferior.
+
+Template recomendado:
+
+```text
+Autorizo um batch local-safe sobre <assunto/seed>.
+Foco inicial: <task ou tema>.
+Perfis permitidos: read-only-review, small-mutation, test-fix.
+Limites: até <N> slices, 1 worker por vez, commit/checkpoint por slice.
+Quota: usar provedores disponíveis com rota/fallback governada; parar em budget block real.
+Máquina/contexto: self-healing local; checkpoint e parada graciosa antes de compact/reload/pressão de host.
+Stop: protected scope, risco de dados/segurança/custo irreversível, dirty inesperado, outcome fail repetido, ambiguidade de produto, reload necessário, sem próxima task local-safe.
+Sem: CI/publish/settings/credenciais/remote/offload/multi-worker/colony/scheduler salvo autorização separada.
+```
+
+Defaults para `agents-lab` quando o operador não disser o contrário:
+
+- quota é recurso de trabalho do projeto: consumir de forma econômica, mas usar as cotas disponíveis em vez de parar por micro-autorização;
+- DashScope deve ter rota/fallback por modelo quando uma cota específica saturar;
+- OpenAI Codex Spark é bom candidato para workers enquanto houver cota específica disponível;
+- OpenAI normal deve ser preservado para o control-plane quando fizer sentido, com fallback governado para Qwen/DashScope quando houver pressão;
+- pressão de disco/RAM/CPU/contexto deve virar parada graciosa com checkpoint, não quebra do ambiente;
+- compact/reload são stop conditions operacionais: registrar handoff, parar e deixar o runtime/operador retomar.
+
+Essa manifestação não substitui permissões protegidas nem autoriza execução irreversível. Ela reduz atrito para fatias locais repetidas porque transforma intenção humana em campos auditáveis: foco, limite, orçamento, validação, rollback, checkpoint e stop conditions.

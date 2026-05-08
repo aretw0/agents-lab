@@ -23163,6 +23163,24 @@
       "milestone": "single-worker-board-driven-lane-2026-05",
       "notes": "Criado porque TASK-BUD-1033 mostrou contrato incompleto: worker precisa ler um derived packet e mutar um target, mas outcome atual trata todo declared file como esperado/obrigatório para mutation.\n[provenance:human] source_task=TASK-BUD-1033 reason=Outcome failed with declared=2 touched=1 because input packet and mutation target were conflated.\nCompleted contract fix: mutation targets are now distinct from read-only packet/input attachments; TASK-BUD-1033 outcome re-evaluates as pass with mutation_target_files.",
       "verification": "VERIF-TASK-BUD-1038-MUTATION-TARGET-FILES"
+    },
+    {
+      "id": "TASK-BUD-1039",
+      "description": "[nudge-free/local-continuity] Clarificar como o operador manifesta autorização abrangente de batch usando contratos existentes, sem criar nova primitive ou vocabulário sobreposto.",
+      "status": "completed",
+      "priority": "p0",
+      "files": [
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "Documento explica que a manifestação do operador compõe `local_slice_human_contract_review`, `unattended_continuation_plan`, `nudge_free_loop_canary`, `context_watch_checkpoint`, gates de quota/máquina e `agent_run_task_dispatch`, sem burlar contratos inferiores.",
+        "Documento fornece template curto para o operador declarar seed/assunto, limites, stop conditions e perfis permitidos em uma única manifestação.",
+        "Documento registra defaults pragmáticos para agents-lab: usar quotas disponíveis com rota/fallback governada, self-healing de máquina/contexto, checkpoint antes de compact/reload e parada graciosa em risco real.",
+        "Documento evita novo nome de lane/primitive e aponta para o vocabulário já existente."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Criado a partir do steer do operador: transformar confiança acumulada em manifestação abrangente de batch/local-continuity, respeitando schemas existentes e sem criar conceitos sobrepostos.\n[provenance:human] source_task=none reason=Operador quer descobrir como dar autorização + seed + controles em uma mesma manifestação para liberar loops bounded com workers/control-plane.\nClarified operator manifestation path using existing nudge-free/local-continuity contracts; no new primitive or overlapping vocabulary introduced.",
+      "verification": "VERIF-TASK-BUD-1039-OPERATOR-MANIFESTATION"
     }
   ]
 }
