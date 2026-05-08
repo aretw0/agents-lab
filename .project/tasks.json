@@ -22584,6 +22584,28 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Próximo passo após validar `task -> packet`: aproximar `packet -> registry/start/outcome` ainda report-only e sem dispatch.\n[provenance:human] source_task=TASK-BUD-1011 reason=TASK-BUD-1011 validou a tool viva; próximo elo first-party é compor packet com registry/start/outcome sem execução.\nImplemented report-only `agent_run_task_start_packet` bridge. It advances task->packet toward packet->registry/start/outcome without starting a worker.",
       "verification": "VERIF-TASK-BUD-1012-TASK-START-PACKET"
+    },
+    {
+      "id": "TASK-BUD-1013",
+      "description": "[agent-first/live-canary] Validar ao vivo, após reload, a nova superfície report-only `agent_run_task_start_packet` contra uma task real do board, sem dispatch de worker.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`agent_run_task_start_packet` retorna mode=agent-run-task-start-packet para TASK-BUD-1013.",
+        "Retorna decision=ready-for-human-decision com dispatchAllowed=false, processStartAllowed=false e processStopAllowed=false.",
+        "Inclui registry dry-run preview, start argv preview, status/log/abort previews e outcome checklist.",
+        "Preserva provider/model scoped budget evidence para openai-codex/gpt-5.3-codex-spark.",
+        "Resultado é registrado como verificação e handoff; nenhum worker é despachado."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criado após reload para validar a ponte `task -> packet -> registry/start/status/log/abort/outcome previews` em runtime real antes de qualquer uso operacional.\n[provenance:human] source_task=TASK-BUD-1012 reason=TASK-BUD-1012 implementou a tool; após reload precisamos validar a superfície viva sem dispatch.\nLive canary after reload passed: `agent_run_task_start_packet` returned ready-for-human-decision with registry=dry-run and dispatch=no for TASK-BUD-1013.",
+      "verification": "VERIF-TASK-BUD-1013-LIVE-AGENT-RUN-TASK-START-PACKET"
     }
   ]
 }
