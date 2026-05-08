@@ -14804,6 +14804,24 @@
       "method": "read-only-detection-and-doc-markers",
       "timestamp": "2026-05-07T23:31:05.964Z",
       "evidence": "Evaluated optional uv support without creating environments or downloading dependencies. Read-only detection: `uv` is available at `/c/users/aretw/.local/bin/uv` with version `uv 0.8.22`; `python`, `python3`, and `py` were not found by the current shell. Updated `docs/research/tooling-acceleration-roadmap-2026-05.md` with uv state `use-if-project-python-context-exists`, use/avoid criteria, and opt-in bootstrap that first detects Python project context before proposing any cache/venv canary. Validation: safe_marker_check uv roadmap markers -> pass; i18n_lint_text pt-BR excerpt -> pass; board_task_quality_gate TASK-BUD-994 -> closeAllowed=yes. [rationale:risk-control] No venv/cache creation, dependency install, or global environment change was performed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1002-AGENT-INVOCATION-SPEC-PACKET",
+      "target": "TASK-BUD-1002",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-07T23:59:59.723Z",
+      "evidence": "Implemented report-only typed AgentInvocationSpec packet: buildAgentInvocationSpecPacket plus agent_invocation_spec_packet tool. It reuses provider budget evidence, declared-file attachment, timeout, log path, fileContract and no-dispatch operator/start packet path; supports read-only-review and small-mutation/test-fix profiles; blocks mutation profiles without validation/rollback; preserves human confirmation and processStartAllowed=false. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 1 file / 22 tests passed. Marker checks passed for implementation, surface, and tests."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1000-AGENT-FIRST-OPERATING-MODE",
+      "target": "TASK-BUD-1000",
+      "target_type": "task",
+      "status": "passed",
+      "method": "worker-review+implementation+test",
+      "timestamp": "2026-05-08T00:00:45.735Z",
+      "evidence": "Agent-first operating mode formalized worker-first. Worker run task-bud-1000-agent-first-invocation-design-review returned PASS and recommended typed AgentInvocationSpec/createAgentInvoker style surface. Control plane codified doctrine in docs/research/agent-first-operating-mode-2026-05.md, created and completed child TASK-BUD-1002 with report-only agent_invocation_spec_packet, and validated with npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 1 file / 22 tests passed plus marker checks. Quality gate: TASK-BUD-1000 closeAllowed=yes after TASK-BUD-1002 dependency completion."
     }
   ]
 }

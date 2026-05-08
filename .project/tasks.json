@@ -22308,7 +22308,7 @@
     {
       "id": "TASK-BUD-1000",
       "description": "[P1/agent-first] Formalizar modo operacional agent-first: control plane prepara pacote, delega a worker quando local-safe, valida resultado e só implementa manualmente infraestrutura/gates.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "docs/research/agent-first-operating-mode-2026-05.md",
@@ -22322,16 +22322,18 @@
         "Incluir métrica simples de mix: trabalho feito por worker vs control plane e próximo limiar de promoção."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Criada por steering humano: reduzir trabalho direto do control plane e focar em melhorar agentes para assumirem mais trabalho. Dependências conceituais já concluídas: TASK-BUD-989/TASK-BUD-998; não foram ligadas como depends_on para evitar coupling protegido no board.\n[provenance:human] source_task=none reason=Usuário observou que o control plane estava executando tarefas finais demais; objetivo é caminhar para control plane mínimo e agentes assumindo execução.\n[worker-first] Executed read-only worker `task-bud-1000-agent-first-invocation-design-review` (DashScope qwen3-coder-plus) against subagents/workflows/jit/ant-colony/current agent-run surfaces. Worker PASS recommended typed AgentInvocationSpec/createAgentInvoker style surface to eliminate hand-assembled argv while preserving registry, budget, declared files, timeout, non-empty output, and outcome contract. Created docs/research/agent-first-operating-mode-2026-05.md and child TASK-BUD-1002 for the report-only spec primitive. TASK-BUD-1000 remains in-progress as umbrella until child implementation path is validated."
+      "notes": "Criada por steering humano: reduzir trabalho direto do control plane e focar em melhorar agentes para assumirem mais trabalho. Dependências conceituais já concluídas: TASK-BUD-989/TASK-BUD-998; não foram ligadas como depends_on para evitar coupling protegido no board.\n[provenance:human] source_task=none reason=Usuário observou que o control plane estava executando tarefas finais demais; objetivo é caminhar para control plane mínimo e agentes assumindo execução.\n[worker-first] Executed read-only worker `task-bud-1000-agent-first-invocation-design-review` (DashScope qwen3-coder-plus) against subagents/workflows/jit/ant-colony/current agent-run surfaces. Worker PASS recommended typed AgentInvocationSpec/createAgentInvoker style surface to eliminate hand-assembled argv while preserving registry, budget, declared files, timeout, non-empty output, and outcome contract. Created docs/research/agent-first-operating-mode-2026-05.md and child TASK-BUD-1002 for the report-only spec primitive. TASK-BUD-1000 remains in-progress as umbrella until child implementation path is validated.\nCompleted agent-first umbrella: doctrine documented and first typed invocation-layer primitive implemented as report-only/no-dispatch. Next task can be TASK-BUD-1001 small-mutation worker canary after reload and explicit execution confirmation.",
+      "depends_on": [
+        "TASK-BUD-1002"
+      ],
+      "verification": "VERIF-TASK-BUD-1000-AGENT-FIRST-OPERATING-MODE"
     },
     {
       "id": "TASK-BUD-1002",
       "description": "[P1/agent-first] Implementar primitiva report-only de AgentInvocationSpec para chamar agentes sem argv manual, preservando budget, escopo, perfis e confirmação humana.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
-      "depends_on": [
-        "TASK-BUD-1000"
-      ],
+      "depends_on": [],
       "files": [
         "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
         "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
@@ -22345,7 +22347,8 @@
         "Testar bloqueios para budget stale/mismatch, protected scope, missing files/validation e output contract obrigatório."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Criada a partir do worker PASS task-bud-1000-agent-first-invocation-design-review: próxima menor fatia é uma spec tipada/ergonômica para invocação de agentes, antes de qualquer mutação canary.\n[provenance:tangent-approved] source_task=TASK-BUD-1000 reason=Worker design review recomendou createAgentInvoker/AgentInvocationSpec para eliminar argv manual e manter governança."
+      "notes": "Criada a partir do worker PASS task-bud-1000-agent-first-invocation-design-review: próxima menor fatia é uma spec tipada/ergonômica para invocação de agentes, antes de qualquer mutação canary.\n[provenance:tangent-approved] source_task=TASK-BUD-1000 reason=Worker design review recomendou createAgentInvoker/AgentInvocationSpec para eliminar argv manual e manter governança.\nCompleted first local-safe implementation slice for typed agent invocation specs. Execution remains report-only/no-dispatch; live use requires reload before trusting new tool registration.",
+      "verification": "VERIF-TASK-BUD-1002-AGENT-INVOCATION-SPEC-PACKET"
     }
   ]
 }

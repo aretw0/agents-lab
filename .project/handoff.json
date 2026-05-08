@@ -1,55 +1,56 @@
 {
-  "timestamp": "2026-05-07T23:43:10.666Z",
-  "context": "Switched to agent-first execution per human steering. Prepared and executed one read-only worker, task-bud-1000-agent-first-invocation-design [snip] until implementation path is validated. [truncated:+483 chars]",
-  "current_tasks": [
-    "TASK-BUD-1000"
-  ],
+  "timestamp": "2026-05-08T00:01:57.844Z",
+  "context": "Completed agent-first lane umbrella and first typed invocation-layer slice. Prior worker PASS was codified in docs/research/agent-first-opera [snip] ed completed with verification entries. [truncated:+634 chars]",
   "next_actions": [
-    "Commit agent-first doc, TASK-BUD-1000 update, TASK-BUD-1002 seed, and handoff.",
-    "Next focus should be TASK-BUD-1002: implement report-only AgentInvocationSpec packet so contro [snip] onger hand-assembles argv. [truncated:+12 chars]",
-    "Do not run mutation canary TASK-BUD-1001 until TASK-BUD-1002 exists and is validated."
+    "Commit the TASK-BUD-1002/TASK-BUD-1000 implementation and board verification changes.",
+    "Run /reload before trusting the newly registered agent_invocation_spec_packet live tool in this session.",
+    "After reload, prepare TASK-BUD-1001 small-mutation worker canary using the typed invocation sp [snip] plicit human confirmation. [truncated:+41 chars]"
   ],
   "blockers": [
-    "Current worker execution still required manual argv because TASK-BUD-1002 is not implemented yet.",
-    "No mutation canary until typed invocation packet exists.",
-    "Background/multi-worker still needs process lifecycle/port lease capabilities."
+    "New live tool registration requires runtime reload before use.",
+    "TASK-BUD-1001 still requires explicit human confirmation for worker execution.",
+    "Disk remains tight; keep validation bounded."
   ],
   "recent_validation": [
-    "agent_run_operator_packet TASK-BUD-1000 -> ready-for-human-decision dispatch=no",
-    "worker task-bud-1000-agent-first-invocation-design-review -> exit_code=0 output_bytes=2451 PASS",
-    "safe_marker_check worker log -> pass"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporte [snip] > 1 file / 22 tests passed [truncated:+7 chars]",
+    "safe_marker_check guardrails-core-agent-run-start.ts -> pass",
+    "safe_marker_check guardrails-core-agent-spawn-readiness-surface.ts -> pass"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1000",
     "canonical_links": [
       "task:TASK-BUD-1000",
-      "task:TASK-BUD-1000-AGENT-FIRST-INVOCATION-DESIGN-REVIEW",
-      "task:TASK-BUD-1002"
+      "task:TASK-BUD-1002",
+      "commit:78f82527"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-07T23:43:10.666Z",
+    "generatedAtIso": "2026-05-08T00:01:57.844Z",
     "level": "ok",
-    "percent": 50,
+    "percent": 28,
     "action": "continue",
-    "recommendation": "commit-worker-derived-agent-first-plan-then-implement-task-bud-1002",
+    "recommendation": "commit-agent-invocation-spec-packet-then-reload-before-next-worker",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-07T23:43:10.666Z",
+      "atIso": "2026-05-08T00:01:57.844Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 50,
+      "percent": 28,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-worker-derived-agent-first-plan-then-implement-task-bud-1002"
+      "recommendation": "commit-agent-invocation-spec-packet-then-reload-before-next-worker"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-1000"
   ]
 }

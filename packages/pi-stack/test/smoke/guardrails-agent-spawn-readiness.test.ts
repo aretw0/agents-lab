@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -219,6 +219,59 @@ describe("agent spawn readiness contract", () => {
     expect(result.startPacket.commandPreview.args).toContain("--print");
     expect(result.startPacket.commandPreview.args).toContain("@packages/pi-stack/extensions/guardrails-core-agent-run-start.ts");
     expect(result.validationChecklist.join("\n")).toContain("file_contract=read-only");
+  });
+
+  it("builds typed agent invocation specs without dispatching", () => {
+    const generatedAtIso = new Date().toISOString();
+    const readOnly = buildAgentInvocationSpecPacket({
+      taskId: "TASK-BUD-1002",
+      purpose: "spec-review",
+      profile: "read-only-review",
+      goal: "Review typed invocation spec and return PASS or FAIL.",
+      providerModelRef: "dashscope/qwen3-coder-plus",
+      cwd: process.cwd(),
+      declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+      budgetDecision: "ok",
+      budgetEvidence: "dashscope ok generatedAt=now",
+      budgetEvidenceSource: "route-advisory",
+      budgetEvidenceProvider: "dashscope",
+      budgetEvidenceGeneratedAtIso: generatedAtIso,
+    });
+
+    expect(readOnly).toMatchObject({
+      mode: "agent-invocation-spec-packet",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      requiresHumanDecision: true,
+      singleRunOnly: true,
+      decision: "ready-for-human-decision",
+      blockers: [],
+    });
+    expect(readOnly.invocationSpec.profile).toBe("read-only-review");
+    expect(readOnly.invocationSpec.fileContract).toBe("read-only");
+    expect(readOnly.invocationSpec.outputContract).toBe("non-empty-text");
+    expect(readOnly.invocationSpec.executionPreview.args).toContain("@packages/pi-stack/extensions/guardrails-core-agent-run-start.ts");
+
+    const mutationBlocked = buildAgentInvocationSpecPacket({
+      ...readOnly.invocationSpec,
+      profile: "small-mutation",
+      fileContract: "mutation",
+    });
+    expect(mutationBlocked.decision).toBe("blocked");
+    expect(mutationBlocked.blockers).toContain("validation-required-for-mutation-profile");
+    expect(mutationBlocked.blockers).toContain("rollback-required-for-mutation-profile");
+
+    const mutationReady = buildAgentInvocationSpecPacket({
+      ...readOnly.invocationSpec,
+      profile: "small-mutation",
+      fileContract: "mutation",
+      validation: ["npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot"],
+      rollback: ["git restore packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+    });
+    expect(mutationReady.decision).toBe("ready-for-human-decision");
+    expect(mutationReady.invocationSpec.fileContract).toBe("mutation");
   });
 
   it("accepts fresh structured budget evidence and blocks stale or mismatched route evidence", () => {
@@ -621,6 +674,58 @@ describe("agent spawn readiness contract", () => {
     expect(result.details?.decision).toBe("ready-for-human-decision");
     expect(result.content?.[0]?.text).toContain("agent-run-operator-packet: decision=ready-for-human-decision");
     expect(result.content?.[0]?.text).not.toContain('"commandPreview"');
+  });
+
+  it("exposes typed agent_invocation_spec_packet as report-only tool", async () => {
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    guardrailsCore(pi);
+
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_invocation_spec_packet");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+
+    const result = await tool.execute(
+      "tc-agent-invocation-spec-packet",
+      {
+        task_id: "TASK-BUD-1002",
+        purpose: "typed-spec",
+        profile: "small-mutation",
+        goal: "prepare a tiny patch and return PASS or FAIL",
+        provider_model_ref: "dashscope/qwen3-coder-plus",
+        declared_files: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+        validation: ["npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot"],
+        rollback: ["git restore packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+        budget_decision: "ok",
+        budget_evidence: "dashscope ok",
+        budget_evidence_source: "route-advisory",
+        budget_evidence_provider: "dashscope",
+        budget_evidence_generated_at_iso: new Date().toISOString(),
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+
+    expect(result.details?.mode).toBe("agent-invocation-spec-packet");
+    expect(result.details?.dispatchAllowed).toBe(false);
+    expect(result.details?.processStartAllowed).toBe(false);
+    expect(result.details?.decision).toBe("ready-for-human-decision");
+    expect(result.content?.[0]?.text).toContain("agent-invocation-spec-packet: decision=ready-for-human-decision");
+    expect(result.content?.[0]?.text).not.toContain('"executionPreview"');
   });
 
   it("exposes agent run status, log tail, and abort surfaces", async () => {

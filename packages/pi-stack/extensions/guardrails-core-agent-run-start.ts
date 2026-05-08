@@ -4,6 +4,7 @@ export type AgentRunExecutorKind = "pi-print-subprocess";
 export type AgentRunStartDecision = "ready-for-human-decision" | "blocked";
 export type AgentRunBudgetDecision = ProviderExecutionBudgetDecision;
 export type AgentRunOperatorFileContract = "read-only" | "mutation";
+export type AgentInvocationProfile = "read-only-review" | "small-mutation" | "test-fix" | "research";
 
 export interface AgentRunStartPacketInput {
   runId?: string;
@@ -128,6 +129,38 @@ export interface AgentRunOperatorPacketResult {
   summary: string;
 }
 
+export interface AgentInvocationSpecPacketInput extends AgentRunOperatorPacketInput {
+  profile?: AgentInvocationProfile | string;
+  validation?: string[];
+  rollback?: string[];
+  outputSchema?: string;
+}
+
+export interface AgentInvocationSpecPacketResult {
+  mode: "agent-invocation-spec-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  requiresHumanDecision: true;
+  singleRunOnly: true;
+  decision: AgentRunStartDecision;
+  recommendationCode: AgentRunStartPacketResult["recommendationCode"] | "agent-invocation-spec-blocked-profile" | "agent-invocation-spec-blocked-validation" | "agent-invocation-spec-blocked-rollback";
+  blockers: string[];
+  invocationSpec: AgentRunOperatorPacketResult["runSpec"] & {
+    profile: AgentInvocationProfile | "unknown";
+    validation: string[];
+    rollback: string[];
+    outputSchema?: string;
+    outputContract: "non-empty-text" | "structured-schema";
+    executionPreview: AgentRunStartPacketResult["commandPreview"];
+  };
+  operatorPacket: AgentRunOperatorPacketResult;
+  nextActions: string[];
+  humanConfirmationPhrase: string;
+  summary: string;
+}
+
 const AGENT_RUN_START_TIMEOUT_MIN_MS = 5_000;
 const AGENT_RUN_START_TIMEOUT_MAX_MS = 180_000;
 const READ_ONLY_TOOL_ALLOWLIST = ["read", "grep", "find", "ls"];
@@ -161,6 +194,10 @@ function normalizeExtensionIsolation(value: unknown): "minimal-no-extensions" | 
 
 function normalizeFileContract(value: unknown): AgentRunOperatorFileContract {
   return value === "mutation" ? "mutation" : "read-only";
+}
+
+function normalizeInvocationProfile(value: unknown): AgentInvocationProfile | "unknown" {
+  return value === "read-only-review" || value === "small-mutation" || value === "test-fix" || value === "research" ? value : "unknown";
 }
 
 function sanitizeRunIdPart(value: string): string {
@@ -371,6 +408,74 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
       `budget=${startPacket.runSpec.budgetDecision}`,
       "dispatch=no",
       startPacket.blockers.length > 0 ? `blockers=${startPacket.blockers.join("|")}` : undefined,
+    ].filter(Boolean).join(" "),
+  };
+}
+
+export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketInput = {}): AgentInvocationSpecPacketResult {
+  const profile = normalizeInvocationProfile(input.profile ?? "read-only-review");
+  const validation = normalizeStringArray(input.validation);
+  const rollback = normalizeStringArray(input.rollback);
+  const outputSchema = normalizeText(input.outputSchema);
+  const fileContract = normalizeFileContract(input.fileContract ?? (profile === "small-mutation" || profile === "test-fix" ? "mutation" : "read-only"));
+  const operatorPacket = buildAgentRunOperatorPacket({
+    ...input,
+    fileContract,
+  });
+  const blockers = [...operatorPacket.blockers];
+  let recommendationCode: AgentInvocationSpecPacketResult["recommendationCode"] = operatorPacket.recommendationCode;
+  const block = (code: AgentInvocationSpecPacketResult["recommendationCode"], blocker: string) => {
+    if (blockers.length === 0 || recommendationCode === operatorPacket.recommendationCode) recommendationCode = code;
+    blockers.push(blocker);
+  };
+
+  if (profile === "unknown") block("agent-invocation-spec-blocked-profile", "profile-unsupported");
+  if ((profile === "small-mutation" || profile === "test-fix") && validation.length === 0) block("agent-invocation-spec-blocked-validation", "validation-required-for-mutation-profile");
+  if ((profile === "small-mutation" || profile === "test-fix") && rollback.length === 0) block("agent-invocation-spec-blocked-rollback", "rollback-required-for-mutation-profile");
+
+  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  if (decision === "ready-for-human-decision") recommendationCode = "agent-run-start-ready-for-human-decision";
+
+  return {
+    mode: "agent-invocation-spec-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    requiresHumanDecision: true,
+    singleRunOnly: true,
+    decision,
+    recommendationCode,
+    blockers,
+    invocationSpec: {
+      ...operatorPacket.runSpec,
+      profile,
+      validation,
+      rollback,
+      ...(outputSchema ? { outputSchema } : {}),
+      outputContract: outputSchema ? "structured-schema" : "non-empty-text",
+      executionPreview: operatorPacket.startPacket.commandPreview,
+    },
+    operatorPacket,
+    nextActions: decision === "ready-for-human-decision"
+      ? [
+          "ask for the exact human confirmation phrase before execution",
+          "registry-upsert running before invoking the execution preview",
+          "execute through the typed invocation spec instead of hand-assembling argv",
+          "after exit, evaluate agent_run_outcome_packet with the declared file contract",
+        ]
+      : ["resolve invocation spec blockers before any dispatch"],
+    humanConfirmationPhrase: operatorPacket.humanConfirmationPhrase,
+    summary: [
+      "agent-invocation-spec-packet:",
+      `decision=${decision}`,
+      `profile=${profile}`,
+      `runId=${operatorPacket.runSpec.runId || "unknown"}`,
+      `fileContract=${fileContract}`,
+      `files=${operatorPacket.runSpec.declaredFiles.length}`,
+      `budget=${operatorPacket.runSpec.budgetDecision}`,
+      "dispatch=no",
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),
   };
 }
