@@ -1,54 +1,53 @@
 {
-  "timestamp": "2026-05-08T01:59:23.212Z",
-  "context": "Completed TASK-BUD-1008: first small code mutation worker using OpenAI Codex Spark model-specific quota. Explicit confirmation received. Work [snip] rk around 82-83%. Board task completed. [truncated:+907 chars]",
+  "timestamp": "2026-05-08T02:01:30.150Z",
+  "context": "User steering after TASK-BUD-1008: agents are now trustworthy enough to work, but the stack should not use them manually/disconnected from th [snip] nted, not equivalent to subagent lane). [truncated:+663 chars]",
+  "current_tasks": [
+    "TASK-BUD-1009"
+  ],
   "next_actions": [
-    "Commit code/docs/board/handoff changes.",
-    "Stop after this worker per outcome recommendation.",
-    "After reload, future agent packets may use openai-codex/gpt-5.3-codex-spark evidence explicitl [snip] codex block as exhaustive. [truncated:+39 chars]"
+    "Commit TASK-BUD-1009 board/handoff evidence.",
+    "After reload, run TASK-BUD-1009 as read-only design matrix, not worker dispatch.",
+    "Then implement next first-party primitive/runner slice based on that matrix."
   ],
   "blockers": [
-    "Runtime extension change requires /reload before trusting live route advisory/ [snip] rom the modified code. [truncated:+13 chars]",
-    "No parallel/background/colony promotion yet."
+    "Reload pending after TASK-BUD-1008 runtime changes; avoid trusting live route [snip] y output until reload. [truncated:+7 chars]",
+    "No new worker dispatch in this design step."
   ],
   "recent_validation": [
-    "worker log PASS and [worker-exit-code] 0",
-    "safe_marker_check type/formatting/test/log/doc markers -> pass",
-    "npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -t targeted -> 1 passed"
+    "board_task_create TASK-BUD-1009 -> planned",
+    "read pi-jit-agents README and agent-spec d.ts",
+    "read pi-workflows README"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1008",
+    "focus": "TASK-BUD-1009",
     "canonical_links": [
-      "task:TASK-BUD-1008",
-      "task:TASK-BUD-1008-CODEX-SPARK-MODEL-BUDGET-ROUTE"
+      "task:TASK-BUD-1009",
+      "task:TASK-BUD-1008"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T01:59:23.212Z",
+    "generatedAtIso": "2026-05-08T02:01:30.150Z",
     "level": "ok",
-    "percent": 45,
+    "percent": 47,
     "action": "continue",
-    "recommendation": "commit-codex-spark-scope-hardening-and-reload-before-use",
+    "recommendation": "commit-agent-architecture-design-task-and-wait-for-reload-before-live-runtime-use",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
-    "focus_task_status": "completed"
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T01:59:23.212Z",
+      "atIso": "2026-05-08T02:01:30.150Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 45,
+      "percent": 47,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-codex-spark-scope-hardening-and-reload-before-use"
+      "recommendation": "commit-agent-architecture-design-task-and-wait-for-reload-before-live-runtime-use"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-1008"
   ]
 }
