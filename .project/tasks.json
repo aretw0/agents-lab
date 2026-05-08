@@ -23290,6 +23290,282 @@
       "milestone": "single-worker-board-driven-lane-2026-05",
       "notes": "Criado a partir do steer do operador: pi-stack pode ser instalada em vários contextos; o primeiro hatch deve descobrir onde está e entrevistar o operador quando contexto estiver ausente.\n[provenance:human] source_task=none reason=Tornar discoverability inicial e UX de entrevista parte dos defaults de projeto novo/vazio.\nRegistered first-hatch intake: discover local context/sandbox, treat empty workspace as interview cue, and keep default report-only/local-safe.",
       "verification": "VERIF-TASK-BUD-1045-FIRST-HATCH-INTAKE"
+    },
+    {
+      "id": "TASK-BUD-1046",
+      "description": "[queen-lane] Criar lane canônica para convergir queen/first-hatch/local-continuity em backlog hard+soft de melhoramento contínuo.",
+      "status": "completed",
+      "priority": "p0",
+      "files": [
+        "docs/research/queen-continuous-improvement-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Documento separa hard intent (código/runtime/tools/tests) de soft intent (skills/prompts/docs/UX).",
+        "Documento referencia os contratos existentes em vez de criar processo paralelo: project-intake, nudge-free/local-continuity, structured_interview_plan, context_watch, board, agent_run gates.",
+        "Documento define ordem de maturação: report-only/packet -> dry-run -> canary local-safe -> batch bounded.",
+        "Documento registra o perfil queen do agents-lab como iteração contínua de melhoramento."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Materializar a conversa em uma lane única para reduzir repetição e convergir o potencial em backlog executável.\n[provenance:human] source_task=none reason=Operador quer deixar o control-plane em loop de melhoramento contínuo com hard/soft intents organizados.\nMaterialized queen continuous-improvement lane with hard+soft backlog and assisted/self-critical semantics.",
+      "verification": "VERIF-TASK-BUD-1046-QUEEN-LANE-MATERIALIZED"
+    },
+    {
+      "id": "TASK-BUD-1047",
+      "description": "[hard-intent/first-hatch] Implementar packet/tool report-only de primeiro hatch: descoberta local-safe de workspace, sandbox, artefatos e perguntas faltantes.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1046"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-intake-primitive.ts",
+        "packages/pi-stack/test/smoke/project-intake-primitive.test.ts",
+        "docs/primitives/project-intake.md"
+      ],
+      "acceptance_criteria": [
+        "Tool/packet retorna modo report-only, dispatchAllowed=false, mutationAllowed=false e authorization=none.",
+        "Detecta/recebe sinais de repo, pasta vazia, sandbox/worktree, artefatos locais, build/tests/CI/docs/configs/.project/.pi e recursos visíveis.",
+        "Quando contexto é ausente/vazio, retorna entrevista curta para operador em vez de bloquear passivamente.",
+        "Teste cobre pasta vazia, repo médio e protected_scope_requested bloqueado."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Hard intent: transformar o hatch documentado em superfície first-party testada.\n[provenance:human] source_task=none reason=Primeiro hatch deve ajudar qualquer instalação pi-stack a entender onde está."
+    },
+    {
+      "id": "TASK-BUD-1048",
+      "description": "[hard-intent/queen] Implementar packet report-only de descoberta de perfil queen: intenção, autonomia, recursos, ROI, limites e stop conditions.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1046"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-local-slice-contracts.ts",
+        "packages/pi-stack/extensions/guardrails-core-structured-interview-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "Packet compõe sinais existentes e não cria executor/gate paralelo.",
+        "Quando faltam dados do operador, retorna perguntas curtas estilo structured_interview_plan.",
+        "Inclui perfil default agents-lab: iteração contínua de melhoramento local-safe.",
+        "Preserva protected scopes e dispatchAllowed=false.",
+        "Teste cobre perfil completo, perfil ausente e bloqueio protected."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Hard intent: tornar queen discoverability uma superfície report-only testável.\n[provenance:human] source_task=none reason=Control-plane deve descobrir perfil/contexto antes de ficar passivo ou pedir micro-autorização."
+    },
+    {
+      "id": "TASK-BUD-1049",
+      "description": "[hard-intent/local-batch] Implementar packet report-only de manifestação mínima do operador para batch local-safe.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1048"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-local-slice-contracts.ts",
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-local-batch-contract.test.ts",
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "Aceita seed/foco e limites/exceções opcionais; defaults sane cobrem commit/checkpoint/validação/rollback.",
+        "Mapeia a manifestação para contratos existentes sem autorizar protected scopes.",
+        "Retorna stop conditions, escopo permitido, perfis permitidos e próximos packets necessários.",
+        "Permanece report-only; não despacha worker, scheduler ou loop.",
+        "Teste cobre manifestação mínima, limites customizados e tentativa protected."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Hard intent: o operador declara direção e exceções; o control-plane materializa contrato auditável sem verbosidade.\n[provenance:human] source_task=none reason=Reduzir repetição do operador e transformar sane defaults em schema."
+    },
+    {
+      "id": "TASK-BUD-1050",
+      "description": "[hard-intent/capability-roi] Implementar packet de discoverability de capacidades/ROI para recomendar ferramentas, workers ou outras capacidades disponíveis.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1048"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts",
+        "packages/pi-stack/extensions/provider-readiness.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts",
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "Packet lista capacidades úteis disponíveis com valor/risco/esforço e recomendação curta.",
+        "Recomenda workers/capacidades quando reduzem tempo, risco ou carga cognitiva.",
+        "Quando autorização é necessária, retorna entrevista curta e provável autorização, não detalhes excessivos.",
+        "Não altera settings/provider nem despacha execução.",
+        "Teste cobre capacidades locais, worker recomendado e capacidade bloqueada/protected."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Hard intent: tornar proatividade por ROI uma superfície explícita e auditável.\n[provenance:human] source_task=none reason=Control-plane deve revelar potencial disponível em vez de esconder o jogo."
+    },
+    {
+      "id": "TASK-BUD-1051",
+      "description": "[hard-intent/batch-dispatch] Projetar e implementar canário dry-run para consumir autorização de batch sem burlar gates de dispatch inferiores.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1049",
+        "TASK-BUD-1050"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/research/queen-continuous-improvement-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Define como uma autorização de batch gera/valida runIds planejados sem aceitar dispatch genérico inseguro.",
+        "Primeira versão é dry-run/report-only e mostra exatamente quais workers seriam iniciados e por quê.",
+        "Preserva single-worker por vez, local-safe, stop conditions e outcome obrigatório.",
+        "Bloqueia protected scope, multi-worker, scheduler e repeat persistente.",
+        "Teste cobre autorização válida, runId fora do batch e protected scope."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Hard intent: ponte segura entre contrato de batch e gate de dispatch, sem bypass.\n[provenance:human] source_task=none reason=Operador quer parar de autorizar worker por worker, mas preservar contratos inferiores."
+    },
+    {
+      "id": "TASK-BUD-1052",
+      "description": "[hard-intent/loop-canary] Implementar canário de loop local-safe bounded para melhoria contínua: selecionar, executar/packetizar, validar, commitar, checkpointar e reavaliar stop conditions.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1049",
+        "TASK-BUD-1051"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "Primeira versão é canário bounded, desabilitado/dry-run por default, sem scheduler persistente.",
+        "Loop só continua quando git limpo/esperado, contexto ok, validação conhecida e protected scopes ausentes.",
+        "Cada slice exige evidência, commit pequeno quando houver diff validado e checkpoint.",
+        "Para graciosamente em compact/reload/machine pressure/budget block/no eligible task/outcome fail repetido.",
+        "Teste cobre continue, checkpoint, stop por dirty, stop por protected e stop por compact."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Hard intent: materializar melhoria contínua local-safe como canário, sem autopromoção insegura.\n[provenance:human] source_task=none reason=Operador quer deixar o control-plane em loop de melhoramento contínuo com graciosidade."
+    },
+    {
+      "id": "TASK-BUD-1053",
+      "description": "[soft-intent/skill] Criar skill leve para queen/first-hatch/local-continuity: como descobrir perfil, entrevistar operador e aplicar defaults sem verbosidade.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1046"
+      ],
+      "files": [
+        "packages/pi-skills/skills/queen-continuity/SKILL.md",
+        "packages/pi-skills/package.json",
+        "packages/pi-skills/README.md"
+      ],
+      "acceptance_criteria": [
+        "Skill explica quando usar: workspace novo, falta de diretriz, autorização ampla, melhoria contínua local-safe.",
+        "Skill aponta para primitives existentes e evita vocabulário paralelo.",
+        "Skill inclui entrevista curta e template mínimo de manifestação.",
+        "Skill preserva protected scopes e stop conditions.",
+        "Validação por marker check e i18n lint."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Soft intent: tornar o padrão recuperável como skill para futuras sessões/projetos.\n[provenance:human] source_task=none reason=Não depender de repetir a conversa; transformar em instrução reaproveitável."
+    },
+    {
+      "id": "TASK-BUD-1054",
+      "description": "[soft-intent/prompt] Criar prompt template de hatch/queen para operador iniciar batch local-safe com seed/foco e defaults sane.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1053"
+      ],
+      "files": [
+        "packages/pi-skills/prompts/hatch.md",
+        "packages/pi-skills/package.json",
+        "packages/pi-skills/README.md"
+      ],
+      "acceptance_criteria": [
+        "Prompt oferece UX curta para seed/foco/limites opcionais.",
+        "Prompt explica capacidades/ROI disponíveis sem despejar detalhes de implementação.",
+        "Prompt aciona entrevista curta quando contexto está vazio ou sem diretriz.",
+        "Prompt não autoriza protected scope nem dispatch irreversível.",
+        "Validação por marker check/i18n lint."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Soft intent: discoverability direta para operador sem precisar lembrar o vocabulário interno.\n[provenance:human] source_task=none reason=Operador quer uma manifestação curta para liberar batch e deixar control-plane trabalhar."
+    },
+    {
+      "id": "TASK-BUD-1055",
+      "description": "[soft-intent/research] Estudar prior art de hatch/intake/autonomy profile em pi ecosystem, Claude Code e ferramentas similares para melhorar UX sem bloquear defaults atuais.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-1046"
+      ],
+      "files": [
+        "docs/research/queen-first-hatch-prior-art-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Pesquisa compara padrões de onboarding/intake/profile/autonomy em pelo menos 3 referências relevantes.",
+        "Registra o que aproveitar na pi-stack sem copiar complexidade desnecessária.",
+        "Separa descobertas soft intent de hard intent implementável.",
+        "Não bloqueia hatch local-safe mínimo já documentado.",
+        "Inclui links/evidência quando possível."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Soft intent/pesquisa: aprender com ecossistemas sem transformar prior art em pré-requisito para o básico.\n[provenance:human] source_task=none reason=Operador apontou que podemos aprender com pi ecosystem, Claude Code e similares."
+    },
+    {
+      "id": "TASK-BUD-1056",
+      "description": "[hard-intent/context] Implementar packet/gate de reload-before-compact: se reload é necessário e compactação se aproxima, checkpointar e pedir reload antes de auto-resume ficar suprimido.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1046"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-reload-intent.ts",
+        "packages/pi-stack/extensions/context-watchdog-operator-signals.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-runtime-reload.test.ts",
+        "docs/research/queen-continuous-improvement-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Packet compõe reloadGate, context level/percent, handoff freshness e pending source/tool changes.",
+        "Quando reload é necessário mas pode ser adiado, recomenda continuar local-safe curto.",
+        "Quando compactação/reload inevitável se aproxima, recomenda checkpoint + pedir reload antes da compactação.",
+        "Não dispara reload sozinho e não suprime auto-resume; apenas produz decisão/nextAction auditável.",
+        "Teste cobre reload-not-required, reload-needed-but-deferrable e reload-before-compact recomendado."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Criado a partir do steer do operador: loop é assistido, e reload deve ser coordenado graciosamente antes de compactação inevitável quando isso evita travar auto-resume.\n[provenance:human] source_task=none reason=Consolidar exemplo reload/compact como hard intent do loop assistido e gracioso."
+    },
+    {
+      "id": "TASK-BUD-1057",
+      "description": "[soft-intent/queen] Documentar que o loop queen/agents-lab é assistido e auto-crítico, não desassistido: usar recursos maduros, pedir intervenção só quando necessário.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1046"
+      ],
+      "files": [
+        "docs/research/queen-continuous-improvement-lane-2026-05.md",
+        "packages/pi-skills/skills/queen-continuity/SKILL.md"
+      ],
+      "acceptance_criteria": [
+        "Documento/skill diferencia loop assistido de unattended/desassistido.",
+        "Registra mentalidade auto-crítica/cientista: usar recursos maduros, observar falhas, criar hardening e parar quando evidência exigir.",
+        "Inclui reload/compact/host pressure como exemplos de intervenção operacional, não falha do loop.",
+        "Evita prometer automação irrestrita ou sem operador."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Soft intent: preservar nuance do operador — melhoria contínua não significa abandonar supervisão; significa reduzir micro-autorização e pedir ajuda quando realmente precisa.\n[provenance:human] source_task=none reason=Operador quer loop de melhoramento contínuo assistido por recursos, não desassistido."
     }
   ]
 }
