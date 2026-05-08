@@ -22626,6 +22626,26 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Próximo elo após TASK-BUD-1013: sair de packet/start preview para runner first-party, mas sempre fail-closed e sem execução sem frase exata.\n[provenance:human] source_task=TASK-BUD-1013 reason=A ponte task-start foi validada ao vivo; falta o dispatch gate first-party para substituir invocação manual sem violar confirmação humana exata.\nImplemented `agent_run_task_dispatch` gated runner. Default path is preview-only; execute path is exact-confirmation gated and not exercised in tests/session.",
       "verification": "VERIF-TASK-BUD-1014-EXACT-CONFIRMATION-DISPATCH-GATE"
+    },
+    {
+      "id": "TASK-BUD-1015",
+      "description": "[agent-first/live-canary] Validar ao vivo, após reload, a nova superfície `agent_run_task_dispatch` nos caminhos preview-only e confirmation-mismatch, sem dispatch de worker.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`agent_run_task_dispatch` retorna mode=agent-run-task-dispatch para TASK-BUD-1015 no caminho preview.",
+        "Preview retorna decision=preview com dispatchAllowed=false e processStartAllowed=false.",
+        "Caminho execute=true com `operator_confirmation` incorreta retorna blocked e inclui operator-confirmation-mismatch.",
+        "Nenhum registry running é criado e nenhum worker/processo é despachado.",
+        "Resultado é registrado como verificação e handoff."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criado após reload para validar ao vivo o runner gate first-party sem usar confirmação correta e sem iniciar processo.\n[provenance:human] source_task=TASK-BUD-1014 reason=TASK-BUD-1014 implementou `agent_run_task_dispatch`; após reload precisamos validar os caminhos seguros de preview e mismatch.\nLive dispatch-gate canary passed safely: preview path returned dispatch=no; wrong-confirmation execute attempt failed closed before dispatch; status confirmed no run registry entry.",
+      "verification": "VERIF-TASK-BUD-1015-LIVE-DISPATCH-GATE-CANARY"
     }
   ]
 }

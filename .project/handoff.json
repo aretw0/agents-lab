@@ -1,32 +1,33 @@
 {
-  "timestamp": "2026-05-08T02:53:30.438Z",
-  "context": "Completed TASK-BUD-1014. Implemented first-party gated agent_run_task_dispatch. It composes task_start_packet; previews by default with dispa [snip] worker was dispatched in this session. [truncated:+377 chars]",
+  "timestamp": "2026-05-08T03:01:21.599Z",
+  "context": "After user confirmed reload, live-validated agent_run_task_dispatch safety gates. Created TASK-BUD-1015. Preview path execute=false returned [snip] ed TASK-BUD-1015. No worker dispatched. [truncated:+301 chars]",
   "next_actions": [
-    "Commit TASK-BUD-1014 implementation plus board/handoff changes.",
-    "After commit, /reload is required before trusting live agent_run_task_dispatch output because extension source changed.",
-    "Next possible slice after reload: live-canary agent_run_task_dispatch preview/mismatch only; d [snip] it exact phrase for runId. [truncated:+28 chars]"
+    "Commit TASK-BUD-1015 board/verification/handoff changes.",
+    "Next logical slice: harden live dispatch UX to expose mismatch as a pure preview/check path wi [snip] eck report-only primitive. [truncated:+87 chars]",
+    "Do not execute a worker unless operator explicitly provides exact phrase for a specific runId and asks to dispatch."
   ],
   "blockers": [
-    "Reload required after commit before using new dispatch tool live.",
-    "No worker dispatch authorized."
+    "No live preview blocker. Correct-confirmation dispatch remains untested and not authorized.",
+    "The execute=true mismatch canary is too close to protected dispatch and was bl [snip] -check primitive next. [truncated:+60 chars]"
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 29 passed",
-    "safe_marker_check guardrails-core-agent-spawn-readiness-surface.ts -> pass",
-    "safe_marker_check guardrails-agent-spawn-readiness.test.ts -> pass"
+    "agent_run_task_dispatch TASK-BUD-1015 execute=false -> decision=preview dispatch=no",
+    "execute=true wrong confirmation -> fail-closed blocked by runtime/guard before dispatch",
+    "agent_run_status task-bud-1015-live-dispatch-gate-canary -> found=no state=unknown dispatch=no"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1014",
+    "focus": "TASK-BUD-1015",
     "canonical_links": [
-      "task:TASK-BUD-1014"
+      "task:TASK-BUD-1015",
+      "task:TASK-BUD-1015-LIVE-DISPATCH-GATE-CANARY"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T02:53:30.438Z",
+    "generatedAtIso": "2026-05-08T03:01:21.599Z",
     "level": "ok",
-    "percent": 45,
+    "percent": 46,
     "action": "continue",
-    "recommendation": "commit-and-reload-before-live-dispatch-gate-canary",
+    "recommendation": "commit-dispatch-gate-canary-and-add-report-only-confirmation-check-next",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
@@ -34,20 +35,20 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T02:53:30.438Z",
+      "atIso": "2026-05-08T03:01:21.599Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 45,
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-and-reload-before-live-dispatch-gate-canary"
+      "recommendation": "commit-dispatch-gate-canary-and-add-report-only-confirmation-check-next"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-1014"
+    "TASK-BUD-1015"
   ]
 }

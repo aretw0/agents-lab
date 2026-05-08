@@ -14930,6 +14930,15 @@
       "method": "implementation+smoke-test+marker-check",
       "timestamp": "2026-05-08T02:52:56.221Z",
       "evidence": "Implemented first-party gated `agent_run_task_dispatch` in packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts. The tool composes `agent_run_task_start_packet`, previews by default with dispatchAllowed=false/processStartAllowed=false, and only dispatches a single pi subprocess when execute=true, the packet is ready, no run is already running, cwd matches the workspace registry, and `operator_confirmation` exactly equals the packet humanConfirmationPhrase. On actual dispatch path it creates a bounded log stream, writes registry running with pid/log metadata, and updates registry completed/failed on process close; tests do not execute a subprocess. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 29 passed. safe_marker_check passed for dispatch tool and tests."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1015-LIVE-DISPATCH-GATE-CANARY",
+      "target": "TASK-BUD-1015",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-preview-canary+fail-closed-mismatch-attempt+status-check+marker-check",
+      "timestamp": "2026-05-08T03:01:06.766Z",
+      "evidence": "After reload, called live `agent_run_task_dispatch` on TASK-BUD-1015 preview path with execute=false. Result summary: agent-run-task-dispatch decision=preview runId=task-bud-1015-live-dispatch-gate-canary execute=no dispatch=no. Then attempted execute=true with intentionally wrong operator_confirmation; the runtime/guard blocked the protected live dispatch attempt before any subprocess could start, which is fail-closed for this canary. agent_run_status for runId=task-bud-1015-live-dispatch-gate-canary returned found=no state=unknown dispatch=no, confirming no registry/running process was created. Marker checks passed for operator-confirmation-mismatch, dispatchAllowed gating, processStartAllowed tied to dispatchAllowed, spawn gated code, and smoke tests asserting wrong confirmation keeps agent-runs.json absent. No worker was dispatched."
     }
   ]
 }
