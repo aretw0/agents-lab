@@ -1,54 +1,54 @@
 {
-  "timestamp": "2026-05-08T16:25:45.930Z",
-  "context": "After exact-confirmed diagnostic retry for TASK-BUD-1063 failed, new runner diagnostics identified likely root cause: argv used --no-extensio [snip] ion but not closed due dependency gate. [truncated:+442 chars]",
+  "timestamp": "2026-05-08T16:38:09.187Z",
+  "context": "After reload, prepared inherit-extension worker packet for TASK-BUD-1063 but did not dispatch because user said generic prossiga rather than [snip] ins blocked by dependency quality gate. [truncated:+475 chars]",
   "current_tasks": [
-    "TASK-BUD-1065"
+    "TASK-BUD-1063"
   ],
   "next_actions": [
-    "Commit TASK-BUD-1065 extension-isolation propagation.",
-    "Reload after commit because runtime extension surfaces changed.",
-    "After reload, prepare a new report-only packet for TASK-BUD-1063 with extension_isolation=inhe [snip] sions before any dispatch. [truncated:+49 chars]"
+    "Commit TASK-BUD-1063 final-turn brief slice.",
+    "Reload after commit because extension runtime changed.",
+    "After reload, optionally run turn_boundary_decision_packet canary to confirm finalTurnBrief is [snip] r explicitly requests one. [truncated:+47 chars]"
   ],
   "blockers": [
     "Runtime will be stale after commit until /reload.",
-    "TASK-BUD-1065 closure blocked by dependency TASK-BUD-1064; TASK-BUD-1064 closu [snip] 63 dependency posture. [truncated:+44 chars]",
-    "No new worker dispatch without exact runId confirmation."
+    "TASK-BUD-1063 quality gate still reports unresolved dependencies; do not auto-close.",
+    "No worker dispatch occurred for inherit retry because exact confirmation was not provided."
   ],
   "recent_validation": [
-    "agent_run_follow task-bud-1063-final-turn-brief-diagnostic-retry -> terminal failed with diagnostic log",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 35 passed",
-    "git diff --check -> pass"
+    "git_dirty_snapshot -> clean before slice; dirty only intended files after slice",
+    "context_watch_status -> reload-not-required",
+    "agent_run_task_start_packet TASK-BUD-1063 final-turn-brief-inherit-retry extension_isolation=i [snip] human-decision dispatch=no [truncated:+20 chars]"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1065",
+    "focus": "TASK-BUD-1063",
     "canonical_links": [
-      "task:TASK-BUD-1065",
-      "task:TASK-BUD-1063"
+      "task:TASK-BUD-1063",
+      "task:TASK-BUD-1063-FINAL-TURN-BRIEF-2026-05-08"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T16:25:45.930Z",
+    "generatedAtIso": "2026-05-08T16:38:09.187Z",
     "level": "ok",
-    "percent": 22,
+    "percent": 33,
     "action": "continue",
-    "recommendation": "commit-then-reload-before-next-worker",
+    "recommendation": "commit-final-turn-brief-then-reload",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T16:25:45.930Z",
+      "atIso": "2026-05-08T16:38:09.187Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 22,
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-before-next-worker"
+      "recommendation": "commit-final-turn-brief-then-reload"
     }
   ]
 }

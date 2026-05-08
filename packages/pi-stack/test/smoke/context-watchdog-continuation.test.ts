@@ -232,4 +232,46 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.summary).toContain("growthDecision=needs-evidence");
     expect(packet.summary).toContain("growthCode=growth-maturity-needs-evidence");
   });
+
+  it("builds a context-rich final-turn brief instead of ids-only options", () => {
+    const packet = buildTurnBoundaryDecisionPacket({
+      ready: true,
+      focusTasks: "TASK-BUD-1063",
+      staleFocusCount: 0,
+      localAuditReasons: [],
+    });
+
+    expect(packet.finalTurnBrief.recommendedDecision).toContain("Consolidate the current lane");
+    expect(packet.finalTurnBrief.recommendedNextSteps.join("\n")).toContain("task title/context");
+    for (const option of packet.finalTurnBrief.optionBriefs) {
+      expect(option.title).not.toBe(option.id);
+      expect(option.context.length).toBeGreaterThan(20);
+      expect(option.whyItMatters.length).toBeGreaterThan(20);
+      expect(option.currentState.length).toBeGreaterThan(10);
+      expect(option.recommendedAction.length).toBeGreaterThan(20);
+    }
+    expect(packet.finalTurnBrief.optionBriefs.map((option) => option.id)).toEqual(["similar-lane", "next-high-value"]);
+  });
+
+  it("adds reload ritual only for clean runtime changes, not docs-only changes", () => {
+    const runtimePacket = buildTurnBoundaryDecisionPacket({
+      ready: true,
+      focusTasks: "TASK-BUD-1063",
+      staleFocusCount: 0,
+      localAuditReasons: [],
+      recentChange: { runtimeChanged: true, gitClean: true },
+    });
+    expect(runtimePacket.finalTurnBrief.reloadRitual.required).toBe(true);
+    expect(runtimePacket.finalTurnBrief.reloadRitual.action).toContain("/reload");
+
+    const docsPacket = buildTurnBoundaryDecisionPacket({
+      ready: true,
+      focusTasks: "TASK-BUD-1063",
+      staleFocusCount: 0,
+      localAuditReasons: [],
+      recentChange: { runtimeChanged: false, docsOnly: true, gitClean: true },
+    });
+    expect(docsPacket.finalTurnBrief.reloadRitual.required).toBe(false);
+    expect(docsPacket.finalTurnBrief.reloadRitual.reason).toContain("Only documentation changed");
+  });
 });

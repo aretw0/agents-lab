@@ -35,6 +35,11 @@ export type TurnBoundaryDirectionOptionId = "similar-lane" | "next-high-value";
 export interface TurnBoundaryDirectionOptionPreview {
   id: TurnBoundaryDirectionOptionId;
   label: string;
+  title: string;
+  context: string;
+  whyItMatters: string;
+  currentState: string;
+  recommendedAction: string;
   suitability: "recommended" | "viable" | "blocked";
   recommendationCode: string;
   nextStep: string;
@@ -62,6 +67,30 @@ export interface TurnBoundaryGrowthMaturitySnapshot {
   score?: number;
   recommendationCode?: string;
   freshness?: "fresh" | "stale" | "unknown";
+}
+
+export interface TurnBoundaryRecentChangeContext {
+  runtimeChanged?: boolean;
+  docsOnly?: boolean;
+  gitClean?: boolean;
+}
+
+export interface TurnBoundaryFinalTurnBrief {
+  recommendedDecision: string;
+  recommendedNextSteps: string[];
+  optionBriefs: Array<{
+    id: TurnBoundaryDirectionOptionId;
+    title: string;
+    context: string;
+    whyItMatters: string;
+    currentState: string;
+    recommendedAction: string;
+  }>;
+  reloadRitual: {
+    required: boolean;
+    reason: string;
+    action: string;
+  };
 }
 
 function toSnapshotGrowthMaturityPacket(
@@ -158,6 +187,7 @@ export interface TurnBoundaryDecisionPacket {
   growthMaturity?: GrowthMaturityScorePacket;
   growthSource?: TurnBoundaryGrowthSource;
   growthFresh?: TurnBoundaryGrowthFreshness;
+  finalTurnBrief: TurnBoundaryFinalTurnBrief;
   recommendationCode: ContextWatchContinuationRecommendationCode;
   dispatchAllowed: false;
   mutationAllowed: false;
@@ -326,6 +356,11 @@ function buildTurnBoundaryDirectionPreview(input: {
     {
       id: "similar-lane",
       label: "continue in a similar lane to consolidate",
+      title: "Consolidate the current lane",
+      context: "Stay near the current focus and finish the smallest validated follow-up before switching lanes.",
+      whyItMatters: "This preserves working memory, keeps rollback simple, and reduces context-switch risk.",
+      currentState: similarBlockers.length > 0 ? `blocked by ${similarBlockers.join(", ")}` : `available while turn decision is ${input.decision}`,
+      recommendedAction: similarSuitability === "blocked" ? "Do not continue this lane until blockers are resolved." : input.nextAutoStep,
       suitability: similarSuitability,
       recommendationCode:
         similarSuitability === "recommended"
@@ -339,6 +374,11 @@ function buildTurnBoundaryDirectionPreview(input: {
     {
       id: "next-high-value",
       label: "switch to the next lane with higher long-term value",
+      title: "Switch to the next high-value lane",
+      context: "Pause this lane and choose one explicit next focus with a report-only packet before execution.",
+      whyItMatters: "This is useful when the current lane is blocked or growth guidance supports a bounded expansion.",
+      currentState: nextLaneBlockers.length > 0 ? `needs ${nextLaneBlockers.join(", ")}` : "available after a concrete focus decision",
+      recommendedAction: "Choose one explicit next-lane focus task and run a report-only packet before execution.",
       suitability: nextLaneSuitability,
       recommendationCode:
         nextLaneSuitability === "recommended"
@@ -361,6 +401,47 @@ function buildTurnBoundaryDirectionPreview(input: {
   };
 }
 
+function buildTurnBoundaryFinalTurnBrief(input: {
+  directionPreview: TurnBoundaryDirectionPreview;
+  recentChange?: TurnBoundaryRecentChangeContext;
+}): TurnBoundaryFinalTurnBrief {
+  const recommended = input.directionPreview.options.find((option) => option.id === input.directionPreview.recommendedOptionId)
+    ?? input.directionPreview.options[0];
+  const runtimeChanged = input.recentChange?.runtimeChanged === true;
+  const docsOnly = input.recentChange?.docsOnly === true;
+  const gitClean = input.recentChange?.gitClean === true;
+  const reloadRequired = runtimeChanged && !docsOnly && gitClean;
+  const reloadRitual = reloadRequired
+    ? {
+        required: true,
+        reason: "Runtime/extension files changed and git is clean, so the current pi process may still be running older code.",
+        action: "Run /reload, then perform a small canary before further worker dispatch.",
+      }
+    : {
+        required: false,
+        reason: docsOnly ? "Only documentation changed; reload would not activate runtime behavior." : "No clean runtime-extension change requiring reload was reported.",
+        action: "Continue bounded work without a reload-specific ritual.",
+      };
+
+  return {
+    recommendedDecision: `${recommended.title}: ${recommended.recommendedAction}`,
+    recommendedNextSteps: [
+      recommended.recommendedAction,
+      reloadRitual.required ? reloadRitual.action : undefined,
+      "Keep the final response context-rich: include task title/context, why it matters, state, and next action rather than IDs only.",
+    ].filter((entry): entry is string => Boolean(entry)),
+    optionBriefs: input.directionPreview.options.map((option) => ({
+      id: option.id,
+      title: option.title,
+      context: option.context,
+      whyItMatters: option.whyItMatters,
+      currentState: option.currentState,
+      recommendedAction: option.recommendedAction,
+    })),
+    reloadRitual,
+  };
+}
+
 export function buildTurnBoundaryDecisionPacket(input: {
   ready: boolean;
   focusTasks: string;
@@ -368,6 +449,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
   localAuditReasons?: string[];
   growthMaturity?: TurnBoundaryGrowthMaturityInput;
   growthMaturitySnapshot?: TurnBoundaryGrowthMaturitySnapshot;
+  recentChange?: TurnBoundaryRecentChangeContext;
 }): TurnBoundaryDecisionPacket {
   const reasons = input.localAuditReasons ?? [];
   const recommendation = resolveContextWatchContinuationRecommendation(input);
@@ -439,6 +521,10 @@ export function buildTurnBoundaryDecisionPacket(input: {
   const directionOptionsCompact = directionPreview.options
     .map((option) => `${option.id}:${option.suitability}`)
     .join(",");
+  const finalTurnBrief = buildTurnBoundaryFinalTurnBrief({
+    directionPreview,
+    recentChange: input.recentChange,
+  });
 
   return {
     mode: "report-only",
@@ -452,6 +538,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     growthMaturity,
     growthSource,
     growthFresh,
+    finalTurnBrief,
     dispatchAllowed: false,
     mutationAllowed: false,
     authorization: "none",
