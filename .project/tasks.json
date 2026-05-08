@@ -22454,7 +22454,7 @@
     {
       "id": "TASK-BUD-1007",
       "description": "[P1/agent-first] Executar segundo canary tiny single-worker para consolidar liberação de subagentes: mutação mínima em arquivo declarado, economia crítica, outcome parent-side e commit pelo control plane.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1001",
@@ -22471,7 +22471,8 @@
         "Sem auto-retry, sem worker paralelo, sem colony/background."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Foco definido pelo operador: não gastar ciclo em tangentes como footer; priorizar sempre o que libera agentes. Esta é a segunda repetição tiny single-worker da escada de promoção.\n[provenance:human] source_task=TASK-BUD-1005 reason=Aplicar a escada de promoção de subagentes com repetição calibrada antes de qualquer promoção para mutação maior ou paralelismo.\n[agent-invocation-spec] Prepared second tiny single-worker canary packet focused on subagent promotion ladder, not footer tangent. runId=task-bud-1007-second-tiny-agent-canary, provider=dashscope/qwen3-coder-plus, declaredFiles=[docs/research/agent-run-provider-native-runner-2026-05.md], fileContract=mutation, economyMode=critical, maxOutputLines=20, timeoutMs=60000, budget=ok from route-advisory generatedAt=2026-05-08T01:29:55.743Z with manual scarce-quota caution. Packet decision=ready-for-human-decision dispatch=no. Registry state=planned. Await exact runId confirmation before dispatch."
+      "notes": "Foco definido pelo operador: não gastar ciclo em tangentes como footer; priorizar sempre o que libera agentes. Esta é a segunda repetição tiny single-worker da escada de promoção.\n[provenance:human] source_task=TASK-BUD-1005 reason=Aplicar a escada de promoção de subagentes com repetição calibrada antes de qualquer promoção para mutação maior ou paralelismo.\n[agent-invocation-spec] Prepared second tiny single-worker canary packet focused on subagent promotion ladder, not footer tangent. runId=task-bud-1007-second-tiny-agent-canary, provider=dashscope/qwen3-coder-plus, declaredFiles=[docs/research/agent-run-provider-native-runner-2026-05.md], fileContract=mutation, economyMode=critical, maxOutputLines=20, timeoutMs=60000, budget=ok from route-advisory generatedAt=2026-05-08T01:29:55.743Z with manual scarce-quota caution. Packet decision=ready-for-human-decision dispatch=no. Registry state=planned. Await exact runId confirmation before dispatch.\nCompleted second tiny single-worker canary. This adds second calibrated evidence point for the subagent promotion ladder. Stop after this canary; no parallel/background/colony promotion without a separate human decision and further gates.",
+      "verification": "VERIF-TASK-BUD-1007-SECOND-TINY-CANARY"
     }
   ]
 }

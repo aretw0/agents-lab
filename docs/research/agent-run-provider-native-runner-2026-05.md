@@ -80,3 +80,5 @@ The lane is now open, but promotion is evidence-based rather than a jump to para
 2. Promote to one small code mutation only after repeated non-empty outputs, expected touched files, focal validation, and control-plane commits.
 3. Keep multi-worker/colony/background blocked until status/log/abort/outcome, process lifecycle, budget, and stop-condition behavior are green across several slices.
 4. Treat compact with dirty state or `recommendation=stop` as expected fail-closed auto-resume behavior; checkpoint/commit first, then choose the next worker deliberately.
+
+**Second-canary rule**: Repeat calibrated single-worker canaries before code-mutation promotion; no parallel/background; parent outcome packet required.
