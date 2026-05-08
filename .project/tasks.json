@@ -22303,7 +22303,7 @@
         "Registrar limites para promoção: quando repetir canary, quando permitir mutação maior, e quando recuar para read-only."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Criada por steering humano para mudar de worker read-only para execução bounded real, mantendo control plane como validador.\n[provenance:human] source_task=TASK-BUD-1000 reason=Próximo passo prático para reduzir implementação manual do control plane."
+      "notes": "Criada por steering humano para mudar de worker read-only para execução bounded real, mantendo control plane como validador.\n[provenance:human] source_task=TASK-BUD-1000 reason=Próximo passo prático para reduzir implementação manual do control plane.\n[quota/economia] Antes de executar o small-mutation worker canary, considerar evidência manual do operador: DashScope qwen3-coder-plus Remaining 246,289 / Total 1,000,000. Usar subagente só com escopo mínimo, prompt enxuto, declared files explícitos, validação focal e sem broad scans. TASK-BUD-1003 foi criado para auditar/propagar política de economia Squeez/MDT para specs de agente; não promover uso intensivo enquanto isso não estiver explícito."
     },
     {
       "id": "TASK-BUD-1000",
@@ -22349,6 +22349,31 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criada a partir do worker PASS task-bud-1000-agent-first-invocation-design-review: próxima menor fatia é uma spec tipada/ergonômica para invocação de agentes, antes de qualquer mutação canary.\n[provenance:tangent-approved] source_task=TASK-BUD-1000 reason=Worker design review recomendou createAgentInvoker/AgentInvocationSpec para eliminar argv manual e manter governança.\nCompleted first local-safe implementation slice for typed agent invocation specs. Execution remains report-only/no-dispatch; live use requires reload before trusting new tool registration.",
       "verification": "VERIF-TASK-BUD-1002-AGENT-INVOCATION-SPEC-PACKET"
+    },
+    {
+      "id": "TASK-BUD-1003",
+      "description": "[P1/agent-first/economia] Garantir que subagentes herdem política de economia de tokens/contexto e budget por modelo antes de ampliar worker usage.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1002"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "docs/research/agent-first-operating-mode-2026-05.md",
+        "docs/research/control-plane-squeez-pattern-synthesis-2026-05-01.md",
+        "docs/research/control-plane-mdt-pattern-synthesis-2026-05-01.md"
+      ],
+      "acceptance_criteria": [
+        "Registrar evidência manual de quota DashScope qwen3-coder-plus Remaining 246,289 / Total 1,000,000 e tratar como sinal de economia para novas invocações.",
+        "Definir um perfil/prompt contract de economia para workers: escopo mínimo, saída curta, leitura seletiva, sem broad scans, sem repetição de contexto e validação focal.",
+        "Auditar se agent_invocation_spec_packet/agent_run_operator_packet propaga orçamento, budget evidence, declared files e instruções de economia para subagentes em minimal-no-extensions.",
+        "Revisitar influências Squeez/MDT já assimiladas e mapear lacunas restantes antes de gastar mais Qwen em canaries.",
+        "Bloquear promoção de uso intensivo de subagentes se a política de economia não estiver explícita na spec/prompt/validação."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criada por steering humano: qwen3-coder-plus DashScope está em Remaining 246,289 / Total 1,000,000; evitar gastar subagentes sem herdar estado da arte de economia de tokens/contexto. Pergunta operacional: subagentes só herdam economia se a invocação/spec/prompt carregar esse contrato; minimal-no-extensions reduz herança implícita, então precisamos tornar o contrato explícito.\n[provenance:human] source_task=none reason=Usuário informou cota DashScope baixa e pediu registrar que subagentes devem usar economia de tokens muito bem."
     }
   ]
 }
