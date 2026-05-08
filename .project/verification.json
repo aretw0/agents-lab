@@ -15236,6 +15236,15 @@
       "method": "focused-test-and-marker-check",
       "timestamp": "2026-05-08T15:04:57.543Z",
       "evidence": "Implemented local-safe toolkit contract primitive after two worker/runner attempts failed. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 33 passed; git diff --check -> pass; safe_marker_check toolkit contract/start packet/tests -> pass. Board quality gate still blocks closure due unresolved dependencies TASK-BUD-1047/TASK-BUD-1050, so task remains planned with verification evidence."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1064-SILENT-RUNNER-DIAGNOSTICS-2026-05-08",
+      "target": "TASK-BUD-1064",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused-test-and-marker-check",
+      "timestamp": "2026-05-08T15:57:03.427Z",
+      "evidence": "Hardened agent runner diagnostics for silent non-zero subprocess exits: logs cwd/source/argv, tracks childOutputBytes, records silent-runner-failure errorCode/errorMessage when exitCode !=0 without stdout/stderr. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 34 passed; git diff --check -> pass; safe_marker_check runner diagnostics and test markers -> pass. Board quality gate still blocks closure due unresolved dependencies, so verification is linked without completing the task."
     }
   ]
 }

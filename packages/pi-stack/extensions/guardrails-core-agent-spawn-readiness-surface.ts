@@ -85,6 +85,11 @@ function appendAgentRunLogLine(logPath: string, line: string): void {
   writeFileSync(logPath, `${line}\n`, { flag: "a", encoding: "utf8" });
 }
 
+function formatAgentRunnerArgvForLog(args: string[], maxChars = 2000): string {
+  const rendered = JSON.stringify(args);
+  return rendered.length <= maxChars ? rendered : `${rendered.slice(0, maxChars)}...[truncated:${rendered.length - maxChars}]`;
+}
+
 export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "agent_spawn_readiness_gate",
@@ -640,12 +645,18 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
           : path.join(ctx.cwd, packet.taskPacket.invocationSpec.logPath);
         mkdirSync(path.dirname(logPath), { recursive: true });
         const subprocess = resolvePiSubprocessInvocation(packet.startPreview);
-        appendAgentRunLogLine(logPath, `[agent-runner] starting command=${subprocess.command} source=${subprocess.source}`);
+        appendAgentRunLogLine(logPath, `[agent-runner] starting command=${subprocess.command} source=${subprocess.source} cwd=${ctx.cwd}`);
+        appendAgentRunLogLine(logPath, `[agent-runner] argv=${formatAgentRunnerArgvForLog(subprocess.args)}`);
         const logStream = createWriteStream(logPath, { flags: "a" });
         const child = spawn(subprocess.command, subprocess.args, { cwd: ctx.cwd, shell: false, stdio: ["ignore", "pipe", "pipe"] });
         pid = child.pid;
-        child.stdout?.pipe(logStream, { end: false });
-        child.stderr?.pipe(logStream, { end: false });
+        let childOutputBytes = 0;
+        const captureChildOutput = (chunk: Buffer | string) => {
+          childOutputBytes += Buffer.isBuffer(chunk) ? chunk.byteLength : Buffer.byteLength(chunk);
+          logStream.write(chunk);
+        };
+        child.stdout?.on("data", captureChildOutput);
+        child.stderr?.on("data", captureChildOutput);
         registryEntry = {
           ...packet.registryPreview.entry,
           ...(pid ? { pid } : {}),
@@ -683,12 +694,20 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
           settled = true;
           clearTimeout(timeout);
           const exitCode = typeof code === "number" ? code : 1;
-          logStream.write(`[agent-runner] close exitCode=${exitCode}\n`, () => {
+          const silentFailure = exitCode !== 0 && childOutputBytes === 0;
+          const silentFailureLine = silentFailure
+            ? "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr; inspect argv/cwd/source and provider/toolkit setup\n"
+            : "";
+          logStream.write(`${silentFailureLine}[agent-runner] close exitCode=${exitCode} childOutputBytes=${childOutputBytes}\n`, () => {
             logStream.end(() => {
               writeRegistryEntry(ctx.cwd, {
                 ...registryEntry,
                 state: exitCode === 0 ? "completed" : "failed",
                 exitCode,
+                ...(silentFailure ? {
+                  errorCode: "silent-runner-failure",
+                  errorMessage: "subprocess exited non-zero without stdout/stderr; inspect argv/cwd/source and provider/toolkit setup",
+                } : {}),
                 outputBytes: readLogByteCount(logPath),
                 lastEventAtIso: new Date().toISOString(),
               });

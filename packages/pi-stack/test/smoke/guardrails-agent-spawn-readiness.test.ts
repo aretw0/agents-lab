@@ -1354,6 +1354,14 @@ describe("agent spawn readiness contract", () => {
     expect(result.content?.[0]?.text).not.toContain('"executionPreview"');
   });
 
+  it("keeps actionable diagnostics for silent agent-runner failures", () => {
+    const text = readFileSync(path.join(process.cwd(), "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts"), "utf8");
+    expect(text).toContain("formatAgentRunnerArgvForLog");
+    expect(text).toContain("childOutputBytes");
+    expect(text).toContain("silent-runner-failure");
+    expect(text).toContain("cwd=${ctx.cwd}");
+  });
+
   it("exposes agent run status, follow, log tail, and abort surfaces", async () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "agent-run-"));
     const reportsDir = path.join(cwd, ".pi", "reports");

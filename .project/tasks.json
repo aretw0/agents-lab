@@ -23715,7 +23715,33 @@
         "Teste cobre: ids-only proibido, rich option labels, reload-needed pós runtime commit, e docs-only sem reload."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Criada após auditoria do passado: TASK-BUD-583/585/586/955 implementaram turn-boundary/hard-intent, mas o gap atual é operator-facing final-turn: não despejar IDs nus e sim carregar contexto rico suficiente para o operador decidir sem perguntar de volta.\n[provenance:human] source_task=none reason=Operador lembrou que o assunto passado envolvia final de turno com contexto rico e evitar citar tasks apenas por ID."
+      "notes": "Criada após auditoria do passado: TASK-BUD-583/585/586/955 implementaram turn-boundary/hard-intent, mas o gap atual é operator-facing final-turn: não despejar IDs nus e sim carregar contexto rico suficiente para o operador decidir sem perguntar de volta.\n[provenance:human] source_task=none reason=Operador lembrou que o assunto passado envolvia final de turno com contexto rico e evitar citar tasks apenas por ID.\n[agent-run] Exact-confirmed worker `task-bud-1063-final-turn-brief-implementation` dispatched after reload, but failed with exitCode=1 and no useful worker output; log only shows runner start/close, git stayed clean, outcome contract failed. Created TASK-BUD-1064 to harden silent runner failure feedback before more implementation dispatches."
+    },
+    {
+      "id": "TASK-BUD-1064",
+      "description": "[hard-intent/agent-runner] Hardenecer falha silenciosa do first-party worker runner: quando subprocesso sai exitCode=1 sem output útil, registrar argv/cwd/source/exit evidence e classificar como runner/toolkit gap recuperável.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1024",
+        "TASK-BUD-1059",
+        "TASK-BUD-1063"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Dispatch log inclui argv preview bounded, cwd e source do subprocesso sem shell interpolation.",
+        "Close com exitCode !=0 e sem output útil registra errorCode/errorMessage no registry/status.",
+        "Outcome/status permitem distinguir process failure comum de silent-runner-failure/toolkit-gap.",
+        "Teste cobre subprocesso exitCode=1 sem stderr útil e garante evidência suficiente para retry/fix.",
+        "Não muda o gate de confirmação nem faz auto-dispatch."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Criada após três workers first-party falharem com log apenas `[agent-runner] starting ...` e `close exitCode=1`, sem output útil nem arquivos tocados. Isso bloqueia agents-as-tools até o runner dar feedback acionável.\n[provenance:human] source_task=TASK-BUD-1063 reason=Worker exact-confirmed de TASK-BUD-1063 repetiu a falha silenciosa observada em TASK-BUD-1059.",
+      "verification": "VERIF-TASK-BUD-1064-SILENT-RUNNER-DIAGNOSTICS-2026-05-08"
     }
   ]
 }
