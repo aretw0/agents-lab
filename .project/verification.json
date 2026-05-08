@@ -15074,6 +15074,33 @@
       "method": "doc-review+marker-check+i18n-lint+diff-check",
       "timestamp": "2026-05-08T06:34:09.639Z",
       "evidence": "Created `docs/research/single-worker-board-driven-lane-2026-05.md` documenting the board-to-worker learning loop and agent-ready checklist. Marker check passed for `single-worker-board-driven-lane`, `## Agent-ready checklist`, `## Current operating mode`, and the explicit multi-worker/background/colony block. i18n lint passed for English artifact. `git diff --check` passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1031-WORKER-CANDIDATE-SELECTION",
+      "target": "TASK-BUD-1031",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-confirmed-read-only-worker+follow+outcome+packetization-lesson",
+      "timestamp": "2026-05-08T07:11:56.652Z",
+      "evidence": "TASK-BUD-1031 was fulfilled by read-only worker retry `task-bud-1031-worker-candidate-selection-retry`. Initial run `task-bud-1031-worker-candidate-selection` completed cleanly but failed contract because output only contained runner lifecycle logs (145 bytes) and no candidate list. Control plane then packetized a bounded board-derived candidate snapshot into `docs/research/single-worker-board-driven-lane-2026-05.md` and narrowed declared files to that packet. Retry dispatch was exact-confirmed, completed with outputBytes=1762, touched no files, and returned 3 candidates: TASK-BUD-946 as read-only-review, TASK-BUD-947 as small-mutation/test-fix, TASK-BUD-1006 as read-only-review; it excluded TASK-BUD-1032/1033 as dependent successors and reported no protected-scope blockers. `agent_run_outcome_packet` returned contract=pass process=completed recommendation=stop. Added packetization lesson: workers should not read full board files; they should consume bounded packets derived from board primitives."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1035-RAW-BOARD-GUARD",
+      "target": "TASK-BUD-1035",
+      "target_type": "task",
+      "status": "passed",
+      "method": "code+smoke+marker-check",
+      "timestamp": "2026-05-08T07:15:39.728Z",
+      "evidence": "Implemented global raw-board guardrail for worker task packets. `guardrails-core-agent-run-start.ts` now detects raw board state files `.project/tasks.json`, `.project/verification.json`, `.project/issues.json`, `.project/handoff.json` in declared files and blocks task packets with blocker `raw-board-state-file-declared-use-derived-board-packet`, exposing `rawBoardScopeDetected=true`. Regression added in `guardrails-agent-spawn-readiness.test.ts` with `TASK-RAW-BOARD`. Lane doc updated from lane-local packetization lesson to stack-wide `Global packetization rule`. Validation: marker checks passed for runtime/test/doc; `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 31 passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1036-STRUCTURED-STATE-REDIRECTS",
+      "target": "TASK-BUD-1036",
+      "target_type": "task",
+      "status": "passed",
+      "method": "code+smoke+marker-check",
+      "timestamp": "2026-05-08T07:22:10.650Z",
+      "evidence": "Extended packetization guardrail to the control plane and known structured state files. `guardrails-core-read-path-runtime.ts` now uses `STRUCTURED_STATE_READ_REDIRECTS` for `.project/tasks.json`, `.project/verification.json`, `.project/issues.json`, `.project/handoff.json`, and `.pi/reports/agent-runs.json`, blocking direct read/bash file access and recommending better surfaces such as `board_query`, `read-block issues`, `context_watch_continuation_readiness`, `agent_run_status`, `agent_run_log_tail`, `agent_run_follow`, or `agent_run_outcome_packet`. Lane doc now states raw structured state is storage, not the working interface, for all agents including control plane. Validation: marker checks passed; `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-human-confirmation-runtime-wiring.test.ts --reporter=dot` -> 2 files passed, 32 tests passed."
     }
   ]
 }

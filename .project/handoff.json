@@ -1,53 +1,54 @@
 {
-  "timestamp": "2026-05-08T07:06:21.944Z",
-  "context": "Exact-confirmed worker dispatch for TASK-BUD-1031 ran as task-bud-1031-worker-candidate-selection. Dispatch check matched and dispatch starte [snip] no; dispatch_check missing dispatch=no. [truncated:+621 chars]",
-  "current_tasks": [
-    "TASK-BUD-1031"
-  ],
+  "timestamp": "2026-05-08T07:22:26.424Z",
+  "context": "Operator generalized packetization rule further: not only workers or board files; no agent/control-plane should manually read known large/str [snip] eload required before live enforcement. [truncated:+479 chars]",
   "next_actions": [
-    "Commit first-run failure evidence, compact candidate snapshot, narrowed declared files, and retry packet prep.",
-    "If operator wants immediate retry, exact phrase is: execute o worker task-bud-1031-worker-candidate-selection-retry.",
-    "After retry, require useful candidate list before completing TASK-BUD-1031; read-only git must remain clean."
+    "Commit TASK-BUD-1035/TASK-BUD-1036/TASK-BUD-1031 completion evidence and code/test/doc changes.",
+    "Ask operator to /reload before relying on live structured-state read redirects.",
+    "After reload, continue with TASK-BUD-1032 using derived packets only; no raw structured state declared/read."
   ],
   "blockers": [
-    "TASK-BUD-1031 first worker run failed contract due missing useful output.",
-    "Retry requires exact runId confirmation."
+    "Runtime reload required for new read/bash guard and task packet guard enforcement.",
+    "Future worker dispatches still require exact runId confirmation."
   ],
   "recent_validation": [
-    "dispatch_check first run -> confirmation=match",
-    "dispatch first run -> pid=56048",
-    "agent_run_follow first run -> completed outputBytes=145"
+    "safe_marker_check guard runtime/test/doc -> pass",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/ [snip] -reporter=dot -> 32 passed [truncated:+74 chars]",
+    "board_task_complete TASK-BUD-1036 -> completed"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1031",
+    "focus": "TASK-BUD-1036",
     "canonical_links": [
-      "task:TASK-BUD-1031",
-      "task:TASK-BUD-1031-WORKER-CANDIDATE-SELECTION"
+      "task:TASK-BUD-1036",
+      "task:TASK-BUD-1035"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T07:06:21.944Z",
+    "generatedAtIso": "2026-05-08T07:22:26.424Z",
     "level": "ok",
-    "percent": 35,
+    "percent": 42,
     "action": "continue",
-    "recommendation": "commit-retry-prep-and-request-exact-phrase",
+    "recommendation": "commit-structured-state-guard-and-reload",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T07:06:21.944Z",
+      "atIso": "2026-05-08T07:22:26.424Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 35,
+      "percent": 42,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-retry-prep-and-request-exact-phrase"
+      "recommendation": "commit-structured-state-guard-and-reload"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-1036"
   ]
 }

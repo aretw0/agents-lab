@@ -8,10 +8,33 @@ import {
 } from "./guardrails-core-path-guard";
 import { resolveTrustedGlobalSkillReadAccess } from "./guardrails-core-skill-access-policy";
 
+const STRUCTURED_STATE_READ_REDIRECTS = [
+  { path: ".project/tasks.json", use: "board_query ou board packet derivado" },
+  { path: ".project/verification.json", use: "board_query entity=verification ou board packet derivado" },
+  { path: ".project/issues.json", use: "read-block issues ou issue packet derivado" },
+  { path: ".project/handoff.json", use: "context_watch_continuation_readiness, context_watch_auto_resume_preview ou checkpoint packet" },
+  { path: ".pi/reports/agent-runs.json", use: "agent_run_status, agent_run_log_tail, agent_run_follow ou agent_run_outcome_packet" },
+];
+
+function resolveStructuredStateReadRedirect(filePath: string): { path: string; use: string } | undefined {
+  const normalized = filePath.replace(/\\/g, "/").toLowerCase();
+  return STRUCTURED_STATE_READ_REDIRECTS.find((entry) => normalized === entry.path || normalized.endsWith(`/${entry.path}`));
+}
+
+function structuredStateReadBlock(filePath: string, redirect: { path: string; use: string }) {
+  return {
+    block: true,
+    reason: `Leitura bloqueada: ${redirect.path} é estado estruturado; use ${redirect.use} em vez de ler o arquivo inteiro (${filePath})`,
+  };
+}
+
 export async function guardReadPath(filePath: string, ctx: ExtensionContext) {
   if (!filePath) return undefined;
 
-  // Inside project — always allowed
+  const structuredRedirect = resolveStructuredStateReadRedirect(filePath);
+  if (structuredRedirect) return structuredStateReadBlock(filePath, structuredRedirect);
+
+  // Inside project — allowed except known structured state files with better first-party surfaces.
   if (isInsideCwd(filePath, ctx.cwd)) return undefined;
 
   // Sensitive — block or confirm
@@ -62,6 +85,8 @@ export async function guardBashPathReads(command: string, ctx: ExtensionContext)
   const paths = extractPathsFromBash(command);
 
   for (const filePath of paths) {
+    const structuredRedirect = resolveStructuredStateReadRedirect(filePath);
+    if (structuredRedirect) return structuredStateReadBlock(filePath, structuredRedirect);
     if (isInsideCwd(filePath, ctx.cwd)) continue;
     if (isAllowedOutside(filePath)) continue;
 

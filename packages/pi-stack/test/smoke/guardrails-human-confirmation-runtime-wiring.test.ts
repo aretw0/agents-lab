@@ -13,5 +13,8 @@ describe("human confirmation runtime wiring", () => {
     expect(auditSource).toContain("authorization: result.authorization");
     expect(readRuntimeSource).toContain('scope: "outside-project-read"');
     expect(readRuntimeSource).toContain('scope: "sensitive-path-read"');
+    expect(readRuntimeSource).toContain("STRUCTURED_STATE_READ_REDIRECTS");
+    expect(readRuntimeSource).toContain("é estado estruturado");
+    expect(readRuntimeSource).toContain("agent_run_status, agent_run_log_tail, agent_run_follow ou agent_run_outcome_packet");
   });
 });

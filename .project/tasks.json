@@ -22990,7 +22990,7 @@
     {
       "id": "TASK-BUD-1031",
       "description": "[agent-first/lane] Selecionar 3 candidatos locais-safe do board para execução single-worker real, priorizando baixo risco e validação focal.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1030"
@@ -23005,7 +23005,8 @@
         "Seleção pode ser produzida por um worker `read-only-review` após frase exata do runId; nenhum worker de mutação é despachado nesta tarefa."
       ],
       "milestone": "single-worker-board-driven-lane-2026-05",
-      "notes": "Segundo passo: abastecer a lane com material real antes de dispatch.\n[provenance:human] source_task=TASK-BUD-1030 reason=Sequência da lane aprovada para aumentar uso de subagentes a partir do board.\nOperator steer: be less timid and use agents earlier. TASK-BUD-1031 will now be fulfilled by a `read-only-review` worker candidate-selection run after exact runId confirmation; control plane only packetizes, follows, validates, and records the decision. Mutation remains blocked for this task.\nFirst worker dispatch `task-bud-1031-worker-candidate-selection` completed and preserved read-only git cleanliness, but contract failed: output was only runner lifecycle logs (145 bytes) and did not include the required 3-candidate list. Control plane added a bounded candidate snapshot into the lane doc and narrowed declared files for a retry so the worker can judge a compact board-derived pool instead of loading the full board."
+      "notes": "Segundo passo: abastecer a lane com material real antes de dispatch.\n[provenance:human] source_task=TASK-BUD-1030 reason=Sequência da lane aprovada para aumentar uso de subagentes a partir do board.\nOperator steer: be less timid and use agents earlier. TASK-BUD-1031 will now be fulfilled by a `read-only-review` worker candidate-selection run after exact runId confirmation; control plane only packetizes, follows, validates, and records the decision. Mutation remains blocked for this task.\nFirst worker dispatch `task-bud-1031-worker-candidate-selection` completed and preserved read-only git cleanliness, but contract failed: output was only runner lifecycle logs (145 bytes) and did not include the required 3-candidate list. Control plane added a bounded candidate snapshot into the lane doc and narrowed declared files for a retry so the worker can judge a compact board-derived pool instead of loading the full board.\nWorker candidate selection passed on retry after bounded packetization. Key lesson: control plane should expose derived board packets, not raw `.project/tasks.json`, to workers.",
+      "verification": "VERIF-TASK-BUD-1031-WORKER-CANDIDATE-SELECTION"
     },
     {
       "id": "TASK-BUD-1032",
@@ -23068,6 +23069,52 @@
       ],
       "milestone": "single-worker-board-driven-lane-2026-05",
       "notes": "Fechamento da primeira onda de uso maior de subagentes/worker.\n[provenance:human] source_task=TASK-BUD-1033 reason=Transformar uso real em decisão de maturidade antes de ampliar autonomia."
+    },
+    {
+      "id": "TASK-BUD-1035",
+      "description": "[agent-first/guardrail] Bloquear declared files de board bruto (`.project/tasks.json` etc.) em worker packets e exigir packets derivados por primitivas.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1031"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/research/single-worker-board-driven-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "`agent_run_task_packet`/start packet bloqueia arquivos de board bruto como `.project/tasks.json`, `.project/verification.json`, `.project/issues.json` e `.project/handoff.json` quando usados como declared files de worker.",
+        "Mensagem/blocker orienta usar packet derivado de board primitives em vez de ler o board inteiro.",
+        "Teste focal cobre a rejeição de `.project/tasks.json` em task packet.",
+        "Documento da lane registra que esta é doutrina global, não só requisito da lane."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Resposta ao steer do operador: não basta cuidado manual; tools/guardrails devem guiar agentes para consumir packets derivados em vez de board bruto.\n[provenance:human] source_task=TASK-BUD-1031 reason=Primeiro worker candidate-selection recebeu `.project/tasks.json` como declared file; operador corrigiu que isso viola a arquitetura global de primitivas/packets.\nGlobal packetization guardrail implemented: workers should consume derived board packets, not raw `.project/*` board files. Runtime reload required before live tools enforce this change.",
+      "verification": "VERIF-TASK-BUD-1035-RAW-BOARD-GUARD"
+    },
+    {
+      "id": "TASK-BUD-1036",
+      "description": "[agent-first/guardrail] Estender a regra de packetização para o control plane: bloquear leituras manuais de estado bruto do board e orientar superfícies estruturadas.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1035"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-read-path-runtime.ts",
+        "packages/pi-stack/test/smoke/guardrails-human-confirmation-runtime-wiring.test.ts",
+        "docs/research/single-worker-board-driven-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Read/bash path guard bloqueia `.project/tasks.json`, `.project/verification.json`, `.project/issues.json` e `.project/handoff.json` quando acessados como arquivos crus pelo agente/control plane.",
+        "Mensagem de bloqueio orienta `board_query` ou packet derivado em vez de leitura manual.",
+        "Teste/marker focal cobre a presença da política no read-path runtime.",
+        "Documento da lane deixa claro que raw board é storage e não interface para qualquer agente, incluindo control plane."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Resposta ao steer do operador: o control plane também é agente e deve ser guiado por canivetes suíços/structured board surfaces, não por leitura manual de arquivos grandes de estado.\n[provenance:human] source_task=TASK-BUD-1035 reason=Globalizar packetização para todos os agentes, incluindo control plane.\nOperator broadened the requirement: not only board files, but known large/structured state should be treated as storage with better first-party surfaces. Implemented the read-path policy as `STRUCTURED_STATE_READ_REDIRECTS`, including board state, handoff state, and agent-run registry, with per-file recommended tools instead of a board-only special case.\nStructured state read redirects implemented. Runtime reload required before live read/bash guards enforce them.",
+      "verification": "VERIF-TASK-BUD-1036-STRUCTURED-STATE-REDIRECTS"
     }
   ]
 }

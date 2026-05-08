@@ -226,6 +226,7 @@ export interface AgentRunTaskPacketResult {
     files: string[];
     acceptanceCriteria: string[];
     protectedScopeDetected: boolean;
+    rawBoardScopeDetected: boolean;
   };
   invocationSpecPacket: AgentInvocationSpecPacketResult;
   invocationSpec: AgentInvocationSpecPacketResult["invocationSpec"];
@@ -340,6 +341,16 @@ function buildEconomyGoalPrefix(mode: AgentInvocationEconomyMode, maxOutputLines
 
 function sanitizeRunIdPart(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+}
+
+function detectRawBoardAgentTaskScope(files: string[]): boolean {
+  const rawBoardFiles = new Set([
+    ".project/tasks.json",
+    ".project/verification.json",
+    ".project/issues.json",
+    ".project/handoff.json",
+  ]);
+  return files.map((file) => file.replace(/\\/g, "/").toLowerCase()).some((file) => rawBoardFiles.has(file));
 }
 
 function detectProtectedAgentTaskScope(files: string[], description: string): boolean {
@@ -690,6 +701,7 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
   const description = normalizeText(task?.description);
   const files = normalizeStringArray(task?.files);
   const acceptanceCriteria = normalizeStringArray(task?.acceptance_criteria);
+  const rawBoardScopeDetected = detectRawBoardAgentTaskScope(files);
   const protectedScopeDetected = input.protectedScopeRequested === true || detectProtectedAgentTaskScope(files, description);
   const validationChecklist = buildTaskValidationChecklist(taskId || "<task-id>", acceptanceCriteria, files);
   const rollback = buildTaskRollback(files);
@@ -729,6 +741,7 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
   if (!taskFound) block("agent-run-task-blocked-task-missing", "task-not-found");
   if (status === "completed") block("agent-run-task-blocked-task-completed", "task-already-completed");
   if (files.length === 0) block("agent-run-task-blocked-files", "task-files-missing");
+  if (rawBoardScopeDetected) block("agent-run-task-blocked-files", "raw-board-state-file-declared-use-derived-board-packet");
   if (acceptanceCriteria.length === 0) block("agent-run-task-blocked-acceptance-criteria", "task-acceptance-criteria-missing");
   if (protectedScopeDetected) block("agent-run-task-blocked-protected-scope", "protected-scope-requested");
 
@@ -755,6 +768,7 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
       files,
       acceptanceCriteria,
       protectedScopeDetected,
+      rawBoardScopeDetected,
     },
     invocationSpecPacket,
     invocationSpec: invocationSpecPacket.invocationSpec,

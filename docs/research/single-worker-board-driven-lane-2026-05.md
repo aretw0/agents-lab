@@ -54,3 +54,11 @@ Candidate pool:
 - `TASK-BUD-1033` — lane follow-up; files: lane doc; goal: run one real small-mutation/test-fix worker; likely profile: `small-mutation` after `TASK-BUD-1032`.
 
 Worker retry instruction: select exactly 3 candidates, and for each return task id, suggested profile, declared files, validation, rollback, protected-scope verdict, and why it teaches the lane something.
+
+## Global packetization rule
+
+Workers should not need to read the full board file. This is a stack-wide guardrail, not just a lane preference. Board records are control-plane state, and workers should consume bounded packets derived from board primitives: filtered candidates, declared files, acceptance criteria, validation, rollback, and protected-scope verdict.
+
+If a worker needs broad `.project/tasks.json` access to decide, the control plane has not packetized enough. The same rule applies to the control plane itself: raw structured state is storage, not the working interface. All agents should prefer first-party primitives, structured selectors, and bounded derived packets over manual full-file reads.
+
+Worker packets must reject raw board state files such as `.project/tasks.json`, `.project/verification.json`, `.project/issues.json`, and `.project/handoff.json` as declared files. Read/bash path guards should also steer manual reads of known structured state files toward better surfaces: `board_query` for board rows, `context_watch_*` for handoff/continuity, `agent_run_status`/`agent_run_log_tail`/`agent_run_follow` for runner registry/logs, and `structured_io`/domain packets for targeted structured edits.

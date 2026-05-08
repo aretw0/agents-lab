@@ -399,6 +399,18 @@ describe("agent spawn readiness contract", () => {
     });
     expect(completed.decision).toBe("blocked");
     expect(completed.blockers).toContain("task-already-completed");
+
+    const rawBoardScope = buildAgentRunTaskPacket({
+      taskId: "TASK-RAW-BOARD",
+      task: { ...readyTask, id: "TASK-RAW-BOARD", files: [".project/tasks.json"] },
+      providerModelRef: "dashscope/qwen3-coder-plus",
+      cwd: process.cwd(),
+      budgetDecision: "ok",
+      budgetEvidence: "dashscope ok",
+    });
+    expect(rawBoardScope.decision).toBe("blocked");
+    expect(rawBoardScope.blockers).toContain("raw-board-state-file-declared-use-derived-board-packet");
+    expect(rawBoardScope.task.rawBoardScopeDetected).toBe(true);
   });
 
   it("composes task packets with registry/start/status/log/abort/outcome previews", () => {
