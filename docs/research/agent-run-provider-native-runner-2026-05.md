@@ -71,3 +71,12 @@ First agent-first small-mutation protocol with economyMode=critical:
 - Goal: mutate exactly one declared file with minimal context restatement
 - Constraint: declaredFiles-only access, output <=20 lines, token conservation
 - Validation: exact file change verification, no auto-retry without human decision
+
+## Subagent promotion ladder after first canary
+
+The lane is now open, but promotion is evidence-based rather than a jump to parallelism:
+
+1. Repeat 1-2 tiny single-worker canaries with explicit human confirmation, fresh budget evidence, declared files, economy critical/conserve, and parent-side outcome packets.
+2. Promote to one small code mutation only after repeated non-empty outputs, expected touched files, focal validation, and control-plane commits.
+3. Keep multi-worker/colony/background blocked until status/log/abort/outcome, process lifecycle, budget, and stop-condition behavior are green across several slices.
+4. Treat compact with dirty state or `recommendation=stop` as expected fail-closed auto-resume behavior; checkpoint/commit first, then choose the next worker deliberately.

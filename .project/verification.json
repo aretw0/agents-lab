@@ -14849,6 +14849,15 @@
       "method": "worker-canary+marker-check+outcome-packet",
       "timestamp": "2026-05-08T00:57:27.220Z",
       "evidence": "Explicit human confirmation received: execute o worker task-bud-1001-small-mutation-doc-canary. Worker was launched via provider-native pi subprocess with minimal-no-extensions against declared file docs/research/agent-run-provider-native-runner-2026-05.md only, economyMode=critical, maxOutputLines=20, timeout=60s, provider=dashscope/qwen3-coder-plus. Worker output was non-empty (302 bytes), exitCode=0, PASS, touched declared file only. safe_marker_check passed for TASK-BUD-1001 small-mutation canary, economyMode=critical, declaredFiles-only. agent_run_outcome_packet returned contract=pass process=completed recommendation=stop. No auto-retry or extra worker dispatch."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1005-SUBAGENT-LADDER",
+      "target": "TASK-BUD-1005",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs+marker-check+board-feedback-intake",
+      "timestamp": "2026-05-08T01:13:33.409Z",
+      "evidence": "Captured the first worker canary learning in docs/research/agent-run-provider-native-runner-2026-05.md by adding 'Subagent promotion ladder after first canary'. The section states the subagent lane is open but evidence-based: repeat 1-2 tiny single-worker canaries, then one small code mutation, while multi-worker/colony/background remain blocked until status/log/abort/outcome, lifecycle, budget, and stop-condition gates are green. It also records compact with dirty state or recommendation=stop as expected fail-closed auto-resume behavior. User footer confusion was assimilated into new TASK-BUD-1006 because TASK-BUD-968 had completed but UX remains unclear. Validation: safe_marker_check passed for promotion ladder markers and existing footer legend markers."
     }
   ]
 }

@@ -22403,6 +22403,53 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criada por steering humano: economia não deve ser só para subagentes; deve ser regra para toda a operação. Não afirmar que já aprendemos tudo de Squeez/indústria sem nova auditoria bounded e evidência.\n[provenance:human] source_task=none reason=Usuário perguntou se a economia é só para subagentes ou para todos, e se já aprendemos tudo de squeez/outros exemplos industriais.\nCompleted global economy audit/documentation slice. Follow-up remains to implement a global_economy_contract primitive if/when useful; TASK-BUD-1001 should use this audit before any worker dispatch.",
       "verification": "VERIF-TASK-BUD-1004-GLOBAL-ECONOMY-AUDIT"
+    },
+    {
+      "id": "TASK-BUD-1005",
+      "description": "[P1/local-safe] Capturar o aprendizado do primeiro worker canary e definir a escada conservadora para liberar subagentes sem perder governança: pós-worker dirty state, auto-resume fail-closed, critérios de repetição e limites de promoção.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1001",
+        "TASK-BUD-1004"
+      ],
+      "files": [
+        "docs/research/agent-run-provider-native-runner-2026-05.md",
+        "docs/research/global-token-economy-audit-2026-05.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar por que o auto-resume não continuou após compact com dirty state + stop condition, e por que isso é comportamento esperado.",
+        "Definir uma escada de liberação de subagentes: repetir tiny canary, ampliar para pequena mutação, depois considerar paralelo/background apenas com gates verdes.",
+        "Registrar critérios mínimos para próximo subagente: explicit human confirmation, declaredFiles, economy critical/conserve, fresh budget evidence, non-empty output, outcome packet e commit pelo control plane.",
+        "Deixar claro que a lane libera potencial dos subagentes por repetição calibrada, não por salto direto para multi-worker/colony."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criada após pergunta do operador: 'e os sub agentes? não estamos na lane que libera o potencial deles?'. Objetivo: transformar o primeiro canary bem-sucedido em escada operacional auditável antes de promover capacidade.\n[provenance:human] source_task=TASK-BUD-1001 reason=O primeiro small-mutation worker canary passou, mas compact/no-auto-resume mostrou a necessidade de explicitar a escada de promoção de subagentes.\nCompleted by documenting the subagent promotion ladder and capturing the footer ambiguity as TASK-BUD-1006. This preserves the plan: unlock subagents by calibrated repetition, not by jumping directly to parallel/background execution.",
+      "verification": "VERIF-TASK-BUD-1005-SUBAGENT-LADDER"
+    },
+    {
+      "id": "TASK-BUD-1006",
+      "description": "[P2/UI] Reabrir ambiguidade do footer compacto de quota: símbolos e percentuais como `✓dashscope:0% ✗codex:96%` continuam pouco autoexplicativos para operador, apesar da legenda já existir em docs.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-968"
+      ],
+      "files": [
+        "docs/research/quota-panel-footer-legend-2026-05.md",
+        "docs/guides/quota-visibility.md",
+        "packages/pi-stack/extensions/custom-footer.ts",
+        "packages/pi-stack/extensions/quota-visibility.ts"
+      ],
+      "acceptance_criteria": [
+        "Explicar no próprio UI/footer ou em hint acessível que ✓/⚠/✗ representam OK/WARN/BLOCK do budget local por provider.",
+        "Explicar que o percentual é pressão local usada/projetada contra budget local, não quota restante do dashboard.",
+        "Tratar `0%` como sem pressão local observada/projetada e `96%` como quase hard cap local, com caveat WHAM/dashboard quando aplicável.",
+        "Validar com teste/snapshot focal de copy operator-visible."
+      ],
+      "milestone": "operator-visible-ui-clarity-2026-05",
+      "notes": "Criada por feedback humano após ver footer `✓dashscope:0% ✗codex:96%`: o usuário não entendeu o significado dos símbolos nem percentuais. TASK-BUD-968 já existia/completou legenda, mas a experiência ainda falha na superfície visível.\n[provenance:human] source_task=TASK-BUD-968 reason=Feedback real mostra que a legenda/documentação ainda não torna o footer autoexplicativo no momento de uso."
     }
   ]
 }

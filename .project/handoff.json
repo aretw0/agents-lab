@@ -1,32 +1,34 @@
 {
-  "timestamp": "2026-05-08T00:57:42.142Z",
-  "context": "Recovered after compact/no-auto-resume. Reason auto-resume did not continue automatically: post-worker state was dirty and handoff still refl [snip] IF-TASK-BUD-1001-SMALL-MUTATION-CANARY. [truncated:+460 chars]",
+  "timestamp": "2026-05-08T01:13:46.994Z",
+  "context": "Assimilated user feedback. Created TASK-BUD-1006 for footer quota ambiguity because the visible footer ✓dashscope:0% ✗codex:96% is still uncl [snip] ct as expected fail-closed auto-resume. [truncated:+621 chars]",
   "next_actions": [
-    "Commit doc, board verification, and fresh handoff changes.",
-    "Do not auto-dispatch another worker; stop after this canary as outcome recommendation says stop.",
-    "Future promotion requires a separate human decision and should remain one tiny canary at a time."
+    "Commit TASK-BUD-1005/TASK-BUD-1006 board/docs changes.",
+    "Next local-safe candidate: TASK-BUD-1006 footer copy/hint improvement, or second tiny single-w [snip] ooses subagent repetition. [truncated:+34 chars]",
+    "Do not start multi-worker/colony/background yet."
   ],
   "blockers": [
-    "Auto-resume failed closed because workspace was dirty and previous handoff was [snip] ful nudge-free resume. [truncated:+92 chars]"
+    "Footer ambiguity persists in visible UI until TASK-BUD-1006 implementation cha [snip] tor-visible copy/hint. [truncated:+14 chars]",
+    "Subagent promotion remains single-worker only until repeated canaries pass."
   ],
   "recent_validation": [
-    "worker log .pi/reports/task-bud-1001-small-mutation-doc-canary.log: PASS, declared file, exitCode=0",
-    "safe_marker_check doc markers: TASK-BUD-1001 small-mutation canary, economyMode=critical, declaredFiles-only -> pass",
-    "safe_marker_check worker log markers PASS/file/exit -> pass"
+    "board_task_create TASK-BUD-1006 -> planned",
+    "safe_marker_check subagent promotion ladder -> pass",
+    "safe_marker_check existing quota footer legend -> pass"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1001",
+    "focus": "TASK-BUD-1005",
     "canonical_links": [
-      "task:TASK-BUD-1001",
-      "task:TASK-BUD-1001-SMALL-MUTATION-CANARY"
+      "task:TASK-BUD-1005",
+      "task:TASK-BUD-1006",
+      "task:TASK-BUD-968"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T00:57:42.142Z",
+    "generatedAtIso": "2026-05-08T01:13:46.994Z",
     "level": "ok",
-    "percent": 21,
+    "percent": 25,
     "action": "continue",
-    "recommendation": "commit-small-mutation-canary-and-stop",
+    "recommendation": "commit-subagent-ladder-and-footer-backlog",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
@@ -34,20 +36,20 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T00:57:42.142Z",
+      "atIso": "2026-05-08T01:13:46.994Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 21,
+      "percent": 25,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-small-mutation-canary-and-stop"
+      "recommendation": "commit-subagent-ladder-and-footer-backlog"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-1001"
+    "TASK-BUD-1005"
   ]
 }
