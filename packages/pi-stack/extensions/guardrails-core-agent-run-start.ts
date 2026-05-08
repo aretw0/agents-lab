@@ -5,6 +5,7 @@ export type AgentRunStartDecision = "ready-for-human-decision" | "blocked";
 export type AgentRunBudgetDecision = ProviderExecutionBudgetDecision;
 export type AgentRunOperatorFileContract = "read-only" | "mutation";
 export type AgentInvocationProfile = "read-only-review" | "small-mutation" | "test-fix" | "research";
+export type AgentInvocationEconomyMode = "standard" | "conserve" | "critical";
 
 export interface AgentRunStartPacketInput {
   runId?: string;
@@ -101,6 +102,9 @@ export interface AgentRunOperatorPacketInput {
   budgetEvidenceProvider?: string;
   budgetEvidenceGeneratedAtIso?: string;
   budgetEvidenceMaxAgeMs?: number;
+  economyMode?: AgentInvocationEconomyMode | string;
+  tokenBudgetEvidence?: string;
+  maxOutputLines?: number;
   protectedScopeRequested?: boolean;
 }
 
@@ -121,6 +125,10 @@ export interface AgentRunOperatorPacketResult {
     purpose: string;
     fileContract: AgentRunOperatorFileContract;
     attachmentMode: "attach-declared-files";
+    economyMode: AgentInvocationEconomyMode;
+    tokenBudgetEvidence: string;
+    maxOutputLines: number;
+    economyInstructions: string[];
   };
   startPacket: AgentRunStartPacketResult;
   validationChecklist: string[];
@@ -145,7 +153,7 @@ export interface AgentInvocationSpecPacketResult {
   requiresHumanDecision: true;
   singleRunOnly: true;
   decision: AgentRunStartDecision;
-  recommendationCode: AgentRunStartPacketResult["recommendationCode"] | "agent-invocation-spec-blocked-profile" | "agent-invocation-spec-blocked-validation" | "agent-invocation-spec-blocked-rollback";
+  recommendationCode: AgentRunStartPacketResult["recommendationCode"] | "agent-invocation-spec-blocked-profile" | "agent-invocation-spec-blocked-validation" | "agent-invocation-spec-blocked-rollback" | "agent-invocation-spec-blocked-economy";
   blockers: string[];
   invocationSpec: AgentRunOperatorPacketResult["runSpec"] & {
     profile: AgentInvocationProfile | "unknown";
@@ -198,6 +206,32 @@ function normalizeFileContract(value: unknown): AgentRunOperatorFileContract {
 
 function normalizeInvocationProfile(value: unknown): AgentInvocationProfile | "unknown" {
   return value === "read-only-review" || value === "small-mutation" || value === "test-fix" || value === "research" ? value : "unknown";
+}
+
+function normalizeEconomyMode(value: unknown): AgentInvocationEconomyMode {
+  return value === "standard" || value === "critical" || value === "conserve" ? value : "conserve";
+}
+
+function normalizeMaxOutputLines(value: unknown, mode: AgentInvocationEconomyMode): number {
+  const fallback = mode === "critical" ? 20 : mode === "conserve" ? 40 : 80;
+  const requested = normalizePositiveInt(value, fallback);
+  return Math.max(5, Math.min(120, requested || fallback));
+}
+
+function buildEconomyInstructions(mode: AgentInvocationEconomyMode, maxOutputLines: number): string[] {
+  const base = [
+    "use only declared files unless the parent explicitly expands scope",
+    "avoid broad scans, dependency installs, remote calls, and repeated context restatement",
+    `keep final output concise: <=${maxOutputLines} lines unless reporting a hard blocker`,
+    "prefer exact file/line evidence over narrative explanation",
+    "stop and report missing context instead of exploring outside the declared scope",
+  ];
+  return mode === "standard" ? base.slice(0, 3) : base;
+}
+
+function buildEconomyGoalPrefix(mode: AgentInvocationEconomyMode, maxOutputLines: number, tokenBudgetEvidence: string): string {
+  const evidence = tokenBudgetEvidence ? ` Token budget evidence: ${tokenBudgetEvidence}.` : "";
+  return `Worker economy contract (${mode}): use declared files only; avoid broad scans; avoid restating context; keep output <=${maxOutputLines} lines.${evidence}`;
 }
 
 function sanitizeRunIdPart(value: string): string {
@@ -344,11 +378,17 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
   const derivedRunId = taskId ? sanitizeRunIdPart(`${taskId}-${purpose}`) : "";
   const runId = normalizeText(input.runId) || derivedRunId;
   const fileContract = normalizeFileContract(input.fileContract);
+  const economyMode = normalizeEconomyMode(input.economyMode);
+  const maxOutputLines = normalizeMaxOutputLines(input.maxOutputLines, economyMode);
+  const tokenBudgetEvidence = normalizeText(input.tokenBudgetEvidence || input.budgetEvidence);
+  const economyInstructions = buildEconomyInstructions(economyMode, maxOutputLines);
+  const goal = normalizeText(input.goal);
+  const economyGoalPrefix = buildEconomyGoalPrefix(economyMode, maxOutputLines, tokenBudgetEvidence);
   const logPath = runId ? `.pi/reports/${runId}.log` : "";
   const startPacket = buildAgentRunStartPacket({
     runId,
     executorKind: "pi-print-subprocess",
-    goal: input.goal,
+    goal: goal ? `${economyGoalPrefix}\n\n${goal}` : economyGoalPrefix,
     providerModelRef: input.providerModelRef,
     cwd: input.cwd,
     declaredFiles: input.declaredFiles,
@@ -372,6 +412,7 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
     "process exit state recorded separately from contractDecision",
     "output_bytes must be greater than zero",
     fileContract === "read-only" ? "agent_run_outcome_packet must use file_contract=read-only" : "mutation run must declare and validate touched files",
+    `worker economy contract must keep output <=${maxOutputLines} lines and use declared files only`,
     "parent markers should include PASS/FAIL verdict and stale-extension-error count",
   ];
 
@@ -393,6 +434,10 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
       purpose,
       fileContract,
       attachmentMode: "attach-declared-files",
+      economyMode,
+      tokenBudgetEvidence,
+      maxOutputLines,
+      economyInstructions,
     },
     startPacket,
     validationChecklist,
@@ -406,6 +451,7 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
       `fileContract=${fileContract}`,
       "attachment=attach-declared-files",
       `budget=${startPacket.runSpec.budgetDecision}`,
+      `economy=${economyMode}`,
       "dispatch=no",
       startPacket.blockers.length > 0 ? `blockers=${startPacket.blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),
@@ -432,6 +478,7 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
   if (profile === "unknown") block("agent-invocation-spec-blocked-profile", "profile-unsupported");
   if ((profile === "small-mutation" || profile === "test-fix") && validation.length === 0) block("agent-invocation-spec-blocked-validation", "validation-required-for-mutation-profile");
   if ((profile === "small-mutation" || profile === "test-fix") && rollback.length === 0) block("agent-invocation-spec-blocked-rollback", "rollback-required-for-mutation-profile");
+  if (operatorPacket.runSpec.budgetDecision === "warn" && operatorPacket.runSpec.economyMode === "standard") block("agent-invocation-spec-blocked-economy", "economy-contract-required-for-warn-budget");
 
   const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
   if (decision === "ready-for-human-decision") recommendationCode = "agent-run-start-ready-for-human-decision";
@@ -462,6 +509,7 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
           "ask for the exact human confirmation phrase before execution",
           "registry-upsert running before invoking the execution preview",
           "execute through the typed invocation spec instead of hand-assembling argv",
+          "preserve the economy contract in the worker prompt and reject output that ignores declared-file/output-line limits",
           "after exit, evaluate agent_run_outcome_packet with the declared file contract",
         ]
       : ["resolve invocation spec blockers before any dispatch"],
@@ -474,6 +522,7 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
       `fileContract=${fileContract}`,
       `files=${operatorPacket.runSpec.declaredFiles.length}`,
       `budget=${operatorPacket.runSpec.budgetDecision}`,
+      `economy=${operatorPacket.runSpec.economyMode}`,
       "dispatch=no",
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),

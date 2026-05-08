@@ -204,6 +204,9 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       budget_evidence_provider: Type.Optional(Type.String({ description: "Provider named by the budget evidence." })),
       budget_evidence_generated_at_iso: Type.Optional(Type.String({ description: "ISO timestamp for structured budget evidence freshness checks." })),
       budget_evidence_max_age_ms: Type.Optional(Type.Number({ description: "Optional max age for structured budget evidence freshness." })),
+      economy_mode: Type.Optional(Type.String({ description: "Worker token/context economy mode: standard, conserve, or critical. Defaults to conserve." })),
+      token_budget_evidence: Type.Optional(Type.String({ description: "Short provider/model quota evidence to embed in the worker economy contract." })),
+      max_output_lines: Type.Optional(Type.Number({ description: "Bounded worker output line target for economy contract." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -224,6 +227,9 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         budgetEvidenceProvider: typeof p.budget_evidence_provider === "string" ? p.budget_evidence_provider : undefined,
         budgetEvidenceGeneratedAtIso: typeof p.budget_evidence_generated_at_iso === "string" ? p.budget_evidence_generated_at_iso : undefined,
         budgetEvidenceMaxAgeMs: typeof p.budget_evidence_max_age_ms === "number" ? p.budget_evidence_max_age_ms : undefined,
+        economyMode: typeof p.economy_mode === "string" ? p.economy_mode : undefined,
+        tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
+        maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       return buildOperatorVisibleToolResponse({
@@ -258,6 +264,9 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       budget_evidence_provider: Type.Optional(Type.String({ description: "Provider named by the budget evidence." })),
       budget_evidence_generated_at_iso: Type.Optional(Type.String({ description: "ISO timestamp for structured budget evidence freshness checks." })),
       budget_evidence_max_age_ms: Type.Optional(Type.Number({ description: "Optional max age for structured budget evidence freshness." })),
+      economy_mode: Type.Optional(Type.String({ description: "Worker token/context economy mode: standard, conserve, or critical. Defaults to conserve." })),
+      token_budget_evidence: Type.Optional(Type.String({ description: "Short provider/model quota evidence to embed in the worker economy contract." })),
+      max_output_lines: Type.Optional(Type.Number({ description: "Bounded worker output line target for economy contract." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -282,6 +291,9 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         budgetEvidenceProvider: typeof p.budget_evidence_provider === "string" ? p.budget_evidence_provider : undefined,
         budgetEvidenceGeneratedAtIso: typeof p.budget_evidence_generated_at_iso === "string" ? p.budget_evidence_generated_at_iso : undefined,
         budgetEvidenceMaxAgeMs: typeof p.budget_evidence_max_age_ms === "number" ? p.budget_evidence_max_age_ms : undefined,
+        economyMode: typeof p.economy_mode === "string" ? p.economy_mode : undefined,
+        tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
+        maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       return buildOperatorVisibleToolResponse({

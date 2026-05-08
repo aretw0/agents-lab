@@ -14822,6 +14822,15 @@
       "method": "worker-review+implementation+test",
       "timestamp": "2026-05-08T00:00:45.735Z",
       "evidence": "Agent-first operating mode formalized worker-first. Worker run task-bud-1000-agent-first-invocation-design-review returned PASS and recommended typed AgentInvocationSpec/createAgentInvoker style surface. Control plane codified doctrine in docs/research/agent-first-operating-mode-2026-05.md, created and completed child TASK-BUD-1002 with report-only agent_invocation_spec_packet, and validated with npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 1 file / 22 tests passed plus marker checks. Quality gate: TASK-BUD-1000 closeAllowed=yes after TASK-BUD-1002 dependency completion."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1003-SUBAGENT-ECONOMY-CONTRACT",
+      "target": "TASK-BUD-1003",
+      "target_type": "task",
+      "status": "passed",
+      "method": "implementation+test+inspection",
+      "timestamp": "2026-05-08T00:18:00.546Z",
+      "evidence": "Implemented explicit subagent economy inheritance contract. AgentRunOperatorPacket and AgentInvocationSpecPacket now carry economyMode/tokenBudgetEvidence/maxOutputLines/economyInstructions, inject a concise Worker economy contract into the worker prompt/command preview, default to conserve, and block warn-budget specs that explicitly request standard economy. Recorded manual DashScope qwen3-coder-plus quota evidence Remaining 246,289 / Total 1,000,000 in docs/research/agent-first-operating-mode-2026-05.md, with Squeez/MDT economy principles. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 1 file / 22 tests passed; safe_marker_check passed on implementation/surface/docs/tests; i18n_lint_text passed for pt-BR doc excerpt."
     }
   ]
 }

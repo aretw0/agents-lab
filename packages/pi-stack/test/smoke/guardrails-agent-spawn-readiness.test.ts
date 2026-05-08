@@ -216,9 +216,13 @@ describe("agent spawn readiness contract", () => {
     expect(result.runSpec.extensionIsolation).toBe("minimal-no-extensions");
     expect(result.runSpec.fileContract).toBe("read-only");
     expect(result.runSpec.attachmentMode).toBe("attach-declared-files");
+    expect(result.runSpec.economyMode).toBe("conserve");
+    expect(result.runSpec.economyInstructions.join("\n")).toContain("use only declared files");
     expect(result.startPacket.commandPreview.args).toContain("--print");
     expect(result.startPacket.commandPreview.args).toContain("@packages/pi-stack/extensions/guardrails-core-agent-run-start.ts");
+    expect(result.startPacket.commandPreview.args.join("\n")).toContain("Worker economy contract (conserve)");
     expect(result.validationChecklist.join("\n")).toContain("file_contract=read-only");
+    expect(result.validationChecklist.join("\n")).toContain("worker economy contract");
   });
 
   it("builds typed agent invocation specs without dispatching", () => {
@@ -231,11 +235,14 @@ describe("agent spawn readiness contract", () => {
       providerModelRef: "dashscope/qwen3-coder-plus",
       cwd: process.cwd(),
       declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
-      budgetDecision: "ok",
-      budgetEvidence: "dashscope ok generatedAt=now",
-      budgetEvidenceSource: "route-advisory",
+      budgetDecision: "warn",
+      budgetEvidence: "dashscope qwen3-coder-plus remaining 246,289 / total 1,000,000",
+      budgetEvidenceSource: "manual",
       budgetEvidenceProvider: "dashscope",
       budgetEvidenceGeneratedAtIso: generatedAtIso,
+      economyMode: "critical",
+      tokenBudgetEvidence: "remaining 246,289 / total 1,000,000",
+      maxOutputLines: 18,
     });
 
     expect(readOnly).toMatchObject({
@@ -252,7 +259,18 @@ describe("agent spawn readiness contract", () => {
     expect(readOnly.invocationSpec.profile).toBe("read-only-review");
     expect(readOnly.invocationSpec.fileContract).toBe("read-only");
     expect(readOnly.invocationSpec.outputContract).toBe("non-empty-text");
+    expect(readOnly.invocationSpec.economyMode).toBe("critical");
+    expect(readOnly.invocationSpec.maxOutputLines).toBe(18);
+    expect(readOnly.invocationSpec.tokenBudgetEvidence).toContain("246,289");
     expect(readOnly.invocationSpec.executionPreview.args).toContain("@packages/pi-stack/extensions/guardrails-core-agent-run-start.ts");
+    expect(readOnly.invocationSpec.executionPreview.args.join("\n")).toContain("Worker economy contract (critical)");
+
+    const standardWarn = buildAgentInvocationSpecPacket({
+      ...readOnly.invocationSpec,
+      economyMode: "standard",
+    });
+    expect(standardWarn.decision).toBe("blocked");
+    expect(standardWarn.blockers).toContain("economy-contract-required-for-warn-budget");
 
     const mutationBlocked = buildAgentInvocationSpecPacket({
       ...readOnly.invocationSpec,
@@ -662,6 +680,9 @@ describe("agent spawn readiness contract", () => {
         budget_evidence_source: "route-advisory",
         budget_evidence_provider: "dashscope",
         budget_evidence_generated_at_iso: generatedAtIso,
+        economy_mode: "critical",
+        token_budget_evidence: "remaining 246,289 / total 1,000,000",
+        max_output_lines: 18,
       },
       undefined as unknown as AbortSignal,
       () => {},
@@ -672,6 +693,8 @@ describe("agent spawn readiness contract", () => {
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.processStartAllowed).toBe(false);
     expect(result.details?.decision).toBe("ready-for-human-decision");
+    expect((result.details as { runSpec?: { economyMode?: string; maxOutputLines?: number } })?.runSpec?.economyMode).toBe("critical");
+    expect((result.details as { runSpec?: { economyMode?: string; maxOutputLines?: number } })?.runSpec?.maxOutputLines).toBe(18);
     expect(result.content?.[0]?.text).toContain("agent-run-operator-packet: decision=ready-for-human-decision");
     expect(result.content?.[0]?.text).not.toContain('"commandPreview"');
   });
@@ -714,6 +737,9 @@ describe("agent spawn readiness contract", () => {
         budget_evidence_source: "route-advisory",
         budget_evidence_provider: "dashscope",
         budget_evidence_generated_at_iso: new Date().toISOString(),
+        economy_mode: "conserve",
+        token_budget_evidence: "remaining 246,289 / total 1,000,000",
+        max_output_lines: 24,
       },
       undefined as unknown as AbortSignal,
       () => {},
@@ -724,6 +750,8 @@ describe("agent spawn readiness contract", () => {
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.processStartAllowed).toBe(false);
     expect(result.details?.decision).toBe("ready-for-human-decision");
+    expect((result.details as { invocationSpec?: { economyMode?: string; maxOutputLines?: number } })?.invocationSpec?.economyMode).toBe("conserve");
+    expect((result.details as { invocationSpec?: { economyMode?: string; maxOutputLines?: number } })?.invocationSpec?.maxOutputLines).toBe(24);
     expect(result.content?.[0]?.text).toContain("agent-invocation-spec-packet: decision=ready-for-human-decision");
     expect(result.content?.[0]?.text).not.toContain('"executionPreview"');
   });

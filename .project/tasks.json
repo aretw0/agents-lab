@@ -22353,7 +22353,7 @@
     {
       "id": "TASK-BUD-1003",
       "description": "[P1/agent-first/economia] Garantir que subagentes herdem política de economia de tokens/contexto e budget por modelo antes de ampliar worker usage.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1002"
@@ -22373,7 +22373,8 @@
         "Bloquear promoção de uso intensivo de subagentes se a política de economia não estiver explícita na spec/prompt/validação."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Criada por steering humano: qwen3-coder-plus DashScope está em Remaining 246,289 / Total 1,000,000; evitar gastar subagentes sem herdar estado da arte de economia de tokens/contexto. Pergunta operacional: subagentes só herdam economia se a invocação/spec/prompt carregar esse contrato; minimal-no-extensions reduz herança implícita, então precisamos tornar o contrato explícito.\n[provenance:human] source_task=none reason=Usuário informou cota DashScope baixa e pediu registrar que subagentes devem usar economia de tokens muito bem."
+      "notes": "Criada por steering humano: qwen3-coder-plus DashScope está em Remaining 246,289 / Total 1,000,000; evitar gastar subagentes sem herdar estado da arte de economia de tokens/contexto. Pergunta operacional: subagentes só herdam economia se a invocação/spec/prompt carregar esse contrato; minimal-no-extensions reduz herança implícita, então precisamos tornar o contrato explícito.\n[provenance:human] source_task=none reason=Usuário informou cota DashScope baixa e pediu registrar que subagentes devem usar economia de tokens muito bem.\nCompleted economy contract slice. Subagents still require a reload before this updated tool surface is live; until then, treat qwen3-coder-plus usage as scarce and keep TASK-BUD-1001 tiny/explicit.",
+      "verification": "VERIF-TASK-BUD-1003-SUBAGENT-ECONOMY-CONTRACT"
     }
   ]
 }

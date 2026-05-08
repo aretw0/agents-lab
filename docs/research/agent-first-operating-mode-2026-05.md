@@ -40,6 +40,20 @@ Padrões recomendados pelo worker:
 - Não altera escopo, provider, ferramentas ou orçamento por conta própria.
 - Declara riscos, validações e arquivos tocados.
 
+## Economia de tokens para subagentes
+
+Evidência manual atual: DashScope `qwen3-coder-plus` está em `Remaining 246,289 / Total 1,000,000`. Isso deve ser tratado como sinal de economia para qualquer worker Qwen.
+
+Workers em `minimal-no-extensions` não herdam automaticamente todo o estado da arte do control plane. Eles herdam o que a spec/prompt carrega. Portanto, toda invocação deve carregar um contrato explícito de economia:
+
+- usar apenas `declaredFiles` salvo expansão humana explícita;
+- evitar broad scans, installs, chamadas remotas e releitura narrativa de contexto;
+- limitar saída por `maxOutputLines` e preferir bullets curtos;
+- pedir contexto faltante em vez de explorar fora do escopo;
+- preservar `budgetEvidence` e evidência de quota no prompt do worker.
+
+Influências Squeez/MDT já assimiladas entram aqui como regra prática: poda de gordura, leitura seletiva, saída curta, single-source/focal evidence e validação mínima suficiente. O uso intensivo de subagentes deve ficar bloqueado quando a spec não explicitar esse contrato.
+
 ## Regra padrão
 
 Toda tarefa local-safe deve tentar primeiro um pacote single-worker antes de implementação manual pelo control plane.
@@ -72,6 +86,12 @@ interface AgentInvocationSpec {
     source: "route-advisory" | "provider-budget-snapshot" | "manual" | "unknown";
     provider: string;
     generatedAtIso: string;
+  };
+  economy: {
+    mode: "standard" | "conserve" | "critical";
+    tokenBudgetEvidence: string;
+    maxOutputLines: number;
+    instructions: string[];
   };
 }
 
