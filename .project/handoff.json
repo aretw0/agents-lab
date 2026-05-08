@@ -1,53 +1,54 @@
 {
-  "timestamp": "2026-05-08T15:05:31.372Z",
-  "context": "Continued pragmatically after agents-as-tools attempts: worker produced a partial draft despite failed runner status; control-plane salvaged [snip] pendencies TASK-BUD-1047/TASK-BUD-1050. [truncated:+601 chars]",
+  "timestamp": "2026-05-08T15:21:32.429Z",
+  "context": "Operator asked whether past completed work already covered final-turn rich context and not citing task IDs alone. Audit found yes, related co [snip] -BUD-1062 note with historical linkage. [truncated:+475 chars]",
   "current_tasks": [
-    "TASK-BUD-1059"
+    "TASK-BUD-1063"
   ],
   "next_actions": [
-    "Commit this validated local-safe diff.",
-    "Do not close TASK-BUD-1059 until dependencies are resolved or dependency plan is updated.",
-    "Next hard slice options: fix runner failure/log capture, implement model-specific Spark route [snip] D-1047 first-hatch intake. [truncated:+30 chars]"
+    "Operator can run /reload now.",
+    "After reload, run canary for live toolkitContract if desired.",
+    "Later implement TASK-BUD-1062/1063 so reload/next-step/rich-context close prompts are automatic and not memory-based."
   ],
   "blockers": [
-    "TASK-BUD-1059 closure blocked by unresolved dependencies TASK-BUD-1047/TASK-BUD-1050.",
-    "First-party worker runner failed twice with exitCode=1/no useful log; needs ha [snip] before more dispatch. [truncated:+7 chars]"
+    "Runtime still stale until /reload after extension changes.",
+    "TASK-BUD-1062/1063 are backlog, not implemented."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 33 passed",
-    "git diff --check -> pass",
-    "safe_marker_check toolkit/start/tests -> pass"
+    "board_query/targeted search found completed related tasks TASK-BUD-583/585/586/955/108/985/990",
+    "board_task_create TASK-BUD-1063 -> planned",
+    "board_update TASK-BUD-1062 historical linkage note -> ok"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1059",
+    "focus": "TASK-BUD-1063",
     "canonical_links": [
-      "task:TASK-BUD-1059",
-      "task:TASK-BUD-1047"
+      "task:TASK-BUD-1063",
+      "task:TASK-BUD-583",
+      "task:TASK-BUD-585"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T15:05:31.372Z",
+    "generatedAtIso": "2026-05-08T15:21:32.429Z",
     "level": "ok",
-    "percent": 39,
+    "percent": 46,
     "action": "continue",
-    "recommendation": "commit-validated-toolkit-contract-slice",
+    "recommendation": "reload-now-then-canary",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T15:05:31.372Z",
+      "atIso": "2026-05-08T15:21:32.429Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 39,
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-validated-toolkit-contract-slice"
+      "recommendation": "reload-now-then-canary"
     }
   ]
 }

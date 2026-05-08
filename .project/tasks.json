@@ -23662,6 +23662,60 @@
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
       "notes": "Hard intent: no hatch, aprender o que temos na sandbox e o que falta antes de prometer trabalho.\n[provenance:human] source_task=none reason=Dar ao control-plane e subagentes o toolkit ideal necessário desde o começo."
+    },
+    {
+      "id": "TASK-BUD-1062",
+      "description": "[hard-intent/turn-close] Implementar rito leve de fechamento de fatia: quando houver commit limpo após mudança de runtime/extensão, o control-plane deve sugerir `/reload` e próximos passos sem ser verboso.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1056"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-continuation-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog-status-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog-runtime-reload.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-runtime-reload.test.ts",
+        "docs/research/queen-continuous-improvement-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Após commit limpo que toca extensões/runtime, packet/status recomenda `/reload` de forma curta e explícita.",
+        "Rito inclui no máximo 2-3 próximos passos úteis: reload/canary/próxima fatia.",
+        "Não sugere reload quando só docs/board foram alterados ou quando reload não é necessário.",
+        "Sinal é report-only e não executa reload automaticamente.",
+        "Teste cobre mudança runtime com git limpo, mudança docs-only, e handoff fresco."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Operador identificou gap: depois de fatia longa/commit runtime, control-plane deveria influenciar o rito de parada e oferecer reload/próximos passos sem depender da memória do agente.\n[provenance:human] source_task=none reason=Tornar o rito de fechamento operacional e leve, evitando esquecer `/reload` após mudanças de extensão/runtime.\n[scope-link] Historical audit found related completed work: TASK-BUD-583 turn_boundary_decision_packet, TASK-BUD-585 directionPrompt, TASK-BUD-586 directionPreview, TASK-BUD-955 hard-intent final response, plus stale reload guidance tasks TASK-BUD-985/TASK-BUD-990. These solved pieces of the contract but did not enforce the current turn-close behavior after runtime commits. Created TASK-BUD-1063 for the missing context-rich final-turn brief: no bare task IDs without title/context/action."
+    },
+    {
+      "id": "TASK-BUD-1063",
+      "description": "[hard-intent/final-turn-brief] Implementar fechamento de turno context-rich: resposta final deve explicar tasks/opções com nomes e contexto útil, não apenas IDs, e sugerir decisão/next step com baixo atrito.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-583",
+        "TASK-BUD-585",
+        "TASK-BUD-586",
+        "TASK-BUD-955",
+        "TASK-BUD-1062"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-continuation-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog-status-formatting.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/research/queen-continuous-improvement-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Final-turn/turn-close packet apresenta opções com título/contexto curto, não só task IDs.",
+        "Quando citar task ID, incluir descrição resumida, por que importa, estado atual e ação recomendada.",
+        "Mensagem final pós-fatia inclui decisão recomendada e 1-3 próximos passos concretos, sem despejo verboso.",
+        "Inclui rito de reload quando runtime/extensão mudou e git está limpo, mas com contexto do porquê.",
+        "Teste cobre: ids-only proibido, rich option labels, reload-needed pós runtime commit, e docs-only sem reload."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Criada após auditoria do passado: TASK-BUD-583/585/586/955 implementaram turn-boundary/hard-intent, mas o gap atual é operator-facing final-turn: não despejar IDs nus e sim carregar contexto rico suficiente para o operador decidir sem perguntar de volta.\n[provenance:human] source_task=none reason=Operador lembrou que o assunto passado envolvia final de turno com contexto rico e evitar citar tasks apenas por ID."
     }
   ]
 }
