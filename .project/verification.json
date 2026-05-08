@@ -15011,6 +15011,15 @@
       "method": "exact-confirmed-dispatch+follow+outcome+dirty-check",
       "timestamp": "2026-05-08T04:17:10.048Z",
       "evidence": "First real first-party runner canary completed after exact operator confirmation for retry runId `task-bud-1018-first-runner-readonly-canary-retry`. Dispatch gate preflight matched exact phrase and `agent_run_task_dispatch` returned decision=dispatched pid=56304 without session crash. `agent_run_follow` after TASK-BUD-1020 returned decision=terminal state=completed terminal=yes outputBytes=1396 dispatch=no. Git remained clean for code/doc files. `agent_run_outcome_packet` after TASK-BUD-1022 with file_contract=read-only, touched_files=[], outputBytes=1396, and pass markers returned contract=pass process=completed recommendation=stop. Separate synthetic read-only touched-file canary in TASK-BUD-1023 returned contract=fail, confirming mutation would fail closed. Original worker self-reported FAIL due pre-follow observability race, but parent-side finalizer/outcome evidence supersedes it for the runner contract."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1024-RUNNER-FINAL-EVIDENCE",
+      "target": "TASK-BUD-1024",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-test+marker-check",
+      "timestamp": "2026-05-08T04:22:59.297Z",
+      "evidence": "Added final runner evidence fields to registry/status/outcome. `AgentRunRegistryEntry` now supports exitCode, outputBytes, errorCode, and errorMessage. Dispatch close handler appends `[agent-runner] close exitCode=...`, computes outputBytes from the log, and writes exitCode/outputBytes to registry. Spawn error handler writes errorCode/errorMessage/outputBytes with state=failed. `agent_run_status` exposes exitCode/outputBytes/errorCode/errorMessage read-only. `buildAgentRunOutcomePacket` falls back to entry.outputBytes when explicit output_bytes is not provided. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 31 passed. Marker checks passed for runtime, dispatch surface, and tests."
     }
   ]
 }

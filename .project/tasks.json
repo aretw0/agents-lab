@@ -22819,6 +22819,31 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criado após reload para validar live o hardening implementado em TASK-BUD-1022.\n[provenance:human] source_task=TASK-BUD-1022 reason=TASK-BUD-1022 mudou runtime de outcome; precisa canary live pós-reload.\nLive outcome hardening canary passed: read-only with touched file fails, read-only with no touched files passes.",
       "verification": "VERIF-TASK-BUD-1023-LIVE-READONLY-OUTCOME"
+    },
+    {
+      "id": "TASK-BUD-1024",
+      "description": "[agent-first/runner-observability] Registrar `exitCode`, `outputBytes` e erro de spawn no registry/log do agent runner para outcome/status finais ficarem auditáveis sem inspeção manual.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1020",
+        "TASK-BUD-1022"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Ao fechar subprocesso, registry recebe exitCode e outputBytes calculado do log.",
+        "Ao erro de spawn, registry recebe state=failed, errorCode/errorMessage e outputBytes quando possível.",
+        "`agent_run_status` expõe exitCode/outputBytes/errorCode de forma read-only.",
+        "`agent_run_outcome_packet` usa entry.outputBytes como fallback quando output_bytes não é fornecido.",
+        "Teste focal cobre fallback de outputBytes e presença dos marcadores de close/error no runner."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criado após fechar o canary read-only: próximo passo é fortalecer evidência final do runner para reduzir inspeção manual de logs.\n[provenance:human] source_task=TASK-BUD-1018 reason=Primeiro runner canary evidenciou que status/outcome precisam carregar bytes/código de saída diretamente no registry.\nRunner final evidence now records exitCode/outputBytes and spawn error metadata in registry/status/outcome paths. Requires `/reload` before live use.",
+      "verification": "VERIF-TASK-BUD-1024-RUNNER-FINAL-EVIDENCE"
     }
   ]
 }

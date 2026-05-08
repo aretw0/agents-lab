@@ -693,6 +693,9 @@ describe("agent spawn readiness contract", () => {
     expect(source).toContain("spawn(subprocess.command, subprocess.args");
     expect(source).toContain("child.on(\"error\", (error: NodeJS.ErrnoException)");
     expect(source).toContain("spawn error code=${code}");
+    expect(source).toContain("[agent-runner] close exitCode=${exitCode}");
+    expect(source).toContain("outputBytes: readLogByteCount(logPath)");
+    expect(source).toContain("errorCode: code");
     expect(source).toContain("state: \"failed\"");
     expect(source).not.toContain("spawn(packet.startPreview.command, packet.startPreview.args");
   });
@@ -967,12 +970,12 @@ describe("agent spawn readiness contract", () => {
       rollbackFiles: [],
     });
 
+    const entryWithOutput = { ...entry, outputBytes: 128 };
     const readOnlyPassed = buildAgentRunOutcomePacket({
       runId: "run-outcome",
-      entry,
+      entry: entryWithOutput,
       touchedFiles: [],
       markerResults: [{ label: "provider-marker", ok: true }],
-      outputBytes: 128,
       fileContract: "read-only",
     });
     expect(readOnlyPassed).toMatchObject({
@@ -981,14 +984,14 @@ describe("agent spawn readiness contract", () => {
       fileContract: "read-only",
       recommendationCode: "agent-run-outcome-pass",
       touchedFiles: [],
+      outputBytes: 128,
     });
 
     const readOnlyTouched = buildAgentRunOutcomePacket({
       runId: "run-outcome",
-      entry,
+      entry: entryWithOutput,
       touchedFiles: ["docs/research/provider-canary-scorecard-dashscope-2026-05.md"],
       markerResults: [{ label: "provider-marker", ok: true }],
-      outputBytes: 128,
       fileContract: "read-only",
     });
     expect(readOnlyTouched).toMatchObject({
@@ -1263,6 +1266,8 @@ describe("agent spawn readiness contract", () => {
         logPath,
         startedAtIso: "2026-05-07T00:00:00.000Z",
         lastEventAtIso: "2026-05-07T00:00:40.000Z",
+        exitCode: 0,
+        outputBytes: 21,
       }],
     }), "utf8");
 
@@ -1330,6 +1335,10 @@ describe("agent spawn readiness contract", () => {
     expect(status.details?.mode).toBe("agent-run-status");
     expect(status.details?.processStopAllowed).toBe(false);
     expect(status.content?.[0]?.text).toContain("state=running");
+
+    const completedStatus = await getTool("agent_run_status").execute("tc-status-completed", { run_id: "run-outcome" }, undefined as unknown as AbortSignal, () => {}, { cwd });
+    expect(completedStatus.details?.exitCode).toBe(0);
+    expect(completedStatus.details?.outputBytes).toBe(21);
 
     const outcome = await getTool("agent_run_outcome_packet").execute(
       "tc-outcome",

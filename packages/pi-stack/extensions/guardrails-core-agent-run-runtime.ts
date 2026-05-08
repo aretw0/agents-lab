@@ -16,6 +16,10 @@ export interface AgentRunRegistryEntry {
   startedAtIso?: string;
   lastEventAtIso?: string;
   timeoutMs?: number;
+  exitCode?: number;
+  outputBytes?: number;
+  errorCode?: string;
+  errorMessage?: string;
   stopRequested?: boolean;
   stopSource?: "human" | "agent" | "timeout" | "unknown";
 }
@@ -39,6 +43,10 @@ export interface AgentRunStatusResult {
   startedAtIso?: string;
   lastEventAtIso?: string;
   elapsedMs?: number;
+  exitCode?: number;
+  outputBytes?: number;
+  errorCode?: string;
+  errorMessage?: string;
   stale: boolean;
   warnings: string[];
   summary: string;
@@ -180,6 +188,12 @@ function normalizeState(value: unknown): AgentRunState {
   return value === "planned" || value === "running" || value === "completed" || value === "failed" || value === "timed-out" || value === "aborted" ? value : "unknown";
 }
 
+function normalizeNonNegativeInteger(value: unknown): number | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
+  const normalized = Math.floor(value);
+  return normalized >= 0 ? normalized : undefined;
+}
+
 function parseIsoMs(value: unknown): number | undefined {
   if (typeof value !== "string" || !value.trim()) return undefined;
   const parsed = Date.parse(value);
@@ -299,6 +313,10 @@ export function buildAgentRunStatus(runId: string, entry?: AgentRunRegistryEntry
     ...(entry?.startedAtIso ? { startedAtIso: entry.startedAtIso } : {}),
     ...(entry?.lastEventAtIso ? { lastEventAtIso: entry.lastEventAtIso } : {}),
     ...(elapsedMs !== undefined ? { elapsedMs } : {}),
+    ...(normalizeNonNegativeInteger(entry?.exitCode) !== undefined ? { exitCode: normalizeNonNegativeInteger(entry?.exitCode) } : {}),
+    ...(normalizeNonNegativeInteger(entry?.outputBytes) !== undefined ? { outputBytes: normalizeNonNegativeInteger(entry?.outputBytes) } : {}),
+    ...(entry?.errorCode ? { errorCode: entry.errorCode } : {}),
+    ...(entry?.errorMessage ? { errorMessage: entry.errorMessage } : {}),
     stale,
     warnings,
     summary,
@@ -311,7 +329,7 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
   const processState = normalizeState(input.entry?.state);
   const declaredFiles = normalizeFiles(input.entry?.declaredFiles);
   const touchedFiles = normalizeFiles(input.touchedFiles);
-  const outputBytes = typeof input.outputBytes === "number" && Number.isFinite(input.outputBytes) && input.outputBytes >= 0 ? Math.floor(input.outputBytes) : undefined;
+  const outputBytes = normalizeNonNegativeInteger(input.outputBytes) ?? normalizeNonNegativeInteger(input.entry?.outputBytes);
   const fileContract: AgentRunFileContract = input.fileContract === "read-only" ? "read-only" : "mutation";
   const declaredSet = new Set(declaredFiles);
   const touchedSet = new Set(touchedFiles);

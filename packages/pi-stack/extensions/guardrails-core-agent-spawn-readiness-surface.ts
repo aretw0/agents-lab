@@ -665,22 +665,34 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
           clearTimeout(timeout);
           const code = error.code || "unknown";
           const message = error.message || String(error);
-          logStream.write(`[agent-runner] spawn error code=${code} message=${message}\n`, () => logStream.end());
-          writeRegistryEntry(ctx.cwd, {
-            ...registryEntry,
-            state: "failed",
-            lastEventAtIso: new Date().toISOString(),
+          logStream.write(`[agent-runner] spawn error code=${code} message=${message}\n`, () => {
+            logStream.end(() => {
+              writeRegistryEntry(ctx.cwd, {
+                ...registryEntry,
+                state: "failed",
+                errorCode: code,
+                errorMessage: message,
+                outputBytes: readLogByteCount(logPath),
+                lastEventAtIso: new Date().toISOString(),
+              });
+            });
           });
         });
         child.on("close", (code) => {
           if (settled) return;
           settled = true;
           clearTimeout(timeout);
-          logStream.end();
-          writeRegistryEntry(ctx.cwd, {
-            ...registryEntry,
-            state: code === 0 ? "completed" : "failed",
-            lastEventAtIso: new Date().toISOString(),
+          const exitCode = typeof code === "number" ? code : 1;
+          logStream.write(`[agent-runner] close exitCode=${exitCode}\n`, () => {
+            logStream.end(() => {
+              writeRegistryEntry(ctx.cwd, {
+                ...registryEntry,
+                state: exitCode === 0 ? "completed" : "failed",
+                exitCode,
+                outputBytes: readLogByteCount(logPath),
+                lastEventAtIso: new Date().toISOString(),
+              });
+            });
           });
         });
       }
