@@ -22646,6 +22646,26 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criado após reload para validar ao vivo o runner gate first-party sem usar confirmação correta e sem iniciar processo.\n[provenance:human] source_task=TASK-BUD-1014 reason=TASK-BUD-1014 implementou `agent_run_task_dispatch`; após reload precisamos validar os caminhos seguros de preview e mismatch.\nLive dispatch-gate canary passed safely: preview path returned dispatch=no; wrong-confirmation execute attempt failed closed before dispatch; status confirmed no run registry entry.",
       "verification": "VERIF-TASK-BUD-1015-LIVE-DISPATCH-GATE-CANARY"
+    },
+    {
+      "id": "TASK-BUD-1016",
+      "description": "[agent-first/code] Implementar uma primitiva report-only `agent_run_task_dispatch_check` para validar confirmação humana contra `humanConfirmationPhrase` sem solicitar execute=true nem iniciar processo.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Tool compõe `agent_run_task_start_packet` a partir de `task_id` e retorna mode=agent-run-task-dispatch-check.",
+        "Sem campo execute e sem spawn; sempre dispatchAllowed=false e processStartAllowed=false.",
+        "Com `operator_confirmation` ausente retorna confirmation=missing; com incorreta retorna confirmation=mismatch; com correta retorna confirmation=match, mas ainda dispatchAllowed=false.",
+        "Retorna `wouldDispatchAfterExplicitExecute=true` somente quando packet ready e confirmação bate, deixando claro que ainda exige chamada separada ao dispatch execute.",
+        "Teste focal cobre missing, mismatch, match e blocked task packet sem iniciar processo."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Derivado do canary TASK-BUD-1015: validar mismatch via execute=true é seguro/fail-closed, mas aciona guard de dispatch; precisamos de check report-only separado.\n[provenance:human] source_task=TASK-BUD-1015 reason=TASK-BUD-1015 mostrou que mismatch live deve ser verificado por superfície report-only, não por tentativa execute=true.\nImplemented `agent_run_task_dispatch_check`, a pure report-only confirmation checker to avoid using execute=true just to test mismatch behavior.",
+      "verification": "VERIF-TASK-BUD-1016-DISPATCH-CHECK"
     }
   ]
 }

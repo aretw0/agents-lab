@@ -14939,6 +14939,15 @@
       "method": "live-preview-canary+fail-closed-mismatch-attempt+status-check+marker-check",
       "timestamp": "2026-05-08T03:01:06.766Z",
       "evidence": "After reload, called live `agent_run_task_dispatch` on TASK-BUD-1015 preview path with execute=false. Result summary: agent-run-task-dispatch decision=preview runId=task-bud-1015-live-dispatch-gate-canary execute=no dispatch=no. Then attempted execute=true with intentionally wrong operator_confirmation; the runtime/guard blocked the protected live dispatch attempt before any subprocess could start, which is fail-closed for this canary. agent_run_status for runId=task-bud-1015-live-dispatch-gate-canary returned found=no state=unknown dispatch=no, confirming no registry/running process was created. Marker checks passed for operator-confirmation-mismatch, dispatchAllowed gating, processStartAllowed tied to dispatchAllowed, spawn gated code, and smoke tests asserting wrong confirmation keeps agent-runs.json absent. No worker was dispatched."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1016-DISPATCH-CHECK",
+      "target": "TASK-BUD-1016",
+      "target_type": "task",
+      "status": "passed",
+      "method": "implementation+smoke-test+marker-check",
+      "timestamp": "2026-05-08T03:04:17.008Z",
+      "evidence": "Implemented report-only `agent_run_task_dispatch_check` in packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts. The tool composes `agent_run_task_start_packet`, compares optional operator_confirmation to the packet humanConfirmationPhrase, returns confirmation=missing|mismatch|match, and reports wouldDispatchAfterExplicitExecute=true only when the packet is ready and the phrase matches. It never accepts execute, never calls spawn, and always keeps dispatchAllowed=false/processStartAllowed=false/processStopAllowed=false. Tests cover missing, mismatch, match, blocked protected task, and agent-runs.json remains absent. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 30 passed. safe_marker_check passed for tool and tests."
     }
   ]
 }
