@@ -22749,6 +22749,29 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criado após operador questionar o uso de `setTimeout` manual para acompanhar o worker. O caminho atual tem status/log/outcome, mas falta uma primitiva integrada de follow bounded.\n[provenance:human] source_task=TASK-BUD-1018 reason=Primeiro retry real expôs lacuna ergonômica/operacional: acompanhamento ainda foi feito por polling manual com sleep.\nNative bounded follow surface added to replace manual sleep/polling for runner observation. Requires `/reload` before live tool use.",
       "verification": "VERIF-TASK-BUD-1020-AGENT-RUN-FOLLOW"
+    },
+    {
+      "id": "TASK-BUD-1021",
+      "description": "[agent-first/live-canary] Validar ao vivo, após reload, a nova superfície read-only bounded `agent_run_follow` contra run existente sem iniciar/parar/redispatchar processo.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1020"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`agent_run_follow` para `task-bud-1018-first-runner-readonly-canary-retry` retorna decision=terminal e terminal=true.",
+        "Resultado inclui status final completed/stale=false, outputBytes>0 e log tail limitado.",
+        "`agent_run_follow` para run ausente retorna decision=missing-run, sem start/stop/dispatch.",
+        "Nenhum worker/processo é iniciado, parado ou redispatchado durante a validação.",
+        "Board/handoff registram que a lacuna do polling manual foi fechada ao vivo."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criado após reload para validar live a superfície `agent_run_follow` implementada em TASK-BUD-1020.\n[provenance:human] source_task=TASK-BUD-1020 reason=TASK-BUD-1020 adicionou a primitiva; após reload precisamos confirmar que a superfície viva funciona com runs reais/ausentes.\nLive follow canary passed: terminal and missing-run paths are observable without manual sleep/polling or process side effects.",
+      "verification": "VERIF-TASK-BUD-1021-LIVE-FOLLOW-CANARY"
     }
   ]
 }
