@@ -14993,6 +14993,24 @@
       "method": "focal-test+marker-check",
       "timestamp": "2026-05-08T04:13:32.109Z",
       "evidence": "Hardened `buildAgentRunOutcomePacket` so `fileContract=read-only` with any non-empty touchedFiles fails with recommendationCode=agent-run-outcome-fail-read-only-touched-files, blocker read-only-touched-files, recommendation ask-human, and rollbackFiles including touched files. Preserved mutation missing-declared behavior by gating it to fileContract != read-only. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 31 passed. Marker checks passed for runtime and test coverage."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1023-LIVE-READONLY-OUTCOME",
+      "target": "TASK-BUD-1023",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-canary+follow+dirty-check",
+      "timestamp": "2026-05-08T04:16:33.925Z",
+      "evidence": "After reload, live-validated `agent_run_outcome_packet` read-only hardening against completed run `task-bud-1018-first-runner-readonly-canary-retry`. Baseline read-only/no touched_files returned contract=pass process=completed recommendation=stop outputBytes=1396 dispatch=no. Synthetic read-only touched_files=[docs/research/first-party-agent-lane-architecture-2026-05.md] returned contract=fail process=completed recommendation=ask-human touched=1 outputBytes=1396 dispatch=no. `agent_run_follow` returned decision=terminal state=completed outputBytes=1396 dispatch=no. No worker/process was started, stopped, or redispatched; git dirty only reflected board updates."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1018-FIRST-RUNNER-READONLY-CANARY",
+      "target": "TASK-BUD-1018",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-confirmed-dispatch+follow+outcome+dirty-check",
+      "timestamp": "2026-05-08T04:17:10.048Z",
+      "evidence": "First real first-party runner canary completed after exact operator confirmation for retry runId `task-bud-1018-first-runner-readonly-canary-retry`. Dispatch gate preflight matched exact phrase and `agent_run_task_dispatch` returned decision=dispatched pid=56304 without session crash. `agent_run_follow` after TASK-BUD-1020 returned decision=terminal state=completed terminal=yes outputBytes=1396 dispatch=no. Git remained clean for code/doc files. `agent_run_outcome_packet` after TASK-BUD-1022 with file_contract=read-only, touched_files=[], outputBytes=1396, and pass markers returned contract=pass process=completed recommendation=stop. Separate synthetic read-only touched-file canary in TASK-BUD-1023 returned contract=fail, confirming mutation would fail closed. Original worker self-reported FAIL due pre-follow observability race, but parent-side finalizer/outcome evidence supersedes it for the runner contract."
     }
   ]
 }

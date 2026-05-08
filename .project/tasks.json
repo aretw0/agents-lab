@@ -22690,7 +22690,7 @@
     {
       "id": "TASK-BUD-1018",
       "description": "[agent-first/canary] Executar, somente com confirmação humana exata, o primeiro worker via `agent_run_task_dispatch` em modo read-only-review para validar o runner first-party de ponta a ponta sem mutação.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "docs/research/first-party-agent-lane-architecture-2026-05.md",
@@ -22704,7 +22704,8 @@
         "Nenhum arquivo deve ser modificado pelo worker; se houver mudança, outcome deve falhar e rollback ser explícito."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Tarefa preparada após validar dispatch_check. Não autoriza execução por si só; exige confirmação humana exata para o runId.\n[provenance:human] source_task=TASK-BUD-1017 reason=TASK-BUD-1017 validou confirmação report-only; próximo passo é preparar o primeiro dispatch real, mas apenas com frase exata do operador.\nFirst real dispatch attempt failed before worker execution: operator reported session crash from unhandled `spawn pi ENOENT`. Registry reconciled to state=failed; outcome packet reports process=failed contract=fail outputBytes=0. Do not retry until TASK-BUD-1019 is committed and `/reload` is done.\nPost-reload live safety check passed without redispatch. Existing original run `task-bud-1018-first-runner-readonly-canary` remains failed/stale=no. Prepared retry packet runId `task-bud-1018-first-runner-readonly-canary-retry`: start_packet ready-for-human-decision, dispatch_check confirmation=missing dispatch=no, dispatch preview execute=no dispatch=no, status found=no. Fresh exact confirmation is required before any retry.\nRetry dispatch executed after exact confirmation. `agent_run_task_dispatch` returned dispatched pid=56304 without session crash. Final status: completed/stale=no; git remained clean. Log output was non-empty (1396 bytes) but worker self-reported FAIL because it observed the run while still running/stale and noted no finalized outcome yet. Parent outcome packet: process=completed contract=fail recommendation=ask-human markerFailure=worker self-reported PASS outputBytes=1396. Created TASK-BUD-1020 to add native bounded follow/await instead of manual sleep/polling."
+      "notes": "Tarefa preparada após validar dispatch_check. Não autoriza execução por si só; exige confirmação humana exata para o runId.\n[provenance:human] source_task=TASK-BUD-1017 reason=TASK-BUD-1017 validou confirmação report-only; próximo passo é preparar o primeiro dispatch real, mas apenas com frase exata do operador.\nFirst real dispatch attempt failed before worker execution: operator reported session crash from unhandled `spawn pi ENOENT`. Registry reconciled to state=failed; outcome packet reports process=failed contract=fail outputBytes=0. Do not retry until TASK-BUD-1019 is committed and `/reload` is done.\nPost-reload live safety check passed without redispatch. Existing original run `task-bud-1018-first-runner-readonly-canary` remains failed/stale=no. Prepared retry packet runId `task-bud-1018-first-runner-readonly-canary-retry`: start_packet ready-for-human-decision, dispatch_check confirmation=missing dispatch=no, dispatch preview execute=no dispatch=no, status found=no. Fresh exact confirmation is required before any retry.\nRetry dispatch executed after exact confirmation. `agent_run_task_dispatch` returned dispatched pid=56304 without session crash. Final status: completed/stale=no; git remained clean. Log output was non-empty (1396 bytes) but worker self-reported FAIL because it observed the run while still running/stale and noted no finalized outcome yet. Parent outcome packet: process=completed contract=fail recommendation=ask-human markerFailure=worker self-reported PASS outputBytes=1396. Created TASK-BUD-1020 to add native bounded follow/await instead of manual sleep/polling.\nCompleted after follow/outcome hardening: exact-confirmed retry process completed, output non-empty, no files touched, parent read-only outcome passed.",
+      "verification": "VERIF-TASK-BUD-1018-FIRST-RUNNER-READONLY-CANARY"
     },
     {
       "id": "TASK-BUD-1019",
@@ -22795,6 +22796,29 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criado após o worker do TASK-BUD-1018 apontar lacuna: outcome atual não falha read-only quando alterações ocorrem dentro do escopo declarado.\n[provenance:human] source_task=TASK-BUD-1018 reason=Worker retry identificou que read-only contract deveria falhar em qualquer touchedFiles, não apenas unexpected files.\nRead-only outcome contract now fails on any touched file, including declared-scope files.",
       "verification": "VERIF-TASK-BUD-1022-READONLY-OUTCOME-HARDENING"
+    },
+    {
+      "id": "TASK-BUD-1023",
+      "description": "[agent-first/live-canary] Validar ao vivo, após reload, o hardening de `agent_run_outcome_packet` para contrato read-only com arquivos tocados.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1022"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`agent_run_outcome_packet` com `file_contract=read-only` e `touched_files` não vazio retorna contract=fail.",
+        "Resultado inclui recommendationCode=agent-run-outcome-fail-read-only-touched-files ou evidência equivalente.",
+        "Rollback files incluem o arquivo tocado.",
+        "Caminho read-only sem `touched_files` para run completo com outputBytes>0 permanece pass.",
+        "Nenhum worker/processo é iniciado, parado ou redispatchado."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criado após reload para validar live o hardening implementado em TASK-BUD-1022.\n[provenance:human] source_task=TASK-BUD-1022 reason=TASK-BUD-1022 mudou runtime de outcome; precisa canary live pós-reload.\nLive outcome hardening canary passed: read-only with touched file fails, read-only with no touched files passes.",
+      "verification": "VERIF-TASK-BUD-1023-LIVE-READONLY-OUTCOME"
     }
   ]
 }
