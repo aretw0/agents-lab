@@ -1,32 +1,32 @@
 {
-  "timestamp": "2026-05-08T04:23:28.889Z",
-  "context": "Completed runner final evidence hardening. Registry entry now supports exitCode/outputBytes/errorCode/errorMessage. Dispatch close handler ap [snip] ed, so reload required before live use. [truncated:+302 chars]",
+  "timestamp": "2026-05-08T05:08:57.054Z",
+  "context": "After reload, live-validated final evidence fields without dispatch. Created synthetic local registry entries under .pi/reports: task-bud-102 [snip] 025. No start/stop/redispatch occurred. [truncated:+490 chars]",
   "next_actions": [
-    "Commit TASK-BUD-1024 code/test/board/verification/handoff changes.",
-    "Operator should run /reload before live validation of exitCode/outputBytes registry evidence.",
-    "After reload, live-canary status/outcome fallback on a synthetic registry entry or next exact-confirmed runner canary."
+    "Commit TASK-BUD-1025 board/verification/handoff changes.",
+    "Next safe slice: prepare next exact-confirmed runner canary using improved follow/outcome/fina [snip] -lane maturity checkpoint. [truncated:+37 chars]"
   ],
   "blockers": [
-    "Reload required after extension source change.",
-    "Any new dispatch still requires exact runId confirmation."
+    "No final-evidence blocker. Any new dispatch still requires exact runId confirmation."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 31 passed",
-    "safe_marker_check runtime fields/outcome fallback -> pass",
-    "safe_marker_check dispatch close/error markers -> pass"
+    "agent_run_status synthetic completed -> found=yes state=completed",
+    "agent_run_outcome_packet synthetic completed no output_bytes -> contract=pass outputBytes=777",
+    "agent_run_status synthetic spawn error -> found=yes state=failed"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1024",
+    "focus": "TASK-BUD-1025",
     "canonical_links": [
-      "task:TASK-BUD-1024"
+      "task:TASK-BUD-1025",
+      "task:TASK-BUD-1025-SYNTHETIC-COMPLETED-EVIDENCE",
+      "task:TASK-BUD-1025-SYNTHETIC-SPAWN-ERROR"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T04:23:28.889Z",
+    "generatedAtIso": "2026-05-08T05:08:57.054Z",
     "level": "ok",
-    "percent": 42,
+    "percent": 43,
     "action": "continue",
-    "recommendation": "commit-final-evidence-hardening-then-reload-before-live-use",
+    "recommendation": "commit-live-final-evidence-canary",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
@@ -34,20 +34,20 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T04:23:28.889Z",
+      "atIso": "2026-05-08T05:08:57.054Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 42,
+      "percent": 43,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-final-evidence-hardening-then-reload-before-live-use"
+      "recommendation": "commit-live-final-evidence-canary"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-1024"
+    "TASK-BUD-1025"
   ]
 }

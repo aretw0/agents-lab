@@ -22844,6 +22844,30 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criado após fechar o canary read-only: próximo passo é fortalecer evidência final do runner para reduzir inspeção manual de logs.\n[provenance:human] source_task=TASK-BUD-1018 reason=Primeiro runner canary evidenciou que status/outcome precisam carregar bytes/código de saída diretamente no registry.\nRunner final evidence now records exitCode/outputBytes and spawn error metadata in registry/status/outcome paths. Requires `/reload` before live use.",
       "verification": "VERIF-TASK-BUD-1024-RUNNER-FINAL-EVIDENCE"
+    },
+    {
+      "id": "TASK-BUD-1025",
+      "description": "[agent-first/live-canary] Validar ao vivo, após reload, os campos finais `exitCode`, `outputBytes`, `errorCode` e `errorMessage` no registry/status/outcome sem dispatch.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1024"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Entrada sintética completed no registry com exitCode/outputBytes aparece em `agent_run_status`.",
+        "`agent_run_outcome_packet` usa `entry.outputBytes` como fallback quando `output_bytes` não é fornecido.",
+        "Entrada sintética failed com errorCode/errorMessage aparece em `agent_run_status`.",
+        "Validação não inicia, para ou redispatcha nenhum processo.",
+        "Registry local `.pi/reports` pode receber artefatos sintéticos, mas git deve permanecer limpo fora de board/handoff."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criado após reload para validar live os campos adicionados em TASK-BUD-1024 usando entradas sintéticas locais no registry, sem dispatch.\n[provenance:human] source_task=TASK-BUD-1024 reason=TASK-BUD-1024 adicionou campos de evidência final; pós-reload precisa validar superfície viva sem gastar novo worker.\nLive final-evidence canary passed: status/follow/outcome can consume synthetic exitCode/outputBytes/errorCode/errorMessage without dispatch.",
+      "verification": "VERIF-TASK-BUD-1025-LIVE-FINAL-EVIDENCE"
     }
   ]
 }

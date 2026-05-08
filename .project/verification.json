@@ -15020,6 +15020,15 @@
       "method": "focal-test+marker-check",
       "timestamp": "2026-05-08T04:22:59.297Z",
       "evidence": "Added final runner evidence fields to registry/status/outcome. `AgentRunRegistryEntry` now supports exitCode, outputBytes, errorCode, and errorMessage. Dispatch close handler appends `[agent-runner] close exitCode=...`, computes outputBytes from the log, and writes exitCode/outputBytes to registry. Spawn error handler writes errorCode/errorMessage/outputBytes with state=failed. `agent_run_status` exposes exitCode/outputBytes/errorCode/errorMessage read-only. `buildAgentRunOutcomePacket` falls back to entry.outputBytes when explicit output_bytes is not provided. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 31 passed. Marker checks passed for runtime, dispatch surface, and tests."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1025-LIVE-FINAL-EVIDENCE",
+      "target": "TASK-BUD-1025",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-canary+synthetic-registry+outcome-fallback",
+      "timestamp": "2026-05-08T05:08:34.744Z",
+      "evidence": "After reload, live-validated final evidence fields without dispatch by adding local synthetic `.pi/reports/agent-runs.json` entries. Completed synthetic run `task-bud-1025-synthetic-completed-evidence` has state=completed exitCode=0 outputBytes=777; `agent_run_status` found it completed, and `agent_run_outcome_packet` with no explicit output_bytes returned contract=pass process=completed outputBytes=777, proving entry.outputBytes fallback. Synthetic spawn-error run `task-bud-1025-synthetic-spawn-error` has state=failed outputBytes=64 errorCode=ENOENT errorMessage='synthetic spawn error canary'; `agent_run_status` found it failed. `agent_run_follow` on completed synthetic run returned terminal completed dispatch=no. No worker/process was started, stopped, or redispatched; only local `.pi/reports` synthetic artifacts and board files changed."
     }
   ]
 }
