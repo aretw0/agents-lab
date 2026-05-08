@@ -1149,6 +1149,17 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mowkp1ct",
+      "title": "The agent produced a silent no-op with no substantive response to the action request, leaving the task unresolved.",
+      "body": "The agent produced a silent no-op with no substantive response to the action request, leaving the task unresolved.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }
