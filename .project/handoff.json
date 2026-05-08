@@ -1,32 +1,30 @@
 {
-  "timestamp": "2026-05-08T05:08:57.054Z",
-  "context": "After reload, live-validated final evidence fields without dispatch. Created synthetic local registry entries under .pi/reports: task-bud-102 [snip] 025. No start/stop/redispatch occurred. [truncated:+490 chars]",
+  "timestamp": "2026-05-08T05:13:17.304Z",
+  "context": "Documented agent runner maturity checkpoint in docs/research/agent-runner-maturity-checkpoint-2026-05.md. It consolidates exact-confirmed dis [snip] ollow/outcome. Completed TASK-BUD-1026. [truncated:+271 chars]",
   "next_actions": [
-    "Commit TASK-BUD-1025 board/verification/handoff changes.",
-    "Next safe slice: prepare next exact-confirmed runner canary using improved follow/outcome/fina [snip] -lane maturity checkpoint. [truncated:+37 chars]"
+    "Commit TASK-BUD-1026 doc/board/verification/handoff changes.",
+    "Next safe slice: prepare a small-mutation runner canary task packet, but do not dispatch without exact runId phrase."
   ],
   "blockers": [
-    "No final-evidence blocker. Any new dispatch still requires exact runId confirmation."
+    "Any future runner dispatch requires exact human confirmation for that runId.",
+    "No multi-worker/colony promotion yet."
   ],
   "recent_validation": [
-    "agent_run_status synthetic completed -> found=yes state=completed",
-    "agent_run_outcome_packet synthetic completed no output_bytes -> contract=pass outputBytes=777",
-    "agent_run_status synthetic spawn error -> found=yes state=failed"
+    "safe_marker_check docs/research/agent-runner-maturity-checkpoint-2026-05.md -> pass",
+    "board_task_complete TASK-BUD-1026 -> completed"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1025",
+    "focus": "TASK-BUD-1026",
     "canonical_links": [
-      "task:TASK-BUD-1025",
-      "task:TASK-BUD-1025-SYNTHETIC-COMPLETED-EVIDENCE",
-      "task:TASK-BUD-1025-SYNTHETIC-SPAWN-ERROR"
+      "task:TASK-BUD-1026"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T05:08:57.054Z",
+    "generatedAtIso": "2026-05-08T05:13:17.304Z",
     "level": "ok",
-    "percent": 43,
+    "percent": 45,
     "action": "continue",
-    "recommendation": "commit-live-final-evidence-canary",
+    "recommendation": "commit-runner-maturity-checkpoint",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
@@ -34,20 +32,20 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T05:08:57.054Z",
+      "atIso": "2026-05-08T05:13:17.304Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 43,
+      "percent": 45,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-live-final-evidence-canary"
+      "recommendation": "commit-runner-maturity-checkpoint"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-1025"
+    "TASK-BUD-1026"
   ]
 }

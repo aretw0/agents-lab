@@ -22868,6 +22868,32 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criado após reload para validar live os campos adicionados em TASK-BUD-1024 usando entradas sintéticas locais no registry, sem dispatch.\n[provenance:human] source_task=TASK-BUD-1024 reason=TASK-BUD-1024 adicionou campos de evidência final; pós-reload precisa validar superfície viva sem gastar novo worker.\nLive final-evidence canary passed: status/follow/outcome can consume synthetic exitCode/outputBytes/errorCode/errorMessage without dispatch.",
       "verification": "VERIF-TASK-BUD-1025-LIVE-FINAL-EVIDENCE"
+    },
+    {
+      "id": "TASK-BUD-1026",
+      "description": "[agent-first/checkpoint] Documentar o checkpoint de maturidade do runner first-party após canaries de dispatch, follow, outcome read-only e evidência final.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1018",
+        "TASK-BUD-1020",
+        "TASK-BUD-1022",
+        "TASK-BUD-1024",
+        "TASK-BUD-1025"
+      ],
+      "files": [
+        "docs/research/agent-runner-maturity-checkpoint-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Documento registra evidências concluídas: dispatch exact-confirmed, crash ENOENT corrigido, follow bounded, outcome read-only, final evidence fields.",
+        "Documento separa processo, contrato e decisão de board/commit.",
+        "Documento mantém bloqueios: novo dispatch exige frase exata por runId; multi-worker/colony ainda bloqueado.",
+        "Documento define próximo degrau recomendado para small-mutation runner com follow/outcome final evidence.",
+        "Validação por marker-check passa."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criado porque o milestone ficou sem planned tasks após TASK-BUD-1025; checkpoint consolida aprendizado antes do próximo runner.\n[provenance:human] source_task=TASK-BUD-1025 reason=Após validar evidência final ao vivo, precisamos consolidar o estado da lane antes de outro dispatch.\nRunner maturity checkpoint documented; next safe rung is a tightly scoped small-mutation runner canary, still exact-confirmation gated.",
+      "verification": "VERIF-TASK-BUD-1026-RUNNER-MATURITY-CHECKPOINT"
     }
   ]
 }

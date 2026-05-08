@@ -15029,6 +15029,15 @@
       "method": "live-tool-canary+synthetic-registry+outcome-fallback",
       "timestamp": "2026-05-08T05:08:34.744Z",
       "evidence": "After reload, live-validated final evidence fields without dispatch by adding local synthetic `.pi/reports/agent-runs.json` entries. Completed synthetic run `task-bud-1025-synthetic-completed-evidence` has state=completed exitCode=0 outputBytes=777; `agent_run_status` found it completed, and `agent_run_outcome_packet` with no explicit output_bytes returned contract=pass process=completed outputBytes=777, proving entry.outputBytes fallback. Synthetic spawn-error run `task-bud-1025-synthetic-spawn-error` has state=failed outputBytes=64 errorCode=ENOENT errorMessage='synthetic spawn error canary'; `agent_run_status` found it failed. `agent_run_follow` on completed synthetic run returned terminal completed dispatch=no. No worker/process was started, stopped, or redispatched; only local `.pi/reports` synthetic artifacts and board files changed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1026-RUNNER-MATURITY-CHECKPOINT",
+      "target": "TASK-BUD-1026",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-review+marker-check",
+      "timestamp": "2026-05-08T05:13:00.271Z",
+      "evidence": "Created `docs/research/agent-runner-maturity-checkpoint-2026-05.md`. It records the completed evidence for exact-confirmed dispatch, ENOENT crash hardening, bounded follow, read-only outcome fail-closed behavior, final evidence fields, separation of dispatch/process/contract/board/commit, and remaining blockers. It recommends the next rung: one small mutation runner canary with declared files, rollback, focal validation, follow, outcome, and parent-side completion. Marker check passed for required evidence markers."
     }
   ]
 }
