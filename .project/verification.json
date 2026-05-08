@@ -15137,6 +15137,15 @@
       "method": "worker-run+marker-check+outcome+test",
       "timestamp": "2026-05-08T12:10:14.684Z",
       "evidence": "Exact-confirmed single-worker run `task-bud-1033-task-bud-946-triage-doc-mutation` dispatched after confirmation phrase matched. Process completed with exitCode=0 and outputBytes=783. Worker touched only `docs/research/control-plane-signal-integrity-audit-2026-05.md`, adding `## TASK-BUD-946 duplicate edit warning triage` and marker `task-bud-946-duplicate-edit-warning-triage`. Parent validation: safe_marker_check passed for heading+marker; `git diff --check` passed. Initial outcome exposed a contract-model gap because the derived packet input and target doc were both declared; TASK-BUD-1038 fixed this with `mutation_target_files`. Re-evaluated outcome passed with process=completed, contract=pass, declared=2, touched=1, mutation target exactly the target doc. Focal regression `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` passed: 31 tests."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1034-MATURITY-SYNTHESIS",
+      "target": "TASK-BUD-1034",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-synthesis+marker-check",
+      "timestamp": "2026-05-08T12:13:19.058Z",
+      "evidence": "Created `docs/research/single-worker-board-driven-lane-maturity-2026-05.md` with marker `single-worker-board-driven-lane-maturity-decision`. The synthesis decides to continue single-worker board-driven lane as normal controlled local-safe operation, records evidence from TASK-BUD-1032/TASK-BUD-1033/TASK-BUD-1038, states that mutation contracts now separate packet/input attachments from mutation targets, and keeps multi-worker/background/colony/protected/unattended dispatch gated. Marker check passed for decision, non-promotion, and mutation-target distinction. i18n lint warned only on the intentionally quoted Portuguese operator phrase `prossiga`; artifact remains otherwise English."
     }
   ]
 }
