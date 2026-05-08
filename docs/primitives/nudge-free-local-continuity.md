@@ -214,6 +214,8 @@ Defaults sane para `agents-lab` quando o operador não disser o contrário:
 - cada slice deve ter checkpoint/handoff curto, rollback não destrutivo conhecido e commit pequeno quando houver diff validado;
 - não pedir micro-autorização para commit/checkpoint/validação/rollback quando tudo está dentro do escopo local-safe;
 - quota é recurso de trabalho do projeto: consumir de forma econômica, mas usar as cotas disponíveis em vez de parar por micro-autorização;
+- na ausência de restrição explícita, o control-plane deve avaliar ROI/produtividade e recomendar workers quando eles reduzem tempo, risco ou carga cognitiva;
+- quando a escala exigir consentimento humano, usar entrevista curta com a autorização provável em vez de despejar detalhes de implementação; ferramentas e workers são meios para entregar trabalho;
 - DashScope deve ter rota/fallback por modelo quando uma cota específica saturar;
 - OpenAI Codex Spark é bom candidato para workers enquanto houver cota específica disponível;
 - OpenAI normal deve ser preservado para o control-plane quando fizer sentido, com fallback governado para Qwen/DashScope quando houver pressão;

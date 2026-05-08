@@ -15164,6 +15164,15 @@
       "method": "doc-update+marker-check+i18n-lint",
       "timestamp": "2026-05-08T13:08:37.380Z",
       "evidence": "Updated `docs/primitives/nudge-free-local-continuity.md` to replace the verbose operator manifestation with `Template mínimo recomendado`: seed/focus plus optional limit/exceptions only. Moved normal development practices into sane defaults: declare scope, validate, record evidence, checkpoint/handoff, rollback known, and commit small validated diffs when gates are green and the change is mature. It explicitly says not to ask for micro-authorization for commit/checkpoint/validation/rollback within local-safe scope. Protected/excluded scopes and stop conditions remain explicit defaults. Marker check passed 4/4; i18n lint pt-BR passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1041-PROACTIVE-ROI-DEFAULT",
+      "target": "TASK-BUD-1041",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-update+marker-check+i18n-lint+interview-plan",
+      "timestamp": "2026-05-08T13:12:43.520Z",
+      "evidence": "Updated `docs/primitives/nudge-free-local-continuity.md` defaults: when there is no explicit restriction, the control-plane should evaluate ROI/productivity and recommend workers when they reduce time, risk, or cognitive load. When scale requires human consent, it should use a short interview with the likely authorization instead of dumping implementation details; tools/workers are means to deliver work. This keeps lower gates/protected limits intact and does not create new vocabulary. Marker check passed 3/3; i18n lint pt-BR passed. Also previewed `structured_interview_plan` for the compact authorization shape: seed, allowed scale, optional limits/exceptions."
     }
   ]
 }

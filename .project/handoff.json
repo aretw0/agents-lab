@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-05-08T13:09:06.012Z",
-  "context": "Operator corrected the previous manifestation as too verbose: normal software practices like commit/checkpoint/validation should be sane defa [snip] tion for these within local-safe scope. [truncated:+375 chars]",
+  "timestamp": "2026-05-08T13:13:02.615Z",
+  "context": "Operator clarified default: when not explicit, control-plane should be proactive about resources and ROI/productivity. If workers help, recom [snip] cal-continuity.md defaults accordingly. [truncated:+229 chars]",
   "next_actions": [
-    "Commit TASK-BUD-1040 sane-defaults doc update.",
-    "Then operator can authorize a batch with the short template: Autorizo um batch local-safe sobr [snip] Foco inicial: <task/tema>. [truncated:+10 chars]"
+    "Commit TASK-BUD-1041 proactive ROI default update.",
+    "Then continue using the concise manifestation/defaults: control-plane recommends workers/resou [snip] ass protected/lower gates. [truncated:+40 chars]"
   ],
   "blockers": [
-    "This documents the upper contract; lower runtime worker exact-confirmation sti [snip] s the contract safely. [truncated:+47 chars]",
-    "Protected scopes and irreversible operations still require separate authorization."
+    "Implementation still needs a future slice if we want runtime to auto-consume s [snip] oc and board evidence. [truncated:+57 chars]",
+    "Protected scope, irreversible risk, remote/offload, scheduler, multi-worker/co [snip] xplicit authorization. [truncated:+20 chars]"
   ],
   "recent_validation": [
-    "safe_marker_check docs/primitives/nudge-free-local-continuity.md -> pass 4/4",
-    "i18n_lint_text pt-BR -> pass",
-    "board_task_complete TASK-BUD-1040 -> completed"
+    "structured_interview_plan preview -> compact seed/scale/exception interview shape",
+    "safe_marker_check docs/primitives/nudge-free-local-continuity.md -> pass 3/3",
+    "i18n_lint_text pt-BR -> pass"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1040",
+    "focus": "TASK-BUD-1041",
     "canonical_links": [
-      "task:TASK-BUD-1040"
+      "task:TASK-BUD-1041"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T13:09:06.012Z",
+    "generatedAtIso": "2026-05-08T13:13:02.615Z",
     "level": "ok",
-    "percent": 36,
+    "percent": 38,
     "action": "continue",
-    "recommendation": "commit-sane-defaults-manifestation",
+    "recommendation": "commit-proactive-roi-default",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
@@ -33,20 +33,20 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T13:09:06.012Z",
+      "atIso": "2026-05-08T13:13:02.615Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 36,
+      "percent": 38,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-sane-defaults-manifestation"
+      "recommendation": "commit-proactive-roi-default"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-1040"
+    "TASK-BUD-1041"
   ]
 }

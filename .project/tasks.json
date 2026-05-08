@@ -23199,6 +23199,24 @@
       "milestone": "single-worker-board-driven-lane-2026-05",
       "notes": "Criado a partir do steer do operador: a manifestação anterior ficou verbosa e incluía práticas que devem ser sane defaults, como commit quando gates estão verdes.\n[provenance:human] source_task=none reason=Reduzir atrito e evitar pedir ao operador que reafirme defaults do processo de desenvolvimento.\nManifestação enxugada: operador declara direção e exceções; commit/checkpoint/validação/rollback viram sane defaults quando gates estão verdes.",
       "verification": "VERIF-TASK-BUD-1040-SANE-DEFAULTS"
+    },
+    {
+      "id": "TASK-BUD-1041",
+      "description": "[nudge-free/local-continuity] Registrar default proativo por ROI: se há recursos e retorno provável, o control-plane recomenda workers e usa entrevista curta para autorização quando necessário.",
+      "status": "completed",
+      "priority": "p0",
+      "files": [
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "Documento registra que, na ausência de restrição explícita, o control-plane deve avaliar ROI/produtividade e recomendar uso de workers quando isso facilitar o trabalho.",
+        "Documento diferencia recomendação proativa de auto-dispatch: quando a escala exigir autorização, o control-plane deve fazer entrevista curta com a autorização provável, não expor detalhes excessivos ao operador.",
+        "Documento mantém defaults de local-safe e limites protegidos sem criar vocabulário novo.",
+        "Documento preserva que ferramentas/workers são meios para entregar trabalho, não fim em si mesmos."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Criado a partir do steer do operador: se há recursos e ROI, o control-plane deve ser proativo em recomendar/usar workers, pedindo autorização curta apenas quando o contrato exigir.\n[provenance:human] source_task=none reason=Reduzir atrito: operador quer trabalho entregue e não microgerenciar detalhes de delegação.\nRegistered proactive ROI default: recommend workers/resources when useful; ask short authorization only when scale/contract requires it.",
+      "verification": "VERIF-TASK-BUD-1041-PROACTIVE-ROI-DEFAULT"
     }
   ]
 }
