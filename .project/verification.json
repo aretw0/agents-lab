@@ -15101,6 +15101,15 @@
       "method": "code+smoke+marker-check",
       "timestamp": "2026-05-08T07:22:10.650Z",
       "evidence": "Extended packetization guardrail to the control plane and known structured state files. `guardrails-core-read-path-runtime.ts` now uses `STRUCTURED_STATE_READ_REDIRECTS` for `.project/tasks.json`, `.project/verification.json`, `.project/issues.json`, `.project/handoff.json`, and `.pi/reports/agent-runs.json`, blocking direct read/bash file access and recommending better surfaces such as `board_query`, `read-block issues`, `context_watch_continuation_readiness`, `agent_run_status`, `agent_run_log_tail`, `agent_run_follow`, or `agent_run_outcome_packet`. Lane doc now states raw structured state is storage, not the working interface, for all agents including control plane. Validation: marker checks passed; `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-human-confirmation-runtime-wiring.test.ts --reporter=dot` -> 2 files passed, 32 tests passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1032-READONLY-WORKER-REVIEW",
+      "target": "TASK-BUD-1032",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-confirmed-read-only-worker+follow+git-clean+outcome",
+      "timestamp": "2026-05-08T07:34:29.097Z",
+      "evidence": "Exact-confirmed read-only worker `task-bud-1032-readonly-task-bud-946-review` ran over derived packet `docs/research/task-bud-1032-readonly-worker-packet-2026-05.md`, not raw structured state. Dispatch check matched; dispatch pid=59796; follow terminal completed with outputBytes=1735. Git stayed clean and touched_files=[]. Worker returned useful review: no direct duplicate-generation source for `oldText must match` found in declared extension scope; likely duplication path is tool-output fan-out/TUI rendering, with `monitor-summary.ts` receiving both `message_end` and `tool_result` and `web-session-gateway.ts` pushing both event types to recent output. Recommended narrowed follow-up files: `packages/pi-stack/extensions/monitor-summary.ts` and `packages/pi-stack/extensions/web-session-gateway.ts`; suggested validation gate: smoke fixture asserting one visible warning line for one synthetic edit-failure event; rollback: revert only these files if duplicate count/teardown behavior regresses. Blocker noted: no reproducible UI/log transcript in packet, attribution inferred. `agent_run_outcome_packet` returned contract=pass process=completed recommendation=stop."
     }
   ]
 }

@@ -23011,7 +23011,7 @@
     {
       "id": "TASK-BUD-1032",
       "description": "[agent-first/lane] Rodar um worker `read-only-review` em uma tarefa real selecionada do board e validar output/contrato sem mutação.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1031"
@@ -23026,7 +23026,8 @@
         "Falhas são classificadas na taxonomia da lane."
       ],
       "milestone": "single-worker-board-driven-lane-2026-05",
-      "notes": "Primeiro uso real pós-lane: read-only antes de mutação.\n[provenance:human] source_task=TASK-BUD-1031 reason=Degrau read-only da escalation ladder single-worker.\nAfter reload and structured-state redirect validation, TASK-BUD-1032 was repacketized to use derived packet `docs/research/task-bud-1032-readonly-worker-packet-2026-05.md` instead of raw `.project/tasks.json`. This follows the operator steer: use existing primitives/surfaces better, avoid new terminology/bloat, and keep raw structured state as storage rather than working interface."
+      "notes": "Primeiro uso real pós-lane: read-only antes de mutação.\n[provenance:human] source_task=TASK-BUD-1031 reason=Degrau read-only da escalation ladder single-worker.\nAfter reload and structured-state redirect validation, TASK-BUD-1032 was repacketized to use derived packet `docs/research/task-bud-1032-readonly-worker-packet-2026-05.md` instead of raw `.project/tasks.json`. This follows the operator steer: use existing primitives/surfaces better, avoid new terminology/bloat, and keep raw structured state as storage rather than working interface.\nRead-only worker review passed and produced a narrowed next-slice recommendation for TASK-BUD-946 without touching files or reading raw structured state.",
+      "verification": "VERIF-TASK-BUD-1032-READONLY-WORKER-REVIEW"
     },
     {
       "id": "TASK-BUD-1033",
