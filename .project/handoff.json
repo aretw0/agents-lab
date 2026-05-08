@@ -1,54 +1,53 @@
 {
-  "timestamp": "2026-05-08T17:29:21.767Z",
-  "context": "Exact-confirmed worker task-bud-1063-spark-model-scope-budget-post-reload dispatched after post-reload packet accepted Spark model-specific b [snip] until preflight/classification exists. [truncated:+450 chars]",
+  "timestamp": "2026-05-08T22:50:16.058Z",
+  "context": "Implemented first local slice of runner preflight/classification for TASK-BUD-1066. Added packages/pi-stack/extensions/guardrails-core-agent- [snip] nable evidence rather than blind retry. [truncated:+712 chars]",
   "current_tasks": [
     "TASK-BUD-1066"
   ],
   "next_actions": [
-    "Implement TASK-BUD-1066 preflight/classifier locally: distinguish CLI argv invalid, provider u [snip] re before more dispatches. [truncated:+97 chars]",
-    "Avoid more worker retries until the classifier yields actionable evidence.",
-    "Keep Spark as preferred model once runner is healthy; avoid DashScope/Qwen until fresh externa [snip] a evidence says available. [truncated:+6 chars]"
+    "Commit TASK-BUD-1066 classifier slice.",
+    "After reload, use agent_run_failure_classification on recent silent runs to verify live behavior.",
+    "Next slice: add a narrower startup/provider diagnostic or compare successful TASK-BUD-1027 vs [snip] ore any new worker canary. [truncated:+33 chars]"
   ],
   "blockers": [
-    "Worker runner still exits with no stdout/stderr after budget+extension fixes.",
-    "Context/handoff changed due control-plane evidence; commit checkpoint/board up [snip] rving this run record. [truncated:+13 chars]",
-    "No safe path to 'use workers by default' until TASK-BUD-1066 is implemented and canaries pass."
+    "New tool requires /reload before live use.",
+    "Workers should still not be retried blindly; classifier says retryAllowed=fals [snip] rrent silent evidence. [truncated:+8 chars]"
   ],
   "recent_validation": [
-    "agent_run_task_dispatch -> dispatched pid=58380",
-    "agent_run_follow -> terminal failed outputBytes=2210",
-    "log shows argv without --no-extensions and silent-runner-failure childOutputBytes=0"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 36 passed",
+    "git diff --check -> pass",
+    "safe_marker_check packages/pi-stack/extensions/guardrails-core-agent-run-diagnostics.ts markers -> pass"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1066",
     "canonical_links": [
       "task:TASK-BUD-1066",
-      "task:TASK-BUD-1063-SPARK-MODEL-SCOPE-BUDGET-POST-RELOAD"
+      "task:TASK-BUD-1027"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T17:29:21.767Z",
-    "level": "warn",
-    "percent": 53,
+    "generatedAtIso": "2026-05-08T22:50:16.058Z",
+    "level": "ok",
+    "percent": 22,
     "action": "continue",
-    "recommendation": "stop-worker-retries-build-runner-preflight",
+    "recommendation": "commit-classifier-then-reload-before-live-use",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T17:29:21.767Z",
+      "atIso": "2026-05-08T22:50:16.058Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 53,
+      "level": "ok",
+      "percent": 22,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "stop-worker-retries-build-runner-preflight"
+      "recommendation": "commit-classifier-then-reload-before-live-use"
     }
   ]
 }

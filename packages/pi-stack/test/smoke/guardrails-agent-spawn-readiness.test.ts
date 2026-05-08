@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildToolkitContract, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -13,6 +13,7 @@ describe("agent spawn readiness contract", () => {
       "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
       "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
       "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+      "packages/pi-stack/extensions/guardrails-core-agent-run-diagnostics.ts",
       "packages/pi-stack/extensions/guardrails-core-provider-budget-evidence.ts",
     ];
     const supersededMarkers = [
@@ -1422,12 +1423,71 @@ describe("agent spawn readiness contract", () => {
     expect(text).toContain("cwd=${ctx.cwd}");
   });
 
-  it("exposes agent run status, follow, log tail, and abort surfaces", async () => {
+  it("classifies runner failures before another worker retry", () => {
+    const silentLog = [
+      "[agent-runner] starting command=node source=current-node-entrypoint cwd=C:/repo",
+      "[agent-runner] argv=[\"cli.js\",\"--no-session\",\"--model\",\"openai-codex/gpt-5.3-codex-spark\",\"--tools\",\"read,grep,find,ls,edit,write\",\"--print\",\"@packages/pi-stack/extensions/context-watchdog-continuation-surface.ts\",\"do work\"]",
+      "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr; inspect argv/cwd/source and provider/toolkit setup",
+      "[agent-runner] close exitCode=1 childOutputBytes=0",
+    ].join("\n");
+    const result = classifyAgentRunFailure({
+      runId: "task-bud-1063-spark-model-scope-budget-post-reload",
+      entry: {
+        runId: "task-bud-1063-spark-model-scope-budget-post-reload",
+        state: "failed",
+        providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+        errorCode: "silent-runner-failure",
+        exitCode: 1,
+      },
+      logText: silentLog,
+    });
+
+    expect(result.failureClass).toBe("silent-runner-failure");
+    expect(result.preflightDecision).toBe("needs-evidence");
+    expect(result.retryAllowed).toBe(false);
+    expect(result.ruledOut).toContain("static-cli-argv-shape");
+    expect(result.ruledOut).toContain("static-tool-allowlist");
+    expect(result.ruledOut).toContain("minimal-no-extensions-isolation");
+    expect(result.argvDiagnostics.extensionIsolation).toBe("inherit");
+    expect(result.nextActions.join("\n")).toContain("Do not retry the worker blindly.");
+
+    const invalidTools = classifyAgentRunFailure({
+      runId: "bad-tools",
+      logText: "[agent-runner] argv=[\"cli.js\",\"--no-session\",\"--model\",\"p/m\",\"--tools\",\"read,rm\",\"--print\",\"prompt\"]\n[agent-runner] close exitCode=1 childOutputBytes=10",
+    });
+    expect(invalidTools.failureClass).toBe("tool-allowlist-invalid");
+    expect(invalidTools.preflightDecision).toBe("blocked");
+
+    const providerUnavailable = classifyAgentRunFailure({
+      runId: "quota",
+      logText: "[agent-runner] close exitCode=1 childOutputBytes=40\nProvider error: 429 insufficient_quota",
+    });
+    expect(providerUnavailable.failureClass).toBe("provider-unavailable");
+
+    const contractFailed = classifyAgentRunFailure({
+      runId: "task-bud-1027-small-mutation-doc-canary",
+      entry: { runId: "task-bud-1027-small-mutation-doc-canary", state: "completed", exitCode: 0, outputBytes: 474 },
+      logText: "[agent-runner] close exitCode=0",
+      touchedFiles: [],
+      markerFailures: ["marker missing after worker self-reported PASS"],
+    });
+    expect(contractFailed.failureClass).toBe("worker-contract-failed");
+    expect(contractFailed.retryAllowed).toBe(false);
+  });
+
+  it("exposes agent run status, follow, log tail, failure classification, and abort surfaces", async () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "agent-run-"));
     const reportsDir = path.join(cwd, ".pi", "reports");
     mkdirSync(reportsDir, { recursive: true });
     const logPath = path.join(reportsDir, "run-1.log");
+    const silentLogPath = path.join(reportsDir, "run-silent.log");
     writeFileSync(logPath, "line-1\nline-2\nline-3\n", "utf8");
+    writeFileSync(silentLogPath, [
+      "[agent-runner] starting command=node source=current-node-entrypoint cwd=C:/repo",
+      "[agent-runner] argv=[\"cli.js\",\"--no-session\",\"--model\",\"openai-codex/gpt-5.3-codex-spark\",\"--tools\",\"read,grep,find,ls,edit,write\",\"--print\",\"@docs/research/provider-canary-scorecard-2026-05.md\",\"review\"]",
+      "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr; inspect argv/cwd/source and provider/toolkit setup",
+      "[agent-runner] close exitCode=1 childOutputBytes=0",
+    ].join("\n"), "utf8");
     writeFileSync(path.join(reportsDir, "agent-runs.json"), JSON.stringify({
       runs: [{
         runId: "run-1",
@@ -1450,6 +1510,18 @@ describe("agent spawn readiness contract", () => {
         lastEventAtIso: "2026-05-07T00:00:40.000Z",
         exitCode: 0,
         outputBytes: 21,
+      }, {
+        runId: "run-silent",
+        state: "failed",
+        providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+        cwd,
+        declaredFiles: ["docs/research/provider-canary-scorecard-2026-05.md"],
+        logPath: silentLogPath,
+        startedAtIso: "2026-05-07T00:00:00.000Z",
+        lastEventAtIso: "2026-05-07T00:00:50.000Z",
+        exitCode: 1,
+        outputBytes: 512,
+        errorCode: "silent-runner-failure",
       }],
     }), "utf8");
 
@@ -1543,6 +1615,13 @@ describe("agent spawn readiness contract", () => {
     const tail = await getTool("agent_run_log_tail").execute("tc-tail", { run_id: "run-1", max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });
     expect(tail.details?.mode).toBe("agent-run-log-tail");
     expect(tail.details?.lines).toEqual(["line-3", ""]);
+
+    const classification = await getTool("agent_run_failure_classification").execute("tc-classify", { run_id: "run-silent" }, undefined as unknown as AbortSignal, () => {}, { cwd });
+    expect(classification.details?.mode).toBe("agent-run-failure-classification");
+    expect(classification.details?.failureClass).toBe("silent-runner-failure");
+    expect(classification.details?.preflightDecision).toBe("needs-evidence");
+    expect(classification.details?.retryAllowed).toBe(false);
+    expect(classification.content?.[0]?.text).toContain("retryAllowed=no");
 
     const followCompleted = await getTool("agent_run_follow").execute("tc-follow-completed", { run_id: "run-outcome", max_wait_ms: 0, max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });
     expect(followCompleted.details?.mode).toBe("agent-run-follow");

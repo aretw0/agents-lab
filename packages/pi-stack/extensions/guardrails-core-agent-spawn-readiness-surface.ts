@@ -5,6 +5,7 @@ import path from "node:path";
 import { Type } from "@sinclair/typebox";
 import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
 import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
+import { classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunRegistryEntry, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
@@ -819,6 +820,38 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const result = buildAgentRunStatus(runId, entry);
       return buildOperatorVisibleToolResponse({
         label: "agent_run_status",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_failure_classification",
+    label: "Agent Run Failure Classification",
+    description: "Read-only classifier for registered agent-run failures. Distinguishes spawn, argv, tool-allowlist, extension-load, provider, model-call, silent-runner, and contract failures before retry decisions. Never dispatches execution.",
+    parameters: Type.Object({
+      run_id: Type.String({ description: "Agent run id to classify." }),
+      log_path: Type.Optional(Type.String({ description: "Optional bounded log path override. Defaults to the registered run log." })),
+      touched_files: Type.Optional(Type.Array(Type.String(), { description: "Optional parent-observed touched files for contract-failure classification." })),
+      marker_failures: Type.Optional(Type.Array(Type.String(), { description: "Optional failed parent-side markers/check labels." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const runId = typeof p.run_id === "string" ? p.run_id : "";
+      const entry = readRegistryEntry(ctx.cwd, runId);
+      const rawLogPath = typeof p.log_path === "string" ? p.log_path : entry?.logPath;
+      const logPath = rawLogPath ? path.isAbsolute(rawLogPath) ? rawLogPath : path.join(ctx.cwd, rawLogPath) : undefined;
+      const logText = logPath && existsSync(logPath) ? readFileSync(logPath, "utf8") : "";
+      const result = classifyAgentRunFailure({
+        runId,
+        entry,
+        logText,
+        touchedFiles: asOptionalStringArray(p.touched_files),
+        markerFailures: asOptionalStringArray(p.marker_failures),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_failure_classification",
         summary: result.summary,
         details: result,
       });
