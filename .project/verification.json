@@ -14921,6 +14921,15 @@
       "method": "live-tool-canary+marker-check",
       "timestamp": "2026-05-08T02:47:08.531Z",
       "evidence": "After reload, called live `agent_run_task_start_packet` on TASK-BUD-1013 with profile=read-only-review and provider_model_ref=openai-codex/gpt-5.3-codex-spark. Result summary: agent-run-task-start-packet decision=ready-for-human-decision task=TASK-BUD-1013 runId=task-bud-1013-live-start-packet-canary registry=dry-run statusFound=no budget=warn dispatch=no. This validates the live bridge from board task packet to registry dry-run/start/status/log/abort/outcome previews: it read the board task, preserved scoped Spark budget evidence, produced a stable runId/human-confirmed path, and kept dispatchAllowed=false/processStartAllowed=false/processStopAllowed=false. No worker was dispatched. Marker checks passed for builder and smoke test markers."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1014-EXACT-CONFIRMATION-DISPATCH-GATE",
+      "target": "TASK-BUD-1014",
+      "target_type": "task",
+      "status": "passed",
+      "method": "implementation+smoke-test+marker-check",
+      "timestamp": "2026-05-08T02:52:56.221Z",
+      "evidence": "Implemented first-party gated `agent_run_task_dispatch` in packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts. The tool composes `agent_run_task_start_packet`, previews by default with dispatchAllowed=false/processStartAllowed=false, and only dispatches a single pi subprocess when execute=true, the packet is ready, no run is already running, cwd matches the workspace registry, and `operator_confirmation` exactly equals the packet humanConfirmationPhrase. On actual dispatch path it creates a bounded log stream, writes registry running with pid/log metadata, and updates registry completed/failed on process close; tests do not execute a subprocess. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 29 passed. safe_marker_check passed for dispatch tool and tests."
     }
   ]
 }

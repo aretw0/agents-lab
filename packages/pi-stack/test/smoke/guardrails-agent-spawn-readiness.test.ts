@@ -523,6 +523,83 @@ describe("agent spawn readiness contract", () => {
     expect(result.content?.[0]?.text).toContain("dispatch=no");
   });
 
+  it("exposes agent_run_task_dispatch as preview-only by default and blocks confirmation mismatch", async () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-task-dispatch-"));
+    mkdirSync(path.join(tmp, ".project"), { recursive: true });
+    writeFileSync(path.join(tmp, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-BUD-1014",
+          description: "Implement exact-confirmation dispatch gate.",
+          status: "planned",
+          files: ["packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts"],
+          acceptance_criteria: ["preview by default", "confirmation mismatch blocks"],
+        },
+        {
+          id: "TASK-PROTECTED",
+          description: "Change CI settings.",
+          status: "planned",
+          files: [".github/workflows/ci.yml"],
+          acceptance_criteria: ["updates protected workflow"],
+        },
+      ],
+    }, null, 2), "utf8");
+
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    guardrailsCore(pi);
+
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_task_dispatch");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+
+    const commonParams = {
+      task_id: "TASK-BUD-1014",
+      provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+      budget_decision: "warn",
+      budget_evidence: "Spark scoped budget usable",
+      budget_evidence_source: "manual",
+      budget_evidence_provider: "openai-codex/gpt-5.3-codex-spark",
+    };
+    const preview = await tool.execute("tc-agent-run-task-dispatch-preview", commonParams, undefined as unknown as AbortSignal, () => {}, { cwd: tmp });
+    expect(preview.details?.mode).toBe("agent-run-task-dispatch");
+    expect(preview.details?.decision).toBe("preview");
+    expect(preview.details?.dispatchAllowed).toBe(false);
+    expect(preview.details?.processStartAllowed).toBe(false);
+    expect(existsSync(path.join(tmp, ".pi", "reports", "agent-runs.json"))).toBe(false);
+    expect(preview.content?.[0]?.text).toContain("dispatch=no");
+
+    const mismatch = await tool.execute("tc-agent-run-task-dispatch-mismatch", { ...commonParams, execute: true, operator_confirmation: "wrong phrase" }, undefined as unknown as AbortSignal, () => {}, { cwd: tmp });
+    expect(mismatch.details?.decision).toBe("blocked");
+    expect(mismatch.details?.dispatchAllowed).toBe(false);
+    expect((mismatch.details?.blockers as string[])).toContain("operator-confirmation-mismatch");
+    expect(existsSync(path.join(tmp, ".pi", "reports", "agent-runs.json"))).toBe(false);
+
+    const protectedScope = await tool.execute(
+      "tc-agent-run-task-dispatch-protected",
+      { ...commonParams, task_id: "TASK-PROTECTED" },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: tmp },
+    );
+    expect(protectedScope.details?.decision).toBe("blocked");
+    expect(protectedScope.details?.dispatchAllowed).toBe(false);
+    expect((protectedScope.details?.blockers as string[])).toContain("protected-scope-requested");
+  });
+
   it("exposes agent_run_task_start_packet as a report-only bridge surface", async () => {
     const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-task-start-packet-"));
     mkdirSync(path.join(tmp, ".project"), { recursive: true });

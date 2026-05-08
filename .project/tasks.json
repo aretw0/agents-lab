@@ -22606,6 +22606,26 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criado após reload para validar a ponte `task -> packet -> registry/start/status/log/abort/outcome previews` em runtime real antes de qualquer uso operacional.\n[provenance:human] source_task=TASK-BUD-1012 reason=TASK-BUD-1012 implementou a tool; após reload precisamos validar a superfície viva sem dispatch.\nLive canary after reload passed: `agent_run_task_start_packet` returned ready-for-human-decision with registry=dry-run and dispatch=no for TASK-BUD-1013.",
       "verification": "VERIF-TASK-BUD-1013-LIVE-AGENT-RUN-TASK-START-PACKET"
+    },
+    {
+      "id": "TASK-BUD-1014",
+      "description": "[agent-first/code] Implementar `agent_run_task_dispatch` como primeiro runner first-party gated: preview por padrão, execute somente com confirmação humana exata para o runId, registry/log/status wiring, sem auto-dispatch.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Tool compõe `agent_run_task_start_packet` a partir de `task_id` e retorna preview com dispatchAllowed=false quando execute não é true.",
+        "Quando execute=true, bloqueia sem `operator_confirmation` exatamente igual à humanConfirmationPhrase do packet.",
+        "Quando execute=true e confirmação bate, só então permite start do subprocesso e registra registry/log path/pid; testes não executam subprocesso real.",
+        "Bloqueia dispatch se task packet/start packet estiver blocked, se já houver run running, ou se cwd de execução divergir do workspace registry.",
+        "Inclui teste focal para preview-only, confirmation mismatch, blocked task packet e garantia de que o caminho default não inicia processo."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Próximo elo após TASK-BUD-1013: sair de packet/start preview para runner first-party, mas sempre fail-closed e sem execução sem frase exata.\n[provenance:human] source_task=TASK-BUD-1013 reason=A ponte task-start foi validada ao vivo; falta o dispatch gate first-party para substituir invocação manual sem violar confirmação humana exata.\nImplemented `agent_run_task_dispatch` gated runner. Default path is preview-only; execute path is exact-confirmation gated and not exercised in tests/session.",
+      "verification": "VERIF-TASK-BUD-1014-EXACT-CONFIRMATION-DISPATCH-GATE"
     }
   ]
 }

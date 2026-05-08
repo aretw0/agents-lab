@@ -1,5 +1,6 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { spawn } from "node:child_process";
+import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Type } from "@sinclair/typebox";
 import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
@@ -411,6 +412,156 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_task_start_packet",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_task_dispatch",
+    label: "Agent Run Task Dispatch",
+    description: "First-party task-runner gate. Preview by default; execute=true requires exact human confirmation phrase and starts only one registered pi subprocess. Never auto-dispatches.",
+    parameters: Type.Object({
+      task_id: Type.String({ description: "Board task id to packetize and optionally dispatch." }),
+      purpose: Type.Optional(Type.String({ description: "Short purpose slug/label for the run id. Defaults to task-packet." })),
+      profile: Type.Optional(Type.String({ description: "Invocation profile: small-mutation, test-fix, read-only-review, or research." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. openai-codex/gpt-5.3-codex-spark." })),
+      cwd: Type.Optional(Type.String({ description: "Worker cwd. For execute=true must match the current workspace cwd." })),
+      timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds; defaults to 90000." })),
+      budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision: ok, warn, blocked, or unknown." })),
+      budget_evidence: Type.Optional(Type.String({ description: "Scoped provider/model budget evidence, preferably model-specific." })),
+      budget_evidence_source: Type.Optional(Type.String({ description: "Budget evidence source: route-advisory, provider-budget-snapshot, manual, or unknown." })),
+      budget_evidence_provider: Type.Optional(Type.String({ description: "Provider named by evidence; for manual model-specific evidence may include provider/model scope." })),
+      budget_evidence_generated_at_iso: Type.Optional(Type.String({ description: "ISO timestamp for structured budget evidence freshness checks." })),
+      budget_evidence_max_age_ms: Type.Optional(Type.Number({ description: "Optional max age for structured budget evidence freshness." })),
+      economy_mode: Type.Optional(Type.String({ description: "Worker token/context economy mode: standard, conserve, or critical. Defaults to critical." })),
+      token_budget_evidence: Type.Optional(Type.String({ description: "Short provider/model quota evidence to embed in the worker economy contract." })),
+      max_output_lines: Type.Optional(Type.Number({ description: "Bounded worker output line target for economy contract. Defaults to 20." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
+      execute: Type.Optional(Type.Boolean({ description: "When true, dispatch the subprocess only after all gates pass and operator_confirmation matches exactly." })),
+      operator_confirmation: Type.Optional(Type.String({ description: "Must exactly equal the packet humanConfirmationPhrase for execute=true." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const taskId = typeof p.task_id === "string" ? p.task_id : "";
+      const cwd = typeof p.cwd === "string" ? p.cwd : ctx.cwd;
+      const { block } = readTasksBlockCached(cwd);
+      const task = block.tasks.find((row) => row.id === taskId);
+      const basePacket = buildAgentRunTaskStartPacket({
+        taskId,
+        task,
+        purpose: typeof p.purpose === "string" ? p.purpose : undefined,
+        profile: typeof p.profile === "string" ? p.profile : undefined,
+        providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
+        cwd,
+        timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
+        budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
+        budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
+        budgetEvidenceSource: typeof p.budget_evidence_source === "string" ? p.budget_evidence_source : undefined,
+        budgetEvidenceProvider: typeof p.budget_evidence_provider === "string" ? p.budget_evidence_provider : undefined,
+        budgetEvidenceGeneratedAtIso: typeof p.budget_evidence_generated_at_iso === "string" ? p.budget_evidence_generated_at_iso : undefined,
+        budgetEvidenceMaxAgeMs: typeof p.budget_evidence_max_age_ms === "number" ? p.budget_evidence_max_age_ms : undefined,
+        economyMode: typeof p.economy_mode === "string" ? p.economy_mode : undefined,
+        tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
+        maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+      });
+      const existingEntry = readRegistryEntry(ctx.cwd, basePacket.taskPacket.invocationSpec.runId);
+      const packet = buildAgentRunTaskStartPacket({
+        taskId,
+        task,
+        existingEntry,
+        purpose: typeof p.purpose === "string" ? p.purpose : undefined,
+        profile: typeof p.profile === "string" ? p.profile : undefined,
+        providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
+        cwd,
+        timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
+        budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
+        budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
+        budgetEvidenceSource: typeof p.budget_evidence_source === "string" ? p.budget_evidence_source : undefined,
+        budgetEvidenceProvider: typeof p.budget_evidence_provider === "string" ? p.budget_evidence_provider : undefined,
+        budgetEvidenceGeneratedAtIso: typeof p.budget_evidence_generated_at_iso === "string" ? p.budget_evidence_generated_at_iso : undefined,
+        budgetEvidenceMaxAgeMs: typeof p.budget_evidence_max_age_ms === "number" ? p.budget_evidence_max_age_ms : undefined,
+        economyMode: typeof p.economy_mode === "string" ? p.economy_mode : undefined,
+        tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
+        maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+      });
+      const executeRequested = p.execute === true;
+      const operatorConfirmation = typeof p.operator_confirmation === "string" ? p.operator_confirmation : "";
+      const blockers = [...packet.blockers];
+      if (packet.decision !== "ready-for-human-decision") blockers.push("task-start-packet-blocked");
+      if (existingEntry?.state === "running") blockers.push("run-already-running");
+      if (executeRequested && cwd !== ctx.cwd) blockers.push("execute-cwd-mismatch");
+      if (executeRequested && operatorConfirmation !== packet.humanConfirmationPhrase) blockers.push("operator-confirmation-mismatch");
+      const dispatchAllowed = executeRequested && blockers.length === 0;
+      let pid: number | undefined;
+      let registryEntry = packet.registryPreview.entry;
+
+      if (dispatchAllowed) {
+        const logPath = path.isAbsolute(packet.taskPacket.invocationSpec.logPath)
+          ? packet.taskPacket.invocationSpec.logPath
+          : path.join(ctx.cwd, packet.taskPacket.invocationSpec.logPath);
+        mkdirSync(path.dirname(logPath), { recursive: true });
+        const logStream = createWriteStream(logPath, { flags: "a" });
+        const child = spawn(packet.startPreview.command, packet.startPreview.args, { cwd: ctx.cwd, shell: false, stdio: ["ignore", "pipe", "pipe"] });
+        pid = child.pid;
+        child.stdout?.pipe(logStream, { end: false });
+        child.stderr?.pipe(logStream, { end: false });
+        registryEntry = {
+          ...packet.registryPreview.entry,
+          pid,
+          state: "running",
+          startedAtIso: new Date().toISOString(),
+          lastEventAtIso: new Date().toISOString(),
+        };
+        writeRegistryEntry(ctx.cwd, registryEntry);
+        const timeoutMs = packet.taskPacket.invocationSpec.timeoutMs;
+        const timeout = setTimeout(() => {
+          if (!child.killed) child.kill("SIGTERM");
+        }, timeoutMs);
+        child.on("close", (code) => {
+          clearTimeout(timeout);
+          logStream.end();
+          writeRegistryEntry(ctx.cwd, {
+            ...registryEntry,
+            state: code === 0 ? "completed" : "failed",
+            lastEventAtIso: new Date().toISOString(),
+          });
+        });
+      }
+
+      const decision = dispatchAllowed ? "dispatched" : blockers.length > 0 ? "blocked" : "preview";
+      const result = {
+        mode: "agent-run-task-dispatch" as const,
+        activation: "none" as const,
+        authorization: dispatchAllowed ? "explicit-human" as const : "none" as const,
+        dispatchAllowed,
+        processStartAllowed: dispatchAllowed,
+        processStopAllowed: false,
+        requiresHumanDecision: true,
+        singleRunOnly: true,
+        decision,
+        blockers,
+        executeRequested,
+        runId: packet.taskPacket.invocationSpec.runId,
+        pid,
+        packet,
+        registryEntry,
+        humanConfirmationPhrase: packet.humanConfirmationPhrase,
+        summary: [
+          "agent-run-task-dispatch:",
+          `decision=${decision}`,
+          `runId=${packet.taskPacket.invocationSpec.runId || "unknown"}`,
+          `execute=${executeRequested ? "yes" : "no"}`,
+          `dispatch=${dispatchAllowed ? "yes" : "no"}`,
+          pid ? `pid=${pid}` : undefined,
+          blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+        ].filter(Boolean).join(" "),
+      };
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_task_dispatch",
         summary: result.summary,
         details: result,
       });
