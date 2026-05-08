@@ -22499,7 +22499,7 @@
     {
       "id": "TASK-BUD-1009",
       "description": "[P1/agent-first/research-design] Mapear a arquitetura first-party para uso excelente de subagentes: influência específica de agentes vs processos genéricos/background, integração com control plane, board, quota/model routing, runtime, outcome e promoção gradual.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "docs/research/agent-run-provider-native-runner-2026-05.md",
@@ -22517,7 +22517,29 @@
         "Não executar novos workers; é uma fatia de design/read-only até reload."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Criada após steering humano: já há evidência para confiar em agentes, mas ainda não devemos usá-los de forma manual/desconectada do control plane. O usuário pediu aprendizado com extensões pi e indústria, separando influência de subagente de processo/background genérico. Reload ainda pendente após TASK-BUD-1008.\n[provenance:human] source_task=TASK-BUD-1008 reason=Após dois docs canaries e uma pequena mutação de código com Codex Spark, precisamos desenhar a camada first-party que torna agentes integrados e excelentes, em vez de invocados ma…"
+      "notes": "Criada após steering humano: já há evidência para confiar em agentes, mas ainda não devemos usá-los de forma manual/desconectada do control plane. O usuário pediu aprendizado com extensões pi e indústria, separando influência de subagente de processo/background genérico. Reload ainda pendente após TASK-BUD-1008.\n[provenance:human] source_task=TASK-BUD-1008 reason=Após dois docs canaries e uma pequena mutação de código com Codex Spark, precisamos desenhar a camada first-party que torna agentes integrados e excelentes, em vez de invocados ma…\n[reload-done] Operator reloaded after TASK-BUD-1008, so live runtime can be trusted again. Proceeding with read-only/design slice: first-party agent architecture and influence separation, no worker dispatch.\nCompleted design/read-only slice. Next implementation target is TASK-BUD-1010: report-only agent_run_task_packet / board-to-agent packetizer so agents stop being invoked by hand.",
+      "verification": "VERIF-TASK-BUD-1009-FIRST-PARTY-AGENT-ARCHITECTURE"
+    },
+    {
+      "id": "TASK-BUD-1010",
+      "description": "[P1/agent-first/code] Implementar superfície first-party report-only `agent_run_task_packet` (ou nome equivalente) que deriva um AgentInvocationSpec a partir de uma task do board, com escopo, economia, budget provider/model e frase de confirmação, sem dispatch.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/research/first-party-agent-lane-architecture-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Tool report-only lê `task_id` no board e falha fechado se task inexistente/completed/protected/missing files/missing acceptance criteria.",
+        "Deriva declaredFiles, validation/rollback checklist, economyMode default critical/conserve e scoped provider/model budget evidence.",
+        "Retorna typed invocation spec, exact human confirmation phrase e dispatchAllowed=false.",
+        "Inclui teste focal para ready mutation task, missing files, protected scope e OpenAI Codex Spark scoped budget quando aggregate Codex está bloqueado.",
+        "Não executa worker, não muda settings, não faz auto-switch."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Derivado de TASK-BUD-1009: próximo passo para parar de invocar agentes na mão e conectar board/control-plane ao agent invocation packet. TASK-BUD-1009 é predecessor lógico, mas não foi declarado como depends_on porque o board bloqueou a dependência como protected-coupling.\n[provenance:human] source_task=TASK-BUD-1009 reason=Arquitetura first-party identificou board-to-agent packetizer como P1 para liberar agentes com governança."
     }
   ]
 }

@@ -14876,6 +14876,15 @@
       "method": "codex-spark-worker+focal-vitest+marker-check+outcome-packet",
       "timestamp": "2026-05-08T01:59:06.783Z",
       "evidence": "Explicit human confirmation received for runId task-bud-1008-codex-spark-model-budget-route. Worker launched through provider-native pi subprocess with minimal-no-extensions, provider=openai-codex/gpt-5.3-codex-spark, declared files quota-visibility-types.ts, quota-visibility-formatting.ts, quota-visibility-parsers.test.ts, economyMode=critical, maxOutputLines=20, timeout=90s. Worker output was non-empty (925 bytes), exitCode=0, PASS, and touched declared files only. Code now exposes RouteAdvisoryCandidate scope fields including providerModelKey/model/scopeKey; buildRouteAdvisory uses provider/model scope in executionBudgetEvidence, executionBudgetEvidenceProvider, providerModelRef, sorting and formatted candidates. Focal test proves aggregate openai-codex can be blocked while openai-codex/gpt-5.3-codex-spark remains a usable warning candidate with dashboardRemainingPct=82 and scope evidence. Validation: npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts --reporter=dot -> 46 passed; safe_marker_check passed for type/formatting/test/log/doc markers; agent_run_outcome_packet returned contract=pass process=completed recommendation=stop. Control plane also updated docs/research/openai-codex-dual-quota-calibration-2026-05.md with operator evidence that normal pool can be around 30% remaining while Spark pool is about 82-83% available."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1009-FIRST-PARTY-AGENT-ARCHITECTURE",
+      "target": "TASK-BUD-1009",
+      "target_type": "task",
+      "status": "passed",
+      "method": "read-only-research+design-doc+marker-check+i18n-lint",
+      "timestamp": "2026-05-08T02:09:02.652Z",
+      "evidence": "After reload, completed read-only/design architecture for first-party agent lane in docs/research/first-party-agent-lane-architecture-2026-05.md. Evidence reviewed: pi-jit-agents README and agent-spec d.ts, pi-workflows README plus task-worker agent and execute-task workflow, ant-colony extension excerpt, OpenAI Symphony influence docs and matrix. The doc explicitly separates subagent/agent-execution influences (typed specs, schema output, task packetization, provider/model routing, outcome) from generic background/process influences (status UI, abort, logs, worktree, lifecycle). It defines missing layers: first-party runner contract, board-to-agent packetizer, outcome/verification bridge, status/log/abort, typed agent specs, workflow integration, and later multi-agent/background promotion. Created TASK-BUD-1010 as the next implementation slice for a report-only board-to-agent packet surface. Validation: safe_marker_check passed on architecture doc and Symphony source docs; i18n_lint_text passed English excerpt."
     }
   ]
 }
