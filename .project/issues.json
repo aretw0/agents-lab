@@ -1094,6 +1094,17 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mow9py18",
+      "title": "The agent responded with only an empty message to an action request, leaving the task unresolved without explanation.",
+      "body": "The agent responded with only an empty message to an action request, leaving the task unresolved without explanation.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }
