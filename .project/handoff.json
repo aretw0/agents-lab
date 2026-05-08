@@ -1,54 +1,53 @@
 {
-  "timestamp": "2026-05-08T01:40:22.317Z",
-  "context": "Completed second tiny single-worker canary for subagent-unlocking lane. Explicit user confirmation was received. Worker runId=task-bud-1007-s [snip] VERIF-TASK-BUD-1007-SECOND-TINY-CANARY. [truncated:+482 chars]",
+  "timestamp": "2026-05-08T01:47:34.502Z",
+  "context": "Assimilated user steering: do not rely only on DashScope; OpenAI Codex has a separate model-specific Spark quota. Operator evidence: general [snip] es and add focal test. No dispatch yet. [truncated:+676 chars]",
+  "current_tasks": [
+    "TASK-BUD-1008"
+  ],
   "next_actions": [
-    "Commit doc/board/handoff changes.",
-    "Stop after this canary; do not auto-dispatch another worker.",
-    "Next agent-unlocking step should be a separate decision: either third tiny canary or first sma [snip] still single-worker only. [truncated:+33 chars]"
+    "Commit board/handoff planning evidence.",
+    "If operator confirms exact phrase, execute one worker only: execute o worker task-bud-1008-cod [snip] x-spark-model-budget-route [truncated:+1 chars]",
+    "After worker, run focal vitest for quota-visibility-parsers and outcome packet before commit."
   ],
   "blockers": [
-    "Outcome recommendation is stop, so no chained worker dispatch.",
-    "Disk remains tight; keep validations focal."
+    "No dispatch authorization yet for TASK-BUD-1008.",
+    "Budget evidence is manual/dashboard, so use warn+critical economy and stop after one worker."
   ],
   "recent_validation": [
-    "git clean before dispatch; machine ok; context ok",
-    "worker log PASS and [worker-exit-code] 0",
-    "git diff touched only docs/research/agent-run-provider-native-runner-2026-05.md"
+    "git clean before prep",
+    "board_task_create TASK-BUD-1008 -> planned after omitting protected-coupled depends_on",
+    "agent_invocation_spec_packet -> ready-for-human-decision dispatch=no"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1007",
+    "focus": "TASK-BUD-1008",
     "canonical_links": [
-      "task:TASK-BUD-1007",
-      "task:TASK-BUD-1007-SECOND-TINY-AGENT-CANARY"
+      "task:TASK-BUD-1008",
+      "task:TASK-BUD-1008-CODEX-SPARK-MODEL-BUDGET-ROUTE"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T01:40:22.317Z",
+    "generatedAtIso": "2026-05-08T01:47:34.502Z",
     "level": "ok",
-    "percent": 28,
+    "percent": 41,
     "action": "continue",
-    "recommendation": "commit-second-canary-and-stop",
+    "recommendation": "await-explicit-codex-spark-worker-confirmation",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
-    "focus_task_status": "completed"
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T01:40:22.317Z",
+      "atIso": "2026-05-08T01:47:34.502Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 28,
+      "percent": 41,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-second-canary-and-stop"
+      "recommendation": "await-explicit-codex-spark-worker-confirmation"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-1007"
   ]
 }

@@ -22473,6 +22473,27 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Foco definido pelo operador: não gastar ciclo em tangentes como footer; priorizar sempre o que libera agentes. Esta é a segunda repetição tiny single-worker da escada de promoção.\n[provenance:human] source_task=TASK-BUD-1005 reason=Aplicar a escada de promoção de subagentes com repetição calibrada antes de qualquer promoção para mutação maior ou paralelismo.\n[agent-invocation-spec] Prepared second tiny single-worker canary packet focused on subagent promotion ladder, not footer tangent. runId=task-bud-1007-second-tiny-agent-canary, provider=dashscope/qwen3-coder-plus, declaredFiles=[docs/research/agent-run-provider-native-runner-2026-05.md], fileContract=mutation, economyMode=critical, maxOutputLines=20, timeoutMs=60000, budget=ok from route-advisory generatedAt=2026-05-08T01:29:55.743Z with manual scarce-quota caution. Packet decision=ready-for-human-decision dispatch=no. Registry state=planned. Await exact runId confirmation before dispatch.\nCompleted second tiny single-worker canary. This adds second calibrated evidence point for the subagent promotion ladder. Stop after this canary; no parallel/background/colony promotion without a separate human decision and further gates.",
       "verification": "VERIF-TASK-BUD-1007-SECOND-TINY-CANARY"
+    },
+    {
+      "id": "TASK-BUD-1008",
+      "description": "[P1/agent-first/code] Harden quota routing to represent OpenAI Codex model-specific Spark quota separately from aggregate OpenAI Codex pressure, so agent-run packets can choose `openai-codex/gpt-5.3-codex-spark` with explicit evidence when the provider aggregate is locally blocked.",
+      "status": "in-progress",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility-types.ts",
+        "packages/pi-stack/extensions/quota-visibility-formatting.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts",
+        "docs/research/openai-codex-dual-quota-calibration-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Route advisory candidates distinguish provider-level `openai-codex` from model-specific `openai-codex/gpt-5.3-codex-spark`.",
+        "Execution budget evidence for model-specific candidates includes the provider/model scope, not only provider aggregate state.",
+        "A focal test proves Spark can appear as a usable warning/ok candidate while aggregate `openai-codex` remains blocked.",
+        "Operator evidence is recorded: general OpenAI Codex and `gpt-5.3-codex-spark` have separate pools; Spark had about 82-83% available while aggregate local pressure could look blocked.",
+        "No settings mutation, no auto-switch, no broad test suite."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criada por steering humano: não depender só de DashScope; OpenAI Codex Spark tem cota separada da normal. O operador reportou que a cota normal pode estar ~30% restante enquanto `gpt-5.3-codex-spark` está ~82% restante, então o código precisa preservar essa distinção para liberar agentes no mesmo provider. TASK-BUD-1007 é predecessor lógico, mas não foi declarado como depends_on porque o board bloqueou a dependência como protected-coupling.\n[provenance:human] source_task=TASK-BUD-1007 reason=Após dois canaries docs com DashScope, o próximo desbloqueio de agentes deve registrar e usar corretamente a cota model-specific do OpenAI Codex Spark.\n[agent-invocation-spec] Prepared first small code mutation worker packet using OpenAI Codex Spark rather than DashScope. runId=task-bud-1008-codex-spark-model-budget-route, provider=openai-codex/gpt-5.3-codex-spark, declaredFiles=[quota-visibility-types.ts, quota-visibility-formatting.ts, quota-visibility-parsers.test.ts], fileContract=mutation, economyMode=critical, maxOutputLines=20, timeoutMs=90000, budget=warn from manual dashboard evidence: general Codex around 30% remaining while Spark model-specific pool around 82% remaining. Packet decision=ready-for-human-decision dispatch=no. Registry state=planned. Await exact runId confirmation before dispatch."
     }
   ]
 }
