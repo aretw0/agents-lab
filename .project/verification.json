@@ -15155,6 +15155,15 @@
       "method": "doc-update+marker-check+i18n-lint",
       "timestamp": "2026-05-08T13:04:39.795Z",
       "evidence": "Updated `docs/primitives/nudge-free-local-continuity.md` with `## Manifestação única do operador`. The section explicitly avoids a new primitive, maps broad authorization to existing contracts (`local_slice_human_contract_review`, `unattended_continuation_plan`, `nudge_free_loop_canary`, `context_watch_checkpoint`, quota/machine gates, and `agent_run_task_dispatch` without bypassing lower gates), and provides one compact operator template for seed/focus, allowed profiles, limits, quota behavior, machine/context self-healing, stop conditions, and excluded scopes. It records agents-lab defaults for using available provider quotas economically with governed fallback, preserving graceful checkpoint/stop for compact/reload/host pressure, and keeping protected/irreversible work separately authorized. Marker check passed 5/5; i18n lint pt-BR passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1040-SANE-DEFAULTS",
+      "target": "TASK-BUD-1040",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-update+marker-check+i18n-lint",
+      "timestamp": "2026-05-08T13:08:37.380Z",
+      "evidence": "Updated `docs/primitives/nudge-free-local-continuity.md` to replace the verbose operator manifestation with `Template mínimo recomendado`: seed/focus plus optional limit/exceptions only. Moved normal development practices into sane defaults: declare scope, validate, record evidence, checkpoint/handoff, rollback known, and commit small validated diffs when gates are green and the change is mature. It explicitly says not to ask for micro-authorization for commit/checkpoint/validation/rollback within local-safe scope. Protected/excluded scopes and stop conditions remain explicit defaults. Marker check passed 4/4; i18n lint pt-BR passed."
     }
   ]
 }

@@ -23181,6 +23181,24 @@
       "milestone": "single-worker-board-driven-lane-2026-05",
       "notes": "Criado a partir do steer do operador: transformar confiança acumulada em manifestação abrangente de batch/local-continuity, respeitando schemas existentes e sem criar conceitos sobrepostos.\n[provenance:human] source_task=none reason=Operador quer descobrir como dar autorização + seed + controles em uma mesma manifestação para liberar loops bounded com workers/control-plane.\nClarified operator manifestation path using existing nudge-free/local-continuity contracts; no new primitive or overlapping vocabulary introduced.",
       "verification": "VERIF-TASK-BUD-1039-OPERATOR-MANIFESTATION"
+    },
+    {
+      "id": "TASK-BUD-1040",
+      "description": "[nudge-free/local-continuity] Enxugar manifestação do operador e promover práticas normais de desenvolvimento a defaults sane.",
+      "status": "completed",
+      "priority": "p0",
+      "files": [
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "Documento deixa claro que o operador só precisa informar seed/foco e exceções aos defaults.",
+        "Documento registra commit/checkpoint/validação/rollback como defaults do processo quando gates estão verdes, não como itens que o operador precisa pedir.",
+        "Template de manifestação fica curto e sem repetir práticas normais de desenvolvimento.",
+        "Escopos protegidos e stop conditions permanecem explícitos como limites do default."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Criado a partir do steer do operador: a manifestação anterior ficou verbosa e incluía práticas que devem ser sane defaults, como commit quando gates estão verdes.\n[provenance:human] source_task=none reason=Reduzir atrito e evitar pedir ao operador que reafirme defaults do processo de desenvolvimento.\nManifestação enxugada: operador declara direção e exceções; commit/checkpoint/validação/rollback viram sane defaults quando gates estão verdes.",
+      "verification": "VERIF-TASK-BUD-1040-SANE-DEFAULTS"
     }
   ]
 }

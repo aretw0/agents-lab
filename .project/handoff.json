@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-05-08T13:04:57.221Z",
-  "context": "Operator clarified the need: a broader authorization that survives several loops, seeds a subject/lane, and includes controls/limitations wit [snip] efaults, and avoid new primitive names. [truncated:+340 chars]",
+  "timestamp": "2026-05-08T13:09:06.012Z",
+  "context": "Operator corrected the previous manifestation as too verbose: normal software practices like commit/checkpoint/validation should be sane defa [snip] tion for these within local-safe scope. [truncated:+375 chars]",
   "next_actions": [
-    "Commit TASK-BUD-1039 documentation update.",
-    "Then if operator wants, they can issue a manifestation using the documented template to author [snip] e batch over a seed/topic. [truncated:+23 chars]"
+    "Commit TASK-BUD-1040 sane-defaults doc update.",
+    "Then operator can authorize a batch with the short template: Autorizo um batch local-safe sobr [snip] Foco inicial: <task/tema>. [truncated:+10 chars]"
   ],
   "blockers": [
-    "Current runtime still has lower exact-confirmation gates for worker dispatch; [snip] dispatch consumption. [truncated:+70 chars]",
-    "Protected scope, irreversible risk, remote/offload, scheduler, multi-worker/co [snip] parate authorizations. [truncated:+14 chars]"
+    "This documents the upper contract; lower runtime worker exact-confirmation sti [snip] s the contract safely. [truncated:+47 chars]",
+    "Protected scopes and irreversible operations still require separate authorization."
   ],
   "recent_validation": [
-    "safe_marker_check docs/primitives/nudge-free-local-continuity.md -> pass 5/5",
-    "i18n_lint_text pt-BR for new section -> pass",
-    "board_task_complete TASK-BUD-1039 -> completed"
+    "safe_marker_check docs/primitives/nudge-free-local-continuity.md -> pass 4/4",
+    "i18n_lint_text pt-BR -> pass",
+    "board_task_complete TASK-BUD-1040 -> completed"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1039",
+    "focus": "TASK-BUD-1040",
     "canonical_links": [
-      "task:TASK-BUD-1039"
+      "task:TASK-BUD-1040"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T13:04:57.221Z",
+    "generatedAtIso": "2026-05-08T13:09:06.012Z",
     "level": "ok",
-    "percent": 35,
+    "percent": 36,
     "action": "continue",
-    "recommendation": "commit-operator-manifestation-doc",
+    "recommendation": "commit-sane-defaults-manifestation",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
@@ -33,20 +33,20 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T13:04:57.221Z",
+      "atIso": "2026-05-08T13:09:06.012Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 35,
+      "percent": 36,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-operator-manifestation-doc"
+      "recommendation": "commit-sane-defaults-manifestation"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-1039"
+    "TASK-BUD-1040"
   ]
 }

@@ -197,23 +197,22 @@ O sucesso desse cenário não é um nome novo nem uma automação nova: é o ope
 
 ## Manifestação única do operador
 
-Não criar primitive nova para “autorização ampla”. A manifestação do operador deve preencher os contratos já existentes para um batch pequeno: `local_slice_human_contract_review`, `unattended_continuation_plan`, `nudge_free_loop_canary`, `context_watch_checkpoint`, gates de quota/máquina e, quando houver worker, `agent_run_task_dispatch` sem burlar o gate inferior.
+Não criar primitive nova para “autorização ampla”. A manifestação do operador deve ser pequena: ela informa o assunto, o foco e qualquer exceção aos defaults. O restante é processo normal de desenvolvimento, executado pelos contratos já existentes: `local_slice_human_contract_review`, `unattended_continuation_plan`, `nudge_free_loop_canary`, `context_watch_checkpoint`, gates de quota/máquina e, quando houver worker, `agent_run_task_dispatch` sem burlar o gate inferior.
 
-Template recomendado:
+Template mínimo recomendado:
 
 ```text
 Autorizo um batch local-safe sobre <assunto/seed>.
 Foco inicial: <task ou tema>.
-Perfis permitidos: read-only-review, small-mutation, test-fix.
-Limites: até <N> slices, 1 worker por vez, commit/checkpoint por slice.
-Quota: usar provedores disponíveis com rota/fallback governada; parar em budget block real.
-Máquina/contexto: self-healing local; checkpoint e parada graciosa antes de compact/reload/pressão de host.
-Stop: protected scope, risco de dados/segurança/custo irreversível, dirty inesperado, outcome fail repetido, ambiguidade de produto, reload necessário, sem próxima task local-safe.
-Sem: CI/publish/settings/credenciais/remote/offload/multi-worker/colony/scheduler salvo autorização separada.
+Limite opcional: <N> slices ou <tempo/custo>, se quiser mudar o default.
+Exceções opcionais: <algo que normalmente seria bloqueado ou priorizado diferente>.
 ```
 
-Defaults para `agents-lab` quando o operador não disser o contrário:
+Defaults sane para `agents-lab` quando o operador não disser o contrário:
 
+- processo de software normal vale por default: declarar escopo, validar, registrar evidência, commitar quando os gates estiverem verdes e a mudança estiver madura;
+- cada slice deve ter checkpoint/handoff curto, rollback não destrutivo conhecido e commit pequeno quando houver diff validado;
+- não pedir micro-autorização para commit/checkpoint/validação/rollback quando tudo está dentro do escopo local-safe;
 - quota é recurso de trabalho do projeto: consumir de forma econômica, mas usar as cotas disponíveis em vez de parar por micro-autorização;
 - DashScope deve ter rota/fallback por modelo quando uma cota específica saturar;
 - OpenAI Codex Spark é bom candidato para workers enquanto houver cota específica disponível;
@@ -221,4 +220,9 @@ Defaults para `agents-lab` quando o operador não disser o contrário:
 - pressão de disco/RAM/CPU/contexto deve virar parada graciosa com checkpoint, não quebra do ambiente;
 - compact/reload são stop conditions operacionais: registrar handoff, parar e deixar o runtime/operador retomar.
 
-Essa manifestação não substitui permissões protegidas nem autoriza execução irreversível. Ela reduz atrito para fatias locais repetidas porque transforma intenção humana em campos auditáveis: foco, limite, orçamento, validação, rollback, checkpoint e stop conditions.
+Limites que continuam explícitos por default:
+
+- sem CI/publish/settings/credenciais/remote/offload/multi-worker/colony/scheduler salvo autorização separada;
+- parar em protected scope, risco de dados/segurança/custo irreversível, dirty inesperado, outcome fail repetido, ambiguidade de produto real, reload necessário ou ausência de próxima task local-safe.
+
+Essa manifestação não substitui permissões protegidas nem autoriza execução irreversível. Ela reduz atrito porque o operador não precisa reafirmar práticas normais; só precisa declarar direção e exceções.
