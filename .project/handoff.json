@@ -1,54 +1,54 @@
 {
-  "timestamp": "2026-05-08T03:54:25.041Z",
-  "context": "After reload, live-validated post-fix runner surfaces without dispatch. Original run task-bud-1018-first-runner-readonly-canary remains faile [snip] =no. No worker dispatched after reload. [truncated:+361 chars]",
+  "timestamp": "2026-05-08T03:58:46.218Z",
+  "context": "User provided exact confirmation for retry runId task-bud-1018-first-runner-readonly-canary-retry. Preflight clean/context ok and dispatch_ch [snip] e to replace manual bash sleep/polling. [truncated:+434 chars]",
   "current_tasks": [
     "TASK-BUD-1018"
   ],
   "next_actions": [
-    "Commit TASK-BUD-1018 post-reload safety note and handoff changes.",
-    "If operator wants to spend another runner attempt, they must send exact phrase: execute o work [snip] ner-readonly-canary-retry. [truncated:+26 chars]",
-    "If not, continue non-dispatch hardening around runner executable resolution/status evidence."
+    "Commit TASK-BUD-1018 note, TASK-BUD-1020 planned task, and handoff updates.",
+    "Do not mark TASK-BUD-1018 completed yet: first runner did not crash and process completed, but [snip] report/observability race. [truncated:+39 chars]",
+    "Next safe slice: implement TASK-BUD-1020 native bounded follow/await/status-finalizer before another runner attempt."
   ],
   "blockers": [
-    "Fresh exact confirmation required before retry dispatch.",
-    "OpenAI Codex Spark budget warn; keep retry bounded if authorized."
+    "Runner follow/await is not native yet; manual sleep/polling was used and cause [snip] self-observation race. [truncated:+9 chars]",
+    "TASK-BUD-1018 contract not passed yet."
   ],
   "recent_validation": [
-    "git dirty before note -> clean",
-    "context_watch_status -> ok reload-not-required",
-    "agent_run_status original -> failed stale=no"
+    "dispatch_check retry -> confirmation=match wouldDispatchAfterExplicitExecute=yes",
+    "agent_run_task_dispatch retry -> decision=dispatched pid=56304 dispatch=yes",
+    "agent_run_status retry final -> completed stale=no"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1018",
     "canonical_links": [
       "task:TASK-BUD-1018",
-      "task:TASK-BUD-1018-FIRST-RUNNER-READONLY-CANARY",
-      "task:TASK-BUD-1018-FIRST-RUNNER-READONLY-CANARY-RETRY"
+      "task:TASK-BUD-1018-FIRST-RUNNER-READONLY-CANARY-RETRY",
+      "task:TASK-BUD-1020"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T03:54:25.041Z",
+    "generatedAtIso": "2026-05-08T03:58:46.218Z",
     "level": "ok",
-    "percent": 28,
+    "percent": 30,
     "action": "continue",
-    "recommendation": "commit-post-reload-preview-and-wait-for-exact-retry-confirmation",
+    "recommendation": "commit-outcome-and-build-native-follow-before-retry",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T03:54:25.041Z",
+      "atIso": "2026-05-08T03:58:46.218Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 28,
+      "percent": 30,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-post-reload-preview-and-wait-for-exact-retry-confirmation"
+      "recommendation": "commit-outcome-and-build-native-follow-before-retry"
     }
   ]
 }

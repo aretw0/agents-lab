@@ -22704,7 +22704,7 @@
         "Nenhum arquivo deve ser modificado pelo worker; se houver mudança, outcome deve falhar e rollback ser explícito."
       ],
       "milestone": "agent-first-control-plane-minimal-2026-05",
-      "notes": "Tarefa preparada após validar dispatch_check. Não autoriza execução por si só; exige confirmação humana exata para o runId.\n[provenance:human] source_task=TASK-BUD-1017 reason=TASK-BUD-1017 validou confirmação report-only; próximo passo é preparar o primeiro dispatch real, mas apenas com frase exata do operador.\nFirst real dispatch attempt failed before worker execution: operator reported session crash from unhandled `spawn pi ENOENT`. Registry reconciled to state=failed; outcome packet reports process=failed contract=fail outputBytes=0. Do not retry until TASK-BUD-1019 is committed and `/reload` is done.\nPost-reload live safety check passed without redispatch. Existing original run `task-bud-1018-first-runner-readonly-canary` remains failed/stale=no. Prepared retry packet runId `task-bud-1018-first-runner-readonly-canary-retry`: start_packet ready-for-human-decision, dispatch_check confirmation=missing dispatch=no, dispatch preview execute=no dispatch=no, status found=no. Fresh exact confirmation is required before any retry."
+      "notes": "Tarefa preparada após validar dispatch_check. Não autoriza execução por si só; exige confirmação humana exata para o runId.\n[provenance:human] source_task=TASK-BUD-1017 reason=TASK-BUD-1017 validou confirmação report-only; próximo passo é preparar o primeiro dispatch real, mas apenas com frase exata do operador.\nFirst real dispatch attempt failed before worker execution: operator reported session crash from unhandled `spawn pi ENOENT`. Registry reconciled to state=failed; outcome packet reports process=failed contract=fail outputBytes=0. Do not retry until TASK-BUD-1019 is committed and `/reload` is done.\nPost-reload live safety check passed without redispatch. Existing original run `task-bud-1018-first-runner-readonly-canary` remains failed/stale=no. Prepared retry packet runId `task-bud-1018-first-runner-readonly-canary-retry`: start_packet ready-for-human-decision, dispatch_check confirmation=missing dispatch=no, dispatch preview execute=no dispatch=no, status found=no. Fresh exact confirmation is required before any retry.\nRetry dispatch executed after exact confirmation. `agent_run_task_dispatch` returned dispatched pid=56304 without session crash. Final status: completed/stale=no; git remained clean. Log output was non-empty (1396 bytes) but worker self-reported FAIL because it observed the run while still running/stale and noted no finalized outcome yet. Parent outcome packet: process=completed contract=fail recommendation=ask-human markerFailure=worker self-reported PASS outputBytes=1396. Created TASK-BUD-1020 to add native bounded follow/await instead of manual sleep/polling."
     },
     {
       "id": "TASK-BUD-1019",
@@ -22725,6 +22725,29 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Derivado de crash real reportado pelo operador: `Error: spawn pi ENOENT` emitido sem handler após dispatch autorizado.\n[provenance:human] source_task=TASK-BUD-1018 reason=Primeira tentativa real do runner crashou a sessão por ENOENT não tratado; precisa hardening antes de nova tentativa.\nSpawn ENOENT hardening completed. Requires `/reload` before trusting live dispatch tool; do not retry TASK-BUD-1018 until after reload.",
       "verification": "VERIF-TASK-BUD-1019-SPAWN-ERROR-HARDENING"
+    },
+    {
+      "id": "TASK-BUD-1020",
+      "description": "[agent-first/observability] Adicionar uma superfície nativa bounded para acompanhar/finalizar runs (`follow`/await status) sem polling manual por `setTimeout` em bash.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1019"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Fornece primitiva report-only/bounded para observar run até terminal state ou timeout curto sem usar sleep manual em bash.",
+        "Retorna status final, log tail limitado, outputBytes quando possível e recomendação de outcome.",
+        "Não inicia, para ou reinicia processos.",
+        "Falha fechado para run ausente, running stale além do timeout ou log indisponível.",
+        "Teste focal cobre completed, running-stale e missing-run."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criado após operador questionar o uso de `setTimeout` manual para acompanhar o worker. O caminho atual tem status/log/outcome, mas falta uma primitiva integrada de follow bounded.\n[provenance:human] source_task=TASK-BUD-1018 reason=Primeiro retry real expôs lacuna ergonômica/operacional: acompanhamento ainda foi feito por polling manual com sleep."
     }
   ]
 }
