@@ -15191,6 +15191,15 @@
       "method": "doc-update+marker-check+i18n-lint",
       "timestamp": "2026-05-08T13:17:58.682Z",
       "evidence": "Added `### Hipótese de guarda-chuva: queen` to `docs/primitives/nudge-free-local-continuity.md`. It frames `queen` as a semantic umbrella for operator + control-plane alignment: high-level intent, autonomy profile, resource strategy, ROI preferences, and stop conditions. It explicitly says queen is not a worker/swarm/scheduler/runtime executor and not a bypass of lower gates; it guides the control-plane to choose/propose capabilities through existing contracts. When explicitness is missing, the control-plane should discover the queen profile with a short interview covering objective, autonomy appetite, acceptable capabilities, limits, and exceptions. Marker check passed; i18n lint pt-BR passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1044-QUEEN-CONTEXT-PROFILE",
+      "target": "TASK-BUD-1044",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-update+marker-check+i18n-lint",
+      "timestamp": "2026-05-08T13:20:56.986Z",
+      "evidence": "Updated `docs/primitives/nudge-free-local-continuity.md` to clarify queen as contextual composition, not only the operator's instant will. The section now states that in a reusable distro like `pi-stack`, queen is composed from operator, project/context, available resources, gate maturity, distro defaults, and persistent installation preferences; pi-stack should provide good defaults and discoverability, and each project can have its own queen profile. It records the current `agents-lab` queen profile as continuous improvement: proactively use local-safe resources to improve the stack, create evidence, close loops with validation/commit/checkpoint, and stop gracefully on real risk, protected scope, reload/compact, or product ambiguity. Marker check passed; i18n lint pt-BR passed."
     }
   ]
 }

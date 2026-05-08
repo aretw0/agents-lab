@@ -23253,6 +23253,24 @@
       "milestone": "single-worker-board-driven-lane-2026-05",
       "notes": "Criado a partir do steer do operador: talvez a ideia de queen esteja nascendo no relacionamento control-plane + operador.\n[provenance:human] source_task=none reason=Nomear um possível guarda-chuva conceitual útil sem sobrepor contratos já cultivados.\nRecorded queen as a possible umbrella concept, not a new execution gate or bypass.",
       "verification": "VERIF-TASK-BUD-1043-QUEEN-HYPOTHESIS"
+    },
+    {
+      "id": "TASK-BUD-1044",
+      "description": "[control-plane/queen] Clarificar queen como perfil composto por operador, contexto, distro pi-stack, recursos e maturidade; registrar perfil agents-lab.",
+      "status": "completed",
+      "priority": "p0",
+      "files": [
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "Documento deixa claro que queen não é apenas operador: inclui contexto/projeto, distribuição pi-stack, recursos disponíveis, maturidade/gates e preferências persistentes.",
+        "Documento diferencia perfil queen geral da pi-stack dos perfis específicos por instalação/projeto.",
+        "Documento registra o perfil queen do agents-lab como iteração contínua de melhoramento com uso proativo de recursos local-safe.",
+        "Documento mantém queen como guarda-chuva semântico, não executor/gate/bypass."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Criado a partir do steer do operador: pi-stack é distro reutilizável; agents-lab é a casa onde o perfil queen atual é iteração contínua de melhoramento.\n[provenance:human] source_task=none reason=Evitar reduzir queen à vontade imediata do operador; registrar composição contextual e perfil agents-lab.\nClarified queen as distro/project/operator profile composition and recorded agents-lab profile as continuous improvement.",
+      "verification": "VERIF-TASK-BUD-1044-QUEEN-CONTEXT-PROFILE"
     }
   ]
 }
