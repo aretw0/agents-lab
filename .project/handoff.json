@@ -1,54 +1,55 @@
 {
-  "timestamp": "2026-05-08T16:38:09.187Z",
-  "context": "After reload, prepared inherit-extension worker packet for TASK-BUD-1063 but did not dispatch because user said generic prossiga rather than [snip] ins blocked by dependency quality gate. [truncated:+475 chars]",
+  "timestamp": "2026-05-08T16:51:08.218Z",
+  "context": "Exact-confirmed worker task-bud-1063-final-turn-brief-inherit-live-canary was dispatched after reload with extension_isolation=inherit. It st [snip] fication before further worker retries. [truncated:+369 chars]",
   "current_tasks": [
-    "TASK-BUD-1063"
+    "TASK-BUD-1066"
   ],
   "next_actions": [
-    "Commit TASK-BUD-1063 final-turn brief slice.",
-    "Reload after commit because extension runtime changed.",
-    "After reload, optionally run turn_boundary_decision_packet canary to confirm finalTurnBrief is [snip] r explicitly requests one. [truncated:+47 chars]"
+    "Pause further worker dispatch retries for TASK-BUD-1063 until TASK-BUD-1066 isolates runner/pi print failure mode.",
+    "Implement a report-only preflight/capture slice that classifies CLI argv/provider/tool/extensi [snip] -call quota when possible. [truncated:+29 chars]",
+    "Once preflight produces actionable green path, run one read-only worker canary, then one tiny [snip] ing workers default again. [truncated:+33 chars]"
   ],
   "blockers": [
-    "Runtime will be stale after commit until /reload.",
-    "TASK-BUD-1063 quality gate still reports unresolved dependencies; do not auto-close.",
-    "No worker dispatch occurred for inherit retry because exact confirmation was not provided."
+    "Workers are not abandoned, but are not stable enough for blind default use unt [snip] failure is classified. [truncated:+17 chars]",
+    "TASK-BUD-1063 implementation is already locally committed, but worker lane val [snip] dation remains failed. [truncated:+1 chars]",
+    "No further worker dispatch without exact confirmation and root-cause evidence."
   ],
   "recent_validation": [
-    "git_dirty_snapshot -> clean before slice; dirty only intended files after slice",
-    "context_watch_status -> reload-not-required",
-    "agent_run_task_start_packet TASK-BUD-1063 final-turn-brief-inherit-retry extension_isolation=i [snip] human-decision dispatch=no [truncated:+20 chars]"
+    "agent_run_task_dispatch -> dispatched pid=58864",
+    "agent_run_follow/log/status -> failed, silent-runner-failure, childOutputBytes=0",
+    "agent_run_outcome_packet -> contract=fail, touched=0, git clean"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1063",
+    "focus": "TASK-BUD-1066",
     "canonical_links": [
-      "task:TASK-BUD-1063",
-      "task:TASK-BUD-1063-FINAL-TURN-BRIEF-2026-05-08"
+      "task:TASK-BUD-1066",
+      "task:TASK-BUD-1063-FINAL-TURN-BRIEF-INHERIT-LIVE-CANARY",
+      "task:TASK-BUD-1065"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T16:38:09.187Z",
+    "generatedAtIso": "2026-05-08T16:51:08.218Z",
     "level": "ok",
-    "percent": 33,
+    "percent": 46,
     "action": "continue",
-    "recommendation": "commit-final-turn-brief-then-reload",
+    "recommendation": "stabilize-runner-preflight-before-more-workers",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T16:38:09.187Z",
+      "atIso": "2026-05-08T16:51:08.218Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 33,
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-final-turn-brief-then-reload"
+      "recommendation": "stabilize-runner-preflight-before-more-workers"
     }
   ]
 }

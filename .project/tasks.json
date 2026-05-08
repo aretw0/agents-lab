@@ -23715,7 +23715,7 @@
         "Teste cobre: ids-only proibido, rich option labels, reload-needed pós runtime commit, e docs-only sem reload."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Criada após auditoria do passado: TASK-BUD-583/585/586/955 implementaram turn-boundary/hard-intent, mas o gap atual é operator-facing final-turn: não despejar IDs nus e sim carregar contexto rico suficiente para o operador decidir sem perguntar de volta.\n[provenance:human] source_task=none reason=Operador lembrou que o assunto passado envolvia final de turno com contexto rico e evitar citar tasks apenas por ID.\n[agent-run] Exact-confirmed worker `task-bud-1063-final-turn-brief-implementation` dispatched after reload, but failed with exitCode=1 and no useful worker output; log only shows runner start/close, git stayed clean, outcome contract failed. Created TASK-BUD-1064 to harden silent runner failure feedback before more implementation dispatches.\n[agent-run] Diagnostic retry `task-bud-1063-final-turn-brief-diagnostic-retry` failed, but new diagnostics worked: log captured cwd/source/argv and `childOutputBytes=0` with `silent-runner-failure`. The argv shows provider `openai-codex/gpt-5.3-codex-spark` launched with `--no-extensions`; likely root cause is custom/provider extension unavailable under minimal-no-extensions. Do not retry blindly; fix packet support for provider-required extension isolation/inherit first.",
+      "notes": "Criada após auditoria do passado: TASK-BUD-583/585/586/955 implementaram turn-boundary/hard-intent, mas o gap atual é operator-facing final-turn: não despejar IDs nus e sim carregar contexto rico suficiente para o operador decidir sem perguntar de volta.\n[provenance:human] source_task=none reason=Operador lembrou que o assunto passado envolvia final de turno com contexto rico e evitar citar tasks apenas por ID.\n[agent-run] Exact-confirmed worker `task-bud-1063-final-turn-brief-implementation` dispatched after reload, but failed with exitCode=1 and no useful worker output; log only shows runner start/close, git stayed clean, outcome contract failed. Created TASK-BUD-1064 to harden silent runner failure feedback before more implementation dispatches.\n[agent-run] Diagnostic retry `task-bud-1063-final-turn-brief-diagnostic-retry` failed, but new diagnostics worked: log captured cwd/source/argv and `childOutputBytes=0` with `silent-runner-failure`. The argv shows provider `openai-codex/gpt-5.3-codex-spark` launched with `--no-extensions`; likely root cause is custom/provider extension unavailable under minimal-no-extensions. Do not retry blindly; fix packet support for provider-required extension isolation/inherit first.\n[agent-run] Exact-confirmed inherit-extension canary `task-bud-1063-final-turn-brief-inherit-live-canary` still failed with `silent-runner-failure`: argv correctly omitted `--no-extensions`, but childOutputBytes=0, exitCode=1, no files touched, git clean. This means TASK-BUD-1065 fixed one blocker but not the runner root cause; pause worker retries until a first-party runner preflight/capture task isolates why pi print exits before output.",
       "verification": "VERIF-TASK-BUD-1063-FINAL-TURN-BRIEF-2026-05-08"
     },
     {
@@ -23767,6 +23767,31 @@
       "milestone": "queen-continuous-improvement-lane-2026-05",
       "notes": "Criada após retry diagnosticável de TASK-BUD-1063 revelar argv com `--no-extensions` para openai-codex/gpt-5.3-codex-spark e childOutputBytes=0/silent-runner-failure. Provável root cause: provider customizado indisponível dentro de worker minimal-no-extensions.\n[provenance:human] source_task=TASK-BUD-1063 reason=Tornar workers realmente capazes de usar providers customizados sem perder governança.",
       "verification": "VERIF-TASK-BUD-1065-EXTENSION-ISOLATION-2026-05-08"
+    },
+    {
+      "id": "TASK-BUD-1066",
+      "description": "[hard-intent/agent-runner] Isolar causa raiz do `silent-runner-failure` no subprocesso `pi --print`: mesmo com `extension_isolation=inherit` e argv sem `--no-extensions`, o child sai exitCode=1 sem stdout/stderr.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1064",
+        "TASK-BUD-1065"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/research/agent-runner-maturity-checkpoint-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Adicionar preflight report-only que valida argv/config/provider/tool availability antes de dispatch, sem chamada de modelo quando possível.",
+        "Capturar motivo de exitCode=1 antes do provider call: erro de CLI, provider config, tool allowlist, sessão/env, cwd ou extensão.",
+        "Log/registry diferenciam `provider-unavailable`, `cli-argv-invalid`, `tool-allowlist-invalid`, `extension-load-failed` e `model-call-failed` em vez de só `silent-runner-failure`.",
+        "Canary local não queima quota em retry cego e produz evidência acionável.",
+        "Não relaxa confirmação humana nem protected-scope gates."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Criada após canary exact-confirmed `task-bud-1063-final-turn-brief-inherit-live-canary`: argv sem `--no-extensions`, mas exitCode=1, childOutputBytes=0, git clean. O problema deixou de ser isolamento por extensão e passou a ser root-cause do runner/pi print.\n[provenance:human] source_task=TASK-BUD-1063 reason=Estabilizar workers para uso normal exige diagnosticar a falha silenciosa residual antes de novos retries."
     }
   ]
 }
