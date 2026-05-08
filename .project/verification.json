@@ -14894,6 +14894,15 @@
       "method": "implementation+smoke-test+marker-check",
       "timestamp": "2026-05-08T02:23:44.225Z",
       "evidence": "Implemented first-party report-only board-to-agent packetizer surface. Added buildAgentRunTaskPacket in packages/pi-stack/extensions/guardrails-core-agent-run-start.ts, exported it via guardrails-core-exports.ts, and registered tool agent_run_task_packet in packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts. The tool reads one .project task, derives declared files and acceptance criteria into a typed AgentInvocationSpec, defaults to critical economy/maxOutputLines 20, preserves scoped provider/model budget evidence, returns an exact human confirmation phrase, and keeps dispatchAllowed=false/processStartAllowed=false. It fails closed for missing task, completed task, missing files, missing acceptance criteria, protected scope, missing provider/model/budget blockers from the underlying invocation packet. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 25 passed. safe_marker_check passed for builder, surface, and tests."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1011-LIVE-AGENT-RUN-TASK-PACKET",
+      "target": "TASK-BUD-1011",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-canary+marker-check",
+      "timestamp": "2026-05-08T02:32:23.962Z",
+      "evidence": "After reload, called live `agent_run_task_packet` on TASK-BUD-1011 with profile=read-only-review and provider_model_ref=openai-codex/gpt-5.3-codex-spark. Result summary: agent-run-task-packet decision=ready-for-human-decision task=TASK-BUD-1011 found=yes status=planned files=3 criteria=5 budget=warn economy=critical dispatch=no. This validates the new first-party board-to-agent packetizer in the live runtime: it read the board task, derived files/acceptance criteria, preserved scoped Spark budget evidence, produced a human-confirmed packet path, and kept dispatchAllowed=false/processStartAllowed=false. No worker was dispatched. Marker checks passed for builder and smoke test markers."
     }
   ]
 }

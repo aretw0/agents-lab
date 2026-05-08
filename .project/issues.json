@@ -1116,6 +1116,17 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mowam5vf",
+      "title": "The agent responded with an empty message to a task that required action or reporting, leaving the request unresolved.",
+      "body": "The agent responded with an empty message to a task that required action or reporting, leaving the request unresolved.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }

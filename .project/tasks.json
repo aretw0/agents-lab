@@ -22541,6 +22541,27 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Derivado de TASK-BUD-1009: próximo passo para parar de invocar agentes na mão e conectar board/control-plane ao agent invocation packet. TASK-BUD-1009 é predecessor lógico, mas não foi declarado como depends_on porque o board bloqueou a dependência como protected-coupling.\n[provenance:human] source_task=TASK-BUD-1009 reason=Arquitetura first-party identificou board-to-agent packetizer como P1 para liberar agentes com governança.\nImplemented report-only `agent_run_task_packet` / `buildAgentRunTaskPacket`. Added focal tests for ready task, missing task/files, protected scope, completed task, and tool registration. Note: also touched guardrails-core-exports.ts to expose the builder publicly.",
       "verification": "VERIF-TASK-BUD-1010-AGENT-RUN-TASK-PACKET"
+    },
+    {
+      "id": "TASK-BUD-1011",
+      "description": "[agent-first/live-canary] Validar ao vivo, após reload, a nova superfície report-only `agent_run_task_packet` contra uma task real do board, sem dispatch de worker.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`agent_run_task_packet` retorna mode=agent-run-task-packet para TASK-BUD-1011.",
+        "Retorna decision=ready-for-human-decision com dispatchAllowed=false e processStartAllowed=false.",
+        "Preserva provider/model scoped budget evidence para openai-codex/gpt-5.3-codex-spark.",
+        "Gera humanConfirmationPhrase estável sem executar worker.",
+        "Resultado é registrado como verificação e handoff; nenhum worker é despachado."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criado após reload para validar a tool recém-implementada em runtime real antes de usá-la como caminho operacional.\n[provenance:human] source_task=TASK-BUD-1010 reason=TASK-BUD-1010 implementou a tool; após reload precisamos validar a superfície viva sem dispatch.\nLive canary after reload passed: `agent_run_task_packet` returned ready-for-human-decision for TASK-BUD-1011 with dispatch=no and no process start.",
+      "verification": "VERIF-TASK-BUD-1011-LIVE-AGENT-RUN-TASK-PACKET"
     }
   ]
 }
