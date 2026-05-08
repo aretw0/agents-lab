@@ -22375,6 +22375,32 @@
       "milestone": "agent-first-control-plane-minimal-2026-05",
       "notes": "Criada por steering humano: qwen3-coder-plus DashScope está em Remaining 246,289 / Total 1,000,000; evitar gastar subagentes sem herdar estado da arte de economia de tokens/contexto. Pergunta operacional: subagentes só herdam economia se a invocação/spec/prompt carregar esse contrato; minimal-no-extensions reduz herança implícita, então precisamos tornar o contrato explícito.\n[provenance:human] source_task=none reason=Usuário informou cota DashScope baixa e pediu registrar que subagentes devem usar economia de tokens muito bem.\nCompleted economy contract slice. Subagents still require a reload before this updated tool surface is live; until then, treat qwen3-coder-plus usage as scarce and keep TASK-BUD-1001 tiny/explicit.",
       "verification": "VERIF-TASK-BUD-1003-SUBAGENT-ECONOMY-CONTRACT"
+    },
+    {
+      "id": "TASK-BUD-1004",
+      "description": "[P1/economia-global] Generalizar contrato de economia de tokens/contexto para toda a stack, não só subagentes, e auditar lacunas frente a Squeez e referências industriais.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1003"
+      ],
+      "files": [
+        "docs/research/agent-first-operating-mode-2026-05.md",
+        "docs/research/control-plane-squeez-pattern-synthesis-2026-05-01.md",
+        "docs/research/control-plane-mdt-pattern-synthesis-2026-05-01.md",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/context-watchdog-auto-resume.ts",
+        "packages/pi-stack/extensions/monitor-summary.ts"
+      ],
+      "acceptance_criteria": [
+        "Definir que economia de tokens/contexto vale para control plane, workers/subagentes, monitores, auto-resume, handoff, validação e documentação operacional.",
+        "Auditar o que já foi assimilado de Squeez/MDT e separar evidência local de lacunas ainda não revisitadas.",
+        "Fazer uma leitura bounded do repositório https://github.com/claudioemmanuel/squeez ou cache local equivalente antes de afirmar cobertura completa.",
+        "Criar matriz de práticas: já implementado, parcialmente implementado, não aplicável, backlog.",
+        "Identificar gates concretos para reduzir gasto: leitura seletiva, saída curta, diffs focais, validação mínima suficiente, dedupe/stale suppression e routing por quota/custo."
+      ],
+      "milestone": "agent-first-control-plane-minimal-2026-05",
+      "notes": "Criada por steering humano: economia não deve ser só para subagentes; deve ser regra para toda a operação. Não afirmar que já aprendemos tudo de Squeez/indústria sem nova auditoria bounded e evidência.\n[provenance:human] source_task=none reason=Usuário perguntou se a economia é só para subagentes ou para todos, e se já aprendemos tudo de squeez/outros exemplos industriais."
     }
   ]
 }
