@@ -23038,7 +23038,8 @@
         "TASK-BUD-1032"
       ],
       "files": [
-        "docs/research/single-worker-board-driven-lane-2026-05.md"
+        "docs/research/task-bud-1033-small-mutation-worker-packet-2026-05.md",
+        "docs/research/control-plane-signal-integrity-audit-2026-05.md"
       ],
       "acceptance_criteria": [
         "Worker é despachado somente após frase exata para o runId específico.",
@@ -23047,7 +23048,7 @@
         "Outcome mutation passa e evidência registra aprendizado de confiabilidade."
       ],
       "milestone": "single-worker-board-driven-lane-2026-05",
-      "notes": "Degrau de mutação real após um read-only review bem-sucedido.\n[provenance:human] source_task=TASK-BUD-1032 reason=Escalar de read-only para mutação pequena mantendo single-worker."
+      "notes": "Degrau de mutação real após um read-only review bem-sucedido.\n[provenance:human] source_task=TASK-BUD-1032 reason=Escalar de read-only para mutação pequena mantendo single-worker.\nPrepared as normal controlled single-worker small-mutation use, not novelty experimentation: derived packet `docs/research/task-bud-1033-small-mutation-worker-packet-2026-05.md` instructs worker to mutate only `docs/research/control-plane-signal-integrity-audit-2026-05.md` by recording TASK-BUD-946 triage and marker evidence from the TASK-BUD-1032 read-only worker."
     },
     {
       "id": "TASK-BUD-1034",
@@ -23115,6 +23116,28 @@
       "milestone": "single-worker-board-driven-lane-2026-05",
       "notes": "Resposta ao steer do operador: o control plane também é agente e deve ser guiado por canivetes suíços/structured board surfaces, não por leitura manual de arquivos grandes de estado.\n[provenance:human] source_task=TASK-BUD-1035 reason=Globalizar packetização para todos os agentes, incluindo control plane.\nOperator broadened the requirement: not only board files, but known large/structured state should be treated as storage with better first-party surfaces. Implemented the read-path policy as `STRUCTURED_STATE_READ_REDIRECTS`, including board state, handoff state, and agent-run registry, with per-file recommended tools instead of a board-only special case.\nStructured state read redirects implemented. Runtime reload required before live read/bash guards enforce them.",
       "verification": "VERIF-TASK-BUD-1036-STRUCTURED-STATE-REDIRECTS"
+    },
+    {
+      "id": "TASK-BUD-1037",
+      "description": "[agent-first/maturity] Registrar para futuras sessões que single-worker delegação já é operação normal controlada, não experimento indefinido.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1032"
+      ],
+      "files": [
+        "docs/research/agent-runner-maturity-checkpoint-2026-05.md",
+        "docs/research/single-worker-board-driven-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Documento distingue `usar mais` de `experimentar para aprender` e define quando cada postura se aplica.",
+        "Documento registra que single-worker com packet derivado, frase exata, follow e outcome pass é uso normal controlado.",
+        "Documento mantém humildade: multi-worker/background/colony continuam exigindo gates próprios e autorização explícita.",
+        "Futuras sessões recebem orientação para respeitar maturidade comprovada por testes/regressões em vez de repetir experimentos por falta de contexto."
+      ],
+      "milestone": "single-worker-board-driven-lane-2026-05",
+      "notes": "Criado a partir do steer do operador: a maturidade deve ficar clara para que sessões futuras não tratem delegação agêntica como anormal depois que os gates estiverem comprovados.\n[provenance:human] source_task=TASK-BUD-1032 reason=Registrar estado de maturidade e postura operacional da delegação single-worker.\nDelegation maturity posture recorded for future sessions: single-worker is normal controlled operation when gates pass; experimentation should shrink as evidence/regressions accumulate.",
+      "verification": "VERIF-TASK-BUD-1037-DELEGATION-MATURITY-POSTURE"
     }
   ]
 }

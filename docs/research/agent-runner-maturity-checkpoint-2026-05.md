@@ -39,6 +39,21 @@ The lane now has distinct checkpoints:
 - No protected scope in runner tasks without explicit separate authorization.
 - Mutation runners require declared files, rollback, validation, follow, and outcome evidence.
 
+## Operational maturity posture
+
+Single-worker delegation is no longer a novelty path here. It is a normal controlled operating mode when all of these are true:
+
+- the worker receives a bounded derived packet instead of raw structured state;
+- the run is single-worker and tied to one explicit `runId`;
+- the operator gives the exact confirmation phrase for that `runId`;
+- `agent_run_follow` reaches a terminal state;
+- `agent_run_outcome_packet` passes the declared file contract;
+- parent-side validation and board completion stay evidence-gated.
+
+Use this mode more often for local-safe board work. Keep experimenting only where evidence is still missing: new profiles, new tool surfaces, protected scopes, multi-worker/background/colony behavior, or failure modes without regression coverage. Once a path has tests plus live pass evidence, future sessions should respect that maturity and avoid re-running calibration exercises just because the context was compacted.
+
+Humility still applies: maturity is scoped, not universal. Current evidence supports frequent bounded single-worker use; it does not by itself promote multi-worker, background, colony, protected-scope, or unattended dispatch.
+
 ## Recommended next step
 
 Run one more single-worker canary, but only after preparing a small mutation target with:

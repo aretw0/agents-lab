@@ -25,7 +25,9 @@ We are ready to use workers more often, but only in the single-worker lane:
 - allowed: frequent single-worker packets for local-safe board tasks;
 - allowed: read-only reviews and small mutations with exact runId confirmation;
 - required: non-empty output, declared-file discipline, parent validation, and outcome packet;
-- blocked: automatic multi-worker, background/colony promotion, or generic dispatch from “prossiga”.
+- normal: when the above gates pass, delegation is an operational path, not an unusual experiment;
+- learn deliberately: treat a run as experimentation only when the profile/tool/scope/failure mode lacks tests or live evidence;
+- blocked: automatic multi-worker, background/colony promotion, protected scope, or generic dispatch from “prossiga”.
 
 ## Learning loop
 

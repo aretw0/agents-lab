@@ -15110,6 +15110,15 @@
       "method": "exact-confirmed-read-only-worker+follow+git-clean+outcome",
       "timestamp": "2026-05-08T07:34:29.097Z",
       "evidence": "Exact-confirmed read-only worker `task-bud-1032-readonly-task-bud-946-review` ran over derived packet `docs/research/task-bud-1032-readonly-worker-packet-2026-05.md`, not raw structured state. Dispatch check matched; dispatch pid=59796; follow terminal completed with outputBytes=1735. Git stayed clean and touched_files=[]. Worker returned useful review: no direct duplicate-generation source for `oldText must match` found in declared extension scope; likely duplication path is tool-output fan-out/TUI rendering, with `monitor-summary.ts` receiving both `message_end` and `tool_result` and `web-session-gateway.ts` pushing both event types to recent output. Recommended narrowed follow-up files: `packages/pi-stack/extensions/monitor-summary.ts` and `packages/pi-stack/extensions/web-session-gateway.ts`; suggested validation gate: smoke fixture asserting one visible warning line for one synthetic edit-failure event; rollback: revert only these files if duplicate count/teardown behavior regresses. Blocker noted: no reproducible UI/log transcript in packet, attribution inferred. `agent_run_outcome_packet` returned contract=pass process=completed recommendation=stop."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1037-DELEGATION-MATURITY-POSTURE",
+      "target": "TASK-BUD-1037",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-update+marker-check",
+      "timestamp": "2026-05-08T11:21:41.616Z",
+      "evidence": "Updated `docs/research/agent-runner-maturity-checkpoint-2026-05.md` with `## Operational maturity posture`: single-worker delegation is now a normal controlled operating mode when bounded derived packet, exact runId confirmation, terminal follow, passing outcome, parent validation, and evidence-gated board completion are present. It instructs future sessions to use this mode more often for local-safe board work, reserve experimentation for profiles/tools/scopes/failure modes without tests/live evidence, and respect maturity after tests plus live pass evidence rather than recalibrating due compacted context. Updated `docs/research/single-worker-board-driven-lane-2026-05.md` so current mode says delegation is operational when gates pass, learn deliberately only when evidence is missing, and multi-worker/background/colony/protected scope remain blocked. Marker checks passed for both docs."
     }
   ]
 }
