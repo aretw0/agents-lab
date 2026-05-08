@@ -23586,6 +23586,81 @@
       "milestone": "queen-continuous-improvement-lane-2026-05",
       "notes": "Operador preferiu control-plane para agora; queen fica reservado para fase futura de swarms/colônias, quando o control-plane delegar coordenação.\n[provenance:human] source_task=none reason=Evitar metáfora prematura e manter vocabulário operacional claro.\nTerminology aligned: control-plane now, queen parked for future swarm/colony coordination role.",
       "verification": "VERIF-TASK-BUD-1058-CONTROL-PLANE-TERMINOLOGY"
+    },
+    {
+      "id": "TASK-BUD-1059",
+      "description": "[hard-intent/toolkit] Implementar contrato de toolkit por step: cada task/worker packet deve declarar capacidades/ferramentas mínimas antes de execução.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1047",
+        "TASK-BUD-1050"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-plan.ts",
+        "packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/research/queen-continuous-improvement-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Packet de worker/step inclui capacidades requeridas, ferramentas disponíveis e gaps antes de execução.",
+        "Read-only/research/mutation/test-fix têm toolkit mínimo explícito e validável.",
+        "Se o step requer web research, filesystem mutation, teste focal ou provider específico, o packet bloqueia ou pede ferramenta quando ela falta.",
+        "Sem dispatch quando requiredCapabilities não estão satisfeitas, salvo se o step for explicitamente reformulado para não precisar daquela capacidade.",
+        "Teste cobre research sem web tool, mutation sem edit/write, test-fix sem focal gate e caso pronto."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Hard intent do operador: não mandar worker/control-plane executar step sem dar toolkit necessário; falta de ferramenta é gap de contrato.\n[provenance:human] source_task=none reason=Garantir que control-plane e workers tenham o que precisam para executar cada step."
+    },
+    {
+      "id": "TASK-BUD-1060",
+      "description": "[hard-intent/toolkit-feedback] Implementar feedback acionável de missing/weak tool: outcome deve classificar falta de ferramenta como blocker recuperável e sugerir retry com toolkit adequado.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1059"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/research/queen-continuous-improvement-lane-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Outcome/packet distingue falha de execução comum de `missing-tool`, `weak-tool` ou `capability-gap`.",
+        "Worker output pode reportar falta de ferramenta e isso vira recommendation `retry-with-toolkit` ou equivalente report-only.",
+        "Control-plane registra o gap no board/handoff e prepara re-run com ferramenta/capacidade adequada quando local-safe.",
+        "Não tenta improvisar com ferramenta inadequada quando há risco de baixa qualidade ou alucinação.",
+        "Teste cobre worker pedindo web search sem ferramenta, ferramenta fraca para tarefa, e re-run packet sugerido."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Hard intent: da visão do worker, não ter ferramenta boa é feedback para resolver e iniciar novamente com o que precisa.\n[provenance:human] source_task=none reason=Aprender continuamente com gaps de toolkit e não culpar o worker por contrato incompleto."
+    },
+    {
+      "id": "TASK-BUD-1061",
+      "description": "[hard-intent/hatch-toolkit] Estender first hatch para inventariar ferramentas/capacidades disponíveis e gaps prováveis do workspace/sandbox.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1047",
+        "TASK-BUD-1059"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-intake-primitive.ts",
+        "packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts",
+        "packages/pi-stack/test/smoke/project-intake-primitive.test.ts",
+        "docs/primitives/project-intake.md"
+      ],
+      "acceptance_criteria": [
+        "First hatch report-only inclui inventário bounded de ferramentas/capacidades locais disponíveis.",
+        "Quando faltam ferramentas para objetivo declarado, retorna entrevista/nextAction para pedir autorização/instalação/alternativa.",
+        "Distingue ferramenta ausente de ferramenta disponível mas inadequada/fraca.",
+        "Não instala nada nem altera settings; apenas reporta e sugere próximos passos.",
+        "Teste cobre pasta vazia com tools mínimas, projeto com testes, e objetivo que requer web/tool ausente."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "Hard intent: no hatch, aprender o que temos na sandbox e o que falta antes de prometer trabalho.\n[provenance:human] source_task=none reason=Dar ao control-plane e subagentes o toolkit ideal necessário desde o começo."
     }
   ]
 }

@@ -14,7 +14,8 @@ This is not a new executor. It composes existing contracts:
 - `context_watch_checkpoint` and context stop conditions;
 - board surfaces for tasks, evidence and completion;
 - provider/quota/machine readiness gates;
-- `agent_run_task_*`, `agent_run_follow`, and `agent_run_outcome_packet` when workers are useful.
+- `agent_run_task_*`, `agent_run_follow`, and `agent_run_outcome_packet` when workers are useful;
+- toolkit/capability checks before a step is given to the control-plane or a worker.
 
 ## Control-plane profile for agents-lab
 
@@ -26,7 +27,8 @@ The current `agents-lab` profile is **assisted continuous improvement**:
 - keep a scientist-style self-critique loop: observe failures, record evidence, harden contracts, then continue;
 - commit/checkpoint/validate as sane development defaults;
 - ask the operator only for missing context, protected scope, real ambiguity, broader authorization, reload or other operational intervention;
-- stop gracefully on reload/compact/host pressure/budget block/outcome failure/dirty drift.
+- stop gracefully on reload/compact/host pressure/budget block/outcome failure/dirty drift;
+- treat missing or weak tools as contract feedback: fix the toolkit, reformulate the step, or ask the operator before retrying.
 
 This does **not** mean unassisted or blind automation. It means reducing micro-authorization while keeping the operator available for real interventions. If reload can be delayed safely, continue; if compact/reload becomes inevitable, checkpoint and ask for reload before auto-resume gets stuck behind a stale runtime.
 
@@ -41,6 +43,9 @@ Code/runtime/tooling work that should eventually be implemented with tests:
 5. `TASK-BUD-1051` — dry-run bridge from batch authorization to worker dispatch gates without bypassing lower contracts.
 6. `TASK-BUD-1052` — bounded local-safe loop canary: select, execute/packetize, validate, commit, checkpoint and re-check stop conditions.
 7. `TASK-BUD-1056` — reload-before-compact packet/gate for graceful checkpoint and operator reload request when runtime freshness would otherwise block continuation.
+8. `TASK-BUD-1059` — toolkit contract per step: required capabilities, available tools and gaps before execution.
+9. `TASK-BUD-1060` — missing/weak tool feedback loop: classify capability gaps and prepare retry with the right toolkit.
+10. `TASK-BUD-1061` — first-hatch toolkit inventory for workspace/sandbox capabilities and missing tools.
 
 ## Soft intent backlog
 
@@ -50,6 +55,10 @@ Skills, prompts, docs and research that make the behavior discoverable and reusa
 2. `TASK-BUD-1054` — hatch/control-plane prompt template for short operator manifestation.
 3. `TASK-BUD-1055` — prior-art research across pi ecosystem, Claude Code and similar tools.
 4. `TASK-BUD-1057` — document assisted/self-critical control-plane loop semantics in docs/skill form.
+
+## Toolkit rule
+
+No step should be assigned without the tools/capabilities needed to do it well. A research step needs research capability; a mutation step needs safe edit/write capability; a test-fix step needs a focal validation gate; a provider-specific step needs provider readiness. Missing or weak tooling is not a worker failure by itself — it is feedback to improve the packet, request the right tool, or re-run with a better toolkit.
 
 ## Maturity order
 
