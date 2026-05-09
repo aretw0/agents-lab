@@ -23818,6 +23818,32 @@
       "milestone": "queen-continuous-improvement-lane-2026-05",
       "notes": "Criada após auditoria dos attempts: últimos workers de TASK-BUD-1063 usaram openai-codex/gpt-5.3-codex-spark; só um retry antigo de TASK-BUD-1059 usou dashscope/qwen3-coder-plus. Ferramenta atual ainda reporta openai-codex agregado blocked e dashscope local ok, o que conflita com intenção operacional de tratar Spark como cota separada e Qwen como possivelmente exaurido no ModelStudio.\n[provenance:human] source_task=TASK-BUD-1066 reason=Estabilização de workers depende de roteamento/budget model-specific confiável.",
       "verification": "VERIF-TASK-BUD-1067-SPARK-MODEL-SCOPE-2026-05-08"
+    },
+    {
+      "id": "TASK-BUD-1068",
+      "description": "[agent-runner/sdk-fallback] Projetar e implementar lane dual para subagents/workers: manter subprocesso pi com diagnóstico estruturado e adicionar alternativa SDK/in-process createAgentSession para cenários onde subprocesso é frágil ou onde controle de sessão/eventos é melhor.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1066"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-diagnostics.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/research/agent-runner-maturity-checkpoint-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Agent-run packets distinguem executor subprocesso vs SDK/in-process sem autorizar dispatch automático.",
+        "Subprocesso preserva diagnóstico estruturado: argv, cwd, source, exitCode, stdoutBytes, stderrBytes, timeout e registry/outcome.",
+        "SDK/in-process tem packet report-only com modelo, cwd, tools, timeout, rollback, budget e abort/final-output contract.",
+        "Política escolhe executor por cenário e sempre exige confirmação humana exata antes de dispatch.",
+        "Testes cobrem os dois caminhos como report-only e fail-closed para protected scope/budget/dirty state."
+      ],
+      "milestone": "agent-first-worker-lane",
+      "notes": "Criado após decisão do operador: queremos subagentes tanto como subprocesso quanto via SDK/in-process, usando prior art local (pi-workflows, pi-extension-subagents, oh-pi-ant-colony) sem recriar a roda.\n[provenance:human] source_task=TASK-BUD-1066 reason=Estabilização de runner mostrou que subprocesso e SDK/in-process devem coexistir como alternativas governadas."
     }
   ]
 }
