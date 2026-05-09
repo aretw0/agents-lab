@@ -1449,7 +1449,11 @@ describe("agent spawn readiness contract", () => {
     expect(result.ruledOut).toContain("static-tool-allowlist");
     expect(result.ruledOut).toContain("minimal-no-extensions-isolation");
     expect(result.argvDiagnostics.extensionIsolation).toBe("inherit");
-    expect(result.nextActions.join("\n")).toContain("Do not retry the worker blindly.");
+    expect(result.argvDiagnostics.cliMode).toBe("print");
+    expect(result.nextProbeProfiles).toContain("json-mode-structured-probe");
+    expect(result.nextProbeProfiles).toContain("package-root-cli-resolution-probe");
+    expect(result.nextProbeProfiles).toContain("stderr-preservation-probe");
+    expect(result.nextActions.join("\n")).toContain("known-good local runner examples");
 
     const invalidTools = classifyAgentRunFailure({
       runId: "bad-tools",
@@ -1621,6 +1625,8 @@ describe("agent spawn readiness contract", () => {
     expect(classification.details?.failureClass).toBe("silent-runner-failure");
     expect(classification.details?.preflightDecision).toBe("needs-evidence");
     expect(classification.details?.retryAllowed).toBe(false);
+    expect((classification.details?.nextProbeProfiles as string[])).not.toContain("prompt-file-argv-probe");
+    expect((classification.details?.nextProbeProfiles as string[])).toContain("stderr-preservation-probe");
     expect(classification.content?.[0]?.text).toContain("retryAllowed=no");
 
     const followCompleted = await getTool("agent_run_follow").execute("tc-follow-completed", { run_id: "run-outcome", max_wait_ms: 0, max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });

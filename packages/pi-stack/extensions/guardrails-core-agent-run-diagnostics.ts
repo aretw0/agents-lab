@@ -25,6 +25,7 @@ export interface AgentRunFailureClassificationInput {
 export interface AgentRunArgvDiagnostics {
   present: boolean;
   commandSource: "current-node-entrypoint" | "preview-command" | "unknown";
+  cliMode: "print" | "json" | "unknown";
   hasNoSession: boolean;
   hasPrint: boolean;
   hasModelFlag: boolean;
@@ -35,6 +36,8 @@ export interface AgentRunArgvDiagnostics {
   extensionIsolation: "inherit" | "minimal-no-extensions" | "unknown";
   attachmentCount: number;
   promptPresent: boolean;
+  inlinePromptCharCount: number;
+  usesPromptFile: boolean;
   blockers: string[];
 }
 
@@ -67,6 +70,7 @@ export interface AgentRunFailureClassificationResult {
   blockers: string[];
   ruledOut: string[];
   argvDiagnostics: AgentRunArgvDiagnostics;
+  nextProbeProfiles: string[];
   nextActions: string[];
   summary: string;
 }
@@ -119,6 +123,7 @@ export function buildAgentRunArgvDiagnostics(logText: string): AgentRunArgvDiagn
     return {
       present: false,
       commandSource: extractCommandSource(logText),
+      cliMode: "unknown",
       hasNoSession: false,
       hasPrint: false,
       hasModelFlag: false,
@@ -128,24 +133,32 @@ export function buildAgentRunArgvDiagnostics(logText: string): AgentRunArgvDiagn
       extensionIsolation: "unknown",
       attachmentCount: 0,
       promptPresent: false,
+      inlinePromptCharCount: 0,
+      usesPromptFile: false,
       blockers: ["argv-log-missing"],
     };
   }
 
   const modelIndex = argv.indexOf("--model");
+  const modelsIndex = argv.indexOf("--models");
+  const modeIndex = argv.indexOf("--mode");
   const toolsIndex = argv.indexOf("--tools");
   const printIndex = argv.indexOf("--print");
-  const providerModelRef = modelIndex >= 0 ? normalizeText(argv[modelIndex + 1]) : "";
+  const providerModelRef = modelIndex >= 0 ? normalizeText(argv[modelIndex + 1]) : modelsIndex >= 0 ? normalizeText(argv[modelsIndex + 1]) : "";
   const toolCsv = toolsIndex >= 0 ? normalizeText(argv[toolsIndex + 1]) : "";
   const tools = toolCsv ? toolCsv.split(",").map((tool) => tool.trim()).filter(Boolean) : [];
   const unsupportedTools = tools.filter((tool) => !KNOWN_AGENT_RUN_TOOLS.has(tool));
-  const afterPrint = printIndex >= 0 ? argv.slice(printIndex + 1) : [];
-  const attachmentCount = afterPrint.filter((arg) => arg.startsWith("@")).length;
-  const promptPresent = afterPrint.some((arg) => !arg.startsWith("@") && arg.trim().length > 0);
+  const promptFlagIndex = argv.indexOf("-p");
+  const promptArgs = printIndex >= 0 ? argv.slice(printIndex + 1) : promptFlagIndex >= 0 ? argv.slice(promptFlagIndex + 1, promptFlagIndex + 2) : [];
+  const attachmentCount = promptArgs.filter((arg) => arg.startsWith("@")).length;
+  const promptPresent = promptArgs.some((arg) => !arg.startsWith("@") && arg.trim().length > 0) || promptArgs.some((arg) => arg.startsWith("@"));
+  const inlinePromptCharCount = promptArgs.filter((arg) => !arg.startsWith("@")).join("\n").length;
+  const usesPromptFile = promptArgs.some((arg) => arg.startsWith("@"));
+  const cliMode = modeIndex >= 0 && argv[modeIndex + 1] === "json" ? "json" : printIndex >= 0 || promptFlagIndex >= 0 ? "print" : "unknown";
   const blockers: string[] = [];
-  if (!argv.includes("--no-session")) blockers.push("no-session-flag-missing");
-  if (printIndex < 0) blockers.push("print-flag-missing");
-  if (modelIndex < 0 || !providerModelRef) blockers.push("model-flag-missing");
+  if (!argv.includes("--no-session") && !argv.includes("--session-dir")) blockers.push("session-isolation-missing");
+  if (printIndex < 0 && promptFlagIndex < 0) blockers.push("prompt-flag-missing");
+  if (modelIndex < 0 && modelsIndex < 0 || !providerModelRef) blockers.push("model-flag-missing");
   if (toolsIndex < 0 || tools.length === 0) blockers.push("tools-flag-missing");
   if (unsupportedTools.length > 0) blockers.push("unsupported-tools");
   if (!promptPresent) blockers.push("prompt-missing");
@@ -153,9 +166,10 @@ export function buildAgentRunArgvDiagnostics(logText: string): AgentRunArgvDiagn
   return {
     present: true,
     commandSource: extractCommandSource(logText),
+    cliMode,
     hasNoSession: argv.includes("--no-session"),
-    hasPrint: printIndex >= 0,
-    hasModelFlag: modelIndex >= 0 && !!providerModelRef,
+    hasPrint: printIndex >= 0 || promptFlagIndex >= 0,
+    hasModelFlag: (modelIndex >= 0 || modelsIndex >= 0) && !!providerModelRef,
     ...(providerModelRef ? { providerModelRef } : {}),
     hasToolsFlag: toolsIndex >= 0 && tools.length > 0,
     tools,
@@ -163,6 +177,8 @@ export function buildAgentRunArgvDiagnostics(logText: string): AgentRunArgvDiagn
     extensionIsolation: argv.includes("--no-extensions") ? "minimal-no-extensions" : "inherit",
     attachmentCount,
     promptPresent,
+    inlinePromptCharCount,
+    usesPromptFile,
     blockers,
   };
 }
@@ -187,10 +203,13 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
   if (typeof childOutputBytes === "number") evidence.push(`childOutputBytes=${childOutputBytes}`);
   if (argvDiagnostics.present) {
     evidence.push(`argv:source=${argvDiagnostics.commandSource}`);
+    evidence.push(`argv:mode=${argvDiagnostics.cliMode}`);
     evidence.push(`argv:model=${argvDiagnostics.providerModelRef ?? "missing"}`);
     evidence.push(`argv:tools=${argvDiagnostics.tools.join(",") || "missing"}`);
     evidence.push(`argv:extensionIsolation=${argvDiagnostics.extensionIsolation}`);
     evidence.push(`argv:attachments=${argvDiagnostics.attachmentCount}`);
+    evidence.push(`argv:inlinePromptChars=${argvDiagnostics.inlinePromptCharCount}`);
+    if (argvDiagnostics.usesPromptFile) evidence.push("argv:usesPromptFile=yes");
   }
 
   if (argvDiagnostics.blockers.length === 0 && argvDiagnostics.present) ruledOut.push("static-cli-argv-shape");
@@ -241,11 +260,23 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
       ? "blocked"
       : "needs-evidence";
   const retryAllowed = failureClass === "none";
+  const nextProbeProfiles = failureClass === "silent-runner-failure"
+    ? [
+      ...(argvDiagnostics.cliMode !== "json" ? ["json-mode-structured-probe"] : []),
+      ...(!argvDiagnostics.usesPromptFile && argvDiagnostics.inlinePromptCharCount > 0 ? ["prompt-file-argv-probe"] : []),
+      ...(argvDiagnostics.commandSource !== "preview-command" ? ["package-root-cli-resolution-probe"] : []),
+      "stderr-preservation-probe",
+    ]
+    : failureClass === "worker-contract-failed"
+      ? ["parent-side-contract-validation-probe"]
+      : [];
+
   const nextActions = failureClass === "silent-runner-failure"
     ? [
       "Do not retry the worker blindly.",
-      "Compare this argv/env with a prior stdout-producing run before dispatch.",
-      "Add or run a narrower startup/provider diagnostic that captures provider, extension-load, and model-call errors before the next canary.",
+      "Run a report-only structured diagnostic that captures events and stderr before the next text-mode canary.",
+      "Compare CLI resolution, builtin-tool filtering, stdout/stderr behavior, and prompt file handoff against known-good local runner examples.",
+      "Only after that, retry a tiny exact-confirmed Spark worker canary.",
     ]
     : failureClass === "provider-unavailable"
       ? ["Refresh provider/model budget and auth evidence before retry."]
@@ -286,6 +317,7 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
     blockers,
     ruledOut,
     argvDiagnostics,
+    nextProbeProfiles,
     nextActions,
     summary,
   };

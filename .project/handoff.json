@@ -1,53 +1,53 @@
 {
-  "timestamp": "2026-05-08T22:50:16.058Z",
-  "context": "Implemented first local slice of runner preflight/classification for TASK-BUD-1066. Added packages/pi-stack/extensions/guardrails-core-agent- [snip] nable evidence rather than blind retry. [truncated:+712 chars]",
+  "timestamp": "2026-05-09T10:40:36.928Z",
+  "context": "Manual nudge substituted for missing auto-resume. Corrected the first runner-diagnostics follow-up slice after operator challenged hardcoded [snip] etection. No worker dispatch attempted. [truncated:+247 chars]",
   "current_tasks": [
     "TASK-BUD-1066"
   ],
   "next_actions": [
-    "Commit TASK-BUD-1066 classifier slice.",
-    "After reload, use agent_run_failure_classification on recent silent runs to verify live behavior.",
-    "Next slice: add a narrower startup/provider diagnostic or compare successful TASK-BUD-1027 vs [snip] ore any new worker canary. [truncated:+33 chars]"
+    "Decide whether to commit this TASK-BUD-1066 diagnostics slice.",
+    "After reload/commit, use agent_run_failure_classification to verify live output includes gener [snip] dcoded ecosystem examples. [truncated:+32 chars]",
+    "Next implementation slice: add/report a structured startup/provider diagnostic before any exact-confirmed worker retry."
   ],
   "blockers": [
-    "New tool requires /reload before live use.",
-    "Workers should still not be retried blindly; classifier says retryAllowed=fals [snip] rrent silent evidence. [truncated:+8 chars]"
+    "Auto-resume did not fire; manual nudge used instead.",
+    "Worker dispatch still blocked without exact runId confirmation.",
+    "Current workspace is dirty with this local-safe TASK-BUD-1066 slice."
   ],
   "recent_validation": [
     "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 36 passed",
-    "git diff --check -> pass",
-    "safe_marker_check packages/pi-stack/extensions/guardrails-core-agent-run-diagnostics.ts markers -> pass"
+    "git diff --check -> passed",
+    "safe_marker_check packages/pi-stack/extensions/guardrails-core-agent-run-diagnostics.ts marker [snip] runner examples -> passed [truncated:+94 chars]"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1066",
     "canonical_links": [
-      "task:TASK-BUD-1066",
-      "task:TASK-BUD-1027"
+      "task:TASK-BUD-1066"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-08T22:50:16.058Z",
+    "generatedAtIso": "2026-05-09T10:40:36.928Z",
     "level": "ok",
-    "percent": 22,
+    "percent": 23,
     "action": "continue",
-    "recommendation": "commit-classifier-then-reload-before-live-use",
+    "recommendation": "commit-local-diagnostics-slice-then-reload-before-live-tool-trust",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-08T22:50:16.058Z",
+      "atIso": "2026-05-09T10:40:36.928Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 22,
+      "percent": 23,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-classifier-then-reload-before-live-use"
+      "recommendation": "commit-local-diagnostics-slice-then-reload-before-live-tool-trust"
     }
   ]
 }
