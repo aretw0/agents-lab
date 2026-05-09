@@ -1,54 +1,53 @@
 {
-  "timestamp": "2026-05-09T18:39:53.255Z",
-  "context": "Post-reload verified the exact-confirmed canary classification fix: task-bud-1066-readonly-runner-diagnostic-canary is now classified as sile [snip] overned alternative, not a replacement. [truncated:+421 chars]",
+  "timestamp": "2026-05-09T19:09:40.975Z",
+  "context": "Continued after reload and DashScope key setup. Verified this process sees DASHSCOPE_API_KEY without exposing the secret; monitor still retai [snip] unded contract for a future SDK worker. [truncated:+572 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Commit the report-only executor strategy packet slice.",
-    "Reload before using the new live tool agent_run_executor_strategy_packet.",
-    "Next TASK-BUD-1068 slice: implement SDK/in-process packet/canary preview using createAgentSess [snip] exact-confirmation gated. [truncated:+35 chars]"
+    "Commit SDK/in-process packet preview slice.",
+    "Reload before using new live tool agent_run_sdk_in_process_packet.",
+    "After reload, run the new packet live; if green, design a separate exact-confirmed SDK canary [snip] e, still no auto-dispatch. [truncated:+19 chars]"
   ],
   "blockers": [
-    "New live tool requires reload before use.",
+    "New live tool agent_run_sdk_in_process_packet requires reload before use.",
     "No SDK worker dispatch is implemented or authorized yet.",
     "Subprocess canary evidence remains silent-runner-failure; do not retry blindly."
   ],
   "recent_validation": [
-    "git_dirty_snapshot -> clean before slice",
-    "agent_run_failure_classification task-bud-1066-readonly-runner-diagnostic-canary -> silent-run [snip] r-failure, retryAllowed=no [truncated:+2 chars]",
-    "agent_run_startup_diagnostic_packet task-bud-1066-readonly-runner-diagnostic-canary -> structu [snip] be-first, canaryAllowed=no [truncated:+7 chars]"
+    "DASHSCOPE_API_KEY_present=true, value not printed",
+    "agent_run_executor_strategy_packet -> sdk-in-process-candidate, dispatch=no",
+    "Read pi SDK docs and examples: docs/sdk.md, examples/sdk/01-minimal.ts, 05-tools.ts, 09-api-ke [snip] .ts, 13-session-runtime.ts [truncated:+12 chars]"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
-      "task:TASK-BUD-1068",
-      "task:TASK-BUD-1066-READONLY-RUNNER-DIAGNOSTIC-CANARY"
+      "task:TASK-BUD-1068"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-09T18:39:53.255Z",
+    "generatedAtIso": "2026-05-09T19:09:40.975Z",
     "level": "warn",
-    "percent": 52,
+    "percent": 39,
     "action": "continue",
-    "recommendation": "commit-executor-strategy-packet-then-reload",
+    "recommendation": "commit-sdk-preview-packet-then-reload",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-09T18:39:53.255Z",
+      "atIso": "2026-05-09T19:09:40.975Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 52,
+      "percent": 39,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-executor-strategy-packet-then-reload"
+      "recommendation": "commit-sdk-preview-packet-then-reload"
     }
   ]
 }

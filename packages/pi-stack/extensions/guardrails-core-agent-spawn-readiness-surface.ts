@@ -7,6 +7,7 @@ import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readi
 import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 import { buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
 import { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run-executor-strategy";
+import { buildAgentRunSdkInProcessPacket } from "./guardrails-core-agent-run-sdk-preview";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunRegistryEntry, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
@@ -797,6 +798,66 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_executor_strategy_packet",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_sdk_in_process_packet",
+    label: "Agent Run SDK In-Process Packet",
+    description: "Report-only SDK/in-process worker packet using createAgentSession patterns. Never dispatches execution and requires exact future confirmation.",
+    parameters: Type.Object({
+      run_id: Type.Optional(Type.String({ description: "Future SDK worker run id." })),
+      goal: Type.Optional(Type.String({ description: "Run goal/prompt for the future SDK worker." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. openai-codex/gpt-5.3-codex-spark." })),
+      cwd: Type.Optional(Type.String({ description: "Worker cwd. Defaults to current cwd." })),
+      declared_files: Type.Optional(Type.Array(Type.String(), { description: "Exact declared file scope for parent validation." })),
+      timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds." })),
+      tool_allowlist: Type.Optional(Type.Array(Type.String(), { description: "SDK tool allowlist, usually read, grep, find, ls for diagnostic canaries." })),
+      session_mode: Type.Optional(Type.String({ description: "SDK session mode: in-memory or run-session-dir." })),
+      file_contract: Type.Optional(Type.String({ description: "read-only or mutation." })),
+      validation_gate_known: Type.Optional(Type.Boolean({ description: "Whether parent-side validation is known before any dispatch." })),
+      rollback_plan_known: Type.Optional(Type.Boolean({ description: "Whether non-destructive rollback is known." })),
+      budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision: ok, warn, blocked, or unknown." })),
+      budget_evidence: Type.Optional(Type.String({ description: "Scoped provider/model budget evidence." })),
+      budget_evidence_source: Type.Optional(Type.String({ description: "Budget evidence source: route-advisory, provider-budget-snapshot, manual, or unknown." })),
+      budget_evidence_provider: Type.Optional(Type.String({ description: "Provider named by evidence; may include provider/model scope." })),
+      budget_evidence_generated_at_iso: Type.Optional(Type.String({ description: "ISO timestamp for structured budget evidence freshness checks." })),
+      budget_evidence_max_age_ms: Type.Optional(Type.Number({ description: "Optional max age for structured budget evidence freshness." })),
+      abort_known: Type.Optional(Type.Boolean({ description: "Whether safe SDK abort is known." })),
+      event_stream_known: Type.Optional(Type.Boolean({ description: "Whether SDK event stream capture is known." })),
+      final_output_contract_known: Type.Optional(Type.Boolean({ description: "Whether final output bytes/contract is known." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = buildAgentRunSdkInProcessPacket({
+        runId: typeof p.run_id === "string" ? p.run_id : undefined,
+        goal: typeof p.goal === "string" ? p.goal : undefined,
+        providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
+        cwd: typeof p.cwd === "string" ? p.cwd : ctx?.cwd,
+        declaredFiles: asOptionalStringArray(p.declared_files),
+        timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
+        toolAllowlist: asOptionalStringArray(p.tool_allowlist),
+        sessionMode: typeof p.session_mode === "string" ? p.session_mode : undefined,
+        fileContract: typeof p.file_contract === "string" ? p.file_contract : undefined,
+        validationGateKnown: asOptionalBoolean(p.validation_gate_known),
+        rollbackPlanKnown: asOptionalBoolean(p.rollback_plan_known),
+        budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
+        budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
+        budgetEvidenceSource: typeof p.budget_evidence_source === "string" ? p.budget_evidence_source : undefined,
+        budgetEvidenceProvider: typeof p.budget_evidence_provider === "string" ? p.budget_evidence_provider : undefined,
+        budgetEvidenceGeneratedAtIso: typeof p.budget_evidence_generated_at_iso === "string" ? p.budget_evidence_generated_at_iso : undefined,
+        budgetEvidenceMaxAgeMs: typeof p.budget_evidence_max_age_ms === "number" ? p.budget_evidence_max_age_ms : undefined,
+        abortKnown: asOptionalBoolean(p.abort_known),
+        eventStreamKnown: asOptionalBoolean(p.event_stream_known),
+        finalOutputContractKnown: asOptionalBoolean(p.final_output_contract_known),
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_sdk_in_process_packet",
         summary: result.summary,
         details: result,
       });

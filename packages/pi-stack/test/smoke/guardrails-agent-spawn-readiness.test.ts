@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunSdkInProcessPacket, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -12,6 +12,7 @@ describe("agent spawn readiness contract", () => {
       "packages/pi-stack/extensions/guardrails-core-agent-run-plan.ts",
       "packages/pi-stack/extensions/guardrails-core-agent-run-runtime.ts",
       "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+      "packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts",
       "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
       "packages/pi-stack/extensions/guardrails-core-agent-run-diagnostics.ts",
       "packages/pi-stack/extensions/guardrails-core-provider-budget-evidence.ts",
@@ -1479,6 +1480,107 @@ describe("agent spawn readiness contract", () => {
     expect(result.details?.mode).toBe("agent-run-executor-strategy-packet");
     expect(result.details?.processStartAllowed).toBe(false);
     expect(result.content?.[0]?.text).toContain("preferred=pi-sdk-in-process");
+  });
+
+  it("builds sdk in-process packet preview without dispatch", async () => {
+    const result = buildAgentRunSdkInProcessPacket({
+      runId: "task-bud-1068-sdk-preview-canary",
+      goal: "Preview an SDK in-process worker without dispatch.",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+      timeoutMs: 90_000,
+      toolAllowlist: ["read", "grep", "find", "ls"],
+      sessionMode: "in-memory",
+      fileContract: "read-only",
+      validationGateKnown: true,
+      rollbackPlanKnown: true,
+      budgetDecision: "ok",
+      budgetEvidence: "Spark model-specific capacity available",
+      budgetEvidenceSource: "manual",
+      budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
+      abortKnown: true,
+      eventStreamKnown: true,
+      finalOutputContractKnown: true,
+    });
+    expect(result).toMatchObject({
+      mode: "agent-run-sdk-in-process-packet",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      processStopAllowed: false,
+      requiresHumanDecision: true,
+      singleRunOnly: true,
+      executorKind: "pi-sdk-in-process",
+      decision: "ready-for-human-decision",
+      humanConfirmationPhrase: "execute o sdk worker task-bud-1068-sdk-preview-canary",
+    });
+    expect(result.sdkPreview).toMatchObject({
+      factory: "createAgentSession",
+      authPattern: "AuthStorage.create + ModelRegistry.create",
+      sessionPattern: "SessionManager.inMemory",
+      toolSelection: ["read", "grep", "find", "ls"],
+    });
+    expect(result.sdkPreview.abortContract).toContain("timeout calls session.abort()");
+    expect(result.sdkPreview.finalOutputContract).toContain("require final output bytes > 0");
+
+    const blocked = buildAgentRunSdkInProcessPacket({
+      runId: "sdk-blocked",
+      goal: "blocked",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+      timeoutMs: 90_000,
+      toolAllowlist: ["read"],
+      validationGateKnown: true,
+      rollbackPlanKnown: true,
+      budgetDecision: "blocked",
+      abortKnown: true,
+      eventStreamKnown: true,
+      finalOutputContractKnown: true,
+    });
+    expect(blocked.decision).toBe("blocked");
+    expect(blocked.blockers).toContain("budget-blocked");
+
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    guardrailsCore(pi);
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_in_process_packet");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+    const surfaceResult = tool.execute("tc-sdk-preview", {
+      run_id: "task-bud-1068-sdk-preview-canary",
+      goal: "Preview SDK worker.",
+      provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+      declared_files: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+      timeout_ms: 90_000,
+      tool_allowlist: ["read", "grep", "find", "ls"],
+      validation_gate_known: true,
+      rollback_plan_known: true,
+      budget_decision: "ok",
+      budget_evidence: "Spark model-specific capacity available",
+      budget_evidence_provider: "openai-codex/gpt-5.3-codex-spark",
+      abort_known: true,
+      event_stream_known: true,
+      final_output_contract_known: true,
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
+    expect(surfaceResult.details?.mode).toBe("agent-run-sdk-in-process-packet");
+    expect(surfaceResult.details?.processStartAllowed).toBe(false);
+    expect(surfaceResult.content?.[0]?.text).toContain("dispatch=no");
   });
 
   it("classifies runner failures before another worker retry", () => {
