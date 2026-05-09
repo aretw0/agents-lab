@@ -1485,6 +1485,16 @@ describe("agent spawn readiness contract", () => {
     expect(invalidTools.failureClass).toBe("tool-allowlist-invalid");
     expect(invalidTools.preflightDecision).toBe("blocked");
 
+    const promptOnlyProviderMarker = classifyAgentRunFailure({
+      runId: "prompt-only-provider-marker",
+      logText: [
+        "[agent-runner] argv=[\"cli.js\",\"--no-session\",\"--model\",\"p/m\",\"--tools\",\"read\",\"--print\",\"Acceptance criterion: classify provider-unavailable separately\"]",
+        "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr",
+        "[agent-runner] close exitCode=1 childOutputBytes=0 stdoutBytes=0 stderrBytes=0",
+      ].join("\n"),
+    });
+    expect(promptOnlyProviderMarker.failureClass).toBe("silent-runner-failure");
+
     const providerUnavailable = classifyAgentRunFailure({
       runId: "quota",
       logText: "[agent-runner] close exitCode=1 childOutputBytes=40\nProvider error: 429 insufficient_quota",

@@ -1,55 +1,55 @@
 {
-  "timestamp": "2026-05-09T11:49:28.656Z",
-  "context": "After reload, ran live startup diagnostic for the silent Spark worker run. It still returned structured-probe-first/canaryAllowed=no, so no w [snip] ld logs lack separated stream evidence. [truncated:+242 chars]",
+  "timestamp": "2026-05-09T18:26:47.005Z",
+  "context": "Executed the exact-confirmed read-only Spark worker canary task-bud-1066-readonly-runner-diagnostic-canary. The run failed with exitCode=1, c [snip] ng while still parsing argv separately. [truncated:+406 chars]",
   "current_tasks": [
     "TASK-BUD-1066"
   ],
   "next_actions": [
-    "Reload before trusting the new stream-split live dispatch behavior.",
-    "After reload, run startup diagnostic again; old silent log should still request stream-byte-sp [snip] e it lacks split evidence. [truncated:+16 chars]",
-    "Then prepare one read-only Spark worker canary only if the operator gives exact runId confirma [snip] rated stdout/stderr bytes. [truncated:+38 chars]"
+    "Commit classifier prompt-contamination fix.",
+    "Reload before trusting live agent_run_failure_classification for the new canary.",
+    "After reload, classify task-bud-1066-readonly-runner-diagnostic-canary; expected class should [snip] not provider-unavailable. [truncated:+25 chars]"
   ],
   "blockers": [
-    "No worker dispatch happened in this slice.",
-    "Old silent evidence remains insufficient for blind retry.",
-    "New dispatch logging requires reload before live use."
+    "Worker subprocess canary still exits with zero stdout/stderr.",
+    "Live classifier will be stale until reload after this fix.",
+    "Context is at compact threshold; checkpoint is refreshed for resume."
   ],
   "recent_validation": [
-    "git_dirty_snapshot before changes -> clean",
-    "agent_run_startup_diagnostic_packet task-bud-1063-spark-model-scope-budget-post-reload -> stru [snip] be-first, canaryAllowed=no [truncated:+10 chars]",
-    "agent_run_failure_classification task-bud-1063-spark-model-scope-budget-post-reload -> silent- [snip] r-failure, retryAllowed=no [truncated:+5 chars]"
+    "agent_run_task_dispatch -> dispatched pid=59504 for exact-confirmed runId task-bud-1066-readon [snip] y-runner-diagnostic-canary [truncated:+1 chars]",
+    "agent_run_follow/log -> close exitCode=1 childOutputBytes=0 stdoutBytes=0 stderrBytes=0",
+    "agent_run_outcome_packet -> contract=fail, outputBytes=0, marker non-empty worker output failed"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1066",
     "canonical_links": [
       "task:TASK-BUD-1066",
-      "task:TASK-BUD-1063-SPARK-MODEL-SCOPE-BUDGET-POST-RELOAD",
-      "commit:c8664ec5"
+      "task:TASK-BUD-1066-READONLY-RUNNER-DIAGNOSTIC-CANARY",
+      "task:TASK-BUD-1068"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-09T11:49:28.656Z",
-    "level": "ok",
-    "percent": 43,
-    "action": "continue",
-    "recommendation": "reload-then-request-exact-readonly-worker-canary-if-operator-wants-worker-evidence",
+    "generatedAtIso": "2026-05-09T18:26:47.005Z",
+    "level": "compact",
+    "percent": 66,
+    "action": "checkpoint-refresh",
+    "recommendation": "commit-then-reload-before-next-classification",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-09T11:49:28.656Z",
+      "atIso": "2026-05-09T18:26:47.005Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 43,
+      "level": "compact",
+      "percent": 66,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-request-exact-readonly-worker-canary-if-operator-wants-worker-evidence"
+      "recommendation": "commit-then-reload-before-next-classification"
     }
   ]
 }

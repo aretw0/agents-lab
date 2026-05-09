@@ -160,6 +160,10 @@ function extractCommandSource(logText: string): AgentRunArgvDiagnostics["command
   return "unknown";
 }
 
+function stripRunnerArgvLines(logText: string): string {
+  return logText.split(/\r?\n/).filter((line) => !line.startsWith("[agent-runner] argv=")).join("\n");
+}
+
 export function buildAgentRunArgvDiagnostics(logText: string): AgentRunArgvDiagnostics {
   const argv = extractRunnerArgv(logText);
   if (!argv) {
@@ -269,7 +273,8 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
   let failureClass: AgentRunnerFailureClass = "unknown";
   let recommendationCode: AgentRunFailureClassificationResult["recommendationCode"] = "agent-runner-classification-unknown";
 
-  const lower = logText.toLowerCase();
+  const operationalLogText = stripRunnerArgvLines(logText);
+  const lower = operationalLogText.toLowerCase();
   const classify = (nextClass: AgentRunnerFailureClass, code: AgentRunFailureClassificationResult["recommendationCode"], blocker?: string) => {
     failureClass = nextClass;
     recommendationCode = code;
