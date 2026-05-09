@@ -1,23 +1,20 @@
 {
-  "timestamp": "2026-05-09T19:09:40.975Z",
-  "context": "Continued after reload and DashScope key setup. Verified this process sees DASHSCOPE_API_KEY without exposing the secret; monitor still retai [snip] unded contract for a future SDK worker. [truncated:+572 chars]",
+  "timestamp": "2026-05-09T19:15:12.707Z",
+  "context": "Persisted operator clarification outside chat: subprocess subagents/workers are not out of consideration. The system direction is dual-execut [snip] ains a valid subprocess maturity probe. [truncated:+429 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Commit SDK/in-process packet preview slice.",
-    "Reload before using new live tool agent_run_sdk_in_process_packet.",
-    "After reload, run the new packet live; if green, design a separate exact-confirmed SDK canary [snip] e, still no auto-dispatch. [truncated:+19 chars]"
+    "Commit the persisted dual-executor policy note.",
+    "After reload, continue TASK-BUD-1068 with the new SDK packet live tool, while preserving subpr [snip] rity work as active scope. [truncated:+10 chars]",
+    "Plan a future subprocess canary in devcontainer/Linux or with improved startup diagnostics bef [snip] ing subprocess unsuitable. [truncated:+10 chars]"
   ],
   "blockers": [
-    "New live tool agent_run_sdk_in_process_packet requires reload before use.",
-    "No SDK worker dispatch is implemented or authorized yet.",
-    "Subprocess canary evidence remains silent-runner-failure; do not retry blindly."
+    "Subprocess canary evidence remains silent-runner-failure on current Windows pa [snip] do not retry blindly. [truncated:+3 chars]",
+    "SDK/in-process still has only report-only packet preview; no dispatch implemen [snip] ion/authorization yet. [truncated:+3 chars]"
   ],
   "recent_validation": [
-    "DASHSCOPE_API_KEY_present=true, value not printed",
-    "agent_run_executor_strategy_packet -> sdk-in-process-candidate, dispatch=no",
-    "Read pi SDK docs and examples: docs/sdk.md, examples/sdk/01-minimal.ts, 05-tools.ts, 09-api-ke [snip] .ts, 13-session-runtime.ts [truncated:+12 chars]"
+    "board_update TASK-BUD-1068 appended [decision:dual-executor-policy] note"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
@@ -26,28 +23,28 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-09T19:09:40.975Z",
+    "generatedAtIso": "2026-05-09T19:15:12.707Z",
     "level": "warn",
-    "percent": 39,
+    "percent": 40,
     "action": "continue",
-    "recommendation": "commit-sdk-preview-packet-then-reload",
+    "recommendation": "commit-dual-executor-policy-memory",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-09T19:09:40.975Z",
+      "atIso": "2026-05-09T19:15:12.707Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 39,
+      "percent": 40,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-sdk-preview-packet-then-reload"
+      "recommendation": "commit-dual-executor-policy-memory"
     }
   ]
 }
