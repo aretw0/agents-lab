@@ -138,6 +138,11 @@ function parseExitCode(logText: string): number | undefined {
   return match ? Number.parseInt(match[1] ?? "", 10) : undefined;
 }
 
+function parseNamedByteCount(logText: string, name: "stdoutBytes" | "stderrBytes"): number | undefined {
+  const match = logText.match(new RegExp(`${name}=(\\d+)`));
+  return match ? Number.parseInt(match[1] ?? "", 10) : undefined;
+}
+
 function extractRunnerArgv(logText: string): string[] | undefined {
   const match = logText.match(/^\[agent-runner\] argv=(\[[^\n]*\])/m);
   if (!match?.[1]) return undefined;
@@ -232,6 +237,9 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
   const markerFailures = normalizeFiles(input.markerFailures);
   const exitCode = typeof entry?.exitCode === "number" ? entry.exitCode : parseExitCode(logText);
   const childOutputBytes = parseChildOutputBytes(logText);
+  const stdoutBytes = parseNamedByteCount(logText, "stdoutBytes");
+  const stderrBytes = parseNamedByteCount(logText, "stderrBytes");
+  const streamByteSplitCaptured = typeof stdoutBytes === "number" && typeof stderrBytes === "number";
   const evidence: string[] = [];
   const blockers: string[] = [];
   const ruledOut: string[] = [];
@@ -239,6 +247,9 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
   if (entry?.errorCode) evidence.push(`entry.errorCode=${entry.errorCode}`);
   if (typeof exitCode === "number") evidence.push(`exitCode=${exitCode}`);
   if (typeof childOutputBytes === "number") evidence.push(`childOutputBytes=${childOutputBytes}`);
+  if (typeof stdoutBytes === "number") evidence.push(`stdoutBytes=${stdoutBytes}`);
+  if (typeof stderrBytes === "number") evidence.push(`stderrBytes=${stderrBytes}`);
+  if (!streamByteSplitCaptured && typeof childOutputBytes === "number") evidence.push("streamByteSplit=missing");
   if (argvDiagnostics.present) {
     evidence.push(`argv:source=${argvDiagnostics.commandSource}`);
     evidence.push(`argv:mode=${argvDiagnostics.cliMode}`);
@@ -303,6 +314,7 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
       ...(argvDiagnostics.cliMode !== "json" ? ["json-mode-structured-probe"] : []),
       ...(!argvDiagnostics.usesPromptFile && argvDiagnostics.inlinePromptCharCount > 0 ? ["prompt-file-argv-probe"] : []),
       ...(argvDiagnostics.commandSource !== "preview-command" ? ["package-root-cli-resolution-probe"] : []),
+      ...(!streamByteSplitCaptured ? ["stream-byte-split-probe"] : []),
       "stderr-preservation-probe",
     ]
     : failureClass === "worker-contract-failed"
@@ -370,6 +382,7 @@ export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagn
     "argv-shape-captured",
     "cwd-and-command-source-captured",
     "stdout-and-stderr-byte-counts-captured",
+    "stdout-stderr-byte-split-captured",
     "exit-code-captured",
     "provider-model-ref-captured",
     "budget-evidence-captured",

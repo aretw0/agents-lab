@@ -1419,6 +1419,8 @@ describe("agent spawn readiness contract", () => {
     const text = readFileSync(path.join(process.cwd(), "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts"), "utf8");
     expect(text).toContain("formatAgentRunnerArgvForLog");
     expect(text).toContain("childOutputBytes");
+    expect(text).toContain("childStdoutBytes");
+    expect(text).toContain("childStderrBytes");
     expect(text).toContain("silent-runner-failure");
     expect(text).toContain("cwd=${ctx.cwd}");
   });
@@ -1452,6 +1454,7 @@ describe("agent spawn readiness contract", () => {
     expect(result.argvDiagnostics.cliMode).toBe("print");
     expect(result.nextProbeProfiles).toContain("json-mode-structured-probe");
     expect(result.nextProbeProfiles).toContain("package-root-cli-resolution-probe");
+    expect(result.nextProbeProfiles).toContain("stream-byte-split-probe");
     expect(result.nextProbeProfiles).toContain("stderr-preservation-probe");
     expect(result.nextActions.join("\n")).toContain("known-good local runner examples");
 
@@ -1473,6 +1476,7 @@ describe("agent spawn readiness contract", () => {
     });
     expect(startupProbe.probeProfiles).toContain("stderr-preservation-probe");
     expect(startupProbe.evidenceChecklist).toContain("stdout-and-stderr-byte-counts-captured");
+    expect(startupProbe.evidenceChecklist).toContain("stdout-stderr-byte-split-captured");
 
     const invalidTools = classifyAgentRunFailure({
       runId: "bad-tools",
@@ -1645,6 +1649,7 @@ describe("agent spawn readiness contract", () => {
     expect(classification.details?.preflightDecision).toBe("needs-evidence");
     expect(classification.details?.retryAllowed).toBe(false);
     expect((classification.details?.nextProbeProfiles as string[])).not.toContain("prompt-file-argv-probe");
+    expect((classification.details?.nextProbeProfiles as string[])).toContain("stream-byte-split-probe");
     expect((classification.details?.nextProbeProfiles as string[])).toContain("stderr-preservation-probe");
     expect(classification.content?.[0]?.text).toContain("retryAllowed=no");
 

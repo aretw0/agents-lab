@@ -666,12 +666,17 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         const child = spawn(subprocess.command, subprocess.args, { cwd: ctx.cwd, shell: false, stdio: ["ignore", "pipe", "pipe"] });
         pid = child.pid;
         let childOutputBytes = 0;
-        const captureChildOutput = (chunk: Buffer | string) => {
-          childOutputBytes += Buffer.isBuffer(chunk) ? chunk.byteLength : Buffer.byteLength(chunk);
+        let childStdoutBytes = 0;
+        let childStderrBytes = 0;
+        const captureChildOutput = (streamName: "stdout" | "stderr") => (chunk: Buffer | string) => {
+          const byteLength = Buffer.isBuffer(chunk) ? chunk.byteLength : Buffer.byteLength(chunk);
+          childOutputBytes += byteLength;
+          if (streamName === "stdout") childStdoutBytes += byteLength;
+          if (streamName === "stderr") childStderrBytes += byteLength;
           logStream.write(chunk);
         };
-        child.stdout?.on("data", captureChildOutput);
-        child.stderr?.on("data", captureChildOutput);
+        child.stdout?.on("data", captureChildOutput("stdout"));
+        child.stderr?.on("data", captureChildOutput("stderr"));
         registryEntry = {
           ...packet.registryPreview.entry,
           ...(pid ? { pid } : {}),
@@ -713,7 +718,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
           const silentFailureLine = silentFailure
             ? "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr; inspect argv/cwd/source and provider/toolkit setup\n"
             : "";
-          logStream.write(`${silentFailureLine}[agent-runner] close exitCode=${exitCode} childOutputBytes=${childOutputBytes}\n`, () => {
+          logStream.write(`${silentFailureLine}[agent-runner] close exitCode=${exitCode} childOutputBytes=${childOutputBytes} stdoutBytes=${childStdoutBytes} stderrBytes=${childStderrBytes}\n`, () => {
             logStream.end(() => {
               writeRegistryEntry(ctx.cwd, {
                 ...registryEntry,
