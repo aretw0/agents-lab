@@ -1,56 +1,55 @@
 {
-  "timestamp": "2026-05-09T10:55:46.961Z",
-  "context": "Post-reload continuation completed next local-safe slice for runner stabilization. Live classification still blocks blind worker retry for ta [snip] uctured-probe evidence before dispatch. [truncated:+209 chars]",
+  "timestamp": "2026-05-09T11:49:28.656Z",
+  "context": "After reload, ran live startup diagnostic for the silent Spark worker run. It still returned structured-probe-first/canaryAllowed=no, so no w [snip] ld logs lack separated stream evidence. [truncated:+242 chars]",
   "current_tasks": [
     "TASK-BUD-1066"
   ],
   "next_actions": [
-    "Reload before using the newly added live tool agent_run_startup_diagnostic_packet.",
-    "After reload, run agent_run_startup_diagnostic_packet against the silent Spark run with budget [snip] ive_reload_completed=true. [truncated:+18 chars]",
-    "If the diagnostic returns worker-canary-ready or structured-probe evidence is sufficient, prep [snip] firmation before dispatch. [truncated:+72 chars]"
+    "Reload before trusting the new stream-split live dispatch behavior.",
+    "After reload, run startup diagnostic again; old silent log should still request stream-byte-sp [snip] e it lacks split evidence. [truncated:+16 chars]",
+    "Then prepare one read-only Spark worker canary only if the operator gives exact runId confirma [snip] rated stdout/stderr bytes. [truncated:+38 chars]"
   ],
   "blockers": [
     "No worker dispatch happened in this slice.",
-    "Blind retry remains blocked by silent-runner-failure evidence.",
-    "New live tool requires reload before it can be trusted in this session."
+    "Old silent evidence remains insufficient for blind retry.",
+    "New dispatch logging requires reload before live use."
   ],
   "recent_validation": [
-    "agent_run_failure_classification task-bud-1063-spark-model-scope-budget-post-reload -> silent- [snip] r-failure, retryAllowed=no [truncated:+5 chars]",
-    "agent_run_failure_classification task-bud-1027-small-mutation-doc-canary -> worker-contract-failed, retryAllowed=no",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 36 passed"
+    "git_dirty_snapshot before changes -> clean",
+    "agent_run_startup_diagnostic_packet task-bud-1063-spark-model-scope-budget-post-reload -> stru [snip] be-first, canaryAllowed=no [truncated:+10 chars]",
+    "agent_run_failure_classification task-bud-1063-spark-model-scope-budget-post-reload -> silent- [snip] r-failure, retryAllowed=no [truncated:+5 chars]"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1066",
     "canonical_links": [
       "task:TASK-BUD-1066",
       "task:TASK-BUD-1063-SPARK-MODEL-SCOPE-BUDGET-POST-RELOAD",
-      "task:TASK-BUD-1027",
-      "commit:3944a176"
+      "commit:c8664ec5"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-09T10:55:46.961Z",
+    "generatedAtIso": "2026-05-09T11:49:28.656Z",
     "level": "ok",
-    "percent": 36,
+    "percent": 43,
     "action": "continue",
-    "recommendation": "reload-then-run-startup-diagnostic-before-worker-canary",
+    "recommendation": "reload-then-request-exact-readonly-worker-canary-if-operator-wants-worker-evidence",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-09T10:55:46.961Z",
+      "atIso": "2026-05-09T11:49:28.656Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 36,
+      "percent": 43,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-run-startup-diagnostic-before-worker-canary"
+      "recommendation": "reload-then-request-exact-readonly-worker-canary-if-operator-wants-worker-evidence"
     }
   ]
 }
