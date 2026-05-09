@@ -1,53 +1,56 @@
 {
-  "timestamp": "2026-05-09T10:40:36.928Z",
-  "context": "Manual nudge substituted for missing auto-resume. Corrected the first runner-diagnostics follow-up slice after operator challenged hardcoded [snip] etection. No worker dispatch attempted. [truncated:+247 chars]",
+  "timestamp": "2026-05-09T10:55:46.961Z",
+  "context": "Post-reload continuation completed next local-safe slice for runner stabilization. Live classification still blocks blind worker retry for ta [snip] uctured-probe evidence before dispatch. [truncated:+209 chars]",
   "current_tasks": [
     "TASK-BUD-1066"
   ],
   "next_actions": [
-    "Decide whether to commit this TASK-BUD-1066 diagnostics slice.",
-    "After reload/commit, use agent_run_failure_classification to verify live output includes gener [snip] dcoded ecosystem examples. [truncated:+32 chars]",
-    "Next implementation slice: add/report a structured startup/provider diagnostic before any exact-confirmed worker retry."
+    "Reload before using the newly added live tool agent_run_startup_diagnostic_packet.",
+    "After reload, run agent_run_startup_diagnostic_packet against the silent Spark run with budget [snip] ive_reload_completed=true. [truncated:+18 chars]",
+    "If the diagnostic returns worker-canary-ready or structured-probe evidence is sufficient, prep [snip] firmation before dispatch. [truncated:+72 chars]"
   ],
   "blockers": [
-    "Auto-resume did not fire; manual nudge used instead.",
-    "Worker dispatch still blocked without exact runId confirmation.",
-    "Current workspace is dirty with this local-safe TASK-BUD-1066 slice."
+    "No worker dispatch happened in this slice.",
+    "Blind retry remains blocked by silent-runner-failure evidence.",
+    "New live tool requires reload before it can be trusted in this session."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 36 passed",
-    "git diff --check -> passed",
-    "safe_marker_check packages/pi-stack/extensions/guardrails-core-agent-run-diagnostics.ts marker [snip] runner examples -> passed [truncated:+94 chars]"
+    "agent_run_failure_classification task-bud-1063-spark-model-scope-budget-post-reload -> silent- [snip] r-failure, retryAllowed=no [truncated:+5 chars]",
+    "agent_run_failure_classification task-bud-1027-small-mutation-doc-canary -> worker-contract-failed, retryAllowed=no",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 36 passed"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1066",
     "canonical_links": [
-      "task:TASK-BUD-1066"
+      "task:TASK-BUD-1066",
+      "task:TASK-BUD-1063-SPARK-MODEL-SCOPE-BUDGET-POST-RELOAD",
+      "task:TASK-BUD-1027",
+      "commit:3944a176"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-09T10:40:36.928Z",
+    "generatedAtIso": "2026-05-09T10:55:46.961Z",
     "level": "ok",
-    "percent": 23,
+    "percent": 36,
     "action": "continue",
-    "recommendation": "commit-local-diagnostics-slice-then-reload-before-live-tool-trust",
+    "recommendation": "reload-then-run-startup-diagnostic-before-worker-canary",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-09T10:40:36.928Z",
+      "atIso": "2026-05-09T10:55:46.961Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 23,
+      "percent": 36,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-local-diagnostics-slice-then-reload-before-live-tool-trust"
+      "recommendation": "reload-then-run-startup-diagnostic-before-worker-canary"
     }
   ]
 }
