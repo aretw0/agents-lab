@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -1455,6 +1455,25 @@ describe("agent spawn readiness contract", () => {
     expect(result.nextProbeProfiles).toContain("stderr-preservation-probe");
     expect(result.nextActions.join("\n")).toContain("known-good local runner examples");
 
+    const startupProbe = buildAgentRunStartupDiagnosticPacket({
+      runId: "silent",
+      logText: silentLog,
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      budgetDecision: "ok",
+      liveReloadCompleted: true,
+    });
+    expect(startupProbe).toMatchObject({
+      mode: "agent-run-startup-diagnostic-packet",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      canaryAllowed: false,
+      decision: "structured-probe-first",
+      recommendationCode: "agent-run-startup-structured-probe-first",
+      failureClass: "silent-runner-failure",
+    });
+    expect(startupProbe.probeProfiles).toContain("stderr-preservation-probe");
+    expect(startupProbe.evidenceChecklist).toContain("stdout-and-stderr-byte-counts-captured");
+
     const invalidTools = classifyAgentRunFailure({
       runId: "bad-tools",
       logText: "[agent-runner] argv=[\"cli.js\",\"--no-session\",\"--model\",\"p/m\",\"--tools\",\"read,rm\",\"--print\",\"prompt\"]\n[agent-runner] close exitCode=1 childOutputBytes=10",
@@ -1628,6 +1647,18 @@ describe("agent spawn readiness contract", () => {
     expect((classification.details?.nextProbeProfiles as string[])).not.toContain("prompt-file-argv-probe");
     expect((classification.details?.nextProbeProfiles as string[])).toContain("stderr-preservation-probe");
     expect(classification.content?.[0]?.text).toContain("retryAllowed=no");
+
+    const startupDiagnostic = await getTool("agent_run_startup_diagnostic_packet").execute("tc-startup-diagnostic", {
+      run_id: "run-silent",
+      provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+      budget_decision: "ok",
+      live_reload_completed: true,
+    }, undefined as unknown as AbortSignal, () => {}, { cwd });
+    expect(startupDiagnostic.details?.mode).toBe("agent-run-startup-diagnostic-packet");
+    expect(startupDiagnostic.details?.decision).toBe("structured-probe-first");
+    expect(startupDiagnostic.details?.canaryAllowed).toBe(false);
+    expect(startupDiagnostic.details?.processStartAllowed).toBe(false);
+    expect(startupDiagnostic.content?.[0]?.text).toContain("dispatch=no");
 
     const followCompleted = await getTool("agent_run_follow").execute("tc-follow-completed", { run_id: "run-outcome", max_wait_ms: 0, max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });
     expect(followCompleted.details?.mode).toBe("agent-run-follow");

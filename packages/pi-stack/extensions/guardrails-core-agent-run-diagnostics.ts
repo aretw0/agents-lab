@@ -13,6 +13,7 @@ export type AgentRunnerFailureClass =
   | "unknown";
 
 export type AgentRunnerPreflightDecision = "ready-for-canary" | "needs-evidence" | "blocked";
+export type AgentRunStartupDiagnosticDecision = "worker-canary-ready" | "structured-probe-first" | "blocked";
 
 export interface AgentRunFailureClassificationInput {
   runId?: string;
@@ -39,6 +40,13 @@ export interface AgentRunArgvDiagnostics {
   inlinePromptCharCount: number;
   usesPromptFile: boolean;
   blockers: string[];
+}
+
+export interface AgentRunStartupDiagnosticInput extends AgentRunFailureClassificationInput {
+  providerModelRef?: string;
+  budgetDecision?: "ok" | "warn" | "blocked" | "unknown" | string;
+  liveReloadCompleted?: boolean;
+  protectedScopeRequested?: boolean;
 }
 
 export interface AgentRunFailureClassificationResult {
@@ -72,6 +80,36 @@ export interface AgentRunFailureClassificationResult {
   argvDiagnostics: AgentRunArgvDiagnostics;
   nextProbeProfiles: string[];
   nextActions: string[];
+  summary: string;
+}
+
+export interface AgentRunStartupDiagnosticPacketResult {
+  mode: "agent-run-startup-diagnostic-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  processStopAllowed: false;
+  requiresHumanDecision: true;
+  runId: string;
+  providerModelRef?: string;
+  decision: AgentRunStartupDiagnosticDecision;
+  recommendationCode:
+    | "agent-run-startup-worker-canary-ready"
+    | "agent-run-startup-structured-probe-first"
+    | "agent-run-startup-blocked-budget"
+    | "agent-run-startup-blocked-protected-scope"
+    | "agent-run-startup-blocked-reload"
+    | "agent-run-startup-blocked-argv";
+  failureClass: AgentRunnerFailureClass;
+  preflightDecision: AgentRunnerPreflightDecision;
+  canaryAllowed: false;
+  exactConfirmationRequired: true;
+  probeProfiles: string[];
+  evidenceChecklist: string[];
+  blockers: string[];
+  nextActions: string[];
+  classification: AgentRunFailureClassificationResult;
   summary: string;
 }
 
@@ -319,6 +357,99 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
     argvDiagnostics,
     nextProbeProfiles,
     nextActions,
+    summary,
+  };
+}
+
+export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagnosticInput = {}): AgentRunStartupDiagnosticPacketResult {
+  const classification = classifyAgentRunFailure(input);
+  const providerModelRef = normalizeText(input.providerModelRef ?? input.entry?.providerModelRef ?? classification.argvDiagnostics.providerModelRef);
+  const budgetDecision = normalizeText(input.budgetDecision || "unknown");
+  const blockers: string[] = [];
+  const evidenceChecklist = [
+    "argv-shape-captured",
+    "cwd-and-command-source-captured",
+    "stdout-and-stderr-byte-counts-captured",
+    "exit-code-captured",
+    "provider-model-ref-captured",
+    "budget-evidence-captured",
+    "reload-state-captured",
+  ];
+
+  if (input.protectedScopeRequested) blockers.push("protected-scope-requested");
+  if (input.liveReloadCompleted !== true) blockers.push("live-reload-not-confirmed");
+  if (budgetDecision === "blocked" || budgetDecision === "unknown" || !budgetDecision) blockers.push(`budget-${budgetDecision || "unknown"}`);
+  if (classification.preflightDecision === "blocked") blockers.push(...classification.blockers.map((blocker) => `classification:${blocker}`));
+
+  let decision: AgentRunStartupDiagnosticDecision = "structured-probe-first";
+  let recommendationCode: AgentRunStartupDiagnosticPacketResult["recommendationCode"] = "agent-run-startup-structured-probe-first";
+  if (blockers.some((blocker) => blocker === "protected-scope-requested")) {
+    decision = "blocked";
+    recommendationCode = "agent-run-startup-blocked-protected-scope";
+  } else if (blockers.some((blocker) => blocker === "live-reload-not-confirmed")) {
+    decision = "blocked";
+    recommendationCode = "agent-run-startup-blocked-reload";
+  } else if (blockers.some((blocker) => blocker.startsWith("budget-"))) {
+    decision = "blocked";
+    recommendationCode = "agent-run-startup-blocked-budget";
+  } else if (classification.preflightDecision === "blocked") {
+    decision = "blocked";
+    recommendationCode = "agent-run-startup-blocked-argv";
+  } else if (classification.failureClass === "none") {
+    decision = "worker-canary-ready";
+    recommendationCode = "agent-run-startup-worker-canary-ready";
+  }
+
+  const probeProfiles = classification.nextProbeProfiles.length > 0
+    ? classification.nextProbeProfiles
+    : decision === "worker-canary-ready"
+      ? ["read-only-worker-canary"]
+      : ["structured-startup-provider-probe"];
+  const nextActions = decision === "worker-canary-ready"
+    ? [
+      "Prepare one read-only worker canary packet.",
+      "Require exact human confirmation for the specific runId before dispatch.",
+    ]
+    : decision === "structured-probe-first"
+      ? [
+        "Run a report-only structured startup/provider probe before any worker retry.",
+        "Do not retry the worker until stderr/stdout/exit/provider evidence is captured.",
+      ]
+      : ["Resolve blockers before any worker canary or startup probe."];
+
+  const summary = [
+    "agent-run-startup-diagnostic-packet:",
+    `decision=${decision}`,
+    `runId=${classification.runId || "unknown"}`,
+    providerModelRef ? `providerModel=${providerModelRef}` : undefined,
+    `failureClass=${classification.failureClass}`,
+    `canaryAllowed=no`,
+    blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+    "dispatch=no",
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+
+  return {
+    mode: "agent-run-startup-diagnostic-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    requiresHumanDecision: true,
+    runId: classification.runId,
+    ...(providerModelRef ? { providerModelRef } : {}),
+    decision,
+    recommendationCode,
+    failureClass: classification.failureClass,
+    preflightDecision: classification.preflightDecision,
+    canaryAllowed: false,
+    exactConfirmationRequired: true,
+    probeProfiles,
+    evidenceChecklist,
+    blockers,
+    nextActions,
+    classification,
     summary,
   };
 }

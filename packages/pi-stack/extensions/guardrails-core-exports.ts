@@ -100,8 +100,8 @@ export type { ProviderExecutionBudgetDecision, ProviderExecutionBudgetEvidence, 
 export { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 export { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
 export { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
-export { buildAgentRunArgvDiagnostics, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
-export type { AgentRunArgvDiagnostics, AgentRunFailureClassificationInput, AgentRunFailureClassificationResult, AgentRunnerFailureClass, AgentRunnerPreflightDecision } from "./guardrails-core-agent-run-diagnostics";
+export { buildAgentRunArgvDiagnostics, buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
+export type { AgentRunArgvDiagnostics, AgentRunFailureClassificationInput, AgentRunFailureClassificationResult, AgentRunStartupDiagnosticDecision, AgentRunStartupDiagnosticInput, AgentRunStartupDiagnosticPacketResult, AgentRunnerFailureClass, AgentRunnerPreflightDecision } from "./guardrails-core-agent-run-diagnostics";
 export { buildToolkitContract } from "./guardrails-core-toolkit-contract";
 export { buildTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationEvidence, extractTrustedHumanConfirmationEvidenceFromEnvelope, recordTrustedHumanConfirmationUiDecision, resolveHumanConfirmationAuditPlan, resolveHumanConfirmationEvidenceMatch, resolveHumanConfirmationImplementationChannelPlan, resolveHumanConfirmationRuntimeConsumptionPlan, resolveHumanConfirmationSignalSourcePlan } from "./guardrails-core-human-confirmation";
 export { resolveMonitorClassifyFailureReadiness } from "./monitor-observability";

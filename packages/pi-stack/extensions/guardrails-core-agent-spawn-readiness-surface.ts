@@ -5,7 +5,7 @@ import path from "node:path";
 import { Type } from "@sinclair/typebox";
 import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
 import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
-import { classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
+import { buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunRegistryEntry, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
@@ -852,6 +852,42 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_failure_classification",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_startup_diagnostic_packet",
+    label: "Agent Run Startup Diagnostic Packet",
+    description: "Report-only startup/provider diagnostic packet for agent runs before retry/canary decisions. Never dispatches execution.",
+    parameters: Type.Object({
+      run_id: Type.String({ description: "Agent run id to diagnose." }),
+      log_path: Type.Optional(Type.String({ description: "Optional bounded log path override. Defaults to the registered run log." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Provider/model ref for the intended future canary." })),
+      budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision: ok, warn, blocked, or unknown." })),
+      live_reload_completed: Type.Optional(Type.Boolean({ description: "Whether runtime reload was completed after diagnostic tool changes." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const runId = typeof p.run_id === "string" ? p.run_id : "";
+      const entry = readRegistryEntry(ctx.cwd, runId);
+      const rawLogPath = typeof p.log_path === "string" ? p.log_path : entry?.logPath;
+      const logPath = rawLogPath ? path.isAbsolute(rawLogPath) ? rawLogPath : path.join(ctx.cwd, rawLogPath) : undefined;
+      const logText = logPath && existsSync(logPath) ? readFileSync(logPath, "utf8") : "";
+      const result = buildAgentRunStartupDiagnosticPacket({
+        runId,
+        entry,
+        logText,
+        providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
+        budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
+        liveReloadCompleted: asOptionalBoolean(p.live_reload_completed),
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_startup_diagnostic_packet",
         summary: result.summary,
         details: result,
       });
