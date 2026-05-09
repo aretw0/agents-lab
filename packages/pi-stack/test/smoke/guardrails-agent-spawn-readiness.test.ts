@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -1423,6 +1423,62 @@ describe("agent spawn readiness contract", () => {
     expect(text).toContain("childStderrBytes");
     expect(text).toContain("silent-runner-failure");
     expect(text).toContain("cwd=${ctx.cwd}");
+  });
+
+  it("selects subprocess or sdk executor strategy without dispatch", async () => {
+    const sdkCandidate = buildAgentRunExecutorStrategyPacket({
+      failureClass: "silent-runner-failure",
+      subprocessDiagnosticsAvailable: true,
+      sdkRuntimeAvailable: true,
+      budgetDecision: "ok",
+    });
+    expect(sdkCandidate).toMatchObject({
+      mode: "agent-run-executor-strategy-packet",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      decision: "sdk-in-process-candidate",
+      preferredExecutor: "pi-sdk-in-process",
+      supportedExecutors: ["pi-print-subprocess", "pi-sdk-in-process"],
+    });
+    expect(sdkCandidate.executorContracts.map((contract) => contract.executor)).toEqual(["pi-print-subprocess", "pi-sdk-in-process"]);
+
+    const blocked = buildAgentRunExecutorStrategyPacket({
+      failureClass: "silent-runner-failure",
+      subprocessDiagnosticsAvailable: true,
+      sdkRuntimeAvailable: true,
+      budgetDecision: "blocked",
+    });
+    expect(blocked.decision).toBe("blocked");
+    expect(blocked.blockers).toContain("budget-blocked");
+
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    guardrailsCore(pi);
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_executor_strategy_packet");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+    const result = tool.execute("tc-executor-strategy", {
+      failure_class: "silent-runner-failure",
+      subprocess_diagnostics_available: true,
+      sdk_runtime_available: true,
+      budget_decision: "ok",
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
+    expect(result.details?.mode).toBe("agent-run-executor-strategy-packet");
+    expect(result.details?.processStartAllowed).toBe(false);
+    expect(result.content?.[0]?.text).toContain("preferred=pi-sdk-in-process");
   });
 
   it("classifies runner failures before another worker retry", () => {

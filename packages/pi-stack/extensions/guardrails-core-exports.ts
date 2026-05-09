@@ -102,6 +102,8 @@ export { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgent
 export { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
 export { buildAgentRunArgvDiagnostics, buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
 export type { AgentRunArgvDiagnostics, AgentRunFailureClassificationInput, AgentRunFailureClassificationResult, AgentRunStartupDiagnosticDecision, AgentRunStartupDiagnosticInput, AgentRunStartupDiagnosticPacketResult, AgentRunnerFailureClass, AgentRunnerPreflightDecision } from "./guardrails-core-agent-run-diagnostics";
+export { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run-executor-strategy";
+export type { AgentRunExecutorStrategyDecision, AgentRunExecutorStrategyInput, AgentRunExecutorStrategyKind, AgentRunExecutorStrategyPacketResult } from "./guardrails-core-agent-run-executor-strategy";
 export { buildToolkitContract } from "./guardrails-core-toolkit-contract";
 export { buildTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationEvidence, extractTrustedHumanConfirmationEvidenceFromEnvelope, recordTrustedHumanConfirmationUiDecision, resolveHumanConfirmationAuditPlan, resolveHumanConfirmationEvidenceMatch, resolveHumanConfirmationImplementationChannelPlan, resolveHumanConfirmationRuntimeConsumptionPlan, resolveHumanConfirmationSignalSourcePlan } from "./guardrails-core-human-confirmation";
 export { resolveMonitorClassifyFailureReadiness } from "./monitor-observability";

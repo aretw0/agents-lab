@@ -6,6 +6,7 @@ import { Type } from "@sinclair/typebox";
 import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
 import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 import { buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
+import { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run-executor-strategy";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunRegistryEntry, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
@@ -766,6 +767,36 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       };
       return buildOperatorVisibleToolResponse({
         label: "agent_run_task_dispatch",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_executor_strategy_packet",
+    label: "Agent Run Executor Strategy Packet",
+    description: "Report-only packet for choosing subprocess vs SDK/in-process worker executor strategy. Never dispatches execution.",
+    parameters: Type.Object({
+      failure_class: Type.Optional(Type.String({ description: "Observed failure class, e.g. silent-runner-failure." })),
+      subprocess_diagnostics_available: Type.Optional(Type.Boolean({ description: "Whether subprocess diagnostics already include argv/source/exit/stdout/stderr evidence." })),
+      sdk_runtime_available: Type.Optional(Type.Boolean({ description: "Whether SDK/in-process runtime path is available for a future canary design." })),
+      budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision: ok, warn, blocked, or unknown." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
+      exact_confirmation_available: Type.Optional(Type.Boolean({ description: "Whether exact runId confirmation is already available for a separate future dispatch." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = buildAgentRunExecutorStrategyPacket({
+        failureClass: typeof p.failure_class === "string" ? p.failure_class : undefined,
+        subprocessDiagnosticsAvailable: asOptionalBoolean(p.subprocess_diagnostics_available),
+        sdkRuntimeAvailable: asOptionalBoolean(p.sdk_runtime_available),
+        budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+        exactConfirmationAvailable: asOptionalBoolean(p.exact_confirmation_available),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_executor_strategy_packet",
         summary: result.summary,
         details: result,
       });
