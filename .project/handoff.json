@@ -1,54 +1,60 @@
 {
-  "timestamp": "2026-05-10T14:01:51.821Z",
-  "context": "Pós-reload confirmado pelo operador. Live validation mostrou turn_boundary_decision_packet.localSafeMayContinue presente, mas ainda no porque [snip] Sem worker/canary dispatch autorizado. [truncated:+212 chars]",
+  "timestamp": "2026-05-10T14:14:58.926Z",
+  "context": "Post auto-resume local-safe continuation. Covered turn_boundary_decision_packet.details.localSafeMayContinue in surface smoke and aligned boa [snip] for new runner-timeout classification. [truncated:+376 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Validar que readiness/turn-boundary deixam de bloquear por reload stale.",
-    "Adicionar teste de surface para turn_boundary_decision_packet.details.localSafeMayContinue.",
-    "Continuar maturação de workers via control-plane hardening; dispatch só com confirmação exata."
+    "Run /reload before live-validating new runner-timeout classification/tool output.",
+    "Continue TASK-BUD-1066 with report-only structured startup/provider probe design; no worker/ca [snip] ithout exact confirmation. [truncated:+15 chars]",
+    "Ask human only for no-auto-close decisions on predecessor tasks TASK-BUD-1059/TASK-BUD-1063/TA [snip] 065 if closure is desired. [truncated:+22 chars]"
   ],
-  "blockers": [],
+  "blockers": [
+    "Runtime changed; /reload needed before trusting live output from changed tools.",
+    "TASK-BUD-1066 remains open because predecessor tasks have passed verification [snip] /keep/defer decisions. [truncated:+37 chars]",
+    "No worker/canary dispatch authorization."
+  ],
   "recent_validation": [
-    "turn_boundary_decision_packet live após reload -> campo localSafeMayContinue presente",
-    "git_dirty_snapshot -> clean=yes"
+    "npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts -t \"turn_boundary_decisio [snip] --reporter=dot -> 1 passed [truncated:+10 chars]",
+    "npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi- [snip] -reporter=dot -> 77 passed [truncated:+43 chars]",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -t \"class [snip] --reporter=dot -> 2 passed [truncated:+44 chars]"
   ],
   "recent_commits": [
-    "10a01a9b chore(context): checkpoint handoff budget fix",
-    "6f7e4544 chore(board): record handoff budget evidence"
+    "3f3c38be test(context): assert boundary local-safe field surface",
+    "f898cc63 chore(board): close continuity signal side-task"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
+      "task:TASK-BUD-1070",
       "task:TASK-BUD-1066",
-      "commit:10a01a9b"
+      "commit:3f3c38be"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T14:01:51.821Z",
-    "level": "ok",
-    "percent": 47,
+    "generatedAtIso": "2026-05-10T14:14:58.926Z",
+    "level": "warn",
+    "percent": 33,
     "action": "continue",
-    "recommendation": "continue-local-safe-hardening",
+    "recommendation": "continue-local-safe-after-reload",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T14:01:51.821Z",
+      "atIso": "2026-05-10T14:14:58.926Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 47,
+      "level": "warn",
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-local-safe-hardening"
+      "recommendation": "continue-local-safe-after-reload"
     }
   ]
 }
