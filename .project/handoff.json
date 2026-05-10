@@ -1,46 +1,48 @@
 {
-  "timestamp": "2026-05-10T12:33:48.019Z",
-  "context": "User confirmed keeping local OpenAI Codex Spark override and already reloaded. Saved UI follow-up separately: TASK-BUD-1069 covers TUI quota [snip] ; no canary/worker dispatch authorized. [truncated:+228 chars]",
+  "timestamp": "2026-05-10T12:36:33.865Z",
+  "context": "Saved Spark quota settings and UI follow-up; previewed exactly one SDK in-process read-only canary packet after reload. Packet runId=task-bud [snip] on=none. No worker/canary was executed. [truncated:+135 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Commit the explicit local settings override and board/handoff updates if validation is clean.",
-    "Resume TASK-BUD-1068 worker/subagent lane; preview only one SDK canary after exact packet, exe [snip] exact runId confirmation. [truncated:+13 chars]",
-    "Defer TASK-BUD-1069 until general UI quota review."
+    "If operator explicitly confirms the exact runId, execute only task-bud-1068-sdk-cadence-readon [snip] worker/subagent critique. [truncated:+40 chars]",
+    "Defer TASK-BUD-1069 UI footer semantics to general UI quota review.",
+    "Continue TASK-BUD-1068 without automatic dispatch."
   ],
   "blockers": [
-    "No canary/worker dispatch authorized by charter.",
+    "No canary/worker dispatch authorized by charter without exact runId confirmation.",
     "TASK-BUD-1066 root cause still unresolved."
   ],
   "recent_validation": [
-    "Board task TASK-BUD-1069 created for deferred UI quota footer correction.",
-    "TASK-BUD-1068 note appended with local settings decision and UI follow-up pointer.",
-    "Previous quota model-specific patch committed: e88ed5e8 fix(quota): infer codex model-specific windows."
+    "git clean before preview after a83171a2 save commit.",
+    "quota route checked; Spark-specific WHAM budget evidence manually scoped for preview.",
+    "agent_run_sdk_in_process_dispatch execute=false -> decision=preview dispatch=no."
   ],
   "recent_commits": [
-    "e88ed5e8 fix(quota): infer codex model-specific windows"
+    "e88ed5e8 fix(quota): infer codex model-specific windows",
+    "a83171a2 chore(context): save spark quota follow-up"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
+      "task:TASK-BUD-1068-SDK-CADENCE-READONLY-PREVIEW",
       "task:TASK-BUD-1069",
-      "commit:e88ed5e8"
+      "commit:a83171a2"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T12:33:48.019Z",
+    "generatedAtIso": "2026-05-10T12:36:33.865Z",
     "level": "warn",
     "action": "continue",
-    "recommendation": "continue-workers-subagents",
+    "recommendation": "await-exact-runid-or-continue-readonly",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T12:33:48.019Z",
+      "atIso": "2026-05-10T12:36:33.865Z",
       "reason": "manual_checkpoint",
       "level": "warn",
       "percent": 0,
@@ -50,7 +52,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-workers-subagents"
+      "recommendation": "await-exact-runid-or-continue-readonly"
     }
   ]
 }
