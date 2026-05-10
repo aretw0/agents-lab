@@ -1439,9 +1439,18 @@ describe("agent spawn readiness contract", () => {
       processStartAllowed: false,
       decision: "sdk-in-process-candidate",
       preferredExecutor: "pi-sdk-in-process",
+      nextProbeExecutor: "pi-sdk-in-process",
       supportedExecutors: ["pi-print-subprocess", "pi-sdk-in-process"],
+      executorPosture: {
+        subprocessRetained: true,
+        sdkIsReplacement: false,
+        subprocessBlindRetryAllowed: false,
+        subprocessMaturityProbe: "devcontainer-or-linux-canary",
+      },
     });
     expect(sdkCandidate.executorContracts.map((contract) => contract.executor)).toEqual(["pi-print-subprocess", "pi-sdk-in-process"]);
+    expect(sdkCandidate.summary).toContain("subprocessRetained=yes");
+    expect(sdkCandidate.summary).toContain("sdkReplacement=no");
 
     const blocked = buildAgentRunExecutorStrategyPacket({
       failureClass: "silent-runner-failure",
@@ -1480,6 +1489,7 @@ describe("agent spawn readiness contract", () => {
     expect(result.details?.mode).toBe("agent-run-executor-strategy-packet");
     expect(result.details?.processStartAllowed).toBe(false);
     expect(result.content?.[0]?.text).toContain("preferred=pi-sdk-in-process");
+    expect(result.content?.[0]?.text).toContain("subprocessRetained=yes");
   });
 
   it("builds sdk in-process packet preview without dispatch", async () => {

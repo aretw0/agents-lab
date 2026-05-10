@@ -1,50 +1,54 @@
 {
-  "timestamp": "2026-05-09T19:15:12.707Z",
-  "context": "Persisted operator clarification outside chat: subprocess subagents/workers are not out of consideration. The system direction is dual-execut [snip] ains a valid subprocess maturity probe. [truncated:+429 chars]",
+  "timestamp": "2026-05-10T03:15:22.537Z",
+  "context": "After reload, validated the live SDK/in-process packet: agent_run_sdk_in_process_packet returned ready-for-human-decision with dispatch=no/au [snip] n runtime output, not just board notes. [truncated:+513 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Commit the persisted dual-executor policy note.",
-    "After reload, continue TASK-BUD-1068 with the new SDK packet live tool, while preserving subpr [snip] rity work as active scope. [truncated:+10 chars]",
-    "Plan a future subprocess canary in devcontainer/Linux or with improved startup diagnostics bef [snip] ing subprocess unsuitable. [truncated:+10 chars]"
+    "Commit dual-executor runtime-output hardening.",
+    "Reload before trusting live agent_run_executor_strategy_packet to show subprocessRetained/sdkReplacement fields.",
+    "Continue TASK-BUD-1068: design future exact-confirmed SDK canary implementation while keeping [snip] vcontainer probe in scope. [truncated:+21 chars]"
   ],
   "blockers": [
-    "Subprocess canary evidence remains silent-runner-failure on current Windows pa [snip] do not retry blindly. [truncated:+3 chars]",
-    "SDK/in-process still has only report-only packet preview; no dispatch implemen [snip] ion/authorization yet. [truncated:+3 chars]"
+    "Live executor strategy tool will be stale until reload after this commit.",
+    "No SDK worker dispatch is implemented or authorized yet.",
+    "Subprocess canary evidence remains silent-runner-failure on current Windows pa [snip] do not retry blindly. [truncated:+3 chars]"
   ],
   "recent_validation": [
-    "board_update TASK-BUD-1068 appended [decision:dual-executor-policy] note"
+    "git_dirty_snapshot before slice -> clean",
+    "agent_run_sdk_in_process_packet live -> ready-for-human-decision, dispatch=no, authorization=none",
+    "agent_run_executor_strategy_packet live -> sdk-in-process-candidate, dispatch=no"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
-      "task:TASK-BUD-1068"
+      "task:TASK-BUD-1068",
+      "task:TASK-BUD-1068-SDK-PREVIEW-CANARY"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-09T19:15:12.707Z",
+    "generatedAtIso": "2026-05-10T03:15:22.537Z",
     "level": "warn",
-    "percent": 40,
+    "percent": 42,
     "action": "continue",
-    "recommendation": "commit-dual-executor-policy-memory",
+    "recommendation": "commit-dual-executor-output-hardening-then-reload",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-09T19:15:12.707Z",
+      "atIso": "2026-05-10T03:15:22.537Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 40,
+      "percent": 42,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-dual-executor-policy-memory"
+      "recommendation": "commit-dual-executor-output-hardening-then-reload"
     }
   ]
 }

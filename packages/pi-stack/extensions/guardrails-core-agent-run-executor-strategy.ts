@@ -22,7 +22,14 @@ export interface AgentRunExecutorStrategyPacketResult {
     | "agent-run-executor-strategy-sdk-candidate"
     | "agent-run-executor-strategy-blocked";
   preferredExecutor: AgentRunExecutorStrategyKind;
+  nextProbeExecutor: AgentRunExecutorStrategyKind;
   supportedExecutors: AgentRunExecutorStrategyKind[];
+  executorPosture: {
+    subprocessRetained: true;
+    sdkIsReplacement: false;
+    subprocessBlindRetryAllowed: boolean;
+    subprocessMaturityProbe: "continue-diagnostics" | "devcontainer-or-linux-canary" | "not-needed-yet";
+  };
   executorContracts: Array<{
     executor: AgentRunExecutorStrategyKind;
     purpose: string;
@@ -63,11 +70,19 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     recommendationCode = "agent-run-executor-strategy-sdk-candidate";
   }
 
+  const nextProbeExecutor: AgentRunExecutorStrategyKind = preferredExecutor;
+  const executorPosture: AgentRunExecutorStrategyPacketResult["executorPosture"] = {
+    subprocessRetained: true,
+    sdkIsReplacement: false,
+    subprocessBlindRetryAllowed: !silentSubprocessFailure && decision !== "blocked",
+    subprocessMaturityProbe: silentSubprocessFailure && subprocessDiagnosticsAvailable ? "devcontainer-or-linux-canary" : "not-needed-yet",
+  };
+
   const executorContracts = [
     {
       executor: "pi-print-subprocess" as const,
-      purpose: "isolated CLI worker with argv/log/registry/outcome evidence",
-      requiredEvidence: ["argv", "cwd", "command-source", "exit-code", "stdout-bytes", "stderr-bytes", "timeout", "registry-state"],
+      purpose: "isolated CLI worker with argv/log/registry/outcome evidence; retained as first-class executor even when blind retry is paused",
+      requiredEvidence: ["argv", "cwd", "command-source", "exit-code", "stdout-bytes", "stderr-bytes", "timeout", "registry-state", "startup-diagnostic-or-devcontainer-probe"],
       dispatchStatus: "not-authorized-by-packet" as const,
     },
     {
@@ -80,8 +95,8 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
 
   const nextActions = decision === "sdk-in-process-candidate"
     ? [
-      "Implement an SDK/in-process packet and canary as a separate local-safe slice.",
-      "Keep subprocess as a supported executor; do not replace it with SDK-only behavior.",
+      "Use SDK/in-process as the next diagnostic candidate, not as a replacement for subprocess.",
+      "Keep subprocess as a first-class executor; mature it with startup diagnostics and/or a devcontainer/Linux canary before judging it unsuitable.",
       "Require exact runId confirmation before either executor starts a worker.",
     ]
     : decision === "subprocess-first"
@@ -95,6 +110,9 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     "agent-run-executor-strategy-packet:",
     `decision=${decision}`,
     `preferred=${preferredExecutor}`,
+    `subprocessRetained=${executorPosture.subprocessRetained ? "yes" : "no"}`,
+    `sdkReplacement=${executorPosture.sdkIsReplacement ? "yes" : "no"}`,
+    `subprocessBlindRetry=${executorPosture.subprocessBlindRetryAllowed ? "yes" : "no"}`,
     `failureClass=${failureClass}`,
     `subprocessDiagnostics=${subprocessDiagnosticsAvailable ? "yes" : "no"}`,
     `sdkRuntime=${sdkRuntimeAvailable ? "yes" : "no"}`,
@@ -112,7 +130,9 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     decision,
     recommendationCode,
     preferredExecutor,
+    nextProbeExecutor,
     supportedExecutors: ["pi-print-subprocess", "pi-sdk-in-process"],
+    executorPosture,
     executorContracts,
     blockers,
     nextActions,
