@@ -1,60 +1,59 @@
 {
-  "timestamp": "2026-05-10T14:14:58.926Z",
-  "context": "Post auto-resume local-safe continuation. Covered turn_boundary_decision_packet.details.localSafeMayContinue in surface smoke and aligned boa [snip] for new runner-timeout classification. [truncated:+376 chars]",
+  "timestamp": "2026-05-10T14:17:25.591Z",
+  "context": "Continued local-safe worker hardening. Additional regression now covers runner-timeout through the existing startup diagnostic packet: decisi [snip] classification still requires /reload. [truncated:+163 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Run /reload before live-validating new runner-timeout classification/tool output.",
-    "Continue TASK-BUD-1066 with report-only structured startup/provider probe design; no worker/ca [snip] ithout exact confirmation. [truncated:+15 chars]",
-    "Ask human only for no-auto-close decisions on predecessor tasks TASK-BUD-1059/TASK-BUD-1063/TA [snip] 065 if closure is desired. [truncated:+22 chars]"
+    "Run /reload before live-validating agent_run_failure_classification or agent_run_startup_diagn [snip] packet for runner-timeout. [truncated:+6 chars]",
+    "After reload, classify task-bud-1066-subprocess-preflight-canary and confirm it reports failur [snip] t and canaryAllowed=false. [truncated:+20 chars]",
+    "Continue report-only startup/provider probe design; do not dispatch workers/canaries without exact confirmation phrase."
   ],
   "blockers": [
     "Runtime changed; /reload needed before trusting live output from changed tools.",
-    "TASK-BUD-1066 remains open because predecessor tasks have passed verification [snip] /keep/defer decisions. [truncated:+37 chars]",
-    "No worker/canary dispatch authorization."
+    "No worker/canary dispatch authorization.",
+    "TASK-BUD-1066 dependency closure still requires human close/keep/defer decisio [snip] h passed verification. [truncated:+28 chars]"
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts -t \"turn_boundary_decisio [snip] --reporter=dot -> 1 passed [truncated:+10 chars]",
-    "npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi- [snip] -reporter=dot -> 77 passed [truncated:+43 chars]",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -t \"class [snip] --reporter=dot -> 2 passed [truncated:+44 chars]"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -t \"class [snip] --reporter=dot -> 1 passed [truncated:+23 chars]",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 41 passed",
+    "git diff --check -> pass"
   ],
   "recent_commits": [
-    "3f3c38be test(context): assert boundary local-safe field surface",
-    "f898cc63 chore(board): close continuity signal side-task"
+    "f9cd7b93 fix(agents): classify runner timeouts distinctly",
+    "f7544eed chore(board): record runner timeout evidence"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1070",
-      "task:TASK-BUD-1066",
-      "commit:3f3c38be"
+      "task:TASK-BUD-1066-SUBPROCESS-PREFLIGHT-CANARY",
+      "commit:f9cd7b93"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T14:14:58.926Z",
+    "generatedAtIso": "2026-05-10T14:17:25.591Z",
     "level": "warn",
-    "percent": 33,
+    "percent": 35,
     "action": "continue",
-    "recommendation": "continue-local-safe-after-reload",
+    "recommendation": "reload-then-live-validate-runner-timeout",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T14:14:58.926Z",
+      "atIso": "2026-05-10T14:17:25.591Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 33,
+      "percent": 35,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-local-safe-after-reload"
+      "recommendation": "reload-then-live-validate-runner-timeout"
     }
   ]
 }
