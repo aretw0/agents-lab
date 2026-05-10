@@ -1,35 +1,37 @@
 {
-  "timestamp": "2026-05-10T13:12:58.714Z",
-  "context": "Post-reload continuation followed user steering: local-safe control-plane improvements should be shared by all surfaces, not only subworkers. [snip] r. No worker/canary dispatch performed. [truncated:+164 chars]",
+  "timestamp": "2026-05-10T13:45:56.115Z",
+  "context": "Continuidade local-safe após steering do operador: não criar novos termos/superfícies para o mesmo problema. finalTurnBrief já existe para br [snip] enhum worker/canary dispatch realizado. [truncated:+265 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Commit bounded SDK output capture slice.",
-    "Reload after commit before trusting live extension behavior.",
-    "Continue TASK-BUD-1068 with shared control-plane hardening; do not dispatch worker/canary without exact confirmation."
+    "Se continuar local-safe, consolidar o mesmo princípio como regra/guard mais geral contra super [snip] antes de novas primitivas. [truncated:+17 chars]",
+    "Não criar ooda_packet; usar OODA apenas como lente interna para melhorar turn_boundary_decision_packet e continuidade.",
+    "Não despachar worker/canary sem confirmação exata do packet."
   ],
   "blockers": [
     "TASK-BUD-1066 subprocess root cause still unresolved.",
-    "No worker/canary dispatch authorized without exact confirmation phrase."
+    "Graceful stop antes de compact ainda não está confiável; compensar com checkpo [snip] ard markers no packet. [truncated:+17 chars]"
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 41 passed",
-    "git diff --check -> passed",
-    "board verification VERIF-TASK-BUD-1068-SDK-OUTPUT-BOUND-20260510 appended"
+    "npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts --reporter=dot -> 15 passed",
+    "git diff --check -> pass"
+  ],
+  "recent_commits": [
+    "b03231c7 fix(context): consolidate turn boundary continuation signal",
+    "eb65b9bb test(context): guard boundary packet consolidation"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1068-SDK-OUTPUT-BOUND-20260510",
-      "commit:20260510"
+      "commit:b03231c7"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T13:12:58.714Z",
+    "generatedAtIso": "2026-05-10T13:45:56.115Z",
     "level": "ok",
-    "percent": 35,
+    "percent": 32,
     "action": "continue",
     "recommendation": "continue-local-safe-hardening",
     "stopStatus": "graceful",
@@ -38,10 +40,10 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T13:12:58.714Z",
+      "atIso": "2026-05-10T13:45:56.115Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 35,
+      "percent": 32,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
