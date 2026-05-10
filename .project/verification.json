@@ -15371,6 +15371,15 @@
       "method": "smoke-test+marker-check",
       "timestamp": "2026-05-10T13:51:18.366Z",
       "evidence": "Promoted `localSafeMayContinue` from compact summary marker to a structured field on the existing `turn_boundary_decision_packet`, preserving `finalTurnBrief` as the only briefing object and avoiding new redundant surfaces. Updated `docs/primitives/nudge-free-local-continuity.md` to document the field in the existing primitive row. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts --reporter=dot` -> 15 passed; `git diff --check` -> pass; `safe_marker_check` on the primitive doc -> pass. Commits: a166661a, cbad2fc4."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-HANDOFF-BUDGET-20260510",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "timestamp": "2026-05-10T13:55:14.658Z",
+      "evidence": "Fixed local slice handoff budget regression found during expanded context-watchdog smoke. `buildLocalSliceHandoffCheckpoint` now drops `context_watch_events` when compacting oversized checkpoints after slice-memory trimming, preserving current `context_watch` state while staying within `LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS`. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts --reporter=dot` -> 77 passed; `git diff --check` -> pass. Commit: fbfbd543."
     }
   ]
 }
