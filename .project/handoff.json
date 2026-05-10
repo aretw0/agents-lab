@@ -1,55 +1,53 @@
 {
-  "timestamp": "2026-05-10T04:43:26.278Z",
-  "context": "Exact-confirmed SDK canary task-bud-1068-sdk-readonly-self-check was dispatched through agent_run_sdk_in_process_dispatch after a first block [snip] nored/untracked not present in status). [truncated:+474 chars]",
+  "timestamp": "2026-05-10T04:45:58.605Z",
+  "context": "User reported hedge classify errors: stale extension ctx after session replacement/reload. This is plausibly related to the new SDK in-proces [snip] serting SDK dispatch isolation markers. [truncated:+502 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Do not mark SDK lane reliable yet.",
-    "Recommended next local-safe improvement: harden SDK runner/canary contract to avoid tool loops [snip] ent evidence more clearly. [truncated:+30 chars]",
-    "If retrying, use a new exact-confirmed minimal no-tool or single-read smoke with much simpler [snip] -sdk-minimal-output-smoke. [truncated:+110 chars]"
+    "Commit SDK noExtensions isolation fix.",
+    "Ask user to /reload before any next SDK dispatch, because live runtime still has old SDK worker code until reload.",
+    "After reload, retry a smaller SDK canary with a new runId and exact confirmation, expecting no [snip] hedge monitor involvement. [truncated:+1 chars]"
   ],
   "blockers": [
-    "SDK worker dispatch works mechanically but first read-only canary timed out; not reliable yet.",
-    "Need exact human confirmation for any retry/new runId.",
-    "Protected scope remains locked until worker reliability improves."
+    "Need /reload before trusting live agent_run_sdk_in_process_dispatch isolation fix.",
+    "SDK lane not reliable yet: prior canary timed out.",
+    "Exact confirmation required for any next worker run."
   ],
   "recent_validation": [
-    "git_dirty_snapshot before dispatch -> clean=yes",
-    "agent_run_sdk_in_process_dispatch with explicit cwd -> blocked execute-cwd-mismatch; no dispatch",
-    "agent_run_sdk_in_process_dispatch with default cwd and exact confirmation -> dispatched"
+    "monitors-inspect hedge -> enabled turn_end monitor; stale ctx error matches extension ctx afte [snip] reload/session replacement [truncated:+2 chars]",
+    "resource-loader.d.ts confirms DefaultResourceLoaderOptions.noExtensions",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 39 passed"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
-      "task:TASK-BUD-1068",
-      "task:TASK-BUD-1068-SDK-READONLY-SELF-CHECK",
-      "task:TASK-BUD-1068-SDK-MINIMAL-OUTPUT-SMOKE"
+      "task:TASK-BUD-1068"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T04:43:26.278Z",
+    "generatedAtIso": "2026-05-10T04:45:58.605Z",
     "level": "warn",
-    "percent": 32,
+    "percent": 40,
     "action": "continue",
-    "recommendation": "harden-sdk-runner-or-exact-confirm-minimal-smoke",
+    "recommendation": "commit-sdk-noextensions-fix-then-reload-before-retry",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T04:43:26.278Z",
+      "atIso": "2026-05-10T04:45:58.605Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 32,
+      "percent": 40,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "harden-sdk-runner-or-exact-confirm-minimal-smoke"
+      "recommendation": "commit-sdk-noextensions-fix-then-reload-before-retry"
     }
   ]
 }

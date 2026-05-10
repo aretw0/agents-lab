@@ -1704,6 +1704,13 @@ describe("agent spawn readiness contract", () => {
     expect(dispatchMismatch.content?.[0]?.text).toContain("operator-confirmation-mismatch");
   });
 
+  it("keeps SDK worker dispatch isolated from extension monitors", () => {
+    const source = readFileSync("packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts", "utf8");
+    expect(source).toContain("DefaultResourceLoader");
+    expect(source).toContain("noExtensions: true");
+    expect(source).toContain("resourceLoader=noExtensions");
+  });
+
   it("classifies runner failures before another worker retry", () => {
     const silentLog = [
       "[agent-runner] starting command=node source=current-node-entrypoint cwd=C:/repo",

@@ -1,4 +1,4 @@
-import { AuthStorage, createAgentSession, ModelRegistry, SessionManager, type ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import { AuthStorage, createAgentSession, DefaultResourceLoader, getAgentDir, ModelRegistry, SessionManager, type ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { spawn } from "node:child_process";
 import { createWriteStream, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -139,11 +139,19 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
       const model = modelRegistry.find(resolved.provider, resolved.modelId);
       if (!model) throw new Error(`model-not-found:${packet.runSpec.providerModelRef}`);
       const sessionManager = packet.runSpec.sessionMode === "run-session-dir" ? SessionManager.create(packet.runSpec.cwd) : SessionManager.inMemory(packet.runSpec.cwd);
+      const resourceLoader = new DefaultResourceLoader({
+        cwd: packet.runSpec.cwd,
+        agentDir: getAgentDir(),
+        noExtensions: true,
+      });
+      await resourceLoader.reload();
+      appendAgentRunLogLine(logPath, "[sdk-runner] resourceLoader=noExtensions");
       const created = await createAgentSession({
         cwd: packet.runSpec.cwd,
         model,
         authStorage,
         modelRegistry,
+        resourceLoader,
         sessionManager,
         tools: packet.runSpec.toolAllowlist,
       });
