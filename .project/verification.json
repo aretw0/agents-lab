@@ -15344,6 +15344,15 @@
       "method": "test",
       "timestamp": "2026-05-10T13:02:42.575Z",
       "evidence": "Added shared execution cwd canonicalization primitive for control-plane surfaces and worker lanes. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 41 passed; git diff --check -> passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-OUTPUT-BOUND-20260510",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-10T13:12:23.163Z",
+      "evidence": "Bounded SDK worker assistant output capture: text deltas are buffered instead of line-logged, duplicate final/fallback output is suppressed, and assistant log capture is capped with assistant-output-truncated marker. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 41 passed; git diff --check -> passed."
     }
   ]
 }

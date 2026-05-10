@@ -124,12 +124,57 @@ function extractAssistantTextFromUnknownMessage(value: unknown): string {
   }).join("");
 }
 
-function appendAssistantOutput(logPath: string, text: string, seenOutput: Set<string>): number {
+const SDK_ASSISTANT_OUTPUT_LOG_MAX_BYTES = 48_000;
+
+interface SdkAssistantOutputCapture {
+  capturedBytes: number;
+  truncated: boolean;
+  seenOutput: Set<string>;
+  streamedText: string;
+}
+
+function truncateUtf8Text(text: string, maxBytes: number): { text: string; bytes: number; truncated: boolean } {
+  const totalBytes = Buffer.byteLength(text);
+  if (totalBytes <= maxBytes) return { text, bytes: totalBytes, truncated: false };
+  let bytes = 0;
+  let clipped = "";
+  for (const char of text) {
+    const charBytes = Buffer.byteLength(char);
+    if (bytes + charBytes > maxBytes) break;
+    clipped += char;
+    bytes += charBytes;
+  }
+  return { text: clipped, bytes, truncated: true };
+}
+
+function isDuplicateAssistantOutput(normalized: string, seenOutput: Set<string>): boolean {
+  if (seenOutput.has(normalized)) return true;
+  for (const seen of seenOutput) {
+    if (seen.length >= 80 && normalized.includes(seen)) return true;
+  }
+  return false;
+}
+
+function appendAssistantOutput(logPath: string, text: string, capture: SdkAssistantOutputCapture): number {
   const normalized = text.trim();
-  if (!normalized || seenOutput.has(normalized)) return 0;
-  seenOutput.add(normalized);
-  appendAgentRunLogLine(logPath, normalized);
-  return Buffer.byteLength(normalized);
+  if (!normalized || isDuplicateAssistantOutput(normalized, capture.seenOutput)) return 0;
+  capture.seenOutput.add(normalized);
+
+  const remainingBytes = Math.max(0, SDK_ASSISTANT_OUTPUT_LOG_MAX_BYTES - capture.capturedBytes);
+  if (remainingBytes <= 0) {
+    if (!capture.truncated) appendAgentRunLogLine(logPath, `[sdk-runner] assistant-output-truncated maxBytes=${SDK_ASSISTANT_OUTPUT_LOG_MAX_BYTES}`);
+    capture.truncated = true;
+    return 0;
+  }
+
+  const clipped = truncateUtf8Text(normalized, remainingBytes);
+  if (clipped.text) appendAgentRunLogLine(logPath, clipped.text);
+  capture.capturedBytes += clipped.bytes;
+  if (clipped.truncated && !capture.truncated) {
+    appendAgentRunLogLine(logPath, `[sdk-runner] assistant-output-truncated maxBytes=${SDK_ASSISTANT_OUTPUT_LOG_MAX_BYTES}`);
+    capture.truncated = true;
+  }
+  return clipped.bytes;
 }
 
 function formatSdkDeclaredFilesForPrompt(declaredFiles: string[]): string {
@@ -183,7 +228,7 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
     let loopAbortReason = "";
     let toolCallCount = 0;
     let turnCount = 0;
-    const seenOutput = new Set<string>();
+    const outputCapture: SdkAssistantOutputCapture = { capturedBytes: 0, truncated: false, seenOutput: new Set<string>(), streamedText: "" };
     let session: Awaited<ReturnType<typeof createAgentSession>>["session"] | undefined;
     const finish = (entry: Partial<AgentRunRegistryEntry>) => {
       writeRegistryEntry(ctxCwd, {
@@ -258,8 +303,7 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
         if (row.type === "message_update") {
           const assistantMessageEvent = row.assistantMessageEvent as Record<string, unknown> | undefined;
           if (assistantMessageEvent?.type === "text_delta" && typeof assistantMessageEvent.delta === "string") {
-            outputBytes += Buffer.byteLength(assistantMessageEvent.delta);
-            appendAgentRunLogLine(logPath, assistantMessageEvent.delta);
+            outputCapture.streamedText += assistantMessageEvent.delta;
           }
         } else if (row.type === "tool_execution_end") {
           toolCallCount += 1;
@@ -271,8 +315,8 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
           }
         } else if (row.type === "turn_end") {
           turnCount += 1;
-          const text = extractAssistantTextFromUnknownMessage(row.message);
-          outputBytes += appendAssistantOutput(logPath, text, seenOutput);
+          const text = extractAssistantTextFromUnknownMessage(row.message) || outputCapture.streamedText;
+          outputBytes += appendAssistantOutput(logPath, text, outputCapture);
           appendAgentRunLogLine(logPath, `[sdk-runner] event=turn_end count=${turnCount}`);
           if (turnCount > maxTurns && !loopAbortReason) {
             loopAbortReason = `sdk-runner-turn-loop turns=${turnCount} maxTurns=${maxTurns}`;
@@ -281,8 +325,8 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
           }
         } else if (row.type === "agent_end") {
           const messages = Array.isArray(row.messages) ? row.messages : [];
-          const text = messages.map(extractAssistantTextFromUnknownMessage).join("\n").trim();
-          outputBytes += appendAssistantOutput(logPath, text, seenOutput);
+          const text = messages.map(extractAssistantTextFromUnknownMessage).join("\n").trim() || outputCapture.streamedText;
+          outputBytes += appendAssistantOutput(logPath, text, outputCapture);
           appendAgentRunLogLine(logPath, "[sdk-runner] event=agent_end");
         }
       });
@@ -298,8 +342,8 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
         const stateMessages = (session as unknown as { agent?: { state?: { messages?: unknown[] } }; messages?: unknown[] }).agent?.state?.messages
           ?? (session as unknown as { messages?: unknown[] }).messages
           ?? [];
-        const fallbackText = stateMessages.map(extractAssistantTextFromUnknownMessage).join("\n").trim();
-        outputBytes += appendAssistantOutput(logPath, fallbackText, seenOutput);
+        const fallbackText = stateMessages.map(extractAssistantTextFromUnknownMessage).join("\n").trim() || outputCapture.streamedText;
+        outputBytes += appendAssistantOutput(logPath, fallbackText, outputCapture);
         unsubscribe();
         session.dispose();
       }

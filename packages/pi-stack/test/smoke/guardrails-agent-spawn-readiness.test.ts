@@ -1750,6 +1750,10 @@ describe("agent spawn readiness contract", () => {
     expect(source).toContain("sdk-runner-loop-guard");
     expect(source).toContain("sdk-runner-empty-output");
     expect(source).toContain("sdk-runner-tool-policy-unsupported");
+    expect(source).toContain("SDK_ASSISTANT_OUTPUT_LOG_MAX_BYTES");
+    expect(source).toContain("assistant-output-truncated");
+    expect(source).toContain("outputCapture.streamedText += assistantMessageEvent.delta");
+    expect(source).not.toContain("appendAgentRunLogLine(logPath, assistantMessageEvent.delta)");
     expect(source).toContain("expandPromptTemplates: false");
   });
 

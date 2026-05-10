@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-05-10T13:03:30.696Z",
-  "context": "Post-reload auto-resume continued local-safe cwd hardening. Generalized cwd normalization/defaulting as shared control-plane execution contex [snip] s. No worker/canary dispatch performed. [truncated:+122 chars]",
+  "timestamp": "2026-05-10T13:12:58.714Z",
+  "context": "Post-reload continuation followed user steering: local-safe control-plane improvements should be shared by all surfaces, not only subworkers. [snip] r. No worker/canary dispatch performed. [truncated:+164 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Commit shared execution cwd canonicalization slice.",
-    "After reload, use the shared execution context primitive from other cwd-sensitive control-plan [snip] ad hoc string comparisons. [truncated:+22 chars]",
-    "Continue TASK-BUD-1068; do not dispatch any worker/canary without exact human confirmation."
+    "Commit bounded SDK output capture slice.",
+    "Reload after commit before trusting live extension behavior.",
+    "Continue TASK-BUD-1068 with shared control-plane hardening; do not dispatch worker/canary without exact confirmation."
   ],
   "blockers": [
     "TASK-BUD-1066 subprocess root cause still unresolved.",
@@ -16,20 +16,20 @@
   "recent_validation": [
     "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 41 passed",
     "git diff --check -> passed",
-    "board verification VERIF-TASK-BUD-1068-CWD-CANON-20260510 appended"
+    "board verification VERIF-TASK-BUD-1068-SDK-OUTPUT-BOUND-20260510 appended"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1068-CWD-CANON-20260510",
+      "task:TASK-BUD-1068-SDK-OUTPUT-BOUND-20260510",
       "commit:20260510"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T13:03:30.696Z",
+    "generatedAtIso": "2026-05-10T13:12:58.714Z",
     "level": "ok",
-    "percent": 30,
+    "percent": 35,
     "action": "continue",
     "recommendation": "continue-local-safe-hardening",
     "stopStatus": "graceful",
@@ -38,10 +38,10 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T13:03:30.696Z",
+      "atIso": "2026-05-10T13:12:58.714Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 30,
+      "percent": 35,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
