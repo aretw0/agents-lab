@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-05-10T03:15:22.537Z",
-  "context": "After reload, validated the live SDK/in-process packet: agent_run_sdk_in_process_packet returned ready-for-human-decision with dispatch=no/au [snip] n runtime output, not just board notes. [truncated:+513 chars]",
+  "timestamp": "2026-05-10T03:32:28.162Z",
+  "context": "After reload, live tools confirmed dual-executor policy is active: agent_run_executor_strategy_packet now shows subprocessRetained=yes, sdkRe [snip] ing with no off-Windows probe declared. [truncated:+637 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Commit dual-executor runtime-output hardening.",
-    "Reload before trusting live agent_run_executor_strategy_packet to show subprocessRetained/sdkReplacement fields.",
-    "Continue TASK-BUD-1068: design future exact-confirmed SDK canary implementation while keeping [snip] vcontainer probe in scope. [truncated:+21 chars]"
+    "Commit scenario-driven executor selection slice.",
+    "Reload before trusting live agent_run_executor_strategy_packet scenario inputs.",
+    "After reload, run live strategy examples for: Windows silent failure -> SDK candidate; devcont [snip] t stream -> SDK candidate. [truncated:+48 chars]"
   ],
   "blockers": [
     "Live executor strategy tool will be stale until reload after this commit.",
@@ -16,39 +16,38 @@
   ],
   "recent_validation": [
     "git_dirty_snapshot before slice -> clean",
-    "agent_run_sdk_in_process_packet live -> ready-for-human-decision, dispatch=no, authorization=none",
-    "agent_run_executor_strategy_packet live -> sdk-in-process-candidate, dispatch=no"
+    "live agent_run_executor_strategy_packet -> subprocessRetained=yes sdkReplacement=no subprocessBlindRetry=no",
+    "live agent_run_sdk_in_process_packet -> ready-for-human-decision dispatch=no authorization=none"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
-      "task:TASK-BUD-1068",
-      "task:TASK-BUD-1068-SDK-PREVIEW-CANARY"
+      "task:TASK-BUD-1068"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T03:15:22.537Z",
+    "generatedAtIso": "2026-05-10T03:32:28.162Z",
     "level": "warn",
-    "percent": 42,
+    "percent": 46,
     "action": "continue",
-    "recommendation": "commit-dual-executor-output-hardening-then-reload",
+    "recommendation": "commit-scenario-driven-executor-selection-then-reload",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T03:15:22.537Z",
+      "atIso": "2026-05-10T03:32:28.162Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 42,
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-dual-executor-output-hardening-then-reload"
+      "recommendation": "commit-scenario-driven-executor-selection-then-reload"
     }
   ]
 }

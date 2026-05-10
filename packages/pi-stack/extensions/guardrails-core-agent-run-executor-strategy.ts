@@ -1,5 +1,6 @@
 export type AgentRunExecutorStrategyDecision = "subprocess-first" | "sdk-in-process-candidate" | "blocked";
 export type AgentRunExecutorStrategyKind = "pi-print-subprocess" | "pi-sdk-in-process";
+export type AgentRunExecutorRuntimeMode = "windows" | "linux" | "devcontainer" | "unknown";
 
 export interface AgentRunExecutorStrategyInput {
   failureClass?: string;
@@ -8,6 +9,11 @@ export interface AgentRunExecutorStrategyInput {
   budgetDecision?: string;
   protectedScopeRequested?: boolean;
   exactConfirmationAvailable?: boolean;
+  runtimeMode?: string;
+  devcontainerAvailable?: boolean;
+  requiresProcessIsolation?: boolean;
+  requiresDirectEventStream?: boolean;
+  mutationRequested?: boolean;
 }
 
 export interface AgentRunExecutorStrategyPacketResult {
@@ -30,6 +36,14 @@ export interface AgentRunExecutorStrategyPacketResult {
     subprocessBlindRetryAllowed: boolean;
     subprocessMaturityProbe: "continue-diagnostics" | "devcontainer-or-linux-canary" | "not-needed-yet";
   };
+  selectionSignals: {
+    runtimeMode: AgentRunExecutorRuntimeMode;
+    devcontainerAvailable: boolean;
+    requiresProcessIsolation: boolean;
+    requiresDirectEventStream: boolean;
+    mutationRequested: boolean;
+  };
+  selectionRationale: string[];
   executorContracts: Array<{
     executor: AgentRunExecutorStrategyKind;
     purpose: string;
@@ -45,6 +59,12 @@ function cleanText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function normalizeRuntimeMode(value: unknown): AgentRunExecutorRuntimeMode {
+  const text = cleanText(value);
+  if (text === "windows" || text === "linux" || text === "devcontainer") return text;
+  return "unknown";
+}
+
 export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrategyInput = {}): AgentRunExecutorStrategyPacketResult {
   const failureClass = cleanText(input.failureClass || "unknown");
   const budgetDecision = cleanText(input.budgetDecision || "unknown");
@@ -55,7 +75,21 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
   const subprocessDiagnosticsAvailable = input.subprocessDiagnosticsAvailable === true;
   const sdkRuntimeAvailable = input.sdkRuntimeAvailable === true;
   const exactConfirmationAvailable = input.exactConfirmationAvailable === true;
+  const runtimeMode = normalizeRuntimeMode(input.runtimeMode);
+  const devcontainerAvailable = input.devcontainerAvailable === true;
+  const requiresProcessIsolation = input.requiresProcessIsolation === true;
+  const requiresDirectEventStream = input.requiresDirectEventStream === true;
+  const mutationRequested = input.mutationRequested === true;
   const silentSubprocessFailure = failureClass === "silent-runner-failure";
+  const canProbeSubprocessOffWindows = silentSubprocessFailure && subprocessDiagnosticsAvailable && (devcontainerAvailable || runtimeMode === "linux" || runtimeMode === "devcontainer");
+  const selectionSignals = {
+    runtimeMode,
+    devcontainerAvailable,
+    requiresProcessIsolation,
+    requiresDirectEventStream,
+    mutationRequested,
+  };
+  const selectionRationale: string[] = [];
 
   let decision: AgentRunExecutorStrategyDecision = "subprocess-first";
   let preferredExecutor: AgentRunExecutorStrategyKind = "pi-print-subprocess";
@@ -64,10 +98,23 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
   if (blockers.length > 0) {
     decision = "blocked";
     recommendationCode = "agent-run-executor-strategy-blocked";
-  } else if (silentSubprocessFailure && subprocessDiagnosticsAvailable && sdkRuntimeAvailable) {
+    selectionRationale.push("blocked until protected-scope and budget gates are clear");
+  } else if (canProbeSubprocessOffWindows || (requiresProcessIsolation && !silentSubprocessFailure) || (mutationRequested && !requiresDirectEventStream)) {
+    decision = "subprocess-first";
+    preferredExecutor = "pi-print-subprocess";
+    recommendationCode = "agent-run-executor-strategy-subprocess-first";
+    selectionRationale.push(canProbeSubprocessOffWindows
+      ? "subprocess remains the next maturity probe because devcontainer/Linux evidence can distinguish Windows startup fragility"
+      : "subprocess is preferred when process isolation or mutation safety dominates");
+  } else if ((silentSubprocessFailure && subprocessDiagnosticsAvailable && sdkRuntimeAvailable) || (requiresDirectEventStream && sdkRuntimeAvailable)) {
     decision = "sdk-in-process-candidate";
     preferredExecutor = "pi-sdk-in-process";
     recommendationCode = "agent-run-executor-strategy-sdk-candidate";
+    selectionRationale.push(silentSubprocessFailure
+      ? "SDK/in-process is the next diagnostic candidate because current subprocess evidence is silent and no off-Windows subprocess probe is declared"
+      : "SDK/in-process is preferred when direct AgentSession event visibility dominates");
+  } else {
+    selectionRationale.push("subprocess remains the conservative default while SDK/process signals are insufficient");
   }
 
   const nextProbeExecutor: AgentRunExecutorStrategyKind = preferredExecutor;
@@ -75,7 +122,7 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     subprocessRetained: true,
     sdkIsReplacement: false,
     subprocessBlindRetryAllowed: !silentSubprocessFailure && decision !== "blocked",
-    subprocessMaturityProbe: silentSubprocessFailure && subprocessDiagnosticsAvailable ? "devcontainer-or-linux-canary" : "not-needed-yet",
+    subprocessMaturityProbe: canProbeSubprocessOffWindows ? "devcontainer-or-linux-canary" : silentSubprocessFailure && subprocessDiagnosticsAvailable ? "devcontainer-or-linux-canary" : "not-needed-yet",
   };
 
   const executorContracts = [
@@ -116,6 +163,11 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     `failureClass=${failureClass}`,
     `subprocessDiagnostics=${subprocessDiagnosticsAvailable ? "yes" : "no"}`,
     `sdkRuntime=${sdkRuntimeAvailable ? "yes" : "no"}`,
+    `runtime=${runtimeMode}`,
+    devcontainerAvailable ? "devcontainerAvailable=yes" : undefined,
+    requiresProcessIsolation ? "requiresProcessIsolation=yes" : undefined,
+    requiresDirectEventStream ? "requiresDirectEventStream=yes" : undefined,
+    mutationRequested ? "mutationRequested=yes" : undefined,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     "dispatch=no",
     "authorization=none",
@@ -133,6 +185,8 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     nextProbeExecutor,
     supportedExecutors: ["pi-print-subprocess", "pi-sdk-in-process"],
     executorPosture,
+    selectionSignals,
+    selectionRationale,
     executorContracts,
     blockers,
     nextActions,

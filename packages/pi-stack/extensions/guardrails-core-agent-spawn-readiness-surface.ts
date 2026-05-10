@@ -785,6 +785,11 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision: ok, warn, blocked, or unknown." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
       exact_confirmation_available: Type.Optional(Type.Boolean({ description: "Whether exact runId confirmation is already available for a separate future dispatch." })),
+      runtime_mode: Type.Optional(Type.String({ description: "Runtime mode evidence: windows, linux, devcontainer, or unknown." })),
+      devcontainer_available: Type.Optional(Type.Boolean({ description: "Whether a devcontainer/Linux subprocess maturity probe is available." })),
+      requires_process_isolation: Type.Optional(Type.Boolean({ description: "Prefer subprocess when process isolation dominates and the subprocess path is not silently failing." })),
+      requires_direct_event_stream: Type.Optional(Type.Boolean({ description: "Prefer SDK/in-process when direct AgentSession event visibility dominates." })),
+      mutation_requested: Type.Optional(Type.Boolean({ description: "Mutation workloads generally prefer stronger process isolation unless direct events dominate." })),
     }),
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -795,6 +800,11 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
         exactConfirmationAvailable: asOptionalBoolean(p.exact_confirmation_available),
+        runtimeMode: typeof p.runtime_mode === "string" ? p.runtime_mode : undefined,
+        devcontainerAvailable: asOptionalBoolean(p.devcontainer_available),
+        requiresProcessIsolation: asOptionalBoolean(p.requires_process_isolation),
+        requiresDirectEventStream: asOptionalBoolean(p.requires_direct_event_stream),
+        mutationRequested: asOptionalBoolean(p.mutation_requested),
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_executor_strategy_packet",

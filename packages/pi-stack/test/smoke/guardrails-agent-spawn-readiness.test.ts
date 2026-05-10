@@ -1451,6 +1451,38 @@ describe("agent spawn readiness contract", () => {
     expect(sdkCandidate.executorContracts.map((contract) => contract.executor)).toEqual(["pi-print-subprocess", "pi-sdk-in-process"]);
     expect(sdkCandidate.summary).toContain("subprocessRetained=yes");
     expect(sdkCandidate.summary).toContain("sdkReplacement=no");
+    expect(sdkCandidate.selectionRationale.join(" ")).toContain("SDK/in-process is the next diagnostic candidate");
+
+    const devcontainerSubprocessProbe = buildAgentRunExecutorStrategyPacket({
+      failureClass: "silent-runner-failure",
+      subprocessDiagnosticsAvailable: true,
+      sdkRuntimeAvailable: true,
+      budgetDecision: "ok",
+      runtimeMode: "devcontainer",
+      devcontainerAvailable: true,
+      requiresProcessIsolation: true,
+    });
+    expect(devcontainerSubprocessProbe).toMatchObject({
+      decision: "subprocess-first",
+      preferredExecutor: "pi-print-subprocess",
+      nextProbeExecutor: "pi-print-subprocess",
+      selectionSignals: {
+        runtimeMode: "devcontainer",
+        devcontainerAvailable: true,
+        requiresProcessIsolation: true,
+      },
+    });
+    expect(devcontainerSubprocessProbe.selectionRationale.join(" ")).toContain("devcontainer/Linux evidence");
+
+    const directEventSdk = buildAgentRunExecutorStrategyPacket({
+      failureClass: "unknown",
+      subprocessDiagnosticsAvailable: true,
+      sdkRuntimeAvailable: true,
+      budgetDecision: "ok",
+      requiresDirectEventStream: true,
+    });
+    expect(directEventSdk.decision).toBe("sdk-in-process-candidate");
+    expect(directEventSdk.summary).toContain("requiresDirectEventStream=yes");
 
     const blocked = buildAgentRunExecutorStrategyPacket({
       failureClass: "silent-runner-failure",
@@ -1485,11 +1517,14 @@ describe("agent spawn readiness contract", () => {
       subprocess_diagnostics_available: true,
       sdk_runtime_available: true,
       budget_decision: "ok",
+      runtime_mode: "windows",
+      requires_direct_event_stream: true,
     }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
     expect(result.details?.mode).toBe("agent-run-executor-strategy-packet");
     expect(result.details?.processStartAllowed).toBe(false);
     expect(result.content?.[0]?.text).toContain("preferred=pi-sdk-in-process");
     expect(result.content?.[0]?.text).toContain("subprocessRetained=yes");
+    expect(result.content?.[0]?.text).toContain("runtime=windows");
   });
 
   it("builds sdk in-process packet preview without dispatch", async () => {
