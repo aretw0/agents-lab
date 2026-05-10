@@ -188,6 +188,7 @@ export interface TurnBoundaryDecisionPacket {
   growthSource?: TurnBoundaryGrowthSource;
   growthFresh?: TurnBoundaryGrowthFreshness;
   finalTurnBrief: TurnBoundaryFinalTurnBrief;
+  localSafeMayContinue: boolean;
   recommendationCode: ContextWatchContinuationRecommendationCode;
   dispatchAllowed: false;
   mutationAllowed: false;
@@ -545,6 +546,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     growthSource,
     growthFresh,
     finalTurnBrief,
+    localSafeMayContinue,
     dispatchAllowed: false,
     mutationAllowed: false,
     authorization: "none",
