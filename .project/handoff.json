@@ -1,42 +1,45 @@
 {
-  "timestamp": "2026-05-10T11:42:58.880Z",
-  "context": "SUBAGENTS-AUTO-IMPROVE-v1 slice advanced: local/web prior-art review found ant-colony as stronger SDK in-process reference (minimal resource [snip] orted after only toolAllowlist*3 calls. [truncated:+395 chars]",
+  "timestamp": "2026-05-10T11:43:56.296Z",
+  "context": "Committed SUBAGENTS-AUTO-IMPROVE-v1 local patch d4db4512 fix(agents): tune sdk worker cadence. Patch includes scaled SDK loop guard, explicit [snip] /CI/remote/publish/reload was executed. [truncated:+127 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Inspect final diff and commit/revert decision for runner-timeout-zero-output plus SDK cadence patch.",
-    "Request /reload before trusting live agent_run_sdk_in_process_dispatch behavior.",
-    "Only after reload, preview a single SDK canary; execute only with exact runId confirmation."
+    "User/operator should /reload before trusting live SDK dispatch surface.",
+    "After reload, preview exactly one SDK canary packet only; execute requires exact runId confirmation.",
+    "Continue read-only critique against Karpathy-style loop/eval and local examples before broader subagent work."
   ],
   "blockers": [
-    "No worker/canary dispatch under charter without exact runId confirmation.",
-    "Runtime changed; /reload required before live use.",
-    "Dirty handoff and guardrails surface remain until committed or reverted."
+    "No canary/worker dispatch authorized by charter.",
+    "Runtime changed; /reload required.",
+    "TASK-BUD-1066 root cause still unresolved."
   ],
   "recent_validation": [
-    "safe_marker_check on SDK loop guard/cadence markers passed.",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 40 passed.",
-    "git diff --check -> ok."
+    "Commit d4db4512 created after focused validation.",
+    "Before commit: safe_marker_check passed, vitest smoke guardrails-agent-spawn-readiness 40 passed, git diff --check ok."
+  ],
+  "recent_commits": [
+    "d4db4512 fix(agents): tune sdk worker cadence"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
-      "task:TASK-BUD-1068"
+      "task:TASK-BUD-1068",
+      "commit:d4db4512"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T11:42:58.880Z",
+    "generatedAtIso": "2026-05-10T11:43:56.296Z",
     "level": "warn",
     "action": "continue",
-    "recommendation": "continue",
+    "recommendation": "pause-for-reload",
     "stopStatus": "graceful",
-    "stopSource": "human",
-    "stopSummary": "graceful source=human; prior slice reported a bounded checkpoint."
+    "stopSource": "agent",
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T11:42:58.880Z",
+      "atIso": "2026-05-10T11:43:56.296Z",
       "reason": "manual_checkpoint",
       "level": "warn",
       "percent": 0,
@@ -46,7 +49,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue"
+      "recommendation": "pause-for-reload"
     }
   ]
 }
