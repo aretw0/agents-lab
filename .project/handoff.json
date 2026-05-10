@@ -1,57 +1,57 @@
 {
-  "timestamp": "2026-05-10T13:51:43.164Z",
-  "context": "Continuidade consolidada no termo existente: turn_boundary_decision_packet agora expõe localSafeMayContinue como campo estruturado e summary [snip] iar no output live das tools alteradas. [truncated:+228 chars]",
+  "timestamp": "2026-05-10T13:55:41.256Z",
+  "context": "Continuidade/handoff hardening: após ampliar smoke para context-watchdog.test.ts, encontrei falha real de orçamento de checkpoint compacto (2 [snip] omada graciosa sem aumentar superfície. [truncated:+213 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Executar /reload antes de confiar no output live do novo campo localSafeMayContinue.",
-    "Após reload, usar turn_boundary_decision_packet.localSafeMayContinue para evitar parar à toa q [snip] xima fatia for local-safe. [truncated:+11 chars]",
-    "Continuar hardening local-safe; não despachar worker/canary sem confirmação exata."
+    "Executar /reload antes de confiar no output live das tools runtime alteradas.",
+    "Após reload, validar turn_boundary_decision_packet.localSafeMayContinue em uma chamada live curta.",
+    "Continuar TASK-BUD-1068/TASK-BUD-1066 sem worker dispatch até confirmação exata."
   ],
   "blockers": [
-    "TASK-BUD-1066 subprocess root cause still unresolved.",
-    "Graceful stop antes de compact ainda não está confiável; compensar com checkpo [snip] hardening específico. [truncated:+17 chars]"
+    "Runtime mudou; live tool output desta sessão pode estar stale até /reload.",
+    "TASK-BUD-1066 subprocess root cause still unresolved."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts --reporter=dot -> 15 passed",
-    "git diff --check -> pass",
-    "safe_marker_check docs/primitives/nudge-free-local-continuity.md -> pass"
+    "npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi- [snip] -reporter=dot -> 77 passed [truncated:+43 chars]",
+    "git diff --check -> pass"
   ],
   "recent_commits": [
-    "b03231c7 fix(context): consolidate turn boundary continuation signal",
-    "eb65b9bb test(context): guard boundary packet consolidation"
+    "a166661a fix(context): expose local-safe continuation field",
+    "cbad2fc4 docs(context): document local-safe continuation signal"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "commit:b03231c7"
+      "task:TASK-BUD-1066",
+      "commit:a166661a"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T13:51:43.164Z",
-    "level": "ok",
-    "percent": 42,
+    "generatedAtIso": "2026-05-10T13:55:41.256Z",
+    "level": "warn",
+    "percent": 47,
     "action": "continue",
-    "recommendation": "continue-local-safe-hardening",
+    "recommendation": "reload-before-live-tool-validation",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T13:51:43.164Z",
+      "atIso": "2026-05-10T13:55:41.256Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 42,
+      "level": "warn",
+      "percent": 47,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-local-safe-hardening"
+      "recommendation": "reload-before-live-tool-validation"
     }
   ]
 }
