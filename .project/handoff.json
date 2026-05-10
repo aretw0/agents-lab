@@ -1,57 +1,58 @@
 {
-  "timestamp": "2026-05-10T06:05:25.655Z",
-  "context": "Post-reload local-safe SDK runner hardening slice completed and committed. Implemented minimal SDK worker resource loading (no extensions/ski [snip] -output failure. No new canary was run. [truncated:+155 chars]",
+  "timestamp": "2026-05-10T06:25:33.477Z",
+  "context": "Exact-confirmed SDK minimal output smoke completed successfully after reload and hardening. RunId task-bud-1068-sdk-minimal-output-smoke disp [snip] er runner stabilization remains needed. [truncated:+259 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "/reload is required before trusting the live agent_run_sdk_in_process_dispatch hardening from commit 2b5e7807.",
-    "After reload, prepare a smaller SDK canary packet with a new runId, exact confirmation only, p [snip] al/no-tool or single-read. [truncated:+15 chars]",
-    "Before any canary, confirm git state is expected/clean and no protected scope is requested."
+    "Use the now-proven SDK minimal canary evidence to design the next TASK-BUD-1066 diagnostic sli [snip] t close TASK-BUD-1068 yet. [truncated:+9 chars]",
+    "If running another worker, require fresh exact runId confirmation and clean git state.",
+    "Consider a bounded SDK diagnostic worker for TASK-BUD-1066 only after a report-only packet/preview."
   ],
   "blockers": [
-    "SDK lane not reliable yet: prior canary timed out.",
-    "Exact confirmation required for any next worker run.",
-    "TASK-BUD-1068 closure still depends on TASK-BUD-1066 runner stabilization."
+    "TASK-BUD-1068 closure still blocked by unresolved dependency TASK-BUD-1066.",
+    "Subprocess lane remains silent-runner-failure; no blind subprocess retry.",
+    "Exact confirmation required for any next worker run."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 39 passed",
-    "git diff --check -> passed",
-    "safe_marker_check packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts -> 9/9 markers"
+    "agent_run_sdk_in_process_dispatch -> decision=dispatched dispatch=yes logPath=.pi/reports/task [snip] nimal-output-smoke.sdk.log [truncated:+16 chars]",
+    "agent_run_follow -> terminal completed outputBytes=11603",
+    "agent_run_outcome_packet -> contract=pass process=completed recommendation=stop"
   ],
   "recent_commits": [
-    "2b5e7807 fix(agents): harden sdk worker runner"
+    "120a8e57 chore(agents): record sdk minimal smoke"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "commit:2b5e7807"
+      "task:TASK-BUD-1068-SDK-MINIMAL-OUTPUT-SMOKE",
+      "commit:120a8e57"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T06:05:25.655Z",
+    "generatedAtIso": "2026-05-10T06:25:33.477Z",
     "level": "ok",
-    "percent": 29,
+    "percent": 31,
     "action": "continue",
-    "recommendation": "reload-before-next-sdk-canary",
+    "recommendation": "sdk-minimal-smoke-passed-use-for-next-diagnostic-planning",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T06:05:25.655Z",
+      "atIso": "2026-05-10T06:25:33.477Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 29,
+      "percent": 31,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-before-next-sdk-canary"
+      "recommendation": "sdk-minimal-smoke-passed-use-for-next-diagnostic-planning"
     }
   ]
 }
