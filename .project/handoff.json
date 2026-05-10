@@ -1,58 +1,59 @@
 {
-  "timestamp": "2026-05-10T06:48:44.751Z",
-  "context": "Implemented the adjusted design requested by user: do not duplicate worker-only tools; instead introduce a reusable declared-file scoped tool [snip] this prompted the policy-wrapper slice. [truncated:+270 chars]",
+  "timestamp": "2026-05-10T06:53:49.650Z",
+  "context": "Exact-confirmed scoped SDK diagnostic run for TASK-BUD-1066 failed, but usefully: policy wrapper blocked out-of-scope read/grep attempts and [snip] after patch because reload is required. [truncated:+206 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "/reload is required before live SDK dispatch uses commit 5bea37a3.",
-    "After reload, preview a new TASK-BUD-1066 SDK diagnostic worker with only read/grep and explic [snip] required before dispatch. [truncated:+51 chars]",
-    "Do not close TASK-BUD-1068 yet; TASK-BUD-1066 dependency remains unresolved."
+    "/reload required before retrying SDK diagnostic with declared_files prompt injection.",
+    "After reload, preview a new runId for TASK-BUD-1066 scoped diagnostic; exact confirmation required before dispatch.",
+    "If retry succeeds, use its output to implement smallest TASK-BUD-1066 subprocess diagnostic patch."
   ],
   "blockers": [
-    "Live runtime needs /reload for SDK tool-policy wrapper changes.",
-    "TASK-BUD-1068 closure still blocked by unresolved TASK-BUD-1066.",
-    "Subprocess lane remains silent-runner-failure; no blind subprocess retry."
+    "Live runtime needs /reload for commit 18fbdda2.",
+    "TASK-BUD-1066 unresolved; TASK-BUD-1068 closure remains blocked by dependency.",
+    "Exact confirmation required for any next worker run."
   ],
   "recent_validation": [
+    "task-bud-1066-sdk-scoped-diagnostic-review -> failed by sdk-runner-turn-loop, outputBytes=2037 [snip] blocks visible, git clean [truncated:+8 chars]",
     "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 40 passed",
-    "git diff --check -> passed",
-    "safe_marker_check guardrails-core-tool-policy.ts -> 6/6"
+    "git diff --check -> passed"
   ],
   "recent_commits": [
-    "5bea37a3 fix(agents): scope sdk worker tools"
+    "18fbdda2 fix(agents): surface sdk declared files"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
       "task:TASK-BUD-1066",
-      "commit:5bea37a3"
+      "task:TASK-BUD-1066-SDK-SCOPED-DIAGNOSTIC-REVIEW",
+      "commit:18fbdda2"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T06:48:44.751Z",
-    "level": "ok",
-    "percent": 51,
-    "action": "continue",
-    "recommendation": "reload-before-scoped-sdk-diagnostic-retry",
+    "generatedAtIso": "2026-05-10T06:53:49.650Z",
+    "level": "checkpoint",
+    "percent": 53,
+    "action": "checkpoint-refresh",
+    "recommendation": "reload-before-scoped-diagnostic-retry-with-declared-files-visible",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T06:48:44.751Z",
+      "atIso": "2026-05-10T06:53:49.650Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 51,
+      "level": "checkpoint",
+      "percent": 53,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-before-scoped-sdk-diagnostic-retry"
+      "recommendation": "reload-before-scoped-diagnostic-retry-with-declared-files-visible"
     }
   ]
 }
