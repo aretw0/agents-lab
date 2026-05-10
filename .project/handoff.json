@@ -1,21 +1,22 @@
 {
-  "timestamp": "2026-05-10T13:45:56.115Z",
-  "context": "Continuidade local-safe após steering do operador: não criar novos termos/superfícies para o mesmo problema. finalTurnBrief já existe para br [snip] enhum worker/canary dispatch realizado. [truncated:+265 chars]",
+  "timestamp": "2026-05-10T13:51:43.164Z",
+  "context": "Continuidade consolidada no termo existente: turn_boundary_decision_packet agora expõe localSafeMayContinue como campo estruturado e summary [snip] iar no output live das tools alteradas. [truncated:+228 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Se continuar local-safe, consolidar o mesmo princípio como regra/guard mais geral contra super [snip] antes de novas primitivas. [truncated:+17 chars]",
-    "Não criar ooda_packet; usar OODA apenas como lente interna para melhorar turn_boundary_decision_packet e continuidade.",
-    "Não despachar worker/canary sem confirmação exata do packet."
+    "Executar /reload antes de confiar no output live do novo campo localSafeMayContinue.",
+    "Após reload, usar turn_boundary_decision_packet.localSafeMayContinue para evitar parar à toa q [snip] xima fatia for local-safe. [truncated:+11 chars]",
+    "Continuar hardening local-safe; não despachar worker/canary sem confirmação exata."
   ],
   "blockers": [
     "TASK-BUD-1066 subprocess root cause still unresolved.",
-    "Graceful stop antes de compact ainda não está confiável; compensar com checkpo [snip] ard markers no packet. [truncated:+17 chars]"
+    "Graceful stop antes de compact ainda não está confiável; compensar com checkpo [snip] hardening específico. [truncated:+17 chars]"
   ],
   "recent_validation": [
     "npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts --reporter=dot -> 15 passed",
-    "git diff --check -> pass"
+    "git diff --check -> pass",
+    "safe_marker_check docs/primitives/nudge-free-local-continuity.md -> pass"
   ],
   "recent_commits": [
     "b03231c7 fix(context): consolidate turn boundary continuation signal",
@@ -29,9 +30,9 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T13:45:56.115Z",
+    "generatedAtIso": "2026-05-10T13:51:43.164Z",
     "level": "ok",
-    "percent": 32,
+    "percent": 42,
     "action": "continue",
     "recommendation": "continue-local-safe-hardening",
     "stopStatus": "graceful",
@@ -40,10 +41,10 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T13:45:56.115Z",
+      "atIso": "2026-05-10T13:51:43.164Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 32,
+      "percent": 42,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
