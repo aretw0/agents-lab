@@ -841,6 +841,12 @@ describe("agent spawn readiness contract", () => {
     expect(source).toContain("spawn(subprocess.command, subprocess.args");
     expect(source).toContain("child.on(\"error\", (error: NodeJS.ErrnoException)");
     expect(source).toContain("spawn error code=${code}");
+    expect(source).toContain("buildPiSubprocessPreflightLines");
+    expect(source).toContain("preflight platform=${process.platform}");
+    expect(source).toContain("preflight commandExists=");
+    expect(source).toContain("preflight entrypointExists=");
+    expect(source).toContain("failure code=runner-timeout");
+    expect(source).toContain("signal=${signal || \"none\"} timedOut=");
     expect(source).toContain("[agent-runner] close exitCode=${exitCode}");
     expect(source).toContain("outputBytes: readLogByteCount(logPath)");
     expect(source).toContain("errorCode: code");

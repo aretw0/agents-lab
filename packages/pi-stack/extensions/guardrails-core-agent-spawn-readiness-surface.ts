@@ -84,6 +84,16 @@ function resolvePiSubprocessInvocation(preview: { command: string; args: string[
   return { command: preview.command, args: preview.args, source: "preview-command" };
 }
 
+function buildPiSubprocessPreflightLines(cwd: string, subprocess: { command: string; args: string[]; source: string }): string[] {
+  const entrypoint = subprocess.source === "current-node-entrypoint" ? subprocess.args[0] : undefined;
+  const commandLooksPath = path.isAbsolute(subprocess.command) || /[\\/]/.test(subprocess.command);
+  return [
+    `[agent-runner] preflight platform=${process.platform} node=${process.version} cwdExists=${existsSync(cwd) ? "yes" : "no"}`,
+    `[agent-runner] preflight commandExists=${commandLooksPath ? existsSync(subprocess.command) ? "yes" : "no" : "path-lookup"} command=${subprocess.command}`,
+    entrypoint ? `[agent-runner] preflight entrypointExists=${existsSync(entrypoint) ? "yes" : "no"} entrypoint=${entrypoint}` : "[agent-runner] preflight entrypointExists=not-applicable",
+  ];
+}
+
 function appendAgentRunLogLine(logPath: string, line: string): void {
   mkdirSync(path.dirname(logPath), { recursive: true });
   writeFileSync(logPath, `${line}\n`, { flag: "a", encoding: "utf8" });
@@ -881,6 +891,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         const subprocess = resolvePiSubprocessInvocation(packet.startPreview);
         appendAgentRunLogLine(logPath, `[agent-runner] starting command=${subprocess.command} source=${subprocess.source} cwd=${ctx.cwd}`);
         appendAgentRunLogLine(logPath, `[agent-runner] argv=${formatAgentRunnerArgvForLog(subprocess.args)}`);
+        for (const line of buildPiSubprocessPreflightLines(ctx.cwd, subprocess)) appendAgentRunLogLine(logPath, line);
         const logStream = createWriteStream(logPath, { flags: "a" });
         const child = spawn(subprocess.command, subprocess.args, { cwd: ctx.cwd, shell: false, stdio: ["ignore", "pipe", "pipe"] });
         pid = child.pid;
@@ -906,7 +917,10 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         writeRegistryEntry(ctx.cwd, registryEntry);
         const timeoutMs = packet.taskPacket.invocationSpec.timeoutMs;
         let settled = false;
+        let timedOut = false;
         const timeout = setTimeout(() => {
+          timedOut = true;
+          logStream.write(`[agent-runner] timeout ms=${timeoutMs}; sending SIGTERM\n`);
           if (!child.killed) child.kill("SIGTERM");
         }, timeoutMs);
         child.on("error", (error: NodeJS.ErrnoException) => {
@@ -928,24 +942,28 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
             });
           });
         });
-        child.on("close", (code) => {
+        child.on("close", (code, signal) => {
           if (settled) return;
           settled = true;
           clearTimeout(timeout);
-          const exitCode = typeof code === "number" ? code : 1;
+          const exitCode = typeof code === "number" ? code : timedOut ? 124 : 1;
           const silentFailure = exitCode !== 0 && childOutputBytes === 0;
           const silentFailureLine = silentFailure
-            ? "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr; inspect argv/cwd/source and provider/toolkit setup\n"
+            ? "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr; preflight lines above record platform/node/cwd/command/entrypoint; next probe should validate provider bootstrap and CLI argument parsing\n"
             : "";
-          logStream.write(`${silentFailureLine}[agent-runner] close exitCode=${exitCode} childOutputBytes=${childOutputBytes} stdoutBytes=${childStdoutBytes} stderrBytes=${childStderrBytes}\n`, () => {
+          const timeoutLine = timedOut ? `[agent-runner] failure code=runner-timeout message=subprocess exceeded timeoutMs=${timeoutMs}\n` : "";
+          logStream.write(`${silentFailureLine}${timeoutLine}[agent-runner] close exitCode=${exitCode} signal=${signal || "none"} timedOut=${timedOut ? "yes" : "no"} childOutputBytes=${childOutputBytes} stdoutBytes=${childStdoutBytes} stderrBytes=${childStderrBytes}\n`, () => {
             logStream.end(() => {
               writeRegistryEntry(ctx.cwd, {
                 ...registryEntry,
-                state: exitCode === 0 ? "completed" : "failed",
+                state: exitCode === 0 ? "completed" : timedOut ? "timed-out" : "failed",
                 exitCode,
                 ...(silentFailure ? {
                   errorCode: "silent-runner-failure",
-                  errorMessage: "subprocess exited non-zero without stdout/stderr; inspect argv/cwd/source and provider/toolkit setup",
+                  errorMessage: "subprocess exited non-zero without stdout/stderr; preflight evidence recorded in log",
+                } : timedOut ? {
+                  errorCode: "runner-timeout",
+                  errorMessage: `subprocess exceeded timeoutMs=${timeoutMs}`,
                 } : {}),
                 outputBytes: readLogByteCount(logPath),
                 lastEventAtIso: new Date().toISOString(),
