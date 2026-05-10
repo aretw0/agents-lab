@@ -7,7 +7,7 @@
   "next_actions": [
     "User/operator should /reload before trusting live SDK dispatch surface.",
     "After reload, preview exactly one SDK canary packet only; execute requires exact runId confirmation.",
-    "Continue read-only critique against Karpathy-style loop/eval and local examples before broader subagent work."
+    "Continue read-only critique against short-loop research/eval practice and local examples before broader subagent work."
   ],
   "blockers": [
     "No canary/worker dispatch authorized by charter.",
