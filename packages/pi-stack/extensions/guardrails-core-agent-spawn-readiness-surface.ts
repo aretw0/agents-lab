@@ -140,8 +140,20 @@ function buildSdkScopedWorkerPrompt(goal: string, declaredFiles: string[]): stri
     "Declared files (only these exact paths are allowed unless a declared entry is a directory):",
     formatSdkDeclaredFilesForPrompt(declaredFiles),
     "",
+    "Tool cadence: inspect each declared file at most twice unless the result is clearly incomplete; then produce the final answer instead of continuing to search.",
+    "If evidence is missing, report the missing evidence explicitly and stop.",
+    "",
     goal,
   ].join("\n");
+}
+
+function computeSdkLoopGuardLimits(toolAllowlist: string[], declaredFiles: string[]): { maxToolCalls: number; maxTurns: number } {
+  const toolBudget = Math.max(1, toolAllowlist.length);
+  const fileBudget = Math.max(1, declaredFiles.length);
+  return {
+    maxToolCalls: Math.max(8, Math.min(24, toolBudget * 4 + fileBudget * 3)),
+    maxTurns: Math.max(4, Math.min(8, 3 + fileBudget)),
+  };
 }
 
 function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPacketResult): { logPath: string } {
@@ -164,8 +176,7 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
   appendAgentRunLogLine(logPath, `[sdk-runner] tools=${packet.runSpec.toolAllowlist.join(",")}`);
 
   void (async () => {
-    const maxToolCalls = Math.max(1, Math.min(12, packet.runSpec.toolAllowlist.length * 3));
-    const maxTurns = 4;
+    const { maxToolCalls, maxTurns } = computeSdkLoopGuardLimits(packet.runSpec.toolAllowlist, packet.runSpec.declaredFiles);
     let outputBytes = 0;
     let timedOut = false;
     let loopAbortReason = "";
@@ -208,6 +219,7 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
           "You are a bounded SDK worker canary.",
           "Return a concise final answer and stop.",
           "Do not call tools repeatedly; inspect only what is necessary.",
+          "Prefer no more than two tool calls per declared file; summarize partial evidence instead of looping.",
           "Declared files are the only allowed filesystem scope:",
           formatSdkDeclaredFilesForPrompt(packet.runSpec.declaredFiles),
           "When calling a path-scoped tool, pass one of those exact paths unless a declared entry is a directory.",
@@ -947,11 +959,12 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
           settled = true;
           clearTimeout(timeout);
           const exitCode = typeof code === "number" ? code : timedOut ? 124 : 1;
-          const silentFailure = exitCode !== 0 && childOutputBytes === 0;
+          const zeroOutput = childOutputBytes === 0;
+          const silentFailure = !timedOut && exitCode !== 0 && zeroOutput;
           const silentFailureLine = silentFailure
             ? "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr; preflight lines above record platform/node/cwd/command/entrypoint; next probe should validate provider bootstrap and CLI argument parsing\n"
             : "";
-          const timeoutLine = timedOut ? `[agent-runner] failure code=runner-timeout message=subprocess exceeded timeoutMs=${timeoutMs}\n` : "";
+          const timeoutLine = timedOut ? `[agent-runner] failure code=runner-timeout message=subprocess exceeded timeoutMs=${timeoutMs} outputBytes=${childOutputBytes}; preflight reached command/entrypoint, so next probe should isolate provider/model-call/bootstrap hang\n` : "";
           logStream.write(`${silentFailureLine}${timeoutLine}[agent-runner] close exitCode=${exitCode} signal=${signal || "none"} timedOut=${timedOut ? "yes" : "no"} childOutputBytes=${childOutputBytes} stdoutBytes=${childStdoutBytes} stderrBytes=${childStderrBytes}\n`, () => {
             logStream.end(() => {
               writeRegistryEntry(ctx.cwd, {
@@ -962,8 +975,8 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
                   errorCode: "silent-runner-failure",
                   errorMessage: "subprocess exited non-zero without stdout/stderr; preflight evidence recorded in log",
                 } : timedOut ? {
-                  errorCode: "runner-timeout",
-                  errorMessage: `subprocess exceeded timeoutMs=${timeoutMs}`,
+                  errorCode: zeroOutput ? "runner-timeout-zero-output" : "runner-timeout",
+                  errorMessage: `subprocess exceeded timeoutMs=${timeoutMs}; ${zeroOutput ? "no stdout/stderr after valid command preflight" : "partial output captured"}`,
                 } : {}),
                 outputBytes: readLogByteCount(logPath),
                 lastEventAtIso: new Date().toISOString(),
