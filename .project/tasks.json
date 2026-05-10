@@ -23867,6 +23867,30 @@
       ],
       "milestone": "ui-quota-followup",
       "notes": "2026-05-10: descoberta após separar cota OpenAI Codex agregada vs `gpt-5.3-codex-spark`; em seguida reconciliada como duplicada da task planejada TASK-BUD-1006 (`operator-visible-ui-clarity-2026-05`). Evidência e diagnóstico movidos para TASK-BUD-1006. Erro de triagem: criação ocorreu após busca estreita por `quota footer/panel`, sem checar task planejada mais ampla. Guardrail operacional: antes de `board_task_create`, fazer duplicate preflight multi-termo e preferir `board_update` em task planejada existente.\n[provenance:human] source_task=TASK-BUD-1068 reason=Usuário pediu registrar follow-up TUI sem tirar foco de workers/subagents."
+    },
+    {
+      "id": "TASK-BUD-1070",
+      "description": "[context-continuity/local-safe] Consolidar sinal hard-intent de continuidade local-safe no `turn_boundary_decision_packet` existente para reduzir paradas desnecessárias sem criar superfícies redundantes.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "`turn_boundary_decision_packet` expõe `localSafeMayContinue` como campo estruturado e summary marker.",
+        "O sinal reutiliza o packet existente e não introduz `operatorBrief`, `continuityContract` ou `ooda_packet` como nova superfície pública.",
+        "Smoke tests cobrem caminho local-safe `yes` e ask-human/pause `no` na builder e na surface registrada.",
+        "Handoff compacto permanece dentro de `LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS` ao descartar histórico dispensável antes de falhar.",
+        "Docs existentes de continuidade local mencionam `localSafeMayContinue` sem criar nova primitiva."
+      ],
+      "milestone": "agent-first-worker-lane",
+      "notes": "[provenance:human] source_task=TASK-BUD-1068 reason=Operador pediu calibrar continuidade para o control plane não parar à toa enquanto a maturação de workers/delegação continua. Side-task local-safe criada após preflight multi-termo sem duplicata aberta compatível; evita esconder mudanças de context-watch dentro do escopo bloqueado de TASK-BUD-1068.\n[completed] Side-task closes the continuity signal consolidation slice. This does not resolve TASK-BUD-1068/TASK-BUD-1066 worker maturity; it only supplies a cleaner hard-intent signal so future local-safe control-plane slices stop less often.",
+      "verification": "VERIF-TASK-BUD-1070-CONTINUITY-SIGNAL-20260510"
     }
   ]
 }
