@@ -15272,6 +15272,15 @@
       "method": "focused-test-and-marker-check",
       "timestamp": "2026-05-08T17:08:07.157Z",
       "evidence": "Implemented first slice of model-specific budget evidence: ProviderExecutionBudgetEvidence now reports providerModelRef and scope provider/provider-model/unknown, accepts structured provider-budget evidence scoped to openai-codex/gpt-5.3-codex-spark as consistent/fresh/ready, and fails mismatch for another model. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 35 passed; git diff --check -> pass; safe_marker_check provider-budget implementation/test markers -> pass. Remaining TASK-BUD-1067 work: surface model-specific budgets in quota visibility provider budgets and reconcile external DashScope/Qwen exhaustion evidence."
+    },
+    {
+      "id": "VERIFY-TASK-BUD-1068-DUAL-EXECUTOR-PACKETS-20260510",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused-test-and-live-packet-inspection",
+      "timestamp": "2026-05-10T04:00:59.665Z",
+      "evidence": "Implemented and validated dual-executor report-only lane: executor strategy packet keeps subprocess retained and SDK non-replacement; SDK in-process preview packet models createAgentSession contract; scenario selection covers Windows silent failure, devcontainer/process-isolation subprocess probe, direct event stream SDK preference; dirty-state fail-closed gates block both packets. Validations: focused vitest guardrails-agent-spawn-readiness.test.ts -> 38 passed; git diff --check passed; marker checks passed; post-reload live packets with unexpected_dirty=true both returned blocked dispatch=no authorization=none."
     }
   ]
 }
