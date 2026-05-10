@@ -189,10 +189,18 @@
           "monthlyQuotaCostUsd": 0.01,
           "warnPct": 70,
           "hardPct": 90
+        },
+        "openai-codex/gpt-5.3-codex-spark": {
+          "owner": "openai-pro-spark-weekly-window",
+          "period": "weekly",
+          "unit": "requests",
+          "model": "gpt-5.3-codex-spark",
+          "warnPct": 80,
+          "hardPct": 100
         }
       },
       "routeModelRefs": {
-        "openai-codex": "openai-codex/gpt-5.3-codex",
+        "openai-codex": "openai-codex/gpt-5.3-codex-spark",
         "dashscope": "dashscope/qwen3.6-flash"
       }
     },
