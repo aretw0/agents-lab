@@ -121,6 +121,19 @@ function appendAssistantOutput(logPath: string, text: string, seenOutput: Set<st
   return Buffer.byteLength(normalized);
 }
 
+function formatSdkDeclaredFilesForPrompt(declaredFiles: string[]): string {
+  return declaredFiles.map((file) => `- ${file}`).join("\n");
+}
+
+function buildSdkScopedWorkerPrompt(goal: string, declaredFiles: string[]): string {
+  return [
+    "Declared files (only these exact paths are allowed unless a declared entry is a directory):",
+    formatSdkDeclaredFilesForPrompt(declaredFiles),
+    "",
+    goal,
+  ].join("\n");
+}
+
 function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPacketResult): { logPath: string } {
   const runId = packet.runSpec.runId;
   const logPath = path.join(ctxCwd, ".pi", "reports", `${runId}.sdk.log`);
@@ -185,6 +198,9 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
           "You are a bounded SDK worker canary.",
           "Return a concise final answer and stop.",
           "Do not call tools repeatedly; inspect only what is necessary.",
+          "Declared files are the only allowed filesystem scope:",
+          formatSdkDeclaredFilesForPrompt(packet.runSpec.declaredFiles),
+          "When calling a path-scoped tool, pass one of those exact paths unless a declared entry is a directory.",
         ].join("\n"),
       });
       await resourceLoader.reload();
@@ -253,7 +269,7 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
         void session?.abort();
       }, packet.runSpec.timeoutMs);
       try {
-        await session.prompt(packet.runSpec.goal, { expandPromptTemplates: false, source: "extension" });
+        await session.prompt(buildSdkScopedWorkerPrompt(packet.runSpec.goal, packet.runSpec.declaredFiles), { expandPromptTemplates: false, source: "extension" });
       } finally {
         clearTimeout(timeout);
         const stateMessages = (session as unknown as { agent?: { state?: { messages?: unknown[] } }; messages?: unknown[] }).agent?.state?.messages

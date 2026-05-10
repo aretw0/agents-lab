@@ -15317,6 +15317,15 @@
       "method": "focused-test-and-marker-check",
       "timestamp": "2026-05-10T06:47:49.737Z",
       "evidence": "Implemented reusable declared-file scoped tool policy primitive instead of duplicating worker-only tools. Added guardrails-core-tool-policy with evaluateDeclaredPathPolicy, wrapToolDefinitionWithDeclaredPathPolicy, and buildDeclaredFileScopedSdkWorkerTools. SDK runner now wraps existing read/grep ToolDefinitions with declared_files policy, logs toolPolicy=..., passes customTools into createAgentSession, and fails closed with sdk-runner-tool-policy-unsupported for allowlisted tools without policy metadata. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 40 passed; git diff --check passed; marker checks passed; tsx import policy-import-ok."
+    },
+    {
+      "id": "VERIFY-TASK-BUD-1068-SDK-SCOPED-PROMPT-20260510",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "failed-canary-analysis+focused-test",
+      "timestamp": "2026-05-10T06:53:09.920Z",
+      "evidence": "Exact-confirmed scoped SDK diagnostic run task-bud-1066-sdk-scoped-diagnostic-review failed by turn-loop guard after policy blocked attempts to read README.md, '.', package.json, and grep without explicit path; git stayed clean and policy enforcement worked. Root cause: SDK runner did not surface declared_files to the model prompt/system prompt, so the model could not reliably choose exact allowed paths. Patched SDK runner to inject declared_files into system prompt and wrap the runtime goal with a declared-files preamble. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 40 passed; git diff --check passed; marker check for scoped prompt markers passed."
     }
   ]
 }

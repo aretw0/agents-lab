@@ -1715,6 +1715,9 @@ describe("agent spawn readiness contract", () => {
     expect(source).toContain("resourceLoader=minimal-noExtensions-noSkills-noPrompts-noContext");
     expect(source).toContain("loopGuards maxToolCalls");
     expect(source).toContain("toolPolicy=");
+    expect(source).toContain("buildSdkScopedWorkerPrompt");
+    expect(source).toContain("Declared files (only these exact paths are allowed");
+    expect(source).toContain("When calling a path-scoped tool, pass one of those exact paths");
     expect(source).toContain("sdk-runner-loop-guard");
     expect(source).toContain("sdk-runner-empty-output");
     expect(source).toContain("sdk-runner-tool-policy-unsupported");
