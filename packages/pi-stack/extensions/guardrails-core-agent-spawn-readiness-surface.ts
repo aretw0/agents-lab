@@ -790,6 +790,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       requires_process_isolation: Type.Optional(Type.Boolean({ description: "Prefer subprocess when process isolation dominates and the subprocess path is not silently failing." })),
       requires_direct_event_stream: Type.Optional(Type.Boolean({ description: "Prefer SDK/in-process when direct AgentSession event visibility dominates." })),
       mutation_requested: Type.Optional(Type.Boolean({ description: "Mutation workloads generally prefer stronger process isolation unless direct events dominate." })),
+      unexpected_dirty: Type.Optional(Type.Boolean({ description: "Blocks executor selection when workspace dirty state is unexpected." })),
     }),
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -805,6 +806,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         requiresProcessIsolation: asOptionalBoolean(p.requires_process_isolation),
         requiresDirectEventStream: asOptionalBoolean(p.requires_direct_event_stream),
         mutationRequested: asOptionalBoolean(p.mutation_requested),
+        unexpectedDirty: asOptionalBoolean(p.unexpected_dirty),
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_executor_strategy_packet",
@@ -840,6 +842,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       event_stream_known: Type.Optional(Type.Boolean({ description: "Whether SDK event stream capture is known." })),
       final_output_contract_known: Type.Optional(Type.Boolean({ description: "Whether final output bytes/contract is known." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
+      unexpected_dirty: Type.Optional(Type.Boolean({ description: "Blocks when workspace dirty state is unexpected." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -865,6 +868,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         eventStreamKnown: asOptionalBoolean(p.event_stream_known),
         finalOutputContractKnown: asOptionalBoolean(p.final_output_contract_known),
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+        unexpectedDirty: asOptionalBoolean(p.unexpected_dirty),
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_sdk_in_process_packet",

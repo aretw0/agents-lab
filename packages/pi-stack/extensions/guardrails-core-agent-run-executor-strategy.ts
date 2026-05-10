@@ -14,6 +14,7 @@ export interface AgentRunExecutorStrategyInput {
   requiresProcessIsolation?: boolean;
   requiresDirectEventStream?: boolean;
   mutationRequested?: boolean;
+  unexpectedDirty?: boolean;
 }
 
 export interface AgentRunExecutorStrategyPacketResult {
@@ -42,6 +43,7 @@ export interface AgentRunExecutorStrategyPacketResult {
     requiresProcessIsolation: boolean;
     requiresDirectEventStream: boolean;
     mutationRequested: boolean;
+    unexpectedDirty: boolean;
   };
   selectionRationale: string[];
   executorContracts: Array<{
@@ -70,6 +72,7 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
   const budgetDecision = cleanText(input.budgetDecision || "unknown");
   const blockers: string[] = [];
   if (input.protectedScopeRequested) blockers.push("protected-scope-requested");
+  if (input.unexpectedDirty) blockers.push("unexpected-dirty-state");
   if (budgetDecision === "blocked" || budgetDecision === "unknown" || !budgetDecision) blockers.push(`budget-${budgetDecision || "unknown"}`);
 
   const subprocessDiagnosticsAvailable = input.subprocessDiagnosticsAvailable === true;
@@ -80,6 +83,7 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
   const requiresProcessIsolation = input.requiresProcessIsolation === true;
   const requiresDirectEventStream = input.requiresDirectEventStream === true;
   const mutationRequested = input.mutationRequested === true;
+  const unexpectedDirty = input.unexpectedDirty === true;
   const silentSubprocessFailure = failureClass === "silent-runner-failure";
   const canProbeSubprocessOffWindows = silentSubprocessFailure && subprocessDiagnosticsAvailable && (devcontainerAvailable || runtimeMode === "linux" || runtimeMode === "devcontainer");
   const selectionSignals = {
@@ -88,6 +92,7 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     requiresProcessIsolation,
     requiresDirectEventStream,
     mutationRequested,
+    unexpectedDirty,
   };
   const selectionRationale: string[] = [];
 
@@ -168,6 +173,7 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     requiresProcessIsolation ? "requiresProcessIsolation=yes" : undefined,
     requiresDirectEventStream ? "requiresDirectEventStream=yes" : undefined,
     mutationRequested ? "mutationRequested=yes" : undefined,
+    unexpectedDirty ? "unexpectedDirty=yes" : undefined,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     "dispatch=no",
     "authorization=none",

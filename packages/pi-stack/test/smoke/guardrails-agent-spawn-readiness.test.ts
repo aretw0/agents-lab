@@ -1493,6 +1493,17 @@ describe("agent spawn readiness contract", () => {
     expect(blocked.decision).toBe("blocked");
     expect(blocked.blockers).toContain("budget-blocked");
 
+    const dirtyBlocked = buildAgentRunExecutorStrategyPacket({
+      failureClass: "unknown",
+      subprocessDiagnosticsAvailable: true,
+      sdkRuntimeAvailable: true,
+      budgetDecision: "ok",
+      unexpectedDirty: true,
+    });
+    expect(dirtyBlocked.decision).toBe("blocked");
+    expect(dirtyBlocked.blockers).toContain("unexpected-dirty-state");
+    expect(dirtyBlocked.summary).toContain("unexpectedDirty=yes");
+
     const rawPi = {
       on: vi.fn(),
       registerTool: vi.fn(),
@@ -1587,6 +1598,26 @@ describe("agent spawn readiness contract", () => {
     });
     expect(blocked.decision).toBe("blocked");
     expect(blocked.blockers).toContain("budget-blocked");
+
+    const dirtyBlocked = buildAgentRunSdkInProcessPacket({
+      runId: "sdk-dirty-blocked",
+      goal: "blocked dirty",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+      timeoutMs: 90_000,
+      toolAllowlist: ["read"],
+      validationGateKnown: true,
+      rollbackPlanKnown: true,
+      budgetDecision: "ok",
+      abortKnown: true,
+      eventStreamKnown: true,
+      finalOutputContractKnown: true,
+      unexpectedDirty: true,
+    });
+    expect(dirtyBlocked.decision).toBe("blocked");
+    expect(dirtyBlocked.blockers).toContain("unexpected-dirty-state");
+    expect(dirtyBlocked.summary).toContain("unexpectedDirty=yes");
 
     const rawPi = {
       on: vi.fn(),

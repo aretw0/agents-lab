@@ -1,23 +1,23 @@
 {
-  "timestamp": "2026-05-10T03:32:28.162Z",
-  "context": "After reload, live tools confirmed dual-executor policy is active: agent_run_executor_strategy_packet now shows subprocessRetained=yes, sdkRe [snip] ing with no off-Windows probe declared. [truncated:+637 chars]",
+  "timestamp": "2026-05-10T03:53:00.940Z",
+  "context": "After reload, validated live scenario-driven executor strategy inputs. Windows silent subprocess failure with no devcontainer probe selects S [snip] llowed=false/processStartAllowed=false. [truncated:+407 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Commit scenario-driven executor selection slice.",
-    "Reload before trusting live agent_run_executor_strategy_packet scenario inputs.",
-    "After reload, run live strategy examples for: Windows silent failure -> SDK candidate; devcont [snip] t stream -> SDK candidate. [truncated:+48 chars]"
+    "Commit dirty-state fail-closed slice.",
+    "Reload before trusting live tools with the new unexpected_dirty parameter.",
+    "After reload, run live dirty-state examples; then evaluate whether TASK-BUD-1068 acceptance cr [snip] d decision packet/closure. [truncated:+35 chars]"
   ],
   "blockers": [
-    "Live executor strategy tool will be stale until reload after this commit.",
+    "Live tools will be stale until reload after this commit.",
     "No SDK worker dispatch is implemented or authorized yet.",
     "Subprocess canary evidence remains silent-runner-failure on current Windows pa [snip] do not retry blindly. [truncated:+3 chars]"
   ],
   "recent_validation": [
-    "git_dirty_snapshot before slice -> clean",
-    "live agent_run_executor_strategy_packet -> subprocessRetained=yes sdkReplacement=no subprocessBlindRetry=no",
-    "live agent_run_sdk_in_process_packet -> ready-for-human-decision dispatch=no authorization=none"
+    "git_dirty_snapshot before live checks -> clean",
+    "live strategy Windows silent failure -> sdk-in-process-candidate",
+    "live strategy devcontainer/process isolation -> subprocess-first"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
@@ -26,28 +26,28 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T03:32:28.162Z",
+    "generatedAtIso": "2026-05-10T03:53:00.940Z",
     "level": "warn",
-    "percent": 46,
+    "percent": 49,
     "action": "continue",
-    "recommendation": "commit-scenario-driven-executor-selection-then-reload",
+    "recommendation": "commit-dirty-state-gates-then-reload",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T03:32:28.162Z",
+      "atIso": "2026-05-10T03:53:00.940Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 46,
+      "percent": 49,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-scenario-driven-executor-selection-then-reload"
+      "recommendation": "commit-dirty-state-gates-then-reload"
     }
   ]
 }

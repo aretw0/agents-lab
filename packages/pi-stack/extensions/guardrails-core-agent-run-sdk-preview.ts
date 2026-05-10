@@ -26,6 +26,7 @@ export interface AgentRunSdkInProcessPacketInput {
   eventStreamKnown?: boolean;
   finalOutputContractKnown?: boolean;
   protectedScopeRequested?: boolean;
+  unexpectedDirty?: boolean;
 }
 
 export interface AgentRunSdkInProcessPacketResult {
@@ -55,7 +56,8 @@ export interface AgentRunSdkInProcessPacketResult {
     | "agent-run-sdk-blocked-abort"
     | "agent-run-sdk-blocked-event-stream"
     | "agent-run-sdk-blocked-final-output"
-    | "agent-run-sdk-blocked-protected-scope";
+    | "agent-run-sdk-blocked-protected-scope"
+    | "agent-run-sdk-blocked-dirty-state";
   blockers: string[];
   runSpec: {
     runId: string;
@@ -83,6 +85,7 @@ export interface AgentRunSdkInProcessPacketResult {
     eventStreamKnown: boolean;
     finalOutputContractKnown: boolean;
     protectedScopeRequested: boolean;
+    unexpectedDirty: boolean;
   };
   sdkPreview: {
     factory: "createAgentSession";
@@ -146,6 +149,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   const eventStreamKnown = input.eventStreamKnown === true;
   const finalOutputContractKnown = input.finalOutputContractKnown === true;
   const protectedScopeRequested = input.protectedScopeRequested === true;
+  const unexpectedDirty = input.unexpectedDirty === true;
   const budget = resolveProviderExecutionBudgetEvidence({
     budgetDecision: input.budgetDecision,
     budgetEvidence: input.budgetEvidence,
@@ -164,6 +168,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   };
 
   if (protectedScopeRequested) block("agent-run-sdk-blocked-protected-scope", "protected-scope-requested");
+  if (unexpectedDirty) block("agent-run-sdk-blocked-dirty-state", "unexpected-dirty-state");
   if (!runId) block("agent-run-sdk-blocked-run-id", "run-id-missing");
   if (!goal) block("agent-run-sdk-blocked-goal", "goal-missing");
   if (!providerModelRef || !providerModelRef.includes("/")) block("agent-run-sdk-blocked-provider-model", "provider-model-ref-missing");
@@ -235,6 +240,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       eventStreamKnown,
       finalOutputContractKnown,
       protectedScopeRequested,
+      unexpectedDirty,
     },
     sdkPreview,
     humanConfirmationPhrase: runId ? `execute o sdk worker ${runId}` : "",
@@ -253,6 +259,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       providerModelRef ? `model=${providerModelRef}` : undefined,
       `tools=${toolAllowlist.length}`,
       `session=${sessionMode}`,
+      unexpectedDirty ? "unexpectedDirty=yes" : undefined,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
       "dispatch=no",
       "authorization=none",
