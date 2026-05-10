@@ -542,6 +542,74 @@ describe("quota-visibility parsers", () => {
     expect(budget?.notes.join("\n")).toContain("projection alone");
   });
 
+  it("applyOpenAIWhamUsageToBudgets sintetiza budget model-specific quando só existe agregado", () => {
+    const budgets = applyOpenAIWhamUsageToBudgets([
+      {
+        provider: "openai-codex",
+        providerAccountKey: "openai-codex",
+        period: "monthly",
+        unit: "tokens-cost",
+        periodDays: 31,
+        periodStartIso: "2026-05-01T00:00:00.000Z",
+        periodEndIso: "2026-05-31T23:59:59.999Z",
+        observedMessages: 10,
+        observedTokens: 1000,
+        observedCostUsd: 10,
+        observedRequests: 0,
+        projectedTokensEndOfPeriod: 2000,
+        projectedCostUsdEndOfPeriod: 20,
+        projectedRequestsEndOfPeriod: 0,
+        periodTokensCap: 1000,
+        periodCostUsdCap: 10,
+        usedPctTokens: 100,
+        usedPctCost: 100,
+        warnPct: 80,
+        hardPct: 100,
+        state: "blocked",
+        notes: [],
+      },
+    ], {
+      provider: "openai-codex",
+      notes: [],
+      windows: [
+        {
+          provider: "openai-codex",
+          source: "openai-wham",
+          label: "Codex (7d)",
+          groupLabel: "Codex",
+          windowLabel: "secondary",
+          model: "codex",
+          percentLeft: 15,
+          usedPercent: 85,
+        },
+        {
+          provider: "openai-codex",
+          source: "openai-wham",
+          label: "GPT-5.3-Codex-Spark (7d)",
+          groupLabel: "GPT-5.3-Codex-Spark",
+          windowLabel: "secondary",
+          model: "gpt-5.3-codex-spark",
+          percentLeft: 76,
+          usedPercent: 24,
+        },
+      ],
+    });
+
+    const aggregate = budgets.find((b) => b.providerAccountKey === "openai-codex" && !b.providerModelKey);
+    const synthetic = budgets.find((b) => b.providerModelKey === "openai-codex/gpt-5.3-codex-spark");
+    expect(aggregate?.state).toBe("blocked");
+    expect(synthetic).toMatchObject({
+      provider: "openai-codex",
+      providerModelKey: "openai-codex/gpt-5.3-codex-spark",
+      model: "gpt-5.3-codex-spark",
+      owner: "openai-wham-live-window",
+      state: "ok",
+      dashboardRemainingPct: 76,
+      usedPctRequests: 24,
+      liveWindowSource: "openai-wham",
+    });
+  });
+
   it("buildProviderBudgetStatuses filtra budget model-specific sem marcar provider geral", () => {
     const now = Date.now();
     const events: QuotaUsageEvent[] = [

@@ -540,6 +540,54 @@ export function parseOpenAIWhamUsage(
 	return result;
 }
 
+function stateFromOpenAIWhamWindow(window: OpenAIWhamUsageWindow): ProviderBudgetStatus["state"] {
+	if (window.allowed === false || window.limitReached === true || window.percentLeft <= 0) return "blocked";
+	return window.usedPercent >= 80 ? "warning" : "ok";
+}
+
+function buildSyntheticOpenAIWhamModelBudget(window: OpenAIWhamUsageWindow, now = new Date()): ProviderBudgetStatus | undefined {
+	const model = normalizeModelId(window.model);
+	if (!model || model === "codex") return undefined;
+	const provider = "openai-codex";
+	const providerModelKey = buildProviderModelKey(provider, model);
+	const periodStart = startOfRollingWeekLocal(now);
+	const periodEnd = new Date(periodStart.getTime() + 7 * 24 * 60 * 60 * 1000 - 1);
+	return {
+		provider,
+		providerAccountKey: provider,
+		providerModelKey,
+		model,
+		owner: "openai-wham-live-window",
+		period: "weekly",
+		unit: "requests",
+		periodDays: 7,
+		periodStartIso: periodStart.toISOString(),
+		periodEndIso: periodEnd.toISOString(),
+		observedMessages: 0,
+		observedTokens: 0,
+		observedCostUsd: 0,
+		observedRequests: Math.max(0, window.usedPercent),
+		projectedTokensEndOfPeriod: 0,
+		projectedCostUsdEndOfPeriod: 0,
+		projectedRequestsEndOfPeriod: Math.max(0, window.usedPercent),
+		periodRequestsCap: 100,
+		usedPctRequests: Math.max(0, window.usedPercent),
+		projectedPctRequests: Math.max(0, window.usedPercent),
+		dashboardRemainingPct: window.percentLeft,
+		dashboardUsedPct: window.usedPercent,
+		dashboardWindowLabel: window.label,
+		dashboardResetDescription: window.resetDescription,
+		liveWindowSource: "openai-wham",
+		warnPct: 80,
+		hardPct: 100,
+		state: stateFromOpenAIWhamWindow(window),
+		notes: [
+			`Synthetic model-specific budget inferred from OpenAI WHAM live window '${window.label}'.`,
+			"Add an explicit providerBudgets entry to customize local caps for this model.",
+		],
+	};
+}
+
 export function applyOpenAIWhamUsageToBudgets(
 	budgets: ProviderBudgetStatus[],
 	wham: OpenAIWhamUsageParseResult | undefined,
@@ -547,7 +595,7 @@ export function applyOpenAIWhamUsageToBudgets(
 	if (!wham || wham.provider !== "openai-codex" || wham.windows.length === 0) {
 		return budgets;
 	}
-	return budgets.map((budget) => {
+	const updated = budgets.map((budget) => {
 		if (normalizeProvider(budget.provider) !== "openai-codex") return budget;
 		const candidates = wham.windows.filter((window) => {
 			if (window.provider !== "openai-codex") return false;
@@ -579,6 +627,25 @@ export function applyOpenAIWhamUsageToBudgets(
 			liveWindowSource: "openai-wham",
 			notes,
 		};
+	});
+
+	const existingModelKeys = new Set(updated.map((budget) => budget.providerModelKey).filter((key): key is string => Boolean(key)));
+	const syntheticByModel = new Map<string, ProviderBudgetStatus>();
+	for (const window of wham.windows) {
+		const model = normalizeModelId(window.model);
+		if (!model || model === "codex") continue;
+		const key = buildProviderModelKey("openai-codex", model);
+		if (existingModelKeys.has(key)) continue;
+		const current = syntheticByModel.get(key);
+		if (!current || safeNum(current.dashboardRemainingPct) > window.percentLeft) {
+			const synthetic = buildSyntheticOpenAIWhamModelBudget(window);
+			if (synthetic) syntheticByModel.set(key, synthetic);
+		}
+	}
+	return [...updated, ...syntheticByModel.values()].sort((a, b) => {
+		const aKey = a.providerModelKey ?? a.providerAccountKey ?? a.provider;
+		const bKey = b.providerModelKey ?? b.providerAccountKey ?? b.provider;
+		return aKey.localeCompare(bKey);
 	});
 }
 
