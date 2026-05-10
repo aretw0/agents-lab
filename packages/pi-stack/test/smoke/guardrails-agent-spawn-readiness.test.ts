@@ -1902,6 +1902,18 @@ describe("agent spawn readiness contract", () => {
     expect(timeoutResult.nextProbeProfiles).toContain("startup-hang-probe");
     expect(timeoutResult.nextActions.join("\n")).toContain("startup/handshake hang");
 
+    const timeoutStartupProbe = buildAgentRunStartupDiagnosticPacket({
+      runId: "task-bud-1066-subprocess-preflight-canary",
+      logText: timeoutResult.evidence.join("\n") + "\n[agent-runner] failure code=runner-timeout\n[agent-runner] close exitCode=124 timedOut=yes childOutputBytes=0 stdoutBytes=0 stderrBytes=0",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      budgetDecision: "ok",
+      liveReloadCompleted: true,
+    });
+    expect(timeoutStartupProbe.decision).toBe("structured-probe-first");
+    expect(timeoutStartupProbe.failureClass).toBe("runner-timeout");
+    expect(timeoutStartupProbe.canaryAllowed).toBe(false);
+    expect(timeoutStartupProbe.probeProfiles).toContain("timeout-budget-probe");
+
     const providerUnavailable = classifyAgentRunFailure({
       runId: "quota",
       logText: "[agent-runner] close exitCode=1 childOutputBytes=40\nProvider error: 429 insufficient_quota",
