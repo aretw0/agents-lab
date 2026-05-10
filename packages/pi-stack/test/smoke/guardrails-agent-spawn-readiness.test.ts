@@ -1657,6 +1657,51 @@ describe("agent spawn readiness contract", () => {
     expect(surfaceResult.details?.mode).toBe("agent-run-sdk-in-process-packet");
     expect(surfaceResult.details?.processStartAllowed).toBe(false);
     expect(surfaceResult.content?.[0]?.text).toContain("dispatch=no");
+
+    const dispatchToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([registered]) => registered?.name === "agent_run_sdk_in_process_dispatch");
+    const dispatchTool = dispatchToolCall?.[0] as typeof tool;
+    const dispatchPreview = dispatchTool.execute("tc-sdk-dispatch-preview", {
+      run_id: "task-bud-1068-sdk-dispatch-preview-canary",
+      goal: "Preview SDK dispatch without execution.",
+      provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+      declared_files: ["packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts"],
+      timeout_ms: 90_000,
+      tool_allowlist: ["read", "grep", "find", "ls"],
+      validation_gate_known: true,
+      rollback_plan_known: true,
+      budget_decision: "ok",
+      budget_evidence: "Spark model-specific capacity available",
+      budget_evidence_provider: "openai-codex/gpt-5.3-codex-spark",
+      abort_known: true,
+      event_stream_known: true,
+      final_output_contract_known: true,
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
+    expect(dispatchPreview.details?.mode).toBe("agent-run-sdk-in-process-dispatch");
+    expect(dispatchPreview.details?.processStartAllowed).toBe(false);
+    expect(dispatchPreview.details?.humanConfirmationPhrase).toBe("execute o sdk worker task-bud-1068-sdk-dispatch-preview-canary");
+    expect(dispatchPreview.content?.[0]?.text).toContain("decision=preview");
+    expect(dispatchPreview.content?.[0]?.text).toContain("dispatch=no");
+
+    const dispatchMismatch = dispatchTool.execute("tc-sdk-dispatch-mismatch", {
+      run_id: "task-bud-1068-sdk-dispatch-preview-canary",
+      goal: "Preview SDK dispatch mismatch.",
+      provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+      declared_files: ["packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts"],
+      timeout_ms: 90_000,
+      tool_allowlist: ["read", "grep", "find", "ls"],
+      validation_gate_known: true,
+      rollback_plan_known: true,
+      budget_decision: "ok",
+      budget_evidence: "Spark model-specific capacity available",
+      budget_evidence_provider: "openai-codex/gpt-5.3-codex-spark",
+      abort_known: true,
+      event_stream_known: true,
+      final_output_contract_known: true,
+      execute: true,
+      operator_confirmation: "wrong confirmation",
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
+    expect(dispatchMismatch.details?.processStartAllowed).toBe(false);
+    expect(dispatchMismatch.content?.[0]?.text).toContain("operator-confirmation-mismatch");
   });
 
   it("classifies runner failures before another worker retry", () => {

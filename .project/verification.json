@@ -15281,6 +15281,15 @@
       "method": "focused-test-and-live-packet-inspection",
       "timestamp": "2026-05-10T04:00:59.665Z",
       "evidence": "Implemented and validated dual-executor report-only lane: executor strategy packet keeps subprocess retained and SDK non-replacement; SDK in-process preview packet models createAgentSession contract; scenario selection covers Windows silent failure, devcontainer/process-isolation subprocess probe, direct event stream SDK preference; dirty-state fail-closed gates block both packets. Validations: focused vitest guardrails-agent-spawn-readiness.test.ts -> 38 passed; git diff --check passed; marker checks passed; post-reload live packets with unexpected_dirty=true both returned blocked dispatch=no authorization=none."
+    },
+    {
+      "id": "VERIFY-TASK-BUD-1068-SDK-DISPATCH-GATE-20260510",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "implementation-and-focused-test",
+      "timestamp": "2026-05-10T04:22:07.286Z",
+      "evidence": "Added first-party SDK/in-process dispatch gate agent_run_sdk_in_process_dispatch. It previews by default, requires execute=true plus exact human confirmation phrase before starting exactly one SDK AgentSession worker, writes registry/log evidence, captures text deltas/outputBytes, records completed/failed/timed-out states, aborts on timeout, and preserves no-dispatch behavior for preview/mismatch. Validations: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 38 passed; git diff --check -> pass; tsx import of guardrails-core-agent-spawn-readiness-surface.ts -> import-ok; marker checks for dispatch surface and test markers -> pass."
     }
   ]
 }

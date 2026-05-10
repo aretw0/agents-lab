@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import { AuthStorage, createAgentSession, ModelRegistry, SessionManager, type ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { spawn } from "node:child_process";
 import { createWriteStream, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -7,7 +7,7 @@ import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readi
 import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 import { buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
 import { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run-executor-strategy";
-import { buildAgentRunSdkInProcessPacket } from "./guardrails-core-agent-run-sdk-preview";
+import { buildAgentRunSdkInProcessPacket, type AgentRunSdkInProcessPacketResult } from "./guardrails-core-agent-run-sdk-preview";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunRegistryEntry, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
@@ -91,6 +91,107 @@ function appendAgentRunLogLine(logPath: string, line: string): void {
 function formatAgentRunnerArgvForLog(args: string[], maxChars = 2000): string {
   const rendered = JSON.stringify(args);
   return rendered.length <= maxChars ? rendered : `${rendered.slice(0, maxChars)}...[truncated:${rendered.length - maxChars}]`;
+}
+
+function resolveSdkModelRef(providerModelRef: string): { provider: string; modelId: string } | undefined {
+  const slashIndex = providerModelRef.indexOf("/");
+  if (slashIndex <= 0 || slashIndex >= providerModelRef.length - 1) return undefined;
+  return { provider: providerModelRef.slice(0, slashIndex), modelId: providerModelRef.slice(slashIndex + 1) };
+}
+
+function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPacketResult): { logPath: string } {
+  const runId = packet.runSpec.runId;
+  const logPath = path.join(ctxCwd, ".pi", "reports", `${runId}.sdk.log`);
+  const startedAtIso = new Date().toISOString();
+  const initialEntry: AgentRunRegistryEntry = {
+    runId,
+    state: "running",
+    providerModelRef: packet.runSpec.providerModelRef,
+    cwd: packet.runSpec.cwd,
+    declaredFiles: packet.runSpec.declaredFiles,
+    logPath,
+    timeoutMs: packet.runSpec.timeoutMs,
+    startedAtIso,
+    lastEventAtIso: startedAtIso,
+  };
+  writeRegistryEntry(ctxCwd, initialEntry);
+  appendAgentRunLogLine(logPath, `[sdk-runner] starting runId=${runId} cwd=${packet.runSpec.cwd} model=${packet.runSpec.providerModelRef} session=${packet.runSpec.sessionMode}`);
+  appendAgentRunLogLine(logPath, `[sdk-runner] tools=${packet.runSpec.toolAllowlist.join(",")}`);
+
+  void (async () => {
+    let outputBytes = 0;
+    let timedOut = false;
+    let session: Awaited<ReturnType<typeof createAgentSession>>["session"] | undefined;
+    const finish = (entry: Partial<AgentRunRegistryEntry>) => {
+      writeRegistryEntry(ctxCwd, {
+        ...initialEntry,
+        ...entry,
+        outputBytes: entry.outputBytes ?? outputBytes,
+        lastEventAtIso: new Date().toISOString(),
+      });
+    };
+
+    try {
+      const resolved = resolveSdkModelRef(packet.runSpec.providerModelRef);
+      if (!resolved) throw new Error("provider-model-ref-invalid");
+      const authStorage = AuthStorage.create();
+      const modelRegistry = ModelRegistry.create(authStorage);
+      const model = modelRegistry.find(resolved.provider, resolved.modelId);
+      if (!model) throw new Error(`model-not-found:${packet.runSpec.providerModelRef}`);
+      const sessionManager = packet.runSpec.sessionMode === "run-session-dir" ? SessionManager.create(packet.runSpec.cwd) : SessionManager.inMemory(packet.runSpec.cwd);
+      const created = await createAgentSession({
+        cwd: packet.runSpec.cwd,
+        model,
+        authStorage,
+        modelRegistry,
+        sessionManager,
+        tools: packet.runSpec.toolAllowlist,
+      });
+      session = created.session;
+      const unsubscribe = session.subscribe((event: unknown) => {
+        const row = event as Record<string, unknown>;
+        if (row.type === "message_update") {
+          const assistantMessageEvent = row.assistantMessageEvent as Record<string, unknown> | undefined;
+          if (assistantMessageEvent?.type === "text_delta" && typeof assistantMessageEvent.delta === "string") {
+            outputBytes += Buffer.byteLength(assistantMessageEvent.delta);
+            appendAgentRunLogLine(logPath, assistantMessageEvent.delta);
+          }
+        } else if (row.type === "tool_execution_end") {
+          appendAgentRunLogLine(logPath, `[sdk-runner] tool_execution_end isError=${String(row.isError ?? "unknown")}`);
+        } else if (row.type === "agent_end" || row.type === "turn_end") {
+          appendAgentRunLogLine(logPath, `[sdk-runner] event=${String(row.type)}`);
+        }
+      });
+      const timeout = setTimeout(() => {
+        timedOut = true;
+        appendAgentRunLogLine(logPath, `[sdk-runner] timeout timeoutMs=${packet.runSpec.timeoutMs}; aborting session`);
+        void session?.abort();
+      }, packet.runSpec.timeoutMs);
+      try {
+        await session.prompt(packet.runSpec.goal);
+      } finally {
+        clearTimeout(timeout);
+        unsubscribe();
+        session.dispose();
+      }
+      if (timedOut) {
+        finish({ state: "timed-out", errorCode: "sdk-runner-timeout", errorMessage: "SDK worker timed out and abort was requested", outputBytes });
+        appendAgentRunLogLine(logPath, `[sdk-runner] close state=timed-out outputBytes=${outputBytes}`);
+        return;
+      }
+      finish({ state: "completed", outputBytes });
+      appendAgentRunLogLine(logPath, `[sdk-runner] close state=completed outputBytes=${outputBytes}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      try { await session?.abort(); } catch { /* best-effort abort */ }
+      try { session?.dispose(); } catch { /* best-effort dispose */ }
+      finish({ state: "failed", errorCode: "sdk-runner-failed", errorMessage: message, outputBytes });
+      appendAgentRunLogLine(logPath, `[sdk-runner] failure code=sdk-runner-failed message=${message}`);
+      appendAgentRunLogLine(logPath, `[sdk-runner] close state=failed outputBytes=${outputBytes}`);
+    }
+  })();
+
+  return { logPath };
 }
 
 export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): void {
@@ -872,6 +973,107 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_sdk_in_process_packet",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_sdk_in_process_dispatch",
+    label: "Agent Run SDK In-Process Dispatch",
+    description: "First-party SDK/in-process worker gate. Preview by default; execute=true requires exact human confirmation and starts only one SDK AgentSession worker.",
+    parameters: Type.Object({
+      run_id: Type.Optional(Type.String({ description: "Future SDK worker run id." })),
+      goal: Type.Optional(Type.String({ description: "Run goal/prompt for the SDK worker." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference." })),
+      cwd: Type.Optional(Type.String({ description: "Worker cwd. For execute=true must match current cwd." })),
+      declared_files: Type.Optional(Type.Array(Type.String(), { description: "Exact declared file scope for parent validation." })),
+      timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds." })),
+      tool_allowlist: Type.Optional(Type.Array(Type.String(), { description: "SDK tool allowlist." })),
+      session_mode: Type.Optional(Type.String({ description: "SDK session mode: in-memory or run-session-dir." })),
+      file_contract: Type.Optional(Type.String({ description: "read-only or mutation." })),
+      validation_gate_known: Type.Optional(Type.Boolean({ description: "Whether parent-side validation is known before any dispatch." })),
+      rollback_plan_known: Type.Optional(Type.Boolean({ description: "Whether non-destructive rollback is known." })),
+      budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision: ok, warn, blocked, or unknown." })),
+      budget_evidence: Type.Optional(Type.String({ description: "Scoped provider/model budget evidence." })),
+      budget_evidence_source: Type.Optional(Type.String({ description: "Budget evidence source." })),
+      budget_evidence_provider: Type.Optional(Type.String({ description: "Provider named by evidence; may include provider/model scope." })),
+      budget_evidence_generated_at_iso: Type.Optional(Type.String({ description: "ISO timestamp for structured budget evidence freshness checks." })),
+      budget_evidence_max_age_ms: Type.Optional(Type.Number({ description: "Optional max age for structured budget evidence freshness." })),
+      abort_known: Type.Optional(Type.Boolean({ description: "Whether safe SDK abort is known." })),
+      event_stream_known: Type.Optional(Type.Boolean({ description: "Whether SDK event stream capture is known." })),
+      final_output_contract_known: Type.Optional(Type.Boolean({ description: "Whether final output bytes/contract is known." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
+      unexpected_dirty: Type.Optional(Type.Boolean({ description: "Blocks when workspace dirty state is unexpected." })),
+      execute: Type.Optional(Type.Boolean({ description: "When true, start exactly one SDK worker after exact confirmation." })),
+      operator_confirmation: Type.Optional(Type.String({ description: "Must exactly equal the packet humanConfirmationPhrase for execute=true." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const packet = buildAgentRunSdkInProcessPacket({
+        runId: typeof p.run_id === "string" ? p.run_id : undefined,
+        goal: typeof p.goal === "string" ? p.goal : undefined,
+        providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
+        cwd: typeof p.cwd === "string" ? p.cwd : ctx?.cwd,
+        declaredFiles: asOptionalStringArray(p.declared_files),
+        timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
+        toolAllowlist: asOptionalStringArray(p.tool_allowlist),
+        sessionMode: typeof p.session_mode === "string" ? p.session_mode : undefined,
+        fileContract: typeof p.file_contract === "string" ? p.file_contract : undefined,
+        validationGateKnown: asOptionalBoolean(p.validation_gate_known),
+        rollbackPlanKnown: asOptionalBoolean(p.rollback_plan_known),
+        budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
+        budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
+        budgetEvidenceSource: typeof p.budget_evidence_source === "string" ? p.budget_evidence_source : undefined,
+        budgetEvidenceProvider: typeof p.budget_evidence_provider === "string" ? p.budget_evidence_provider : undefined,
+        budgetEvidenceGeneratedAtIso: typeof p.budget_evidence_generated_at_iso === "string" ? p.budget_evidence_generated_at_iso : undefined,
+        budgetEvidenceMaxAgeMs: typeof p.budget_evidence_max_age_ms === "number" ? p.budget_evidence_max_age_ms : undefined,
+        abortKnown: asOptionalBoolean(p.abort_known),
+        eventStreamKnown: asOptionalBoolean(p.event_stream_known),
+        finalOutputContractKnown: asOptionalBoolean(p.final_output_contract_known),
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+        unexpectedDirty: asOptionalBoolean(p.unexpected_dirty),
+      });
+      const executeRequested = p.execute === true;
+      const operatorConfirmation = typeof p.operator_confirmation === "string" ? p.operator_confirmation : "";
+      const existingEntry = packet.runSpec.runId ? readRegistryEntry(ctx.cwd, packet.runSpec.runId) : undefined;
+      const blockers = [...packet.blockers];
+      if (packet.decision !== "ready-for-human-decision") blockers.push("sdk-packet-blocked");
+      if (existingEntry?.state === "running") blockers.push("run-already-running");
+      if (executeRequested && packet.runSpec.cwd !== ctx.cwd) blockers.push("execute-cwd-mismatch");
+      if (executeRequested && operatorConfirmation !== packet.humanConfirmationPhrase) blockers.push("operator-confirmation-mismatch");
+      const dispatchAllowed = executeRequested && blockers.length === 0;
+      const started = dispatchAllowed ? startSdkInProcessWorker(ctx.cwd, packet) : undefined;
+      const decision = dispatchAllowed ? "dispatched" : blockers.length > 0 ? "blocked" : "preview";
+      const result = {
+        mode: "agent-run-sdk-in-process-dispatch" as const,
+        activation: "none" as const,
+        authorization: dispatchAllowed ? "explicit-human" as const : "none" as const,
+        dispatchAllowed,
+        processStartAllowed: dispatchAllowed,
+        processStopAllowed: false,
+        requiresHumanDecision: true,
+        singleRunOnly: true,
+        decision,
+        blockers,
+        executeRequested,
+        runId: packet.runSpec.runId,
+        logPath: started?.logPath,
+        packet,
+        humanConfirmationPhrase: packet.humanConfirmationPhrase,
+        summary: [
+          "agent-run-sdk-in-process-dispatch:",
+          `decision=${decision}`,
+          `runId=${packet.runSpec.runId || "unknown"}`,
+          `execute=${executeRequested ? "yes" : "no"}`,
+          `dispatch=${dispatchAllowed ? "yes" : "no"}`,
+          started?.logPath ? `logPath=${started.logPath}` : undefined,
+          blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+        ].filter(Boolean).join(" "),
+      };
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_sdk_in_process_dispatch",
         summary: result.summary,
         details: result,
       });

@@ -1,55 +1,56 @@
 {
-  "timestamp": "2026-05-10T04:01:20.782Z",
-  "context": "Post-reload live validation completed for dirty-state fail-closed gates. Both agent_run_executor_strategy_packet and agent_run_sdk_in_process [snip] open/deferred rather than auto-closed. [truncated:+342 chars]",
+  "timestamp": "2026-05-10T04:22:20.710Z",
+  "context": "Implemented first-party SDK/in-process worker dispatch gate in packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts. [snip] quired before live tool can be trusted. [truncated:+661 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Commit verification/handoff state.",
-    "Keep TASK-BUD-1068 open until TASK-BUD-1066 dependency is resolved or dependency policy is intentionally reconciled.",
-    "Continue with TASK-BUD-1066 runner stabilization or dependency reconciliation before closure."
+    "Commit SDK dispatch gate implementation.",
+    "Ask/recommend /reload before using live agent_run_sdk_in_process_dispatch.",
+    "Recommended first canary after reload: runId task-bud-1068-sdk-readonly-self-check, read-only [snip] 8-sdk-readonly-self-check. [truncated:+129 chars]"
   ],
   "blockers": [
-    "TASK-BUD-1068 closure blocked by unresolved dependency TASK-BUD-1066.",
-    "No SDK worker dispatch is implemented or authorized yet.",
-    "Subprocess canary evidence remains silent-runner-failure on current Windows pa [snip] do not retry blindly. [truncated:+3 chars]"
+    "Live runtime must be reloaded after this source change before dispatch tool behavior is trusted.",
+    "No protected scope until SDK worker reliability evidence exists.",
+    "Subprocess Windows lane remains paused for blind retries; SDK lane should be used first locally."
   ],
   "recent_validation": [
-    "git_dirty_snapshot -> clean before live checks",
-    "agent_run_executor_strategy_packet unexpected_dirty=true -> decision=blocked, blockers=unexpec [snip] d-dirty-state, dispatch=no [truncated:+2 chars]",
-    "agent_run_sdk_in_process_packet unexpected_dirty=true -> decision=blocked, blockers=unexpected-dirty-state, dispatch=no"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 38 passed",
+    "git diff --check -> pass",
+    "npx tsx -e import guardrails-core-agent-spawn-readiness-surface.ts -> import-ok"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1068-DUAL-EXECUTOR-PACKETS-20260510",
+      "task:TASK-BUD-1068-SDK-DISPATCH-GATE-20260510",
+      "task:TASK-BUD-1068-SDK-READONLY-SELF-CHECK",
       "commit:20260510"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T04:01:20.782Z",
+    "generatedAtIso": "2026-05-10T04:22:20.710Z",
     "level": "warn",
-    "percent": 50,
+    "percent": 30,
     "action": "continue",
-    "recommendation": "commit-verification-keep-task-open",
+    "recommendation": "commit-then-reload-then-exact-confirm-sdk-canary",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T04:01:20.782Z",
+      "atIso": "2026-05-10T04:22:20.710Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 50,
+      "percent": 30,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-verification-keep-task-open"
+      "recommendation": "commit-then-reload-then-exact-confirm-sdk-canary"
     }
   ]
 }
