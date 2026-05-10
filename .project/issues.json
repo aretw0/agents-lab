@@ -1160,6 +1160,18 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mozf3v9o",
+      "title": "The agent noticed a real issue—the worker lacked declared_files in context—but chose not to fix the broken flow and instead deferred the root-cause correction to later, leaving the task unresolved.",
+      "body": "The monitor feedback was evaluated after reload. The declared_files context issue was already fixed in commit 18fbdda2 by injecting declared_files into the SDK worker system prompt and runtime goal; reload was completed before the next scoped diagnostic preview. Remaining TASK-BUD-1066 work is the downstream subprocess diagnostic patch, not the declared_files context fix.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "resolved",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor",
+      "resolved_by": "18fbdda2 fix(agents): surface sdk declared files"
     }
   ]
 }
