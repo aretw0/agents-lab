@@ -15335,6 +15335,15 @@
       "method": "scoped-sdk-diagnostic+focused-test",
       "timestamp": "2026-05-10T07:05:30.863Z",
       "evidence": "Exact-confirmed SDK diagnostic retry task-bud-1066-sdk-scoped-diagnostic-review-2 used visible declared_files and scoped read/grep policy; tool calls were successful (isError=false) until maxToolCalls guard, with git clean and outputBytes=4165. The partial evidence confirmed existing silent-runner-failure log has argv/source but lacks runtime preflight details. Implemented local subprocess diagnostic hardening: agent_run_task_dispatch now logs platform/node/cwdExists, commandExists, entrypointExists before spawn; close log includes signal and timedOut; timeout emits runner-timeout and registry state timed-out; silent-runner-failure message now points to preflight evidence and next provider/bootstrap/argv parsing probe. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 40 passed; git diff --check passed; marker check for preflight/timeout/signal markers passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-CWD-CANON-20260510",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-10T13:02:42.575Z",
+      "evidence": "Added shared execution cwd canonicalization primitive for control-plane surfaces and worker lanes. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 41 passed; git diff --check -> passed."
     }
   ]
 }

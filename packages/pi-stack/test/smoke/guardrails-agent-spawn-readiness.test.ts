@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunSdkInProcessPacket, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildDeclaredFileScopedSdkWorkerTools, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, evaluateDeclaredPathPolicy, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunSdkInProcessPacket, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildDeclaredFileScopedSdkWorkerTools, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, evaluateDeclaredPathPolicy, resolveExecutionCwdParam, resolveProviderExecutionBudgetEvidence, sameCwd } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -114,6 +114,29 @@ describe("agent spawn readiness contract", () => {
       recommendationCode: "agent-run-ready-for-human-decision",
       blockers: [],
     });
+  });
+
+  it("canonicalizes execution cwd inputs for control-plane surfaces", () => {
+    const cwd = process.cwd();
+    const cwdWithTrailingSeparator = `${cwd}${path.sep}`;
+
+    expect(resolveExecutionCwdParam(undefined, cwd)).toBe(cwd);
+    expect(resolveExecutionCwdParam("   ", cwd)).toBe(cwd);
+    expect(resolveExecutionCwdParam(cwdWithTrailingSeparator, cwd)).toBe(cwd);
+    expect(sameCwd(cwdWithTrailingSeparator, cwd)).toBe(true);
+
+    const abortPlan = buildAgentRunAbortPlan({
+      runId: "cwd-normalized-abort",
+      entry: {
+        runId: "cwd-normalized-abort",
+        state: "running",
+        pid: 12345,
+        cwd: cwdWithTrailingSeparator,
+      },
+      cwdExpected: cwd,
+      execute: false,
+    });
+    expect(abortPlan.blockers).not.toContain("cwd-mismatch");
   });
 
   it("keeps provider execution budget evidence generic for control-plane and agent starts", () => {

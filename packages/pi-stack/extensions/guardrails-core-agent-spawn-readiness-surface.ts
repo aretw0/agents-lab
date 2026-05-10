@@ -12,6 +12,7 @@ import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegist
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 import { readTasksBlockCached } from "./project-board-model";
+import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
 import { buildDeclaredFileScopedSdkWorkerTools } from "./guardrails-core-tool-policy";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
@@ -609,7 +610,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const taskId = typeof p.task_id === "string" ? p.task_id : "";
-      const cwd = typeof p.cwd === "string" ? p.cwd : ctx.cwd;
+      const cwd = resolveExecutionCwdParam(p.cwd, ctx.cwd);
       const { block } = readTasksBlockCached(cwd);
       const task = block.tasks.find((row) => row.id === taskId);
       const result = buildAgentRunTaskPacket({
@@ -666,7 +667,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const taskId = typeof p.task_id === "string" ? p.task_id : "";
-      const cwd = typeof p.cwd === "string" ? p.cwd : ctx.cwd;
+      const cwd = resolveExecutionCwdParam(p.cwd, ctx.cwd);
       const { block } = readTasksBlockCached(cwd);
       const task = block.tasks.find((row) => row.id === taskId);
       const existingEntry = readRegistryEntry(ctx.cwd, taskId);
@@ -726,7 +727,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const taskId = typeof p.task_id === "string" ? p.task_id : "";
-      const cwd = typeof p.cwd === "string" ? p.cwd : ctx.cwd;
+      const cwd = resolveExecutionCwdParam(p.cwd, ctx.cwd);
       const { block } = readTasksBlockCached(cwd);
       const task = block.tasks.find((row) => row.id === taskId);
       const basePacket = buildAgentRunTaskStartPacket({
@@ -839,7 +840,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const taskId = typeof p.task_id === "string" ? p.task_id : "";
-      const cwd = typeof p.cwd === "string" ? p.cwd : ctx.cwd;
+      const cwd = resolveExecutionCwdParam(p.cwd, ctx.cwd);
       const { block } = readTasksBlockCached(cwd);
       const task = block.tasks.find((row) => row.id === taskId);
       const basePacket = buildAgentRunTaskStartPacket({
@@ -889,7 +890,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const blockers = [...packet.blockers];
       if (packet.decision !== "ready-for-human-decision") blockers.push("task-start-packet-blocked");
       if (existingEntry?.state === "running") blockers.push("run-already-running");
-      if (executeRequested && cwd !== ctx.cwd) blockers.push("execute-cwd-mismatch");
+      if (executeRequested && !sameCwd(cwd, ctx.cwd)) blockers.push("execute-cwd-mismatch");
       if (executeRequested && operatorConfirmation !== packet.humanConfirmationPhrase) blockers.push("operator-confirmation-mismatch");
       const dispatchAllowed = executeRequested && blockers.length === 0;
       let pid: number | undefined;
@@ -1098,7 +1099,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         runId: typeof p.run_id === "string" ? p.run_id : undefined,
         goal: typeof p.goal === "string" ? p.goal : undefined,
         providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
-        cwd: typeof p.cwd === "string" ? p.cwd : ctx?.cwd,
+        cwd: resolveExecutionCwdParam(p.cwd, ctx.cwd),
         declaredFiles: asOptionalStringArray(p.declared_files),
         timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
         toolAllowlist: asOptionalStringArray(p.tool_allowlist),
@@ -1162,7 +1163,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         runId: typeof p.run_id === "string" ? p.run_id : undefined,
         goal: typeof p.goal === "string" ? p.goal : undefined,
         providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
-        cwd: typeof p.cwd === "string" ? p.cwd : ctx?.cwd,
+        cwd: resolveExecutionCwdParam(p.cwd, ctx.cwd),
         declaredFiles: asOptionalStringArray(p.declared_files),
         timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
         toolAllowlist: asOptionalStringArray(p.tool_allowlist),
@@ -1188,7 +1189,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const blockers = [...packet.blockers];
       if (packet.decision !== "ready-for-human-decision") blockers.push("sdk-packet-blocked");
       if (existingEntry?.state === "running") blockers.push("run-already-running");
-      if (executeRequested && packet.runSpec.cwd !== ctx.cwd) blockers.push("execute-cwd-mismatch");
+      if (executeRequested && !sameCwd(packet.runSpec.cwd, ctx.cwd)) blockers.push("execute-cwd-mismatch");
       if (executeRequested && operatorConfirmation !== packet.humanConfirmationPhrase) blockers.push("operator-confirmation-mismatch");
       const dispatchAllowed = executeRequested && blockers.length === 0;
       const started = dispatchAllowed ? startSdkInProcessWorker(ctx.cwd, packet) : undefined;
@@ -1244,7 +1245,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const runId = typeof p.run_id === "string" ? p.run_id : "";
-      const cwd = typeof p.cwd === "string" ? p.cwd : ctx.cwd;
+      const cwd = resolveExecutionCwdParam(p.cwd, ctx.cwd);
       const entry = readRegistryEntry(ctx.cwd, runId);
       const result = buildAgentRunRegistryUpsertPacket({
         runId,

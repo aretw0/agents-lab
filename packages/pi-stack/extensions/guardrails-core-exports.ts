@@ -1,3 +1,5 @@
+export { normalizeCwdForCompare, resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
+
 export {
   resolveBloatSmellConfig,
   shouldEmitBloatSmellSignal,

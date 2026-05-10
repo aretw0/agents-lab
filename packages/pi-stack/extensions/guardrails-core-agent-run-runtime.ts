@@ -1,3 +1,5 @@
+import { sameCwd } from "./guardrails-core-execution-context";
+
 export type AgentRunState = "planned" | "running" | "completed" | "failed" | "timed-out" | "aborted" | "unknown";
 export type AgentRunAbortDecision = "dry-run" | "abort-ready" | "blocked";
 export type AgentRunContractDecision = "pass" | "partial" | "fail";
@@ -454,7 +456,7 @@ export function buildAgentRunAbortPlan(input: AgentRunAbortPlanInput = {}): Agen
   if (!entry) block("agent-run-abort-blocked-missing-run", "run-not-found");
   if (entry && normalizeState(entry.state) !== "running") block("agent-run-abort-blocked-not-running", "run-not-running");
   if (entry && !pid) block("agent-run-abort-blocked-missing-pid", "pid-missing");
-  if (entry && cwdExpected && normalizeText(entry.cwd) !== cwdExpected) block("agent-run-abort-blocked-cwd-mismatch", "cwd-mismatch");
+  if (entry && cwdExpected && !sameCwd(normalizeText(entry.cwd), cwdExpected)) block("agent-run-abort-blocked-cwd-mismatch", "cwd-mismatch");
   if (execute && !operatorConfirmed) block("agent-run-abort-blocked-human-confirmation", "human-confirmation-missing");
 
   const decision: AgentRunAbortDecision = blockers.length > 0 ? "blocked" : execute ? "abort-ready" : "dry-run";
