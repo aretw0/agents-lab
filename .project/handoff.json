@@ -1,56 +1,55 @@
 {
-  "timestamp": "2026-05-10T04:22:20.710Z",
-  "context": "Implemented first-party SDK/in-process worker dispatch gate in packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts. [snip] quired before live tool can be trusted. [truncated:+661 chars]",
+  "timestamp": "2026-05-10T04:43:26.278Z",
+  "context": "Exact-confirmed SDK canary task-bud-1068-sdk-readonly-self-check was dispatched through agent_run_sdk_in_process_dispatch after a first block [snip] nored/untracked not present in status). [truncated:+474 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Commit SDK dispatch gate implementation.",
-    "Ask/recommend /reload before using live agent_run_sdk_in_process_dispatch.",
-    "Recommended first canary after reload: runId task-bud-1068-sdk-readonly-self-check, read-only [snip] 8-sdk-readonly-self-check. [truncated:+129 chars]"
+    "Do not mark SDK lane reliable yet.",
+    "Recommended next local-safe improvement: harden SDK runner/canary contract to avoid tool loops [snip] ent evidence more clearly. [truncated:+30 chars]",
+    "If retrying, use a new exact-confirmed minimal no-tool or single-read smoke with much simpler [snip] -sdk-minimal-output-smoke. [truncated:+110 chars]"
   ],
   "blockers": [
-    "Live runtime must be reloaded after this source change before dispatch tool behavior is trusted.",
-    "No protected scope until SDK worker reliability evidence exists.",
-    "Subprocess Windows lane remains paused for blind retries; SDK lane should be used first locally."
+    "SDK worker dispatch works mechanically but first read-only canary timed out; not reliable yet.",
+    "Need exact human confirmation for any retry/new runId.",
+    "Protected scope remains locked until worker reliability improves."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 38 passed",
-    "git diff --check -> pass",
-    "npx tsx -e import guardrails-core-agent-spawn-readiness-surface.ts -> import-ok"
+    "git_dirty_snapshot before dispatch -> clean=yes",
+    "agent_run_sdk_in_process_dispatch with explicit cwd -> blocked execute-cwd-mismatch; no dispatch",
+    "agent_run_sdk_in_process_dispatch with default cwd and exact confirmation -> dispatched"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1068-SDK-DISPATCH-GATE-20260510",
       "task:TASK-BUD-1068-SDK-READONLY-SELF-CHECK",
-      "commit:20260510"
+      "task:TASK-BUD-1068-SDK-MINIMAL-OUTPUT-SMOKE"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T04:22:20.710Z",
+    "generatedAtIso": "2026-05-10T04:43:26.278Z",
     "level": "warn",
-    "percent": 30,
+    "percent": 32,
     "action": "continue",
-    "recommendation": "commit-then-reload-then-exact-confirm-sdk-canary",
+    "recommendation": "harden-sdk-runner-or-exact-confirm-minimal-smoke",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T04:22:20.710Z",
+      "atIso": "2026-05-10T04:43:26.278Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 30,
+      "percent": 32,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-then-exact-confirm-sdk-canary"
+      "recommendation": "harden-sdk-runner-or-exact-confirm-minimal-smoke"
     }
   ]
 }
