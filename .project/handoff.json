@@ -1,22 +1,22 @@
 {
-  "timestamp": "2026-05-10T12:36:33.865Z",
-  "context": "Saved Spark quota settings and UI follow-up; previewed exactly one SDK in-process read-only canary packet after reload. Packet runId=task-bud [snip] on=none. No worker/canary was executed. [truncated:+135 chars]",
+  "timestamp": "2026-05-10T12:42:01.693Z",
+  "context": "Reconciled accidental duplicate UI task. TASK-BUD-1069 was a duplicate of existing planned TASK-BUD-1006 for quota footer ambiguity. Moved Op [snip] board_update on existing planned task. [truncated:+179 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "If operator explicitly confirms the exact runId, execute only task-bud-1068-sdk-cadence-readon [snip] worker/subagent critique. [truncated:+40 chars]",
-    "Defer TASK-BUD-1069 UI footer semantics to general UI quota review.",
-    "Continue TASK-BUD-1068 without automatic dispatch."
+    "Commit board/handoff duplicate reconciliation.",
+    "Continue TASK-BUD-1068 worker/subagent focus; do not dispatch without exact runId confirmation.",
+    "Use duplicate preflight before any future board_task_create."
   ],
   "blockers": [
     "No canary/worker dispatch authorized by charter without exact runId confirmation.",
     "TASK-BUD-1066 root cause still unresolved."
   ],
   "recent_validation": [
-    "git clean before preview after a83171a2 save commit.",
-    "quota route checked; Spark-specific WHAM budget evidence manually scoped for preview.",
-    "agent_run_sdk_in_process_dispatch execute=false -> decision=preview dispatch=no."
+    "Found existing TASK-BUD-1006 planned for footer compact quota ambiguity.",
+    "Updated TASK-BUD-1006 with Codex/Spark footer evidence.",
+    "Cancelled TASK-BUD-1069 as duplicate."
   ],
   "recent_commits": [
     "e88ed5e8 fix(quota): infer codex model-specific windows",
@@ -26,23 +26,23 @@
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1068-SDK-CADENCE-READONLY-PREVIEW",
       "task:TASK-BUD-1069",
-      "commit:a83171a2"
+      "task:TASK-BUD-1006",
+      "commit:e88ed5e8"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T12:36:33.865Z",
+    "generatedAtIso": "2026-05-10T12:42:01.693Z",
     "level": "warn",
     "action": "continue",
-    "recommendation": "await-exact-runid-or-continue-readonly",
+    "recommendation": "continue-workers-subagents",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T12:36:33.865Z",
+      "atIso": "2026-05-10T12:42:01.693Z",
       "reason": "manual_checkpoint",
       "level": "warn",
       "percent": 0,
@@ -52,7 +52,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "await-exact-runid-or-continue-readonly"
+      "recommendation": "continue-workers-subagents"
     }
   ]
 }

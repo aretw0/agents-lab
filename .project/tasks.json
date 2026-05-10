@@ -22449,7 +22449,7 @@
         "Validar com teste/snapshot focal de copy operator-visible."
       ],
       "milestone": "operator-visible-ui-clarity-2026-05",
-      "notes": "Criada por feedback humano após ver footer `✓dashscope:0% ✗codex:96%`: o usuário não entendeu o significado dos símbolos nem percentuais. TASK-BUD-968 já existia/completou legenda, mas a experiência ainda falha na superfície visível.\n[provenance:human] source_task=TASK-BUD-968 reason=Feedback real mostra que a legenda/documentação ainda não torna o footer autoexplicativo no momento de uso."
+      "notes": "Criada por feedback humano após ver footer `✓dashscope:0% ✗codex:96%`: o usuário não entendeu o significado dos símbolos nem percentuais. TASK-BUD-968 já existia/completou legenda, mas a experiência ainda falha na superfície visível.\n[provenance:human] source_task=TASK-BUD-968 reason=Feedback real mostra que a legenda/documentação ainda não torna o footer autoexplicativo no momento de uso.\n2026-05-10: Evidência nova do caso OpenAI Codex/Spark deve ser tratada aqui, não em task nova. Exemplo observado no footer: `✓dashscope:0% ✗codex:122% ✓codex/gpt-5.3-codex-spark:0%`. Diagnóstico provável: `formatBudgetStatusParts` mostra pressão local por `usedPctTokens|usedPctCost|usedPctRequests` e ignora `dashboardUsedPct`/`dashboardRemainingPct` do WHAM; isso é enganoso quando o agregado Codex está alto/bloqueado mas `gpt-5.3-codex-spark` tem janela/cota separada viva. TASK-BUD-1069 foi cancelada como duplicada desta task."
     },
     {
       "id": "TASK-BUD-1007",
@@ -23850,10 +23850,10 @@
     {
       "id": "TASK-BUD-1069",
       "description": "[P2/UI] Corrigir semântica do footer TUI de quota para janelas OpenAI Codex model-specific WHAM: evitar que o agregado `codex` bloqueado/alto e o Spark `0%` passem impressão errada quando `gpt-5.3-codex-spark` tem cota separada viva.",
-      "status": "planned",
+      "status": "cancelled",
       "priority": "p2",
       "depends_on": [
-        "TASK-BUD-968"
+        "TASK-BUD-1006"
       ],
       "files": [
         "packages/pi-stack/extensions/quota-visibility-model.ts",
@@ -23863,12 +23863,10 @@
         "packages/pi-stack/test/smoke/quota-panel.test.ts"
       ],
       "acceptance_criteria": [
-        "Footer deve diferenciar agregado `openai-codex` de escopo model-specific `openai-codex/gpt-5.3-codex-spark` sem sugerir que Spark está sem uso/cota quando WHAM informa `dashboardUsedPct`/`dashboardRemainingPct`.",
-        "Formato compacto deve preservar anti-clutter e explicar se o percentual é uso local, projeção ou janela viva WHAM.",
-        "Adicionar teste cobrindo exemplo `✓dashscope:0% ✗codex:122% ✓codex/gpt-5.3-codex-spark:0%` e a representação corrigida/deferida."
+        "Cancelada como duplicada de TASK-BUD-1006; evidência foi movida para TASK-BUD-1006."
       ],
       "milestone": "ui-quota-followup",
-      "notes": "2026-05-10: descoberto após separar cota OpenAI Codex agregada vs `gpt-5.3-codex-spark`. Raiz provável: `formatBudgetStatusParts` usa max local `usedPctTokens|usedPctCost|usedPctRequests` e ignora `dashboardUsedPct`/`dashboardRemainingPct`; com budget Spark explícito sem eventos locais, aparece `0%` apesar de WHAM mostrar janela separada com saldo. Deferido para revisão geral de UI; foco atual permanece workers/subagents.\n[provenance:human] source_task=TASK-BUD-1068 reason=Usuário pediu registrar follow-up TUI sem tirar foco de workers/subagents."
+      "notes": "2026-05-10: descoberta após separar cota OpenAI Codex agregada vs `gpt-5.3-codex-spark`; em seguida reconciliada como duplicada da task planejada TASK-BUD-1006 (`operator-visible-ui-clarity-2026-05`). Evidência e diagnóstico movidos para TASK-BUD-1006. Erro de triagem: criação ocorreu após busca estreita por `quota footer/panel`, sem checar task planejada mais ampla. Guardrail operacional: antes de `board_task_create`, fazer duplicate preflight multi-termo e preferir `board_update` em task planejada existente.\n[provenance:human] source_task=TASK-BUD-1068 reason=Usuário pediu registrar follow-up TUI sem tirar foco de workers/subagents."
     }
   ]
 }
