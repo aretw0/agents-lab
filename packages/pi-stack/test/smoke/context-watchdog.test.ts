@@ -2518,6 +2518,8 @@ describe("context-watchdog", () => {
 			expect(checkpointResult.details?.decision).toBe("continue");
 			expect(checkpointResult.details?.reasonCode).toBe("turn-boundary-continue-local");
 			expect(checkpointResult.details?.humanActionRequired).toBe(false);
+			expect(checkpointResult.details?.localSafeMayContinue).toBe(true);
+			expect(checkpointResult.directionPrompt).toBeUndefined();
 			expect(checkpointResult.details?.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
 			expect(checkpointResult.details?.directionPromptCanonical).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
 			expect(checkpointResult.details?.directionPreview?.recommendedOptionId).toBe("similar-lane");
@@ -2528,6 +2530,7 @@ describe("context-watchdog", () => {
 			expect(checkpointResult.content?.[0]?.text).toContain("directionPrompt=similar-lane-or-next-value");
 			expect(checkpointResult.content?.[0]?.text).toContain("directionRecommended=similar-lane");
 			expect(checkpointResult.content?.[0]?.text).toContain("directionOptions=similar-lane:recommended,next-high-value:viable");
+			expect(checkpointResult.content?.[0]?.text).toContain("localSafeMayContinue=yes");
 			expect(checkpointResult.content?.[0]?.text).not.toContain("growthDecision=");
 			expect(checkpointResult.content?.[0]?.text).not.toContain("growthScore=");
 			expect(checkpointResult.content?.[0]?.text).not.toContain("growthSource=");
@@ -2682,6 +2685,7 @@ describe("context-watchdog", () => {
 			expect(askResult.details?.decision).toBe("ask-human");
 			expect(askResult.details?.reasonCode).toBe("turn-boundary-ask-human-decision-required");
 			expect(askResult.details?.humanActionRequired).toBe(true);
+			expect(askResult.details?.localSafeMayContinue).toBe(false);
 			expect(askResult.details?.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
 			expect(askResult.details?.directionPreview?.recommendedOptionId).toBe("next-high-value");
 			expect(askResult.details?.directionPreview?.options?.map((option: { id: string; suitability: string }) => `${option.id}:${option.suitability}`)).toEqual([
@@ -2689,6 +2693,7 @@ describe("context-watchdog", () => {
 				"next-high-value:recommended",
 			]);
 			expect(askResult.content?.[0]?.text).toContain("directionOptions=similar-lane:blocked,next-high-value:recommended");
+			expect(askResult.content?.[0]?.text).toContain("localSafeMayContinue=no");
 		} finally {
 			rmSync(cwdAskHuman, { recursive: true, force: true });
 		}
