@@ -1,15 +1,17 @@
 {
-  "timestamp": "2026-05-10T06:53:49.650Z",
+  "timestamp": "2026-05-10T06:59:32.052Z",
   "context": "Exact-confirmed scoped SDK diagnostic run for TASK-BUD-1066 failed, but usefully: policy wrapper blocked out-of-scope read/grep attempts and [snip] after patch because reload is required. [truncated:+206 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
+    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
     "/reload required before retrying SDK diagnostic with declared_files prompt injection.",
     "After reload, preview a new runId for TASK-BUD-1066 scoped diagnostic; exact confirmation required before dispatch.",
     "If retry succeeds, use its output to implement smallest TASK-BUD-1066 subprocess diagnostic patch."
   ],
   "blockers": [
+    "context-watch-checkpoint-required",
     "Live runtime needs /reload for commit 18fbdda2.",
     "TASK-BUD-1066 unresolved; TASK-BUD-1068 closure remains blocked by dependency.",
     "Exact confirmation required for any next worker run."
@@ -54,6 +56,19 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "reload-before-scoped-diagnostic-retry-with-declared-files-visible"
+    },
+    {
+      "atIso": "2026-05-10T06:59:32.052Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ]
 }
