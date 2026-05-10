@@ -15389,6 +15389,15 @@
       "method": "smoke-test+marker-check",
       "timestamp": "2026-05-10T14:05:55.382Z",
       "evidence": "Implemented and validated local-safe continuation hard-intent signal by extending the existing `turn_boundary_decision_packet`, not creating a new public primitive/surface. Evidence: `localSafeMayContinue` is now a structured packet field and compact summary marker; `finalTurnBrief` remains the briefing object; regression asserts no `operatorBrief`/`continuityContract` fields in this packet; registered surface test asserts details/content expose yes/no; handoff budget compaction drops `context_watch_events` when needed to stay within `LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS`; docs update mentions the field in existing `nudge-free-local-continuity` primitive table. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts --reporter=dot` -> 77 passed; `git diff --check` -> pass; `safe_marker_check docs/primitives/nudge-free-local-continuity.md` -> pass. Commits include b03231c7, eb65b9bb, a166661a, cbad2fc4, fbfbd543, 3f3c38be."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-RUNNER-TIMEOUT-20260510",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test+log-inspection",
+      "timestamp": "2026-05-10T14:14:20.773Z",
+      "evidence": "Local-safe hardening of subprocess failure classification, no worker/canary dispatch. Existing log `.pi/reports/task-bud-1066-subprocess-preflight-canary.log` showed both `failure code=silent-runner-failure` and `failure code=runner-timeout`, `exitCode=124`, `timedOut=yes`, `stdoutBytes=0`, `stderrBytes=0`; prior classification collapsed that into `silent-runner-failure`. Implemented `runner-timeout` as a distinct `AgentRunnerFailureClass` with recommendation `agent-runner-classification-runner-timeout`, timeout/startup-hang probe suggestions, blind retry disabled, and executor strategy treating timeout as subprocess startup failure eligible for SDK diagnostic candidate or off-Windows subprocess probe. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -t \"classifies runner failures|selects subprocess\" --reporter=dot` -> 2 passed; full `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: f9cd7b93."
     }
   ]
 }
