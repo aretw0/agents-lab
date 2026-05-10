@@ -141,6 +141,10 @@ function trimSliceMemoryForBudget(checkpoint: Record<string, unknown>): Record<s
 	}
 	if (jsonChars > LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS) {
 		delete candidate.slice_memory;
+		jsonChars = JSON.stringify(candidate).length;
+	}
+	if (jsonChars > LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS && Array.isArray(candidate.context_watch_events)) {
+		delete candidate.context_watch_events;
 	}
 	return candidate;
 }

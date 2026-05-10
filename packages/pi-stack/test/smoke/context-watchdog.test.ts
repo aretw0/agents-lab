@@ -1545,6 +1545,7 @@ describe("context-watchdog", () => {
 		expect((checkpoint as any).recent_commits).toHaveLength(2);
 		expect((checkpoint as any).next_actions).toHaveLength(3);
 		expect((checkpoint as any).blockers).toHaveLength(3);
+		expect((checkpoint as any).context_watch_events).toBeUndefined();
 	});
 
 	it("assesses and blocks oversized local slice handoff checkpoints", () => {
