@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunSdkInProcessPacket, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunSdkInProcessPacket, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildDeclaredFileScopedSdkWorkerTools, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, evaluateDeclaredPathPolicy, resolveProviderExecutionBudgetEvidence } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -1714,9 +1714,58 @@ describe("agent spawn readiness contract", () => {
     expect(source).toContain("noContextFiles: true");
     expect(source).toContain("resourceLoader=minimal-noExtensions-noSkills-noPrompts-noContext");
     expect(source).toContain("loopGuards maxToolCalls");
+    expect(source).toContain("toolPolicy=");
     expect(source).toContain("sdk-runner-loop-guard");
     expect(source).toContain("sdk-runner-empty-output");
+    expect(source).toContain("sdk-runner-tool-policy-unsupported");
     expect(source).toContain("expandPromptTemplates: false");
+  });
+
+  it("enforces declared file scope through reusable SDK tool policy wrappers", () => {
+    const cwd = process.cwd();
+    const allowed = evaluateDeclaredPathPolicy({ path: "packages/pi-stack/README.md" }, {
+      cwd,
+      declaredFiles: ["packages/pi-stack/README.md"],
+      pathFields: ["path"],
+      requiredPathFields: ["path"],
+    });
+    expect(allowed.ok).toBe(true);
+
+    const outside = evaluateDeclaredPathPolicy({ path: ".project/tasks.json" }, {
+      cwd,
+      declaredFiles: ["packages/pi-stack/README.md"],
+      pathFields: ["path"],
+      requiredPathFields: ["path"],
+    });
+    expect(outside).toMatchObject({ ok: false, reason: "path-outside-declared-files", field: "path" });
+
+    const missing = evaluateDeclaredPathPolicy({ pattern: "silent-runner" }, {
+      cwd,
+      declaredFiles: ["packages/pi-stack/README.md"],
+      pathFields: ["path"],
+      requiredPathFields: ["path"],
+      forbiddenFields: ["glob"],
+    });
+    expect(missing).toMatchObject({ ok: false, reason: "required-path-field-missing", field: "path" });
+
+    const globBlocked = evaluateDeclaredPathPolicy({ pattern: "silent-runner", path: "packages/pi-stack/README.md", glob: "**/*" }, {
+      cwd,
+      declaredFiles: ["packages/pi-stack/README.md"],
+      pathFields: ["path"],
+      requiredPathFields: ["path"],
+      forbiddenFields: ["glob"],
+    });
+    expect(globBlocked).toMatchObject({ ok: false, reason: "forbidden-path-field", field: "glob" });
+
+    const plan = buildDeclaredFileScopedSdkWorkerTools({
+      cwd,
+      declaredFiles: ["packages/pi-stack/README.md"],
+      toolAllowlist: ["read", "grep", "find"],
+    });
+    expect(plan.customTools.map((tool) => tool.name)).toEqual(["read", "grep"]);
+    expect(plan.unsupportedTools).toEqual(["find"]);
+    expect(plan.policySummary.join("\n")).toContain("read:path=>declared-files");
+    expect(plan.policySummary.join("\n")).toContain("grep:path=>declared-files;glob=blocked");
   });
 
   it("classifies runner failures before another worker retry", () => {

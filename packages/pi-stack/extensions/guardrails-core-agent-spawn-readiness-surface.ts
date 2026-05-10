@@ -12,6 +12,7 @@ import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegist
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 import { readTasksBlockCached } from "./project-board-model";
+import { buildDeclaredFileScopedSdkWorkerTools } from "./guardrails-core-tool-policy";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
@@ -189,6 +190,18 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
       await resourceLoader.reload();
       appendAgentRunLogLine(logPath, "[sdk-runner] resourceLoader=minimal-noExtensions-noSkills-noPrompts-noContext");
       appendAgentRunLogLine(logPath, `[sdk-runner] loopGuards maxToolCalls=${maxToolCalls} maxTurns=${maxTurns}`);
+      const toolPolicy = buildDeclaredFileScopedSdkWorkerTools({
+        cwd: packet.runSpec.cwd,
+        declaredFiles: packet.runSpec.declaredFiles,
+        toolAllowlist: packet.runSpec.toolAllowlist,
+      });
+      appendAgentRunLogLine(logPath, `[sdk-runner] toolPolicy=${toolPolicy.policySummary.join(",") || "none"}`);
+      if (toolPolicy.unsupportedTools.length > 0) {
+        const message = `unsupported SDK worker tools without policy metadata: ${toolPolicy.unsupportedTools.join(",")}`;
+        finish({ state: "failed", errorCode: "sdk-runner-tool-policy-unsupported", errorMessage: message, outputBytes });
+        appendAgentRunLogLine(logPath, `[sdk-runner] close state=failed reason=tool-policy-unsupported tools=${toolPolicy.unsupportedTools.join(",")}`);
+        return;
+      }
       const created = await createAgentSession({
         cwd: packet.runSpec.cwd,
         model,
@@ -198,6 +211,7 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
         sessionManager,
         settingsManager,
         tools: packet.runSpec.toolAllowlist,
+        customTools: toolPolicy.customTools,
       });
       session = created.session;
       const unsubscribe = session.subscribe((event: unknown) => {
