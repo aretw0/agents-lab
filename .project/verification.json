@@ -15299,6 +15299,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-10T06:04:23.635Z",
       "evidence": "Hardened SDK in-process runner before any new canary: minimal DefaultResourceLoader disables extensions/skills/prompts/themes/context files, uses SettingsManager.inMemory with compaction/retry off, adds loop guards, captures turn/agent/fallback assistant text, and fails empty output. Validation: vitest guardrails-agent-spawn-readiness 39 passed; git diff --check passed; marker check 9/9 passed. Single-file tsc check still reports pre-existing project typing/tool registration errors unrelated to this slice."
+    },
+    {
+      "id": "VERIFY-TASK-BUD-1068-SDK-MINIMAL-SMOKE-20260510",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-confirmed-sdk-canary",
+      "timestamp": "2026-05-10T06:24:17.086Z",
+      "evidence": "Exact-confirmed SDK in-process canary runId=task-bud-1068-sdk-minimal-output-smoke completed. Dispatch gate required phrase `execute o sdk worker task-bud-1068-sdk-minimal-output-smoke`; agent_run_follow terminal completed; outputBytes=11603; agent_run_outcome_packet contract=pass process=completed recommendation=stop; git dirty snapshot clean after run. Log markers present: resourceLoader=minimal-noExtensions-noSkills-noPrompts-noContext, loopGuards maxToolCalls=3 maxTurns=4, tool_execution_end count=1 isError=false, close state=completed. `rg hedge` hits in log are README content, not stale-extension-ctx; no stale extension ctx marker observed."
     }
   ]
 }
