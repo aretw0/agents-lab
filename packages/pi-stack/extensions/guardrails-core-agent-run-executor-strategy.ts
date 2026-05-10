@@ -84,8 +84,8 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
   const requiresDirectEventStream = input.requiresDirectEventStream === true;
   const mutationRequested = input.mutationRequested === true;
   const unexpectedDirty = input.unexpectedDirty === true;
-  const silentSubprocessFailure = failureClass === "silent-runner-failure";
-  const canProbeSubprocessOffWindows = silentSubprocessFailure && subprocessDiagnosticsAvailable && (devcontainerAvailable || runtimeMode === "linux" || runtimeMode === "devcontainer");
+  const subprocessStartupFailure = failureClass === "silent-runner-failure" || failureClass === "runner-timeout";
+  const canProbeSubprocessOffWindows = subprocessStartupFailure && subprocessDiagnosticsAvailable && (devcontainerAvailable || runtimeMode === "linux" || runtimeMode === "devcontainer");
   const selectionSignals = {
     runtimeMode,
     devcontainerAvailable,
@@ -104,19 +104,19 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     decision = "blocked";
     recommendationCode = "agent-run-executor-strategy-blocked";
     selectionRationale.push("blocked until protected-scope and budget gates are clear");
-  } else if (canProbeSubprocessOffWindows || (requiresProcessIsolation && !silentSubprocessFailure) || (mutationRequested && !requiresDirectEventStream)) {
+  } else if (canProbeSubprocessOffWindows || (requiresProcessIsolation && !subprocessStartupFailure) || (mutationRequested && !requiresDirectEventStream)) {
     decision = "subprocess-first";
     preferredExecutor = "pi-print-subprocess";
     recommendationCode = "agent-run-executor-strategy-subprocess-first";
     selectionRationale.push(canProbeSubprocessOffWindows
       ? "subprocess remains the next maturity probe because devcontainer/Linux evidence can distinguish Windows startup fragility"
       : "subprocess is preferred when process isolation or mutation safety dominates");
-  } else if ((silentSubprocessFailure && subprocessDiagnosticsAvailable && sdkRuntimeAvailable) || (requiresDirectEventStream && sdkRuntimeAvailable)) {
+  } else if ((subprocessStartupFailure && subprocessDiagnosticsAvailable && sdkRuntimeAvailable) || (requiresDirectEventStream && sdkRuntimeAvailable)) {
     decision = "sdk-in-process-candidate";
     preferredExecutor = "pi-sdk-in-process";
     recommendationCode = "agent-run-executor-strategy-sdk-candidate";
-    selectionRationale.push(silentSubprocessFailure
-      ? "SDK/in-process is the next diagnostic candidate because current subprocess evidence is silent and no off-Windows subprocess probe is declared"
+    selectionRationale.push(subprocessStartupFailure
+      ? "SDK/in-process is the next diagnostic candidate because current subprocess startup evidence is not actionable enough and no off-Windows subprocess probe is declared"
       : "SDK/in-process is preferred when direct AgentSession event visibility dominates");
   } else {
     selectionRationale.push("subprocess remains the conservative default while SDK/process signals are insufficient");
@@ -126,8 +126,8 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
   const executorPosture: AgentRunExecutorStrategyPacketResult["executorPosture"] = {
     subprocessRetained: true,
     sdkIsReplacement: false,
-    subprocessBlindRetryAllowed: !silentSubprocessFailure && decision !== "blocked",
-    subprocessMaturityProbe: canProbeSubprocessOffWindows ? "devcontainer-or-linux-canary" : silentSubprocessFailure && subprocessDiagnosticsAvailable ? "devcontainer-or-linux-canary" : "not-needed-yet",
+    subprocessBlindRetryAllowed: !subprocessStartupFailure && decision !== "blocked",
+    subprocessMaturityProbe: canProbeSubprocessOffWindows ? "devcontainer-or-linux-canary" : subprocessStartupFailure && subprocessDiagnosticsAvailable ? "devcontainer-or-linux-canary" : "not-needed-yet",
   };
 
   const executorContracts = [

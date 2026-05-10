@@ -8,6 +8,7 @@ export type AgentRunnerFailureClass =
   | "extension-load-failed"
   | "provider-unavailable"
   | "model-call-failed"
+  | "runner-timeout"
   | "silent-runner-failure"
   | "worker-contract-failed"
   | "unknown";
@@ -70,6 +71,7 @@ export interface AgentRunFailureClassificationResult {
     | "agent-runner-classification-extension-load-failed"
     | "agent-runner-classification-provider-unavailable"
     | "agent-runner-classification-model-call-failed"
+    | "agent-runner-classification-runner-timeout"
     | "agent-runner-classification-silent-needs-evidence"
     | "agent-runner-classification-worker-contract-failed"
     | "agent-runner-classification-missing-evidence"
@@ -302,6 +304,8 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
     classify("provider-unavailable", "agent-runner-classification-provider-unavailable", "provider-unavailable");
   } else if (includesAny(lower, [/model call failed/, /api error/, /stream.*error/, /request failed/, /responses api/, /completion.*failed/])) {
     classify("model-call-failed", "agent-runner-classification-model-call-failed", "model-call-failed");
+  } else if (entry?.state === "timed-out" || normalizeText(entry?.errorCode) === "runner-timeout" || /runner-timeout/.test(logText) || /timedOut=yes/.test(logText) || exitCode === 124) {
+    classify("runner-timeout", "agent-runner-classification-runner-timeout", "runner-timeout");
   } else if (entry?.errorCode === "silent-runner-failure" || /silent-runner-failure/.test(logText) || (exitCode && exitCode !== 0 && childOutputBytes === 0)) {
     classify("silent-runner-failure", "agent-runner-classification-silent-needs-evidence", "silent-runner-failure");
   } else {
@@ -322,9 +326,16 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
       ...(!streamByteSplitCaptured ? ["stream-byte-split-probe"] : []),
       "stderr-preservation-probe",
     ]
-    : failureClass === "worker-contract-failed"
-      ? ["parent-side-contract-validation-probe"]
-      : [];
+    : failureClass === "runner-timeout"
+      ? [
+        "timeout-budget-probe",
+        "startup-hang-probe",
+        ...(argvDiagnostics.cliMode !== "json" ? ["json-mode-structured-probe"] : []),
+        "stderr-preservation-probe",
+      ]
+      : failureClass === "worker-contract-failed"
+        ? ["parent-side-contract-validation-probe"]
+        : [];
 
   const nextActions = failureClass === "silent-runner-failure"
     ? [
@@ -333,6 +344,12 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
       "Compare CLI resolution, builtin-tool filtering, stdout/stderr behavior, and prompt file handoff against known-good local runner examples.",
       "Only after that, retry a tiny exact-confirmed Spark worker canary.",
     ]
+    : failureClass === "runner-timeout"
+      ? [
+        "Do not retry the worker blindly.",
+        "Treat the last subprocess as a startup/handshake hang, not an empty-response success.",
+        "Run a report-only structured startup probe that captures early events, stderr, and elapsed startup phases before any canary retry.",
+      ]
     : failureClass === "provider-unavailable"
       ? ["Refresh provider/model budget and auth evidence before retry."]
       : failureClass === "extension-load-failed"

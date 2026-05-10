@@ -1482,6 +1482,16 @@ describe("agent spawn readiness contract", () => {
     expect(sdkCandidate.summary).toContain("sdkReplacement=no");
     expect(sdkCandidate.selectionRationale.join(" ")).toContain("SDK/in-process is the next diagnostic candidate");
 
+    const timeoutSdkCandidate = buildAgentRunExecutorStrategyPacket({
+      failureClass: "runner-timeout",
+      subprocessDiagnosticsAvailable: true,
+      sdkRuntimeAvailable: true,
+      budgetDecision: "ok",
+    });
+    expect(timeoutSdkCandidate.decision).toBe("sdk-in-process-candidate");
+    expect(timeoutSdkCandidate.executorPosture.subprocessBlindRetryAllowed).toBe(false);
+    expect(timeoutSdkCandidate.summary).toContain("failureClass=runner-timeout");
+
     const devcontainerSubprocessProbe = buildAgentRunExecutorStrategyPacket({
       failureClass: "silent-runner-failure",
       subprocessDiagnosticsAvailable: true,
@@ -1873,6 +1883,24 @@ describe("agent spawn readiness contract", () => {
       ].join("\n"),
     });
     expect(promptOnlyProviderMarker.failureClass).toBe("silent-runner-failure");
+
+    const timeoutResult = classifyAgentRunFailure({
+      runId: "task-bud-1066-subprocess-preflight-canary",
+      entry: { runId: "task-bud-1066-subprocess-preflight-canary", state: "timed-out", exitCode: 124, errorCode: "runner-timeout" },
+      logText: [
+        "[agent-runner] argv=[\"cli.js\",\"--no-session\",\"--model\",\"openai-codex/gpt-5.3-codex-spark\",\"--tools\",\"read,grep,find,ls\",\"--print\",\"@docs/research/agent-runner-maturity-checkpoint-2026-05.md\",\"diagnose\"]",
+        "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr",
+        "[agent-runner] failure code=runner-timeout message=subprocess exceeded timeoutMs=60000",
+        "[agent-runner] close exitCode=124 signal=SIGTERM timedOut=yes childOutputBytes=0 stdoutBytes=0 stderrBytes=0",
+      ].join("\n"),
+    });
+    expect(timeoutResult.failureClass).toBe("runner-timeout");
+    expect(timeoutResult.recommendationCode).toBe("agent-runner-classification-runner-timeout");
+    expect(timeoutResult.preflightDecision).toBe("needs-evidence");
+    expect(timeoutResult.retryAllowed).toBe(false);
+    expect(timeoutResult.nextProbeProfiles).toContain("timeout-budget-probe");
+    expect(timeoutResult.nextProbeProfiles).toContain("startup-hang-probe");
+    expect(timeoutResult.nextActions.join("\n")).toContain("startup/handshake hang");
 
     const providerUnavailable = classifyAgentRunFailure({
       runId: "quota",
