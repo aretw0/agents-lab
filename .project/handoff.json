@@ -1,49 +1,46 @@
 {
-  "timestamp": "2026-05-10T13:55:41.256Z",
-  "context": "Continuidade/handoff hardening: após ampliar smoke para context-watchdog.test.ts, encontrei falha real de orçamento de checkpoint compacto (2 [snip] omada graciosa sem aumentar superfície. [truncated:+213 chars]",
+  "timestamp": "2026-05-10T14:01:51.821Z",
+  "context": "Pós-reload confirmado pelo operador. Live validation mostrou turn_boundary_decision_packet.localSafeMayContinue presente, mas ainda no porque [snip] Sem worker/canary dispatch autorizado. [truncated:+212 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Executar /reload antes de confiar no output live das tools runtime alteradas.",
-    "Após reload, validar turn_boundary_decision_packet.localSafeMayContinue em uma chamada live curta.",
-    "Continuar TASK-BUD-1068/TASK-BUD-1066 sem worker dispatch até confirmação exata."
+    "Validar que readiness/turn-boundary deixam de bloquear por reload stale.",
+    "Adicionar teste de surface para turn_boundary_decision_packet.details.localSafeMayContinue.",
+    "Continuar maturação de workers via control-plane hardening; dispatch só com confirmação exata."
   ],
-  "blockers": [
-    "Runtime mudou; live tool output desta sessão pode estar stale até /reload.",
-    "TASK-BUD-1066 subprocess root cause still unresolved."
-  ],
+  "blockers": [],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi- [snip] -reporter=dot -> 77 passed [truncated:+43 chars]",
-    "git diff --check -> pass"
+    "turn_boundary_decision_packet live após reload -> campo localSafeMayContinue presente",
+    "git_dirty_snapshot -> clean=yes"
   ],
   "recent_commits": [
-    "a166661a fix(context): expose local-safe continuation field",
-    "cbad2fc4 docs(context): document local-safe continuation signal"
+    "10a01a9b chore(context): checkpoint handoff budget fix",
+    "6f7e4544 chore(board): record handoff budget evidence"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
       "task:TASK-BUD-1066",
-      "commit:a166661a"
+      "commit:10a01a9b"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-10T13:55:41.256Z",
-    "level": "warn",
+    "generatedAtIso": "2026-05-10T14:01:51.821Z",
+    "level": "ok",
     "percent": 47,
     "action": "continue",
-    "recommendation": "reload-before-live-tool-validation",
+    "recommendation": "continue-local-safe-hardening",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-10T13:55:41.256Z",
+      "atIso": "2026-05-10T14:01:51.821Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
+      "level": "ok",
       "percent": 47,
       "thresholds": {
         "warnPct": 50,
@@ -51,7 +48,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-before-live-tool-validation"
+      "recommendation": "continue-local-safe-hardening"
     }
   ]
 }
