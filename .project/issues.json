@@ -1172,6 +1172,18 @@
       "package": "pi-stack",
       "source": "monitor",
       "resolved_by": "18fbdda2 fix(agents): surface sdk declared files"
+    },
+    {
+      "id": "fragility-fragility-mozfkr4w",
+      "title": "The agent acknowledged repeated failures and a maxToolCalls limit, then chose to stop and patch the subprocess runner locally without resolving the underlying silent failure path or confirming the scoped diagnostic review was completed.",
+      "body": "The monitor caution is accepted. The scoped SDK diagnostic was explicitly recorded as incomplete/contract-failed due maxToolCalls; the local patch was not treated as resolving the underlying silent failure, only as preflight hardening for the next canary. After reload, next step is a bounded subprocess canary preview/execution only with exact confirmation, so the actual silent failure path remains under test rather than considered closed.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "resolved",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor",
+      "resolved_by": "2ac9b83a fix(agents): record subprocess preflight evidence; next subprocess canary requires explicit confirmation"
     }
   ]
 }
