@@ -256,6 +256,20 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.finalTurnBrief.optionBriefs.map((option) => option.id)).toEqual(["similar-lane", "next-high-value"]);
   });
 
+  it("keeps continuation signal consolidated in the existing boundary packet", () => {
+    const packet = buildTurnBoundaryDecisionPacket({
+      ready: true,
+      focusTasks: "TASK-BUD-1063",
+      staleFocusCount: 0,
+      localAuditReasons: [],
+    }) as Record<string, unknown>;
+
+    expect(packet.summary).toContain("localSafeMayContinue=yes");
+    expect(packet.finalTurnBrief).toBeDefined();
+    expect(packet.operatorBrief).toBeUndefined();
+    expect(packet.continuityContract).toBeUndefined();
+  });
+
   it("adds reload ritual only for clean runtime changes, not docs-only changes", () => {
     const runtimePacket = buildTurnBoundaryDecisionPacket({
       ready: true,
