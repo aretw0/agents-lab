@@ -1704,11 +1704,19 @@ describe("agent spawn readiness contract", () => {
     expect(dispatchMismatch.content?.[0]?.text).toContain("operator-confirmation-mismatch");
   });
 
-  it("keeps SDK worker dispatch isolated from extension monitors", () => {
+  it("keeps SDK worker dispatch isolated from extension monitors and bounded loops", () => {
     const source = readFileSync("packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts", "utf8");
     expect(source).toContain("DefaultResourceLoader");
+    expect(source).toContain("SettingsManager.inMemory");
     expect(source).toContain("noExtensions: true");
-    expect(source).toContain("resourceLoader=noExtensions");
+    expect(source).toContain("noSkills: true");
+    expect(source).toContain("noPromptTemplates: true");
+    expect(source).toContain("noContextFiles: true");
+    expect(source).toContain("resourceLoader=minimal-noExtensions-noSkills-noPrompts-noContext");
+    expect(source).toContain("loopGuards maxToolCalls");
+    expect(source).toContain("sdk-runner-loop-guard");
+    expect(source).toContain("sdk-runner-empty-output");
+    expect(source).toContain("expandPromptTemplates: false");
   });
 
   it("classifies runner failures before another worker retry", () => {

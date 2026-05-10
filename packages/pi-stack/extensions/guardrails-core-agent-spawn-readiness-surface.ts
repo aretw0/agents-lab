@@ -1,4 +1,4 @@
-import { AuthStorage, createAgentSession, DefaultResourceLoader, getAgentDir, ModelRegistry, SessionManager, type ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import { AuthStorage, createAgentSession, DefaultResourceLoader, getAgentDir, ModelRegistry, SessionManager, SettingsManager, type ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { spawn } from "node:child_process";
 import { createWriteStream, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -99,6 +99,27 @@ function resolveSdkModelRef(providerModelRef: string): { provider: string; model
   return { provider: providerModelRef.slice(0, slashIndex), modelId: providerModelRef.slice(slashIndex + 1) };
 }
 
+function extractAssistantTextFromUnknownMessage(value: unknown): string {
+  if (!value || typeof value !== "object") return "";
+  const row = value as Record<string, unknown>;
+  const content = row.content;
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return "";
+  return content.map((part) => {
+    if (!part || typeof part !== "object") return "";
+    const item = part as Record<string, unknown>;
+    return typeof item.text === "string" ? item.text : "";
+  }).join("");
+}
+
+function appendAssistantOutput(logPath: string, text: string, seenOutput: Set<string>): number {
+  const normalized = text.trim();
+  if (!normalized || seenOutput.has(normalized)) return 0;
+  seenOutput.add(normalized);
+  appendAgentRunLogLine(logPath, normalized);
+  return Buffer.byteLength(normalized);
+}
+
 function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPacketResult): { logPath: string } {
   const runId = packet.runSpec.runId;
   const logPath = path.join(ctxCwd, ".pi", "reports", `${runId}.sdk.log`);
@@ -119,8 +140,14 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
   appendAgentRunLogLine(logPath, `[sdk-runner] tools=${packet.runSpec.toolAllowlist.join(",")}`);
 
   void (async () => {
+    const maxToolCalls = Math.max(1, Math.min(12, packet.runSpec.toolAllowlist.length * 3));
+    const maxTurns = 4;
     let outputBytes = 0;
     let timedOut = false;
+    let loopAbortReason = "";
+    let toolCallCount = 0;
+    let turnCount = 0;
+    const seenOutput = new Set<string>();
     let session: Awaited<ReturnType<typeof createAgentSession>>["session"] | undefined;
     const finish = (entry: Partial<AgentRunRegistryEntry>) => {
       writeRegistryEntry(ctxCwd, {
@@ -139,13 +166,29 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
       const model = modelRegistry.find(resolved.provider, resolved.modelId);
       if (!model) throw new Error(`model-not-found:${packet.runSpec.providerModelRef}`);
       const sessionManager = packet.runSpec.sessionMode === "run-session-dir" ? SessionManager.create(packet.runSpec.cwd) : SessionManager.inMemory(packet.runSpec.cwd);
+      const settingsManager = SettingsManager.inMemory({
+        compaction: { enabled: false },
+        retry: { enabled: false, maxRetries: 0, provider: { maxRetries: 0, timeoutMs: packet.runSpec.timeoutMs } },
+        defaultThinkingLevel: "off",
+      });
       const resourceLoader = new DefaultResourceLoader({
         cwd: packet.runSpec.cwd,
         agentDir: getAgentDir(),
+        settingsManager,
         noExtensions: true,
+        noSkills: true,
+        noPromptTemplates: true,
+        noThemes: true,
+        noContextFiles: true,
+        systemPromptOverride: () => [
+          "You are a bounded SDK worker canary.",
+          "Return a concise final answer and stop.",
+          "Do not call tools repeatedly; inspect only what is necessary.",
+        ].join("\n"),
       });
       await resourceLoader.reload();
-      appendAgentRunLogLine(logPath, "[sdk-runner] resourceLoader=noExtensions");
+      appendAgentRunLogLine(logPath, "[sdk-runner] resourceLoader=minimal-noExtensions-noSkills-noPrompts-noContext");
+      appendAgentRunLogLine(logPath, `[sdk-runner] loopGuards maxToolCalls=${maxToolCalls} maxTurns=${maxTurns}`);
       const created = await createAgentSession({
         cwd: packet.runSpec.cwd,
         model,
@@ -153,6 +196,7 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
         modelRegistry,
         resourceLoader,
         sessionManager,
+        settingsManager,
         tools: packet.runSpec.toolAllowlist,
       });
       session = created.session;
@@ -165,9 +209,28 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
             appendAgentRunLogLine(logPath, assistantMessageEvent.delta);
           }
         } else if (row.type === "tool_execution_end") {
-          appendAgentRunLogLine(logPath, `[sdk-runner] tool_execution_end isError=${String(row.isError ?? "unknown")}`);
-        } else if (row.type === "agent_end" || row.type === "turn_end") {
-          appendAgentRunLogLine(logPath, `[sdk-runner] event=${String(row.type)}`);
+          toolCallCount += 1;
+          appendAgentRunLogLine(logPath, `[sdk-runner] tool_execution_end count=${toolCallCount} isError=${String(row.isError ?? "unknown")}`);
+          if (toolCallCount > maxToolCalls && !loopAbortReason) {
+            loopAbortReason = `sdk-runner-tool-loop toolCalls=${toolCallCount} maxToolCalls=${maxToolCalls}`;
+            appendAgentRunLogLine(logPath, `[sdk-runner] loop-guard ${loopAbortReason}; aborting session`);
+            void session?.abort();
+          }
+        } else if (row.type === "turn_end") {
+          turnCount += 1;
+          const text = extractAssistantTextFromUnknownMessage(row.message);
+          outputBytes += appendAssistantOutput(logPath, text, seenOutput);
+          appendAgentRunLogLine(logPath, `[sdk-runner] event=turn_end count=${turnCount}`);
+          if (turnCount > maxTurns && !loopAbortReason) {
+            loopAbortReason = `sdk-runner-turn-loop turns=${turnCount} maxTurns=${maxTurns}`;
+            appendAgentRunLogLine(logPath, `[sdk-runner] loop-guard ${loopAbortReason}; aborting session`);
+            void session?.abort();
+          }
+        } else if (row.type === "agent_end") {
+          const messages = Array.isArray(row.messages) ? row.messages : [];
+          const text = messages.map(extractAssistantTextFromUnknownMessage).join("\n").trim();
+          outputBytes += appendAssistantOutput(logPath, text, seenOutput);
+          appendAgentRunLogLine(logPath, "[sdk-runner] event=agent_end");
         }
       });
       const timeout = setTimeout(() => {
@@ -176,15 +239,30 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
         void session?.abort();
       }, packet.runSpec.timeoutMs);
       try {
-        await session.prompt(packet.runSpec.goal);
+        await session.prompt(packet.runSpec.goal, { expandPromptTemplates: false, source: "extension" });
       } finally {
         clearTimeout(timeout);
+        const stateMessages = (session as unknown as { agent?: { state?: { messages?: unknown[] } }; messages?: unknown[] }).agent?.state?.messages
+          ?? (session as unknown as { messages?: unknown[] }).messages
+          ?? [];
+        const fallbackText = stateMessages.map(extractAssistantTextFromUnknownMessage).join("\n").trim();
+        outputBytes += appendAssistantOutput(logPath, fallbackText, seenOutput);
         unsubscribe();
         session.dispose();
+      }
+      if (loopAbortReason) {
+        finish({ state: "failed", errorCode: "sdk-runner-loop-guard", errorMessage: loopAbortReason, outputBytes });
+        appendAgentRunLogLine(logPath, `[sdk-runner] close state=failed reason=loop-guard outputBytes=${outputBytes}`);
+        return;
       }
       if (timedOut) {
         finish({ state: "timed-out", errorCode: "sdk-runner-timeout", errorMessage: "SDK worker timed out and abort was requested", outputBytes });
         appendAgentRunLogLine(logPath, `[sdk-runner] close state=timed-out outputBytes=${outputBytes}`);
+        return;
+      }
+      if (outputBytes <= 0) {
+        finish({ state: "failed", errorCode: "sdk-runner-empty-output", errorMessage: "SDK worker completed without assistant text output", outputBytes });
+        appendAgentRunLogLine(logPath, "[sdk-runner] close state=failed reason=empty-output outputBytes=0");
         return;
       }
       finish({ state: "completed", outputBytes });
