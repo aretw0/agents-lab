@@ -71,6 +71,7 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.summary).toContain("directionPrompt=similar-lane-or-next-value");
     expect(packet.summary).toContain("directionRecommended=similar-lane");
     expect(packet.summary).toContain("directionOptions=similar-lane:recommended,next-high-value:viable");
+    expect(packet.summary).toContain("localSafeMayContinue=yes");
   });
 
   it("builds pause packet without human action when local-safe next step is missing", () => {
@@ -91,6 +92,7 @@ describe("context-watchdog continuation recommendation", () => {
       "next-high-value:recommended",
     ]);
     expect(packet.summary).toContain("directionOptions=similar-lane:blocked,next-high-value:recommended");
+    expect(packet.summary).toContain("localSafeMayContinue=no");
   });
 
   it("builds ask-human packet when protected/validation blockers are present", () => {
@@ -114,6 +116,7 @@ describe("context-watchdog continuation recommendation", () => {
     const nextLane = packet.directionPreview.options.find((option) => option.id === "next-high-value");
     expect(nextLane?.nextStep).toContain("report-only packet");
     expect(packet.summary).toContain("directionOptions=similar-lane:blocked,next-high-value:recommended");
+    expect(packet.summary).toContain("localSafeMayContinue=no");
   });
 
   it("uses growth go signal to recommend next-high-value direction when local blockers are clear", () => {

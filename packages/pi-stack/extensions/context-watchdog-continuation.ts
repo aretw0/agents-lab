@@ -525,6 +525,12 @@ export function buildTurnBoundaryDecisionPacket(input: {
     directionPreview,
     recentChange: input.recentChange,
   });
+  const localSafeMayContinue = !humanActionRequired
+    && decision !== "pause"
+    && !reasons.includes("protected-scopes:invalid")
+    && !reasons.includes("validation:invalid")
+    && !reasons.includes("stop-conditions:invalid")
+    && !reasons.includes("no-local-safe-next-step");
 
   return {
     mode: "report-only",
@@ -551,6 +557,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
       "directionPrompt=similar-lane-or-next-value",
       `directionRecommended=${directionPreview.recommendedOptionId}`,
       `directionOptions=${directionOptionsCompact}`,
+      `localSafeMayContinue=${localSafeMayContinue ? "yes" : "no"}`,
       growthMaturity ? `growthDecision=${growthMaturity.decision}` : undefined,
       growthMaturity ? `growthCode=${growthMaturity.recommendationCode}` : undefined,
       growthMaturity ? `growthScore=${growthMaturity.score ?? "na"}` : undefined,
