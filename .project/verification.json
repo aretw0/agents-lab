@@ -15479,6 +15479,15 @@
       "method": "worker-outcome+smoke-test",
       "timestamp": "2026-05-11T18:43:16.381Z",
       "evidence": "After SDK worker `task-bud-1066-sdk-startup-probe-readonly-2` failed with loop guard and output truncation, hardened SDK output capture to avoid treating `turn_end` messages/session state snapshots as final assistant output. The runner now appends bounded assistant text from streamed deltas/final agent end only, reducing nested tool-output/log bloat before the next canary. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: a7b92d20. Runtime changed; reload required before live worker retry."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-READONLY-FINAL-OUTPUT-20260511",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "worker-outcome+smoke-test",
+      "timestamp": "2026-05-11T19:06:33.475Z",
+      "evidence": "Exact-approved SDK worker `task-bud-1066-sdk-startup-probe-readonly-3` ran once, touched no files, and produced concise useful diagnostic output, but the runtime marked it failed because a turn-loop guard fired just before `agent_end` (`outputBytes=2382`). Hardened SDK runner semantics: for read-only workers only, if a turn-loop guard fired but `agent_end` arrived with non-empty final output, close as completed with reason `loop-guard-with-output`; tool-loop/no-output/mutation cases remain failed. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: 1351670a. Runtime changed; reload required before live-validating the new close behavior."
     }
   ]
 }
