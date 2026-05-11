@@ -2,14 +2,20 @@
 
 ## Status
 
-The first-party single-runner lane is now past the first read-only canary:
+The first-party single-runner lane now has two different maturity levels:
+
+- **SDK/in-process, narrow read-only diagnostics**: live-validated and usable after exact per-run confirmation when scope is small, declared, read-only, and output-contracted.
+- **Subprocess `pi --print` runner**: still blocked for blind retry by `runner-timeout`; continue only through report-only structured startup/provider probe design until root-cause evidence improves.
+
+The lane is past the first read-only canary:
 
 - exact-confirmed dispatch gate works for one explicit `runId`;
 - the Windows `spawn pi ENOENT` crash path was reproduced and hardened;
 - `agent_run_follow` provides a bounded native follow/finalizer path, replacing manual sleep/polling;
 - `agent_run_outcome_packet` separates process state from contract result;
 - read-only outcomes fail closed when any touched file is reported;
-- registry/status/outcome can carry final evidence: `exitCode`, `outputBytes`, `errorCode`, and `errorMessage`.
+- registry/status/outcome can carry final evidence: `exitCode`, `outputBytes`, `errorCode`, and `errorMessage`;
+- SDK read-only smoke `task-bud-1066-sdk-readonly-final-output-smoke` completed with one declared file, one `read` call, no touched files, and a final `PASS` output.
 
 ## Evidence
 
@@ -22,6 +28,7 @@ Key completed slices:
 - `TASK-BUD-1024`: runner final evidence is recorded in registry/status/outcome paths.
 - `TASK-BUD-1025`: post-reload live canary validated final evidence fields without dispatch.
 - `TASK-BUD-1066`: subprocess preflight canary produced a startup timeout (`runner-timeout`, `exitCode=124`, `timedOut=yes`, zero stdout/stderr). The classifier now preserves this separately from generic `silent-runner-failure` and the startup diagnostic packet asks for timeout/signal/timedOut evidence before any retry.
+- `TASK-BUD-1066`: SDK attempts learned the safe envelope: unsupported `find/ls` tools now block before dispatch; broad read-only scope can still loop/bloat; narrow read-only scope with one file and one `read` call completed successfully.
 
 ## Current contract
 
@@ -39,6 +46,7 @@ The lane now has distinct checkpoints:
 - No multi-worker, background swarm, or colony promotion from this evidence alone.
 - No protected scope in runner tasks without explicit separate authorization.
 - Mutation runners require declared files, rollback, validation, follow, and outcome evidence.
+- Broad SDK diagnostic tasks are not mature yet; prefer one or two declared files and an explicit final-output shape.
 
 ## Operational maturity posture
 
@@ -54,6 +62,24 @@ Single-worker delegation is no longer a novelty path here. It is a normal contro
 Use this mode more often for local-safe board work. Keep experimenting only where evidence is still missing: new profiles, new tool surfaces, protected scopes, multi-worker/background/colony behavior, or failure modes without regression coverage. Once a path has tests plus live pass evidence, future sessions should respect that maturity and avoid re-running calibration exercises just because the context was compacted.
 
 Humility still applies: maturity is scoped, not universal. Current evidence supports frequent bounded single-worker use; it does not by itself promote multi-worker, background, colony, protected-scope, or unattended dispatch.
+
+## Continuous improvement lane contract
+
+Use existing milestone semantics instead of inventing another public surface:
+
+- Milestone: `agent-first-worker-lane` for SDK/subprocess runner maturation.
+- Active board anchors: `TASK-BUD-1068` for dual-executor maturity and `TASK-BUD-1066` for subprocess timeout root cause.
+- Local-safe continuation is allowed without another human nudge when the next slice is one of: documentation, board evidence, regression test, classifier/packet hardening, handoff checkpoint, or report-only preview.
+- Stop and ask only for: worker/provider dispatch, protected scope, destructive state change, publish/CI/settings/credential changes, or task closure when decision packets ask a human to close/keep/defer.
+- At turn boundaries, use OODA only as an internal quality filter: observe current evidence, orient against the lane contract, decide the next smallest validated slice, act with tests/checkpoint. Do not create a new `ooda_*` packet or term unless a real reuse gap appears.
+
+### What made the assistant stop
+
+The stop was not lack of work; it was an authorization boundary. The prior slices changed runtime code, so live trust required `/reload`, and each worker approval was single-run only. After each exact-approved run finished, the control plane could keep doing local-safe hardening, but it could not legally dispatch the next worker or retry subprocess without a fresh exact phrase. The missing declaration was not a new concept; it was a compact lane rule saying: continue local-safe improvement under `agent-first-worker-lane`, auto-prepare the next packet/preview, but never auto-dispatch providers.
+
+### How to need the operator less
+
+This lane can reduce operator interrupts by keeping a stocked queue of narrow, validated previews and by making the final-turn brief carry the exact phrase when a worker is the next useful step. It still needs the operator for provider dispatch under current governance. Removing that need would require a separate, explicit policy/tooling change: a bounded auto-dispatch contract with budget caps, cooldown, run count, declared-file scope, abort/follow/outcome gates, and rollback evidence. Until that exists and is validated, exact per-run confirmation remains the safety boundary.
 
 ## Recommended next step
 
