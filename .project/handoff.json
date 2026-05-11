@@ -1,60 +1,59 @@
 {
-  "timestamp": "2026-05-11T18:20:45.788Z",
-  "context": "Exact human approval dispatched one SDK in-process read-only worker: task-bud-1066-sdk-startup-probe-readonly. It failed fast/safely with too [snip] trusting the new live packet behavior. [truncated:+426 chars]",
+  "timestamp": "2026-05-11T18:44:31.976Z",
+  "context": "Exact-approved SDK worker task-bud-1066-sdk-startup-probe-readonly-2 ran once with supported tools read,grep. It touched no files but failed [snip] validating or approving another worker. [truncated:+522 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Run /reload before live-validating the packet fix.",
-    "After reload, create/validate a new SDK in-process read-only preview with only supported tools: read,grep.",
-    "Recommended next approval phrase after reload and preview: execute o sdk worker task-bud-1066- [snip] k-startup-probe-readonly-2 [truncated:+2 chars]"
+    "Run /reload before trusting live classifier/output-capture fixes.",
+    "After reload, live-validate classification for task-bud-1066-sdk-startup-probe-readonly-2 shou [snip] ot tool-allowlist-invalid. [truncated:+62 chars]",
+    "Only after a green preview, recommend a new single SDK worker with a much narrower declared sc [snip] rst goal; do not reuse -2. [truncated:+15 chars]"
   ],
   "blockers": [
-    "Runtime changed; /reload required before live packet trust.",
-    "No authorization for another worker yet; previous exact approval was single-run only and consumed.",
-    "Subprocess retry remains blocked; subprocess retained as first-class but no blind retry."
+    "Runtime changed; /reload required.",
+    "Previous exact approval consumed; no authorization for another worker.",
+    "Subprocess retry remains blocked; keep subprocess first-class but no blind retry."
   ],
   "recent_validation": [
-    "agent_run_sdk_in_process_dispatch execute=true with exact confirmation -> dispatched one run only",
-    "agent_run_follow -> terminal failed outputBytes=505",
-    "log .pi/reports/task-bud-1066-sdk-startup-probe-readonly.sdk.log -> close state=failed reason= [snip] -unsupported tools=find,ls [truncated:+11 chars]"
+    "git status --short before dispatch -> clean",
+    "agent_run_sdk_in_process_dispatch task-bud-1066-sdk-startup-probe-readonly-2 execute=true exac [snip] tion -> dispatched one run [truncated:+10 chars]",
+    "agent_run_follow -> terminal failed outputBytes=49834"
   ],
   "recent_commits": [
-    "5461b419 fix(agents): block unsupported sdk tools before dispatch",
-    "e93514e3 chore(board): record sdk tool policy outcome"
+    "1ce62d15 fix(agents): classify sdk loop guard close reason",
+    "464bc973 chore(board): record sdk loop guard outcome"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1066-SDK-STARTUP-PROBE-READONLY",
       "task:TASK-BUD-1066-SDK-STARTUP-PROBE-READONLY-2",
-      "commit:5461b419"
+      "commit:1ce62d15"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T18:20:45.788Z",
+    "generatedAtIso": "2026-05-11T18:44:31.976Z",
     "level": "warn",
-    "percent": 32,
+    "percent": 42,
     "action": "continue",
-    "recommendation": "reload-then-preview-read-grep-sdk-worker",
+    "recommendation": "reload-then-live-validate-sdk-loop-classification",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T18:20:45.788Z",
+      "atIso": "2026-05-11T18:44:31.976Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 32,
+      "percent": 42,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-preview-read-grep-sdk-worker"
+      "recommendation": "reload-then-live-validate-sdk-loop-classification"
     }
   ]
 }
