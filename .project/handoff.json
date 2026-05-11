@@ -1,59 +1,59 @@
 {
-  "timestamp": "2026-05-11T21:35:24.914Z",
-  "context": "Exact confirmation received and consumed for task-bud-1068-sdk-board-evidence-smoke. Dispatched exactly one SDK in-process worker under valid [snip] lects the promoted board-question rung. [truncated:+805 chars]",
+  "timestamp": "2026-05-11T22:20:33.868Z",
+  "context": "After user reload, continued SDK in-process lane without dispatch. Git clean; context ok though handoff had aged stale; provider readiness op [snip] Board evidence recorded and committed. [truncated:+608 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Ask operator to /reload before relying on live packet text for the promoted board-question rung.",
-    "After reload, prepare a preview for the next SDK rung: narrow read-only synthesis with cited b [snip] atch without exact phrase. [truncated:+85 chars]",
-    "Keep subprocess root-cause work deferred until SDK in-process lane is more productive, per operator direction."
+    "If operator wants to execute the synthesis rung, require exact phrase: execute o sdk worker ta [snip] hesis-recommendation-smoke [truncated:+20 chars]",
+    "Without exact phrase, continue local-safe by preparing packet ergonomics/validation markers for synthesis outcomes.",
+    "If exact-approved and passing, promote synthesis rung only after outcome/classifier/log marker validation."
   ],
   "blockers": [
-    "Runtime extension changes committed; reload needed before live surface reflect [snip] d board-question rung. [truncated:+9 chars]",
-    "No standing authorization for additional worker/provider dispatch; exact phrase has been consumed.",
+    "No standing authorization for worker/provider dispatch; exact per-run confirmation required.",
+    "Next SDK synthesis smoke is previewed but not executed.",
     "SDK broad read-only/mutation/multi-worker/unattended dispatch remain immature."
   ],
   "recent_validation": [
-    "agent_run_sdk_in_process_dispatch execute=true exact phrase -> dispatched one run only",
-    "agent_run_follow -> terminal completed outputBytes=1154 lines=16",
-    "log .pi/reports/task-bud-1068-sdk-board-evidence-smoke.sdk.log -> tools=read,grep, declared-fi [snip] completed outputBytes=331 [truncated:+73 chars]"
+    "git status --short before preview -> clean",
+    "context_watch_status -> ok reload-not-required; handoff stale by age",
+    "provider_readiness_matrix openai-codex -> ready entries present, degraded=0 blocked=0"
   ],
   "recent_commits": [
-    "053546a3 chore(board): record sdk board evidence smoke",
-    "81ce9885 feat(agents): promote sdk board question rung"
+    "19729cd5 chore(board): preview sdk synthesis recommendation smoke"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1068-SDK-BOARD-EVIDENCE-SMOKE",
+      "task:TASK-BUD-1068-SDK-SYNTHESIS-RECOMMENDATION-SMOKE",
+      "task:TASK-BUD-1068-SDK-SYNTHESIS-PREVIEW-20260511",
       "commit:20260511"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T21:35:24.914Z",
+    "generatedAtIso": "2026-05-11T22:20:33.868Z",
     "level": "ok",
-    "percent": 37,
+    "percent": 39,
     "action": "continue",
-    "recommendation": "reload-then-preview-sdk-synthesis-rung",
+    "recommendation": "sdk-synthesis-preview-ready",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T21:35:24.914Z",
+      "atIso": "2026-05-11T22:20:33.868Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 37,
+      "percent": 39,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-preview-sdk-synthesis-rung"
+      "recommendation": "sdk-synthesis-preview-ready"
     }
   ]
 }
