@@ -1783,6 +1783,9 @@ describe("agent spawn readiness contract", () => {
     expect(source).toContain("SDK_ASSISTANT_OUTPUT_LOG_MAX_BYTES");
     expect(source).toContain("assistant-output-truncated");
     expect(source).toContain("outputCapture.streamedText += assistantMessageEvent.delta");
+    expect(source).toContain("appendAssistantOutput(logPath, outputCapture.streamedText, outputCapture)");
+    expect(source).not.toContain("extractAssistantTextFromUnknownMessage(row.message) || outputCapture.streamedText");
+    expect(source).not.toContain("stateMessages.map(extractAssistantTextFromUnknownMessage)");
     expect(source).not.toContain("appendAgentRunLogLine(logPath, assistantMessageEvent.delta)");
     expect(source).toContain("expandPromptTemplates: false");
   });

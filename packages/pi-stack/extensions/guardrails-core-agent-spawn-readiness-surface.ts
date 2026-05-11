@@ -315,8 +315,6 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
           }
         } else if (row.type === "turn_end") {
           turnCount += 1;
-          const text = extractAssistantTextFromUnknownMessage(row.message) || outputCapture.streamedText;
-          outputBytes += appendAssistantOutput(logPath, text, outputCapture);
           appendAgentRunLogLine(logPath, `[sdk-runner] event=turn_end count=${turnCount}`);
           if (turnCount > maxTurns && !loopAbortReason) {
             loopAbortReason = `sdk-runner-turn-loop turns=${turnCount} maxTurns=${maxTurns}`;
@@ -324,9 +322,7 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
             void session?.abort();
           }
         } else if (row.type === "agent_end") {
-          const messages = Array.isArray(row.messages) ? row.messages : [];
-          const text = messages.map(extractAssistantTextFromUnknownMessage).join("\n").trim() || outputCapture.streamedText;
-          outputBytes += appendAssistantOutput(logPath, text, outputCapture);
+          outputBytes += appendAssistantOutput(logPath, outputCapture.streamedText, outputCapture);
           appendAgentRunLogLine(logPath, "[sdk-runner] event=agent_end");
         }
       });
@@ -339,11 +335,7 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
         await session.prompt(buildSdkScopedWorkerPrompt(packet.runSpec.goal, packet.runSpec.declaredFiles), { expandPromptTemplates: false, source: "extension" });
       } finally {
         clearTimeout(timeout);
-        const stateMessages = (session as unknown as { agent?: { state?: { messages?: unknown[] } }; messages?: unknown[] }).agent?.state?.messages
-          ?? (session as unknown as { messages?: unknown[] }).messages
-          ?? [];
-        const fallbackText = stateMessages.map(extractAssistantTextFromUnknownMessage).join("\n").trim() || outputCapture.streamedText;
-        outputBytes += appendAssistantOutput(logPath, fallbackText, outputCapture);
+        outputBytes += appendAssistantOutput(logPath, outputCapture.streamedText, outputCapture);
         unsubscribe();
         session.dispose();
       }
