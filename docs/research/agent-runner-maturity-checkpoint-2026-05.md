@@ -57,7 +57,7 @@ Humility still applies: maturity is scoped, not universal. Current evidence supp
 
 ## Recommended next step
 
-For the current `TASK-BUD-1066` subprocess blocker, do **not** retry the worker blindly. The next local-safe step is a report-only structured startup/provider probe design that captures startup phases, stderr preservation, timeout budget, termination signal, and provider bootstrap evidence without a model call where possible.
+For the current `TASK-BUD-1066` subprocess blocker, do **not** retry the worker blindly. The next local-safe step is the existing startup diagnostic packet's `startupProbePlan`: a report-only structured startup/provider probe plan that captures startup phases, stderr preservation, timeout budget, termination signal, elapsed time, and provider bootstrap evidence without a model call where possible. Each startup probe step is advisory only and keeps `modelCallAllowed=false` and `dispatchAllowed=false`.
 
 Run one more single-worker canary only after preparing a small mutation target with:
 
