@@ -1894,6 +1894,20 @@ describe("agent spawn readiness contract", () => {
     expect(invalidTools.failureClass).toBe("tool-allowlist-invalid");
     expect(invalidTools.preflightDecision).toBe("blocked");
 
+    const sdkNestedLogLoop = classifyAgentRunFailure({
+      runId: "sdk-loop-with-nested-log",
+      logText: [
+        "[sdk-runner] toolPolicy=read:path=>declared-files,grep:path=>declared-files;glob=blocked",
+        "[sdk-runner] close state=failed reason=tool-policy-unsupported tools=find,ls",
+        "worker copied an older log above as evidence",
+        "[sdk-runner] event=agent_end",
+        "[sdk-runner] close state=failed reason=loop-guard outputBytes=48000",
+      ].join("\n"),
+    });
+    expect(sdkNestedLogLoop.failureClass).toBe("worker-contract-failed");
+    expect(sdkNestedLogLoop.blockers).toContain("sdk-runner-loop-guard");
+    expect(sdkNestedLogLoop.evidence).toContain("sdkCloseReason=loop-guard");
+
     const promptOnlyProviderMarker = classifyAgentRunFailure({
       runId: "prompt-only-provider-marker",
       logText: [

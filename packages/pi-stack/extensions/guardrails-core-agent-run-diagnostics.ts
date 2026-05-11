@@ -173,6 +173,12 @@ function parseTimedOut(logText: string): boolean {
   return /timedOut=yes/.test(logText) || /failure code=runner-timeout/.test(logText);
 }
 
+function extractLastSdkRunnerCloseReason(logText: string): string | undefined {
+  const matches = [...logText.matchAll(/^\[sdk-runner\] close state=\S+ reason=([^\s]+)/gm)];
+  const last = matches.at(-1);
+  return last?.[1];
+}
+
 function extractRunnerArgv(logText: string): string[] | undefined {
   const match = logText.match(/^\[agent-runner\] argv=(\[[^\n]*\])/m);
   if (!match?.[1]) return undefined;
@@ -293,6 +299,7 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
   const timeoutMs = parseRunnerTimeoutMs(logText);
   const signal = parseRunnerSignal(logText);
   const elapsedMs = parseRunnerElapsedMs(logText);
+  const sdkCloseReason = extractLastSdkRunnerCloseReason(logText);
   const timedOut = entry?.state === "timed-out" || parseTimedOut(logText) || exitCode === 124;
   const streamByteSplitCaptured = typeof stdoutBytes === "number" && typeof stderrBytes === "number";
   const evidence: string[] = [];
@@ -307,6 +314,7 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
   if (typeof timeoutMs === "number") evidence.push(`timeoutMs=${timeoutMs}`);
   if (typeof elapsedMs === "number") evidence.push(`elapsedMs=${elapsedMs}`);
   if (signal) evidence.push(`signal=${signal}`);
+  if (sdkCloseReason) evidence.push(`sdkCloseReason=${sdkCloseReason}`);
   if (timedOut) evidence.push("timedOut=yes");
   if (!streamByteSplitCaptured && typeof childOutputBytes === "number") evidence.push("streamByteSplit=missing");
   if (argvDiagnostics.present) {
@@ -347,7 +355,9 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
     }
   } else if (/\[agent-runner\] spawn error/i.test(logText) || normalizeText(entry?.errorCode).startsWith("ENOENT")) {
     classify("spawn-error", "agent-runner-classification-spawn-error", "spawn-error");
-  } else if (argvDiagnostics.blockers.includes("unsupported-tools") || includesAny(lower, [/unknown tool/, /invalid tool/, /tool .*not found/, /unsupported tool/])) {
+  } else if (sdkCloseReason === "loop-guard") {
+    classify("worker-contract-failed", "agent-runner-classification-worker-contract-failed", "sdk-runner-loop-guard");
+  } else if (sdkCloseReason === "tool-policy-unsupported" || argvDiagnostics.blockers.includes("unsupported-tools") || includesAny(lower, [/unknown tool/, /invalid tool/, /tool .*not found/, /unsupported tool/])) {
     classify("tool-allowlist-invalid", "agent-runner-classification-tool-allowlist-invalid", "tool-allowlist-invalid");
   } else if (argvDiagnostics.blockers.some((blocker) => blocker !== "argv-log-missing") || includesAny(lower, [/unknown option/, /unrecognized option/, /missing required argument/, /usage:/, /invalid argv/, /invalid argument/])) {
     classify("cli-argv-invalid", "agent-runner-classification-cli-argv-invalid", "cli-argv-invalid");
