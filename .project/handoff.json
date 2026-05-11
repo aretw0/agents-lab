@@ -1,59 +1,59 @@
 {
-  "timestamp": "2026-05-11T19:07:29.394Z",
-  "context": "Exact-approved SDK worker task-bud-1066-sdk-startup-probe-readonly-3 ran once with narrow read-only scope (2 declared files, read/grep). It t [snip] ore live-validating new close behavior. [truncated:+643 chars]",
+  "timestamp": "2026-05-11T19:13:28.077Z",
+  "context": "Post-reload validation completed after SDK read-only final-output semantic fix. Git clean; context ok; provider openai-codex ready. Historica [snip] e=false is green; no worker dispatched. [truncated:+547 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Run /reload before trusting new read-only loop-guard-with-output close behavior.",
-    "After reload, preview a minimal live SDK smoke or inspect packet behavior; do not reuse -3 for dispatch.",
-    "If another worker is needed, use exact new confirmation only after preview; prefer a tiny read [snip] t no-loop answer contract. [truncated:+49 chars]"
+    "If operator wants to live-validate the new read-only loop-guard-with-output behavior, exact ph [snip] eadonly-final-output-smoke [truncated:+46 chars]",
+    "Do not treat generic continue as worker authorization.",
+    "After any smoke run, follow status/log/outcome and validate no touched files and final output contract."
   ],
   "blockers": [
-    "Runtime changed; /reload required.",
-    "Previous exact approval consumed; no authorization for another worker.",
-    "Subprocess retry remains blocked by runner-timeout evidence until structured p [snip] implemented/validated. [truncated:+15 chars]"
+    "No authorization for another worker yet; only preview exists.",
+    "Historical -3 log cannot prove the new close behavior; a new exact-approved sm [snip] d for live validation. [truncated:+14 chars]",
+    "Subprocess runner-timeout remains unresolved; no blind subprocess retry."
   ],
   "recent_validation": [
-    "git status --short before dispatch -> clean",
-    "agent_run_sdk_in_process_dispatch task-bud-1066-sdk-startup-probe-readonly-3 execute=true exac [snip] tion -> dispatched one run [truncated:+10 chars]",
-    "agent_run_follow -> terminal failed outputBytes=2382 under old runtime"
+    "git status --short -> clean",
+    "context_watch_status -> ok, reload-not-required",
+    "agent_run_failure_classification task-bud-1066-sdk-startup-probe-readonly-3 -> worker-contract [snip] cal log under old runtime) [truncated:+64 chars]"
   ],
   "recent_commits": [
-    "1351670a fix(agents): accept sdk read-only final output after turn guard",
-    "d65d3543 chore(board): record sdk readonly output outcome"
+    "52a8a7b4 chore(context): checkpoint sdk readonly output semantics"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
       "task:TASK-BUD-1066-SDK-STARTUP-PROBE-READONLY-3",
-      "commit:1351670a"
+      "task:TASK-BUD-1066-SUBPROCESS-PREFLIGHT-CANARY",
+      "commit:52a8a7b4"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T19:07:29.394Z",
-    "level": "warn",
-    "percent": 46,
+    "generatedAtIso": "2026-05-11T19:13:28.077Z",
+    "level": "ok",
+    "percent": 47,
     "action": "continue",
-    "recommendation": "reload-then-validate-sdk-readonly-final-output-semantics",
+    "recommendation": "await-exact-sdk-smoke-confirmation-or-continue-report-only",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T19:07:29.394Z",
+      "atIso": "2026-05-11T19:13:28.077Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 46,
+      "level": "ok",
+      "percent": 47,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-validate-sdk-readonly-final-output-semantics"
+      "recommendation": "await-exact-sdk-smoke-confirmation-or-continue-report-only"
     }
   ]
 }
