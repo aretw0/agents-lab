@@ -21,6 +21,7 @@ Key completed slices:
 - `TASK-BUD-1022`: read-only contract fails on any touched file.
 - `TASK-BUD-1024`: runner final evidence is recorded in registry/status/outcome paths.
 - `TASK-BUD-1025`: post-reload live canary validated final evidence fields without dispatch.
+- `TASK-BUD-1066`: subprocess preflight canary produced a startup timeout (`runner-timeout`, `exitCode=124`, `timedOut=yes`, zero stdout/stderr). The classifier now preserves this separately from generic `silent-runner-failure` and the startup diagnostic packet asks for timeout/signal/timedOut evidence before any retry.
 
 ## Current contract
 
@@ -56,7 +57,9 @@ Humility still applies: maturity is scoped, not universal. Current evidence supp
 
 ## Recommended next step
 
-Run one more single-worker canary, but only after preparing a small mutation target with:
+For the current `TASK-BUD-1066` subprocess blocker, do **not** retry the worker blindly. The next local-safe step is a report-only structured startup/provider probe design that captures startup phases, stderr preservation, timeout budget, termination signal, and provider bootstrap evidence without a model call where possible.
+
+Run one more single-worker canary only after preparing a small mutation target with:
 
 - one or two declared files;
 - explicit non-destructive rollback;
