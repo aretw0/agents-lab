@@ -15551,6 +15551,15 @@
       "method": "vitest+marker-check+diff-check",
       "timestamp": "2026-05-11T20:51:16.609Z",
       "evidence": "Added explicit `sdkMaturity` telemetry to the SDK in-process packet so future previews classify whether they are inside the validated envelope or need new evidence. New rung values include `validated-narrow-readgrep`, `needs-evidence-broad-readonly`, `needs-evidence-mutation`, and `blocked`; the summary now includes `sdkMaturity=<rung>`. Validated envelope is one/two declared files, read-only, tools within `read/grep`; broad read-only remains ready for human decision only as a new evidence rung, not validated. Regression tests cover validated narrow read/grep, broad read-only evidence-needed, and blocked budget maturity. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; marker check for SDK maturity symbols passed; `git diff --check` passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-MATURITY-NEXT-ACTIONS-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "vitest+marker-check+diff-check",
+      "timestamp": "2026-05-11T20:55:20.244Z",
+      "evidence": "Hardened SDK packet nextActions so `sdkMaturity.validatedEnvelope=false` previews are explicitly framed as a new evidence rung rather than routine validated SDK use. Validated narrow read/grep previews still recommend the ready envelope; broad read-only previews now say `new evidence rung` and include the shrink/new-evidence recommendation. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; marker check for `readyNextActions`, `new evidence rung`, `sdkMaturity.recommendation`, and `validatedEnvelope` passed; `git diff --check` passed."
     }
   ]
 }

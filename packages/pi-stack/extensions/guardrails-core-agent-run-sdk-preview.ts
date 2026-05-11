@@ -252,6 +252,19 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     toolAllowlist,
     fileContract,
   });
+  const readyNextActions = sdkMaturity.validatedEnvelope
+    ? [
+      "present this SDK/in-process packet for explicit human decision; the packet itself cannot dispatch",
+      "prefer the validated SDK safe envelope first: one or two declared files, read/grep only, strict final output contract, bounded timeout",
+      "if separately implemented and confirmed, start exactly one SDK worker and record registry/log/outcome evidence",
+      "after completion, validate final output bytes and declared file scope from the parent",
+    ]
+    : [
+      "present this SDK/in-process packet as a new evidence rung, not as routine validated SDK use",
+      sdkMaturity.recommendation,
+      "if exact-confirmed anyway, start exactly one SDK worker and record registry/log/outcome evidence before expanding scope",
+      "after completion, validate final output bytes and declared file scope from the parent",
+    ];
   const sdkPreview = {
     factory: "createAgentSession" as const,
     authPattern: "AuthStorage.create + ModelRegistry.create" as const,
@@ -315,12 +328,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     sdkPreview,
     humanConfirmationPhrase: runId ? `execute o sdk worker ${runId}` : "",
     nextActions: decision === "ready-for-human-decision"
-      ? [
-        "present this SDK/in-process packet for explicit human decision; the packet itself cannot dispatch",
-        "prefer the validated SDK safe envelope first: one or two declared files, read/grep only, strict final output contract, bounded timeout",
-        "if separately implemented and confirmed, start exactly one SDK worker and record registry/log/outcome evidence",
-        "after completion, validate final output bytes and declared file scope from the parent",
-      ]
+      ? readyNextActions
       : ["resolve blockers before any SDK/in-process worker implementation or dispatch", "keep subprocess route available; do not switch globally"],
     rollbackHint: declaredFiles.length > 0 ? `restore/remove only declared files: ${declaredFiles.join(", ")}` : "no rollback target is safe until declaredFiles is provided",
     summary: [

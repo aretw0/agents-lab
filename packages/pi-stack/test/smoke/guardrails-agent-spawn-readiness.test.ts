@@ -1657,6 +1657,8 @@ describe("agent spawn readiness contract", () => {
       validatedEnvelope: false,
       scope: "broad",
     });
+    expect(broadReadOnly.nextActions.join("\n")).toContain("new evidence rung");
+    expect(broadReadOnly.nextActions.join("\n")).toContain("shrink to one or two declared files");
 
     const blocked = buildAgentRunSdkInProcessPacket({
       runId: "sdk-blocked",
