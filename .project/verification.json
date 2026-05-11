@@ -15560,6 +15560,15 @@
       "method": "vitest+marker-check+diff-check",
       "timestamp": "2026-05-11T20:55:20.244Z",
       "evidence": "Hardened SDK packet nextActions so `sdkMaturity.validatedEnvelope=false` previews are explicitly framed as a new evidence rung rather than routine validated SDK use. Validated narrow read/grep previews still recommend the ready envelope; broad read-only previews now say `new evidence rung` and include the shrink/new-evidence recommendation. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; marker check for `readyNextActions`, `new evidence rung`, `sdkMaturity.recommendation`, and `validatedEnvelope` passed; `git diff --check` passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-BOARD-EVIDENCE-PREVIEW-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-sdk-packet-preview-after-reload",
+      "timestamp": "2026-05-11T21:24:17.181Z",
+      "evidence": "After operator reload, prepared the first narrow SDK in-process preview that answers a real board question rather than marker-only validation. RunId: `task-bud-1068-sdk-board-evidence-smoke`. Question: read only `.project/tasks.json` and `.project/verification.json` to determine whether `TASK-BUD-1068` has recorded evidence that the SDK in-process one/two-file read/grep envelope is validated and still remains in-progress. Packet scope: two declared files, `read,grep`, read-only, timeout 45000ms, strict one-sentence PASS/FAIL final output ending with STOP. Live `agent_run_sdk_in_process_packet` after reload returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required before execution: `execute o sdk worker task-bud-1068-sdk-board-evidence-smoke`."
     }
   ]
 }
