@@ -199,8 +199,8 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     finalOutputContract: ["capture assistant text deltas", "require final output bytes > 0", "parent validates declared file scope after completion"],
     isolationNotes: [
       "SDK/in-process shares the parent Node.js process; use only after report-only packet and exact confirmation.",
-      "Live-validated safe envelope: narrow read-only diagnostics with one declared file, read-only tool use, explicit final output contract, follow, and outcome validation.",
-      "Next maturity rung: at most two declared files with read/grep only and a strict final-answer shape; broad read-only scopes still need evidence because prior runs looped or bloated output.",
+      "Live-validated safe envelope: narrow read-only diagnostics with one or two declared files, read/grep only, explicit final output contract, follow, and outcome validation.",
+      "Next maturity rung: a similarly narrow read-only diagnostic that answers a real board question rather than only marker presence; broad read-only scopes still need evidence because prior runs looped or bloated output.",
       "Use read-only tools for diagnostic canaries unless a mutation profile declares validation and rollback.",
       "Keep subprocess executor supported for stronger process isolation and argv-level diagnostics.",
     ],
@@ -252,7 +252,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     nextActions: decision === "ready-for-human-decision"
       ? [
         "present this SDK/in-process packet for explicit human decision; the packet itself cannot dispatch",
-        "prefer the validated SDK safe envelope first: narrow read-only scope, read/grep only, strict final output contract, bounded timeout",
+        "prefer the validated SDK safe envelope first: one or two declared files, read/grep only, strict final output contract, bounded timeout",
         "if separately implemented and confirmed, start exactly one SDK worker and record registry/log/outcome evidence",
         "after completion, validate final output bytes and declared file scope from the parent",
       ]

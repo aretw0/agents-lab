@@ -70,11 +70,12 @@ Do not forget the sequence already tried:
 1. `find/ls` in the SDK declared-file policy failed safely and now blocks before dispatch.
 2. Broad read-only diagnostics with many declared files reached useful evidence but looped/bloated output.
 3. Narrow read-only diagnostics with one declared file and one `read` call completed and passed.
+4. The next narrow rung with two declared files and `read/grep` completed and passed.
 
 Use this ladder to unlock more work gradually:
 
-- **Ready now**: one declared file, `read` only, explicit one-answer output shape, exact confirmation, follow/outcome validation.
-- **Next rung**: one or two declared files, `read/grep`, strict output shape, small timeout, exact confirmation.
+- **Ready now**: one or two declared files, `read/grep` only, explicit one-answer output shape, exact confirmation, follow/outcome validation.
+- **Next rung**: a similarly narrow read-only worker that answers a real board question rather than only marker presence.
 - **Not ready yet**: broad read-only analysis, mutation, multi-worker, protected scope, or unattended provider dispatch.
 
 When preparing a worker, prefer the next smallest rung that can answer the question. If the worker loops, bloats output, or reads old logs as fresh evidence, harden the packet/runner before expanding scope.

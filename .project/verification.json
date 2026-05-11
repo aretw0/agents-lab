@@ -15524,6 +15524,24 @@
       "method": "report-only-sdk-packet-preview",
       "timestamp": "2026-05-11T20:23:48.948Z",
       "evidence": "Prepared the next SDK in-process maturity rung as report-only preview, no dispatch: runId `task-bud-1068-sdk-readgrep-two-file-smoke`, two declared files (`docs/research/agent-runner-maturity-checkpoint-2026-05.md`, `packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts`), tools `read,grep`, timeout 45000ms, read-only contract, strict one-sentence PASS/FAIL final output ending with STOP. `agent_run_sdk_in_process_packet` returned `decision=ready-for-human-decision dispatch=no authorization=none`; `agent_run_sdk_in_process_dispatch execute=false` returned `decision=preview dispatch=no`. Provider readiness matrix reported openai-codex ready/degraded=0/blocked=0 in this slice. Exact confirmation remains required before any execution: `execute o sdk worker task-bud-1068-sdk-readgrep-two-file-smoke`."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-READGREP-TWO-FILE-SMOKE-PASS-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-approved-sdk-in-process-smoke+outcome-packet+marker-check",
+      "timestamp": "2026-05-11T20:38:51.796Z",
+      "evidence": "Exact-approved SDK in-process next-rung smoke `task-bud-1068-sdk-readgrep-two-file-smoke` completed successfully. Scope: two declared files (`docs/research/agent-runner-maturity-checkpoint-2026-05.md`, `packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1068-sdk-readgrep-two-file-smoke.sdk.log` shows declared-file tool policy, 2 tool_execution_end events, final `PASS; ... SDK in-process maturity ladder ... Live-validated safe envelope ... STOP.`, `event=agent_end`, and `close state=completed outputBytes=231`. Git status after run was clean (no touched files). Outcome packet: `contract=pass process=completed recommendation=stop declared=2 touched=0 outputBytes=231`. Failure classification: `class=none preflight=ready-for-canary`. Marker check on log passed for tools, policy, PASS output, markers, agent_end, and completed close."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-READGREP-RUNG-PROMOTED-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-packet-test-promotion+vitest+i18n-marker-diff",
+      "timestamp": "2026-05-11T20:42:19.448Z",
+      "evidence": "Promoted the SDK in-process two-file `read/grep` rung from preview/next-rung to validated safe envelope after exact-approved pass. Updated `docs/research/agent-runner-maturity-checkpoint-2026-05.md` to record four tried steps and mark `one or two declared files, read/grep only` as ready now. Updated `guardrails-core-agent-run-sdk-preview.ts` isolation/nextAction guidance so future packets remember the validated envelope and next rung is a narrow worker answering a real board question. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; i18n lint pass; marker check pass; `git diff --check` pass."
     }
   ]
 }
