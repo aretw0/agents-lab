@@ -15515,6 +15515,15 @@
       "method": "vitest+i18n-lint+marker-check+diff-check",
       "timestamp": "2026-05-11T20:20:42.616Z",
       "evidence": "After reload and auto-resume, encoded the learned SDK/in-process safe envelope into `guardrails-core-agent-run-sdk-preview.ts`, regression tests, and `docs/research/agent-runner-maturity-checkpoint-2026-05.md`. The packet now reminds operators of the live-validated safe envelope (narrow read-only diagnostics, declared file scope, explicit final output, follow/outcome) and next rung (at most two declared files, read/grep only, strict final-answer shape). The doc records the attempted sequence: unsupported find/ls blocked before dispatch; broad read-only scope can loop/bloat; one-file read-only smoke completed. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; i18n lint pass; marker check for SDK ladder markers pass; `git diff --check` pass."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-READGREP-TWO-FILE-PREVIEW-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "report-only-sdk-packet-preview",
+      "timestamp": "2026-05-11T20:23:48.948Z",
+      "evidence": "Prepared the next SDK in-process maturity rung as report-only preview, no dispatch: runId `task-bud-1068-sdk-readgrep-two-file-smoke`, two declared files (`docs/research/agent-runner-maturity-checkpoint-2026-05.md`, `packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts`), tools `read,grep`, timeout 45000ms, read-only contract, strict one-sentence PASS/FAIL final output ending with STOP. `agent_run_sdk_in_process_packet` returned `decision=ready-for-human-decision dispatch=no authorization=none`; `agent_run_sdk_in_process_dispatch execute=false` returned `decision=preview dispatch=no`. Provider readiness matrix reported openai-codex ready/degraded=0/blocked=0 in this slice. Exact confirmation remains required before any execution: `execute o sdk worker task-bud-1068-sdk-readgrep-two-file-smoke`."
     }
   ]
 }
