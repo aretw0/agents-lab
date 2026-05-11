@@ -15614,6 +15614,15 @@
       "method": "doc-packet-test-promotion+vitest+i18n-marker-diff",
       "timestamp": "2026-05-11T22:46:58.203Z",
       "evidence": "Promoted the SDK in-process narrow synthesis rung after exact-approved pass. Updated `docs/research/agent-runner-maturity-checkpoint-2026-05.md` to record that a narrow synthesis worker read one doc and one board file, recommended the next SDK rung with cited board/doc evidence, and passed. Updated `guardrails-core-agent-run-sdk-preview.ts` isolation/recommendation text so the validated envelope explicitly includes narrow cited synthesis and the next rung is narrow read-only code/test review recommending a parent-side patch with cited evidence. Added regression assertion for `Live-validated synthesis rung`. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; i18n lint pass; marker check pass; `git diff --check` pass."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-CODE-TEST-REVIEW-PREVIEW-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-sdk-packet-preview-after-reload",
+      "timestamp": "2026-05-11T23:09:13.022Z",
+      "evidence": "After reload, prepared the next SDK in-process rung as preview only: `task-bud-1068-sdk-code-test-review-smoke`. Purpose: narrow read-only code/test review that recommends one parent-side patch to further unlock pragmatic SDK in-process worker use without broadening scope, with cited evidence from both files. Declared files: `packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts` and `packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts`; tools `read,grep`; read-only; timeout 45000ms; strict one-sentence final output starting `PASS; recommended patch:` or `FAIL;` and ending with `STOP.` Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required before execution: `execute o sdk worker task-bud-1068-sdk-code-test-review-smoke`."
     }
   ]
 }
