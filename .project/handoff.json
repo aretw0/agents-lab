@@ -1,26 +1,27 @@
 {
-  "timestamp": "2026-05-11T21:25:29.213Z",
-  "context": "After reload, continued SDK in-process lane without dispatch. Git was clean; context ok; provider readiness for openai-codex ready/degraded=0 [snip] Board evidence recorded and committed. [truncated:+622 chars]",
+  "timestamp": "2026-05-11T21:35:24.914Z",
+  "context": "Exact confirmation received and consumed for task-bud-1068-sdk-board-evidence-smoke. Dispatched exactly one SDK in-process worker under valid [snip] lects the promoted board-question rung. [truncated:+805 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "If operator wants to execute the next SDK real-board-question smoke, require exact phrase: exe [snip] 8-sdk-board-evidence-smoke [truncated:+30 chars]",
-    "Without exact phrase, continue local-safe by hardening SDK board-question packet ergonomics an [snip] lidated-envelope previews. [truncated:+19 chars]",
-    "Keep subprocess root-cause work deferred until SDK in-process lane is more productive."
+    "Ask operator to /reload before relying on live packet text for the promoted board-question rung.",
+    "After reload, prepare a preview for the next SDK rung: narrow read-only synthesis with cited b [snip] atch without exact phrase. [truncated:+85 chars]",
+    "Keep subprocess root-cause work deferred until SDK in-process lane is more productive, per operator direction."
   ],
   "blockers": [
-    "No standing authorization for worker/provider dispatch; exact per-run confirmation still required.",
-    "Next SDK board evidence smoke is previewed but not executed.",
+    "Runtime extension changes committed; reload needed before live surface reflect [snip] d board-question rung. [truncated:+9 chars]",
+    "No standing authorization for additional worker/provider dispatch; exact phrase has been consumed.",
     "SDK broad read-only/mutation/multi-worker/unattended dispatch remain immature."
   ],
   "recent_validation": [
-    "git status --short before preview -> clean",
-    "context_watch_status -> ok reload-not-required",
-    "provider_readiness_matrix openai-codex -> ready entries present, degraded=0 blocked=0"
+    "agent_run_sdk_in_process_dispatch execute=true exact phrase -> dispatched one run only",
+    "agent_run_follow -> terminal completed outputBytes=1154 lines=16",
+    "log .pi/reports/task-bud-1068-sdk-board-evidence-smoke.sdk.log -> tools=read,grep, declared-fi [snip] completed outputBytes=331 [truncated:+73 chars]"
   ],
   "recent_commits": [
-    "e7b6f436 chore(board): preview sdk board evidence smoke"
+    "053546a3 chore(board): record sdk board evidence smoke",
+    "81ce9885 feat(agents): promote sdk board question rung"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
@@ -31,28 +32,28 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T21:25:29.213Z",
+    "generatedAtIso": "2026-05-11T21:35:24.914Z",
     "level": "ok",
-    "percent": 33,
+    "percent": 37,
     "action": "continue",
-    "recommendation": "sdk-board-evidence-preview-ready",
+    "recommendation": "reload-then-preview-sdk-synthesis-rung",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T21:25:29.213Z",
+      "atIso": "2026-05-11T21:35:24.914Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 33,
+      "percent": 37,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "sdk-board-evidence-preview-ready"
+      "recommendation": "reload-then-preview-sdk-synthesis-rung"
     }
   ]
 }
