@@ -426,6 +426,7 @@ export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagn
     "stdout-and-stderr-byte-counts-captured",
     "stdout-stderr-byte-split-captured",
     "exit-code-captured",
+    ...(classification.failureClass === "runner-timeout" ? ["timeout-ms-captured", "termination-signal-captured", "timed-out-flag-captured"] : []),
     "provider-model-ref-captured",
     "budget-evidence-captured",
     "reload-state-captured",

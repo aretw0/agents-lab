@@ -1916,6 +1916,9 @@ describe("agent spawn readiness contract", () => {
     expect(timeoutStartupProbe.failureClass).toBe("runner-timeout");
     expect(timeoutStartupProbe.canaryAllowed).toBe(false);
     expect(timeoutStartupProbe.probeProfiles).toContain("timeout-budget-probe");
+    expect(timeoutStartupProbe.evidenceChecklist).toContain("timeout-ms-captured");
+    expect(timeoutStartupProbe.evidenceChecklist).toContain("termination-signal-captured");
+    expect(timeoutStartupProbe.evidenceChecklist).toContain("timed-out-flag-captured");
 
     const providerUnavailable = classifyAgentRunFailure({
       runId: "quota",
