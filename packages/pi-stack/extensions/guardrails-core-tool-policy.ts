@@ -109,15 +109,24 @@ export interface SdkWorkerToolPolicyPlan {
   policySummary: string[];
 }
 
+export const DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOLS = ["read", "grep"] as const;
+
+const DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOL_SET = new Set<string>(DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOLS);
+
+export function findUnsupportedDeclaredFileScopedSdkWorkerTools(toolAllowlist: string[]): string[] {
+  return [...new Set(toolAllowlist.map((tool) => tool.trim()).filter(Boolean))]
+    .filter((toolName) => !DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOL_SET.has(toolName));
+}
+
 export function buildDeclaredFileScopedSdkWorkerTools(input: {
   cwd: string;
   declaredFiles: string[];
   toolAllowlist: string[];
 }): SdkWorkerToolPolicyPlan {
   const customTools: ToolDefinition[] = [];
-  const unsupportedTools: string[] = [];
   const policySummary: string[] = [];
   const uniqueTools = [...new Set(input.toolAllowlist.map((tool) => tool.trim()).filter(Boolean))];
+  const unsupportedTools = findUnsupportedDeclaredFileScopedSdkWorkerTools(uniqueTools);
 
   for (const toolName of uniqueTools) {
     if (toolName === "read") {
@@ -139,8 +148,6 @@ export function buildDeclaredFileScopedSdkWorkerTools(input: {
         policyLabel: "declared-file-scope",
       }));
       policySummary.push("grep:path=>declared-files;glob=blocked");
-    } else {
-      unsupportedTools.push(toolName);
     }
   }
 

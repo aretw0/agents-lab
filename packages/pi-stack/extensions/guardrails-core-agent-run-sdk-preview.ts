@@ -1,4 +1,5 @@
 import { resolveProviderExecutionBudgetEvidence, type ProviderExecutionBudgetDecision } from "./guardrails-core-provider-budget-evidence";
+import { findUnsupportedDeclaredFileScopedSdkWorkerTools } from "./guardrails-core-tool-policy";
 
 export type AgentRunSdkSessionMode = "in-memory" | "run-session-dir" | "unknown";
 export type AgentRunSdkPacketDecision = "ready-for-human-decision" | "blocked";
@@ -141,6 +142,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   const declaredFiles = normalizeFiles(input.declaredFiles);
   const timeoutMs = normalizePositiveInt(input.timeoutMs, 0);
   const toolAllowlist = normalizeFiles(input.toolAllowlist);
+  const unsupportedPolicyTools = findUnsupportedDeclaredFileScopedSdkWorkerTools(toolAllowlist);
   const sessionMode = normalizeSessionMode(input.sessionMode || "in-memory");
   const fileContract = normalizeFileContract(input.fileContract || "read-only");
   const validationGateKnown = input.validationGateKnown === true;
@@ -176,6 +178,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   if (declaredFiles.length === 0) block("agent-run-sdk-blocked-files", "declared-files-missing");
   if (timeoutMs < SDK_TIMEOUT_MIN_MS || timeoutMs > SDK_TIMEOUT_MAX_MS) block("agent-run-sdk-blocked-timeout", "timeout-out-of-bounds");
   if (toolAllowlist.length === 0) block("agent-run-sdk-blocked-tools", "tool-allowlist-missing");
+  if (unsupportedPolicyTools.length > 0) block("agent-run-sdk-blocked-tools", `unsupported-tool-policy:${unsupportedPolicyTools.join(",")}`);
   if (sessionMode === "unknown") block("agent-run-sdk-blocked-session-mode", "session-mode-unknown");
   if (!validationGateKnown) block("agent-run-sdk-blocked-validation", "validation-gate-missing");
   if (!rollbackPlanKnown) block("agent-run-sdk-blocked-rollback", "rollback-plan-missing");

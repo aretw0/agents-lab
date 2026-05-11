@@ -108,7 +108,7 @@ export { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run
 export type { AgentRunExecutorStrategyDecision, AgentRunExecutorStrategyInput, AgentRunExecutorStrategyKind, AgentRunExecutorStrategyPacketResult } from "./guardrails-core-agent-run-executor-strategy";
 export { buildAgentRunSdkInProcessPacket } from "./guardrails-core-agent-run-sdk-preview";
 export type { AgentRunSdkFileContract, AgentRunSdkInProcessPacketInput, AgentRunSdkInProcessPacketResult, AgentRunSdkPacketDecision, AgentRunSdkSessionMode } from "./guardrails-core-agent-run-sdk-preview";
-export { buildDeclaredFileScopedSdkWorkerTools, evaluateDeclaredPathPolicy, wrapToolDefinitionWithDeclaredPathPolicy } from "./guardrails-core-tool-policy";
+export { buildDeclaredFileScopedSdkWorkerTools, DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOLS, evaluateDeclaredPathPolicy, findUnsupportedDeclaredFileScopedSdkWorkerTools, wrapToolDefinitionWithDeclaredPathPolicy } from "./guardrails-core-tool-policy";
 export type { DeclaredPathPolicy, SdkWorkerToolPolicyPlan, ToolPolicyDecision } from "./guardrails-core-tool-policy";
 export { buildToolkitContract } from "./guardrails-core-toolkit-contract";
 export { buildTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationEvidence, extractTrustedHumanConfirmationEvidenceFromEnvelope, recordTrustedHumanConfirmationUiDecision, resolveHumanConfirmationAuditPlan, resolveHumanConfirmationEvidenceMatch, resolveHumanConfirmationImplementationChannelPlan, resolveHumanConfirmationRuntimeConsumptionPlan, resolveHumanConfirmationSignalSourcePlan } from "./guardrails-core-human-confirmation";

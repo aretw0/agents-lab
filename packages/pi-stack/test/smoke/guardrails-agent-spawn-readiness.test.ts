@@ -1586,7 +1586,7 @@ describe("agent spawn readiness contract", () => {
       cwd: process.cwd(),
       declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
       timeoutMs: 90_000,
-      toolAllowlist: ["read", "grep", "find", "ls"],
+      toolAllowlist: ["read", "grep"],
       sessionMode: "in-memory",
       fileContract: "read-only",
       validationGateKnown: true,
@@ -1616,7 +1616,7 @@ describe("agent spawn readiness contract", () => {
       factory: "createAgentSession",
       authPattern: "AuthStorage.create + ModelRegistry.create",
       sessionPattern: "SessionManager.inMemory",
-      toolSelection: ["read", "grep", "find", "ls"],
+      toolSelection: ["read", "grep"],
     });
     expect(result.sdkPreview.abortContract).toContain("timeout calls session.abort()");
     expect(result.sdkPreview.finalOutputContract).toContain("require final output bytes > 0");
@@ -1659,6 +1659,25 @@ describe("agent spawn readiness contract", () => {
     expect(dirtyBlocked.blockers).toContain("unexpected-dirty-state");
     expect(dirtyBlocked.summary).toContain("unexpectedDirty=yes");
 
+    const unsupportedToolsBlocked = buildAgentRunSdkInProcessPacket({
+      runId: "sdk-unsupported-tools-blocked",
+      goal: "blocked unsupported tools",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+      timeoutMs: 90_000,
+      toolAllowlist: ["read", "grep", "find", "ls"],
+      validationGateKnown: true,
+      rollbackPlanKnown: true,
+      budgetDecision: "ok",
+      abortKnown: true,
+      eventStreamKnown: true,
+      finalOutputContractKnown: true,
+    });
+    expect(unsupportedToolsBlocked.decision).toBe("blocked");
+    expect(unsupportedToolsBlocked.recommendationCode).toBe("agent-run-sdk-blocked-tools");
+    expect(unsupportedToolsBlocked.blockers).toContain("unsupported-tool-policy:find,ls");
+
     const rawPi = {
       on: vi.fn(),
       registerTool: vi.fn(),
@@ -1684,7 +1703,7 @@ describe("agent spawn readiness contract", () => {
       provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
       declared_files: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
       timeout_ms: 90_000,
-      tool_allowlist: ["read", "grep", "find", "ls"],
+      tool_allowlist: ["read", "grep"],
       validation_gate_known: true,
       rollback_plan_known: true,
       budget_decision: "ok",
@@ -1706,7 +1725,7 @@ describe("agent spawn readiness contract", () => {
       provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
       declared_files: ["packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts"],
       timeout_ms: 90_000,
-      tool_allowlist: ["read", "grep", "find", "ls"],
+      tool_allowlist: ["read", "grep"],
       validation_gate_known: true,
       rollback_plan_known: true,
       budget_decision: "ok",
@@ -1728,7 +1747,7 @@ describe("agent spawn readiness contract", () => {
       provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
       declared_files: ["packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts"],
       timeout_ms: 90_000,
-      tool_allowlist: ["read", "grep", "find", "ls"],
+      tool_allowlist: ["read", "grep"],
       validation_gate_known: true,
       rollback_plan_known: true,
       budget_decision: "ok",
