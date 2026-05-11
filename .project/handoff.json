@@ -1,59 +1,60 @@
 {
-  "timestamp": "2026-05-11T17:57:46.661Z",
-  "context": "Operator reloaded and asked to visualize when workers can be used again, with proactive exact approval guidance. Post-reload live validation: [snip] y. No worker/canary dispatch performed. [truncated:+535 chars]",
+  "timestamp": "2026-05-11T18:20:45.788Z",
+  "context": "Exact human approval dispatched one SDK in-process read-only worker: task-bud-1066-sdk-startup-probe-readonly. It failed fast/safely with too [snip] trusting the new live packet behavior. [truncated:+426 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "If the operator wants to approve the next worker, they should reply exactly: execute o sdk wor [snip] sdk-startup-probe-readonly [truncated:+18 chars]",
-    "On exact approval only, run agent_run_sdk_in_process_dispatch with execute=true and operator_c [snip] l-safe report-only design. [truncated:+57 chars]",
-    "After any SDK run, follow with status/log/outcome and parent-side validation before board/commit."
+    "Run /reload before live-validating the packet fix.",
+    "After reload, create/validate a new SDK in-process read-only preview with only supported tools: read,grep.",
+    "Recommended next approval phrase after reload and preview: execute o sdk worker task-bud-1066- [snip] k-startup-probe-readonly-2 [truncated:+2 chars]"
   ],
   "blockers": [
-    "No worker/canary dispatch authorization yet; preview only.",
-    "TASK-BUD-1066 close remains blocked by predecessor close/keep/defer decisions.",
-    "If runtime code changes again, require /reload before live-validating changed tools."
+    "Runtime changed; /reload required before live packet trust.",
+    "No authorization for another worker yet; previous exact approval was single-run only and consumed.",
+    "Subprocess retry remains blocked; subprocess retained as first-class but no blind retry."
   ],
   "recent_validation": [
-    "git status --short -> clean before preview",
-    "agent_run_startup_diagnostic_packet task-bud-1066-subprocess-preflight-canary -> decision=stru [snip] yAllowed=false dispatch=no [truncated:+52 chars]",
-    "agent_run_executor_strategy_packet failure_class=runner-timeout -> decision=sdk-in-process-can [snip] no subprocessBlindRetry=no [truncated:+73 chars]"
+    "agent_run_sdk_in_process_dispatch execute=true with exact confirmation -> dispatched one run only",
+    "agent_run_follow -> terminal failed outputBytes=505",
+    "log .pi/reports/task-bud-1066-sdk-startup-probe-readonly.sdk.log -> close state=failed reason= [snip] -unsupported tools=find,ls [truncated:+11 chars]"
   ],
   "recent_commits": [
-    "92938463 chore(context): checkpoint startup probe plan"
+    "5461b419 fix(agents): block unsupported sdk tools before dispatch",
+    "e93514e3 chore(board): record sdk tool policy outcome"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
       "task:TASK-BUD-1066-SDK-STARTUP-PROBE-READONLY",
-      "task:TASK-BUD-1066-SUBPROCESS-PREFLIGHT-CANARY",
-      "commit:92938463"
+      "task:TASK-BUD-1066-SDK-STARTUP-PROBE-READONLY-2",
+      "commit:5461b419"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T17:57:46.661Z",
+    "generatedAtIso": "2026-05-11T18:20:45.788Z",
     "level": "warn",
-    "percent": 50,
+    "percent": 32,
     "action": "continue",
-    "recommendation": "await-explicit-sdk-worker-confirmation-or-continue-report-only",
+    "recommendation": "reload-then-preview-read-grep-sdk-worker",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T17:57:46.661Z",
+      "atIso": "2026-05-11T18:20:45.788Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 50,
+      "percent": 32,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "await-explicit-sdk-worker-confirmation-or-continue-report-only"
+      "recommendation": "reload-then-preview-read-grep-sdk-worker"
     }
   ]
 }
