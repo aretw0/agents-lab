@@ -1,59 +1,59 @@
 {
-  "timestamp": "2026-05-11T18:44:31.976Z",
-  "context": "Exact-approved SDK worker task-bud-1066-sdk-startup-probe-readonly-2 ran once with supported tools read,grep. It touched no files but failed [snip] validating or approving another worker. [truncated:+522 chars]",
+  "timestamp": "2026-05-11T19:07:29.394Z",
+  "context": "Exact-approved SDK worker task-bud-1066-sdk-startup-probe-readonly-3 ran once with narrow read-only scope (2 declared files, read/grep). It t [snip] ore live-validating new close behavior. [truncated:+643 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Run /reload before trusting live classifier/output-capture fixes.",
-    "After reload, live-validate classification for task-bud-1066-sdk-startup-probe-readonly-2 shou [snip] ot tool-allowlist-invalid. [truncated:+62 chars]",
-    "Only after a green preview, recommend a new single SDK worker with a much narrower declared sc [snip] rst goal; do not reuse -2. [truncated:+15 chars]"
+    "Run /reload before trusting new read-only loop-guard-with-output close behavior.",
+    "After reload, preview a minimal live SDK smoke or inspect packet behavior; do not reuse -3 for dispatch.",
+    "If another worker is needed, use exact new confirmation only after preview; prefer a tiny read [snip] t no-loop answer contract. [truncated:+49 chars]"
   ],
   "blockers": [
     "Runtime changed; /reload required.",
     "Previous exact approval consumed; no authorization for another worker.",
-    "Subprocess retry remains blocked; keep subprocess first-class but no blind retry."
+    "Subprocess retry remains blocked by runner-timeout evidence until structured p [snip] implemented/validated. [truncated:+15 chars]"
   ],
   "recent_validation": [
     "git status --short before dispatch -> clean",
-    "agent_run_sdk_in_process_dispatch task-bud-1066-sdk-startup-probe-readonly-2 execute=true exac [snip] tion -> dispatched one run [truncated:+10 chars]",
-    "agent_run_follow -> terminal failed outputBytes=49834"
+    "agent_run_sdk_in_process_dispatch task-bud-1066-sdk-startup-probe-readonly-3 execute=true exac [snip] tion -> dispatched one run [truncated:+10 chars]",
+    "agent_run_follow -> terminal failed outputBytes=2382 under old runtime"
   ],
   "recent_commits": [
-    "1ce62d15 fix(agents): classify sdk loop guard close reason",
-    "464bc973 chore(board): record sdk loop guard outcome"
+    "1351670a fix(agents): accept sdk read-only final output after turn guard",
+    "d65d3543 chore(board): record sdk readonly output outcome"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1066-SDK-STARTUP-PROBE-READONLY-2",
-      "commit:1ce62d15"
+      "task:TASK-BUD-1066-SDK-STARTUP-PROBE-READONLY-3",
+      "commit:1351670a"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T18:44:31.976Z",
+    "generatedAtIso": "2026-05-11T19:07:29.394Z",
     "level": "warn",
-    "percent": 42,
+    "percent": 46,
     "action": "continue",
-    "recommendation": "reload-then-live-validate-sdk-loop-classification",
+    "recommendation": "reload-then-validate-sdk-readonly-final-output-semantics",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T18:44:31.976Z",
+      "atIso": "2026-05-11T19:07:29.394Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 42,
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-live-validate-sdk-loop-classification"
+      "recommendation": "reload-then-validate-sdk-readonly-final-output-semantics"
     }
   ]
 }
