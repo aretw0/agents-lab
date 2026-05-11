@@ -1,60 +1,59 @@
 {
-  "timestamp": "2026-05-11T17:42:08.741Z",
-  "context": "Post-reload continuation. Live validation after reload confirmed previous runner-timeout classification and startup diagnostic behavior. Cont [snip] idating the new startupProbePlan field. [truncated:+389 chars]",
+  "timestamp": "2026-05-11T17:57:46.661Z",
+  "context": "Operator reloaded and asked to visualize when workers can be used again, with proactive exact approval guidance. Post-reload live validation: [snip] y. No worker/canary dispatch performed. [truncated:+535 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Run /reload before live-validating new startupProbePlan field because runtime code changed again.",
-    "After reload, call agent_run_startup_diagnostic_packet for task-bud-1066-subprocess-preflight- [snip] and dispatchAllowed=false. [truncated:+91 chars]",
-    "Continue TASK-BUD-1066 with report-only structured startup/provider probe implementation/desig [snip] exact confirmation phrase. [truncated:+44 chars]"
+    "If the operator wants to approve the next worker, they should reply exactly: execute o sdk wor [snip] sdk-startup-probe-readonly [truncated:+18 chars]",
+    "On exact approval only, run agent_run_sdk_in_process_dispatch with execute=true and operator_c [snip] l-safe report-only design. [truncated:+57 chars]",
+    "After any SDK run, follow with status/log/outcome and parent-side validation before board/commit."
   ],
   "blockers": [
-    "Runtime changed after reload; /reload needed before trusting live output for new startupProbePlan.",
-    "No worker/canary dispatch authorization.",
-    "TASK-BUD-1066 close remains blocked by unresolved predecessor tasks whose deci [snip] uman close/keep/defer. [truncated:+22 chars]"
+    "No worker/canary dispatch authorization yet; preview only.",
+    "TASK-BUD-1066 close remains blocked by predecessor close/keep/defer decisions.",
+    "If runtime code changes again, require /reload before live-validating changed tools."
   ],
   "recent_validation": [
-    "git status --short -> clean before changes",
-    "Post-reload agent_run_failure_classification task-bud-1066-subprocess-preflight-canary -> clas [snip] s-evidence retryAllowed=no [truncated:+31 chars]",
-    "Post-reload agent_run_startup_diagnostic_packet -> decision=structured-probe-first failureClas [snip] yAllowed=false dispatch=no [truncated:+22 chars]"
+    "git status --short -> clean before preview",
+    "agent_run_startup_diagnostic_packet task-bud-1066-subprocess-preflight-canary -> decision=stru [snip] yAllowed=false dispatch=no [truncated:+52 chars]",
+    "agent_run_executor_strategy_packet failure_class=runner-timeout -> decision=sdk-in-process-can [snip] no subprocessBlindRetry=no [truncated:+73 chars]"
   ],
   "recent_commits": [
-    "26546365 feat(agents): add startup probe plan to diagnostics",
-    "d1448631 chore(board): record startup probe plan evidence"
+    "92938463 chore(context): checkpoint startup probe plan"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1066",
+      "task:TASK-BUD-1066-SDK-STARTUP-PROBE-READONLY",
       "task:TASK-BUD-1066-SUBPROCESS-PREFLIGHT-CANARY",
-      "commit:26546365"
+      "commit:92938463"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T17:42:08.741Z",
+    "generatedAtIso": "2026-05-11T17:57:46.661Z",
     "level": "warn",
-    "percent": 49,
+    "percent": 50,
     "action": "continue",
-    "recommendation": "reload-then-live-validate-startup-probe-plan",
+    "recommendation": "await-explicit-sdk-worker-confirmation-or-continue-report-only",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T17:42:08.741Z",
+      "atIso": "2026-05-11T17:57:46.661Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 49,
+      "percent": 50,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-live-validate-startup-probe-plan"
+      "recommendation": "await-explicit-sdk-worker-confirmation-or-continue-report-only"
     }
   ]
 }
