@@ -15443,6 +15443,15 @@
       "method": "live-validation+smoke-test",
       "timestamp": "2026-05-11T17:37:02.111Z",
       "evidence": "Post-reload live validation confirmed `task-bud-1066-subprocess-preflight-canary` classifies as `runner-timeout` and startup diagnostic packet remains `structured-probe-first`, `canaryAllowed=false`, `dispatch=no`. Added `startupProbePlan` to the existing startup diagnostic packet (no new dispatch surface): deterministic report-only steps derived from probeProfiles with `modelCallAllowed=false` and `dispatchAllowed=false`, covering timeout-budget, startup-hang, json-mode structured, stderr preservation, and related probes. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -t \"classifies runner failures\" --reporter=dot` -> 1 passed; full `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: 26546365. No worker/canary dispatch performed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-STARTUP-PROBE-PLAN-DOC-20260511",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-marker-check+i18n-lint",
+      "timestamp": "2026-05-11T17:39:53.708Z",
+      "evidence": "Documented the startup probe plan contract in `docs/research/agent-runner-maturity-checkpoint-2026-05.md`: `startupProbePlan` is report-only, captures startup phases/stderr/timeout budget/signal/elapsed time/provider bootstrap evidence, and every step remains `modelCallAllowed=false` and `dispatchAllowed=false`. Validation: i18n lint pass; safe_marker_check markers `startupProbePlan`, `modelCallAllowed=false`, `dispatchAllowed=false`, `elapsed time` -> pass; `git diff --check` -> pass. Commit: be0567f0. No worker/canary dispatch performed."
     }
   ]
 }
