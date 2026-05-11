@@ -1,60 +1,59 @@
 {
-  "timestamp": "2026-05-11T20:24:50.517Z",
-  "context": "Auto-resumed after reload with user direction to prioritize SDK in-process workers before subprocess. Continued local-safe under agent-first- [snip] view are green but dispatch remains no. [truncated:+701 chars]",
+  "timestamp": "2026-05-11T20:44:02.343Z",
+  "context": "Exact confirmation received and consumed for SDK worker task-bud-1068-sdk-readgrep-two-file-smoke. Dispatched exactly one SDK in-process read [snip] ion. Validation after promotion passed. [truncated:+784 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "If operator wants to run the next SDK rung, require exact phrase: execute o sdk worker task-bu [snip] dk-readgrep-two-file-smoke [truncated:+8 chars]",
-    "Without exact phrase, continue local-safe by hardening SDK packet/operator ergonomics and desi [snip] er previews automatically. [truncated:+30 chars]",
-    "Keep subprocess root-cause work deferred until SDK in-process lane is more productive, per user direction."
+    "Do not dispatch more workers without a new exact phrase.",
+    "Continue local-safe by preparing the next SDK preview: a narrow read-only worker that answers [snip] o-file read/grep envelope. [truncated:+48 chars]",
+    "Keep subprocess root-cause work deferred until SDK in-process lane is more productive, per operator direction."
   ],
   "blockers": [
-    "No standing authorization for worker/provider dispatch; exact per-run confirmation still required.",
-    "SDK next rung is previewed but not executed.",
-    "Subprocess runner-timeout root cause unresolved and intentionally deprioritize [snip] ntil SDK lane matures. [truncated:+3 chars]"
+    "No standing authorization for additional worker/provider dispatch; the exact p [snip] oke has been consumed. [truncated:+48 chars]",
+    "SDK broad read-only/mutation/multi-worker/unattended dispatch remain immature.",
+    "Subprocess runner-timeout root cause unresolved and intentionally deprioritized."
   ],
   "recent_validation": [
-    "git status --short at resume showed only expected handoff/doc/sdk/test edits",
-    "context_watch_status -> ok, reload-not-required",
-    "agent_run_failure_classification task-bud-1066-sdk-readonly-final-output-smoke -> class=none p [snip] ady-for-canary dispatch=no [truncated:+11 chars]"
+    "agent_run_sdk_in_process_dispatch execute=true with exact phrase -> dispatched one run only",
+    "agent_run_follow -> terminal completed outputBytes=913 lines=13",
+    "log .pi/reports/task-bud-1068-sdk-readgrep-two-file-smoke.sdk.log -> tools=read,grep, toolPoli [snip] completed outputBytes=231 [truncated:+70 chars]"
   ],
   "recent_commits": [
-    "e5bfa949 feat(agents): encode sdk in-process maturity ladder",
-    "10016d39 chore(board): record sdk readgrep preview"
+    "849dc7d1 feat(agents): promote sdk readgrep safe envelope"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
       "task:TASK-BUD-1068-SDK-READGREP-TWO-FILE-SMOKE",
-      "task:TASK-BUD-1066-SDK-READONLY-FINAL-OUTPUT-SMOKE",
+      "task:TASK-BUD-1068-SDK-READGREP-TWO-FILE-SMOKE-PASS-20260511",
       "commit:20260511"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T20:24:50.517Z",
+    "generatedAtIso": "2026-05-11T20:44:02.343Z",
     "level": "ok",
-    "percent": 25,
+    "percent": 27,
     "action": "continue",
-    "recommendation": "sdk-in-process-next-rung-preview-ready",
+    "recommendation": "sdk-readgrep-safe-envelope-validated",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T20:24:50.517Z",
+      "atIso": "2026-05-11T20:44:02.343Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 25,
+      "percent": 27,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "sdk-in-process-next-rung-preview-ready"
+      "recommendation": "sdk-readgrep-safe-envelope-validated"
     }
   ]
 }
