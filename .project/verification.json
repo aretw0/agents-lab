@@ -15488,6 +15488,15 @@
       "method": "worker-outcome+smoke-test",
       "timestamp": "2026-05-11T19:06:33.475Z",
       "evidence": "Exact-approved SDK worker `task-bud-1066-sdk-startup-probe-readonly-3` ran once, touched no files, and produced concise useful diagnostic output, but the runtime marked it failed because a turn-loop guard fired just before `agent_end` (`outputBytes=2382`). Hardened SDK runner semantics: for read-only workers only, if a turn-loop guard fired but `agent_end` arrived with non-empty final output, close as completed with reason `loop-guard-with-output`; tool-loop/no-output/mutation cases remain failed. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: 1351670a. Runtime changed; reload required before live-validating the new close behavior."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-SMOKE-PASS-20260511",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-approved-sdk-smoke+outcome",
+      "timestamp": "2026-05-11T19:19:22.759Z",
+      "evidence": "Exact-approved SDK read-only smoke `task-bud-1066-sdk-readonly-final-output-smoke` completed successfully under the post-reload runtime. Scope: one declared file `.pi/reports/task-bud-1066-subprocess-preflight-canary.log`, tool allowlist `read`, timeout 45s. Runtime evidence: one read tool call, `agent_end`, close state=completed, outputBytes=244 in log (831 by follow packet), touched files: none. Final output matched contract: `PASS; ... runner-timeout ... exitCode=124 ... timedOut=yes ... STOP.` Outcome packet: contract=pass, process=completed, recommendation=stop. Failure classifier: class=none, preflight=ready-for-canary, retryAllowed=yes. No additional worker dispatched."
     }
   ]
 }
