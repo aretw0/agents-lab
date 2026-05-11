@@ -15632,6 +15632,15 @@
       "method": "exact-approved-sdk-in-process-code-test-review+outcome-packet+classifier",
       "timestamp": "2026-05-11T23:35:20.367Z",
       "evidence": "Exact-approved SDK in-process code/test review smoke `task-bud-1068-sdk-code-test-review-smoke` failed safely. Scope: two declared files (`packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts`, `packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1068-sdk-code-test-review-smoke.sdk.log` shows declared-file tool policy, 6 successful tool_execution_end events, then `loop-guard sdk-runner-turn-loop turns=6 maxTurns=5`, `event=agent_end`, and `close state=failed reason=loop-guard outputBytes=0`. Git status after run was clean (no touched files). Outcome packet: `contract=fail process=failed recommendation=ask-human markerFailures=3 outputBytes=0`. Failure classification: `class=worker-contract-failed preflight=needs-evidence retryAllowed=no blockers=sdk-runner-loop-guard`. Marker check passed for tools, declared-file policy, loop guard, and failed close. Do not retry this same rung blindly; shrink code/test review scope or harden the prompt/runner before another exact-confirmed attempt."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-CODE-REVIEW-FAILURE-HARDENED-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-packet-test-hardening+vitest+i18n-marker-diff",
+      "timestamp": "2026-05-11T23:44:07.853Z",
+      "evidence": "Hardened the SDK in-process ladder after the exact-approved code/test review failed safely. Updated `docs/research/agent-runner-maturity-checkpoint-2026-05.md` to record that the two-file code/test review stayed inside declared files but looped with zero output, and that this shape must not be retried blindly. Updated `guardrails-core-agent-run-sdk-preview.ts` isolation notes to include a `Failed evidence rung` and shrink the next code/test review attempt to one target file or one named symbol with strict tool budget and parent-side patch recommendation. Added regression assertion for `Failed evidence rung`. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; i18n lint pass; marker check pass; `git diff --check` pass."
     }
   ]
 }

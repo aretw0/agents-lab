@@ -1623,6 +1623,7 @@ describe("agent spawn readiness contract", () => {
     expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Live-validated safe envelope");
     expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Live-validated board-question rung");
     expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Live-validated synthesis rung");
+    expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Failed evidence rung");
     expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Next maturity rung");
     expect(result.nextActions.join("\n")).toContain("validated SDK safe envelope");
     expect(result.sdkMaturity).toMatchObject({
