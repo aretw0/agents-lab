@@ -15605,6 +15605,15 @@
       "method": "exact-approved-sdk-in-process-synthesis+outcome-packet+marker-check",
       "timestamp": "2026-05-11T22:38:54.426Z",
       "evidence": "Exact-approved SDK in-process synthesis smoke `task-bud-1068-sdk-synthesis-recommendation-smoke` completed successfully under the validated narrow read/grep envelope. Scope: two declared files (`docs/research/agent-runner-maturity-checkpoint-2026-05.md`, `.project/verification.json`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1068-sdk-synthesis-recommendation-smoke.sdk.log` shows declared-file tool policy, 4 successful tool_execution_end events, final `PASS; recommended next rung:` answer recommending narrow read-only synthesis with cited board/doc evidence, citing `agent-runner-maturity-checkpoint-2026-05.md`, `VERIF-TASK-BUD-1068-SDK-BOARD-QUESTION-RUNG-PROMOTED`, `VERIF-TASK-BUD-1068-SDK-SYNTHESIS-PREVIEW`, and prior run `task-bud-1068-sdk-board-evidence-smoke`; then `event=agent_end` and `close state=completed outputBytes=601`. Git status after run was clean (no touched files). Outcome packet: `contract=pass process=completed recommendation=stop declared=2 touched=0 outputBytes=601`. Failure classification: `class=none preflight=ready-for-canary`. Marker check passed for tools, policy, PASS prefix, synthesis/doc/verification/prior-run evidence, STOP, agent_end, and completed close."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-SYNTHESIS-RUNG-PROMOTED-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-packet-test-promotion+vitest+i18n-marker-diff",
+      "timestamp": "2026-05-11T22:46:58.203Z",
+      "evidence": "Promoted the SDK in-process narrow synthesis rung after exact-approved pass. Updated `docs/research/agent-runner-maturity-checkpoint-2026-05.md` to record that a narrow synthesis worker read one doc and one board file, recommended the next SDK rung with cited board/doc evidence, and passed. Updated `guardrails-core-agent-run-sdk-preview.ts` isolation/recommendation text so the validated envelope explicitly includes narrow cited synthesis and the next rung is narrow read-only code/test review recommending a parent-side patch with cited evidence. Added regression assertion for `Live-validated synthesis rung`. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; i18n lint pass; marker check pass; `git diff --check` pass."
     }
   ]
 }

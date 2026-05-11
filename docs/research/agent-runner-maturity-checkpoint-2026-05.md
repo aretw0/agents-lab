@@ -72,11 +72,12 @@ Do not forget the sequence already tried:
 3. Narrow read-only diagnostics with one declared file and one `read` call completed and passed.
 4. The next narrow rung with two declared files and `read/grep` completed and passed.
 5. A narrow real-board-question worker read `.project/tasks.json` and `.project/verification.json`, confirmed TASK-BUD-1068 evidence/status, and passed.
+6. A narrow synthesis worker read one doc and one board file, recommended the next SDK rung with cited board/doc evidence, and passed.
 
 Use this ladder to unlock more work gradually:
 
-- **Ready now**: one or two declared files, `read/grep` only, explicit one-answer output shape, exact confirmation, follow/outcome validation, including real board-question checks.
-- **Next rung**: a similarly narrow read-only synthesis that produces a recommendation with cited board/doc evidence.
+- **Ready now**: one or two declared files, `read/grep` only, explicit one-answer output shape, exact confirmation, follow/outcome validation, including real board-question checks and narrow cited synthesis.
+- **Next rung**: a narrow read-only code/test review that recommends a parent-side patch with cited evidence.
 - **Not ready yet**: broad read-only analysis, mutation, multi-worker, protected scope, or unattended provider dispatch.
 
 When preparing a worker, prefer the next smallest rung that can answer the question. If the worker loops, bloats output, or reads old logs as fresh evidence, harden the packet/runner before expanding scope.
