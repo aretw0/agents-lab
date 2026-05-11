@@ -1,59 +1,59 @@
 {
-  "timestamp": "2026-05-11T19:13:28.077Z",
-  "context": "Post-reload validation completed after SDK read-only final-output semantic fix. Git clean; context ok; provider openai-codex ready. Historica [snip] e=false is green; no worker dispatched. [truncated:+547 chars]",
+  "timestamp": "2026-05-11T19:21:37.836Z",
+  "context": "Exact-approved SDK read-only smoke task-bud-1066-sdk-readonly-final-output-smoke completed successfully after reload. It used one declared fi [snip] obe design before any subprocess retry. [truncated:+508 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "If operator wants to live-validate the new read-only loop-guard-with-output behavior, exact ph [snip] eadonly-final-output-smoke [truncated:+46 chars]",
-    "Do not treat generic continue as worker authorization.",
-    "After any smoke run, follow status/log/outcome and validate no touched files and final output contract."
+    "SDK in-process can now be used for very narrow read-only diagnostics after exact preview/confi [snip] contract, bounded timeout. [truncated:+71 chars]",
+    "Do not generalize to broad SDK runs yet; previous broader runs looped or bloated output.",
+    "Continue TASK-BUD-1066 by designing the report-only structured startup/provider probe for subp [snip] no blind subprocess retry. [truncated:+23 chars]"
   ],
   "blockers": [
-    "No authorization for another worker yet; only preview exists.",
-    "Historical -3 log cannot prove the new close behavior; a new exact-approved sm [snip] d for live validation. [truncated:+14 chars]",
-    "Subprocess runner-timeout remains unresolved; no blind subprocess retry."
+    "Subprocess runner-timeout root cause unresolved.",
+    "No standing authorization for additional workers; each worker remains single-r [snip] act-confirmation only. [truncated:+5 chars]",
+    "TASK-BUD-1066 closure still blocked by predecessor close/keep/defer decisions."
   ],
   "recent_validation": [
-    "git status --short -> clean",
-    "context_watch_status -> ok, reload-not-required",
-    "agent_run_failure_classification task-bud-1066-sdk-startup-probe-readonly-3 -> worker-contract [snip] cal log under old runtime) [truncated:+64 chars]"
+    "git status --short before dispatch -> clean",
+    "agent_run_sdk_in_process_dispatch task-bud-1066-sdk-readonly-final-output-smoke execute=true e [snip] tion -> dispatched one run [truncated:+13 chars]",
+    "agent_run_follow -> terminal completed outputBytes=831"
   ],
   "recent_commits": [
-    "52a8a7b4 chore(context): checkpoint sdk readonly output semantics"
+    "2edab715 chore(board): record sdk smoke pass"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1066-SDK-STARTUP-PROBE-READONLY-3",
-      "task:TASK-BUD-1066-SUBPROCESS-PREFLIGHT-CANARY",
-      "commit:52a8a7b4"
+      "task:TASK-BUD-1066-SDK-READONLY-FINAL-OUTPUT-SMOKE",
+      "task:TASK-BUD-1066-SDK-SMOKE-PASS-20260511",
+      "commit:20260511"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T19:13:28.077Z",
+    "generatedAtIso": "2026-05-11T19:21:37.836Z",
     "level": "ok",
-    "percent": 47,
+    "percent": 48,
     "action": "continue",
-    "recommendation": "await-exact-sdk-smoke-confirmation-or-continue-report-only",
+    "recommendation": "continue-with-narrow-sdk-readonly-lane-and-design-subprocess-probe",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T19:13:28.077Z",
+      "atIso": "2026-05-11T19:21:37.836Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 47,
+      "percent": 48,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "await-exact-sdk-smoke-confirmation-or-continue-report-only"
+      "recommendation": "continue-with-narrow-sdk-readonly-lane-and-design-subprocess-probe"
     }
   ]
 }
