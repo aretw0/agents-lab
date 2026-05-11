@@ -15452,6 +15452,15 @@
       "method": "doc-marker-check+i18n-lint",
       "timestamp": "2026-05-11T17:39:53.708Z",
       "evidence": "Documented the startup probe plan contract in `docs/research/agent-runner-maturity-checkpoint-2026-05.md`: `startupProbePlan` is report-only, captures startup phases/stderr/timeout budget/signal/elapsed time/provider bootstrap evidence, and every step remains `modelCallAllowed=false` and `dispatchAllowed=false`. Validation: i18n lint pass; safe_marker_check markers `startupProbePlan`, `modelCallAllowed=false`, `dispatchAllowed=false`, `elapsed time` -> pass; `git diff --check` -> pass. Commit: be0567f0. No worker/canary dispatch performed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-UNSUPPORTED-TOOLS-20260511",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "worker-outcome+smoke-test",
+      "timestamp": "2026-05-11T18:18:07.883Z",
+      "evidence": "Exact human confirmation dispatched one SDK in-process read-only worker: `task-bud-1066-sdk-startup-probe-readonly`. It failed safely before model/tool work with `tool-policy-unsupported tools=find,ls`; touched files: none; outcome packet contract=fail/process=failed; classifier: `tool-allowlist-invalid`, preflight=blocked, retryAllowed=no, dispatch=no. Fixed packet/dispatch preview path to fail closed before dispatch when SDK allowlist includes tools without declared-file policy metadata (`unsupported-tool-policy:find,ls`). Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: 5461b419. No retry dispatched."
     }
   ]
 }
