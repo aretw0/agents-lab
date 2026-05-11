@@ -15497,6 +15497,15 @@
       "method": "exact-approved-sdk-smoke+outcome",
       "timestamp": "2026-05-11T19:19:22.759Z",
       "evidence": "Exact-approved SDK read-only smoke `task-bud-1066-sdk-readonly-final-output-smoke` completed successfully under the post-reload runtime. Scope: one declared file `.pi/reports/task-bud-1066-subprocess-preflight-canary.log`, tool allowlist `read`, timeout 45s. Runtime evidence: one read tool call, `agent_end`, close state=completed, outputBytes=244 in log (831 by follow packet), touched files: none. Final output matched contract: `PASS; ... runner-timeout ... exitCode=124 ... timedOut=yes ... STOP.` Outcome packet: contract=pass, process=completed, recommendation=stop. Failure classifier: class=none, preflight=ready-for-canary, retryAllowed=yes. No additional worker dispatched."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-CONTINUOUS-LANE-CONTRACT-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-marker-check+i18n-lint",
+      "timestamp": "2026-05-11T19:36:30.677Z",
+      "evidence": "Documented the continuous improvement lane contract in `docs/research/agent-runner-maturity-checkpoint-2026-05.md` without creating a new public primitive: milestone `agent-first-worker-lane`, anchors `TASK-BUD-1068`/`TASK-BUD-1066`, local-safe continuation allowed for docs/board/tests/classifier/packet/handoff/report-only previews, stop conditions for worker/provider dispatch/protected/destructive/task-closure decisions, and OODA as an internal quality filter only. Also recorded why the assistant stopped: runtime reload boundaries and single-run exact worker authorization, not lack of work. Validation: i18n lint pass; marker check for contract/milestone/task/OODA/exact-dispatch markers passed; `git diff --check` passed. Commit: 3aef0c67."
     }
   ]
 }
