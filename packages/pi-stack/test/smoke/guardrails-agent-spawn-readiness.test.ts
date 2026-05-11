@@ -1623,6 +1623,40 @@ describe("agent spawn readiness contract", () => {
     expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Live-validated safe envelope");
     expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Next maturity rung");
     expect(result.nextActions.join("\n")).toContain("validated SDK safe envelope");
+    expect(result.sdkMaturity).toMatchObject({
+      rung: "validated-narrow-readgrep",
+      validatedEnvelope: true,
+      scope: "narrow",
+      maxDeclaredFilesValidated: 2,
+      supportedToolsValidated: ["read", "grep"],
+    });
+    expect(result.summary).toContain("sdkMaturity=validated-narrow-readgrep");
+
+    const broadReadOnly = buildAgentRunSdkInProcessPacket({
+      runId: "sdk-broad-readonly",
+      goal: "broad read-only",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+      ],
+      timeoutMs: 90_000,
+      toolAllowlist: ["read", "grep"],
+      validationGateKnown: true,
+      rollbackPlanKnown: true,
+      budgetDecision: "ok",
+      abortKnown: true,
+      eventStreamKnown: true,
+      finalOutputContractKnown: true,
+    });
+    expect(broadReadOnly.decision).toBe("ready-for-human-decision");
+    expect(broadReadOnly.sdkMaturity).toMatchObject({
+      rung: "needs-evidence-broad-readonly",
+      validatedEnvelope: false,
+      scope: "broad",
+    });
 
     const blocked = buildAgentRunSdkInProcessPacket({
       runId: "sdk-blocked",
@@ -1641,6 +1675,7 @@ describe("agent spawn readiness contract", () => {
     });
     expect(blocked.decision).toBe("blocked");
     expect(blocked.blockers).toContain("budget-blocked");
+    expect(blocked.sdkMaturity.rung).toBe("blocked");
 
     const dirtyBlocked = buildAgentRunSdkInProcessPacket({
       runId: "sdk-dirty-blocked",

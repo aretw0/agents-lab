@@ -4,6 +4,11 @@ import { findUnsupportedDeclaredFileScopedSdkWorkerTools } from "./guardrails-co
 export type AgentRunSdkSessionMode = "in-memory" | "run-session-dir" | "unknown";
 export type AgentRunSdkPacketDecision = "ready-for-human-decision" | "blocked";
 export type AgentRunSdkFileContract = "read-only" | "mutation" | "unknown";
+export type AgentRunSdkMaturityRung =
+  | "validated-narrow-readgrep"
+  | "needs-evidence-broad-readonly"
+  | "needs-evidence-mutation"
+  | "blocked";
 
 export interface AgentRunSdkInProcessPacketInput {
   runId?: string;
@@ -88,6 +93,14 @@ export interface AgentRunSdkInProcessPacketResult {
     protectedScopeRequested: boolean;
     unexpectedDirty: boolean;
   };
+  sdkMaturity: {
+    rung: AgentRunSdkMaturityRung;
+    validatedEnvelope: boolean;
+    scope: "narrow" | "broad" | "none";
+    maxDeclaredFilesValidated: number;
+    supportedToolsValidated: string[];
+    recommendation: string;
+  };
   sdkPreview: {
     factory: "createAgentSession";
     authPattern: "AuthStorage.create + ModelRegistry.create";
@@ -132,6 +145,51 @@ function normalizeFileContract(value: unknown): AgentRunSdkFileContract {
   const text = normalizeText(value);
   if (text === "read-only" || text === "mutation") return text;
   return "unknown";
+}
+
+function buildSdkMaturity(input: {
+  blocked: boolean;
+  declaredFiles: string[];
+  toolAllowlist: string[];
+  fileContract: AgentRunSdkFileContract;
+}): AgentRunSdkInProcessPacketResult["sdkMaturity"] {
+  const scope = input.declaredFiles.length === 0 ? "none" : input.declaredFiles.length <= 2 ? "narrow" : "broad";
+  const toolsWithinValidatedEnvelope = input.toolAllowlist.length > 0 && input.toolAllowlist.every((tool) => tool === "read" || tool === "grep");
+  const base = {
+    scope,
+    maxDeclaredFilesValidated: 2,
+    supportedToolsValidated: ["read", "grep"],
+  } as const;
+  if (input.blocked) {
+    return {
+      ...base,
+      rung: "blocked",
+      validatedEnvelope: false,
+      recommendation: "resolve packet blockers before using SDK maturity evidence",
+    };
+  }
+  if (input.fileContract === "mutation") {
+    return {
+      ...base,
+      rung: "needs-evidence-mutation",
+      validatedEnvelope: false,
+      recommendation: "keep mutation SDK workers behind separate validation, rollback, and exact-confirmation evidence",
+    };
+  }
+  if (input.fileContract === "read-only" && scope === "narrow" && toolsWithinValidatedEnvelope) {
+    return {
+      ...base,
+      rung: "validated-narrow-readgrep",
+      validatedEnvelope: true,
+      recommendation: "ready for exact human decision under the validated one/two-file read/grep envelope",
+    };
+  }
+  return {
+    ...base,
+    rung: "needs-evidence-broad-readonly",
+    validatedEnvelope: false,
+    recommendation: "shrink to one or two declared files with read/grep, or treat this as a new evidence rung",
+  };
 }
 
 export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacketInput = {}): AgentRunSdkInProcessPacketResult {
@@ -188,6 +246,12 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   if (!finalOutputContractKnown) block("agent-run-sdk-blocked-final-output", "final-output-contract-missing");
 
   const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const sdkMaturity = buildSdkMaturity({
+    blocked: blockers.length > 0,
+    declaredFiles,
+    toolAllowlist,
+    fileContract,
+  });
   const sdkPreview = {
     factory: "createAgentSession" as const,
     authPattern: "AuthStorage.create + ModelRegistry.create" as const,
@@ -247,6 +311,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       protectedScopeRequested,
       unexpectedDirty,
     },
+    sdkMaturity,
     sdkPreview,
     humanConfirmationPhrase: runId ? `execute o sdk worker ${runId}` : "",
     nextActions: decision === "ready-for-human-decision"
@@ -265,6 +330,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       providerModelRef ? `model=${providerModelRef}` : undefined,
       `tools=${toolAllowlist.length}`,
       `session=${sessionMode}`,
+      `sdkMaturity=${sdkMaturity.rung}`,
       unexpectedDirty ? "unexpectedDirty=yes" : undefined,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
       "dispatch=no",

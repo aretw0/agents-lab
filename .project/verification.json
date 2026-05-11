@@ -15542,6 +15542,15 @@
       "method": "doc-packet-test-promotion+vitest+i18n-marker-diff",
       "timestamp": "2026-05-11T20:42:19.448Z",
       "evidence": "Promoted the SDK in-process two-file `read/grep` rung from preview/next-rung to validated safe envelope after exact-approved pass. Updated `docs/research/agent-runner-maturity-checkpoint-2026-05.md` to record four tried steps and mark `one or two declared files, read/grep only` as ready now. Updated `guardrails-core-agent-run-sdk-preview.ts` isolation/nextAction guidance so future packets remember the validated envelope and next rung is a narrow worker answering a real board question. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; i18n lint pass; marker check pass; `git diff --check` pass."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-MATURITY-TELEMETRY-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "vitest+marker-check+diff-check",
+      "timestamp": "2026-05-11T20:51:16.609Z",
+      "evidence": "Added explicit `sdkMaturity` telemetry to the SDK in-process packet so future previews classify whether they are inside the validated envelope or need new evidence. New rung values include `validated-narrow-readgrep`, `needs-evidence-broad-readonly`, `needs-evidence-mutation`, and `blocked`; the summary now includes `sdkMaturity=<rung>`. Validated envelope is one/two declared files, read-only, tools within `read/grep`; broad read-only remains ready for human decision only as a new evidence rung, not validated. Regression tests cover validated narrow read/grep, broad read-only evidence-needed, and blocked budget maturity. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; marker check for SDK maturity symbols passed; `git diff --check` passed."
     }
   ]
 }
