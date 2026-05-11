@@ -15623,6 +15623,15 @@
       "method": "live-sdk-packet-preview-after-reload",
       "timestamp": "2026-05-11T23:09:13.022Z",
       "evidence": "After reload, prepared the next SDK in-process rung as preview only: `task-bud-1068-sdk-code-test-review-smoke`. Purpose: narrow read-only code/test review that recommends one parent-side patch to further unlock pragmatic SDK in-process worker use without broadening scope, with cited evidence from both files. Declared files: `packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts` and `packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts`; tools `read,grep`; read-only; timeout 45000ms; strict one-sentence final output starting `PASS; recommended patch:` or `FAIL;` and ending with `STOP.` Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required before execution: `execute o sdk worker task-bud-1068-sdk-code-test-review-smoke`."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-CODE-TEST-REVIEW-SMOKE-FAIL-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "failed",
+      "method": "exact-approved-sdk-in-process-code-test-review+outcome-packet+classifier",
+      "timestamp": "2026-05-11T23:35:20.367Z",
+      "evidence": "Exact-approved SDK in-process code/test review smoke `task-bud-1068-sdk-code-test-review-smoke` failed safely. Scope: two declared files (`packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts`, `packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1068-sdk-code-test-review-smoke.sdk.log` shows declared-file tool policy, 6 successful tool_execution_end events, then `loop-guard sdk-runner-turn-loop turns=6 maxTurns=5`, `event=agent_end`, and `close state=failed reason=loop-guard outputBytes=0`. Git status after run was clean (no touched files). Outcome packet: `contract=fail process=failed recommendation=ask-human markerFailures=3 outputBytes=0`. Failure classification: `class=worker-contract-failed preflight=needs-evidence retryAllowed=no blockers=sdk-runner-loop-guard`. Marker check passed for tools, declared-file policy, loop guard, and failed close. Do not retry this same rung blindly; shrink code/test review scope or harden the prompt/runner before another exact-confirmed attempt."
     }
   ]
 }
