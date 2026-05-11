@@ -226,6 +226,7 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
     let outputBytes = 0;
     let timedOut = false;
     let loopAbortReason = "";
+    let agentEnded = false;
     let toolCallCount = 0;
     let turnCount = 0;
     const outputCapture: SdkAssistantOutputCapture = { capturedBytes: 0, truncated: false, seenOutput: new Set<string>(), streamedText: "" };
@@ -322,6 +323,7 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
             void session?.abort();
           }
         } else if (row.type === "agent_end") {
+          agentEnded = true;
           outputBytes += appendAssistantOutput(logPath, outputCapture.streamedText, outputCapture);
           appendAgentRunLogLine(logPath, "[sdk-runner] event=agent_end");
         }
@@ -340,6 +342,12 @@ function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInProcessPac
         session.dispose();
       }
       if (loopAbortReason) {
+        const readOnlyFinalOutputAfterTurnLoop = packet.runSpec.fileContract === "read-only" && loopAbortReason.startsWith("sdk-runner-turn-loop") && agentEnded && outputBytes > 0;
+        if (readOnlyFinalOutputAfterTurnLoop) {
+          finish({ state: "completed", errorCode: "sdk-runner-loop-guard-with-output", errorMessage: loopAbortReason, outputBytes });
+          appendAgentRunLogLine(logPath, `[sdk-runner] close state=completed reason=loop-guard-with-output outputBytes=${outputBytes}`);
+          return;
+        }
         finish({ state: "failed", errorCode: "sdk-runner-loop-guard", errorMessage: loopAbortReason, outputBytes });
         appendAgentRunLogLine(logPath, `[sdk-runner] close state=failed reason=loop-guard outputBytes=${outputBytes}`);
         return;

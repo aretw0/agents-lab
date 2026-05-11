@@ -1778,6 +1778,8 @@ describe("agent spawn readiness contract", () => {
     expect(source).toContain("Declared files (only these exact paths are allowed");
     expect(source).toContain("When calling a path-scoped tool, pass one of those exact paths");
     expect(source).toContain("sdk-runner-loop-guard");
+    expect(source).toContain("loop-guard-with-output");
+    expect(source).toContain("readOnlyFinalOutputAfterTurnLoop");
     expect(source).toContain("sdk-runner-empty-output");
     expect(source).toContain("sdk-runner-tool-policy-unsupported");
     expect(source).toContain("SDK_ASSISTANT_OUTPUT_LOG_MAX_BYTES");
