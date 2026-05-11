@@ -1,59 +1,60 @@
 {
-  "timestamp": "2026-05-11T17:25:52.374Z",
-  "context": "Post-reload continuation for TASK-BUD-1068/TASK-BUD-1066. Live validation after operator reload confirmed existing changed tools now classify [snip] new timeout evidence fields/checklist. [truncated:+622 chars]",
+  "timestamp": "2026-05-11T17:42:08.741Z",
+  "context": "Post-reload continuation. Live validation after reload confirmed previous runner-timeout classification and startup diagnostic behavior. Cont [snip] idating the new startupProbePlan field. [truncated:+389 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Run /reload before live-validating new timeout evidence fields/checklist because runtime code changed again.",
-    "After reload, classify task-bud-1066-subprocess-preflight-canary and confirm evidence includes [snip] s, not the historical log. [truncated:+75 chars]",
-    "Continue report-only structured startup/provider probe design; do not dispatch workers/canarie [snip] human confirmation phrase. [truncated:+16 chars]"
+    "Run /reload before live-validating new startupProbePlan field because runtime code changed again.",
+    "After reload, call agent_run_startup_diagnostic_packet for task-bud-1066-subprocess-preflight- [snip] and dispatchAllowed=false. [truncated:+91 chars]",
+    "Continue TASK-BUD-1066 with report-only structured startup/provider probe implementation/desig [snip] exact confirmation phrase. [truncated:+44 chars]"
   ],
   "blockers": [
-    "Runtime changed after reload; /reload needed before trusting live output for t [snip] nce/checklist changes. [truncated:+23 chars]",
+    "Runtime changed after reload; /reload needed before trusting live output for new startupProbePlan.",
     "No worker/canary dispatch authorization.",
-    "TASK-BUD-1066 dependencies still require human close/keep/defer decisions for [snip] if closure is desired. [truncated:+18 chars]"
+    "TASK-BUD-1066 close remains blocked by unresolved predecessor tasks whose deci [snip] uman close/keep/defer. [truncated:+22 chars]"
   ],
   "recent_validation": [
-    "Post-reload live agent_run_failure_classification task-bud-1066-subprocess-preflight-canary -> [snip] s-evidence retryAllowed=no [truncated:+36 chars]",
-    "Post-reload live agent_run_startup_diagnostic_packet -> decision=structured-probe-first failur [snip] yAllowed=false dispatch=no [truncated:+27 chars]",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -t \"class [snip] --reporter=dot -> 1 passed [truncated:+23 chars]"
+    "git status --short -> clean before changes",
+    "Post-reload agent_run_failure_classification task-bud-1066-subprocess-preflight-canary -> clas [snip] s-evidence retryAllowed=no [truncated:+31 chars]",
+    "Post-reload agent_run_startup_diagnostic_packet -> decision=structured-probe-first failureClas [snip] yAllowed=false dispatch=no [truncated:+22 chars]"
   ],
   "recent_commits": [
-    "fa08669a fix(agents): preserve runner timeout evidence",
-    "d9ef99a2 chore(board): record timeout evidence validation"
+    "26546365 feat(agents): add startup probe plan to diagnostics",
+    "d1448631 chore(board): record startup probe plan evidence"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
       "task:TASK-BUD-1066",
-      "commit:fa08669a"
+      "task:TASK-BUD-1066-SUBPROCESS-PREFLIGHT-CANARY",
+      "commit:26546365"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T17:25:52.374Z",
+    "generatedAtIso": "2026-05-11T17:42:08.741Z",
     "level": "warn",
-    "percent": 45,
+    "percent": 49,
     "action": "continue",
-    "recommendation": "reload-then-live-validate-timeout-evidence",
+    "recommendation": "reload-then-live-validate-startup-probe-plan",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T17:25:52.374Z",
+      "atIso": "2026-05-11T17:42:08.741Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 45,
+      "percent": 49,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-live-validate-timeout-evidence"
+      "recommendation": "reload-then-live-validate-startup-probe-plan"
     }
   ]
 }
