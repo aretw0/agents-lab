@@ -15398,6 +15398,15 @@
       "method": "smoke-test+log-inspection",
       "timestamp": "2026-05-10T14:14:20.773Z",
       "evidence": "Local-safe hardening of subprocess failure classification, no worker/canary dispatch. Existing log `.pi/reports/task-bud-1066-subprocess-preflight-canary.log` showed both `failure code=silent-runner-failure` and `failure code=runner-timeout`, `exitCode=124`, `timedOut=yes`, `stdoutBytes=0`, `stderrBytes=0`; prior classification collapsed that into `silent-runner-failure`. Implemented `runner-timeout` as a distinct `AgentRunnerFailureClass` with recommendation `agent-runner-classification-runner-timeout`, timeout/startup-hang probe suggestions, blind retry disabled, and executor strategy treating timeout as subprocess startup failure eligible for SDK diagnostic candidate or off-Windows subprocess probe. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -t \"classifies runner failures|selects subprocess\" --reporter=dot` -> 2 passed; full `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: f9cd7b93."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-TIMEOUT-EVIDENCE-20260511",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-validation+smoke-test",
+      "timestamp": "2026-05-11T17:13:48.956Z",
+      "evidence": "Post-reload live validation confirmed changed tools classify `task-bud-1066-subprocess-preflight-canary` as `failureClass=runner-timeout`, `preflight=needs-evidence`, `retryAllowed=no`; startup diagnostic packet returned `decision=structured-probe-first`, `failureClass=runner-timeout`, `canaryAllowed=false`, `dispatch=no`, `authorization=none`. Then added a local-safe follow-up preserving timeout evidence in classifier output: `timeoutMs`, `signal`, and `timedOut=yes` are parsed from existing logs/registry evidence. Validation after patch: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -t \"classifies runner failures\" --reporter=dot` -> 1 passed; full `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: fa08669a. No worker/canary dispatch performed."
     }
   ]
 }
