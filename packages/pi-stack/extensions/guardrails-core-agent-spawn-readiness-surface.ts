@@ -973,11 +973,12 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         };
         writeRegistryEntry(ctx.cwd, registryEntry);
         const timeoutMs = packet.taskPacket.invocationSpec.timeoutMs;
+        const startedAtMs = Date.now();
         let settled = false;
         let timedOut = false;
         const timeout = setTimeout(() => {
           timedOut = true;
-          logStream.write(`[agent-runner] timeout ms=${timeoutMs}; sending SIGTERM\n`);
+          logStream.write(`[agent-runner] timeout ms=${timeoutMs} elapsedMs=${Date.now() - startedAtMs}; sending SIGTERM\n`);
           if (!child.killed) child.kill("SIGTERM");
         }, timeoutMs);
         child.on("error", (error: NodeJS.ErrnoException) => {
@@ -1009,8 +1010,9 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
           const silentFailureLine = silentFailure
             ? "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr; preflight lines above record platform/node/cwd/command/entrypoint; next probe should validate provider bootstrap and CLI argument parsing\n"
             : "";
-          const timeoutLine = timedOut ? `[agent-runner] failure code=runner-timeout message=subprocess exceeded timeoutMs=${timeoutMs} outputBytes=${childOutputBytes}; preflight reached command/entrypoint, so next probe should isolate provider/model-call/bootstrap hang\n` : "";
-          logStream.write(`${silentFailureLine}${timeoutLine}[agent-runner] close exitCode=${exitCode} signal=${signal || "none"} timedOut=${timedOut ? "yes" : "no"} childOutputBytes=${childOutputBytes} stdoutBytes=${childStdoutBytes} stderrBytes=${childStderrBytes}\n`, () => {
+          const elapsedMs = Date.now() - startedAtMs;
+          const timeoutLine = timedOut ? `[agent-runner] failure code=runner-timeout message=subprocess exceeded timeoutMs=${timeoutMs} elapsedMs=${elapsedMs} outputBytes=${childOutputBytes}; preflight reached command/entrypoint, so next probe should isolate provider/model-call/bootstrap hang\n` : "";
+          logStream.write(`${silentFailureLine}${timeoutLine}[agent-runner] close exitCode=${exitCode} signal=${signal || "none"} timedOut=${timedOut ? "yes" : "no"} elapsedMs=${elapsedMs} childOutputBytes=${childOutputBytes} stdoutBytes=${childStdoutBytes} stderrBytes=${childStderrBytes}\n`, () => {
             logStream.end(() => {
               writeRegistryEntry(ctx.cwd, {
                 ...registryEntry,

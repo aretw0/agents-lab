@@ -869,6 +869,7 @@ describe("agent spawn readiness contract", () => {
     expect(source).toContain("preflight commandExists=");
     expect(source).toContain("preflight entrypointExists=");
     expect(source).toContain("failure code=runner-timeout");
+    expect(source).toContain("elapsedMs=${Date.now() - startedAtMs}");
     expect(source).toContain("signal=${signal || \"none\"} timedOut=");
     expect(source).toContain("[agent-runner] close exitCode=${exitCode}");
     expect(source).toContain("outputBytes: readLogByteCount(logPath)");
@@ -1890,8 +1891,8 @@ describe("agent spawn readiness contract", () => {
       logText: [
         "[agent-runner] argv=[\"cli.js\",\"--no-session\",\"--model\",\"openai-codex/gpt-5.3-codex-spark\",\"--tools\",\"read,grep,find,ls\",\"--print\",\"@docs/research/agent-runner-maturity-checkpoint-2026-05.md\",\"diagnose\"]",
         "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr",
-        "[agent-runner] failure code=runner-timeout message=subprocess exceeded timeoutMs=60000",
-        "[agent-runner] close exitCode=124 signal=SIGTERM timedOut=yes childOutputBytes=0 stdoutBytes=0 stderrBytes=0",
+        "[agent-runner] failure code=runner-timeout message=subprocess exceeded timeoutMs=60000 elapsedMs=60025",
+        "[agent-runner] close exitCode=124 signal=SIGTERM timedOut=yes elapsedMs=60031 childOutputBytes=0 stdoutBytes=0 stderrBytes=0",
       ].join("\n"),
     });
     expect(timeoutResult.failureClass).toBe("runner-timeout");
@@ -1899,6 +1900,7 @@ describe("agent spawn readiness contract", () => {
     expect(timeoutResult.preflightDecision).toBe("needs-evidence");
     expect(timeoutResult.retryAllowed).toBe(false);
     expect(timeoutResult.evidence).toContain("timeoutMs=60000");
+    expect(timeoutResult.evidence).toContain("elapsedMs=60025");
     expect(timeoutResult.evidence).toContain("signal=SIGTERM");
     expect(timeoutResult.evidence).toContain("timedOut=yes");
     expect(timeoutResult.nextProbeProfiles).toContain("timeout-budget-probe");
@@ -1917,6 +1919,7 @@ describe("agent spawn readiness contract", () => {
     expect(timeoutStartupProbe.canaryAllowed).toBe(false);
     expect(timeoutStartupProbe.probeProfiles).toContain("timeout-budget-probe");
     expect(timeoutStartupProbe.evidenceChecklist).toContain("timeout-ms-captured");
+    expect(timeoutStartupProbe.evidenceChecklist).toContain("elapsed-ms-captured");
     expect(timeoutStartupProbe.evidenceChecklist).toContain("termination-signal-captured");
     expect(timeoutStartupProbe.evidenceChecklist).toContain("timed-out-flag-captured");
 

@@ -155,6 +155,11 @@ function parseRunnerSignal(logText: string): string | undefined {
   return match?.[1];
 }
 
+function parseRunnerElapsedMs(logText: string): number | undefined {
+  const match = logText.match(/elapsedMs=(\d+)/);
+  return match ? Number.parseInt(match[1] ?? "", 10) : undefined;
+}
+
 function parseTimedOut(logText: string): boolean {
   return /timedOut=yes/.test(logText) || /failure code=runner-timeout/.test(logText);
 }
@@ -261,6 +266,7 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
   const stderrBytes = parseNamedByteCount(logText, "stderrBytes");
   const timeoutMs = parseRunnerTimeoutMs(logText);
   const signal = parseRunnerSignal(logText);
+  const elapsedMs = parseRunnerElapsedMs(logText);
   const timedOut = entry?.state === "timed-out" || parseTimedOut(logText) || exitCode === 124;
   const streamByteSplitCaptured = typeof stdoutBytes === "number" && typeof stderrBytes === "number";
   const evidence: string[] = [];
@@ -273,6 +279,7 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
   if (typeof stdoutBytes === "number") evidence.push(`stdoutBytes=${stdoutBytes}`);
   if (typeof stderrBytes === "number") evidence.push(`stderrBytes=${stderrBytes}`);
   if (typeof timeoutMs === "number") evidence.push(`timeoutMs=${timeoutMs}`);
+  if (typeof elapsedMs === "number") evidence.push(`elapsedMs=${elapsedMs}`);
   if (signal) evidence.push(`signal=${signal}`);
   if (timedOut) evidence.push("timedOut=yes");
   if (!streamByteSplitCaptured && typeof childOutputBytes === "number") evidence.push("streamByteSplit=missing");
@@ -426,7 +433,7 @@ export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagn
     "stdout-and-stderr-byte-counts-captured",
     "stdout-stderr-byte-split-captured",
     "exit-code-captured",
-    ...(classification.failureClass === "runner-timeout" ? ["timeout-ms-captured", "termination-signal-captured", "timed-out-flag-captured"] : []),
+    ...(classification.failureClass === "runner-timeout" ? ["timeout-ms-captured", "elapsed-ms-captured", "termination-signal-captured", "timed-out-flag-captured"] : []),
     "provider-model-ref-captured",
     "budget-evidence-captured",
     "reload-state-captured",
