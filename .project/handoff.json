@@ -1,60 +1,58 @@
 {
-  "timestamp": "2026-05-11T20:57:02.035Z",
-  "context": "Continued pragmatically after SDK read/grep pass by making maturity explicit in the SDK in-process packet. Added AgentRunSdkMaturityRung and [snip] ude the new sdkMaturity fields/actions. [truncated:+595 chars]",
+  "timestamp": "2026-05-11T21:25:29.213Z",
+  "context": "After reload, continued SDK in-process lane without dispatch. Git was clean; context ok; provider readiness for openai-codex ready/degraded=0 [snip] Board evidence recorded and committed. [truncated:+622 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Ask operator to /reload before relying on live agent_run_sdk_in_process_packet output for sdkMaturity.",
-    "After reload, prepare a narrow read-only SDK preview that answers a real board question under [snip] atch without exact phrase. [truncated:+50 chars]",
-    "Keep subprocess root-cause work deferred until SDK in-process lane is more productive, per operator direction."
+    "If operator wants to execute the next SDK real-board-question smoke, require exact phrase: exe [snip] 8-sdk-board-evidence-smoke [truncated:+30 chars]",
+    "Without exact phrase, continue local-safe by hardening SDK board-question packet ergonomics an [snip] lidated-envelope previews. [truncated:+19 chars]",
+    "Keep subprocess root-cause work deferred until SDK in-process lane is more productive."
   ],
   "blockers": [
-    "Runtime extension changes are committed but need reload before live tool surfa [snip] reflects sdkMaturity. [truncated:+2 chars]",
     "No standing authorization for worker/provider dispatch; exact per-run confirmation still required.",
+    "Next SDK board evidence smoke is previewed but not executed.",
     "SDK broad read-only/mutation/multi-worker/unattended dispatch remain immature."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporte [snip] fter sdkMaturity telemetry [truncated:+20 chars]",
-    "safe_marker_check guardrails-core-agent-run-sdk-preview.ts markers AgentRunSdkMaturityRung, va [snip] aredFilesValidated -> pass [truncated:+76 chars]",
-    "git diff --check -> pass"
+    "git status --short before preview -> clean",
+    "context_watch_status -> ok reload-not-required",
+    "provider_readiness_matrix openai-codex -> ready entries present, degraded=0 blocked=0"
   ],
   "recent_commits": [
-    "5395c563 feat(agents): classify sdk maturity rung",
-    "d82349b2 fix(agents): label unvalidated sdk evidence rungs"
+    "e7b6f436 chore(board): preview sdk board evidence smoke"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1068-SDK-MATURITY-TELEMETRY-20260511",
-      "task:TASK-BUD-1068-SDK-MATURITY-NEXT-ACTIONS-20260511",
+      "task:TASK-BUD-1068-SDK-BOARD-EVIDENCE-SMOKE",
       "commit:20260511"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T20:57:02.035Z",
+    "generatedAtIso": "2026-05-11T21:25:29.213Z",
     "level": "ok",
-    "percent": 32,
+    "percent": 33,
     "action": "continue",
-    "recommendation": "reload-then-use-sdk-maturity-packet",
+    "recommendation": "sdk-board-evidence-preview-ready",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T20:57:02.035Z",
+      "atIso": "2026-05-11T21:25:29.213Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 32,
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-use-sdk-maturity-packet"
+      "recommendation": "sdk-board-evidence-preview-ready"
     }
   ]
 }
