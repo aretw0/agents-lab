@@ -1,59 +1,60 @@
 {
-  "timestamp": "2026-05-11T19:37:34.418Z",
-  "context": "User asked why the control plane stopped and how to declare a continuous improvement lane without semantic bloat. Answered by documenting the [snip] vailable work. Board evidence recorded. [truncated:+550 chars]",
+  "timestamp": "2026-05-11T20:24:50.517Z",
+  "context": "Auto-resumed after reload with user direction to prioritize SDK in-process workers before subprocess. Continued local-safe under agent-first- [snip] view are green but dispatch remains no. [truncated:+701 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Continue local-safe under agent-first-worker-lane without asking: design the report-only struc [snip] subprocess runner-timeout. [truncated:+47 chars]",
-    "Keep preparing narrow SDK worker previews when useful, but never dispatch without exact phrase for the specific runId.",
-    "Use OODA only internally at turn boundaries to select smallest validated next slice; do not create new ooda_* surface."
+    "If operator wants to run the next SDK rung, require exact phrase: execute o sdk worker task-bu [snip] dk-readgrep-two-file-smoke [truncated:+8 chars]",
+    "Without exact phrase, continue local-safe by hardening SDK packet/operator ergonomics and desi [snip] er previews automatically. [truncated:+30 chars]",
+    "Keep subprocess root-cause work deferred until SDK in-process lane is more productive, per user direction."
   ],
   "blockers": [
-    "No standing authorization for worker/provider dispatch; exact per-run confirma [snip] by current governance. [truncated:+20 chars]",
-    "Subprocess runner-timeout root cause unresolved; no blind subprocess retry.",
-    "TASK-BUD-1066 closure remains blocked by predecessor human close/keep/defer decisions."
+    "No standing authorization for worker/provider dispatch; exact per-run confirmation still required.",
+    "SDK next rung is previewed but not executed.",
+    "Subprocess runner-timeout root cause unresolved and intentionally deprioritize [snip] ntil SDK lane matures. [truncated:+3 chars]"
   ],
   "recent_validation": [
-    "board duplicate preflight via board_query searches for SDK/dual executor/continuous/auto melho [snip] r than creating a new task [truncated:+60 chars]",
-    "i18n lint on new doc section -> pass",
-    "safe_marker_check docs/research/agent-runner-maturity-checkpoint-2026-05.md markers Continuous [snip] er, exact dispatch -> pass [truncated:+117 chars]"
+    "git status --short at resume showed only expected handoff/doc/sdk/test edits",
+    "context_watch_status -> ok, reload-not-required",
+    "agent_run_failure_classification task-bud-1066-sdk-readonly-final-output-smoke -> class=none p [snip] ady-for-canary dispatch=no [truncated:+11 chars]"
   ],
   "recent_commits": [
-    "3aef0c67 docs(agents): declare continuous worker lane contract",
-    "2060039e chore(board): record continuous worker lane contract"
+    "e5bfa949 feat(agents): encode sdk in-process maturity ladder",
+    "10016d39 chore(board): record sdk readgrep preview"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1066",
+      "task:TASK-BUD-1068-SDK-READGREP-TWO-FILE-SMOKE",
+      "task:TASK-BUD-1066-SDK-READONLY-FINAL-OUTPUT-SMOKE",
       "commit:20260511"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T19:37:34.418Z",
+    "generatedAtIso": "2026-05-11T20:24:50.517Z",
     "level": "ok",
-    "percent": 51,
+    "percent": 25,
     "action": "continue",
-    "recommendation": "continue-local-safe-subprocess-probe-design",
+    "recommendation": "sdk-in-process-next-rung-preview-ready",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T19:37:34.418Z",
+      "atIso": "2026-05-11T20:24:50.517Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 51,
+      "percent": 25,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-local-safe-subprocess-probe-design"
+      "recommendation": "sdk-in-process-next-rung-preview-ready"
     }
   ]
 }
