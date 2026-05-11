@@ -1,59 +1,60 @@
 {
-  "timestamp": "2026-05-11T23:13:52.416Z",
-  "context": "After user reload, continued SDK in-process lane without dispatch. Git clean; context ok/fresh; provider readiness openai-codex ready/degrade [snip] Board evidence recorded and committed. [truncated:+691 chars]",
+  "timestamp": "2026-05-11T23:50:43.652Z",
+  "context": "Exact confirmation received and consumed for task-bud-1068-sdk-code-test-review-smoke. Dispatched exactly one SDK in-process worker under val [snip] et text reflects failed-rung hardening. [truncated:+804 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "If operator wants to execute the code/test review rung, require exact phrase: execute o sdk wo [snip] sdk-code-test-review-smoke [truncated:+19 chars]",
-    "Without exact phrase, continue local-safe by preparing parent-side validation markers for code/test review outcomes.",
-    "If exact-approved and passing, consider applying the recommended parent-side patch locally onl [snip] worker remains read-only. [truncated:+21 chars]"
+    "Ask operator to /reload before relying on live packet text for failed-rung hardening.",
+    "After reload, prepare a narrower preview only: one target file or one named symbol, strict too [snip] atch without exact phrase. [truncated:+66 chars]",
+    "Do not retry task-bud-1068-sdk-code-test-review-smoke shape blindly."
   ],
   "blockers": [
-    "No standing authorization for worker/provider dispatch; exact per-run confirmation required.",
-    "Next SDK code/test review smoke is previewed but not executed.",
-    "SDK broad read-only/mutation/multi-worker/unattended dispatch remain immature."
+    "Runtime extension changes committed; reload needed before live surface reflect [snip] failed-rung hardening. [truncated:+2 chars]",
+    "No standing authorization for additional worker/provider dispatch; exact phrase has been consumed.",
+    "Two-file open-ended code/test review is not validated; SDK broad read-only/mut [snip] patch remain immature. [truncated:+33 chars]"
   ],
   "recent_validation": [
-    "git status --short before preview -> clean",
-    "context_watch_status -> ok reload-not-required handoff fresh",
-    "provider_readiness_matrix openai-codex -> ready entries present, degraded=0 blocked=0"
+    "agent_run_sdk_in_process_dispatch execute=true exact phrase -> dispatched one run only",
+    "agent_run_follow -> terminal failed outputBytes=1171 lines=22",
+    "log .pi/reports/task-bud-1068-sdk-code-test-review-smoke.sdk.log -> tools=read,grep, declared- [snip] n=loop-guard outputBytes=0 [truncated:+108 chars]"
   ],
   "recent_commits": [
-    "a51e5394 chore(board): preview sdk code test review smoke"
+    "0ce7f69d chore(board): record sdk code review failure",
+    "e7511a50 fix(agents): record sdk code review failed rung"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
       "task:TASK-BUD-1068-SDK-CODE-TEST-REVIEW-SMOKE",
-      "task:TASK-BUD-1068-SDK-CODE-TEST-REVIEW-PREVIEW-20260511",
+      "task:TASK-BUD-1068-SDK-CODE-TEST-REVIEW-SMOKE-FAIL-20260511",
       "commit:20260511"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T23:13:52.416Z",
+    "generatedAtIso": "2026-05-11T23:50:43.652Z",
     "level": "ok",
-    "percent": 44,
+    "percent": 47,
     "action": "continue",
-    "recommendation": "sdk-code-test-review-preview-ready",
+    "recommendation": "reload-then-preview-narrower-code-review",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T23:13:52.416Z",
+      "atIso": "2026-05-11T23:50:43.652Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 44,
+      "percent": 47,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "sdk-code-test-review-preview-ready"
+      "recommendation": "reload-then-preview-narrower-code-review"
     }
   ]
 }
