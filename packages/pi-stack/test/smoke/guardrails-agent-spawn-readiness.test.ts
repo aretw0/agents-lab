@@ -1898,6 +1898,9 @@ describe("agent spawn readiness contract", () => {
     expect(timeoutResult.recommendationCode).toBe("agent-runner-classification-runner-timeout");
     expect(timeoutResult.preflightDecision).toBe("needs-evidence");
     expect(timeoutResult.retryAllowed).toBe(false);
+    expect(timeoutResult.evidence).toContain("timeoutMs=60000");
+    expect(timeoutResult.evidence).toContain("signal=SIGTERM");
+    expect(timeoutResult.evidence).toContain("timedOut=yes");
     expect(timeoutResult.nextProbeProfiles).toContain("timeout-budget-probe");
     expect(timeoutResult.nextProbeProfiles).toContain("startup-hang-probe");
     expect(timeoutResult.nextActions.join("\n")).toContain("startup/handshake hang");

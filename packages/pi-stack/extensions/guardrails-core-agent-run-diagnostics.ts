@@ -145,6 +145,20 @@ function parseNamedByteCount(logText: string, name: "stdoutBytes" | "stderrBytes
   return match ? Number.parseInt(match[1] ?? "", 10) : undefined;
 }
 
+function parseRunnerTimeoutMs(logText: string): number | undefined {
+  const match = logText.match(/timeout(?:Ms| ms)=(\d+)/);
+  return match ? Number.parseInt(match[1] ?? "", 10) : undefined;
+}
+
+function parseRunnerSignal(logText: string): string | undefined {
+  const match = logText.match(/signal=([A-Z0-9_-]+)/);
+  return match?.[1];
+}
+
+function parseTimedOut(logText: string): boolean {
+  return /timedOut=yes/.test(logText) || /failure code=runner-timeout/.test(logText);
+}
+
 function extractRunnerArgv(logText: string): string[] | undefined {
   const match = logText.match(/^\[agent-runner\] argv=(\[[^\n]*\])/m);
   if (!match?.[1]) return undefined;
@@ -245,6 +259,9 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
   const childOutputBytes = parseChildOutputBytes(logText);
   const stdoutBytes = parseNamedByteCount(logText, "stdoutBytes");
   const stderrBytes = parseNamedByteCount(logText, "stderrBytes");
+  const timeoutMs = parseRunnerTimeoutMs(logText);
+  const signal = parseRunnerSignal(logText);
+  const timedOut = entry?.state === "timed-out" || parseTimedOut(logText) || exitCode === 124;
   const streamByteSplitCaptured = typeof stdoutBytes === "number" && typeof stderrBytes === "number";
   const evidence: string[] = [];
   const blockers: string[] = [];
@@ -255,6 +272,9 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
   if (typeof childOutputBytes === "number") evidence.push(`childOutputBytes=${childOutputBytes}`);
   if (typeof stdoutBytes === "number") evidence.push(`stdoutBytes=${stdoutBytes}`);
   if (typeof stderrBytes === "number") evidence.push(`stderrBytes=${stderrBytes}`);
+  if (typeof timeoutMs === "number") evidence.push(`timeoutMs=${timeoutMs}`);
+  if (signal) evidence.push(`signal=${signal}`);
+  if (timedOut) evidence.push("timedOut=yes");
   if (!streamByteSplitCaptured && typeof childOutputBytes === "number") evidence.push("streamByteSplit=missing");
   if (argvDiagnostics.present) {
     evidence.push(`argv:source=${argvDiagnostics.commandSource}`);
@@ -304,7 +324,7 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
     classify("provider-unavailable", "agent-runner-classification-provider-unavailable", "provider-unavailable");
   } else if (includesAny(lower, [/model call failed/, /api error/, /stream.*error/, /request failed/, /responses api/, /completion.*failed/])) {
     classify("model-call-failed", "agent-runner-classification-model-call-failed", "model-call-failed");
-  } else if (entry?.state === "timed-out" || normalizeText(entry?.errorCode) === "runner-timeout" || /runner-timeout/.test(logText) || /timedOut=yes/.test(logText) || exitCode === 124) {
+  } else if (timedOut || normalizeText(entry?.errorCode) === "runner-timeout") {
     classify("runner-timeout", "agent-runner-classification-runner-timeout", "runner-timeout");
   } else if (entry?.errorCode === "silent-runner-failure" || /silent-runner-failure/.test(logText) || (exitCode && exitCode !== 0 && childOutputBytes === 0)) {
     classify("silent-runner-failure", "agent-runner-classification-silent-needs-evidence", "silent-runner-failure");
