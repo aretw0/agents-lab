@@ -15434,6 +15434,15 @@
       "method": "smoke-test",
       "timestamp": "2026-05-11T17:24:41.365Z",
       "evidence": "Runner timeout logs now include elapsed time at timeout and close (`elapsedMs=...`), and the failure classifier parses it into evidence plus the startup diagnostic checklist (`elapsed-ms-captured`). This helps distinguish timeout budget/cleanup behavior from generic startup silence and keeps the next probe evidence-driven. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -t \"spawn errors|classifies runner failures\" --reporter=dot` -> 2 passed; full `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: b31369c5. No worker/canary dispatch performed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-STARTUP-PROBE-PLAN-20260511",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-validation+smoke-test",
+      "timestamp": "2026-05-11T17:37:02.111Z",
+      "evidence": "Post-reload live validation confirmed `task-bud-1066-subprocess-preflight-canary` classifies as `runner-timeout` and startup diagnostic packet remains `structured-probe-first`, `canaryAllowed=false`, `dispatch=no`. Added `startupProbePlan` to the existing startup diagnostic packet (no new dispatch surface): deterministic report-only steps derived from probeProfiles with `modelCallAllowed=false` and `dispatchAllowed=false`, covering timeout-budget, startup-hang, json-mode structured, stderr preservation, and related probes. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -t \"classifies runner failures\" --reporter=dot` -> 1 passed; full `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: 26546365. No worker/canary dispatch performed."
     }
   ]
 }
