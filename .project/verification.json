@@ -15461,6 +15461,15 @@
       "method": "worker-outcome+smoke-test",
       "timestamp": "2026-05-11T18:18:07.883Z",
       "evidence": "Exact human confirmation dispatched one SDK in-process read-only worker: `task-bud-1066-sdk-startup-probe-readonly`. It failed safely before model/tool work with `tool-policy-unsupported tools=find,ls`; touched files: none; outcome packet contract=fail/process=failed; classifier: `tool-allowlist-invalid`, preflight=blocked, retryAllowed=no, dispatch=no. Fixed packet/dispatch preview path to fail closed before dispatch when SDK allowlist includes tools without declared-file policy metadata (`unsupported-tool-policy:find,ls`). Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: 5461b419. No retry dispatched."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-LOOP-GUARD-20260511",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "worker-outcome+regression-test",
+      "timestamp": "2026-05-11T18:37:46.237Z",
+      "evidence": "Exact-approved SDK read-only worker `task-bud-1066-sdk-startup-probe-readonly-2` ran with supported tools `read,grep` and touched no files, but failed by SDK loop guard after 10 turns / output truncation (`close state=failed reason=loop-guard outputBytes=48000`). Initial classifier was contaminated by nested previous log evidence and reported `tool-allowlist-invalid`; fixed classifier to prefer the latest SDK runner close reason so nested log content cannot override real final close state. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: 1ce62d15. No retry dispatched."
     }
   ]
 }
