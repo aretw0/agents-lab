@@ -15569,6 +15569,15 @@
       "method": "live-sdk-packet-preview-after-reload",
       "timestamp": "2026-05-11T21:24:17.181Z",
       "evidence": "After operator reload, prepared the first narrow SDK in-process preview that answers a real board question rather than marker-only validation. RunId: `task-bud-1068-sdk-board-evidence-smoke`. Question: read only `.project/tasks.json` and `.project/verification.json` to determine whether `TASK-BUD-1068` has recorded evidence that the SDK in-process one/two-file read/grep envelope is validated and still remains in-progress. Packet scope: two declared files, `read,grep`, read-only, timeout 45000ms, strict one-sentence PASS/FAIL final output ending with STOP. Live `agent_run_sdk_in_process_packet` after reload returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required before execution: `execute o sdk worker task-bud-1068-sdk-board-evidence-smoke`."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-BOARD-EVIDENCE-SMOKE-PASS-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-approved-sdk-in-process-board-question+outcome-packet+marker-check",
+      "timestamp": "2026-05-11T21:31:00.107Z",
+      "evidence": "Exact-approved SDK in-process real-board-question smoke `task-bud-1068-sdk-board-evidence-smoke` completed successfully under the validated narrow read/grep envelope. Scope: two declared files (`.project/tasks.json`, `.project/verification.json`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1068-sdk-board-evidence-smoke.sdk.log` shows declared-file tool policy, 4 successful tool_execution_end events, final `PASS;` answer confirming `TASK-BUD-1068` has recorded passed evidence for the SDK one/two-file read/grep envelope (`VERIF-TASK-BUD-1068-SDK-READGREP-TWO-FILE-SMOKE-PASS-20260511` and `VERIF-TASK-BUD-1068-SDK-READGREP-RUNG-PROMOTED-20260511`) and still has status `in-progress`, then `event=agent_end` and `close state=completed outputBytes=331`. Git status after run was clean (no touched files). Outcome packet: `contract=pass process=completed recommendation=stop declared=2 touched=0 outputBytes=331`. Failure classification: `class=none preflight=ready-for-canary`. Marker checks passed after correcting the status marker wording to `task status is still in-progress`."
     }
   ]
 }
