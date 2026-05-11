@@ -15587,6 +15587,15 @@
       "method": "doc-packet-test-promotion+vitest+i18n-marker-diff",
       "timestamp": "2026-05-11T21:34:24.563Z",
       "evidence": "Promoted the real-board-question SDK in-process rung after exact-approved pass. Updated `docs/research/agent-runner-maturity-checkpoint-2026-05.md` to record that a narrow worker read `.project/tasks.json` and `.project/verification.json`, confirmed TASK-BUD-1068 evidence/status, and passed. Updated `guardrails-core-agent-run-sdk-preview.ts` isolation/recommendation text so the validated envelope explicitly includes real board-question checks and the next rung is narrow read-only synthesis with cited board/doc evidence. Added regression assertion for `Live-validated board-question rung`. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; i18n lint pass; marker check pass; `git diff --check` pass."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-SYNTHESIS-PREVIEW-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-sdk-packet-preview-after-reload",
+      "timestamp": "2026-05-11T22:18:32.259Z",
+      "evidence": "After reload, prepared the next SDK in-process rung as preview only: `task-bud-1068-sdk-synthesis-recommendation-smoke`. Purpose: narrow read-only synthesis with recommendation and cited board/doc evidence, answering the next pragmatic SDK worker rung after the validated board-question check. Declared files: `docs/research/agent-runner-maturity-checkpoint-2026-05.md` and `.project/verification.json`; tools `read,grep`; read-only; timeout 45000ms; strict one-sentence final output starting `PASS; recommended next rung:` or `FAIL;` and ending with `STOP.` Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required before execution: `execute o sdk worker task-bud-1068-sdk-synthesis-recommendation-smoke`."
     }
   ]
 }
