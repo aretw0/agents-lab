@@ -15416,6 +15416,15 @@
       "method": "smoke-test",
       "timestamp": "2026-05-11T17:16:48.396Z",
       "evidence": "Extended the existing startup diagnostic packet so runner-timeout cases explicitly require timeout evidence in the checklist: `timeout-ms-captured`, `termination-signal-captured`, `timed-out-flag-captured`. This keeps the next structured probe report-only and prevents timeout evidence from being hidden inside a generic silent failure. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -t \"classifies runner failures\" --reporter=dot` -> 1 passed; full `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; `git diff --check` -> pass. Commit: afd1bd8a. No worker/canary dispatch performed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-TIMEOUT-POSTURE-DOC-20260511",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-marker-check+i18n-lint",
+      "timestamp": "2026-05-11T17:19:16.513Z",
+      "evidence": "Updated `docs/research/agent-runner-maturity-checkpoint-2026-05.md` to record the current runner-timeout posture: TASK-BUD-1066 preflight canary is a startup timeout, not a generic silent failure; classifier preserves `runner-timeout`; startup diagnostic packet requires timeout/signal/timedOut evidence; next step is report-only structured startup/provider probe design, not blind retry. Validation: i18n lint pass; safe_marker_check markers `runner-timeout`, `timeout/signal/timedOut`, and `do **not** retry the worker blindly` -> pass; `git diff --check` -> pass. Commit: 38ebe6b7."
     }
   ]
 }
