@@ -1922,6 +1922,14 @@ describe("agent spawn readiness contract", () => {
     expect(timeoutStartupProbe.evidenceChecklist).toContain("elapsed-ms-captured");
     expect(timeoutStartupProbe.evidenceChecklist).toContain("termination-signal-captured");
     expect(timeoutStartupProbe.evidenceChecklist).toContain("timed-out-flag-captured");
+    expect(timeoutStartupProbe.startupProbePlan.map((step) => step.id)).toEqual([
+      "timeout-budget-probe",
+      "startup-hang-probe",
+      "json-mode-structured-probe",
+      "stderr-preservation-probe",
+    ]);
+    expect(timeoutStartupProbe.startupProbePlan.every((step) => step.modelCallAllowed === false && step.dispatchAllowed === false)).toBe(true);
+    expect(timeoutStartupProbe.startupProbePlan.find((step) => step.id === "timeout-budget-probe")?.evidence).toContain("elapsedMs");
 
     const providerUnavailable = classifyAgentRunFailure({
       runId: "quota",

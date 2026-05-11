@@ -103,7 +103,7 @@ export { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 export { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
 export { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
 export { buildAgentRunArgvDiagnostics, buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
-export type { AgentRunArgvDiagnostics, AgentRunFailureClassificationInput, AgentRunFailureClassificationResult, AgentRunStartupDiagnosticDecision, AgentRunStartupDiagnosticInput, AgentRunStartupDiagnosticPacketResult, AgentRunnerFailureClass, AgentRunnerPreflightDecision } from "./guardrails-core-agent-run-diagnostics";
+export type { AgentRunArgvDiagnostics, AgentRunFailureClassificationInput, AgentRunFailureClassificationResult, AgentRunStartupDiagnosticDecision, AgentRunStartupDiagnosticInput, AgentRunStartupDiagnosticPacketResult, AgentRunStartupProbePlanStep, AgentRunnerFailureClass, AgentRunnerPreflightDecision } from "./guardrails-core-agent-run-diagnostics";
 export { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run-executor-strategy";
 export type { AgentRunExecutorStrategyDecision, AgentRunExecutorStrategyInput, AgentRunExecutorStrategyKind, AgentRunExecutorStrategyPacketResult } from "./guardrails-core-agent-run-executor-strategy";
 export { buildAgentRunSdkInProcessPacket } from "./guardrails-core-agent-run-sdk-preview";

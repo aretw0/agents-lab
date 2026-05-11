@@ -85,6 +85,14 @@ export interface AgentRunFailureClassificationResult {
   summary: string;
 }
 
+export interface AgentRunStartupProbePlanStep {
+  id: string;
+  purpose: string;
+  modelCallAllowed: false;
+  dispatchAllowed: false;
+  evidence: string[];
+}
+
 export interface AgentRunStartupDiagnosticPacketResult {
   mode: "agent-run-startup-diagnostic-packet";
   activation: "none";
@@ -109,6 +117,7 @@ export interface AgentRunStartupDiagnosticPacketResult {
   exactConfirmationRequired: true;
   probeProfiles: string[];
   evidenceChecklist: string[];
+  startupProbePlan: AgentRunStartupProbePlanStep[];
   blockers: string[];
   nextActions: string[];
   classification: AgentRunFailureClassificationResult;
@@ -183,6 +192,23 @@ function extractCommandSource(logText: string): AgentRunArgvDiagnostics["command
 
 function stripRunnerArgvLines(logText: string): string {
   return logText.split(/\r?\n/).filter((line) => !line.startsWith("[agent-runner] argv=")).join("\n");
+}
+
+function buildStartupProbePlan(probeProfiles: string[], failureClass: AgentRunnerFailureClass): AgentRunStartupProbePlanStep[] {
+  if (failureClass === "none") return [];
+  const steps: AgentRunStartupProbePlanStep[] = [];
+  const addStep = (id: string, purpose: string, evidence: string[]) => {
+    if (probeProfiles.includes(id)) steps.push({ id, purpose, modelCallAllowed: false, dispatchAllowed: false, evidence });
+  };
+  addStep("timeout-budget-probe", "Compare configured timeout budget with observed elapsed startup/termination timing before any retry.", ["timeoutMs", "elapsedMs", "timedOut", "signal"]);
+  addStep("startup-hang-probe", "Distinguish CLI bootstrap hang from provider/model-call hang using preflight and first-event evidence.", ["preflight", "first-output-byte", "stderr", "exitCode"]);
+  addStep("json-mode-structured-probe", "Prefer structured CLI/event output for the next diagnostic so startup phases are machine-classifiable.", ["json-events", "phase", "exitCode"]);
+  addStep("prompt-file-argv-probe", "Move large inline prompts to a bounded prompt file before comparing argv/path behavior.", ["prompt-file", "argv", "attachment-count"]);
+  addStep("package-root-cli-resolution-probe", "Verify CLI entrypoint resolution from package root versus current-node entrypoint.", ["command-source", "entrypoint", "cwd"]);
+  addStep("stream-byte-split-probe", "Capture stdout and stderr byte counts separately before interpreting empty output.", ["stdoutBytes", "stderrBytes", "childOutputBytes"]);
+  addStep("stderr-preservation-probe", "Ensure stderr is preserved verbatim enough to classify provider/bootstrap errors.", ["stderr-tail", "error-code", "exitCode"]);
+  addStep("parent-side-contract-validation-probe", "Keep process success separate from parent-side file/marker contract validation.", ["touched-files", "marker-results", "outputBytes"]);
+  return steps;
 }
 
 export function buildAgentRunArgvDiagnostics(logText: string): AgentRunArgvDiagnostics {
@@ -468,6 +494,7 @@ export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagn
     : decision === "worker-canary-ready"
       ? ["read-only-worker-canary"]
       : ["structured-startup-provider-probe"];
+  const startupProbePlan = buildStartupProbePlan(probeProfiles, classification.failureClass);
   const nextActions = decision === "worker-canary-ready"
     ? [
       "Prepare one read-only worker canary packet.",
@@ -510,6 +537,7 @@ export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagn
     exactConfirmationRequired: true,
     probeProfiles,
     evidenceChecklist,
+    startupProbePlan,
     blockers,
     nextActions,
     classification,
