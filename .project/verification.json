@@ -15578,6 +15578,15 @@
       "method": "exact-approved-sdk-in-process-board-question+outcome-packet+marker-check",
       "timestamp": "2026-05-11T21:31:00.107Z",
       "evidence": "Exact-approved SDK in-process real-board-question smoke `task-bud-1068-sdk-board-evidence-smoke` completed successfully under the validated narrow read/grep envelope. Scope: two declared files (`.project/tasks.json`, `.project/verification.json`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1068-sdk-board-evidence-smoke.sdk.log` shows declared-file tool policy, 4 successful tool_execution_end events, final `PASS;` answer confirming `TASK-BUD-1068` has recorded passed evidence for the SDK one/two-file read/grep envelope (`VERIF-TASK-BUD-1068-SDK-READGREP-TWO-FILE-SMOKE-PASS-20260511` and `VERIF-TASK-BUD-1068-SDK-READGREP-RUNG-PROMOTED-20260511`) and still has status `in-progress`, then `event=agent_end` and `close state=completed outputBytes=331`. Git status after run was clean (no touched files). Outcome packet: `contract=pass process=completed recommendation=stop declared=2 touched=0 outputBytes=331`. Failure classification: `class=none preflight=ready-for-canary`. Marker checks passed after correcting the status marker wording to `task status is still in-progress`."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-BOARD-QUESTION-RUNG-PROMOTED-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-packet-test-promotion+vitest+i18n-marker-diff",
+      "timestamp": "2026-05-11T21:34:24.563Z",
+      "evidence": "Promoted the real-board-question SDK in-process rung after exact-approved pass. Updated `docs/research/agent-runner-maturity-checkpoint-2026-05.md` to record that a narrow worker read `.project/tasks.json` and `.project/verification.json`, confirmed TASK-BUD-1068 evidence/status, and passed. Updated `guardrails-core-agent-run-sdk-preview.ts` isolation/recommendation text so the validated envelope explicitly includes real board-question checks and the next rung is narrow read-only synthesis with cited board/doc evidence. Added regression assertion for `Live-validated board-question rung`. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; i18n lint pass; marker check pass; `git diff --check` pass."
     }
   ]
 }

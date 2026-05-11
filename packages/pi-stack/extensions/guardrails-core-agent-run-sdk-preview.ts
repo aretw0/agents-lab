@@ -181,7 +181,7 @@ function buildSdkMaturity(input: {
       ...base,
       rung: "validated-narrow-readgrep",
       validatedEnvelope: true,
-      recommendation: "ready for exact human decision under the validated one/two-file read/grep envelope",
+      recommendation: "ready for exact human decision under the validated one/two-file read/grep envelope, including real board-question checks",
     };
   }
   return {
@@ -277,7 +277,8 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     isolationNotes: [
       "SDK/in-process shares the parent Node.js process; use only after report-only packet and exact confirmation.",
       "Live-validated safe envelope: narrow read-only diagnostics with one or two declared files, read/grep only, explicit final output contract, follow, and outcome validation.",
-      "Next maturity rung: a similarly narrow read-only diagnostic that answers a real board question rather than only marker presence; broad read-only scopes still need evidence because prior runs looped or bloated output.",
+      "Live-validated board-question rung: narrow read-only diagnostics can answer a real board question from one or two declared files when constrained to read/grep and strict final output.",
+      "Next maturity rung: a narrow read-only synthesis that produces a recommendation with cited board/doc evidence; broad read-only scopes still need evidence because prior runs looped or bloated output.",
       "Use read-only tools for diagnostic canaries unless a mutation profile declares validation and rollback.",
       "Keep subprocess executor supported for stronger process isolation and argv-level diagnostics.",
     ],
