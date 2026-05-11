@@ -63,6 +63,22 @@ Use this mode more often for local-safe board work. Keep experimenting only wher
 
 Humility still applies: maturity is scoped, not universal. Current evidence supports frequent bounded single-worker use; it does not by itself promote multi-worker, background, colony, protected-scope, or unattended dispatch.
 
+## SDK in-process maturity ladder
+
+Do not forget the sequence already tried:
+
+1. `find/ls` in the SDK declared-file policy failed safely and now blocks before dispatch.
+2. Broad read-only diagnostics with many declared files reached useful evidence but looped/bloated output.
+3. Narrow read-only diagnostics with one declared file and one `read` call completed and passed.
+
+Use this ladder to unlock more work gradually:
+
+- **Ready now**: one declared file, `read` only, explicit one-answer output shape, exact confirmation, follow/outcome validation.
+- **Next rung**: one or two declared files, `read/grep`, strict output shape, small timeout, exact confirmation.
+- **Not ready yet**: broad read-only analysis, mutation, multi-worker, protected scope, or unattended provider dispatch.
+
+When preparing a worker, prefer the next smallest rung that can answer the question. If the worker loops, bloats output, or reads old logs as fresh evidence, harden the packet/runner before expanding scope.
+
 ## Continuous improvement lane contract
 
 Use existing milestone semantics instead of inventing another public surface:

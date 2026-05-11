@@ -15506,6 +15506,15 @@
       "method": "doc-marker-check+i18n-lint",
       "timestamp": "2026-05-11T19:36:30.677Z",
       "evidence": "Documented the continuous improvement lane contract in `docs/research/agent-runner-maturity-checkpoint-2026-05.md` without creating a new public primitive: milestone `agent-first-worker-lane`, anchors `TASK-BUD-1068`/`TASK-BUD-1066`, local-safe continuation allowed for docs/board/tests/classifier/packet/handoff/report-only previews, stop conditions for worker/provider dispatch/protected/destructive/task-closure decisions, and OODA as an internal quality filter only. Also recorded why the assistant stopped: runtime reload boundaries and single-run exact worker authorization, not lack of work. Validation: i18n lint pass; marker check for contract/milestone/task/OODA/exact-dispatch markers passed; `git diff --check` passed. Commit: 3aef0c67."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-MATURITY-LADDER-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "vitest+i18n-lint+marker-check+diff-check",
+      "timestamp": "2026-05-11T20:20:42.616Z",
+      "evidence": "After reload and auto-resume, encoded the learned SDK/in-process safe envelope into `guardrails-core-agent-run-sdk-preview.ts`, regression tests, and `docs/research/agent-runner-maturity-checkpoint-2026-05.md`. The packet now reminds operators of the live-validated safe envelope (narrow read-only diagnostics, declared file scope, explicit final output, follow/outcome) and next rung (at most two declared files, read/grep only, strict final-answer shape). The doc records the attempted sequence: unsupported find/ls blocked before dispatch; broad read-only scope can loop/bloat; one-file read-only smoke completed. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; i18n lint pass; marker check for SDK ladder markers pass; `git diff --check` pass."
     }
   ]
 }

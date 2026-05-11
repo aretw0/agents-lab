@@ -1620,6 +1620,9 @@ describe("agent spawn readiness contract", () => {
     });
     expect(result.sdkPreview.abortContract).toContain("timeout calls session.abort()");
     expect(result.sdkPreview.finalOutputContract).toContain("require final output bytes > 0");
+    expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Live-validated safe envelope");
+    expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Next maturity rung");
+    expect(result.nextActions.join("\n")).toContain("validated SDK safe envelope");
 
     const blocked = buildAgentRunSdkInProcessPacket({
       runId: "sdk-blocked",
