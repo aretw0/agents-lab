@@ -1,59 +1,60 @@
 {
-  "timestamp": "2026-05-11T20:44:02.343Z",
-  "context": "Exact confirmation received and consumed for SDK worker task-bud-1068-sdk-readgrep-two-file-smoke. Dispatched exactly one SDK in-process read [snip] ion. Validation after promotion passed. [truncated:+784 chars]",
+  "timestamp": "2026-05-11T20:57:02.035Z",
+  "context": "Continued pragmatically after SDK read/grep pass by making maturity explicit in the SDK in-process packet. Added AgentRunSdkMaturityRung and [snip] ude the new sdkMaturity fields/actions. [truncated:+595 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Do not dispatch more workers without a new exact phrase.",
-    "Continue local-safe by preparing the next SDK preview: a narrow read-only worker that answers [snip] o-file read/grep envelope. [truncated:+48 chars]",
+    "Ask operator to /reload before relying on live agent_run_sdk_in_process_packet output for sdkMaturity.",
+    "After reload, prepare a narrow read-only SDK preview that answers a real board question under [snip] atch without exact phrase. [truncated:+50 chars]",
     "Keep subprocess root-cause work deferred until SDK in-process lane is more productive, per operator direction."
   ],
   "blockers": [
-    "No standing authorization for additional worker/provider dispatch; the exact p [snip] oke has been consumed. [truncated:+48 chars]",
-    "SDK broad read-only/mutation/multi-worker/unattended dispatch remain immature.",
-    "Subprocess runner-timeout root cause unresolved and intentionally deprioritized."
+    "Runtime extension changes are committed but need reload before live tool surfa [snip] reflects sdkMaturity. [truncated:+2 chars]",
+    "No standing authorization for worker/provider dispatch; exact per-run confirmation still required.",
+    "SDK broad read-only/mutation/multi-worker/unattended dispatch remain immature."
   ],
   "recent_validation": [
-    "agent_run_sdk_in_process_dispatch execute=true with exact phrase -> dispatched one run only",
-    "agent_run_follow -> terminal completed outputBytes=913 lines=13",
-    "log .pi/reports/task-bud-1068-sdk-readgrep-two-file-smoke.sdk.log -> tools=read,grep, toolPoli [snip] completed outputBytes=231 [truncated:+70 chars]"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporte [snip] fter sdkMaturity telemetry [truncated:+20 chars]",
+    "safe_marker_check guardrails-core-agent-run-sdk-preview.ts markers AgentRunSdkMaturityRung, va [snip] aredFilesValidated -> pass [truncated:+76 chars]",
+    "git diff --check -> pass"
   ],
   "recent_commits": [
-    "849dc7d1 feat(agents): promote sdk readgrep safe envelope"
+    "5395c563 feat(agents): classify sdk maturity rung",
+    "d82349b2 fix(agents): label unvalidated sdk evidence rungs"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1068-SDK-READGREP-TWO-FILE-SMOKE",
-      "task:TASK-BUD-1068-SDK-READGREP-TWO-FILE-SMOKE-PASS-20260511",
+      "task:TASK-BUD-1068-SDK-MATURITY-TELEMETRY-20260511",
+      "task:TASK-BUD-1068-SDK-MATURITY-NEXT-ACTIONS-20260511",
       "commit:20260511"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T20:44:02.343Z",
+    "generatedAtIso": "2026-05-11T20:57:02.035Z",
     "level": "ok",
-    "percent": 27,
+    "percent": 32,
     "action": "continue",
-    "recommendation": "sdk-readgrep-safe-envelope-validated",
+    "recommendation": "reload-then-use-sdk-maturity-packet",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T20:44:02.343Z",
+      "atIso": "2026-05-11T20:57:02.035Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 27,
+      "percent": 32,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "sdk-readgrep-safe-envelope-validated"
+      "recommendation": "reload-then-use-sdk-maturity-packet"
     }
   ]
 }
