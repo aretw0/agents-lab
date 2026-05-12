@@ -7,7 +7,7 @@ import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readi
 import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 import { buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
 import { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run-executor-strategy";
-import { buildAgentRunSdkInProcessPacket, type AgentRunSdkInProcessPacketResult } from "./guardrails-core-agent-run-sdk-preview";
+import { buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket, type AgentRunSdkInProcessPacketResult } from "./guardrails-core-agent-run-sdk-preview";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunRegistryEntry, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
@@ -1105,6 +1105,79 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_executor_strategy_packet",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_sdk_readonly_batch_packet",
+    label: "Agent Run SDK Read-Only Batch Packet",
+    description: "Report-only batch packet for future parallel SDK read-only fan-out/fan-in. Never dispatches workers and always requires a separate human decision.",
+    parameters: Type.Object({
+      batch_id: Type.Optional(Type.String({ description: "Future read-only batch id." })),
+      shared_evidence: Type.Optional(Type.Array(Type.String(), { description: "Bounded shared evidence/cache pack identifiers or summaries." })),
+      max_workers: Type.Optional(Type.Number({ description: "Maximum workers allowed in this batch preview, clamped to 2..5." })),
+      workers: Type.Optional(Type.Array(Type.Object({
+        run_id: Type.Optional(Type.String({ description: "Future SDK worker run id." })),
+        goal: Type.Optional(Type.String({ description: "Run goal/prompt for the future SDK worker." })),
+        provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference." })),
+        cwd: Type.Optional(Type.String({ description: "Worker cwd. Defaults to current cwd." })),
+        declared_files: Type.Optional(Type.Array(Type.String(), { description: "Exact declared file scope for parent validation." })),
+        timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds." })),
+        tool_allowlist: Type.Optional(Type.Array(Type.String(), { description: "SDK tool allowlist." })),
+        session_mode: Type.Optional(Type.String({ description: "SDK session mode." })),
+        validation_gate_known: Type.Optional(Type.Boolean({ description: "Whether parent-side validation is known." })),
+        rollback_plan_known: Type.Optional(Type.Boolean({ description: "Whether rollback is known." })),
+        budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision." })),
+        budget_evidence: Type.Optional(Type.String({ description: "Scoped provider/model budget evidence." })),
+        budget_evidence_source: Type.Optional(Type.String({ description: "Budget evidence source." })),
+        budget_evidence_provider: Type.Optional(Type.String({ description: "Provider named by evidence." })),
+        budget_evidence_generated_at_iso: Type.Optional(Type.String({ description: "ISO timestamp for budget evidence freshness." })),
+        budget_evidence_max_age_ms: Type.Optional(Type.Number({ description: "Optional max age for budget evidence freshness." })),
+        abort_known: Type.Optional(Type.Boolean({ description: "Whether safe SDK abort is known." })),
+        event_stream_known: Type.Optional(Type.Boolean({ description: "Whether SDK event stream capture is known." })),
+        final_output_contract_known: Type.Optional(Type.Boolean({ description: "Whether final output contract is known." })),
+      }), { description: "Independent future read-only SDK workers." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
+      unexpected_dirty: Type.Optional(Type.Boolean({ description: "Blocks when workspace dirty state is unexpected." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const workersRaw = Array.isArray(p.workers) ? p.workers : [];
+      const workers = workersRaw.filter((entry): entry is Record<string, unknown> => !!entry && typeof entry === "object").map((worker) => ({
+        runId: typeof worker.run_id === "string" ? worker.run_id : undefined,
+        goal: typeof worker.goal === "string" ? worker.goal : undefined,
+        providerModelRef: typeof worker.provider_model_ref === "string" ? worker.provider_model_ref : undefined,
+        cwd: resolveExecutionCwdParam(worker.cwd, ctx.cwd),
+        declaredFiles: asOptionalStringArray(worker.declared_files),
+        timeoutMs: typeof worker.timeout_ms === "number" ? worker.timeout_ms : undefined,
+        toolAllowlist: asOptionalStringArray(worker.tool_allowlist),
+        sessionMode: typeof worker.session_mode === "string" ? worker.session_mode : undefined,
+        fileContract: "read-only",
+        validationGateKnown: asOptionalBoolean(worker.validation_gate_known),
+        rollbackPlanKnown: asOptionalBoolean(worker.rollback_plan_known),
+        budgetDecision: typeof worker.budget_decision === "string" ? worker.budget_decision : undefined,
+        budgetEvidence: typeof worker.budget_evidence === "string" ? worker.budget_evidence : undefined,
+        budgetEvidenceSource: typeof worker.budget_evidence_source === "string" ? worker.budget_evidence_source : undefined,
+        budgetEvidenceProvider: typeof worker.budget_evidence_provider === "string" ? worker.budget_evidence_provider : undefined,
+        budgetEvidenceGeneratedAtIso: typeof worker.budget_evidence_generated_at_iso === "string" ? worker.budget_evidence_generated_at_iso : undefined,
+        budgetEvidenceMaxAgeMs: typeof worker.budget_evidence_max_age_ms === "number" ? worker.budget_evidence_max_age_ms : undefined,
+        abortKnown: asOptionalBoolean(worker.abort_known),
+        eventStreamKnown: asOptionalBoolean(worker.event_stream_known),
+        finalOutputContractKnown: asOptionalBoolean(worker.final_output_contract_known),
+      }));
+      const result = buildAgentRunSdkReadOnlyBatchPacket({
+        batchId: typeof p.batch_id === "string" ? p.batch_id : undefined,
+        sharedEvidence: asOptionalStringArray(p.shared_evidence),
+        maxWorkers: typeof p.max_workers === "number" ? p.max_workers : undefined,
+        workers,
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+        unexpectedDirty: asOptionalBoolean(p.unexpected_dirty),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_sdk_readonly_batch_packet",
         summary: result.summary,
         details: result,
       });

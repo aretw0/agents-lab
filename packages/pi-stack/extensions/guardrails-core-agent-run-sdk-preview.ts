@@ -222,6 +222,46 @@ function buildSdkMaturity(input: {
   };
 }
 
+export interface AgentRunSdkReadOnlyBatchPacketInput {
+  batchId?: string;
+  workers?: AgentRunSdkInProcessPacketInput[];
+  sharedEvidence?: string[];
+  maxWorkers?: number;
+  protectedScopeRequested?: boolean;
+  unexpectedDirty?: boolean;
+}
+
+export interface AgentRunSdkReadOnlyBatchPacketResult {
+  mode: "agent-run-sdk-readonly-batch-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  parallelDispatchAllowed: false;
+  processStartAllowed: false;
+  processStopAllowed: false;
+  requiresHumanDecision: true;
+  executorKind: "pi-sdk-in-process";
+  decision: AgentRunSdkPacketDecision;
+  recommendationCode: "agent-run-sdk-readonly-batch-ready-for-human-decision" | "agent-run-sdk-readonly-batch-blocked";
+  blockers: string[];
+  batchSpec: {
+    batchId: string;
+    workerCount: number;
+    maxWorkers: number;
+    sharedEvidence: string[];
+    protectedScopeRequested: boolean;
+    unexpectedDirty: boolean;
+  };
+  workers: AgentRunSdkInProcessPacketResult[];
+  readyWorkerCount: number;
+  fanOutContract: string[];
+  fanInContract: string[];
+  cacheEconomyContract: string[];
+  humanConfirmationPhrase: string;
+  nextActions: string[];
+  summary: string;
+}
+
 export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacketInput = {}): AgentRunSdkInProcessPacketResult {
   const runId = normalizeText(input.runId);
   const goal = normalizeText(input.goal);
@@ -392,6 +432,110 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       unexpectedDirty ? "unexpectedDirty=yes" : undefined,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
       "dispatch=no",
+      "authorization=none",
+    ].filter(Boolean).join(" "),
+  };
+}
+
+export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBatchPacketInput = {}): AgentRunSdkReadOnlyBatchPacketResult {
+  const batchId = normalizeText(input.batchId);
+  const workersInput = Array.isArray(input.workers) ? input.workers : [];
+  const sharedEvidence = normalizeFiles(input.sharedEvidence);
+  const requestedMaxWorkers = normalizePositiveInt(input.maxWorkers, 5);
+  const maxWorkers = Math.max(2, Math.min(5, requestedMaxWorkers || 5));
+  const protectedScopeRequested = input.protectedScopeRequested === true;
+  const unexpectedDirty = input.unexpectedDirty === true;
+  const workers = workersInput.map((worker) => buildAgentRunSdkInProcessPacket({
+    ...worker,
+    fileContract: "read-only",
+    protectedScopeRequested: protectedScopeRequested || worker.protectedScopeRequested,
+    unexpectedDirty: unexpectedDirty || worker.unexpectedDirty,
+  }));
+
+  const blockers: string[] = [];
+  if (!batchId) blockers.push("batch-id-missing");
+  if (protectedScopeRequested) blockers.push("protected-scope-requested");
+  if (unexpectedDirty) blockers.push("unexpected-dirty-state");
+  if (sharedEvidence.length === 0) blockers.push("shared-evidence-missing");
+  if (workers.length < 2) blockers.push("batch-needs-at-least-two-workers");
+  if (workers.length > maxWorkers) blockers.push(`worker-count-exceeds-max:${workers.length}>${maxWorkers}`);
+  const seenRunIds = new Set<string>();
+  for (const worker of workers) {
+    const runId = worker.runSpec.runId;
+    if (!runId) continue;
+    if (seenRunIds.has(runId)) blockers.push(`duplicate-run-id:${runId}`);
+    seenRunIds.add(runId);
+  }
+  for (const worker of workers) {
+    if (worker.decision !== "ready-for-human-decision") blockers.push(`worker-blocked:${worker.runSpec.runId || "missing"}`);
+    if (!worker.sdkMaturity.validatedEnvelope) blockers.push(`worker-not-validated-envelope:${worker.runSpec.runId || "missing"}:${worker.sdkMaturity.rung}`);
+    if (worker.runSpec.fileContract !== "read-only") blockers.push(`worker-not-readonly:${worker.runSpec.runId || "missing"}`);
+  }
+
+  const readyWorkerCount = workers.filter((worker) => worker.decision === "ready-for-human-decision" && worker.sdkMaturity.validatedEnvelope && worker.runSpec.fileContract === "read-only").length;
+  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const fanOutContract = [
+    "batch packet is report-only and never dispatches workers by itself",
+    "all workers must be independent, read-only, narrow, and validated under the read/grep SDK envelope",
+    "future execution must preserve per-worker run ids, logs, timeouts, abort visibility, and exact confirmation for the batch id",
+  ];
+  const fanInContract = [
+    "parent must collect every worker outcome before using the batch result",
+    "fan-in fails closed on missing output, failed outcome, touched files, protected scope, dirty state, or budget blockers",
+    "promotion requires an aggregate verification entry listing each worker run id and cache-hit/cache-miss evidence",
+  ];
+  const cacheEconomyContract = [
+    "shared evidence pack is required before fan-out so workers avoid repeated broad reads",
+    "each worker should read only focal anchors not covered by fresh shared evidence",
+    "cache freshness must be invalidated by unexpected dirty state or touched declared files",
+  ];
+
+  return {
+    mode: "agent-run-sdk-readonly-batch-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    parallelDispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    requiresHumanDecision: true,
+    executorKind: "pi-sdk-in-process",
+    decision,
+    recommendationCode: decision === "ready-for-human-decision" ? "agent-run-sdk-readonly-batch-ready-for-human-decision" : "agent-run-sdk-readonly-batch-blocked",
+    blockers,
+    batchSpec: {
+      batchId,
+      workerCount: workers.length,
+      maxWorkers,
+      sharedEvidence,
+      protectedScopeRequested,
+      unexpectedDirty,
+    },
+    workers,
+    readyWorkerCount,
+    fanOutContract,
+    fanInContract,
+    cacheEconomyContract,
+    humanConfirmationPhrase: batchId ? `approve sdk readonly batch ${batchId}` : "",
+    nextActions: decision === "ready-for-human-decision"
+      ? [
+        "present this read-only batch packet for explicit human decision; the packet itself cannot dispatch",
+        "if a future executor is implemented, start at most the listed independent workers and preserve per-worker outcome validation",
+        "after fan-in, record aggregate verification before promoting any result",
+      ]
+      : [
+        "resolve batch blockers before any parallel SDK worker design or dispatch",
+        "fallback to single-worker SDK packets while batch evidence is incomplete",
+      ],
+    summary: [
+      "agent-run-sdk-readonly-batch-packet:",
+      `decision=${decision}`,
+      `batchId=${batchId || "missing"}`,
+      `workers=${workers.length}`,
+      `ready=${readyWorkerCount}`,
+      `maxWorkers=${maxWorkers}`,
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+      "parallelDispatch=no",
       "authorization=none",
     ].filter(Boolean).join(" "),
   };

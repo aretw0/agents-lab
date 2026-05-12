@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunSdkInProcessPacket, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildDeclaredFileScopedSdkWorkerTools, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, evaluateDeclaredPathPolicy, resolveExecutionCwdParam, resolveProviderExecutionBudgetEvidence, sameCwd } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildDeclaredFileScopedSdkWorkerTools, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, evaluateDeclaredPathPolicy, resolveExecutionCwdParam, resolveProviderExecutionBudgetEvidence, sameCwd } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -1777,6 +1777,79 @@ describe("agent spawn readiness contract", () => {
     expect(unsupportedToolsBlocked.recommendationCode).toBe("agent-run-sdk-blocked-tools");
     expect(unsupportedToolsBlocked.blockers).toContain("unsupported-tool-policy:find,ls");
 
+    const batchPacket = buildAgentRunSdkReadOnlyBatchPacket({
+      batchId: "task-bud-1071-sdk-readonly-batch-preview",
+      sharedEvidence: ["VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512"],
+      workers: [
+        {
+          runId: "batch-worker-a",
+          goal: "Read only one declared file and answer with PASS/FAIL.",
+          providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+          cwd: process.cwd(),
+          declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+          timeoutMs: 45_000,
+          toolAllowlist: ["read", "grep"],
+          validationGateKnown: true,
+          rollbackPlanKnown: true,
+          budgetDecision: "ok",
+          abortKnown: true,
+          eventStreamKnown: true,
+          finalOutputContractKnown: true,
+        },
+        {
+          runId: "batch-worker-b",
+          goal: "Read only one declared file and answer with PASS/FAIL.",
+          providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+          cwd: process.cwd(),
+          declaredFiles: ["packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"],
+          timeoutMs: 45_000,
+          toolAllowlist: ["read", "grep"],
+          validationGateKnown: true,
+          rollbackPlanKnown: true,
+          budgetDecision: "ok",
+          abortKnown: true,
+          eventStreamKnown: true,
+          finalOutputContractKnown: true,
+        },
+      ],
+    });
+    expect(batchPacket).toMatchObject({
+      mode: "agent-run-sdk-readonly-batch-packet",
+      decision: "ready-for-human-decision",
+      dispatchAllowed: false,
+      parallelDispatchAllowed: false,
+      readyWorkerCount: 2,
+      humanConfirmationPhrase: "approve sdk readonly batch task-bud-1071-sdk-readonly-batch-preview",
+    });
+    expect(batchPacket.fanOutContract.join("\n")).toContain("never dispatches workers by itself");
+    expect(batchPacket.fanInContract.join("\n")).toContain("cache-hit/cache-miss evidence");
+    expect(batchPacket.cacheEconomyContract.join("\n")).toContain("shared evidence pack");
+    expect(batchPacket.summary).toContain("parallelDispatch=no");
+
+    const batchBlocked = buildAgentRunSdkReadOnlyBatchPacket({
+      batchId: "batch-blocked",
+      workers: [
+        {
+          runId: "batch-single",
+          goal: "single worker is not a batch",
+          providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+          cwd: process.cwd(),
+          declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+          timeoutMs: 45_000,
+          toolAllowlist: ["read", "grep"],
+          validationGateKnown: true,
+          rollbackPlanKnown: true,
+          budgetDecision: "ok",
+          abortKnown: true,
+          eventStreamKnown: true,
+          finalOutputContractKnown: true,
+        },
+      ],
+    });
+    expect(batchBlocked.decision).toBe("blocked");
+    expect(batchBlocked.blockers).toContain("shared-evidence-missing");
+    expect(batchBlocked.blockers).toContain("batch-needs-at-least-two-workers");
+
     const rawPi = {
       on: vi.fn(),
       registerTool: vi.fn(),
@@ -1786,6 +1859,53 @@ describe("agent spawn readiness contract", () => {
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
     const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
     guardrailsCore(pi);
+    const batchToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_readonly_batch_packet");
+    const batchTool = batchToolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+    const batchSurface = batchTool.execute("tc-sdk-batch-preview", {
+      batch_id: "task-bud-1071-sdk-readonly-batch-preview",
+      shared_evidence: ["VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512"],
+      workers: [
+        {
+          run_id: "batch-surface-worker-a",
+          goal: "Read one file and stop.",
+          provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+          declared_files: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+          timeout_ms: 45_000,
+          tool_allowlist: ["read", "grep"],
+          validation_gate_known: true,
+          rollback_plan_known: true,
+          budget_decision: "ok",
+          abort_known: true,
+          event_stream_known: true,
+          final_output_contract_known: true,
+        },
+        {
+          run_id: "batch-surface-worker-b",
+          goal: "Read one file and stop.",
+          provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+          declared_files: ["packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"],
+          timeout_ms: 45_000,
+          tool_allowlist: ["read", "grep"],
+          validation_gate_known: true,
+          rollback_plan_known: true,
+          budget_decision: "ok",
+          abort_known: true,
+          event_stream_known: true,
+          final_output_contract_known: true,
+        },
+      ],
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
+    expect(batchSurface.details?.mode).toBe("agent-run-sdk-readonly-batch-packet");
+    expect(batchSurface.details?.parallelDispatchAllowed).toBe(false);
+    expect(batchSurface.content?.[0]?.text).toContain("parallelDispatch=no");
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_in_process_packet");
     const tool = toolCall?.[0] as {
       execute: (

@@ -15821,6 +15821,15 @@
       "method": "incident-capture+continuity-diagnostics",
       "timestamp": "2026-05-12T22:57:30.576Z",
       "evidence": "Captured operator-observed continuity failure: a forced auto-compact occurred, the operator manually reloaded, auto-resume was suppressed/failed to fire, and the operator had to manually nudge the session. Boundary diagnostics after nudge: `context_watch_status` reported `level=ok`, `reloadGate=reload-not-required`, `postReloadResume=pending`, stale handoff; `context_watch_continuation_readiness` reported `ready=no`, `audit=blocked`, reasons `candidate:invalid|checkpoint:invalid|handoff-budget:invalid`, `dirty=dirty`, `postReloadResume=pending`. Created TASK-BUD-1072 to harden the post-reload resume pending-state contract and operator-visible incident logging. This verification documents the repeated-pattern evidence; it does not authorize scheduler, remote, worker dispatch, or unattended execution."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-READONLY-BATCH-PACKET-20260512",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke-test+marker-check",
+      "timestamp": "2026-05-12T23:07:13.351Z",
+      "evidence": "Added a report-only `buildAgentRunSdkReadOnlyBatchPacket` and registered `agent_run_sdk_readonly_batch_packet` surface for future parallel SDK read-only fan-out/fan-in. The packet never dispatches (`parallelDispatchAllowed=false`, `dispatchAllowed=false`), requires 2..5 workers, shared evidence, unique run ids, validated narrow read/grep read-only worker packets, and fail-closed fan-in. Surface tool accepts batch id, shared evidence, and independent worker specs; it returns operator-visible preview only. Test coverage added for ready batch, blocked missing shared evidence/single-worker batch, and surface registration output. Validation: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` passed 41/41; `git diff --check` passed; marker checks passed for builder, surface, and smoke test."
     }
   ]
 }
