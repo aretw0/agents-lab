@@ -15776,6 +15776,24 @@
       "method": "sdk-in-process-worker-preview-no-dispatch",
       "timestamp": "2026-05-12T15:43:48.598Z",
       "evidence": "Prepared next SDK in-process read-only worker preview after startup-boundary probe. Run `task-bud-1066-sdk-startup-timestamp-design` declares two read-only node_modules files (`node_modules/@mariozechner/pi-coding-agent/dist/main.js`, `node_modules/@mariozechner/pi-coding-agent/dist/modes/print-mode.js`), allows `read,grep`, timeout 45000ms, read-only contract, and asks for the smallest report-only timestamp/instrumentation plan to distinguish `createAgentSessionRuntime(...)` completion from `session.prompt(...)` start/completion without changing node_modules and without running a subprocess. Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required: `execute o sdk worker task-bud-1066-sdk-startup-timestamp-design`."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-STARTUP-TIMESTAMP-WORKER-FAIL-20260512",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "failed",
+      "method": "exact-approved-sdk-in-process-readonly-worker+outcome+classification",
+      "timestamp": "2026-05-12T16:21:40.760Z",
+      "evidence": "Exact-approved SDK in-process worker `task-bud-1066-sdk-startup-timestamp-design` failed safely under read-only constraints. Scope: two declared node_modules files (`main.js`, `print-mode.js`), tools `read,grep`, no touched files. Log shows 10 successful tool executions, then `loop-guard sdk-runner-turn-loop turns=6 maxTurns=5`, `agent_end`, and `close state=failed reason=loop-guard outputBytes=0`. Outcome packet: `contract=fail process=failed recommendation=ask-human markerFailures=4 outputBytes=0`. Failure classification: `worker-contract-failed preflight=needs-evidence retryAllowed=no blockers=sdk-runner-loop-guard`. Interpretation: the two-file timestamp-design prompt was too broad for the current narrow worker envelope; next attempt should shrink to one file and one named function (`dist/modes/print-mode.js` `runPrintMode`) before asking for timestamp design. Diagnostic packet updated; doc marker check, i18n lint, and `git diff --check` passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-PRINTMODE-TIMESTAMP-WORKER-PREVIEW-20260512",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "sdk-in-process-worker-preview-no-dispatch",
+      "timestamp": "2026-05-12T16:26:30.003Z",
+      "evidence": "Prepared narrower SDK in-process read-only worker preview after two-file timestamp-design loop guard. Run `task-bud-1066-sdk-printmode-timestamp-design` declares one file (`node_modules/@mariozechner/pi-coding-agent/dist/modes/print-mode.js`), allows `read,grep`, timeout 45000ms, read-only contract, focuses only on `runPrintMode`, and asks for the smallest report-only timestamp plan around `session.prompt(...)` start/completion and `writeRawStdout`. Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required: `execute o sdk worker task-bud-1066-sdk-printmode-timestamp-design`."
     }
   ]
 }
