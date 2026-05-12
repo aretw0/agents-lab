@@ -1,59 +1,59 @@
 {
-  "timestamp": "2026-05-12T16:39:48.773Z",
-  "context": "Exact confirmation received and consumed for task-bud-1066-sdk-startup-timestamp-design. Dispatched exactly one SDK in-process read-only work [snip] ud-1066-sdk-printmode-timestamp-design. [truncated:+792 chars]",
+  "timestamp": "2026-05-12T17:38:04.874Z",
+  "context": "User asked if a reload requirement appearing during task-bud-1066-sdk-printmode-timestamp-design would affect the run. We did not reload mid- [snip] e refreshed after checkpoint if needed. [truncated:+635 chars]",
   "current_tasks": [
     "TASK-BUD-1066"
   ],
   "next_actions": [
-    "If operator confirms exact phrase, execute only task-bud-1066-sdk-printmode-timestamp-design a [snip] hed files/outcome/markers. [truncated:+19 chars]",
-    "Do not retry the two-file timestamp-design shape; it is too broad for the current SDK worker envelope.",
-    "Use this failure as evidence for TASK-BUD-1071 cache/economy/reliability: avoid repeated broad [snip] worker goals aggressively. [truncated:+18 chars]"
+    "If reload notice persists, reload after this checkpoint; do not reload in the middle of a runn [snip] ss aborting intentionally. [truncated:+15 chars]",
+    "Next local-safe step: design parent-side report-only instrumentation patch in first-party runn [snip] out-first-byte timestamps. [truncated:+63 chars]",
+    "No subprocess retry until instrumentation plan is implemented/validated and exact-confirmed."
   ],
   "blockers": [
-    "TASK-BUD-1066 root cause unresolved: timestamp design still needs narrower one-file probe.",
+    "TASK-BUD-1066 root cause unresolved until timestamp instrumentation distinguis [snip] hang from stdout path. [truncated:+11 chars]",
     "No standing authorization for worker dispatch beyond exact per-run confirmation.",
     "No subprocess retry authorized; blind retry remains blocked."
   ],
   "recent_validation": [
-    "agent_run_sdk_in_process_dispatch execute=true exact phrase -> dispatched timestamp-design worker only",
-    "agent_run_follow -> terminal failed outputBytes=1390 lines=26",
-    "git status after worker -> clean"
+    "agent_run_status -> completed",
+    "agent_run_follow -> terminal completed outputBytes=1120 lines=15",
+    "read log -> PASS timestamp-design, probes=prompt-start,prompt-end,stdout-first-byte, STOP, clo [snip] completed outputBytes=399 [truncated:+2 chars]"
   ],
   "recent_commits": [
-    "10af778a chore(board): record sdk timestamp design failure"
+    "940d448b chore(board): record sdk printmode timestamp pass"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1066",
     "canonical_links": [
       "task:TASK-BUD-1066",
-      "task:TASK-BUD-1066-SDK-STARTUP-TIMESTAMP-DESIGN",
       "task:TASK-BUD-1066-SDK-PRINTMODE-TIMESTAMP-DESIGN",
+      "task:TASK-BUD-1066-SDK-PRINTMODE-TIMESTAMP-WORKER-PASS-20260512",
       "commit:20260512"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-12T16:39:48.773Z",
-    "level": "ok",
-    "percent": 49,
+    "generatedAtIso": "2026-05-12T17:38:04.874Z",
+    "level": "warn",
+    "percent": 51,
     "action": "continue",
-    "recommendation": "await-exact-printmode-timestamp-worker-confirmation",
+    "recommendation": "reload-after-checkpoint-then-design-instrumentation-patch",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-12T16:39:48.773Z",
+      "atIso": "2026-05-12T17:38:04.874Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 49,
+      "level": "warn",
+      "percent": 51,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "await-exact-printmode-timestamp-worker-confirmation"
+      "recommendation": "reload-after-checkpoint-then-design-instrumentation-patch"
     }
   ]
 }
