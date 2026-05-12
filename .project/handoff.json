@@ -1,58 +1,58 @@
 {
-  "timestamp": "2026-05-12T01:15:43.851Z",
-  "context": "Auto-resumed from handoff. Reload had been done before this slice. Completed the local-safe parent-side tiny guard recommended by the success [snip] ovider dispatch occurred in this slice. [truncated:+537 chars]",
+  "timestamp": "2026-05-12T01:56:58.822Z",
+  "context": "User reported reload done. Ran post-reload live preview only, no worker/provider dispatch. task-bud-1068-sdk-two-file-code-review-guard-previ [snip] of unresolved dependency TASK-BUD-1066. [truncated:+562 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Reload before relying on live runtime text for the new needs-evidence-code-review rung.",
-    "After reload, preview the packet live for a two-file open-ended code/test review and confirm i [snip] false; no dispatch needed. [truncated:+69 chars]",
-    "Then consider whether TASK-BUD-1068 can be closed or remains blocked by TASK-BUD-1066 subprocess root cause."
+    "Do not dispatch more workers without exact per-run confirmation.",
+    "Decide whether to keep TASK-BUD-1068 open until TASK-BUD-1066 subprocess root cause is solved, [snip] ia a human board decision. [truncated:+32 chars]",
+    "If continuing locally, inspect TASK-BUD-1066 subprocess runner-timeout evidence read-only and [snip] no blind subprocess retry. [truncated:+46 chars]"
   ],
   "blockers": [
-    "Runtime extension changed again; reload needed before live tool surface reflects this guard.",
+    "TASK-BUD-1068 closure blocked by unresolved dependency TASK-BUD-1066.",
     "No standing authorization for additional worker/provider dispatch.",
-    "TASK-BUD-1068 closure may remain coupled to unresolved TASK-BUD-1066 depending on board decision."
+    "Subprocess runner-timeout root cause remains unresolved."
   ],
   "recent_validation": [
-    "git status at resume -> only expected local changes from prior interrupted slice",
+    "git status before preview -> clean",
     "context_watch_status -> ok reload-not-required",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot -> 41 passed"
+    "agent_run_sdk_in_process_packet two-file open-ended code/test review -> sdkMaturity=needs-evid [snip] ce-code-review dispatch=no [truncated:+2 chars]"
   ],
   "recent_commits": [
-    "b5415ded fix(agents): guard sdk code review maturity"
+    "1dfc787c chore(board): record sdk guard live preview"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1068-SDK-CODE-REVIEW-MATURITY-GUARD-20260511",
+      "task:TASK-BUD-1068-SDK-TWO-FILE-CODE-REVIEW-GUARD-PREVIEW",
       "commit:20260511"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-12T01:15:43.851Z",
+    "generatedAtIso": "2026-05-12T01:56:58.822Z",
     "level": "ok",
-    "percent": 26,
+    "percent": 28,
     "action": "continue",
-    "recommendation": "reload-then-preview-guard-no-dispatch",
+    "recommendation": "dependency-decision-or-readonly-task-bud-1066-triage",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-12T01:15:43.851Z",
+      "atIso": "2026-05-12T01:56:58.822Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 26,
+      "percent": 28,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-preview-guard-no-dispatch"
+      "recommendation": "dependency-decision-or-readonly-task-bud-1066-triage"
     }
   ]
 }
