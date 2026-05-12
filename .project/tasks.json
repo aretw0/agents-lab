@@ -23939,8 +23939,8 @@
         "Preserve explicit human-control gates: no scheduler, remote, or worker dispatch is authorized by the resume signal itself."
       ],
       "milestone": "worker-lane-continuity",
-      "notes": "2026-05-12 incident: user observed forced auto-compact, then manual reload suppressed auto-resume; no auto-resume fired, requiring a manual nudge. Current status evidence showed `postReloadResume=pending`, stale handoff, dirty local slice, and continuation readiness blocked on candidate/checkpoint/handoff-budget. This should be hardened so unexplained stops are logged and resumed/blocked with operator-visible reason.\n[provenance:human] source_task=TASK-BUD-1071 reason=Parallel/continuity discussion exposed a repeated operational failure mode: work stopped despite local-safe work remaining after compact/reload boundary.",
-      "verification": "VERIF-TASK-BUD-1072-AUTO-RESUME-SUPPRESSION-INCIDENT-20260512"
+      "notes": "2026-05-12 incident: user observed forced auto-compact, then manual reload suppressed auto-resume; no auto-resume fired, requiring a manual nudge. Current status evidence showed `postReloadResume=pending`, stale handoff, dirty local slice, and continuation readiness blocked on candidate/checkpoint/handoff-budget. This should be hardened so unexplained stops are logged and resumed/blocked with operator-visible reason.\n[provenance:human] source_task=TASK-BUD-1071 reason=Parallel/continuity discussion exposed a repeated operational failure mode: work stopped despite local-safe work remaining after compact/reload boundary.\n2026-05-12: Second continuity incident captured: `WebSocket closed 1006` forced operator to end/return to saved session manually. Post-resume state was git clean, reload not required, but handoff stale and continuation readiness blocked (`candidate:invalid|checkpoint:invalid|stop-conditions:invalid`) despite local-safe TASK-BUD-1071 work remaining. Evidence: VERIF-TASK-BUD-1072-WEBSOCKET-1006-SESSION-RESUME-20260512.",
+      "verification": "VERIF-TASK-BUD-1072-WEBSOCKET-1006-SESSION-RESUME-20260512"
     }
   ]
 }
