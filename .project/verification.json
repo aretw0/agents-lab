@@ -15758,6 +15758,24 @@
       "method": "sdk-in-process-worker-preview-no-dispatch",
       "timestamp": "2026-05-12T14:19:20.939Z",
       "evidence": "Prepared next SDK in-process read-only worker preview after capture-path check. Run `task-bud-1066-sdk-startup-boundary-probe` declares two read-only node_modules files (`node_modules/@mariozechner/pi-coding-agent/dist/main.js`, `node_modules/@mariozechner/pi-coding-agent/dist/modes/print-mode.js`), allows `read,grep`, timeout 45000ms, read-only contract, and asks for the most likely zero-output hang boundary after static argv validation and before child stdout/stderr. Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required: `execute o sdk worker task-bud-1066-sdk-startup-boundary-probe`."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-STARTUP-BOUNDARY-WORKER-PASS-20260512",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-approved-sdk-in-process-readonly-worker+outcome+marker-check",
+      "timestamp": "2026-05-12T15:31:38.639Z",
+      "evidence": "Exact-approved SDK in-process worker `task-bud-1066-sdk-startup-boundary-probe` completed successfully as a read-only diagnostic probe. Scope: two declared files (`node_modules/@mariozechner/pi-coding-agent/dist/main.js`, `node_modules/@mariozechner/pi-coding-agent/dist/modes/print-mode.js`), tools `read,grep`, no touched files. Worker result: `PASS; startup-boundary`; most likely zero-output boundary is `dist/modes/print-mode.js` `runPrintMode` at `await session.prompt(initialMessage)` or subsequent `await session.prompt(message)`, after argv validation and runtime/session setup but before the `writeRawStdout` output path. Outcome packet: `contract=pass process=completed recommendation=stop declared=2 touched=0 outputBytes=594`. Classifier: `class=none preflight=ready-for-canary`. Marker check passed 9/9. Diagnostic packet updated; doc marker check, i18n lint, and `git diff --check` passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-STARTUP-TIMESTAMP-WORKER-PREVIEW-20260512",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "sdk-in-process-worker-preview-no-dispatch",
+      "timestamp": "2026-05-12T15:43:48.598Z",
+      "evidence": "Prepared next SDK in-process read-only worker preview after startup-boundary probe. Run `task-bud-1066-sdk-startup-timestamp-design` declares two read-only node_modules files (`node_modules/@mariozechner/pi-coding-agent/dist/main.js`, `node_modules/@mariozechner/pi-coding-agent/dist/modes/print-mode.js`), allows `read,grep`, timeout 45000ms, read-only contract, and asks for the smallest report-only timestamp/instrumentation plan to distinguish `createAgentSessionRuntime(...)` completion from `session.prompt(...)` start/completion without changing node_modules and without running a subprocess. Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required: `execute o sdk worker task-bud-1066-sdk-startup-timestamp-design`."
     }
   ]
 }

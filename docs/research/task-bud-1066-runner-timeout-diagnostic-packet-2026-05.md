@@ -70,9 +70,20 @@ Result:
 - Future subprocess runs can expose elapsed timing even if child stdout/stderr remains empty.
 - Recommended next probe: report-only structured startup/provider probe, with `timeout-budget-probe` plus `startup-hang-probe` as the evidence branch.
 
+### startup-boundary probe
+
+Exact-approved SDK in-process worker `task-bud-1066-sdk-startup-boundary-probe` completed read-only with no touched files.
+
+Result:
+
+- `PASS; startup-boundary`
+- Most likely zero-output boundary: `dist/modes/print-mode.js` `runPrintMode`, at `await session.prompt(initialMessage)` or subsequent `await session.prompt(message)`.
+- This sits after argv validation and runtime/session setup, but before the `writeRawStdout` output path.
+- Recommended next probe: distinguish `createAgentSessionRuntime(...)` completion from `session.prompt(...)` completion with report-only instrumentation/timestamp design before any subprocess retry.
+
 ## Interpretation
 
-The subprocess runner no longer looks like an immediate missing-file, missing-entrypoint, or static CLI argv-shape failure: cwd, Node command, CLI entrypoint, required print-mode flags, attachments, and prompt all exist. The current historical canary log lacks `elapsedMs`, but the current parent-side runtime is instrumented to expose elapsed timing for future subprocess runs. The remaining unknown is the zero-output startup hang boundary. That makes `runner-timeout` the correct parent-side class and keeps blind retry blocked.
+The subprocess runner no longer looks like an immediate missing-file, missing-entrypoint, or static CLI argv-shape failure: cwd, Node command, CLI entrypoint, required print-mode flags, attachments, and prompt all exist. The current historical canary log lacks `elapsedMs`, but the current parent-side runtime is instrumented to expose elapsed timing for future subprocess runs. The remaining unknown is likely inside print-mode after runtime/session setup and before stdout emission, especially around `session.prompt(...)`. That makes `runner-timeout` the correct parent-side class and keeps blind retry blocked.
 
 Most likely next diagnostic categories:
 
