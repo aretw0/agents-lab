@@ -15668,6 +15668,15 @@
       "method": "doc-packet-test-promotion+vitest+i18n-marker-diff",
       "timestamp": "2026-05-12T00:31:27.685Z",
       "evidence": "Promoted the SDK in-process one-file/named-symbol code-review replacement rung after exact-approved pass. Updated `docs/research/agent-runner-maturity-checkpoint-2026-05.md` to record that one-file/named-symbol code review with tighter loop guards produced a parent-side patch recommendation and passed. Updated `guardrails-core-agent-run-sdk-preview.ts` nextActions/isolation notes to explicitly recommend one-file/named-symbol retry after failed two-file code/test review and to mark the live-validated one-symbol review rung. Added regression assertions for `Live-validated one-symbol review rung` and the one target file/named symbol nextAction. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; i18n lint pass; marker check pass; `git diff --check` pass."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-CODE-REVIEW-MATURITY-GUARD-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "parent-side-guard+vitest+marker+diff-check",
+      "timestamp": "2026-05-12T00:52:53.816Z",
+      "evidence": "Implemented the parent-side tiny guard recommended by the one-symbol SDK review. `buildSdkMaturity` now receives the goal and classifies two-file open-ended code/test review goals as `needs-evidence-code-review` with `validatedEnvelope=false`, recommending shrink to one target file or one named symbol before retrying. One-file/named-symbol code-review goals remain inside `validated-narrow-readgrep`. Added helpers `isCodeReviewGoal` and `hasOneFileOrSymbolCue`, plus regression cases for two-file code-review evidence-needed and one-symbol code-review validated. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; marker check for `needs-evidence-code-review`, helpers, and recommendation text passed; `git diff --check` passed."
     }
   ]
 }

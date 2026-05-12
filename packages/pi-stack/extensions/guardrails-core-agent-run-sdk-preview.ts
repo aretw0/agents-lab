@@ -7,6 +7,7 @@ export type AgentRunSdkFileContract = "read-only" | "mutation" | "unknown";
 export type AgentRunSdkMaturityRung =
   | "validated-narrow-readgrep"
   | "needs-evidence-broad-readonly"
+  | "needs-evidence-code-review"
   | "needs-evidence-mutation"
   | "blocked";
 
@@ -147,8 +148,27 @@ function normalizeFileContract(value: unknown): AgentRunSdkFileContract {
   return "unknown";
 }
 
+function isCodeReviewGoal(goal: string): boolean {
+  const lower = goal.toLowerCase();
+  return lower.includes("code/test review")
+    || lower.includes("code review")
+    || lower.includes("recommended patch")
+    || lower.includes("parent-side patch");
+}
+
+function hasOneFileOrSymbolCue(goal: string): boolean {
+  const lower = goal.toLowerCase();
+  return lower.includes("one target file")
+    || lower.includes("one named symbol")
+    || lower.includes("one-symbol")
+    || lower.includes("focus only")
+    || lower.includes("readynextactions")
+    || lower.includes("buildsdkmaturity");
+}
+
 function buildSdkMaturity(input: {
   blocked: boolean;
+  goal: string;
   declaredFiles: string[];
   toolAllowlist: string[];
   fileContract: AgentRunSdkFileContract;
@@ -177,11 +197,19 @@ function buildSdkMaturity(input: {
     };
   }
   if (input.fileContract === "read-only" && scope === "narrow" && toolsWithinValidatedEnvelope) {
+    if (input.declaredFiles.length > 1 && isCodeReviewGoal(input.goal) && !hasOneFileOrSymbolCue(input.goal)) {
+      return {
+        ...base,
+        rung: "needs-evidence-code-review",
+        validatedEnvelope: false,
+        recommendation: "two-file open-ended code/test review is not validated; shrink to one target file or one named symbol before retrying",
+      };
+    }
     return {
       ...base,
       rung: "validated-narrow-readgrep",
       validatedEnvelope: true,
-      recommendation: "ready for exact human decision under the validated one/two-file read/grep envelope, including real board-question checks and narrow cited synthesis",
+      recommendation: "ready for exact human decision under the validated one/two-file read/grep envelope, including real board-question checks, narrow cited synthesis, and one-file/named-symbol code review",
     };
   }
   return {
@@ -248,6 +276,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
   const sdkMaturity = buildSdkMaturity({
     blocked: blockers.length > 0,
+    goal,
     declaredFiles,
     toolAllowlist,
     fileContract,

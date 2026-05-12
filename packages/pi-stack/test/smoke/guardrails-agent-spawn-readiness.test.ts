@@ -1637,6 +1637,54 @@ describe("agent spawn readiness contract", () => {
     });
     expect(result.summary).toContain("sdkMaturity=validated-narrow-readgrep");
 
+    const twoFileCodeReview = buildAgentRunSdkInProcessPacket({
+      runId: "sdk-two-file-code-review",
+      goal: "Produce a narrow read-only code/test review answering: what is one parent-side patch that would further unlock pragmatic SDK in-process worker use without broadening scope?",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+      ],
+      timeoutMs: 90_000,
+      toolAllowlist: ["read", "grep"],
+      validationGateKnown: true,
+      rollbackPlanKnown: true,
+      budgetDecision: "ok",
+      abortKnown: true,
+      eventStreamKnown: true,
+      finalOutputContractKnown: true,
+    });
+    expect(twoFileCodeReview.decision).toBe("ready-for-human-decision");
+    expect(twoFileCodeReview.sdkMaturity).toMatchObject({
+      rung: "needs-evidence-code-review",
+      validatedEnvelope: false,
+      scope: "narrow",
+    });
+    expect(twoFileCodeReview.nextActions.join("\n")).toContain("new evidence rung");
+    expect(twoFileCodeReview.nextActions.join("\n")).toContain("shrink to one target file or one named symbol");
+
+    const oneSymbolCodeReview = buildAgentRunSdkInProcessPacket({
+      runId: "sdk-one-symbol-code-review",
+      goal: "Read only the declared file and focus only on the readyNextActions / buildSdkMaturity area; recommend one parent-side patch.",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+      timeoutMs: 90_000,
+      toolAllowlist: ["read", "grep"],
+      validationGateKnown: true,
+      rollbackPlanKnown: true,
+      budgetDecision: "ok",
+      abortKnown: true,
+      eventStreamKnown: true,
+      finalOutputContractKnown: true,
+    });
+    expect(oneSymbolCodeReview.sdkMaturity).toMatchObject({
+      rung: "validated-narrow-readgrep",
+      validatedEnvelope: true,
+      scope: "narrow",
+    });
+
     const broadReadOnly = buildAgentRunSdkInProcessPacket({
       runId: "sdk-broad-readonly",
       goal: "broad read-only",
