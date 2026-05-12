@@ -1,60 +1,59 @@
 {
-  "timestamp": "2026-05-12T12:12:57.003Z",
-  "context": "Exact confirmation received and consumed for task-bud-1066-sdk-argv-shape-inspection. Dispatched exactly one SDK in-process read-only worker [snip] task-bud-1066-sdk-timeout-budget-probe. [truncated:+849 chars]",
+  "timestamp": "2026-05-12T13:37:50.977Z",
+  "context": "Exact confirmation received and consumed for task-bud-1066-sdk-timeout-budget-probe. Dispatched exactly one SDK in-process read-only worker u [snip] r task-bud-1066-sdk-capture-path-check. [truncated:+871 chars]",
   "current_tasks": [
     "TASK-BUD-1066"
   ],
   "next_actions": [
-    "If operator confirms exact phrase, execute only task-bud-1066-sdk-timeout-budget-probe and val [snip] hed files/outcome/markers. [truncated:+13 chars]",
-    "Do not run subprocess retry; argv static shape is ruled out, next evidence target is timeout b [snip] / elapsedMs completeness. [truncated:+5 chars]",
-    "After timeout-budget probe, continue one worker at a time to startup-surface/provider/tool/capture probes."
+    "If operator confirms exact phrase, execute only task-bud-1066-sdk-capture-path-check and valid [snip] hed files/outcome/markers. [truncated:+11 chars]",
+    "Do not run subprocess retry; current existing canary log lacks elapsedMs so timeout-budget evidence is incomplete.",
+    "After capture-path check, decide whether a local patch/doc update or a future exact-confirmed [snip] rumented canary is needed. [truncated:+4 chars]"
   ],
   "blockers": [
-    "TASK-BUD-1066 subprocess root cause unresolved; current static argv shape is v [snip] imeout reason unknown. [truncated:+10 chars]",
+    "TASK-BUD-1066 subprocess root cause unresolved; timeout-budget evidence incomp [snip] n existing canary log. [truncated:+32 chars]",
     "No standing authorization for worker dispatch beyond exact per-run confirmation.",
     "No subprocess retry authorized; blind retry remains blocked."
   ],
   "recent_validation": [
     "agent_run_sdk_in_process_dispatch execute=true exact phrase -> dispatched one run only",
-    "agent_run_follow -> terminal completed outputBytes=988 lines=16",
+    "agent_run_follow -> terminal completed outputBytes=1393 lines=21",
     "git status after worker -> clean"
   ],
   "recent_commits": [
-    "72475979 chore(board): record sdk argv shape pass",
-    "035a655f chore(board): preview sdk timeout budget worker"
+    "4a24962a chore(board): record sdk timeout budget probe"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1066",
     "canonical_links": [
       "task:TASK-BUD-1066",
-      "task:TASK-BUD-1066-SDK-ARGV-SHAPE-INSPECTION",
       "task:TASK-BUD-1066-SDK-TIMEOUT-BUDGET-PROBE",
+      "task:TASK-BUD-1066-SUBPROCESS-PREFLIGHT-CANARY",
       "commit:20260512"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-12T12:12:57.003Z",
+    "generatedAtIso": "2026-05-12T13:37:50.977Z",
     "level": "ok",
-    "percent": 38,
+    "percent": 41,
     "action": "continue",
-    "recommendation": "await-exact-timeout-budget-worker-confirmation",
+    "recommendation": "await-exact-capture-path-worker-confirmation",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-12T12:12:57.003Z",
+      "atIso": "2026-05-12T13:37:50.977Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 38,
+      "percent": 41,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "await-exact-timeout-budget-worker-confirmation"
+      "recommendation": "await-exact-capture-path-worker-confirmation"
     }
   ]
 }
