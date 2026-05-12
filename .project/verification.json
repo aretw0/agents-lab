@@ -15794,6 +15794,15 @@
       "method": "sdk-in-process-worker-preview-no-dispatch",
       "timestamp": "2026-05-12T16:26:30.003Z",
       "evidence": "Prepared narrower SDK in-process read-only worker preview after two-file timestamp-design loop guard. Run `task-bud-1066-sdk-printmode-timestamp-design` declares one file (`node_modules/@mariozechner/pi-coding-agent/dist/modes/print-mode.js`), allows `read,grep`, timeout 45000ms, read-only contract, focuses only on `runPrintMode`, and asks for the smallest report-only timestamp plan around `session.prompt(...)` start/completion and `writeRawStdout`. Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required: `execute o sdk worker task-bud-1066-sdk-printmode-timestamp-design`."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-PRINTMODE-TIMESTAMP-WORKER-PASS-20260512",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-approved-sdk-in-process-readonly-worker+outcome+marker-check",
+      "timestamp": "2026-05-12T17:32:39.650Z",
+      "evidence": "Exact-approved SDK in-process worker `task-bud-1066-sdk-printmode-timestamp-design` completed successfully as a narrower one-file/one-function read-only diagnostic after the broader two-file timestamp design worker looped. Scope: one declared file (`node_modules/@mariozechner/pi-coding-agent/dist/modes/print-mode.js`), tools `read,grep`, no touched files. Worker result: `PASS; timestamp-design`; probes proposed: `prompt-start`, `prompt-end`, `stdout-first-byte`; implementation shape: local monotonic-timer probe table, wrap each `session.prompt(...)` with pre/post timestamps, and use a local `writeRawStdout` shim that records first invocation before delegating unchanged. Outcome packet: `contract=pass process=completed recommendation=stop declared=1 touched=0 outputBytes=399`. Classifier: `class=none preflight=ready-for-canary`. Marker check passed 8/8. Diagnostic packet updated; doc marker check, i18n lint, and `git diff --check` passed. Reload notice appeared during/after the run, but the worker already completed and was validated without relying on a live reload mid-run."
     }
   ]
 }

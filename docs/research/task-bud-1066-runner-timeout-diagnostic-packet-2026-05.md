@@ -93,6 +93,17 @@ Result:
 - Interpretation: the two-file timestamp-design prompt was too broad for the current narrow worker envelope.
 - Next shape: shrink to one file and one named function, likely `dist/modes/print-mode.js` `runPrintMode`, before asking for a timestamp design.
 
+### print-mode timestamp design
+
+Exact-approved SDK in-process worker `task-bud-1066-sdk-printmode-timestamp-design` completed read-only with no touched files.
+
+Result:
+
+- `PASS; timestamp-design`
+- Valid narrow shape: one file, one function focus (`print-mode.js` `runPrintMode`).
+- Proposed probes: `prompt-start`, `prompt-end`, `stdout-first-byte`.
+- Proposed implementation shape: local monotonic-timer probe table, wrap each `session.prompt(...)` with pre/post timestamps, and use a local `writeRawStdout` shim that records first invocation before delegating unchanged.
+
 ## Interpretation
 
 The subprocess runner no longer looks like an immediate missing-file, missing-entrypoint, or static CLI argv-shape failure: cwd, Node command, CLI entrypoint, required print-mode flags, attachments, and prompt all exist. The current historical canary log lacks `elapsedMs`, but the current parent-side runtime is instrumented to expose elapsed timing for future subprocess runs. The remaining unknown is likely inside print-mode after runtime/session setup and before stdout emission, especially around `session.prompt(...)`. That makes `runner-timeout` the correct parent-side class and keeps blind retry blocked.
