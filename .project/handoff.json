@@ -1,60 +1,59 @@
 {
-  "timestamp": "2026-05-11T23:50:43.652Z",
-  "context": "Exact confirmation received and consumed for task-bud-1068-sdk-code-test-review-smoke. Dispatched exactly one SDK in-process worker under val [snip] et text reflects failed-rung hardening. [truncated:+804 chars]",
+  "timestamp": "2026-05-12T00:07:03.814Z",
+  "context": "User asked why the SDK code/test review failed despite the control plane being able to do that work, and reported reload done. Reconciled git [snip] Board evidence recorded and committed. [truncated:+924 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Ask operator to /reload before relying on live packet text for failed-rung hardening.",
-    "After reload, prepare a narrower preview only: one target file or one named symbol, strict too [snip] atch without exact phrase. [truncated:+66 chars]",
-    "Do not retry task-bud-1068-sdk-code-test-review-smoke shape blindly."
+    "If operator wants to test the narrower replacement, require exact phrase: execute o sdk worker [snip] dk-one-symbol-review-smoke [truncated:+16 chars]",
+    "Do not retry task-bud-1068-sdk-code-test-review-smoke; same shape is explicitly non-validated.",
+    "If the one-symbol preview passes, then promote the narrower code-review shape; if it fails, ha [snip] l budget before expanding. [truncated:+15 chars]"
   ],
   "blockers": [
-    "Runtime extension changes committed; reload needed before live surface reflect [snip] failed-rung hardening. [truncated:+2 chars]",
-    "No standing authorization for additional worker/provider dispatch; exact phrase has been consumed.",
-    "Two-file open-ended code/test review is not validated; SDK broad read-only/mut [snip] patch remain immature. [truncated:+33 chars]"
+    "No standing authorization for additional worker/provider dispatch; exact per-r [snip] confirmation required. [truncated:+3 chars]",
+    "Two-file open-ended code/test review is not validated and retryAllowed=no for that failed run.",
+    "SDK broad read-only/mutation/multi-worker/unattended dispatch remain immature."
   ],
   "recent_validation": [
-    "agent_run_sdk_in_process_dispatch execute=true exact phrase -> dispatched one run only",
-    "agent_run_follow -> terminal failed outputBytes=1171 lines=22",
-    "log .pi/reports/task-bud-1068-sdk-code-test-review-smoke.sdk.log -> tools=read,grep, declared- [snip] n=loop-guard outputBytes=0 [truncated:+108 chars]"
+    "git status --short -> clean before preview",
+    "context_watch_status -> ok reload-not-required",
+    "agent_run_failure_classification task-bud-1068-sdk-code-test-review-smoke -> worker-contract-f [snip] kers=sdk-runner-loop-guard [truncated:+51 chars]"
   ],
   "recent_commits": [
-    "0ce7f69d chore(board): record sdk code review failure",
-    "e7511a50 fix(agents): record sdk code review failed rung"
+    "0ba08e42 chore(board): preview narrower sdk code review"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
       "task:TASK-BUD-1068-SDK-CODE-TEST-REVIEW-SMOKE",
-      "task:TASK-BUD-1068-SDK-CODE-TEST-REVIEW-SMOKE-FAIL-20260511",
+      "task:TASK-BUD-1068-SDK-ONE-SYMBOL-REVIEW-SMOKE",
       "commit:20260511"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-11T23:50:43.652Z",
+    "generatedAtIso": "2026-05-12T00:07:03.814Z",
     "level": "ok",
-    "percent": 47,
+    "percent": 48,
     "action": "continue",
-    "recommendation": "reload-then-preview-narrower-code-review",
+    "recommendation": "explain-failure-and-preview-one-symbol-review",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-11T23:50:43.652Z",
+      "atIso": "2026-05-12T00:07:03.814Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 47,
+      "percent": 48,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-preview-narrower-code-review"
+      "recommendation": "explain-failure-and-preview-one-symbol-review"
     }
   ]
 }
