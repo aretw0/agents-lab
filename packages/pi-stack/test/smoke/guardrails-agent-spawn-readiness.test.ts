@@ -1620,6 +1620,10 @@ describe("agent spawn readiness contract", () => {
     });
     expect(result.sdkPreview.abortContract).toContain("timeout calls session.abort()");
     expect(result.sdkPreview.finalOutputContract).toContain("require final output bytes > 0");
+    expect(result.sdkPreview.cacheEconomyContract.join("\n")).toContain("shared evidence pack");
+    expect(result.sdkPreview.cacheEconomyContract.join("\n")).toContain("cache-hit/cache-miss");
+    expect(result.sdkPreview.parallelReadOnlyContract.join("\n")).toContain("separate batch gate");
+    expect(result.sdkPreview.parallelReadOnlyContract.join("\n")).toContain("fan-in");
     expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Live-validated safe envelope");
     expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Live-validated board-question rung");
     expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Live-validated synthesis rung");
@@ -1628,6 +1632,8 @@ describe("agent spawn readiness contract", () => {
     expect(result.sdkPreview.isolationNotes.join("\n")).toContain("Next maturity rung");
     expect(result.nextActions.join("\n")).toContain("validated SDK safe envelope");
     expect(result.nextActions.join("\n")).toContain("one target file or one named symbol");
+    expect(result.nextActions.join("\n")).toContain("shared parent-side cache/evidence packs");
+    expect(result.nextActions.join("\n")).toContain("read-only batch packet");
     expect(result.sdkMaturity).toMatchObject({
       rung: "validated-narrow-readgrep",
       validatedEnvelope: true,

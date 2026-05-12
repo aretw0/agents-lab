@@ -111,6 +111,8 @@ export interface AgentRunSdkInProcessPacketResult {
     eventCapture: string[];
     abortContract: string[];
     finalOutputContract: string[];
+    cacheEconomyContract: string[];
+    parallelReadOnlyContract: string[];
     isolationNotes: string[];
   };
   humanConfirmationPhrase: string;
@@ -286,6 +288,8 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       "present this SDK/in-process packet for explicit human decision; the packet itself cannot dispatch",
       "prefer the validated SDK safe envelope first: one or two declared files, read/grep only, strict final output contract, bounded timeout",
       "after a failed two-file code/test review, retry only as one target file or one named symbol before expanding scope",
+      "prefer shared parent-side cache/evidence packs before repeated reads of stable logs, docs, or declared files",
+      "for parallel fan-out, prepare a separate read-only batch packet with shared cache/evidence and fan-in validation; do not start multiple workers from this single-worker packet",
       "if separately implemented and confirmed, start exactly one SDK worker and record registry/log/outcome evidence",
       "after completion, validate final output bytes and declared file scope from the parent",
     ]
@@ -304,6 +308,18 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     eventCapture: ["message_update:text_delta", "tool_execution_end", "agent_end", "turn_end"],
     abortContract: ["parent timeout owns AbortController", "timeout calls session.abort()", "registry records timed-out or aborted"],
     finalOutputContract: ["capture assistant text deltas", "require final output bytes > 0", "parent validates declared file scope after completion"],
+    cacheEconomyContract: [
+      "parent should attach a bounded shared evidence pack before asking workers to reread stable logs, docs, or packet previews",
+      "cache keys should include path plus freshness evidence such as git object, mtime/size, or explicit verification id",
+      "worker goals should prefer cached summaries first and read only focal anchors when the cache is fresh",
+      "fan-in evidence should record cache-hit/cache-miss and invalidate on unexpected dirty state or touched declared files",
+    ],
+    parallelReadOnlyContract: [
+      "parallel SDK fan-out remains report-only until a separate batch gate exists; this single-worker packet never dispatches multiple workers",
+      "eligible parallel workers must be independent, read-only, narrow, and limited to read/grep with strict final output contracts",
+      "batch confirmation must be exact for the batch id and still preserve per-worker run ids, logs, outcome packets, and abort visibility",
+      "fan-in must validate every worker outcome before promotion and fail closed on mutation, protected scope, dirty state, budget blockers, or missing output",
+    ],
     isolationNotes: [
       "SDK/in-process shares the parent Node.js process; use only after report-only packet and exact confirmation.",
       "Live-validated safe envelope: narrow read-only diagnostics with one or two declared files, read/grep only, explicit final output contract, follow, and outcome validation.",

@@ -23914,7 +23914,33 @@
         "Adicionar testes que provem que cache/reliability guidance aparece sem relaxar confirmação humana nem gates de dispatch."
       ],
       "milestone": "agent-first-worker-lane",
-      "notes": "Criada a partir do reforço humano de 2026-05-12: dado o sucesso dos SDK workers, o control-plane deve refletir capacidades de cache, reliability e economia de tokens em todos os workers para permitir mais delegação e menos pesquisa direta no control-plane.\n[provenance:human] source_task=TASK-BUD-1068 reason=Human reinforced that SDK worker success should unlock cache/reliability/token-economy improvements shared across workers so control-plane can focus on high-level orchestration."
+      "notes": "Criada a partir do reforço humano de 2026-05-12: dado o sucesso dos SDK workers, o control-plane deve refletir capacidades de cache, reliability e economia de tokens em todos os workers para permitir mais delegação e menos pesquisa direta no control-plane.\n[provenance:human] source_task=TASK-BUD-1068 reason=Human reinforced that SDK worker success should unlock cache/reliability/token-economy improvements shared across workers so control-plane can focus on high-level orchestration.\n2026-05-12: Added first report-only SDK worker cache/economy + parallel read-only fan-out/fan-in contract to `agent_run_sdk_in_process_packet`; no parallel dispatch enabled. Validation: one incorrect Vitest `--runInBand` attempt failed as unsupported, then targeted smoke passed 41/41; `git diff --check` and marker checks passed. Evidence: VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512.",
+      "verification": "VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512"
+    },
+    {
+      "id": "TASK-BUD-1072",
+      "description": "Investigate and harden auto-resume continuity after compact/reload suppression",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1071"
+      ],
+      "files": [
+        ".project/handoff.json",
+        "packages/pi-stack/extensions/context-watchdog-auto-resume.ts",
+        "packages/pi-stack/extensions/context-watchdog-post-reload-runtime.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Record a reproducible incident packet when auto-compact/reload suppresses expected auto-resume and the operator must nudge manually.",
+        "Define a post-reload resume pending-state contract that survives compact/reload and explains why auto-resume did or did not fire.",
+        "Add/adjust a local smoke test or report-only guard so future repeated stops are visible before relying on unattended continuation.",
+        "Preserve explicit human-control gates: no scheduler, remote, or worker dispatch is authorized by the resume signal itself."
+      ],
+      "milestone": "worker-lane-continuity",
+      "notes": "2026-05-12 incident: user observed forced auto-compact, then manual reload suppressed auto-resume; no auto-resume fired, requiring a manual nudge. Current status evidence showed `postReloadResume=pending`, stale handoff, dirty local slice, and continuation readiness blocked on candidate/checkpoint/handoff-budget. This should be hardened so unexplained stops are logged and resumed/blocked with operator-visible reason.\n[provenance:human] source_task=TASK-BUD-1071 reason=Parallel/continuity discussion exposed a repeated operational failure mode: work stopped despite local-safe work remaining after compact/reload boundary.",
+      "verification": "VERIF-TASK-BUD-1072-AUTO-RESUME-SUPPRESSION-INCIDENT-20260512"
     }
   ]
 }

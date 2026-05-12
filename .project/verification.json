@@ -15803,6 +15803,24 @@
       "method": "exact-approved-sdk-in-process-readonly-worker+outcome+marker-check",
       "timestamp": "2026-05-12T17:32:39.650Z",
       "evidence": "Exact-approved SDK in-process worker `task-bud-1066-sdk-printmode-timestamp-design` completed successfully as a narrower one-file/one-function read-only diagnostic after the broader two-file timestamp design worker looped. Scope: one declared file (`node_modules/@mariozechner/pi-coding-agent/dist/modes/print-mode.js`), tools `read,grep`, no touched files. Worker result: `PASS; timestamp-design`; probes proposed: `prompt-start`, `prompt-end`, `stdout-first-byte`; implementation shape: local monotonic-timer probe table, wrap each `session.prompt(...)` with pre/post timestamps, and use a local `writeRawStdout` shim that records first invocation before delegating unchanged. Outcome packet: `contract=pass process=completed recommendation=stop declared=1 touched=0 outputBytes=399`. Classifier: `class=none preflight=ready-for-canary`. Marker check passed 8/8. Diagnostic packet updated; doc marker check, i18n lint, and `git diff --check` passed. Reload notice appeared during/after the run, but the worker already completed and was validated without relying on a live reload mid-run."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke-test+marker-check",
+      "timestamp": "2026-05-12T22:56:53.047Z",
+      "evidence": "Added report-only cache/economy and parallel read-only fan-out/fan-in contracts to the SDK in-process packet surface without enabling parallel dispatch. `sdkPreview` now exposes `cacheEconomyContract` and `parallelReadOnlyContract`; ready next actions now prefer shared parent-side cache/evidence packs and require a separate read-only batch packet for fan-out. Tests updated to assert shared evidence pack/cache-hit-cache-miss and separate batch gate/fan-in wording. Validation: initial `pnpm vitest ... --runInBand` failed because Vitest does not support that option; reran `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` and it passed 41/41. `git diff --check` passed. Marker checks passed for implementation and test files."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1072-AUTO-RESUME-SUPPRESSION-INCIDENT-20260512",
+      "target": "TASK-BUD-1072",
+      "target_type": "task",
+      "status": "passed",
+      "method": "incident-capture+continuity-diagnostics",
+      "timestamp": "2026-05-12T22:57:30.576Z",
+      "evidence": "Captured operator-observed continuity failure: a forced auto-compact occurred, the operator manually reloaded, auto-resume was suppressed/failed to fire, and the operator had to manually nudge the session. Boundary diagnostics after nudge: `context_watch_status` reported `level=ok`, `reloadGate=reload-not-required`, `postReloadResume=pending`, stale handoff; `context_watch_continuation_readiness` reported `ready=no`, `audit=blocked`, reasons `candidate:invalid|checkpoint:invalid|handoff-budget:invalid`, `dirty=dirty`, `postReloadResume=pending`. Created TASK-BUD-1072 to harden the post-reload resume pending-state contract and operator-visible incident logging. This verification documents the repeated-pattern evidence; it does not authorize scheduler, remote, worker dispatch, or unattended execution."
     }
   ]
 }
