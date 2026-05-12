@@ -15686,6 +15686,15 @@
       "method": "post-reload-live-packet-preview-no-dispatch",
       "timestamp": "2026-05-12T01:54:31.535Z",
       "evidence": "After reload, live-previewed the two-file open-ended code/test review guard without dispatch. Packet `task-bud-1068-sdk-two-file-code-review-guard-preview` declared two files (`guardrails-core-agent-run-sdk-preview.ts`, `guardrails-agent-spawn-readiness.test.ts`), read/grep only, read-only contract, exact confirmation still required. Live packet returned `decision=ready-for-human-decision sdkMaturity=needs-evidence-code-review dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. This confirms the runtime now distinguishes the failed two-file open-ended code/test review shape from the validated one-file/named-symbol shape and does not mark it as validated narrow read/grep."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-RUNNER-TIMEOUT-DIAGNOSTIC-PACKET-20260511",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "read-only-triage+startup-diagnostic-packet+doc-marker-i18n-diff",
+      "timestamp": "2026-05-12T02:17:33.407Z",
+      "evidence": "Prepared read-only diagnostic packet for `TASK-BUD-1066` without subprocess retry or worker/provider dispatch. Evidence reviewed: `task-bud-1066-subprocess-preflight-canary` registry state `timed-out`; failure classification `runner-timeout`, `preflight=needs-evidence`, `retryAllowed=no`; startup diagnostic packet `decision=structured-probe-first`, `canaryAllowed=no`, `dispatch=no`, `authorization=none`; log records cwd/command/entrypoint preflight ok, timeout 60000ms, SIGTERM, `exitCode=124`, `timedOut=yes`, zero stdout/stderr. Wrote `docs/research/task-bud-1066-runner-timeout-diagnostic-packet-2026-05.md` with a report-only next probe plan (argv-shape, startup-surface, provider bootstrap readiness, tool allowlist compatibility, capture-path), all requiring `modelCallAllowed=false` and `dispatchAllowed=false`. Validation: marker check passed 7/7, i18n lint passed, `git diff --check` passed."
     }
   ]
 }
