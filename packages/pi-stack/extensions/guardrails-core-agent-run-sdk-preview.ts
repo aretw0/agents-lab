@@ -256,6 +256,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     ? [
       "present this SDK/in-process packet for explicit human decision; the packet itself cannot dispatch",
       "prefer the validated SDK safe envelope first: one or two declared files, read/grep only, strict final output contract, bounded timeout",
+      "after a failed two-file code/test review, retry only as one target file or one named symbol before expanding scope",
       "if separately implemented and confirmed, start exactly one SDK worker and record registry/log/outcome evidence",
       "after completion, validate final output bytes and declared file scope from the parent",
     ]
@@ -280,7 +281,8 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       "Live-validated board-question rung: narrow read-only diagnostics can answer a real board question from one or two declared files when constrained to read/grep and strict final output.",
       "Live-validated synthesis rung: narrow read-only diagnostics can produce a one-sentence recommendation with cited board/doc evidence from one or two declared files.",
       "Failed evidence rung: two-file code/test review looped with zero output; shrink to one target file or one named symbol before retrying code/test review.",
-      "Next maturity rung: a narrower read-only code/test review with one target file or symbol, strict tool budget, and parent-side patch recommendation; broad read-only scopes still need evidence because prior runs looped or bloated output.",
+      "Live-validated one-symbol review rung: one target file or named symbol can produce a parent-side patch recommendation without broadening scope.",
+      "Next maturity rung: parent-side implementation of a tiny guard/recommendation patch derived from a one-symbol review, with local tests before any worker mutation; broad read-only scopes still need evidence because prior runs looped or bloated output.",
       "Use read-only tools for diagnostic canaries unless a mutation profile declares validation and rollback.",
       "Keep subprocess executor supported for stronger process isolation and argv-level diagnostics.",
     ],

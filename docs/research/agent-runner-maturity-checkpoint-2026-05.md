@@ -74,11 +74,12 @@ Do not forget the sequence already tried:
 5. A narrow real-board-question worker read `.project/tasks.json` and `.project/verification.json`, confirmed TASK-BUD-1068 evidence/status, and passed.
 6. A narrow synthesis worker read one doc and one board file, recommended the next SDK rung with cited board/doc evidence, and passed.
 7. A two-file code/test review stayed inside declared files but looped with zero output; do not retry that shape blindly.
+8. A one-file/named-symbol code review with tighter loop guards produced a parent-side patch recommendation and passed.
 
 Use this ladder to unlock more work gradually:
 
-- **Ready now**: one or two declared files, `read/grep` only, explicit one-answer output shape, exact confirmation, follow/outcome validation, including real board-question checks and narrow cited synthesis.
-- **Next rung**: a narrower read-only code/test review with one target file or one named symbol, strict tool budget, and a parent-side patch recommendation.
+- **Ready now**: one or two declared files, `read/grep` only, explicit one-answer output shape, exact confirmation, follow/outcome validation, including real board-question checks, narrow cited synthesis, and one-file/named-symbol code review.
+- **Next rung**: parent-side implementation of a tiny guard/recommendation patch derived from the one-symbol review, with local tests before any worker mutation.
 - **Not ready yet**: broad read-only analysis, two-file open-ended code/test review, mutation, multi-worker, protected scope, or unattended provider dispatch.
 
 When preparing a worker, prefer the next smallest rung that can answer the question. If the worker loops, bloats output, or reads old logs as fresh evidence, harden the packet/runner before expanding scope.

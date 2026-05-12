@@ -15659,6 +15659,15 @@
       "method": "exact-approved-sdk-in-process-one-symbol-review+outcome-packet+marker-check",
       "timestamp": "2026-05-12T00:18:45.832Z",
       "evidence": "Exact-approved SDK in-process one-symbol/one-file review smoke `task-bud-1068-sdk-one-symbol-review-smoke` completed successfully under a narrower replacement shape after the failed two-file code/test review. Scope: one declared file (`packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1068-sdk-one-symbol-review-smoke.sdk.log` shows declared-file tool policy, tightened loop guards `maxToolCalls=11 maxTurns=4`, one successful tool_execution_end, final `PASS; recommended patch:` answer citing `readyNextActions`, `Failed evidence rung`, `buildSdkMaturity`, and a `one-file/named-symbol retry`, then `event=agent_end` and `close state=completed outputBytes=367`. Git status after run was clean (no touched files). Outcome packet: `contract=pass process=completed recommendation=stop declared=1 touched=0 outputBytes=367`. Failure classification: `class=none preflight=ready-for-canary`. Marker check passed 10/10. This validates the narrower one-file/named-symbol code-review replacement shape, not the failed two-file open-ended shape."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-ONE-SYMBOL-RUNG-PROMOTED-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-packet-test-promotion+vitest+i18n-marker-diff",
+      "timestamp": "2026-05-12T00:31:27.685Z",
+      "evidence": "Promoted the SDK in-process one-file/named-symbol code-review replacement rung after exact-approved pass. Updated `docs/research/agent-runner-maturity-checkpoint-2026-05.md` to record that one-file/named-symbol code review with tighter loop guards produced a parent-side patch recommendation and passed. Updated `guardrails-core-agent-run-sdk-preview.ts` nextActions/isolation notes to explicitly recommend one-file/named-symbol retry after failed two-file code/test review and to mark the live-validated one-symbol review rung. Added regression assertions for `Live-validated one-symbol review rung` and the one target file/named symbol nextAction. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; i18n lint pass; marker check pass; `git diff --check` pass."
     }
   ]
 }
