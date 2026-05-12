@@ -1,58 +1,60 @@
 {
-  "timestamp": "2026-05-12T02:18:26.264Z",
-  "context": "User requested read-only triage of TASK-BUD-1066/subprocess runner-timeout and diagnostic packet, explicitly no blind retry. Performed read-o [snip] Board evidence recorded and committed. [truncated:+763 chars]",
+  "timestamp": "2026-05-12T12:12:57.003Z",
+  "context": "Exact confirmation received and consumed for task-bud-1066-sdk-argv-shape-inspection. Dispatched exactly one SDK in-process read-only worker [snip] task-bud-1066-sdk-timeout-budget-probe. [truncated:+849 chars]",
   "current_tasks": [
     "TASK-BUD-1066"
   ],
   "next_actions": [
-    "Continue with report-only probe 1: inspect argv construction/print-mode flags and compare with [snip] do not start a model call. [truncated:+19 chars]",
-    "Then inspect startup surface/provider bootstrap boundary and tool allowlist compatibility as read-only code review.",
-    "Do not retry subprocess canary until a concrete reason is identified and an exact single-run confirmation is given."
+    "If operator confirms exact phrase, execute only task-bud-1066-sdk-timeout-budget-probe and val [snip] hed files/outcome/markers. [truncated:+13 chars]",
+    "Do not run subprocess retry; argv static shape is ruled out, next evidence target is timeout b [snip] / elapsedMs completeness. [truncated:+5 chars]",
+    "After timeout-budget probe, continue one worker at a time to startup-surface/provider/tool/capture probes."
   ],
   "blockers": [
-    "TASK-BUD-1066 root cause remains unresolved; runner-timeout evidence blocks blind retry.",
-    "No standing authorization for worker/provider dispatch.",
-    "Potential Windows-specific subprocess behavior remains unproven until report-o [snip] obes narrow the cause. [truncated:+6 chars]"
+    "TASK-BUD-1066 subprocess root cause unresolved; current static argv shape is v [snip] imeout reason unknown. [truncated:+10 chars]",
+    "No standing authorization for worker dispatch beyond exact per-run confirmation.",
+    "No subprocess retry authorized; blind retry remains blocked."
   ],
   "recent_validation": [
-    "git status before triage -> clean",
-    "context_watch_status -> ok reload-not-required",
-    "agent_run_status task-bud-1066-subprocess-preflight-canary -> timed-out"
+    "agent_run_sdk_in_process_dispatch execute=true exact phrase -> dispatched one run only",
+    "agent_run_follow -> terminal completed outputBytes=988 lines=16",
+    "git status after worker -> clean"
   ],
   "recent_commits": [
-    "476c8a6e docs(agents): add runner timeout diagnostic packet"
+    "72475979 chore(board): record sdk argv shape pass",
+    "035a655f chore(board): preview sdk timeout budget worker"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1066",
     "canonical_links": [
       "task:TASK-BUD-1066",
-      "task:TASK-BUD-1066-SUBPROCESS-PREFLIGHT-CANARY",
-      "commit:20260511"
+      "task:TASK-BUD-1066-SDK-ARGV-SHAPE-INSPECTION",
+      "task:TASK-BUD-1066-SDK-TIMEOUT-BUDGET-PROBE",
+      "commit:20260512"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-12T02:18:26.264Z",
+    "generatedAtIso": "2026-05-12T12:12:57.003Z",
     "level": "ok",
-    "percent": 32,
+    "percent": 38,
     "action": "continue",
-    "recommendation": "continue-report-only-argv-startup-probe",
+    "recommendation": "await-exact-timeout-budget-worker-confirmation",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-12T02:18:26.264Z",
+      "atIso": "2026-05-12T12:12:57.003Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 32,
+      "percent": 38,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-report-only-argv-startup-probe"
+      "recommendation": "await-exact-timeout-budget-worker-confirmation"
     }
   ]
 }
