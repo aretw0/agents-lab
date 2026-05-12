@@ -46,9 +46,21 @@ Result:
 - Static diagnostics found no argv blockers.
 - Recommended next probe: `timeout-budget-probe`.
 
+### timeout-budget probe
+
+Exact-approved SDK in-process worker `task-bud-1066-sdk-timeout-budget-probe` completed read-only with no touched files.
+
+Result:
+
+- `FAIL; timeout-budget`
+- Present evidence: `timeoutMs=60000`, `signal=SIGTERM`, `timedOut=yes`.
+- Missing evidence in the actual canary log: `elapsedMs`.
+- Parser/startup diagnostics expect `elapsedMs` for timeout-budget analysis.
+- Recommended next probe remains `timeout-budget-probe`, narrowed to capture-path/timing instrumentation evidence before any retry-like canary action.
+
 ## Interpretation
 
-The subprocess runner no longer looks like an immediate missing-file, missing-entrypoint, or static CLI argv-shape failure: cwd, Node command, CLI entrypoint, required print-mode flags, attachments, and prompt all exist. The current failure is a zero-output startup hang until timeout. That makes `runner-timeout` the correct parent-side class and keeps blind retry blocked.
+The subprocess runner no longer looks like an immediate missing-file, missing-entrypoint, or static CLI argv-shape failure: cwd, Node command, CLI entrypoint, required print-mode flags, attachments, and prompt all exist. The current failure is a zero-output startup hang until timeout, and the actual canary log still lacks `elapsedMs`, so timeout-budget analysis is incomplete. That makes `runner-timeout` the correct parent-side class and keeps blind retry blocked.
 
 Most likely next diagnostic categories:
 

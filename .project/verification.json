@@ -15722,6 +15722,24 @@
       "method": "sdk-in-process-worker-preview-no-dispatch",
       "timestamp": "2026-05-12T12:00:50.108Z",
       "evidence": "Prepared next SDK in-process read-only worker preview under the operator-authorized TASK-BUD-1066 worker phase. Run `task-bud-1066-sdk-timeout-budget-probe` declares two files (`.pi/reports/task-bud-1066-subprocess-preflight-canary.log`, `guardrails-core-agent-run-diagnostics.ts`), allows `read,grep`, timeout 45000ms, read-only contract, and asks whether timeout budget evidence is sufficient or whether `elapsedMs` is missing from the actual canary log. Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required: `execute o sdk worker task-bud-1066-sdk-timeout-budget-probe`."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-TIMEOUT-BUDGET-WORKER-PASS-20260512",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-approved-sdk-in-process-readonly-worker+outcome+marker-check",
+      "timestamp": "2026-05-12T13:15:24.852Z",
+      "evidence": "Exact-approved SDK in-process worker `task-bud-1066-sdk-timeout-budget-probe` completed successfully as a read-only diagnostic probe. Scope: two declared files (`.pi/reports/task-bud-1066-subprocess-preflight-canary.log`, `guardrails-core-agent-run-diagnostics.ts`), tools `read,grep`, no touched files. Worker diagnostic result: `FAIL; timeout-budget` because evidence has `timeoutMs=60000`, `signal=SIGTERM`, `timedOut=yes`, but the actual canary log lacks `elapsedMs`; parser/startup diagnostics expect `elapsedMs` for timeout-budget analysis. Outcome packet: `contract=pass process=completed recommendation=stop declared=2 touched=0 outputBytes=534`. Classifier: `class=none preflight=ready-for-canary`. Marker check passed 10/10. Diagnostic packet updated; doc marker check, i18n lint, and `git diff --check` passed. This means the worker ran successfully but the timeout-budget evidence remains incomplete."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-CAPTURE-PATH-WORKER-PREVIEW-20260512",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "sdk-in-process-worker-preview-no-dispatch",
+      "timestamp": "2026-05-12T13:27:45.515Z",
+      "evidence": "Prepared next SDK in-process read-only worker preview after timeout-budget probe. Run `task-bud-1066-sdk-capture-path-check` declares two files (`guardrails-core-agent-run-runtime.ts`, `guardrails-core-agent-run-diagnostics.ts`), allows `read,grep`, timeout 45000ms, read-only contract, and asks whether current parent-side runtime code is instrumented to capture `elapsedMs` for future subprocess runs after the existing canary log was found missing `elapsedMs`. Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required: `execute o sdk worker task-bud-1066-sdk-capture-path-check`."
     }
   ]
 }
