@@ -15650,6 +15650,15 @@
       "method": "live-sdk-packet-preview-after-reload",
       "timestamp": "2026-05-12T00:00:36.287Z",
       "evidence": "After reload and after analyzing why `task-bud-1068-sdk-code-test-review-smoke` failed, prepared a narrower replacement preview only: `task-bud-1068-sdk-one-symbol-review-smoke`. It declares one file (`packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts`), narrows focus to the `readyNextActions` / `buildSdkMaturity` area, asks for one parent-side patch to reduce loop risk, permits `read,grep`, and explicitly says use at most one read and one grep. Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required before execution: `execute o sdk worker task-bud-1068-sdk-one-symbol-review-smoke`."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-ONE-SYMBOL-REVIEW-SMOKE-PASS-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-approved-sdk-in-process-one-symbol-review+outcome-packet+marker-check",
+      "timestamp": "2026-05-12T00:18:45.832Z",
+      "evidence": "Exact-approved SDK in-process one-symbol/one-file review smoke `task-bud-1068-sdk-one-symbol-review-smoke` completed successfully under a narrower replacement shape after the failed two-file code/test review. Scope: one declared file (`packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1068-sdk-one-symbol-review-smoke.sdk.log` shows declared-file tool policy, tightened loop guards `maxToolCalls=11 maxTurns=4`, one successful tool_execution_end, final `PASS; recommended patch:` answer citing `readyNextActions`, `Failed evidence rung`, `buildSdkMaturity`, and a `one-file/named-symbol retry`, then `event=agent_end` and `close state=completed outputBytes=367`. Git status after run was clean (no touched files). Outcome packet: `contract=pass process=completed recommendation=stop declared=1 touched=0 outputBytes=367`. Failure classification: `class=none preflight=ready-for-canary`. Marker check passed 10/10. This validates the narrower one-file/named-symbol code-review replacement shape, not the failed two-file open-ended shape."
     }
   ]
 }
