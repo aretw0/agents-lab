@@ -15830,6 +15830,15 @@
       "method": "local-smoke-test+marker-check",
       "timestamp": "2026-05-12T23:07:13.351Z",
       "evidence": "Added a report-only `buildAgentRunSdkReadOnlyBatchPacket` and registered `agent_run_sdk_readonly_batch_packet` surface for future parallel SDK read-only fan-out/fan-in. The packet never dispatches (`parallelDispatchAllowed=false`, `dispatchAllowed=false`), requires 2..5 workers, shared evidence, unique run ids, validated narrow read/grep read-only worker packets, and fail-closed fan-in. Surface tool accepts batch id, shared evidence, and independent worker specs; it returns operator-visible preview only. Test coverage added for ready batch, blocked missing shared evidence/single-worker batch, and surface registration output. Validation: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` passed 41/41; `git diff --check` passed; marker checks passed for builder, surface, and smoke test."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-READONLY-BATCH-LIVE-PREVIEW-20260512",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-live-tool-preview",
+      "timestamp": "2026-05-12T23:26:39.956Z",
+      "evidence": "After reload, live `agent_run_sdk_readonly_batch_packet` preview succeeded without dispatch. Batch `task-bud-1071-sdk-readonly-batch-live-preview` used shared evidence from prior TASK-BUD-1071 verifications, 2 independent narrow read-only workers, read/grep only, max_workers=2, no protected scope, clean workspace. Tool returned `decision=ready-for-human-decision`, `workers=2`, `ready=2`, `maxWorkers=2`, `parallelDispatch=no`, `authorization=none`. This validates the new report-only surface is live after reload; it does not authorize parallel execution."
     }
   ]
 }
