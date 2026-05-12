@@ -15677,6 +15677,15 @@
       "method": "parent-side-guard+vitest+marker+diff-check",
       "timestamp": "2026-05-12T00:52:53.816Z",
       "evidence": "Implemented the parent-side tiny guard recommended by the one-symbol SDK review. `buildSdkMaturity` now receives the goal and classifies two-file open-ended code/test review goals as `needs-evidence-code-review` with `validatedEnvelope=false`, recommending shrink to one target file or one named symbol before retrying. One-file/named-symbol code-review goals remain inside `validated-narrow-readgrep`. Added helpers `isCodeReviewGoal` and `hasOneFileOrSymbolCue`, plus regression cases for two-file code-review evidence-needed and one-symbol code-review validated. Validation: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot` -> 41 passed; marker check for `needs-evidence-code-review`, helpers, and recommendation text passed; `git diff --check` passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-SDK-CODE-REVIEW-GUARD-LIVE-PREVIEW-20260511",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-live-packet-preview-no-dispatch",
+      "timestamp": "2026-05-12T01:54:31.535Z",
+      "evidence": "After reload, live-previewed the two-file open-ended code/test review guard without dispatch. Packet `task-bud-1068-sdk-two-file-code-review-guard-preview` declared two files (`guardrails-core-agent-run-sdk-preview.ts`, `guardrails-agent-spawn-readiness.test.ts`), read/grep only, read-only contract, exact confirmation still required. Live packet returned `decision=ready-for-human-decision sdkMaturity=needs-evidence-code-review dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. This confirms the runtime now distinguishes the failed two-file open-ended code/test review shape from the validated one-file/named-symbol shape and does not mark it as validated narrow read/grep."
     }
   ]
 }
