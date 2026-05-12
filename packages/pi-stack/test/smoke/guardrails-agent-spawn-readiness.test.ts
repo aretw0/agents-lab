@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildDeclaredFileScopedSdkWorkerTools, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, evaluateDeclaredPathPolicy, resolveExecutionCwdParam, resolveProviderExecutionBudgetEvidence, sameCwd } from "../../extensions/guardrails-core";
-import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
+import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
   it("keeps the agent-run family free of superseded naming", () => {
@@ -1240,6 +1240,80 @@ describe("agent spawn readiness contract", () => {
     });
   });
 
+  it("aggregates SDK batch worker outcomes with fail-closed fan-in", () => {
+    const passed = buildAgentRunBatchOutcomePacket({
+      batchId: "task-bud-1071-sdk-readonly-batch-live-preview",
+      expectedRunIds: ["worker-a", "worker-b"],
+      workerOutcomes: [
+        {
+          runId: "worker-a",
+          processState: "completed",
+          contractDecision: "pass",
+          touchedFiles: [],
+          markerFailures: [],
+          outputBytes: 128,
+          cacheStatus: "hit",
+        },
+        {
+          runId: "worker-b",
+          processState: "completed",
+          contractDecision: "pass",
+          touchedFiles: [],
+          markerFailures: [],
+          outputBytes: 256,
+          cacheStatus: "miss",
+        },
+      ],
+    });
+    expect(passed).toMatchObject({
+      mode: "agent-run-batch-outcome-packet",
+      decision: "pass",
+      recommendation: "promote",
+      dispatchAllowed: false,
+      workerCount: 2,
+      passedWorkerCount: 2,
+      cacheHits: 1,
+      cacheMisses: 1,
+      cacheUnknown: 0,
+    });
+    expect(passed.fanInContract.join("\n")).toContain("cache-hit/cache-miss evidence");
+    expect(passed.summary).toContain("dispatch=no");
+
+    const blocked = buildAgentRunBatchOutcomePacket({
+      batchId: "task-bud-1071-sdk-readonly-batch-live-preview",
+      expectedRunIds: ["worker-a", "worker-b", "worker-c"],
+      workerOutcomes: [
+        {
+          runId: "worker-a",
+          processState: "completed",
+          contractDecision: "pass",
+          touchedFiles: [],
+          markerFailures: [],
+          outputBytes: 128,
+          cacheStatus: "unknown",
+        },
+        {
+          runId: "worker-b",
+          processState: "failed",
+          contractDecision: "fail",
+          touchedFiles: ["unexpected.txt"],
+          markerFailures: ["marker-b"],
+          outputBytes: 0,
+          cacheStatus: "miss",
+        },
+      ],
+    });
+    expect(blocked.decision).toBe("partial");
+    expect(blocked.recommendation).toBe("ask-human");
+    expect(blocked.blockers).toContain("worker-cache-status-unknown:worker-a");
+    expect(blocked.blockers).toContain("worker-process-not-completed:worker-b:failed");
+    expect(blocked.blockers).toContain("worker-contract-not-pass:worker-b:fail");
+    expect(blocked.blockers).toContain("worker-touched-files:worker-b:1");
+    expect(blocked.blockers).toContain("worker-marker-failures:worker-b:1");
+    expect(blocked.blockers).toContain("worker-output-missing:worker-b");
+    expect(blocked.blockers).toContain("expected-run-missing:worker-c");
+  });
+
   it("exposes agent_spawn_readiness_gate as read-only tool", async () => {
     const rawPi = {
       on: vi.fn(),
@@ -2341,6 +2415,41 @@ describe("agent spawn readiness contract", () => {
     expect(outcome.details?.contractDecision).toBe("pass");
     expect(outcome.details?.outputBytes).toBe(128);
     expect(outcome.content?.[0]?.text).toContain("contract=pass");
+
+    const batchOutcome = await getTool("agent_run_batch_outcome_packet").execute(
+      "tc-batch-outcome",
+      {
+        batch_id: "task-bud-1071-sdk-readonly-batch-live-preview",
+        expected_run_ids: ["run-outcome", "run-other"],
+        worker_outcomes: [
+          {
+            run_id: "run-outcome",
+            process_state: "completed",
+            contract_decision: "pass",
+            touched_files: [],
+            marker_failures: [],
+            output_bytes: 128,
+            cache_status: "hit",
+          },
+          {
+            run_id: "run-other",
+            process_state: "completed",
+            contract_decision: "pass",
+            touched_files: [],
+            marker_failures: [],
+            output_bytes: 64,
+            cache_status: "miss",
+          },
+        ],
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+    expect(batchOutcome.details?.mode).toBe("agent-run-batch-outcome-packet");
+    expect(batchOutcome.details?.decision).toBe("pass");
+    expect(batchOutcome.details?.processStartAllowed).toBe(false);
+    expect(batchOutcome.content?.[0]?.text).toContain("dispatch=no");
 
     const tail = await getTool("agent_run_log_tail").execute("tc-tail", { run_id: "run-1", max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });
     expect(tail.details?.mode).toBe("agent-run-log-tail");

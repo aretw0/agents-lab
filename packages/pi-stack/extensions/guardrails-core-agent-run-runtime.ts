@@ -141,6 +141,55 @@ export interface AgentRunOutcomeResult {
   summary: string;
 }
 
+export interface AgentRunBatchOutcomeWorkerInput {
+  runId?: string;
+  processState?: AgentRunState | string;
+  contractDecision?: AgentRunContractDecision | string;
+  touchedFiles?: string[];
+  markerFailures?: string[];
+  outputBytes?: number;
+  cacheStatus?: "hit" | "miss" | "unknown" | string;
+}
+
+export interface AgentRunBatchOutcomeInput {
+  batchId?: string;
+  expectedRunIds?: string[];
+  workerOutcomes?: AgentRunBatchOutcomeWorkerInput[];
+  protectedScopeRequested?: boolean;
+  unexpectedDirty?: boolean;
+}
+
+export interface AgentRunBatchOutcomeResult {
+  mode: "agent-run-batch-outcome-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  processStopAllowed: false;
+  decision: AgentRunContractDecision;
+  recommendation: "promote" | "ask-human";
+  recommendationCode: "agent-run-batch-outcome-pass" | "agent-run-batch-outcome-partial" | "agent-run-batch-outcome-fail";
+  blockers: string[];
+  batchId: string;
+  expectedRunIds: string[];
+  workerCount: number;
+  passedWorkerCount: number;
+  cacheHits: number;
+  cacheMisses: number;
+  cacheUnknown: number;
+  workerSummaries: Array<{
+    runId: string;
+    processState: AgentRunState;
+    contractDecision: AgentRunContractDecision;
+    touchedFileCount: number;
+    markerFailureCount: number;
+    outputBytes?: number;
+    cacheStatus: "hit" | "miss" | "unknown";
+  }>;
+  fanInContract: string[];
+  summary: string;
+}
+
 export interface AgentRunAbortPlanInput {
   runId?: string;
   entry?: AgentRunRegistryEntry;
@@ -190,6 +239,14 @@ function normalizeFiles(value: unknown): string[] {
 
 function normalizeState(value: unknown): AgentRunState {
   return value === "planned" || value === "running" || value === "completed" || value === "failed" || value === "timed-out" || value === "aborted" ? value : "unknown";
+}
+
+function normalizeContractDecision(value: unknown): AgentRunContractDecision {
+  return value === "pass" || value === "partial" || value === "fail" ? value : "fail";
+}
+
+function normalizeCacheStatus(value: unknown): "hit" | "miss" | "unknown" {
+  return value === "hit" || value === "miss" ? value : "unknown";
 }
 
 function normalizeNonNegativeInteger(value: unknown): number | undefined {
@@ -434,6 +491,104 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
     fileContract,
     rollbackFiles,
     blockers,
+    summary,
+  };
+}
+
+export function buildAgentRunBatchOutcomePacket(input: AgentRunBatchOutcomeInput = {}): AgentRunBatchOutcomeResult {
+  const batchId = normalizeText(input.batchId);
+  const expectedRunIds = normalizeFiles(input.expectedRunIds);
+  const outcomes = Array.isArray(input.workerOutcomes) ? input.workerOutcomes : [];
+  const protectedScopeRequested = input.protectedScopeRequested === true;
+  const unexpectedDirty = input.unexpectedDirty === true;
+  const blockers: string[] = [];
+  if (!batchId) blockers.push("batch-id-missing");
+  if (protectedScopeRequested) blockers.push("protected-scope-requested");
+  if (unexpectedDirty) blockers.push("unexpected-dirty-state");
+  if (outcomes.length === 0) blockers.push("worker-outcomes-missing");
+
+  const seenRunIds = new Set<string>();
+  const workerSummaries = outcomes.map((outcome, index) => {
+    const runId = normalizeText(outcome.runId);
+    const processState = normalizeState(outcome.processState);
+    const contractDecision = normalizeContractDecision(outcome.contractDecision);
+    const touchedFiles = normalizeFiles(outcome.touchedFiles);
+    const markerFailures = normalizeFiles(outcome.markerFailures);
+    const outputBytes = normalizeNonNegativeInteger(outcome.outputBytes);
+    const cacheStatus = normalizeCacheStatus(outcome.cacheStatus);
+    const label = runId || `worker-${index + 1}`;
+    if (!runId) blockers.push(`worker-run-id-missing:${index + 1}`);
+    if (runId && seenRunIds.has(runId)) blockers.push(`duplicate-run-id:${runId}`);
+    if (runId) seenRunIds.add(runId);
+    if (processState !== "completed") blockers.push(`worker-process-not-completed:${label}:${processState}`);
+    if (contractDecision !== "pass") blockers.push(`worker-contract-not-pass:${label}:${contractDecision}`);
+    if (touchedFiles.length > 0) blockers.push(`worker-touched-files:${label}:${touchedFiles.length}`);
+    if (markerFailures.length > 0) blockers.push(`worker-marker-failures:${label}:${markerFailures.length}`);
+    if (outputBytes === undefined || outputBytes === 0) blockers.push(`worker-output-missing:${label}`);
+    if (cacheStatus === "unknown") blockers.push(`worker-cache-status-unknown:${label}`);
+    return {
+      runId,
+      processState,
+      contractDecision,
+      touchedFileCount: touchedFiles.length,
+      markerFailureCount: markerFailures.length,
+      ...(outputBytes !== undefined ? { outputBytes } : {}),
+      cacheStatus,
+    };
+  });
+
+  for (const expectedRunId of expectedRunIds) {
+    if (!seenRunIds.has(expectedRunId)) blockers.push(`expected-run-missing:${expectedRunId}`);
+  }
+
+  const passedWorkerCount = workerSummaries.filter((worker) => worker.processState === "completed" && worker.contractDecision === "pass" && worker.touchedFileCount === 0 && worker.markerFailureCount === 0 && (worker.outputBytes ?? 0) > 0).length;
+  const cacheHits = workerSummaries.filter((worker) => worker.cacheStatus === "hit").length;
+  const cacheMisses = workerSummaries.filter((worker) => worker.cacheStatus === "miss").length;
+  const cacheUnknown = workerSummaries.filter((worker) => worker.cacheStatus === "unknown").length;
+  const decision: AgentRunContractDecision = blockers.length === 0 ? "pass" : passedWorkerCount > 0 ? "partial" : "fail";
+  const recommendation = decision === "pass" ? "promote" : "ask-human";
+  const recommendationCode: AgentRunBatchOutcomeResult["recommendationCode"] = decision === "pass" ? "agent-run-batch-outcome-pass" : decision === "partial" ? "agent-run-batch-outcome-partial" : "agent-run-batch-outcome-fail";
+  const fanInContract = [
+    "batch outcome aggregation is report-only and never authorizes worker dispatch",
+    "all expected workers must be completed, contract=pass, outputBytes>0, read-only clean, and marker-clean before promotion",
+    "cache-hit/cache-miss evidence must be explicit for every worker; unknown cache status blocks promotion",
+    "any failed, missing, touched-file, protected-scope, dirty-state, or missing-output signal requires human review",
+  ];
+  const summary = [
+    "agent-run-batch-outcome:",
+    `decision=${decision}`,
+    `recommendation=${recommendation}`,
+    `batchId=${batchId || "unknown"}`,
+    `workers=${workerSummaries.length}`,
+    `passed=${passedWorkerCount}`,
+    `cacheHits=${cacheHits}`,
+    `cacheMisses=${cacheMisses}`,
+    cacheUnknown > 0 ? `cacheUnknown=${cacheUnknown}` : undefined,
+    blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+    "dispatch=no",
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+
+  return {
+    mode: "agent-run-batch-outcome-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    decision,
+    recommendation,
+    recommendationCode,
+    blockers,
+    batchId,
+    expectedRunIds,
+    workerCount: workerSummaries.length,
+    passedWorkerCount,
+    cacheHits,
+    cacheMisses,
+    cacheUnknown,
+    workerSummaries,
+    fanInContract,
     summary,
   };
 }

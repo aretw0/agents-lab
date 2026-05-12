@@ -8,7 +8,7 @@ import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 import { buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
 import { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run-executor-strategy";
 import { buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket, type AgentRunSdkInProcessPacketResult } from "./guardrails-core-agent-run-sdk-preview";
-import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunRegistryEntry, type AgentRunState } from "./guardrails-core-agent-run-runtime";
+import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunRegistryEntry, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 import { readTasksBlockCached } from "./project-board-model";
@@ -1607,6 +1607,52 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_outcome_packet",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_batch_outcome_packet",
+    label: "Agent Run Batch Outcome Packet",
+    description: "Report-only fan-in packet for aggregating SDK read-only batch worker outcomes. Never dispatches execution.",
+    parameters: Type.Object({
+      batch_id: Type.String({ description: "Batch id being aggregated." }),
+      expected_run_ids: Type.Optional(Type.Array(Type.String(), { description: "Run ids expected in the fan-in set." })),
+      worker_outcomes: Type.Optional(Type.Array(Type.Object({
+        run_id: Type.Optional(Type.String({ description: "Worker run id." })),
+        process_state: Type.Optional(Type.String({ description: "Worker process state." })),
+        contract_decision: Type.Optional(Type.String({ description: "Worker contract decision: pass, partial, or fail." })),
+        touched_files: Type.Optional(Type.Array(Type.String(), { description: "Touched files observed for this worker." })),
+        marker_failures: Type.Optional(Type.Array(Type.String(), { description: "Failed parent-side marker labels." })),
+        output_bytes: Type.Optional(Type.Number({ description: "Worker output byte count." })),
+        cache_status: Type.Optional(Type.String({ description: "Cache evidence status: hit, miss, or unknown." })),
+      }), { description: "Per-worker outcome rows from prior outcome packets." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope was involved." })),
+      unexpected_dirty: Type.Optional(Type.Boolean({ description: "Blocks when workspace dirty state was unexpected." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const workersRaw = Array.isArray(p.worker_outcomes) ? p.worker_outcomes : [];
+      const workerOutcomes = workersRaw.filter((entry): entry is Record<string, unknown> => !!entry && typeof entry === "object").map((worker) => ({
+        runId: typeof worker.run_id === "string" ? worker.run_id : undefined,
+        processState: typeof worker.process_state === "string" ? worker.process_state : undefined,
+        contractDecision: typeof worker.contract_decision === "string" ? worker.contract_decision : undefined,
+        touchedFiles: asOptionalStringArray(worker.touched_files),
+        markerFailures: asOptionalStringArray(worker.marker_failures),
+        outputBytes: typeof worker.output_bytes === "number" ? worker.output_bytes : undefined,
+        cacheStatus: typeof worker.cache_status === "string" ? worker.cache_status : undefined,
+      }));
+      const result = buildAgentRunBatchOutcomePacket({
+        batchId: typeof p.batch_id === "string" ? p.batch_id : undefined,
+        expectedRunIds: asOptionalStringArray(p.expected_run_ids),
+        workerOutcomes,
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+        unexpectedDirty: asOptionalBoolean(p.unexpected_dirty),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_batch_outcome_packet",
         summary: result.summary,
         details: result,
       });

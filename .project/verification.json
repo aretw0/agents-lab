@@ -15848,6 +15848,15 @@
       "method": "operator-incident-report+continuity-diagnostics",
       "timestamp": "2026-05-12T23:51:03.005Z",
       "evidence": "Captured a second continuity interruption after the earlier compact/reload suppression incident: operator reported `WebSocket closed 1006`, had to close/stop and return to the saved session manually. Post-resume diagnostics: git status clean; `context_watch_status` level=ok percent=37 action=continue reloadGate=reload-not-required but handoff stale (2556/1800); `context_watch_continuation_readiness` ready=no with reasons `candidate:invalid|checkpoint:invalid|stop-conditions:invalid`, dirty=clean, focus=TASK-BUD-1071. This indicates transport/session interruption plus stale checkpoint/readiness gating can still require manual nudge even when local-safe work remains. Evidence recorded for future hardening; does not authorize scheduler, remote, worker dispatch, or unattended execution."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-BATCH-OUTCOME-PACKET-20260512",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke-test+marker-check",
+      "timestamp": "2026-05-12T23:59:03.712Z",
+      "evidence": "Added report-only `buildAgentRunBatchOutcomePacket` and `agent_run_batch_outcome_packet` surface for fan-in aggregation of SDK read-only batch worker outcomes. The packet never dispatches; it aggregates expected run ids, per-worker process state, contract decision, touched files, marker failures, output bytes, and cache hit/miss evidence. Promotion passes only when all expected workers are completed, contract=pass, outputBytes>0, read-only clean, marker-clean, and cache status is explicit; missing/failed/touched/unknown-cache/protected/dirty signals fail closed to human review. Validation: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` passed 42/42; `git diff --check` passed; marker checks passed for runtime, surface, and smoke test."
     }
   ]
 }
