@@ -1,59 +1,59 @@
 {
-  "timestamp": "2026-05-12T17:38:04.874Z",
-  "context": "User asked if a reload requirement appearing during task-bud-1066-sdk-printmode-timestamp-design would affect the run. We did not reload mid- [snip] e refreshed after checkpoint if needed. [truncated:+635 chars]",
+  "timestamp": "2026-05-12T22:58:24.185Z",
+  "context": "Post-reload manual nudge exposed continuity failure: operator observed forced auto-compact, then manual reload suppressed or failed expected [snip] itted implementation/board as 12130cd9. [truncated:+603 chars]",
   "current_tasks": [
-    "TASK-BUD-1066"
+    "TASK-BUD-1071"
   ],
   "next_actions": [
-    "If reload notice persists, reload after this checkpoint; do not reload in the middle of a runn [snip] ss aborting intentionally. [truncated:+15 chars]",
-    "Next local-safe step: design parent-side report-only instrumentation patch in first-party runn [snip] out-first-byte timestamps. [truncated:+63 chars]",
-    "No subprocess retry until instrumentation plan is implemented/validated and exact-confirmed."
+    "Continue TASK-BUD-1071 with a separate report-only batch packet primitive for parallel read-on [snip] multi-worker dispatch yet. [truncated:+37 chars]",
+    "Work TASK-BUD-1072 later: harden post-reload resume pending-state contract and explain/record [snip] esume did or did not fire. [truncated:+10 chars]",
+    "If stop occurs again without obvious reason, immediately record continuity diagnostics and app [snip] evidence to TASK-BUD-1072. [truncated:+4 chars]"
   ],
   "blockers": [
-    "TASK-BUD-1066 root cause unresolved until timestamp instrumentation distinguis [snip] hang from stdout path. [truncated:+11 chars]",
-    "No standing authorization for worker dispatch beyond exact per-run confirmation.",
-    "No subprocess retry authorized; blind retry remains blocked."
+    "No parallel worker dispatch is enabled yet; current change only surfaces contract text and tests.",
+    "Auto-resume suppression/root cause remains unresolved under TASK-BUD-1072.",
+    "No scheduler/remote/worker dispatch authorized by continuation signals."
   ],
   "recent_validation": [
-    "agent_run_status -> completed",
-    "agent_run_follow -> terminal completed outputBytes=1120 lines=15",
-    "read log -> PASS timestamp-design, probes=prompt-start,prompt-end,stdout-first-byte, STOP, clo [snip] completed outputBytes=399 [truncated:+2 chars]"
+    "git status before slice showed dirty handoff plus SDK preview/test edits from pre-compact work",
+    "context_watch_status -> level=ok reloadGate=reload-not-required postReloadResume=pending",
+    "context_watch_continuation_readiness -> ready=no reasons candidate:invalid / checkpoint:invali [snip] y postReloadResume=pending [truncated:+37 chars]"
   ],
   "recent_commits": [
-    "940d448b chore(board): record sdk printmode timestamp pass"
+    "12130cd9 feat(agents): add sdk cache parallel contract"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1066",
+    "focus": "TASK-BUD-1071",
     "canonical_links": [
-      "task:TASK-BUD-1066",
-      "task:TASK-BUD-1066-SDK-PRINTMODE-TIMESTAMP-DESIGN",
-      "task:TASK-BUD-1066-SDK-PRINTMODE-TIMESTAMP-WORKER-PASS-20260512",
+      "task:TASK-BUD-1071",
+      "task:TASK-BUD-1072",
+      "task:TASK-BUD-1072-AUTO-RESUME-SUPPRESSION-INCIDENT-20260512",
       "commit:20260512"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-12T17:38:04.874Z",
-    "level": "warn",
-    "percent": 51,
+    "generatedAtIso": "2026-05-12T22:58:24.185Z",
+    "level": "ok",
+    "percent": 26,
     "action": "continue",
-    "recommendation": "reload-after-checkpoint-then-design-instrumentation-patch",
+    "recommendation": "continue-local-safe-after-checkpoint",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-12T17:38:04.874Z",
+      "atIso": "2026-05-12T22:58:24.185Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 51,
+      "level": "ok",
+      "percent": 26,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-after-checkpoint-then-design-instrumentation-patch"
+      "recommendation": "continue-local-safe-after-checkpoint"
     }
   ]
 }
