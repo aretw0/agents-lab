@@ -15740,6 +15740,24 @@
       "method": "sdk-in-process-worker-preview-no-dispatch",
       "timestamp": "2026-05-12T13:27:45.515Z",
       "evidence": "Prepared next SDK in-process read-only worker preview after timeout-budget probe. Run `task-bud-1066-sdk-capture-path-check` declares two files (`guardrails-core-agent-run-runtime.ts`, `guardrails-core-agent-run-diagnostics.ts`), allows `read,grep`, timeout 45000ms, read-only contract, and asks whether current parent-side runtime code is instrumented to capture `elapsedMs` for future subprocess runs after the existing canary log was found missing `elapsedMs`. Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required: `execute o sdk worker task-bud-1066-sdk-capture-path-check`."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-CAPTURE-PATH-WORKER-PASS-20260512",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-approved-sdk-in-process-readonly-worker+outcome+marker-check",
+      "timestamp": "2026-05-12T14:07:20.079Z",
+      "evidence": "Exact-approved SDK in-process worker `task-bud-1066-sdk-capture-path-check` completed successfully as a read-only diagnostic probe. Scope: two declared files (`guardrails-core-agent-run-runtime.ts`, `guardrails-core-agent-run-diagnostics.ts`), tools `read,grep`, no touched files. Worker result: `PASS; capture-path`, `elapsedMsFuture=yes`, `nextProbe=timeout-budget-probe` plus startup-hang branch; it found parent-side status already computes elapsed timing from registry timestamps (`nowMs - startedAtIso`), so future subprocess runs can expose elapsed timing even if child stdout/stderr remains empty. Outcome packet: `contract=pass process=completed recommendation=stop declared=2 touched=0 outputBytes=558`. Classifier: `class=none preflight=ready-for-canary`. Marker checks passed for worker log and runtime source; diagnostic packet updated; doc marker check, i18n lint, and `git diff --check` passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-STARTUP-BOUNDARY-WORKER-PREVIEW-20260512",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "sdk-in-process-worker-preview-no-dispatch",
+      "timestamp": "2026-05-12T14:19:20.939Z",
+      "evidence": "Prepared next SDK in-process read-only worker preview after capture-path check. Run `task-bud-1066-sdk-startup-boundary-probe` declares two read-only node_modules files (`node_modules/@mariozechner/pi-coding-agent/dist/main.js`, `node_modules/@mariozechner/pi-coding-agent/dist/modes/print-mode.js`), allows `read,grep`, timeout 45000ms, read-only contract, and asks for the most likely zero-output hang boundary after static argv validation and before child stdout/stderr. Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required: `execute o sdk worker task-bud-1066-sdk-startup-boundary-probe`."
     }
   ]
 }

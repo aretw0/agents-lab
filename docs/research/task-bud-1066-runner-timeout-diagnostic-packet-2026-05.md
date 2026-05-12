@@ -58,9 +58,21 @@ Result:
 - Parser/startup diagnostics expect `elapsedMs` for timeout-budget analysis.
 - Recommended next probe remains `timeout-budget-probe`, narrowed to capture-path/timing instrumentation evidence before any retry-like canary action.
 
+### capture-path check
+
+Exact-approved SDK in-process worker `task-bud-1066-sdk-capture-path-check` completed read-only with no touched files.
+
+Result:
+
+- `PASS; capture-path`
+- `elapsedMsFuture=yes`
+- Parent-side status already computes `elapsedMs` from registry timestamps (`nowMs - startedAtIso`).
+- Future subprocess runs can expose elapsed timing even if child stdout/stderr remains empty.
+- Recommended next probe: report-only structured startup/provider probe, with `timeout-budget-probe` plus `startup-hang-probe` as the evidence branch.
+
 ## Interpretation
 
-The subprocess runner no longer looks like an immediate missing-file, missing-entrypoint, or static CLI argv-shape failure: cwd, Node command, CLI entrypoint, required print-mode flags, attachments, and prompt all exist. The current failure is a zero-output startup hang until timeout, and the actual canary log still lacks `elapsedMs`, so timeout-budget analysis is incomplete. That makes `runner-timeout` the correct parent-side class and keeps blind retry blocked.
+The subprocess runner no longer looks like an immediate missing-file, missing-entrypoint, or static CLI argv-shape failure: cwd, Node command, CLI entrypoint, required print-mode flags, attachments, and prompt all exist. The current historical canary log lacks `elapsedMs`, but the current parent-side runtime is instrumented to expose elapsed timing for future subprocess runs. The remaining unknown is the zero-output startup hang boundary. That makes `runner-timeout` the correct parent-side class and keeps blind retry blocked.
 
 Most likely next diagnostic categories:
 
