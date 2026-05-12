@@ -1,59 +1,59 @@
 {
-  "timestamp": "2026-05-12T22:58:24.185Z",
-  "context": "Post-reload manual nudge exposed continuity failure: operator observed forced auto-compact, then manual reload suppressed or failed expected [snip] itted implementation/board as 12130cd9. [truncated:+603 chars]",
+  "timestamp": "2026-05-12T23:08:10.678Z",
+  "context": "Continued after manual nudge and incident capture. Completed second TASK-BUD-1071 slice: implemented report-only SDK read-only batch packet p [snip] current tool list for it until reload. [truncated:+503 chars]",
   "current_tasks": [
     "TASK-BUD-1071"
   ],
   "next_actions": [
-    "Continue TASK-BUD-1071 with a separate report-only batch packet primitive for parallel read-on [snip] multi-worker dispatch yet. [truncated:+37 chars]",
-    "Work TASK-BUD-1072 later: harden post-reload resume pending-state contract and explain/record [snip] esume did or did not fire. [truncated:+10 chars]",
-    "If stop occurs again without obvious reason, immediately record continuity diagnostics and app [snip] evidence to TASK-BUD-1072. [truncated:+4 chars]"
+    "Reload before calling the new agent_run_sdk_readonly_batch_packet live surface.",
+    "After reload, preview a 2-worker read-only batch only; do not execute parallel dispatch becaus [snip] tor exists/authorized yet. [truncated:+10 chars]",
+    "Continue TASK-BUD-1071 with cache-pack shape/freshness evidence or aggregate fan-in outcome packet."
   ],
   "blockers": [
-    "No parallel worker dispatch is enabled yet; current change only surfaces contract text and tests.",
-    "Auto-resume suppression/root cause remains unresolved under TASK-BUD-1072.",
-    "No scheduler/remote/worker dispatch authorized by continuation signals."
+    "New live tool surface requires reload.",
+    "Parallel execution remains intentionally disabled/report-only.",
+    "TASK-BUD-1072 auto-resume suppression root cause remains unresolved."
   ],
   "recent_validation": [
-    "git status before slice showed dirty handoff plus SDK preview/test edits from pre-compact work",
-    "context_watch_status -> level=ok reloadGate=reload-not-required postReloadResume=pending",
-    "context_watch_continuation_readiness -> ready=no reasons candidate:invalid / checkpoint:invali [snip] y postReloadResume=pending [truncated:+37 chars]"
+    "pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 41/41 passed",
+    "git diff --check -> passed",
+    "safe_marker_check builder -> 5/5 passed"
   ],
   "recent_commits": [
-    "12130cd9 feat(agents): add sdk cache parallel contract"
+    "12130cd9 feat(agents): add sdk cache parallel contract",
+    "4bc746dd chore(context): record auto resume suppression incident"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1071",
     "canonical_links": [
       "task:TASK-BUD-1071",
-      "task:TASK-BUD-1072",
-      "task:TASK-BUD-1072-AUTO-RESUME-SUPPRESSION-INCIDENT-20260512",
+      "task:TASK-BUD-1071-SDK-READONLY-BATCH-PACKET-20260512",
       "commit:20260512"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-12T22:58:24.185Z",
+    "generatedAtIso": "2026-05-12T23:08:10.678Z",
     "level": "ok",
-    "percent": 26,
+    "percent": 35,
     "action": "continue",
-    "recommendation": "continue-local-safe-after-checkpoint",
+    "recommendation": "reload-before-live-batch-tool-preview",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-12T22:58:24.185Z",
+      "atIso": "2026-05-12T23:08:10.678Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 26,
+      "percent": 35,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-local-safe-after-checkpoint"
+      "recommendation": "reload-before-live-batch-tool-preview"
     }
   ]
 }
