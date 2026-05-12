@@ -1,59 +1,59 @@
 {
-  "timestamp": "2026-05-12T13:37:50.977Z",
-  "context": "Exact confirmation received and consumed for task-bud-1066-sdk-timeout-budget-probe. Dispatched exactly one SDK in-process read-only worker u [snip] r task-bud-1066-sdk-capture-path-check. [truncated:+871 chars]",
+  "timestamp": "2026-05-12T14:30:20.772Z",
+  "context": "User confirmed strategic direction: successful SDK workers should be improved with cache/reliability/token-economy so the control-plane can d [snip] sk-bud-1066-sdk-startup-boundary-probe. [truncated:+911 chars]",
   "current_tasks": [
     "TASK-BUD-1066"
   ],
   "next_actions": [
-    "If operator confirms exact phrase, execute only task-bud-1066-sdk-capture-path-check and valid [snip] hed files/outcome/markers. [truncated:+11 chars]",
-    "Do not run subprocess retry; current existing canary log lacks elapsedMs so timeout-budget evidence is incomplete.",
-    "After capture-path check, decide whether a local patch/doc update or a future exact-confirmed [snip] rumented canary is needed. [truncated:+4 chars]"
+    "If operator confirms exact phrase, execute only task-bud-1066-sdk-startup-boundary-probe and v [snip] hed files/outcome/markers. [truncated:+15 chars]",
+    "Continue TASK-BUD-1066 with one SDK read-only worker at a time; no subprocess retry until star [snip] ntifies a concrete reason. [truncated:+31 chars]",
+    "After TASK-BUD-1066 probe wave, begin TASK-BUD-1071 to add shared cache/reliability/token-econ [snip] trol-plane delegates more. [truncated:+35 chars]"
   ],
   "blockers": [
-    "TASK-BUD-1066 subprocess root cause unresolved; timeout-budget evidence incomp [snip] n existing canary log. [truncated:+32 chars]",
+    "TASK-BUD-1066 root cause unresolved: zero-output startup hang boundary still unknown.",
     "No standing authorization for worker dispatch beyond exact per-run confirmation.",
     "No subprocess retry authorized; blind retry remains blocked."
   ],
   "recent_validation": [
-    "agent_run_sdk_in_process_dispatch execute=true exact phrase -> dispatched one run only",
-    "agent_run_follow -> terminal completed outputBytes=1393 lines=21",
+    "agent_run_sdk_in_process_dispatch execute=true exact phrase -> dispatched capture-path worker only",
+    "agent_run_follow -> terminal completed outputBytes=1451 lines=23",
     "git status after worker -> clean"
   ],
   "recent_commits": [
-    "4a24962a chore(board): record sdk timeout budget probe"
+    "6f7b01b8 chore(board): record sdk capture path probe"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1066",
     "canonical_links": [
       "task:TASK-BUD-1066",
-      "task:TASK-BUD-1066-SDK-TIMEOUT-BUDGET-PROBE",
-      "task:TASK-BUD-1066-SUBPROCESS-PREFLIGHT-CANARY",
+      "task:TASK-BUD-1071",
+      "task:TASK-BUD-1068",
       "commit:20260512"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-12T13:37:50.977Z",
+    "generatedAtIso": "2026-05-12T14:30:20.772Z",
     "level": "ok",
-    "percent": 41,
+    "percent": 44,
     "action": "continue",
-    "recommendation": "await-exact-capture-path-worker-confirmation",
+    "recommendation": "await-exact-startup-boundary-worker-confirmation",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-12T13:37:50.977Z",
+      "atIso": "2026-05-12T14:30:20.772Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 41,
+      "percent": 44,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "await-exact-capture-path-worker-confirmation"
+      "recommendation": "await-exact-startup-boundary-worker-confirmation"
     }
   ]
 }
