@@ -32,9 +32,23 @@ Read-only diagnostic packet for `TASK-BUD-1066`. This packet does **not** author
 
 Older diagnostic canary evidence (`task-bud-1066-readonly-runner-diagnostic-canary.log`) still shows the legacy silent non-zero shape: exit code 1 with no stdout/stderr and no structured preflight lines. The current actionable path is therefore the newer preflight timeout evidence, not a blind retry of the legacy shape.
 
+## Worker probe results
+
+### argv-shape inspection
+
+Exact-approved SDK in-process worker `task-bud-1066-sdk-argv-shape-inspection` completed read-only with no touched files.
+
+Result:
+
+- `PASS; cli-argv-valid`
+- Required flags were present: `--no-session`, `--model`, `--tools`, `--print`.
+- Attachments and inline prompt were present.
+- Static diagnostics found no argv blockers.
+- Recommended next probe: `timeout-budget-probe`.
+
 ## Interpretation
 
-The subprocess runner no longer looks like an immediate missing-file or missing-entrypoint failure: cwd, Node command, and CLI entrypoint all exist. The current failure is a zero-output startup hang until timeout. That makes `runner-timeout` the correct parent-side class and keeps blind retry blocked.
+The subprocess runner no longer looks like an immediate missing-file, missing-entrypoint, or static CLI argv-shape failure: cwd, Node command, CLI entrypoint, required print-mode flags, attachments, and prompt all exist. The current failure is a zero-output startup hang until timeout. That makes `runner-timeout` the correct parent-side class and keeps blind retry blocked.
 
 Most likely next diagnostic categories:
 
