@@ -1,59 +1,60 @@
 {
-  "timestamp": "2026-05-12T00:07:03.814Z",
-  "context": "User asked why the SDK code/test review failed despite the control plane being able to do that work, and reported reload done. Reconciled git [snip] Board evidence recorded and committed. [truncated:+924 chars]",
+  "timestamp": "2026-05-12T00:39:08.554Z",
+  "context": "Exact confirmation received and consumed for task-bud-1068-sdk-one-symbol-review-smoke. Dispatched exactly one SDK in-process worker under na [snip] reflects the one-symbol rung promotion. [truncated:+1003 chars]",
   "current_tasks": [
     "TASK-BUD-1068"
   ],
   "next_actions": [
-    "If operator wants to test the narrower replacement, require exact phrase: execute o sdk worker [snip] dk-one-symbol-review-smoke [truncated:+16 chars]",
-    "Do not retry task-bud-1068-sdk-code-test-review-smoke; same shape is explicitly non-validated.",
-    "If the one-symbol preview passes, then promote the narrower code-review shape; if it fails, ha [snip] l budget before expanding. [truncated:+15 chars]"
+    "Ask operator to /reload before relying on live packet text for one-symbol promotion.",
+    "After reload, prepare local-safe parent-side tiny guard/recommendation patch preview or implem [snip] ains local and reversible. [truncated:+37 chars]",
+    "Do not retry two-file open-ended code/test review; validated code-review shape is one file or named symbol only."
   ],
   "blockers": [
-    "No standing authorization for additional worker/provider dispatch; exact per-r [snip] confirmation required. [truncated:+3 chars]",
-    "Two-file open-ended code/test review is not validated and retryAllowed=no for that failed run.",
+    "Runtime extension changes committed; reload needed before live surface reflect [snip] one-symbol promotion. [truncated:+1 chars]",
+    "No standing authorization for additional worker/provider dispatch; exact phrase consumed.",
     "SDK broad read-only/mutation/multi-worker/unattended dispatch remain immature."
   ],
   "recent_validation": [
-    "git status --short -> clean before preview",
-    "context_watch_status -> ok reload-not-required",
-    "agent_run_failure_classification task-bud-1068-sdk-code-test-review-smoke -> worker-contract-f [snip] kers=sdk-runner-loop-guard [truncated:+51 chars]"
+    "agent_run_sdk_in_process_dispatch execute=true exact phrase -> dispatched one run only",
+    "agent_run_follow -> terminal completed outputBytes=995 lines=12",
+    "log .pi/reports/task-bud-1068-sdk-one-symbol-review-smoke.sdk.log -> tools=read,grep, declared [snip] completed outputBytes=367 [truncated:+115 chars]"
   ],
   "recent_commits": [
-    "0ba08e42 chore(board): preview narrower sdk code review"
+    "18fd931b chore(board): record sdk one-symbol review pass",
+    "314ecb9d feat(agents): promote sdk one-symbol review rung"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1068",
     "canonical_links": [
       "task:TASK-BUD-1068",
-      "task:TASK-BUD-1068-SDK-CODE-TEST-REVIEW-SMOKE",
       "task:TASK-BUD-1068-SDK-ONE-SYMBOL-REVIEW-SMOKE",
+      "task:TASK-BUD-1068-SDK-ONE-SYMBOL-REVIEW-SMOKE-PASS-20260511",
       "commit:20260511"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-12T00:07:03.814Z",
-    "level": "ok",
-    "percent": 48,
-    "action": "continue",
-    "recommendation": "explain-failure-and-preview-one-symbol-review",
+    "generatedAtIso": "2026-05-12T00:39:08.554Z",
+    "level": "checkpoint",
+    "percent": 51,
+    "action": "checkpoint-refresh",
+    "recommendation": "reload-then-parent-side-tiny-guard",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-12T00:07:03.814Z",
+      "atIso": "2026-05-12T00:39:08.554Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 48,
+      "level": "checkpoint",
+      "percent": 51,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "explain-failure-and-preview-one-symbol-review"
+      "recommendation": "reload-then-parent-side-tiny-guard"
     }
   ]
 }
