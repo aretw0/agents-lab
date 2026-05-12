@@ -15695,6 +15695,15 @@
       "method": "read-only-triage+startup-diagnostic-packet+doc-marker-i18n-diff",
       "timestamp": "2026-05-12T02:17:33.407Z",
       "evidence": "Prepared read-only diagnostic packet for `TASK-BUD-1066` without subprocess retry or worker/provider dispatch. Evidence reviewed: `task-bud-1066-subprocess-preflight-canary` registry state `timed-out`; failure classification `runner-timeout`, `preflight=needs-evidence`, `retryAllowed=no`; startup diagnostic packet `decision=structured-probe-first`, `canaryAllowed=no`, `dispatch=no`, `authorization=none`; log records cwd/command/entrypoint preflight ok, timeout 60000ms, SIGTERM, `exitCode=124`, `timedOut=yes`, zero stdout/stderr. Wrote `docs/research/task-bud-1066-runner-timeout-diagnostic-packet-2026-05.md` with a report-only next probe plan (argv-shape, startup-surface, provider bootstrap readiness, tool allowlist compatibility, capture-path), all requiring `modelCallAllowed=false` and `dispatchAllowed=false`. Validation: marker check passed 7/7, i18n lint passed, `git diff --check` passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SDK-ARGV-SHAPE-WORKER-PREVIEW-20260511",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "sdk-in-process-worker-preview-no-dispatch",
+      "timestamp": "2026-05-12T02:36:51.402Z",
+      "evidence": "Prepared first SDK in-process read-only worker preview under the operator-authorized TASK-BUD-1066 worker phase (one worker at a time, preview + exact confirmation per run, no subprocess retry, no mutation, no protected scope). Run `task-bud-1066-sdk-argv-shape-inspection` declares two files (`guardrails-core-agent-run-start.ts`, `guardrails-core-agent-run-diagnostics.ts`), allows `read,grep`, timeout 45000ms, read-only contract, and asks for static argv-shape classification (`cli-argv-valid` or `cli-argv-invalid:<reason>`) plus next report-only probe. Live packet returned `decision=ready-for-human-decision sdkMaturity=validated-narrow-readgrep dispatch=no authorization=none`; dispatch preview with `execute=false` returned `decision=preview dispatch=no`. Exact confirmation required: `execute o sdk worker task-bud-1066-sdk-argv-shape-inspection`."
     }
   ]
 }
