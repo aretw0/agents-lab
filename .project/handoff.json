@@ -1,15 +1,17 @@
 {
-  "timestamp": "2026-05-13T00:12:50.626Z",
+  "timestamp": "2026-05-13T00:32:00.646Z",
   "context": "Operator flagged a missed bad-smell/line-budget signal: packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts reached 2632 li [snip] e still requires reload before preview. [truncated:+688 chars]",
   "current_tasks": [
     "TASK-BUD-1073"
   ],
   "next_actions": [
+    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
     "Reload before live-previewing new agent_run_sdk_cache_pack_packet surface from commit a2ceff06.",
     "Prioritize TASK-BUD-1073 soon: split oversized smoke test and make line-budget/bad-smell a str [snip] gate for large test files. [truncated:+15 chars]",
     "Once worker/batch lane is approved, use read-only workers to plan the test split in parallel, [snip] locally with focal tests. [truncated:+14 chars]"
   ],
   "blockers": [
+    "context-watch-checkpoint-required",
     "New cache-pack live tool surface requires reload.",
     "guardrails-agent-spawn-readiness.test.ts is oversized and should not receive u [snip] lit/gate is addressed. [truncated:+27 chars]",
     "Parallel workers remain preview/report-only; no dispatch without exact confirmation."
@@ -39,7 +41,15 @@
     "recommendation": "reload-cache-pack-preview-or-switch-to-task-bud-1073-split",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
+    "auto_resume_after_reload": {
+      "pending": true,
+      "createdAtIso": "2026-05-13T00:38:02.858Z",
+      "reason": "reload-required-after-compact",
+      "focusTasks": [
+        "TASK-BUD-1073"
+      ]
+    }
   },
   "context_watch_events": [
     {
@@ -54,6 +64,19 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "reload-cache-pack-preview-or-switch-to-task-bud-1073-split"
+    },
+    {
+      "atIso": "2026-05-13T00:32:00.646Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ]
 }

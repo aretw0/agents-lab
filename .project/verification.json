@@ -15884,6 +15884,24 @@
       "method": "operator-report+line-count+line-budget-snapshot",
       "timestamp": "2026-05-13T00:11:33.478Z",
       "evidence": "Operator reported that `packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` should have triggered bad-smell/line-budget feedback before growing further. Measurement: file has 2632 lines; related files include `guardrails-core-agent-spawn-readiness-surface.ts` at 1734 lines, `guardrails-core-agent-run-sdk-preview.ts` at 706 lines, and `guardrails-core-agent-run-runtime.ts` at 645 lines. `line_budget_snapshot` returned `recommendation=extract`, `code=line-budget-extract`, `scanned=203`, `aboveWatch=4`, `aboveExtract=1`, blockers=`line-budget-extract-required`. Interpretation: signal exists but was not consulted/enforced as a pre-edit gate for the test file, so we kept appending cases. Created TASK-BUD-1073 to split the oversized smoke test and harden bad-smell gating."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1073-AGENT-RUN-SMOKE-SPLIT-20260513",
+      "target": "TASK-BUD-1073",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-refactor+focal-vitest+line-count",
+      "timestamp": "2026-05-13T03:02:03.148Z",
+      "evidence": "Split oversized `packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` into narrower smoke files: `guardrails-agent-run-sdk.test.ts` (SDK packet/cache/batch preview coverage), `guardrails-agent-run-runtime.test.ts` (registry/status/abort/outcome/fan-in runtime packet coverage), and `guardrails-agent-run-task-packets.test.ts` (board task packet/start/dispatch surfaces). Main file reduced from 2632 lines to 1377 lines. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts` -> 4 files passed, 42 tests passed. Commit: a70c2057."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1072-POST-RELOAD-MANUAL-NUDGE-20260513",
+      "target": "TASK-BUD-1072",
+      "target_type": "task",
+      "status": "passed",
+      "method": "operator-report+context-watch-status",
+      "timestamp": "2026-05-13T03:02:24.489Z",
+      "evidence": "After forced context compaction and reload, auto-resume was suppressed/pending and did not resume until the operator sent a manual continuation message. `context_watch_status` after resume reported `postReloadResume=pending`, `handoff=stale`, `handoffAgeSec=8755/1800`, while level was ok and reload was not required. Operator explicitly reported needing this message to continue after reload with compacted context. This is a continuity incident for hardening post-reload resume/manual-nudge diagnostics."
     }
   ]
 }
