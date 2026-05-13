@@ -75,6 +75,31 @@ export function formatAgentRunnerArgvForLog(args: string[], maxChars = 2000): st
   return rendered.length <= maxChars ? rendered : `${rendered.slice(0, maxChars)}...[truncated:${rendered.length - maxChars}]`;
 }
 
+export function createAgentRunChildOutputCapture(logStream: { write(chunk: string | Buffer): unknown }, startedAtMs: number) {
+  let outputBytes = 0;
+  let stdoutBytes = 0;
+  let stderrBytes = 0;
+  let firstOutputElapsedMs: number | undefined;
+  const captureChildOutput = (streamName: "stdout" | "stderr") => (chunk: Buffer | string) => {
+    const byteLength = Buffer.isBuffer(chunk) ? chunk.byteLength : Buffer.byteLength(chunk);
+    outputBytes += byteLength;
+    if (streamName === "stdout") stdoutBytes += byteLength;
+    if (streamName === "stderr") stderrBytes += byteLength;
+    if (firstOutputElapsedMs === undefined) {
+      firstOutputElapsedMs = Date.now() - startedAtMs;
+      logStream.write(`[agent-runner] first-byte stream=${streamName} elapsedMs=${firstOutputElapsedMs} bytes=${byteLength}\n`);
+    }
+    logStream.write(chunk);
+  };
+  return {
+    captureChildOutput,
+    outputBytes: () => outputBytes,
+    stdoutBytes: () => stdoutBytes,
+    stderrBytes: () => stderrBytes,
+    firstOutputElapsedMs: () => firstOutputElapsedMs,
+  };
+}
+
 function resolveSdkModelRef(providerModelRef: string): { provider: string; modelId: string } | undefined {
   const slashIndex = providerModelRef.indexOf("/");
   if (slashIndex <= 0 || slashIndex >= providerModelRef.length - 1) return undefined;

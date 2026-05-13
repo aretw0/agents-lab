@@ -452,6 +452,8 @@ describe("agent run task packet surfaces", () => {
     expect(source).toContain("preflight commandExists=");
     expect(source).toContain("preflight entrypointExists=");
     expect(source).toContain("failure code=runner-timeout");
+    expect(source).toContain("first-byte stream=${streamName}");
+    expect(source).toContain("firstOutputElapsedMs=${outputCapture.firstOutputElapsedMs()");
     expect(source).toContain("elapsedMs=${Date.now() - startedAtMs}");
     expect(source).toContain("signal=${signal || \"none\"} timedOut=");
     expect(source).toContain("[agent-runner] close exitCode=${exitCode}");

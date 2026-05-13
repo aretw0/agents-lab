@@ -13,7 +13,7 @@ import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgent
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 import { readTasksBlockCached } from "./project-board-model";
 import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
-import { appendAgentRunLogLine, buildPiSubprocessPreflightLines, formatAgentRunnerArgvForLog, isTerminalAgentRunState, readLogByteCount, readLogTail, readRegistryEntry, resolvePiSubprocessInvocation, sleepMs, startSdkInProcessWorker, writeRegistryEntry } from "./guardrails-core-agent-run-surface-runtime";
+import { appendAgentRunLogLine, buildPiSubprocessPreflightLines, createAgentRunChildOutputCapture, formatAgentRunnerArgvForLog, isTerminalAgentRunState, readLogByteCount, readLogTail, readRegistryEntry, resolvePiSubprocessInvocation, sleepMs, startSdkInProcessWorker, writeRegistryEntry } from "./guardrails-core-agent-run-surface-runtime";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
@@ -608,20 +608,12 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         appendAgentRunLogLine(logPath, `[agent-runner] argv=${formatAgentRunnerArgvForLog(subprocess.args)}`);
         for (const line of buildPiSubprocessPreflightLines(ctx.cwd, subprocess)) appendAgentRunLogLine(logPath, line);
         const logStream = createWriteStream(logPath, { flags: "a" });
+        const startedAtMs = Date.now();
+        const outputCapture = createAgentRunChildOutputCapture(logStream, startedAtMs);
         const child = spawn(subprocess.command, subprocess.args, { cwd: ctx.cwd, shell: false, stdio: ["ignore", "pipe", "pipe"] });
         pid = child.pid;
-        let childOutputBytes = 0;
-        let childStdoutBytes = 0;
-        let childStderrBytes = 0;
-        const captureChildOutput = (streamName: "stdout" | "stderr") => (chunk: Buffer | string) => {
-          const byteLength = Buffer.isBuffer(chunk) ? chunk.byteLength : Buffer.byteLength(chunk);
-          childOutputBytes += byteLength;
-          if (streamName === "stdout") childStdoutBytes += byteLength;
-          if (streamName === "stderr") childStderrBytes += byteLength;
-          logStream.write(chunk);
-        };
-        child.stdout?.on("data", captureChildOutput("stdout"));
-        child.stderr?.on("data", captureChildOutput("stderr"));
+        child.stdout?.on("data", outputCapture.captureChildOutput("stdout"));
+        child.stderr?.on("data", outputCapture.captureChildOutput("stderr"));
         registryEntry = {
           ...packet.registryPreview.entry,
           ...(pid ? { pid } : {}),
@@ -631,7 +623,6 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         };
         writeRegistryEntry(ctx.cwd, registryEntry);
         const timeoutMs = packet.taskPacket.invocationSpec.timeoutMs;
-        const startedAtMs = Date.now();
         let settled = false;
         let timedOut = false;
         const timeout = setTimeout(() => {
@@ -663,14 +654,15 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
           settled = true;
           clearTimeout(timeout);
           const exitCode = typeof code === "number" ? code : timedOut ? 124 : 1;
+          const childOutputBytes = outputCapture.outputBytes();
           const zeroOutput = childOutputBytes === 0;
           const silentFailure = !timedOut && exitCode !== 0 && zeroOutput;
           const silentFailureLine = silentFailure
             ? "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr; preflight lines above record platform/node/cwd/command/entrypoint; next probe should validate provider bootstrap and CLI argument parsing\n"
             : "";
           const elapsedMs = Date.now() - startedAtMs;
-          const timeoutLine = timedOut ? `[agent-runner] failure code=runner-timeout message=subprocess exceeded timeoutMs=${timeoutMs} elapsedMs=${elapsedMs} outputBytes=${childOutputBytes}; preflight reached command/entrypoint, so next probe should isolate provider/model-call/bootstrap hang\n` : "";
-          logStream.write(`${silentFailureLine}${timeoutLine}[agent-runner] close exitCode=${exitCode} signal=${signal || "none"} timedOut=${timedOut ? "yes" : "no"} elapsedMs=${elapsedMs} childOutputBytes=${childOutputBytes} stdoutBytes=${childStdoutBytes} stderrBytes=${childStderrBytes}\n`, () => {
+          const timeoutLine = timedOut ? `[agent-runner] failure code=runner-timeout message=subprocess exceeded timeoutMs=${timeoutMs} elapsedMs=${elapsedMs} outputBytes=${childOutputBytes} firstOutputElapsedMs=${outputCapture.firstOutputElapsedMs() ?? "none"}; preflight reached command/entrypoint, so next probe should isolate provider/model-call/bootstrap hang\n` : "";
+          logStream.write(`${silentFailureLine}${timeoutLine}[agent-runner] close exitCode=${exitCode} signal=${signal || "none"} timedOut=${timedOut ? "yes" : "no"} elapsedMs=${elapsedMs} childOutputBytes=${childOutputBytes} stdoutBytes=${outputCapture.stdoutBytes()} stderrBytes=${outputCapture.stderrBytes()} firstOutputElapsedMs=${outputCapture.firstOutputElapsedMs() ?? "none"}\n`, () => {
             logStream.end(() => {
               writeRegistryEntry(ctx.cwd, {
                 ...registryEntry,

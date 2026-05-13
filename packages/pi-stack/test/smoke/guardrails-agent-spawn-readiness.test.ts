@@ -742,11 +742,15 @@ describe("agent spawn readiness contract", () => {
   });
 
   it("keeps actionable diagnostics for silent agent-runner failures", () => {
-    const text = readFileSync(path.join(process.cwd(), "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts"), "utf8");
+    const text = [
+      "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+      "packages/pi-stack/extensions/guardrails-core-agent-run-surface-runtime.ts",
+    ].map((file) => readFileSync(path.join(process.cwd(), file), "utf8")).join("\n");
     expect(text).toContain("formatAgentRunnerArgvForLog");
     expect(text).toContain("childOutputBytes");
-    expect(text).toContain("childStdoutBytes");
-    expect(text).toContain("childStderrBytes");
+    expect(text).toContain("stdoutBytes");
+    expect(text).toContain("stderrBytes");
+    expect(text).toContain("firstOutputElapsedMs");
     expect(text).toContain("silent-runner-failure");
     expect(text).toContain("cwd=${ctx.cwd}");
   });
