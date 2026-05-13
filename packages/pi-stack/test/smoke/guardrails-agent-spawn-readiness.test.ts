@@ -874,7 +874,7 @@ describe("agent spawn readiness contract", () => {
   });
 
   it("keeps SDK worker dispatch isolated from extension monitors and bounded loops", () => {
-    const source = readFileSync("packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts", "utf8");
+    const source = readFileSync("packages/pi-stack/extensions/guardrails-core-agent-run-surface-runtime.ts", "utf8");
     expect(source).toContain("DefaultResourceLoader");
     expect(source).toContain("SettingsManager.inMemory");
     expect(source).toContain("noExtensions: true");

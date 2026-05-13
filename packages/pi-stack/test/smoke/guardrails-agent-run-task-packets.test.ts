@@ -439,7 +439,10 @@ describe("agent run task packet surfaces", () => {
   });
 
   it("hardens agent_run_task_dispatch against subprocess spawn errors", () => {
-    const source = readFileSync(path.join(process.cwd(), "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts"), "utf8");
+    const source = [
+      "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+      "packages/pi-stack/extensions/guardrails-core-agent-run-surface-runtime.ts",
+    ].map((file) => readFileSync(path.join(process.cwd(), file), "utf8")).join("\n");
     expect(source).toContain("resolvePiSubprocessInvocation(packet.startPreview)");
     expect(source).toContain("spawn(subprocess.command, subprocess.args");
     expect(source).toContain("child.on(\"error\", (error: NodeJS.ErrnoException)");
