@@ -16001,6 +16001,15 @@
       "method": "local-refactor+focal-vitest+line-budget-live-preview",
       "timestamp": "2026-05-13T12:34:14.997Z",
       "evidence": "Split over-extract `packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` by extracting delivery/promotion evidence coverage into `packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts`. Line counts: colony-pilot-parsers reduced from 1537 to 1131; new delivery file is 464. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts` -> 2 files passed, 82 tests passed. Live `line_budget_snapshot` after the split reported `scanned=343 aboveWatch=14 aboveExtract=1 aboveCritical=0`, reducing aboveExtract from 2 to 1. Commit: 64c1896c."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1073-AGENT-RUN-SURFACE-RUNTIME-EXTRACTION-20260513",
+      "target": "TASK-BUD-1073",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-refactor+focal-vitest+line-budget-live-preview",
+      "timestamp": "2026-05-13T12:52:47.339Z",
+      "evidence": "Extracted SDK runner/log/registry/subprocess preflight helpers from `packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts` into new cohesive module `packages/pi-stack/extensions/guardrails-core-agent-run-surface-runtime.ts`. Line count for the former above-extract file dropped from 1734 to 1393; new runtime helper file is 348. Updated source-inspection tests to inspect the new runtime helper where appropriate. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts` -> 4 files passed, 42 tests passed. Broader validation passed: guardrails-tool-hygiene + agent-run quartet + colony split pair -> 7 files passed, 139 tests passed. Live `line_budget_snapshot` after extraction reported `scanned=344 aboveWatch=14 aboveExtract=0 aboveCritical=0 recommendation=watch`, clearing line-budget extract debt. Commit: 8adc4c9c."
     }
   ]
 }
