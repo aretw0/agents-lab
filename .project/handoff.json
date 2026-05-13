@@ -1,59 +1,58 @@
 {
-  "timestamp": "2026-05-13T13:08:23.694Z",
-  "context": "TASK-BUD-1073 is complete and line-budget extract debt is cleared. Returned to agent-unblocking lane. Implemented parent-side subprocess firs [snip] ct-confirmed canary that depends on it. [truncated:+772 chars]",
+  "timestamp": "2026-05-13T13:45:46.658Z",
+  "context": "Follow-up from operator after reload: line-budget widening is useful, but reusable pi-stack guardrail scoring should not remain hardcoded to [snip] trusting widened live scanner behavior. [truncated:+474 chars]",
   "current_tasks": [
     "TASK-BUD-1066"
   ],
   "next_actions": [
-    "Perform/recommend /reload before live canary or trusting new agent-run runtime behavior.",
-    "After reload, run report-only startup diagnostic/status packets against existing TASK-BUD-1066 [snip] /provider gates are green. [truncated:+74 chars]",
-    "Continue TASK-BUD-1071 report-only cache/freshness/attachment-shape hardening for SDK workers; [snip] xecution remains disabled. [truncated:+11 chars]"
+    "Commit TASK-BUD-1074 board entry/checkpoint.",
+    "Recommend /reload before trusting latest line-budget scanner runtime.",
+    "Return to TASK-BUD-1066/TASK-BUD-1071 agent-lane stabilization; do not start TASK-BUD-1074 yet."
   ],
   "blockers": [
     "No worker/provider dispatch authorized without exact one-run confirmation.",
-    "Budget for future run is not established in current packet; executor strategy [snip] budget=unknown blocks. [truncated:+5 chars]",
-    "Runtime extension changes require reload."
+    "Runtime extension changed after reload; reload required again for latest scanner behavior."
   ],
   "recent_validation": [
-    "agent-run focal tests -> 4 files passed, 42 tests passed",
-    "line_budget_snapshot -> scanned=344 aboveWatch=14 aboveExtract=0 aboveCritical=0 recommendation=watch",
-    "git clean after commit expected"
+    "TASK-BUD-1074 created as planned backlog with dependencies TASK-BUD-1066 and TASK-BUD-1071",
+    "line-budget scanner focal test passed before commit: guardrails-tool-hygiene 15 tests",
+    "line_budget_snapshot pre-reload stayed watch with aboveExtract=0 aboveCritical=0"
   ],
   "recent_commits": [
-    "04fbf499 feat(agents): log subprocess first-byte timing",
-    "13c67b32 chore(board): record subprocess first-byte instrumentation"
+    "5791082b fix(guardrails): scan all pi-stack ts line budgets",
+    "7c517d3b chore(board): record package-wide line budget scan"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1066",
     "canonical_links": [
       "task:TASK-BUD-1066",
-      "task:TASK-BUD-1073",
-      "commit:20260513"
+      "task:TASK-BUD-1074",
+      "commit:5791082b"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-13T13:08:23.694Z",
-    "level": "warn",
-    "percent": 52,
+    "generatedAtIso": "2026-05-13T13:45:46.658Z",
+    "level": "ok",
+    "percent": 25,
     "action": "continue",
-    "recommendation": "reload-then-agent-diagnostic-packet-or-sdk-cache-hardening",
+    "recommendation": "commit-backlog-then-return-agent-lane",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-13T13:08:23.694Z",
+      "atIso": "2026-05-13T13:45:46.658Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 52,
+      "level": "ok",
+      "percent": 25,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-agent-diagnostic-packet-or-sdk-cache-hardening"
+      "recommendation": "commit-backlog-then-return-agent-lane"
     }
   ]
 }
