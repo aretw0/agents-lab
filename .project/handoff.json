@@ -1,22 +1,20 @@
 {
-  "timestamp": "2026-05-13T12:42:10.031Z",
-  "context": "Auto-resume/truncated handoff arrived while continuing TASK-BUD-1073. Real current state: colony parser split is already complete and committ [snip] avior change and focal tests afterward. [truncated:+538 chars]",
-  "current_tasks": [
-    "TASK-BUD-1073"
-  ],
+  "timestamp": "2026-05-13T12:54:43.977Z",
+  "context": "TASK-BUD-1073 stabilized/closed. Line-budget extract debt is cleared: live line_budget_snapshot reports scanned=344 aboveWatch=14 aboveExtrac [snip] ged agent-run runtime surface behavior. [truncated:+751 chars]",
   "next_actions": [
-    "Extract SDK in-process runner/log/registry helpers from guardrails-core-agent-spawn-readiness- [snip] istration surface thinner. [truncated:+53 chars]",
-    "Run focal agent-run/agent-spawn tests and line_budget_snapshot.",
-    "If aboveExtract reaches 0, record board evidence and then return to the agent-unblocking lane [snip] confirmation for dispatch. [truncated:+54 chars]"
+    "Return to agent-unblocking lane: TASK-BUD-1071 cache/fan-out/fan-in freshness/attachment shape [snip] subprocess runner-timeout. [truncated:+63 chars]",
+    "Before live-testing changed agent-run runtime tool surfaces, perform/recommend /reload.",
+    "No worker/provider dispatch is authorized without exact per-run human confirmation."
   ],
   "blockers": [
-    "No worker/provider dispatch authorized; only local code/test edits are in scope.",
-    "Subprocess retry remains blocked by prior runner-timeout evidence."
+    "Runtime extension changes require reload before trusting live output.",
+    "Subprocess retry remains blocked; no blind retry.",
+    "Parallel SDK execution remains report-only unless a future exact-confirmed imp [snip] separately authorized. [truncated:+15 chars]"
   ],
   "recent_validation": [
-    "git status before this checkpoint showed only .project/handoff.json modified",
-    "line_budget_snapshot latest -> scanned=343 aboveWatch=14 aboveExtract=1 aboveCritical=0",
-    "colony split focal test -> 2 files passed, 82 tests passed"
+    "colony split focal -> 2 files passed, 82 tests passed",
+    "agent-run extraction focal -> 4 files passed, 42 tests passed",
+    "broader focal -> 7 files passed, 139 tests passed"
   ],
   "recent_commits": [
     "64c1896c test(colony): split delivery evidence parser coverage",
@@ -26,33 +24,37 @@
     "focus": "TASK-BUD-1073",
     "canonical_links": [
       "task:TASK-BUD-1073",
-      "task:TASK-BUD-1071",
-      "commit:64c1896c"
+      "task:TASK-BUD-1073-AGENT-RUN-SURFACE-RUNTIME-EXTRACTION-20260513",
+      "commit:20260513"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-13T12:42:10.031Z",
+    "generatedAtIso": "2026-05-13T12:54:43.977Z",
     "level": "ok",
-    "percent": 25,
+    "percent": 42,
     "action": "continue",
-    "recommendation": "continue-extension-helper-extraction-then-return-agent-lane",
+    "recommendation": "return-agent-unblocking-lane-after-reload",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-13T12:42:10.031Z",
+      "atIso": "2026-05-13T12:54:43.977Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 25,
+      "percent": 42,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-extension-helper-extraction-then-return-agent-lane"
+      "recommendation": "return-agent-unblocking-lane-after-reload"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-1073"
   ]
 }
