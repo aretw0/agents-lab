@@ -15857,6 +15857,15 @@
       "method": "local-smoke-test+marker-check",
       "timestamp": "2026-05-12T23:59:03.712Z",
       "evidence": "Added report-only `buildAgentRunBatchOutcomePacket` and `agent_run_batch_outcome_packet` surface for fan-in aggregation of SDK read-only batch worker outcomes. The packet never dispatches; it aggregates expected run ids, per-worker process state, contract decision, touched files, marker failures, output bytes, and cache hit/miss evidence. Promotion passes only when all expected workers are completed, contract=pass, outputBytes>0, read-only clean, marker-clean, and cache status is explicit; missing/failed/touched/unknown-cache/protected/dirty signals fail closed to human review. Validation: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` passed 42/42; `git diff --check` passed; marker checks passed for runtime, surface, and smoke test."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-BATCH-OUTCOME-LIVE-PREVIEW-20260512",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-live-tool-preview",
+      "timestamp": "2026-05-13T00:03:09.618Z",
+      "evidence": "After reload, live `agent_run_batch_outcome_packet` preview succeeded without dispatch. Batch `task-bud-1071-sdk-readonly-batch-live-preview` aggregated two expected worker outcome rows with `process_state=completed`, `contract_decision=pass`, no touched files, no marker failures, positive output bytes, and explicit cache evidence (`hit` and `miss`). Tool returned `decision=pass`, `recommendation=promote`, `workers=2`, `passed=2`, `cacheHits=1`, `cacheMisses=1`, `dispatch=no`, `authorization=none`. This validates the report-only fan-in surface is live after reload; it does not authorize worker dispatch or parallel execution."
     }
   ]
 }
