@@ -15992,6 +15992,15 @@
       "method": "local-refactor+focal-vitest+line-budget-live-preview",
       "timestamp": "2026-05-13T12:08:51.044Z",
       "evidence": "Split over-extract `packages/pi-stack/test/smoke/project-board-surface.test.ts` again by extracting rationale-aware query/update coverage into `packages/pi-stack/test/smoke/project-board-rationale.test.ts`. Line counts: project-board-surface reduced from 1540 to 1090; new rationale file is 608. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/project-board-rationale.test.ts packages/pi-stack/test/smoke/project-board-tools.test.ts` -> 3 files passed, 64 tests passed. Live `line_budget_snapshot` after the split reported `scanned=342 aboveWatch=14 aboveExtract=2 aboveCritical=0`, reducing aboveExtract from 3 to 2. Commit: 623fd1bf."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1073-COLONY-DELIVERY-SPLIT-20260513",
+      "target": "TASK-BUD-1073",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-refactor+focal-vitest+line-budget-live-preview",
+      "timestamp": "2026-05-13T12:34:14.997Z",
+      "evidence": "Split over-extract `packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` by extracting delivery/promotion evidence coverage into `packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts`. Line counts: colony-pilot-parsers reduced from 1537 to 1131; new delivery file is 464. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts` -> 2 files passed, 82 tests passed. Live `line_budget_snapshot` after the split reported `scanned=343 aboveWatch=14 aboveExtract=1 aboveCritical=0`, reducing aboveExtract from 2 to 1. Commit: 64c1896c."
     }
   ]
 }
