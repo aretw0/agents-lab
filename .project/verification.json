@@ -16028,6 +16028,15 @@
       "method": "local-refactor+focal-vitest+live-preview",
       "timestamp": "2026-05-13T13:35:18.314Z",
       "evidence": "Hardened line-budget discovery so future TypeScript files anywhere under `packages/pi-stack` are included, not only `extensions` and `test/smoke`. Scanner now walks `packages/pi-stack` and skips generated/vendor dirs (`node_modules`, `dist`, `coverage`, `.pi-lens`). Regression fixture proves non-smoke test helpers and a new package-level surface are included, while `node_modules` is ignored. Validation: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts` -> 1 file passed, 15 tests passed. Live pre-reload `line_budget_snapshot` remains `recommendation=watch aboveExtract=0 aboveCritical=0 scanned=344`; extension changed again, so `/reload` is required before trusting the widened live scanner. Commit: 5791082b."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-STRUCTURED-SUBPROCESS-PREFLIGHT-20260513",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-refactor+focal-vitest+line-budget-preview",
+      "timestamp": "2026-05-13T14:12:51.603Z",
+      "evidence": "Added no-model-call structured subprocess preflight logging before any exact-confirmed `agent_run_task_dispatch` child start. Future subprocess logs now include argv shape (`print`, `noSession`, provider/model, tool count, print payload count), declared attachment count/missing evidence, and prompt segment/char count in addition to platform/command/entrypoint evidence. This supports the startup diagnostic recommendation `structured-probe-first` without changing confirmation gates or dispatching a worker. Validation: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` -> 3 files passed, 42 tests passed. `line_budget_snapshot` remained `recommendation=watch aboveExtract=0 aboveCritical=0`. Commit: bea08575."
     }
   ]
 }
