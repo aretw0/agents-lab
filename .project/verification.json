@@ -15938,6 +15938,15 @@
       "method": "local-refactor+focal-vitest+line-budget-live-preview",
       "timestamp": "2026-05-13T03:26:40.225Z",
       "evidence": "Split the largest line-budget offender `packages/pi-stack/test/smoke/context-watchdog.test.ts` by extracting tool-surface coverage into `packages/pi-stack/test/smoke/context-watchdog-surfaces.test.ts`. Line counts: context-watchdog reduced from 2878 to 1676; new surfaces file is 1321. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-surfaces.test.ts` -> 2 files passed, 62 tests passed. Broader focal validation passed: guardrails-tool-hygiene + context-watchdog pair + agent-run split files -> 7 files passed, 119 tests passed. Live `line_budget_snapshot` after the split reported `scanned=336 aboveWatch=14 aboveExtract=7 aboveCritical=1`, reducing critical files from 2 to 1. Commit: f81b7166."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1073-PROJECT-BOARD-TOOLS-SPLIT-20260513",
+      "target": "TASK-BUD-1073",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-refactor+focal-vitest+line-budget-live-preview",
+      "timestamp": "2026-05-13T10:32:15.650Z",
+      "evidence": "Split the remaining critical line-budget offender `packages/pi-stack/test/smoke/project-board-surface.test.ts` by extracting registered board tool surface coverage into `packages/pi-stack/test/smoke/project-board-tools.test.ts`. Line counts: project-board-surface reduced from 2220 to 1541; new project-board-tools file is 839. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/project-board-tools.test.ts` -> 2 files passed, 64 tests passed. Broader focal validation passed: guardrails-tool-hygiene + project-board pair + context-watchdog pair + agent-run split files -> 9 files passed, 183 tests passed. Live `line_budget_snapshot` after the split reported `scanned=337 aboveWatch=14 aboveExtract=7 aboveCritical=0`, eliminating critical files. Commit: 82363efb."
     }
   ]
 }
