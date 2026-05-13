@@ -15947,6 +15947,15 @@
       "method": "local-refactor+focal-vitest+line-budget-live-preview",
       "timestamp": "2026-05-13T10:32:15.650Z",
       "evidence": "Split the remaining critical line-budget offender `packages/pi-stack/test/smoke/project-board-surface.test.ts` by extracting registered board tool surface coverage into `packages/pi-stack/test/smoke/project-board-tools.test.ts`. Line counts: project-board-surface reduced from 2220 to 1541; new project-board-tools file is 839. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/project-board-tools.test.ts` -> 2 files passed, 64 tests passed. Broader focal validation passed: guardrails-tool-hygiene + project-board pair + context-watchdog pair + agent-run split files -> 9 files passed, 183 tests passed. Live `line_budget_snapshot` after the split reported `scanned=337 aboveWatch=14 aboveExtract=7 aboveCritical=0`, eliminating critical files. Commit: 82363efb."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1073-UNATTENDED-MEASURED-SPLIT-20260513",
+      "target": "TASK-BUD-1073",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-refactor+focal-vitest+line-budget-live-preview",
+      "timestamp": "2026-05-13T10:37:49.404Z",
+      "evidence": "Split over-extract `packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts` by extracting measured nudge-free canary coverage into `packages/pi-stack/test/smoke/guardrails-unattended-continuation-measured.test.ts`. Line counts: unattended-continuation reduced from 1837 to 1064; new measured file is 843. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-measured.test.ts` -> 2 files passed, 44 tests passed. Broader focal validation passed: guardrails-tool-hygiene + unattended pair + project-board pair + context-watchdog pair + agent-run split files -> 11 files passed, 227 tests passed. Live `line_budget_snapshot` after the split reported `scanned=338 aboveWatch=14 aboveExtract=6 aboveCritical=0`, reducing aboveExtract from 7 to 6. Commit: 58c01ccf."
     }
   ]
 }
