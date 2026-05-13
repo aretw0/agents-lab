@@ -1,60 +1,59 @@
 {
-  "timestamp": "2026-05-13T00:00:03.615Z",
-  "context": "Operator reported a WebSocket closed 1006 interruption requiring manual session restart/resume. Recorded incident under TASK-BUD-1072 with ve [snip] /unknown-cache/protected/dirty signals. [truncated:+706 chars]",
+  "timestamp": "2026-05-13T00:12:50.626Z",
+  "context": "Operator flagged a missed bad-smell/line-budget signal: packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts reached 2632 li [snip] e still requires reload before preview. [truncated:+688 chars]",
   "current_tasks": [
-    "TASK-BUD-1071"
+    "TASK-BUD-1073"
   ],
   "next_actions": [
-    "Reload before calling new live agent_run_batch_outcome_packet surface.",
-    "After reload, live-preview a sample batch outcome aggregation only; do not enable parallel dispatch.",
-    "Continue TASK-BUD-1071 with cache-pack/freshness shape or close planning gap for batch executo [snip] as separate guarded task. [truncated:+1 chars]"
+    "Reload before live-previewing new agent_run_sdk_cache_pack_packet surface from commit a2ceff06.",
+    "Prioritize TASK-BUD-1073 soon: split oversized smoke test and make line-budget/bad-smell a str [snip] gate for large test files. [truncated:+15 chars]",
+    "Once worker/batch lane is approved, use read-only workers to plan the test split in parallel, [snip] locally with focal tests. [truncated:+14 chars]"
   ],
   "blockers": [
-    "New live batch outcome tool surface requires reload.",
-    "Parallel execution remains intentionally disabled/report-only.",
-    "TASK-BUD-1072 continuity root causes remain unresolved: auto-resume suppressio [snip] et 1006 manual resume. [truncated:+13 chars]"
+    "New cache-pack live tool surface requires reload.",
+    "guardrails-agent-spawn-readiness.test.ts is oversized and should not receive u [snip] lit/gate is addressed. [truncated:+27 chars]",
+    "Parallel workers remain preview/report-only; no dispatch without exact confirmation."
   ],
   "recent_validation": [
-    "git status after WebSocket resume -> clean",
-    "context_watch_status -> level=ok percent=37 reloadGate=reload-not-required handoff=stale",
-    "context_watch_continuation_readiness -> ready=no reasons=candidate:invalid / checkpoint:invali [snip] itions:invalid dirty=clean [truncated:+13 chars]"
+    "git status before incident capture showed clean after previous commit",
+    "wc -l -> guardrails-agent-spawn-readiness.test.ts 2632 lines; surface 1734; sdk preview 706; runtime 645",
+    "line_budget_snapshot -> recommendation=extract code=line-budget-extract scanned=203 aboveWatch [snip] ne-budget-extract-required [truncated:+29 chars]"
   ],
   "recent_commits": [
-    "9c0a0f84 chore(board): record websocket continuity incident",
-    "a7d36632 feat(agents): add sdk batch outcome packet"
+    "f4182569 chore(board): record sdk batch outcome live preview",
+    "a2ceff06 feat(agents): add sdk cache pack packet"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1071",
+    "focus": "TASK-BUD-1073",
     "canonical_links": [
+      "task:TASK-BUD-1073",
       "task:TASK-BUD-1071",
-      "task:TASK-BUD-1072",
-      "task:TASK-BUD-1072-WEBSOCKET-1006-SESSION-RESUME-20260512",
       "commit:20260512"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-13T00:00:03.615Z",
-    "level": "ok",
-    "percent": 43,
+    "generatedAtIso": "2026-05-13T00:12:50.626Z",
+    "level": "warn",
+    "percent": 48,
     "action": "continue",
-    "recommendation": "reload-before-live-batch-outcome-preview",
+    "recommendation": "reload-cache-pack-preview-or-switch-to-task-bud-1073-split",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-13T00:00:03.615Z",
+      "atIso": "2026-05-13T00:12:50.626Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 43,
+      "level": "warn",
+      "percent": 48,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-before-live-batch-outcome-preview"
+      "recommendation": "reload-cache-pack-preview-or-switch-to-task-bud-1073-split"
     }
   ]
 }
