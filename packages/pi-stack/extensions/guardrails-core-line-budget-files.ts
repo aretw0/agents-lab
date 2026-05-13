@@ -2,6 +2,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type { LineBudgetFileEntry } from "./guardrails-core-tool-hygiene";
 
+const LINE_BUDGET_IGNORED_DIRS = new Set([".pi-lens", "coverage", "dist", "node_modules"]);
+
 function collectTypeScriptFiles(rootDir: string): string[] {
   if (!existsSync(rootDir)) return [];
 
@@ -10,7 +12,7 @@ function collectTypeScriptFiles(rootDir: string): string[] {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        walk(full);
+        if (!LINE_BUDGET_IGNORED_DIRS.has(entry.name)) walk(full);
         continue;
       }
       if (!entry.isFile()) continue;
@@ -27,12 +29,8 @@ function countLines(filePath: string): number {
 }
 
 export function buildExtensionLineBudgetEntries(cwd: string): LineBudgetFileEntry[] {
-  const roots = [
-    path.join(cwd, "packages", "pi-stack", "extensions"),
-    path.join(cwd, "packages", "pi-stack", "test", "smoke"),
-  ];
-  const files = roots.flatMap((root) => collectTypeScriptFiles(root));
-  return files.map((file) => ({
+  const root = path.join(cwd, "packages", "pi-stack");
+  return collectTypeScriptFiles(root).map((file) => ({
     path: path.relative(cwd, file).replace(/\\/g, "/"),
     lines: countLines(file),
   }));

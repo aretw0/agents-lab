@@ -368,11 +368,20 @@ describe("tool hygiene scorecard", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "line-budget-snapshot-"));
     const extDir = path.join(cwd, "packages", "pi-stack", "extensions");
     const smokeDir = path.join(cwd, "packages", "pi-stack", "test", "smoke");
+    const helperDir = path.join(cwd, "packages", "pi-stack", "test", "helpers");
+    const extraDir = path.join(cwd, "packages", "pi-stack", "themes");
+    const ignoredDir = path.join(cwd, "packages", "pi-stack", "node_modules", "ignored-package");
     mkdirSync(extDir, { recursive: true });
     mkdirSync(smokeDir, { recursive: true });
+    mkdirSync(helperDir, { recursive: true });
+    mkdirSync(extraDir, { recursive: true });
+    mkdirSync(ignoredDir, { recursive: true });
     writeFileSync(path.join(extDir, "small.ts"), "export const a = 1;\n", "utf8");
     writeFileSync(path.join(extDir, "watch.ts"), `${"x\n".repeat(1105)}`, "utf8");
     writeFileSync(path.join(smokeDir, "oversized.test.ts"), `${"x\n".repeat(1505)}`, "utf8");
+    writeFileSync(path.join(helperDir, "new-helper.ts"), `${"x\n".repeat(1005)}`, "utf8");
+    writeFileSync(path.join(extraDir, "new-package-surface.ts"), `${"x\n".repeat(1015)}`, "utf8");
+    writeFileSync(path.join(ignoredDir, "vendor.ts"), `${"x\n".repeat(2005)}`, "utf8");
 
     const result = await tool.execute(
       "tc-line-budget",
@@ -388,5 +397,8 @@ describe("tool hygiene scorecard", () => {
     expect(result.details?.authorization).toBe("none");
     expect(Array.isArray(result.details?.rows)).toBe(true);
     expect((result.details?.rows as Array<{ path: string }>).some((row) => row.path === "packages/pi-stack/test/smoke/oversized.test.ts")).toBe(true);
+    expect((result.details?.rows as Array<{ path: string }>).some((row) => row.path === "packages/pi-stack/test/helpers/new-helper.ts")).toBe(true);
+    expect((result.details?.rows as Array<{ path: string }>).some((row) => row.path === "packages/pi-stack/themes/new-package-surface.ts")).toBe(true);
+    expect((result.details?.rows as Array<{ path: string }>).some((row) => row.path.includes("node_modules/ignored-package/vendor.ts"))).toBe(false);
   });
 });
