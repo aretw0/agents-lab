@@ -16019,6 +16019,15 @@
       "method": "local-refactor+focal-vitest+line-budget-live-preview",
       "timestamp": "2026-05-13T13:05:51.688Z",
       "evidence": "Added parent-side subprocess timing instrumentation without dispatching a worker or patching node_modules. `agent_run_task_dispatch` now logs first stdout/stderr byte evidence via `createAgentRunChildOutputCapture`: `[agent-runner] first-byte stream=... elapsedMs=... bytes=...`; close/runner-timeout lines include `firstOutputElapsedMs=...` plus stdout/stderr byte counters. This narrows future `runner-timeout` triage by distinguishing no child output after valid preflight from provider/bootstrap hangs with partial output. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts` -> 4 files passed, 42 tests passed. Live `line_budget_snapshot` remained `aboveExtract=0 aboveCritical=0 recommendation=watch`. Commit: 04fbf499."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1073-LINE-BUDGET-PACKAGE-WIDE-SCAN-20260513",
+      "target": "TASK-BUD-1073",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-refactor+focal-vitest+live-preview",
+      "timestamp": "2026-05-13T13:35:18.314Z",
+      "evidence": "Hardened line-budget discovery so future TypeScript files anywhere under `packages/pi-stack` are included, not only `extensions` and `test/smoke`. Scanner now walks `packages/pi-stack` and skips generated/vendor dirs (`node_modules`, `dist`, `coverage`, `.pi-lens`). Regression fixture proves non-smoke test helpers and a new package-level surface are included, while `node_modules` is ignored. Validation: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts` -> 1 file passed, 15 tests passed. Live pre-reload `line_budget_snapshot` remains `recommendation=watch aboveExtract=0 aboveCritical=0 scanned=344`; extension changed again, so `/reload` is required before trusting the widened live scanner. Commit: 5791082b."
     }
   ]
 }
