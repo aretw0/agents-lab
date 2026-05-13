@@ -1,59 +1,58 @@
 {
-  "timestamp": "2026-05-13T03:13:00.025Z",
-  "context": "Continued local-safe control-plane/agent hardening after manual post-reload nudge. Recorded the reload continuity incident under TASK-BUD-107 [snip] reflect the line-budget scanner change. [truncated:+489 chars]",
+  "timestamp": "2026-05-13T03:28:20.476Z",
+  "context": "Post-reload continuation completed live validations and another line-budget split. Live line_budget_snapshot now reflects smoke-test scanning [snip] atch=14 aboveExtract=7 aboveCritical=1. [truncated:+455 chars]",
   "current_tasks": [
     "TASK-BUD-1073"
   ],
   "next_actions": [
-    "Reload before trusting live line_budget_snapshot to include smoke tests.",
-    "After reload, live-preview line_budget_snapshot and record verification for TASK-BUD-1073.",
-    "Continue TASK-BUD-1073 by deciding whether a stronger pre-edit gate/report packet is needed beyond expanded scanning."
+    "Continue TASK-BUD-1073 with the remaining critical file: packages/pi-stack/test/smoke/project- [snip] ace.test.ts at 2221 lines. [truncated:+10 chars]",
+    "Consider extracting guardrails-unattended-continuation.test.ts (1838) and guardrails-core-agen [snip] critical file is handled. [truncated:+45 chars]",
+    "For TASK-BUD-1071, cache-pack packet is live-validated; next SDK work can design cache freshne [snip] confirmation is provided. [truncated:+86 chars]"
   ],
   "blockers": [
-    "Runtime extension changes require /reload before live tool output reflects smoke-test scanning.",
-    "postReloadResume remains pending after the forced reload/manual nudge incident [snip] clears or explains it. [truncated:+28 chars]",
-    "Parallel/worker execution remains report-only unless exact per-run confirmation is provided."
+    "line_budget_snapshot still recommends extract: aboveExtract=7 aboveCritical=1.",
+    "No worker/provider dispatch authorized; all worker/batch executor work remains [snip] ut exact confirmation. [truncated:+18 chars]"
   ],
   "recent_validation": [
-    "Initial split validation: pnpm vitest run guardrails-agent-spawn-readiness + agent-run-sdk + a [snip] es passed, 42 tests passed [truncated:+50 chars]",
-    "Line-budget scanner hardening validation: pnpm vitest run guardrails-tool-hygiene + the four a [snip] es passed, 57 tests passed [truncated:+29 chars]",
-    "Line counts after split: spawn readiness 1377, sdk 480, runtime 271, task packets 519"
+    "live agent_run_sdk_cache_pack_packet -> decision=ready-for-human-decision entries=3 fresh=3 di [snip] atch=no authorization=none [truncated:+2 chars]",
+    "live line_budget_snapshot after reload -> scanned=335 aboveWatch=13 aboveExtract=7 aboveCritical=2",
+    "context watchdog split focal: pnpm vitest run context-watchdog.test.ts context-watchdog-surfac [snip] es passed, 62 tests passed [truncated:+19 chars]"
   ],
   "recent_commits": [
-    "a70c2057 test(agents): split agent-run smoke coverage",
-    "de484d49 chore(board): record agent-run split and reload incident"
+    "b20505cd chore(board): record post-reload live previews",
+    "f81b7166 test(context): split watchdog surface coverage"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1073",
     "canonical_links": [
       "task:TASK-BUD-1073",
-      "task:TASK-BUD-1072",
-      "commit:20260513"
+      "task:TASK-BUD-1071",
+      "commit:b20505cd"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-13T03:13:00.025Z",
+    "generatedAtIso": "2026-05-13T03:28:20.476Z",
     "level": "ok",
-    "percent": 30,
+    "percent": 35,
     "action": "continue",
-    "recommendation": "reload-then-live-preview-line-budget-and-cache-pack",
+    "recommendation": "continue-line-budget-critical-file-or-task-bud-1072-post-reload-hardening",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-13T03:13:00.025Z",
+      "atIso": "2026-05-13T03:28:20.476Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 30,
+      "percent": 35,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-live-preview-line-budget-and-cache-pack"
+      "recommendation": "continue-line-budget-critical-file-or-task-bud-1072-post-reload-hardening"
     }
   ]
 }
