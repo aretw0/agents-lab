@@ -123,6 +123,8 @@ export interface AgentRunSdkInProcessPacketResult {
 
 const SDK_TIMEOUT_MIN_MS = 5_000;
 const SDK_TIMEOUT_MAX_MS = 180_000;
+const SDK_CACHE_PACK_SUMMARY_MAX_CHARS = 600;
+const SDK_CACHE_PACK_EVIDENCE_MAX_CHARS = 300;
 
 function normalizeText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -258,13 +260,17 @@ export interface AgentRunSdkCachePackPacketResult {
     unknownCount: number;
     protectedScopeRequested: boolean;
     unexpectedDirty: boolean;
+    maxSummaryChars: number;
+    maxEvidenceChars: number;
   };
   entries: Array<{
     id: string;
     path?: string;
     summary: string;
+    summaryChars: number;
     freshness: "fresh" | "stale" | "unknown";
     evidence: string;
+    evidenceChars: number;
   }>;
   cacheKeyContract: string[];
   freshnessContract: string[];
@@ -518,15 +524,21 @@ export function buildAgentRunSdkCachePackPacket(input: AgentRunSdkCachePackPacke
     if (!id) blockers.push(`entry-id-missing:${index + 1}`);
     if (id && seenIds.has(id)) blockers.push(`duplicate-entry-id:${id}`);
     if (id) seenIds.add(id);
+    const summaryChars = summary.length;
+    const evidenceChars = evidence.length;
     if (!summary) blockers.push(`entry-summary-missing:${label}`);
+    if (summaryChars > SDK_CACHE_PACK_SUMMARY_MAX_CHARS) blockers.push(`entry-summary-too-large:${label}:${summaryChars}>${SDK_CACHE_PACK_SUMMARY_MAX_CHARS}`);
     if (!evidence) blockers.push(`entry-evidence-missing:${label}`);
+    if (evidenceChars > SDK_CACHE_PACK_EVIDENCE_MAX_CHARS) blockers.push(`entry-evidence-too-large:${label}:${evidenceChars}>${SDK_CACHE_PACK_EVIDENCE_MAX_CHARS}`);
     if (freshness !== "fresh") blockers.push(`entry-not-fresh:${label}:${freshness}`);
     return {
       id,
       ...(entryPath ? { path: entryPath } : {}),
       summary,
+      summaryChars,
       freshness,
       evidence,
+      evidenceChars,
     };
   });
 
@@ -538,6 +550,7 @@ export function buildAgentRunSdkCachePackPacket(input: AgentRunSdkCachePackPacke
     "cache keys should include pack id, entry id, path when present, and freshness evidence",
     "path-backed entries should cite git object, mtime/size, or verification id evidence before workers trust the summary",
     "duplicate entry ids are blocked so fan-out workers can cite cache evidence unambiguously",
+    `entry summaries are bounded to ${SDK_CACHE_PACK_SUMMARY_MAX_CHARS} chars and evidence labels to ${SDK_CACHE_PACK_EVIDENCE_MAX_CHARS} chars`,
   ];
   const freshnessContract = [
     "only fresh entries are promotable into worker prompts",
@@ -570,6 +583,8 @@ export function buildAgentRunSdkCachePackPacket(input: AgentRunSdkCachePackPacke
       unknownCount,
       protectedScopeRequested,
       unexpectedDirty,
+      maxSummaryChars: SDK_CACHE_PACK_SUMMARY_MAX_CHARS,
+      maxEvidenceChars: SDK_CACHE_PACK_EVIDENCE_MAX_CHARS,
     },
     entries,
     cacheKeyContract,

@@ -228,10 +228,15 @@ describe("agent run SDK packet surfaces", () => {
         freshCount: 2,
         staleCount: 0,
         unknownCount: 0,
+        maxSummaryChars: 600,
+        maxEvidenceChars: 300,
       },
       humanConfirmationPhrase: "approve sdk cache pack task-bud-1071-shared-evidence-pack",
     });
+    expect(cachePack.entries[0]?.summaryChars).toBe("SDK packet exposes report-only cache and batch contracts.".length);
+    expect(cachePack.entries[0]?.evidenceChars).toBe("VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512".length);
     expect(cachePack.cacheKeyContract.join("\n")).toContain("verification id evidence");
+    expect(cachePack.cacheKeyContract.join("\n")).toContain("bounded to 600 chars");
     expect(cachePack.workerUseContract.join("\n")).toContain("cache-hit/cache-miss");
 
     const staleCachePack = buildAgentRunSdkCachePackPacket({
@@ -247,6 +252,21 @@ describe("agent run SDK packet surfaces", () => {
     });
     expect(staleCachePack.decision).toBe("blocked");
     expect(staleCachePack.blockers).toContain("entry-not-fresh:stale-entry:stale");
+
+    const oversizedCachePack = buildAgentRunSdkCachePackPacket({
+      packId: "task-bud-1071-oversized-evidence-pack",
+      entries: [
+        {
+          id: "oversized-entry",
+          summary: "x".repeat(601),
+          freshness: "fresh",
+          evidence: "y".repeat(301),
+        },
+      ],
+    });
+    expect(oversizedCachePack.decision).toBe("blocked");
+    expect(oversizedCachePack.blockers).toContain("entry-summary-too-large:oversized-entry:601>600");
+    expect(oversizedCachePack.blockers).toContain("entry-evidence-too-large:oversized-entry:301>300");
 
     const batchPacket = buildAgentRunSdkReadOnlyBatchPacket({
       batchId: "task-bud-1071-sdk-readonly-batch-preview",
