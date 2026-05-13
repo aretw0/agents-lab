@@ -16010,6 +16010,15 @@
       "method": "local-refactor+focal-vitest+line-budget-live-preview",
       "timestamp": "2026-05-13T12:52:47.339Z",
       "evidence": "Extracted SDK runner/log/registry/subprocess preflight helpers from `packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts` into new cohesive module `packages/pi-stack/extensions/guardrails-core-agent-run-surface-runtime.ts`. Line count for the former above-extract file dropped from 1734 to 1393; new runtime helper file is 348. Updated source-inspection tests to inspect the new runtime helper where appropriate. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts` -> 4 files passed, 42 tests passed. Broader validation passed: guardrails-tool-hygiene + agent-run quartet + colony split pair -> 7 files passed, 139 tests passed. Live `line_budget_snapshot` after extraction reported `scanned=344 aboveWatch=14 aboveExtract=0 aboveCritical=0 recommendation=watch`, clearing line-budget extract debt. Commit: 8adc4c9c."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-SUBPROCESS-FIRST-BYTE-INSTRUMENTATION-20260513",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-refactor+focal-vitest+line-budget-live-preview",
+      "timestamp": "2026-05-13T13:05:51.688Z",
+      "evidence": "Added parent-side subprocess timing instrumentation without dispatching a worker or patching node_modules. `agent_run_task_dispatch` now logs first stdout/stderr byte evidence via `createAgentRunChildOutputCapture`: `[agent-runner] first-byte stream=... elapsedMs=... bytes=...`; close/runner-timeout lines include `firstOutputElapsedMs=...` plus stdout/stderr byte counters. This narrows future `runner-timeout` triage by distinguishing no child output after valid preflight from provider/bootstrap hangs with partial output. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts` -> 4 files passed, 42 tests passed. Live `line_budget_snapshot` remained `aboveExtract=0 aboveCritical=0 recommendation=watch`. Commit: 04fbf499."
     }
   ]
 }
