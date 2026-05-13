@@ -27,8 +27,11 @@ function countLines(filePath: string): number {
 }
 
 export function buildExtensionLineBudgetEntries(cwd: string): LineBudgetFileEntry[] {
-  const root = path.join(cwd, "packages", "pi-stack", "extensions");
-  const files = collectTypeScriptFiles(root);
+  const roots = [
+    path.join(cwd, "packages", "pi-stack", "extensions"),
+    path.join(cwd, "packages", "pi-stack", "test", "smoke"),
+  ];
+  const files = roots.flatMap((root) => collectTypeScriptFiles(root));
   return files.map((file) => ({
     path: path.relative(cwd, file).replace(/\\/g, "/"),
     lines: countLines(file),

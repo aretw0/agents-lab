@@ -367,9 +367,12 @@ describe("tool hygiene scorecard", () => {
 
     const cwd = mkdtempSync(path.join(tmpdir(), "line-budget-snapshot-"));
     const extDir = path.join(cwd, "packages", "pi-stack", "extensions");
+    const smokeDir = path.join(cwd, "packages", "pi-stack", "test", "smoke");
     mkdirSync(extDir, { recursive: true });
+    mkdirSync(smokeDir, { recursive: true });
     writeFileSync(path.join(extDir, "small.ts"), "export const a = 1;\n", "utf8");
     writeFileSync(path.join(extDir, "watch.ts"), `${"x\n".repeat(1105)}`, "utf8");
+    writeFileSync(path.join(smokeDir, "oversized.test.ts"), `${"x\n".repeat(1505)}`, "utf8");
 
     const result = await tool.execute(
       "tc-line-budget",
@@ -384,5 +387,6 @@ describe("tool hygiene scorecard", () => {
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.authorization).toBe("none");
     expect(Array.isArray(result.details?.rows)).toBe(true);
+    expect((result.details?.rows as Array<{ path: string }>).some((row) => row.path === "packages/pi-stack/test/smoke/oversized.test.ts")).toBe(true);
   });
 });
