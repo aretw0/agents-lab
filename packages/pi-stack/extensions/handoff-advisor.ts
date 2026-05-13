@@ -130,25 +130,35 @@ export async function buildHandoffAdvisory(
   try {
     const days = safeNum(qv.defaultDays) || 30;
     const status = await analyzeQuota({ days, providerBudgets, providerWindowHours: {}, cwd });
-    routeAdvisory = buildRouteAdvisory(status, toRoutingProfile(undefined));
+    routeAdvisory = buildRouteAdvisory(status, toRoutingProfile(undefined), {
+      preferredScopeKeys: Object.values(routeModelRefs),
+    });
   } catch {
     routeAdvisory = null;
   }
 
   const budgetStateByProvider: Record<string, string> = {};
+  const budgetStateByScope: Record<string, string> = {};
   if (routeAdvisory) {
     for (const c of routeAdvisory.consideredProviders) {
-      budgetStateByProvider[c.provider] = c.state;
+      const scope = c.providerModelKey ?? c.providerAccountKey ?? c.provider;
+      budgetStateByScope[scope] = c.state;
+      if (budgetStateByProvider[c.provider] !== "ok" && c.state !== "blocked") {
+        budgetStateByProvider[c.provider] = c.state;
+      } else if (!budgetStateByProvider[c.provider]) {
+        budgetStateByProvider[c.provider] = c.state;
+      }
     }
   }
 
   // Combine readiness + budget into unified candidates list
   const candidates: ProviderHandoffScore[] = matrix.entries.map((entry) => {
-    const budgetState = (budgetStateByProvider[entry.provider] ?? entry.budgetState) as string;
+    const modelRef = routeModelRefs[entry.provider] ?? entry.modelRef ?? undefined;
+    const budgetState = (modelRef ? budgetStateByScope[modelRef] : undefined) ?? budgetStateByProvider[entry.provider] ?? entry.budgetState;
     const score = computeHandoffScore(budgetState, entry.readiness);
     return {
       provider: entry.provider,
-      modelRef: entry.modelRef,
+      modelRef: modelRef ?? null,
       budgetState: budgetState as ProviderHandoffScore["budgetState"],
       readiness: entry.readiness,
       score,

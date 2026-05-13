@@ -802,15 +802,16 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 				reason?: string;
 			};
 			const status = await getStatus(ctx, { days: p.days });
+			const settings = readSettings(ctx.cwd);
 			const advisory = buildRouteAdvisory(
 				status,
 				parseRoutingProfile(p.profile),
+				{ preferredScopeKeys: Object.values(settings.routeModelRefs ?? {}) },
 			);
 
 			let executed = false;
 			let executedModelRef: string | undefined;
 			if (p.execute === true && advisory.recommendedProvider) {
-				const settings = readSettings(ctx.cwd);
 				const modelRef =
 					settings.routeModelRefs?.[advisory.recommendedProvider];
 				if (modelRef) {
@@ -950,13 +951,15 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 						: parseDays(tokens[2]);
 				const execute = parseBooleanFlag(tokens, "--execute", "--apply");
 				const status = await getStatus(ctx, { days });
-				const advisory = buildRouteAdvisory(status, profile);
+				const settings = readSettings(ctx.cwd);
+				const advisory = buildRouteAdvisory(status, profile, {
+					preferredScopeKeys: Object.values(settings.routeModelRefs ?? {}),
+				});
 
 				let executed = false;
 				let executedModelRef: string | undefined;
 
 				if (execute && advisory.recommendedProvider) {
-					const settings = readSettings(ctx.cwd);
 					const modelRef =
 						settings.routeModelRefs?.[advisory.recommendedProvider];
 					if (!modelRef) {

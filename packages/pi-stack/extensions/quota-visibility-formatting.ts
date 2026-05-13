@@ -126,6 +126,7 @@ function maxPressurePct(status: ProviderBudgetStatus): number {
 function routePriority(
 	status: ProviderBudgetStatus,
 	profile: RoutingProfile,
+	preferredRank?: number,
 ): number {
 	const pressure = maxPressurePct(status);
 	const stateScore =
@@ -136,14 +137,35 @@ function routePriority(
 	const cheapBonus = profile === "cheap" ? requestsBonus : 0;
 	const balancedBonus =
 		profile === "balanced" ? (status.state === "ok" ? -10 : 0) : 0;
+	const preferredBonus =
+		preferredRank === undefined ? 0 : -100 * (100 - preferredRank);
 
-	return stateScore + pressure + reliableBonus + cheapBonus + balancedBonus;
+	return stateScore + pressure + reliableBonus + cheapBonus + balancedBonus + preferredBonus;
+}
+
+export interface RouteAdvisoryOptions {
+	preferredScopeKeys?: string[];
+}
+
+function normalizePreferredScopeKeys(values?: string[]): string[] {
+	const seen = new Set<string>();
+	const out: string[] = [];
+	for (const raw of values ?? []) {
+		const value = raw.trim();
+		if (!value || seen.has(value)) continue;
+		seen.add(value);
+		out.push(value);
+	}
+	return out;
 }
 
 export function buildRouteAdvisory(
 	status: QuotaStatus,
 	profile: RoutingProfile = "balanced",
+	options: RouteAdvisoryOptions = {},
 ): RouteAdvisory {
+	const preferredScopeKeys = normalizePreferredScopeKeys(options.preferredScopeKeys);
+	const preferredRankByScope = new Map(preferredScopeKeys.map((scope, index) => [scope, index]));
 	const considered = status.providerBudgets
 		.map((b) => {
 			const budgetDecision = b.state === "warning" ? "warn" : b.state;
@@ -164,6 +186,7 @@ export function buildRouteAdvisory(
 				budgetEvidenceGeneratedAtIso: status.source.generatedAtIso,
 				nowMs: Date.parse(status.source.generatedAtIso),
 			});
+			const preferredRank = preferredRankByScope.get(scopeKey);
 			return {
 				provider: b.provider,
 				providerModelKey: b.providerModelKey,
@@ -180,33 +203,47 @@ export function buildRouteAdvisory(
 				executionBudgetEvidenceSource: "route-advisory" as const,
 				executionBudgetEvidenceProvider: scopeKey,
 				executionBudgetEvidenceGeneratedAtIso: status.source.generatedAtIso,
-				_sortScore: routePriority(b, profile),
+				_preferredRank: preferredRank,
+				_sortScore: routePriority(b, profile, preferredRank),
 			};
 		})
 		.sort(
 			(a, b) =>
-				a._sortScore - b._sortScore || advisoryScopeKey(a).localeCompare(advisoryScopeKey(b)) || a.provider.localeCompare(b.provider),
+				a._sortScore - b._sortScore ||
+				(a._preferredRank ?? Number.POSITIVE_INFINITY) - (b._preferredRank ?? Number.POSITIVE_INFINITY) ||
+				advisoryScopeKey(a).localeCompare(advisoryScopeKey(b)) ||
+				a.provider.localeCompare(b.provider),
 		);
 
-	const blockedProviders = considered
+	const blockedProviders = Array.from(new Set(considered
 		.filter((c) => c.state === "blocked")
-		.map((c) => c.provider);
-	const winner = considered.find((c) => c.state !== "blocked");
+		.map((c) => c.provider)));
+	const preferredWinner = preferredScopeKeys
+		.map((scope) => considered.find((c) => advisoryScopeKey(c) === scope && c.state !== "blocked"))
+		.find(Boolean);
+	const winner = preferredWinner ?? considered.find((c) => c.state !== "blocked");
+	const winnerScope = winner ? advisoryScopeKey(winner) : undefined;
+	const preferredReason = winnerScope && preferredScopeKeys.includes(winnerScope);
 
 	const reason = !winner
 		? "BLOCKER: todos os providers avaliados estão em BLOCK; use recovery/override auditável e ajuste orçamento."
-		: winner.state === "warning"
-			? `WARN: ${winner.provider} é a melhor opção disponível no momento, porém já está em WARNING.`
-			: `OK: ${winner.provider} apresenta melhor headroom para o perfil '${profile}'.`;
+		: preferredReason && winner.state === "warning"
+			? `WARN: ${winnerScope} é a rota configurada em routeModelRefs e está disponível em WARNING; mantendo preferência antes de fallback para outro provider.`
+			: preferredReason
+				? `OK: ${winnerScope} é a rota configurada em routeModelRefs com melhor prioridade determinística.`
+				: winner.state === "warning"
+					? `WARN: ${winner.provider} é a melhor opção disponível no momento, porém já está em WARNING.`
+					: `OK: ${winner.provider} apresenta melhor headroom para o perfil '${profile}'.`;
 
 	return {
 		profile,
 		generatedAtIso: status.source.generatedAtIso,
 		recommendedProvider: winner?.provider,
+		recommendedScopeKey: winnerScope,
 		state: !winner ? "blocked" : winner.state,
 		reason,
 		blockedProviders,
-		consideredProviders: considered.map(({ _sortScore, ...row }) => row),
+		consideredProviders: considered.map(({ _sortScore, _preferredRank, ...row }) => row),
 		noAutoSwitch: true,
 	};
 }
@@ -219,6 +256,9 @@ export function formatRouteAdvisory(advisory: RouteAdvisory): string {
 	lines.push(
 		`recommendedProvider: ${advisory.recommendedProvider ?? "(none)"}`,
 	);
+	if (advisory.recommendedScopeKey) {
+		lines.push(`recommendedScopeKey: ${advisory.recommendedScopeKey}`);
+	}
 	lines.push(
 		`policy: no-auto-switch=${advisory.noAutoSwitch ? "true" : "false"}`,
 	);

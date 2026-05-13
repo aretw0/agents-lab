@@ -195,6 +195,7 @@
           "period": "weekly",
           "unit": "requests",
           "model": "gpt-5.3-codex-spark",
+          "weeklyQuotaRequests": 100,
           "warnPct": 80,
           "hardPct": 100
         }

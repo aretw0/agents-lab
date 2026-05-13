@@ -191,6 +191,7 @@ export interface RouteAdvisory {
 	profile: RoutingProfile;
 	generatedAtIso: string;
 	recommendedProvider?: string;
+	recommendedScopeKey?: string;
 	state: "ok" | "warning" | "blocked";
 	reason: string;
 	blockedProviders: string[];

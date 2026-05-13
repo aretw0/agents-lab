@@ -16064,6 +16064,15 @@
       "method": "local-refactor+focal-vitest+line-budget-preview",
       "timestamp": "2026-05-13T15:21:53.335Z",
       "evidence": "Hardened report-only SDK read-only batch packets so sharedEvidence is bounded before future fan-out attachment: maxSharedEvidenceItems=20, maxSharedEvidenceChars=300, duplicate shared evidence is blocked, and oversized entries emit shared-evidence-too-large. This preserves dispatchAllowed=false/parallelDispatchAllowed=false and supports cache economy without authorizing execution. Validation: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts` -> 1 file passed, 1 test passed; `git diff --check` passed; `line_budget_snapshot` remained recommendation=watch aboveExtract=0 aboveCritical=0."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1070-SPARK-ROUTE-PREFERENCE-20260513",
+      "target": "TASK-BUD-1070",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-fix+focal-vitest+line-budget-preview",
+      "timestamp": "2026-05-13T16:31:00.229Z",
+      "evidence": "Fixed routing/budget selection so configured routeModelRefs are treated as deterministic preferred execution scopes before fallback providers. With routeModelRefs ordering `openai-codex -> openai-codex/gpt-5.3-codex-spark` before `dashscope`, the advisory now selects the non-blocked Spark model scope even when aggregate openai-codex is blocked and dashscope is locally ok; if Spark is blocked, fallback providers can still be considered. Added `recommendedScopeKey` to make the selected provider/model scope explicit, propagated preference into quota_visibility_route, slash route, handoff-advisor, and quota-panel snapshot, and set `.pi/settings.json` Spark budget to explicit `weeklyQuotaRequests=100`. Validation: `pnpm vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/quota-visibility-route-advisory.test.ts packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts` -> 4 files passed, 94 tests passed; `git diff --check` passed; `line_budget_snapshot` recommendation=watch aboveExtract=0 aboveCritical=0. Runtime source changed after user reload, so another reload is required before trusting live route tool output."
     }
   ]
 }

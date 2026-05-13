@@ -22,6 +22,7 @@ import {
 	type ProviderWindowInsight,
 	parseProviderBudgets,
 	parseProviderWindowHours,
+	parseRouteModelRefs,
 	type QuotaStatus,
 	safeNum,
 	shortProviderLabel,
@@ -165,6 +166,7 @@ function panelDivider(label: string, width: number): string {
 export function buildPanelLines(
 	status: QuotaStatus | null,
 	width: number,
+	options: { preferredScopeKeys?: string[] } = {},
 ): string[] {
 	if (!status) {
 		return [
@@ -185,7 +187,9 @@ export function buildPanelLines(
 		for (const w of windows) lines.push(windowRow(w));
 	}
 	if (status.providerBudgets.length > 0) {
-		const advisory = buildRouteAdvisory(status, "balanced");
+		const advisory = buildRouteAdvisory(status, "balanced", {
+			preferredScopeKeys: options.preferredScopeKeys,
+		});
 		lines.push(panelDivider("Route Advisory", width));
 		const candidates = advisory.consideredProviders
 			.map((c) => {
@@ -209,6 +213,7 @@ export function buildPanelLines(
 function readPanelSettings(cwd: string): {
 	providerBudgets: ReturnType<typeof parseProviderBudgets>;
 	providerWindowHours: ReturnType<typeof parseProviderWindowHours>;
+	routeModelRefs: ReturnType<typeof parseRouteModelRefs>;
 	days: number;
 	panelMode?: PanelMode;
 } {
@@ -222,6 +227,7 @@ function readPanelSettings(cwd: string): {
 		const providerWindowHours = parseProviderWindowHours(
 			qv.providerWindowHours,
 		);
+		const routeModelRefs = parseRouteModelRefs(qv.routeModelRefs);
 		const panelCfg = ((raw?.piStack as Record<string, unknown>)?.quotaPanel ??
 			{}) as Record<string, unknown>;
 		const panelMode = resolvePanelMode(panelCfg.mode, "off");
@@ -229,11 +235,12 @@ function readPanelSettings(cwd: string): {
 		const dayOfMonth = new Date().getDate();
 		// dayOfMonth ensures monthly budgets cover the full billing period so far.
 		const days = Math.max(dayOfMonth, defaultDays > 0 ? defaultDays : 7);
-		return { providerBudgets, providerWindowHours, days, panelMode };
+		return { providerBudgets, providerWindowHours, routeModelRefs, days, panelMode };
 	} catch {
 		return {
 			providerBudgets: {},
 			providerWindowHours: {},
+			routeModelRefs: {},
 			days: 7,
 			panelMode: "off",
 		};
@@ -307,7 +314,7 @@ export default function quotaPanelExtension(pi: ExtensionAPI) {
 			}
 
 			if (cmd === "snapshot") {
-				const { providerBudgets, providerWindowHours, days } =
+				const { providerBudgets, providerWindowHours, routeModelRefs, days } =
 					readPanelSettings(ctx.cwd);
 				if (Object.keys(providerBudgets).length === 0) {
 					ctx.ui.notify(
@@ -322,7 +329,9 @@ export default function quotaPanelExtension(pi: ExtensionAPI) {
 						providerBudgets,
 						providerWindowHours,
 					});
-					const lines = buildPanelLines(status, 80);
+					const lines = buildPanelLines(status, 80, {
+						preferredScopeKeys: Object.values(routeModelRefs),
+					});
 					ctx.ui.notify(
 						lines.join("\n") || "quota panel: sem dados para exibir",
 						"info",
