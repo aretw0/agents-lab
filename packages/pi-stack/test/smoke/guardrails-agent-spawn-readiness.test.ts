@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildDeclaredFileScopedSdkWorkerTools, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, evaluateDeclaredPathPolicy, resolveExecutionCwdParam, resolveProviderExecutionBudgetEvidence, sameCwd } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildDeclaredFileScopedSdkWorkerTools, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, evaluateDeclaredPathPolicy, resolveExecutionCwdParam, resolveProviderExecutionBudgetEvidence, sameCwd } from "../../extensions/guardrails-core";
 import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
 
 describe("agent spawn readiness contract", () => {
@@ -1851,6 +1851,53 @@ describe("agent spawn readiness contract", () => {
     expect(unsupportedToolsBlocked.recommendationCode).toBe("agent-run-sdk-blocked-tools");
     expect(unsupportedToolsBlocked.blockers).toContain("unsupported-tool-policy:find,ls");
 
+    const cachePack = buildAgentRunSdkCachePackPacket({
+      packId: "task-bud-1071-shared-evidence-pack",
+      entries: [
+        {
+          id: "sdk-contract",
+          path: "packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts",
+          summary: "SDK packet exposes report-only cache and batch contracts.",
+          freshness: "fresh",
+          evidence: "VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512",
+        },
+        {
+          id: "batch-outcome",
+          summary: "Batch outcome fan-in requires explicit cache hit/miss evidence.",
+          freshness: "fresh",
+          evidence: "VERIF-TASK-BUD-1071-SDK-BATCH-OUTCOME-LIVE-PREVIEW-20260512",
+        },
+      ],
+    });
+    expect(cachePack).toMatchObject({
+      mode: "agent-run-sdk-cache-pack-packet",
+      decision: "ready-for-human-decision",
+      dispatchAllowed: false,
+      packSpec: {
+        entryCount: 2,
+        freshCount: 2,
+        staleCount: 0,
+        unknownCount: 0,
+      },
+      humanConfirmationPhrase: "approve sdk cache pack task-bud-1071-shared-evidence-pack",
+    });
+    expect(cachePack.cacheKeyContract.join("\n")).toContain("verification id evidence");
+    expect(cachePack.workerUseContract.join("\n")).toContain("cache-hit/cache-miss");
+
+    const staleCachePack = buildAgentRunSdkCachePackPacket({
+      packId: "task-bud-1071-stale-evidence-pack",
+      entries: [
+        {
+          id: "stale-entry",
+          summary: "Stale evidence must not be attached to fan-out workers.",
+          freshness: "stale",
+          evidence: "old-verification",
+        },
+      ],
+    });
+    expect(staleCachePack.decision).toBe("blocked");
+    expect(staleCachePack.blockers).toContain("entry-not-fresh:stale-entry:stale");
+
     const batchPacket = buildAgentRunSdkReadOnlyBatchPacket({
       batchId: "task-bud-1071-sdk-readonly-batch-preview",
       sharedEvidence: ["VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512"],
@@ -1933,6 +1980,31 @@ describe("agent spawn readiness contract", () => {
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
     const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
     guardrailsCore(pi);
+    const cachePackToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_cache_pack_packet");
+    const cachePackTool = cachePackToolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+    const cachePackSurface = cachePackTool.execute("tc-sdk-cache-pack-preview", {
+      pack_id: "task-bud-1071-shared-evidence-pack",
+      entries: [
+        {
+          id: "sdk-contract",
+          path: "packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts",
+          summary: "SDK packet exposes report-only cache and batch contracts.",
+          freshness: "fresh",
+          evidence: "VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512",
+        },
+      ],
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
+    expect(cachePackSurface.details?.mode).toBe("agent-run-sdk-cache-pack-packet");
+    expect(cachePackSurface.details?.dispatchAllowed).toBe(false);
+    expect(cachePackSurface.content?.[0]?.text).toContain("dispatch=no");
     const batchToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_readonly_batch_packet");
     const batchTool = batchToolCall?.[0] as {
       execute: (

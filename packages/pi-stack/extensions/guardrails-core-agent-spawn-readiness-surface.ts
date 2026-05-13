@@ -7,7 +7,7 @@ import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readi
 import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 import { buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
 import { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run-executor-strategy";
-import { buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket, type AgentRunSdkInProcessPacketResult } from "./guardrails-core-agent-run-sdk-preview";
+import { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket, type AgentRunSdkInProcessPacketResult } from "./guardrails-core-agent-run-sdk-preview";
 import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunRegistryEntry, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
@@ -1105,6 +1105,48 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_executor_strategy_packet",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_sdk_cache_pack_packet",
+    label: "Agent Run SDK Cache Pack Packet",
+    description: "Report-only shared evidence/cache pack packet for SDK workers. Never reads files, dispatches workers, or authorizes execution.",
+    parameters: Type.Object({
+      pack_id: Type.Optional(Type.String({ description: "Future shared evidence/cache pack id." })),
+      entries: Type.Optional(Type.Array(Type.Object({
+        id: Type.Optional(Type.String({ description: "Stable entry id." })),
+        path: Type.Optional(Type.String({ description: "Optional path represented by this evidence." })),
+        summary: Type.Optional(Type.String({ description: "Bounded summary for worker prompt reuse." })),
+        freshness: Type.Optional(Type.String({ description: "fresh, stale, or unknown." })),
+        evidence: Type.Optional(Type.String({ description: "Freshness evidence such as verification id, git object, mtime/size, or log id." })),
+      }), { description: "Bounded cache/evidence entries." })),
+      max_entries: Type.Optional(Type.Number({ description: "Maximum entries allowed in this pack, clamped to 1..20." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
+      unexpected_dirty: Type.Optional(Type.Boolean({ description: "Blocks when workspace dirty state is unexpected." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const entriesRaw = Array.isArray(p.entries) ? p.entries : [];
+      const entries = entriesRaw.filter((entry): entry is Record<string, unknown> => !!entry && typeof entry === "object").map((entry) => ({
+        id: typeof entry.id === "string" ? entry.id : undefined,
+        path: typeof entry.path === "string" ? entry.path : undefined,
+        summary: typeof entry.summary === "string" ? entry.summary : undefined,
+        freshness: typeof entry.freshness === "string" ? entry.freshness : undefined,
+        evidence: typeof entry.evidence === "string" ? entry.evidence : undefined,
+      }));
+      const result = buildAgentRunSdkCachePackPacket({
+        packId: typeof p.pack_id === "string" ? p.pack_id : undefined,
+        entries,
+        maxEntries: typeof p.max_entries === "number" ? p.max_entries : undefined,
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+        unexpectedDirty: asOptionalBoolean(p.unexpected_dirty),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_sdk_cache_pack_packet",
         summary: result.summary,
         details: result,
       });

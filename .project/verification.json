@@ -15866,6 +15866,15 @@
       "method": "post-reload-live-tool-preview",
       "timestamp": "2026-05-13T00:03:09.618Z",
       "evidence": "After reload, live `agent_run_batch_outcome_packet` preview succeeded without dispatch. Batch `task-bud-1071-sdk-readonly-batch-live-preview` aggregated two expected worker outcome rows with `process_state=completed`, `contract_decision=pass`, no touched files, no marker failures, positive output bytes, and explicit cache evidence (`hit` and `miss`). Tool returned `decision=pass`, `recommendation=promote`, `workers=2`, `passed=2`, `cacheHits=1`, `cacheMisses=1`, `dispatch=no`, `authorization=none`. This validates the report-only fan-in surface is live after reload; it does not authorize worker dispatch or parallel execution."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-CACHE-PACK-PACKET-20260512",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke-test+marker-check",
+      "timestamp": "2026-05-13T00:09:09.575Z",
+      "evidence": "Added report-only `buildAgentRunSdkCachePackPacket` and `agent_run_sdk_cache_pack_packet` surface for shared SDK worker evidence/cache packs. The packet never reads files or dispatches workers; it validates bounded entries, stable entry ids, freshness evidence, duplicate prevention, stale/unknown blocking, and worker-use contract requiring cache-hit/cache-miss output. Validation: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` passed 42/42; `git diff --check` passed; marker checks passed for builder, surface, and smoke test. Live surface still requires reload before use."
     }
   ]
 }

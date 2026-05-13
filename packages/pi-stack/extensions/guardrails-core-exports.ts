@@ -106,8 +106,8 @@ export { buildAgentRunArgvDiagnostics, buildAgentRunStartupDiagnosticPacket, cla
 export type { AgentRunArgvDiagnostics, AgentRunFailureClassificationInput, AgentRunFailureClassificationResult, AgentRunStartupDiagnosticDecision, AgentRunStartupDiagnosticInput, AgentRunStartupDiagnosticPacketResult, AgentRunStartupProbePlanStep, AgentRunnerFailureClass, AgentRunnerPreflightDecision } from "./guardrails-core-agent-run-diagnostics";
 export { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run-executor-strategy";
 export type { AgentRunExecutorStrategyDecision, AgentRunExecutorStrategyInput, AgentRunExecutorStrategyKind, AgentRunExecutorStrategyPacketResult } from "./guardrails-core-agent-run-executor-strategy";
-export { buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket } from "./guardrails-core-agent-run-sdk-preview";
-export type { AgentRunSdkFileContract, AgentRunSdkInProcessPacketInput, AgentRunSdkInProcessPacketResult, AgentRunSdkPacketDecision, AgentRunSdkReadOnlyBatchPacketInput, AgentRunSdkReadOnlyBatchPacketResult, AgentRunSdkSessionMode } from "./guardrails-core-agent-run-sdk-preview";
+export { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket } from "./guardrails-core-agent-run-sdk-preview";
+export type { AgentRunSdkCachePackPacketInput, AgentRunSdkCachePackPacketResult, AgentRunSdkFileContract, AgentRunSdkInProcessPacketInput, AgentRunSdkInProcessPacketResult, AgentRunSdkPacketDecision, AgentRunSdkReadOnlyBatchPacketInput, AgentRunSdkReadOnlyBatchPacketResult, AgentRunSdkSessionMode } from "./guardrails-core-agent-run-sdk-preview";
 export { buildDeclaredFileScopedSdkWorkerTools, DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOLS, evaluateDeclaredPathPolicy, findUnsupportedDeclaredFileScopedSdkWorkerTools, wrapToolDefinitionWithDeclaredPathPolicy } from "./guardrails-core-tool-policy";
 export type { DeclaredPathPolicy, SdkWorkerToolPolicyPlan, ToolPolicyDecision } from "./guardrails-core-tool-policy";
 export { buildToolkitContract } from "./guardrails-core-toolkit-contract";

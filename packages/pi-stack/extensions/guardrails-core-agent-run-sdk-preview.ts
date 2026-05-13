@@ -222,6 +222,58 @@ function buildSdkMaturity(input: {
   };
 }
 
+export interface AgentRunSdkCachePackEntryInput {
+  id?: string;
+  path?: string;
+  summary?: string;
+  freshness?: "fresh" | "stale" | "unknown" | string;
+  evidence?: string;
+}
+
+export interface AgentRunSdkCachePackPacketInput {
+  packId?: string;
+  entries?: AgentRunSdkCachePackEntryInput[];
+  maxEntries?: number;
+  protectedScopeRequested?: boolean;
+  unexpectedDirty?: boolean;
+}
+
+export interface AgentRunSdkCachePackPacketResult {
+  mode: "agent-run-sdk-cache-pack-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  processStopAllowed: false;
+  requiresHumanDecision: true;
+  decision: AgentRunSdkPacketDecision;
+  recommendationCode: "agent-run-sdk-cache-pack-ready-for-human-decision" | "agent-run-sdk-cache-pack-blocked";
+  blockers: string[];
+  packSpec: {
+    packId: string;
+    entryCount: number;
+    maxEntries: number;
+    freshCount: number;
+    staleCount: number;
+    unknownCount: number;
+    protectedScopeRequested: boolean;
+    unexpectedDirty: boolean;
+  };
+  entries: Array<{
+    id: string;
+    path?: string;
+    summary: string;
+    freshness: "fresh" | "stale" | "unknown";
+    evidence: string;
+  }>;
+  cacheKeyContract: string[];
+  freshnessContract: string[];
+  workerUseContract: string[];
+  humanConfirmationPhrase: string;
+  nextActions: string[];
+  summary: string;
+}
+
 export interface AgentRunSdkReadOnlyBatchPacketInput {
   batchId?: string;
   workers?: AgentRunSdkInProcessPacketInput[];
@@ -430,6 +482,118 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       `session=${sessionMode}`,
       `sdkMaturity=${sdkMaturity.rung}`,
       unexpectedDirty ? "unexpectedDirty=yes" : undefined,
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+      "dispatch=no",
+      "authorization=none",
+    ].filter(Boolean).join(" "),
+  };
+}
+
+function normalizeCacheFreshness(value: unknown): "fresh" | "stale" | "unknown" {
+  return value === "fresh" || value === "stale" ? value : "unknown";
+}
+
+export function buildAgentRunSdkCachePackPacket(input: AgentRunSdkCachePackPacketInput = {}): AgentRunSdkCachePackPacketResult {
+  const packId = normalizeText(input.packId);
+  const entriesInput = Array.isArray(input.entries) ? input.entries : [];
+  const requestedMaxEntries = normalizePositiveInt(input.maxEntries, 12);
+  const maxEntries = Math.max(1, Math.min(20, requestedMaxEntries || 12));
+  const protectedScopeRequested = input.protectedScopeRequested === true;
+  const unexpectedDirty = input.unexpectedDirty === true;
+  const blockers: string[] = [];
+  if (!packId) blockers.push("pack-id-missing");
+  if (protectedScopeRequested) blockers.push("protected-scope-requested");
+  if (unexpectedDirty) blockers.push("unexpected-dirty-state");
+  if (entriesInput.length === 0) blockers.push("cache-pack-entries-missing");
+  if (entriesInput.length > maxEntries) blockers.push(`cache-pack-entry-count-exceeds-max:${entriesInput.length}>${maxEntries}`);
+
+  const seenIds = new Set<string>();
+  const entries = entriesInput.map((entry, index) => {
+    const id = normalizeText(entry.id);
+    const entryPath = normalizeText(entry.path);
+    const summary = normalizeText(entry.summary);
+    const freshness = normalizeCacheFreshness(entry.freshness);
+    const evidence = normalizeText(entry.evidence);
+    const label = id || `entry-${index + 1}`;
+    if (!id) blockers.push(`entry-id-missing:${index + 1}`);
+    if (id && seenIds.has(id)) blockers.push(`duplicate-entry-id:${id}`);
+    if (id) seenIds.add(id);
+    if (!summary) blockers.push(`entry-summary-missing:${label}`);
+    if (!evidence) blockers.push(`entry-evidence-missing:${label}`);
+    if (freshness !== "fresh") blockers.push(`entry-not-fresh:${label}:${freshness}`);
+    return {
+      id,
+      ...(entryPath ? { path: entryPath } : {}),
+      summary,
+      freshness,
+      evidence,
+    };
+  });
+
+  const freshCount = entries.filter((entry) => entry.freshness === "fresh").length;
+  const staleCount = entries.filter((entry) => entry.freshness === "stale").length;
+  const unknownCount = entries.filter((entry) => entry.freshness === "unknown").length;
+  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const cacheKeyContract = [
+    "cache keys should include pack id, entry id, path when present, and freshness evidence",
+    "path-backed entries should cite git object, mtime/size, or verification id evidence before workers trust the summary",
+    "duplicate entry ids are blocked so fan-out workers can cite cache evidence unambiguously",
+  ];
+  const freshnessContract = [
+    "only fresh entries are promotable into worker prompts",
+    "stale or unknown freshness blocks the pack and should force focal reread or pack regeneration",
+    "unexpected dirty state invalidates the whole pack before fan-out",
+  ];
+  const workerUseContract = [
+    "workers should consume the shared pack first and read only focal anchors not covered by fresh evidence",
+    "worker final output should report cache-hit/cache-miss for parent fan-in",
+    "the cache pack never authorizes dispatch; it is an attachment/evidence contract only",
+  ];
+
+  return {
+    mode: "agent-run-sdk-cache-pack-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    requiresHumanDecision: true,
+    decision,
+    recommendationCode: decision === "ready-for-human-decision" ? "agent-run-sdk-cache-pack-ready-for-human-decision" : "agent-run-sdk-cache-pack-blocked",
+    blockers,
+    packSpec: {
+      packId,
+      entryCount: entries.length,
+      maxEntries,
+      freshCount,
+      staleCount,
+      unknownCount,
+      protectedScopeRequested,
+      unexpectedDirty,
+    },
+    entries,
+    cacheKeyContract,
+    freshnessContract,
+    workerUseContract,
+    humanConfirmationPhrase: packId ? `approve sdk cache pack ${packId}` : "",
+    nextActions: decision === "ready-for-human-decision"
+      ? [
+        "attach this cache pack to a future read-only SDK worker or batch packet only after explicit human decision",
+        "keep worker prompts narrow and require cache-hit/cache-miss evidence in final output",
+        "regenerate or block the pack if git state becomes unexpected dirty before fan-out",
+      ]
+      : [
+        "resolve cache pack blockers before attaching it to workers",
+        "fallback to focal reads when freshness is stale or unknown",
+      ],
+    summary: [
+      "agent-run-sdk-cache-pack-packet:",
+      `decision=${decision}`,
+      `packId=${packId || "missing"}`,
+      `entries=${entries.length}`,
+      `fresh=${freshCount}`,
+      staleCount > 0 ? `stale=${staleCount}` : undefined,
+      unknownCount > 0 ? `unknown=${unknownCount}` : undefined,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
       "dispatch=no",
       "authorization=none",
