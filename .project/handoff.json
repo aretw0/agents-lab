@@ -1,15 +1,17 @@
 {
-  "timestamp": "2026-05-13T14:29:31.373Z",
+  "timestamp": "2026-05-13T15:07:17.382Z",
   "context": "Continued from TASK-BUD-1066 into TASK-BUD-1071 while runner canary remains blocked pending reload + exact human confirmation. Added report-o [snip] required before trusting live behavior. [truncated:+403 chars]",
   "current_tasks": [
     "TASK-BUD-1071"
   ],
   "next_actions": [
+    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
     "Run /reload before any live agent-run canary or trusting latest SDK cache-pack packet shape.",
     "After reload, either prepare a single exact-confirmed TASK-BUD-1066 subprocess diagnostic cana [snip] ch/cache fan-in hardening. [truncated:+90 chars]",
     "Do not dispatch workers without exact one-run confirmation; parallel SDK execution remains disabled/report-only."
   ],
   "blockers": [
+    "context-watch-checkpoint-required",
     "No worker/provider dispatch authorized without exact one-run confirmation.",
     "Runtime extension changed; reload required before trusting latest live behavior.",
     "TASK-BUD-1066 root cause remains unresolved until a future exact-confirmed can [snip] t/first-byte evidence. [truncated:+32 chars]"
@@ -54,6 +56,19 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "reload-before-live-canary-or-continue-report-only-hardening"
+    },
+    {
+      "atIso": "2026-05-13T15:07:17.382Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ]
 }
