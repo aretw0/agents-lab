@@ -16055,6 +16055,15 @@
       "method": "exact-confirmed-readonly-subprocess-canary+follow+classification+outcome",
       "timestamp": "2026-05-13T15:00:17.547Z",
       "evidence": "Exact-confirmed one-run canary `task-bud-1066-structured-preflight-probe` was dispatched after reload with human phrase `execute o worker task-bud-1066-structured-preflight-probe`. Outcome: process failed as diagnostic expected, workspace stayed clean, no touched files. The new structured preflight worked: cwd/command/entrypoint exist; argv shape logged `print=yes noSession=yes provider=dashscope model=qwen3-coder-plus toolsCount=4 printPayloadCount=5`; attachments logged `count=4 missing=0`; prompt logged `segments=1 chars=1362`; first byte logged on stderr at `elapsedMs=35610`. Root cause evidence shifted from silent/timeout to provider/runtime: stderr includes `400 The free tier of the model has been exhausted...`; classifier reports `provider-unavailable`, retryAllowed=no. Log also exposes repeated stale-extension-context errors after reload from web-session-gateway, monitor-sovereign, machine-maintenance, context-watchdog, guardrails-core, project-workflows monitors, and auto-session-name. Outcome packet failed contract because process failed, but diagnostic evidence is actionable."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-BATCH-SHARED-EVIDENCE-BOUNDS-20260513",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-refactor+focal-vitest+line-budget-preview",
+      "timestamp": "2026-05-13T15:21:53.335Z",
+      "evidence": "Hardened report-only SDK read-only batch packets so sharedEvidence is bounded before future fan-out attachment: maxSharedEvidenceItems=20, maxSharedEvidenceChars=300, duplicate shared evidence is blocked, and oversized entries emit shared-evidence-too-large. This preserves dispatchAllowed=false/parallelDispatchAllowed=false and supports cache economy without authorizing execution. Validation: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts` -> 1 file passed, 1 test passed; `git diff --check` passed; `line_budget_snapshot` remained recommendation=watch aboveExtract=0 aboveCritical=0."
     }
   ]
 }

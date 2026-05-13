@@ -315,6 +315,9 @@ describe("agent run SDK packet surfaces", () => {
     expect(batchPacket.fanOutContract.join("\n")).toContain("never dispatches workers by itself");
     expect(batchPacket.fanInContract.join("\n")).toContain("cache-hit/cache-miss evidence");
     expect(batchPacket.cacheEconomyContract.join("\n")).toContain("shared evidence pack");
+    expect(batchPacket.cacheEconomyContract.join("\n")).toContain("bounded to 20 items of 300 chars each");
+    expect(batchPacket.batchSpec.maxSharedEvidenceItems).toBe(20);
+    expect(batchPacket.batchSpec.maxSharedEvidenceChars).toBe(300);
     expect(batchPacket.summary).toContain("parallelDispatch=no");
 
     const batchBlocked = buildAgentRunSdkReadOnlyBatchPacket({
@@ -340,6 +343,46 @@ describe("agent run SDK packet surfaces", () => {
     expect(batchBlocked.decision).toBe("blocked");
     expect(batchBlocked.blockers).toContain("shared-evidence-missing");
     expect(batchBlocked.blockers).toContain("batch-needs-at-least-two-workers");
+
+    const oversizedSharedEvidenceBatch = buildAgentRunSdkReadOnlyBatchPacket({
+      batchId: "batch-oversized-shared-evidence",
+      sharedEvidence: ["VERIF-DUPLICATE", "VERIF-DUPLICATE", "x".repeat(301)],
+      workers: [
+        {
+          runId: "batch-oversized-a",
+          goal: "Read only one declared file and answer with PASS/FAIL.",
+          providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+          cwd: process.cwd(),
+          declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+          timeoutMs: 45_000,
+          toolAllowlist: ["read", "grep"],
+          validationGateKnown: true,
+          rollbackPlanKnown: true,
+          budgetDecision: "ok",
+          abortKnown: true,
+          eventStreamKnown: true,
+          finalOutputContractKnown: true,
+        },
+        {
+          runId: "batch-oversized-b",
+          goal: "Read only one declared file and answer with PASS/FAIL.",
+          providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+          cwd: process.cwd(),
+          declaredFiles: ["packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts"],
+          timeoutMs: 45_000,
+          toolAllowlist: ["read", "grep"],
+          validationGateKnown: true,
+          rollbackPlanKnown: true,
+          budgetDecision: "ok",
+          abortKnown: true,
+          eventStreamKnown: true,
+          finalOutputContractKnown: true,
+        },
+      ],
+    });
+    expect(oversizedSharedEvidenceBatch.decision).toBe("blocked");
+    expect(oversizedSharedEvidenceBatch.blockers).toContain("duplicate-shared-evidence:VERIF-DUPLICATE");
+    expect(oversizedSharedEvidenceBatch.blockers).toContain("shared-evidence-too-large:3:301>300");
 
     const rawPi = {
       on: vi.fn(),

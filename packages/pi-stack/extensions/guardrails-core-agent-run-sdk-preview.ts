@@ -125,6 +125,8 @@ const SDK_TIMEOUT_MIN_MS = 5_000;
 const SDK_TIMEOUT_MAX_MS = 180_000;
 const SDK_CACHE_PACK_SUMMARY_MAX_CHARS = 600;
 const SDK_CACHE_PACK_EVIDENCE_MAX_CHARS = 300;
+const SDK_SHARED_EVIDENCE_MAX_ITEMS = 20;
+const SDK_SHARED_EVIDENCE_MAX_CHARS = 300;
 
 function normalizeText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -307,6 +309,8 @@ export interface AgentRunSdkReadOnlyBatchPacketResult {
     workerCount: number;
     maxWorkers: number;
     sharedEvidence: string[];
+    maxSharedEvidenceItems: number;
+    maxSharedEvidenceChars: number;
     protectedScopeRequested: boolean;
     unexpectedDirty: boolean;
   };
@@ -636,6 +640,13 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
   if (protectedScopeRequested) blockers.push("protected-scope-requested");
   if (unexpectedDirty) blockers.push("unexpected-dirty-state");
   if (sharedEvidence.length === 0) blockers.push("shared-evidence-missing");
+  if (sharedEvidence.length > SDK_SHARED_EVIDENCE_MAX_ITEMS) blockers.push(`shared-evidence-count-exceeds-max:${sharedEvidence.length}>${SDK_SHARED_EVIDENCE_MAX_ITEMS}`);
+  const seenSharedEvidence = new Set<string>();
+  for (const [index, evidence] of sharedEvidence.entries()) {
+    if (evidence.length > SDK_SHARED_EVIDENCE_MAX_CHARS) blockers.push(`shared-evidence-too-large:${index + 1}:${evidence.length}>${SDK_SHARED_EVIDENCE_MAX_CHARS}`);
+    if (seenSharedEvidence.has(evidence)) blockers.push(`duplicate-shared-evidence:${evidence}`);
+    seenSharedEvidence.add(evidence);
+  }
   if (workers.length < 2) blockers.push("batch-needs-at-least-two-workers");
   if (workers.length > maxWorkers) blockers.push(`worker-count-exceeds-max:${workers.length}>${maxWorkers}`);
   const seenRunIds = new Set<string>();
@@ -665,6 +676,7 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
   ];
   const cacheEconomyContract = [
     "shared evidence pack is required before fan-out so workers avoid repeated broad reads",
+    `shared evidence is bounded to ${SDK_SHARED_EVIDENCE_MAX_ITEMS} items of ${SDK_SHARED_EVIDENCE_MAX_CHARS} chars each and duplicates are blocked`,
     "each worker should read only focal anchors not covered by fresh shared evidence",
     "cache freshness must be invalidated by unexpected dirty state or touched declared files",
   ];
@@ -687,6 +699,8 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
       workerCount: workers.length,
       maxWorkers,
       sharedEvidence,
+      maxSharedEvidenceItems: SDK_SHARED_EVIDENCE_MAX_ITEMS,
+      maxSharedEvidenceChars: SDK_SHARED_EVIDENCE_MAX_CHARS,
       protectedScopeRequested,
       unexpectedDirty,
     },
