@@ -1,82 +1,59 @@
 {
-  "timestamp": "2026-05-13T00:32:00.646Z",
-  "context": "Operator flagged a missed bad-smell/line-budget signal: packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts reached 2632 li [snip] e still requires reload before preview. [truncated:+688 chars]",
+  "timestamp": "2026-05-13T03:13:00.025Z",
+  "context": "Continued local-safe control-plane/agent hardening after manual post-reload nudge. Recorded the reload continuity incident under TASK-BUD-107 [snip] reflect the line-budget scanner change. [truncated:+489 chars]",
   "current_tasks": [
     "TASK-BUD-1073"
   ],
   "next_actions": [
-    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
-    "Reload before live-previewing new agent_run_sdk_cache_pack_packet surface from commit a2ceff06.",
-    "Prioritize TASK-BUD-1073 soon: split oversized smoke test and make line-budget/bad-smell a str [snip] gate for large test files. [truncated:+15 chars]",
-    "Once worker/batch lane is approved, use read-only workers to plan the test split in parallel, [snip] locally with focal tests. [truncated:+14 chars]"
+    "Reload before trusting live line_budget_snapshot to include smoke tests.",
+    "After reload, live-preview line_budget_snapshot and record verification for TASK-BUD-1073.",
+    "Continue TASK-BUD-1073 by deciding whether a stronger pre-edit gate/report packet is needed beyond expanded scanning."
   ],
   "blockers": [
-    "context-watch-checkpoint-required",
-    "New cache-pack live tool surface requires reload.",
-    "guardrails-agent-spawn-readiness.test.ts is oversized and should not receive u [snip] lit/gate is addressed. [truncated:+27 chars]",
-    "Parallel workers remain preview/report-only; no dispatch without exact confirmation."
+    "Runtime extension changes require /reload before live tool output reflects smoke-test scanning.",
+    "postReloadResume remains pending after the forced reload/manual nudge incident [snip] clears or explains it. [truncated:+28 chars]",
+    "Parallel/worker execution remains report-only unless exact per-run confirmation is provided."
   ],
   "recent_validation": [
-    "git status before incident capture showed clean after previous commit",
-    "wc -l -> guardrails-agent-spawn-readiness.test.ts 2632 lines; surface 1734; sdk preview 706; runtime 645",
-    "line_budget_snapshot -> recommendation=extract code=line-budget-extract scanned=203 aboveWatch [snip] ne-budget-extract-required [truncated:+29 chars]"
+    "Initial split validation: pnpm vitest run guardrails-agent-spawn-readiness + agent-run-sdk + a [snip] es passed, 42 tests passed [truncated:+50 chars]",
+    "Line-budget scanner hardening validation: pnpm vitest run guardrails-tool-hygiene + the four a [snip] es passed, 57 tests passed [truncated:+29 chars]",
+    "Line counts after split: spawn readiness 1377, sdk 480, runtime 271, task packets 519"
   ],
   "recent_commits": [
-    "f4182569 chore(board): record sdk batch outcome live preview",
-    "a2ceff06 feat(agents): add sdk cache pack packet"
+    "a70c2057 test(agents): split agent-run smoke coverage",
+    "de484d49 chore(board): record agent-run split and reload incident"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1073",
     "canonical_links": [
       "task:TASK-BUD-1073",
-      "task:TASK-BUD-1071",
-      "commit:20260512"
+      "task:TASK-BUD-1072",
+      "commit:20260513"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-13T00:12:50.626Z",
-    "level": "warn",
-    "percent": 48,
+    "generatedAtIso": "2026-05-13T03:13:00.025Z",
+    "level": "ok",
+    "percent": 30,
     "action": "continue",
-    "recommendation": "reload-cache-pack-preview-or-switch-to-task-bud-1073-split",
+    "recommendation": "reload-then-live-preview-line-budget-and-cache-pack",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
-    "auto_resume_after_reload": {
-      "pending": true,
-      "createdAtIso": "2026-05-13T00:38:02.858Z",
-      "reason": "reload-required-after-compact",
-      "focusTasks": [
-        "TASK-BUD-1073"
-      ]
-    }
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-13T00:12:50.626Z",
+      "atIso": "2026-05-13T03:13:00.025Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 48,
+      "level": "ok",
+      "percent": 30,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-cache-pack-preview-or-switch-to-task-bud-1073-split"
-    },
-    {
-      "atIso": "2026-05-13T00:32:00.646Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 55,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+      "recommendation": "reload-then-live-preview-line-budget-and-cache-pack"
     }
   ]
 }
