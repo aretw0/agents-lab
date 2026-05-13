@@ -1,59 +1,59 @@
 {
-  "timestamp": "2026-05-13T14:17:56.642Z",
-  "context": "Continued after auto-resume. Current focus remains TASK-BUD-1066. Existing failed run task-bud-1066-readonly-runner-diagnostic-canary still c [snip] or running any exact-confirmed canary. [truncated:+632 chars]",
+  "timestamp": "2026-05-13T14:29:31.373Z",
+  "context": "Continued from TASK-BUD-1066 into TASK-BUD-1071 while runner canary remains blocked pending reload + exact human confirmation. Added report-o [snip] required before trusting live behavior. [truncated:+403 chars]",
   "current_tasks": [
-    "TASK-BUD-1066"
+    "TASK-BUD-1071"
   ],
   "next_actions": [
-    "Reload before any live canary that relies on new runner preflight logs.",
-    "After reload and only with exact confirmation, prepare a single bounded diagnostic canary usin [snip] irst-byte instrumentation. [truncated:+38 chars]",
-    "If no confirmation/reload, continue TASK-BUD-1071 report-only SDK cache/freshness/attachment-s [snip] xecution remains disabled. [truncated:+26 chars]"
+    "Run /reload before any live agent-run canary or trusting latest SDK cache-pack packet shape.",
+    "After reload, either prepare a single exact-confirmed TASK-BUD-1066 subprocess diagnostic cana [snip] ch/cache fan-in hardening. [truncated:+90 chars]",
+    "Do not dispatch workers without exact one-run confirmation; parallel SDK execution remains disabled/report-only."
   ],
   "blockers": [
     "No worker/provider dispatch authorized without exact one-run confirmation.",
-    "Runtime extension changed; reload required before trusting latest live agent-run behavior.",
-    "Existing startup diagnostic remains structured-probe-first, not blind retry."
+    "Runtime extension changed; reload required before trusting latest live behavior.",
+    "TASK-BUD-1066 root cause remains unresolved until a future exact-confirmed can [snip] t/first-byte evidence. [truncated:+32 chars]"
   ],
   "recent_validation": [
-    "agent_run_status task-bud-1066-readonly-runner-diagnostic-canary -> found failed",
-    "agent_run_failure_classification -> silent-runner-failure, retryAllowed=no",
-    "agent_run_startup_diagnostic_packet -> structured-probe-first, canaryAllowed=no"
+    "TASK-BUD-1066 structured preflight tests -> 3 files passed, 42 tests passed",
+    "TASK-BUD-1071 SDK cache pack tests -> 2 files passed, 28 tests passed",
+    "line_budget_snapshot -> watch, aboveExtract=0, aboveCritical=0"
   ],
   "recent_commits": [
     "bea08575 feat(agents): add structured subprocess preflight logs",
     "28166360 chore(board): record structured runner preflight"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1066",
+    "focus": "TASK-BUD-1071",
     "canonical_links": [
+      "task:TASK-BUD-1071",
       "task:TASK-BUD-1066",
-      "task:TASK-BUD-1066-READONLY-RUNNER-DIAGNOSTIC-CANARY",
       "commit:bea08575"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-13T14:17:56.642Z",
+    "generatedAtIso": "2026-05-13T14:29:31.373Z",
     "level": "ok",
-    "percent": 35,
+    "percent": 40,
     "action": "continue",
-    "recommendation": "reload-before-runner-canary-or-continue-report-only-sdk-cache",
+    "recommendation": "reload-before-live-canary-or-continue-report-only-hardening",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-13T14:17:56.642Z",
+      "atIso": "2026-05-13T14:29:31.373Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 35,
+      "percent": 40,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-before-runner-canary-or-continue-report-only-sdk-cache"
+      "recommendation": "reload-before-live-canary-or-continue-report-only-hardening"
     }
   ]
 }
