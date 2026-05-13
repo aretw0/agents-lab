@@ -1,59 +1,60 @@
 {
-  "timestamp": "2026-05-12T23:08:10.678Z",
-  "context": "Continued after manual nudge and incident capture. Completed second TASK-BUD-1071 slice: implemented report-only SDK read-only batch packet p [snip] current tool list for it until reload. [truncated:+503 chars]",
+  "timestamp": "2026-05-13T00:00:03.615Z",
+  "context": "Operator reported a WebSocket closed 1006 interruption requiring manual session restart/resume. Recorded incident under TASK-BUD-1072 with ve [snip] /unknown-cache/protected/dirty signals. [truncated:+706 chars]",
   "current_tasks": [
     "TASK-BUD-1071"
   ],
   "next_actions": [
-    "Reload before calling the new agent_run_sdk_readonly_batch_packet live surface.",
-    "After reload, preview a 2-worker read-only batch only; do not execute parallel dispatch becaus [snip] tor exists/authorized yet. [truncated:+10 chars]",
-    "Continue TASK-BUD-1071 with cache-pack shape/freshness evidence or aggregate fan-in outcome packet."
+    "Reload before calling new live agent_run_batch_outcome_packet surface.",
+    "After reload, live-preview a sample batch outcome aggregation only; do not enable parallel dispatch.",
+    "Continue TASK-BUD-1071 with cache-pack/freshness shape or close planning gap for batch executo [snip] as separate guarded task. [truncated:+1 chars]"
   ],
   "blockers": [
-    "New live tool surface requires reload.",
+    "New live batch outcome tool surface requires reload.",
     "Parallel execution remains intentionally disabled/report-only.",
-    "TASK-BUD-1072 auto-resume suppression root cause remains unresolved."
+    "TASK-BUD-1072 continuity root causes remain unresolved: auto-resume suppressio [snip] et 1006 manual resume. [truncated:+13 chars]"
   ],
   "recent_validation": [
-    "pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 41/41 passed",
-    "git diff --check -> passed",
-    "safe_marker_check builder -> 5/5 passed"
+    "git status after WebSocket resume -> clean",
+    "context_watch_status -> level=ok percent=37 reloadGate=reload-not-required handoff=stale",
+    "context_watch_continuation_readiness -> ready=no reasons=candidate:invalid / checkpoint:invali [snip] itions:invalid dirty=clean [truncated:+13 chars]"
   ],
   "recent_commits": [
-    "12130cd9 feat(agents): add sdk cache parallel contract",
-    "4bc746dd chore(context): record auto resume suppression incident"
+    "9c0a0f84 chore(board): record websocket continuity incident",
+    "a7d36632 feat(agents): add sdk batch outcome packet"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1071",
     "canonical_links": [
       "task:TASK-BUD-1071",
-      "task:TASK-BUD-1071-SDK-READONLY-BATCH-PACKET-20260512",
+      "task:TASK-BUD-1072",
+      "task:TASK-BUD-1072-WEBSOCKET-1006-SESSION-RESUME-20260512",
       "commit:20260512"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-12T23:08:10.678Z",
+    "generatedAtIso": "2026-05-13T00:00:03.615Z",
     "level": "ok",
-    "percent": 35,
+    "percent": 43,
     "action": "continue",
-    "recommendation": "reload-before-live-batch-tool-preview",
+    "recommendation": "reload-before-live-batch-outcome-preview",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-12T23:08:10.678Z",
+      "atIso": "2026-05-13T00:00:03.615Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 35,
+      "percent": 43,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-before-live-batch-tool-preview"
+      "recommendation": "reload-before-live-batch-outcome-preview"
     }
   ]
 }
