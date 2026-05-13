@@ -15956,6 +15956,15 @@
       "method": "local-refactor+focal-vitest+line-budget-live-preview",
       "timestamp": "2026-05-13T10:37:49.404Z",
       "evidence": "Split over-extract `packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts` by extracting measured nudge-free canary coverage into `packages/pi-stack/test/smoke/guardrails-unattended-continuation-measured.test.ts`. Line counts: unattended-continuation reduced from 1837 to 1064; new measured file is 843. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-measured.test.ts` -> 2 files passed, 44 tests passed. Broader focal validation passed: guardrails-tool-hygiene + unattended pair + project-board pair + context-watchdog pair + agent-run split files -> 11 files passed, 227 tests passed. Live `line_budget_snapshot` after the split reported `scanned=338 aboveWatch=14 aboveExtract=6 aboveCritical=0`, reducing aboveExtract from 7 to 6. Commit: 58c01ccf."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1073-CONTEXT-WATCHDOG-HANDOFF-SPLIT-20260513",
+      "target": "TASK-BUD-1073",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-refactor+focal-vitest+line-budget-live-preview",
+      "timestamp": "2026-05-13T11:41:57.307Z",
+      "evidence": "Split over-extract `packages/pi-stack/test/smoke/context-watchdog.test.ts` by extracting handoff reconciliation/bootstrap coverage into `packages/pi-stack/test/smoke/context-watchdog-handoff-bootstrap.test.ts`. Line counts: context-watchdog reduced from 1675 to 1346; new handoff/bootstrap file is 447. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-handoff-bootstrap.test.ts packages/pi-stack/test/smoke/context-watchdog-surfaces.test.ts` -> 3 files passed, 62 tests passed. Broader focal validation passed: guardrails-tool-hygiene + context-watchdog trio + unattended pair + project-board pair + agent-run split files -> 12 files passed, 227 tests passed. Live `line_budget_snapshot` after the split reported `scanned=339 aboveWatch=14 aboveExtract=5 aboveCritical=0`, reducing aboveExtract from 6 to 5. Commit: e52aa408."
     }
   ]
 }
