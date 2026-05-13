@@ -216,7 +216,10 @@ export function buildRouteAdvisory(
 		);
 
 	const blockedProviders = Array.from(new Set(considered
-		.filter((c) => c.state === "blocked")
+		.filter((candidate) => {
+			if (candidate.state !== "blocked") return false;
+			return !considered.some((other) => other.provider === candidate.provider && other.state !== "blocked");
+		})
 		.map((c) => c.provider)));
 	const preferredWinner = preferredScopeKeys
 		.map((scope) => considered.find((c) => advisoryScopeKey(c) === scope && c.state !== "blocked"))

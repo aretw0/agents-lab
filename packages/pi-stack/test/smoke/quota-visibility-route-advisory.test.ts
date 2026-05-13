@@ -117,6 +117,7 @@ describe("quota visibility route advisory", () => {
 
     expect(advisory.recommendedProvider).toBe("openai-codex");
     expect(advisory.recommendedScopeKey).toBe("openai-codex/gpt-5.3-codex-spark");
+    expect(advisory.blockedProviders).not.toContain("openai-codex");
     expect(advisory.state).toBe("warning");
     expect(advisory.reason).toContain("routeModelRefs");
     expect(formatRouteAdvisory(advisory)).toContain("recommendedScopeKey: openai-codex/gpt-5.3-codex-spark");

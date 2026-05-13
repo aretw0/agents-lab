@@ -16073,6 +16073,15 @@
       "method": "local-fix+focal-vitest+line-budget-preview",
       "timestamp": "2026-05-13T16:31:00.229Z",
       "evidence": "Fixed routing/budget selection so configured routeModelRefs are treated as deterministic preferred execution scopes before fallback providers. With routeModelRefs ordering `openai-codex -> openai-codex/gpt-5.3-codex-spark` before `dashscope`, the advisory now selects the non-blocked Spark model scope even when aggregate openai-codex is blocked and dashscope is locally ok; if Spark is blocked, fallback providers can still be considered. Added `recommendedScopeKey` to make the selected provider/model scope explicit, propagated preference into quota_visibility_route, slash route, handoff-advisor, and quota-panel snapshot, and set `.pi/settings.json` Spark budget to explicit `weeklyQuotaRequests=100`. Validation: `pnpm vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/quota-visibility-route-advisory.test.ts packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts` -> 4 files passed, 94 tests passed; `git diff --check` passed; `line_budget_snapshot` recommendation=watch aboveExtract=0 aboveCritical=0. Runtime source changed after user reload, so another reload is required before trusting live route tool output."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1070-BLOCKED-SCOPE-SEMANTICS-20260513",
+      "target": "TASK-BUD-1070",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-fix+focal-vitest+line-budget-preview",
+      "timestamp": "2026-05-13T16:48:17.519Z",
+      "evidence": "Refined route advisory blocked-provider semantics after live reload check showed a confusing state: recommendedScopeKey could be `openai-codex/gpt-5.3-codex-spark` while blockedProviders still listed `openai-codex` because the aggregate budget row was blocked. Providers now appear in blockedProviders only when all scopes for that provider are blocked; aggregate blocked rows can still appear in consideredProviders without masking an available configured model-specific scope. Runtime routing remains config-driven from routeModelRefs; grep over quota/handoff/panel runtime files found no hardcoded Spark/DashScope model names. Validation: `pnpm vitest run packages/pi-stack/test/smoke/quota-visibility-route-advisory.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts` -> 2 files passed, 48 tests passed; `git diff --check` passed; `line_budget_snapshot` recommendation=watch aboveExtract=0 aboveCritical=0."
     }
   ]
 }
