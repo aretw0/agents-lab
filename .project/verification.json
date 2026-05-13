@@ -15929,6 +15929,15 @@
       "method": "post-reload-live-tool-preview",
       "timestamp": "2026-05-13T03:16:26.795Z",
       "evidence": "After `/reload`, live `agent_run_sdk_cache_pack_packet` preview succeeded with no dispatch: `decision=ready-for-human-decision packId=task-bud-1071-shared-evidence-pack entries=3 fresh=3 dispatch=no authorization=none`. Entries included SDK contract evidence, batch outcome fan-in evidence, and smoke-split evidence. This validates the live cache-pack packet surface introduced before reload."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1073-CONTEXT-WATCHDOG-SURFACE-SPLIT-20260513",
+      "target": "TASK-BUD-1073",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-refactor+focal-vitest+line-budget-live-preview",
+      "timestamp": "2026-05-13T03:26:40.225Z",
+      "evidence": "Split the largest line-budget offender `packages/pi-stack/test/smoke/context-watchdog.test.ts` by extracting tool-surface coverage into `packages/pi-stack/test/smoke/context-watchdog-surfaces.test.ts`. Line counts: context-watchdog reduced from 2878 to 1676; new surfaces file is 1321. Focal validation passed: `pnpm vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-surfaces.test.ts` -> 2 files passed, 62 tests passed. Broader focal validation passed: guardrails-tool-hygiene + context-watchdog pair + agent-run split files -> 7 files passed, 119 tests passed. Live `line_budget_snapshot` after the split reported `scanned=336 aboveWatch=14 aboveExtract=7 aboveCritical=1`, reducing critical files from 2 to 1. Commit: f81b7166."
     }
   ]
 }
