@@ -15902,6 +15902,15 @@
       "method": "operator-report+context-watch-status",
       "timestamp": "2026-05-13T03:02:24.489Z",
       "evidence": "After forced context compaction and reload, auto-resume was suppressed/pending and did not resume until the operator sent a manual continuation message. `context_watch_status` after resume reported `postReloadResume=pending`, `handoff=stale`, `handoffAgeSec=8755/1800`, while level was ok and reload was not required. Operator explicitly reported needing this message to continue after reload with compacted context. This is a continuity incident for hardening post-reload resume/manual-nudge diagnostics."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1073-LINE-BUDGET-SMOKE-SCAN-20260513",
+      "target": "TASK-BUD-1073",
+      "target_type": "task",
+      "status": "passed",
+      "method": "code-change+smoke-test",
+      "timestamp": "2026-05-13T03:09:40.585Z",
+      "evidence": "Hardened line-budget coverage so the scanner includes `packages/pi-stack/test/smoke/**/*.ts` in addition to extension files. Added regression coverage in `guardrails-tool-hygiene.test.ts` proving `line_budget_snapshot` rows include an oversized smoke test path. Validation passed: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts` -> 5 files passed, 57 tests passed. Commit: 725cfef8. Note: live `line_budget_snapshot` tool still reflects pre-reload code until `/reload`."
     }
   ]
 }
