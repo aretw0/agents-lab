@@ -1,58 +1,58 @@
 {
-  "timestamp": "2026-05-13T03:28:20.476Z",
-  "context": "Post-reload continuation completed live validations and another line-budget split. Live line_budget_snapshot now reflects smoke-test scanning [snip] atch=14 aboveExtract=7 aboveCritical=1. [truncated:+455 chars]",
+  "timestamp": "2026-05-13T10:39:44.486Z",
+  "context": "Continued line-budget/test-surface hardening after user asked to proceed. Split two more over-budget smoke files. First, extracted registered [snip] xtract 7 -> 6, aboveCritical remains 0. [truncated:+467 chars]",
   "current_tasks": [
     "TASK-BUD-1073"
   ],
   "next_actions": [
-    "Continue TASK-BUD-1073 with the remaining critical file: packages/pi-stack/test/smoke/project- [snip] ace.test.ts at 2221 lines. [truncated:+10 chars]",
-    "Consider extracting guardrails-unattended-continuation.test.ts (1838) and guardrails-core-agen [snip] critical file is handled. [truncated:+45 chars]",
-    "For TASK-BUD-1071, cache-pack packet is live-validated; next SDK work can design cache freshne [snip] confirmation is provided. [truncated:+86 chars]"
+    "Continue TASK-BUD-1073 by addressing remaining aboveExtract files. Current top rows: guardrail [snip] ilot-parsers.test.ts 1538. [truncated:+204 chars]",
+    "Prefer more test splits before extension-code extraction unless a code module seam is obvious.",
+    "Consider adding/using a stronger pre-edit gate after the line-budget debt is below extract threshold."
   ],
   "blockers": [
-    "line_budget_snapshot still recommends extract: aboveExtract=7 aboveCritical=1.",
-    "No worker/provider dispatch authorized; all worker/batch executor work remains [snip] ut exact confirmation. [truncated:+18 chars]"
+    "line_budget_snapshot still recommends extract: aboveExtract=6, aboveCritical=0.",
+    "No worker/provider dispatch authorized; worker/batch executor remains report-o [snip] firmation is provided. [truncated:+20 chars]"
   ],
   "recent_validation": [
-    "live agent_run_sdk_cache_pack_packet -> decision=ready-for-human-decision entries=3 fresh=3 di [snip] atch=no authorization=none [truncated:+2 chars]",
-    "live line_budget_snapshot after reload -> scanned=335 aboveWatch=13 aboveExtract=7 aboveCritical=2",
-    "context watchdog split focal: pnpm vitest run context-watchdog.test.ts context-watchdog-surfac [snip] es passed, 62 tests passed [truncated:+19 chars]"
+    "project-board focal: pnpm vitest run project-board-surface.test.ts project-board-tools.test.ts [snip] es passed, 64 tests passed [truncated:+9 chars]",
+    "project-board broader focal: guardrails-tool-hygiene + project-board pair + context-watchdog p [snip] s passed, 183 tests passed [truncated:+37 chars]",
+    "after project-board split: live line_budget_snapshot -> scanned=337 aboveWatch=14 aboveExtract=7 aboveCritical=0"
   ],
   "recent_commits": [
-    "b20505cd chore(board): record post-reload live previews",
-    "f81b7166 test(context): split watchdog surface coverage"
+    "82363efb test(board): split project board tool surface coverage",
+    "fa46d620 chore(board): record project board test split"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1073",
     "canonical_links": [
       "task:TASK-BUD-1073",
-      "task:TASK-BUD-1071",
-      "commit:b20505cd"
+      "task:TASK-BUD-1072",
+      "commit:82363efb"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-13T03:28:20.476Z",
+    "generatedAtIso": "2026-05-13T10:39:44.486Z",
     "level": "ok",
-    "percent": 35,
+    "percent": 40,
     "action": "continue",
-    "recommendation": "continue-line-budget-critical-file-or-task-bud-1072-post-reload-hardening",
+    "recommendation": "continue-remaining-aboveextract-test-splits-before-code-extraction",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-13T03:28:20.476Z",
+      "atIso": "2026-05-13T10:39:44.486Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 35,
+      "percent": 40,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-line-budget-critical-file-or-task-bud-1072-post-reload-hardening"
+      "recommendation": "continue-remaining-aboveextract-test-splits-before-code-extraction"
     }
   ]
 }
