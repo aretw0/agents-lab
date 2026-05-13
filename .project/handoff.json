@@ -1,74 +1,58 @@
 {
-  "timestamp": "2026-05-13T15:07:17.382Z",
-  "context": "Continued from TASK-BUD-1066 into TASK-BUD-1071 while runner canary remains blocked pending reload + exact human confirmation. Added report-o [snip] required before trusting live behavior. [truncated:+403 chars]",
+  "timestamp": "2026-05-13T15:25:25.227Z",
+  "context": "Continued local-safe TASK-BUD-1071 after auto-resume. First committed pending board evidence for TASK-BUD-1066 structured preflight canary. T [snip] llel SDK execution remains report-only. [truncated:+295 chars]",
   "current_tasks": [
     "TASK-BUD-1071"
   ],
   "next_actions": [
-    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
-    "Run /reload before any live agent-run canary or trusting latest SDK cache-pack packet shape.",
-    "After reload, either prepare a single exact-confirmed TASK-BUD-1066 subprocess diagnostic cana [snip] ch/cache fan-in hardening. [truncated:+90 chars]",
-    "Do not dispatch workers without exact one-run confirmation; parallel SDK execution remains disabled/report-only."
+    "Run /reload before trusting live agent_run_sdk_readonly_batch_packet shape because runtime extension source changed.",
+    "After reload, live-preview the batch packet sharedEvidence bounds with an oversized/duplicate [snip] idence input; no dispatch. [truncated:+9 chars]",
+    "Continue TASK-BUD-1071 with report-only cache/fan-in hardening, or prepare TASK-BUD-1066 canar [snip] ne-run human confirmation. [truncated:+19 chars]"
   ],
   "blockers": [
-    "context-watch-checkpoint-required",
     "No worker/provider dispatch authorized without exact one-run confirmation.",
-    "Runtime extension changed; reload required before trusting latest live behavior.",
-    "TASK-BUD-1066 root cause remains unresolved until a future exact-confirmed can [snip] t/first-byte evidence. [truncated:+32 chars]"
+    "Runtime extension changed; /reload required before trusting latest live behavior.",
+    "Parallel SDK execution remains disabled/report-only."
   ],
   "recent_validation": [
-    "TASK-BUD-1066 structured preflight tests -> 3 files passed, 42 tests passed",
-    "TASK-BUD-1071 SDK cache pack tests -> 2 files passed, 28 tests passed",
-    "line_budget_snapshot -> watch, aboveExtract=0, aboveCritical=0"
+    "pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts -> 1 file passed, 1 test passed",
+    "git diff --check passed",
+    "line_budget_snapshot recommendation=watch aboveExtract=0 aboveCritical=0"
   ],
   "recent_commits": [
-    "bea08575 feat(agents): add structured subprocess preflight logs",
-    "28166360 chore(board): record structured runner preflight"
+    "4752c132 chore(board): record structured preflight canary",
+    "3ec4bbe9 fix(agents): bound sdk batch shared evidence"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1071",
     "canonical_links": [
       "task:TASK-BUD-1071",
       "task:TASK-BUD-1066",
-      "commit:bea08575"
+      "commit:4752c132"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-13T14:29:31.373Z",
+    "generatedAtIso": "2026-05-13T15:25:25.227Z",
     "level": "ok",
-    "percent": 40,
     "action": "continue",
-    "recommendation": "reload-before-live-canary-or-continue-report-only-hardening",
+    "recommendation": "reload-before-live-preview-or-continue-report-only",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-13T14:29:31.373Z",
+      "atIso": "2026-05-13T15:25:25.227Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 40,
+      "percent": 0,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-before-live-canary-or-continue-report-only-hardening"
-    },
-    {
-      "atIso": "2026-05-13T15:07:17.382Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 55,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+      "recommendation": "reload-before-live-preview-or-continue-report-only"
     }
   ]
 }
