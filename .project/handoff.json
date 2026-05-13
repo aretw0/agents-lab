@@ -1,60 +1,59 @@
 {
-  "timestamp": "2026-05-13T12:54:43.977Z",
-  "context": "TASK-BUD-1073 stabilized/closed. Line-budget extract debt is cleared: live line_budget_snapshot reports scanned=344 aboveWatch=14 aboveExtrac [snip] ged agent-run runtime surface behavior. [truncated:+751 chars]",
+  "timestamp": "2026-05-13T13:08:23.694Z",
+  "context": "TASK-BUD-1073 is complete and line-budget extract debt is cleared. Returned to agent-unblocking lane. Implemented parent-side subprocess firs [snip] ct-confirmed canary that depends on it. [truncated:+772 chars]",
+  "current_tasks": [
+    "TASK-BUD-1066"
+  ],
   "next_actions": [
-    "Return to agent-unblocking lane: TASK-BUD-1071 cache/fan-out/fan-in freshness/attachment shape [snip] subprocess runner-timeout. [truncated:+63 chars]",
-    "Before live-testing changed agent-run runtime tool surfaces, perform/recommend /reload.",
-    "No worker/provider dispatch is authorized without exact per-run human confirmation."
+    "Perform/recommend /reload before live canary or trusting new agent-run runtime behavior.",
+    "After reload, run report-only startup diagnostic/status packets against existing TASK-BUD-1066 [snip] /provider gates are green. [truncated:+74 chars]",
+    "Continue TASK-BUD-1071 report-only cache/freshness/attachment-shape hardening for SDK workers; [snip] xecution remains disabled. [truncated:+11 chars]"
   ],
   "blockers": [
-    "Runtime extension changes require reload before trusting live output.",
-    "Subprocess retry remains blocked; no blind retry.",
-    "Parallel SDK execution remains report-only unless a future exact-confirmed imp [snip] separately authorized. [truncated:+15 chars]"
+    "No worker/provider dispatch authorized without exact one-run confirmation.",
+    "Budget for future run is not established in current packet; executor strategy [snip] budget=unknown blocks. [truncated:+5 chars]",
+    "Runtime extension changes require reload."
   ],
   "recent_validation": [
-    "colony split focal -> 2 files passed, 82 tests passed",
-    "agent-run extraction focal -> 4 files passed, 42 tests passed",
-    "broader focal -> 7 files passed, 139 tests passed"
+    "agent-run focal tests -> 4 files passed, 42 tests passed",
+    "line_budget_snapshot -> scanned=344 aboveWatch=14 aboveExtract=0 aboveCritical=0 recommendation=watch",
+    "git clean after commit expected"
   ],
   "recent_commits": [
-    "64c1896c test(colony): split delivery evidence parser coverage",
-    "ff681bcd chore(board): record colony delivery test split"
+    "04fbf499 feat(agents): log subprocess first-byte timing",
+    "13c67b32 chore(board): record subprocess first-byte instrumentation"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1073",
+    "focus": "TASK-BUD-1066",
     "canonical_links": [
+      "task:TASK-BUD-1066",
       "task:TASK-BUD-1073",
-      "task:TASK-BUD-1073-AGENT-RUN-SURFACE-RUNTIME-EXTRACTION-20260513",
       "commit:20260513"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-13T12:54:43.977Z",
-    "level": "ok",
-    "percent": 42,
+    "generatedAtIso": "2026-05-13T13:08:23.694Z",
+    "level": "warn",
+    "percent": 52,
     "action": "continue",
-    "recommendation": "return-agent-unblocking-lane-after-reload",
+    "recommendation": "reload-then-agent-diagnostic-packet-or-sdk-cache-hardening",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
-    "focus_task_status": "completed"
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-13T12:54:43.977Z",
+      "atIso": "2026-05-13T13:08:23.694Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 42,
+      "level": "warn",
+      "percent": 52,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "return-agent-unblocking-lane-after-reload"
+      "recommendation": "reload-then-agent-diagnostic-packet-or-sdk-cache-hardening"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-1073"
   ]
 }
