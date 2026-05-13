@@ -15911,6 +15911,24 @@
       "method": "code-change+smoke-test",
       "timestamp": "2026-05-13T03:09:40.585Z",
       "evidence": "Hardened line-budget coverage so the scanner includes `packages/pi-stack/test/smoke/**/*.ts` in addition to extension files. Added regression coverage in `guardrails-tool-hygiene.test.ts` proving `line_budget_snapshot` rows include an oversized smoke test path. Validation passed: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts` -> 5 files passed, 57 tests passed. Commit: 725cfef8. Note: live `line_budget_snapshot` tool still reflects pre-reload code until `/reload`."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1073-LINE-BUDGET-LIVE-SMOKE-SCAN-20260513",
+      "target": "TASK-BUD-1073",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-live-tool-preview+local-line-count",
+      "timestamp": "2026-05-13T03:16:26.631Z",
+      "evidence": "After `/reload`, live `line_budget_snapshot` reflected the widened scanner: summary `recommendation=extract code=line-budget-extract scanned=335 aboveWatch=13 aboveExtract=7 aboveCritical=2 blockers=line-budget-extract-required authorization=none` (previous live scan before reload was scanned=203). Local top over-budget list now includes smoke tests, proving runtime picked up smoke-test scanning: `context-watchdog.test.ts` 2878, `project-board-surface.test.ts` 2221, `guardrails-unattended-continuation.test.ts` 1838, `guardrails-core-agent-spawn-readiness-surface.ts` 1735, `autonomy-lane-surface.test.ts` 1604, `guardrails-long-run-intent-queue.test.ts` 1551, `colony-pilot-parsers.test.ts` 1538, and the split `guardrails-agent-spawn-readiness.test.ts` now 1378 (watch, below extract)."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-CACHE-PACK-LIVE-PREVIEW-20260513",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-live-tool-preview",
+      "timestamp": "2026-05-13T03:16:26.795Z",
+      "evidence": "After `/reload`, live `agent_run_sdk_cache_pack_packet` preview succeeded with no dispatch: `decision=ready-for-human-decision packId=task-bud-1071-shared-evidence-pack entries=3 fresh=3 dispatch=no authorization=none`. Entries included SDK contract evidence, batch outcome fan-in evidence, and smoke-split evidence. This validates the live cache-pack packet surface introduced before reload."
     }
   ]
 }
