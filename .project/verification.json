@@ -15875,6 +15875,15 @@
       "method": "local-smoke-test+marker-check",
       "timestamp": "2026-05-13T00:09:09.575Z",
       "evidence": "Added report-only `buildAgentRunSdkCachePackPacket` and `agent_run_sdk_cache_pack_packet` surface for shared SDK worker evidence/cache packs. The packet never reads files or dispatches workers; it validates bounded entries, stable entry ids, freshness evidence, duplicate prevention, stale/unknown blocking, and worker-use contract requiring cache-hit/cache-miss output. Validation: `pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` passed 42/42; `git diff --check` passed; marker checks passed for builder, surface, and smoke test. Live surface still requires reload before use."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1073-LINE-BUDGET-INCIDENT-20260512",
+      "target": "TASK-BUD-1073",
+      "target_type": "task",
+      "status": "passed",
+      "method": "operator-report+line-count+line-budget-snapshot",
+      "timestamp": "2026-05-13T00:11:33.478Z",
+      "evidence": "Operator reported that `packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` should have triggered bad-smell/line-budget feedback before growing further. Measurement: file has 2632 lines; related files include `guardrails-core-agent-spawn-readiness-surface.ts` at 1734 lines, `guardrails-core-agent-run-sdk-preview.ts` at 706 lines, and `guardrails-core-agent-run-runtime.ts` at 645 lines. `line_budget_snapshot` returned `recommendation=extract`, `code=line-budget-extract`, `scanned=203`, `aboveWatch=4`, `aboveExtract=1`, blockers=`line-budget-extract-required`. Interpretation: signal exists but was not consulted/enforced as a pre-edit gate for the test file, so we kept appending cases. Created TASK-BUD-1073 to split the oversized smoke test and harden bad-smell gating."
     }
   ]
 }
