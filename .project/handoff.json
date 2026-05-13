@@ -1,58 +1,59 @@
 {
-  "timestamp": "2026-05-13T13:45:46.658Z",
-  "context": "Follow-up from operator after reload: line-budget widening is useful, but reusable pi-stack guardrail scoring should not remain hardcoded to [snip] trusting widened live scanner behavior. [truncated:+474 chars]",
+  "timestamp": "2026-05-13T14:17:56.642Z",
+  "context": "Continued after auto-resume. Current focus remains TASK-BUD-1066. Existing failed run task-bud-1066-readonly-runner-diagnostic-canary still c [snip] or running any exact-confirmed canary. [truncated:+632 chars]",
   "current_tasks": [
     "TASK-BUD-1066"
   ],
   "next_actions": [
-    "Commit TASK-BUD-1074 board entry/checkpoint.",
-    "Recommend /reload before trusting latest line-budget scanner runtime.",
-    "Return to TASK-BUD-1066/TASK-BUD-1071 agent-lane stabilization; do not start TASK-BUD-1074 yet."
+    "Reload before any live canary that relies on new runner preflight logs.",
+    "After reload and only with exact confirmation, prepare a single bounded diagnostic canary usin [snip] irst-byte instrumentation. [truncated:+38 chars]",
+    "If no confirmation/reload, continue TASK-BUD-1071 report-only SDK cache/freshness/attachment-s [snip] xecution remains disabled. [truncated:+26 chars]"
   ],
   "blockers": [
     "No worker/provider dispatch authorized without exact one-run confirmation.",
-    "Runtime extension changed after reload; reload required again for latest scanner behavior."
+    "Runtime extension changed; reload required before trusting latest live agent-run behavior.",
+    "Existing startup diagnostic remains structured-probe-first, not blind retry."
   ],
   "recent_validation": [
-    "TASK-BUD-1074 created as planned backlog with dependencies TASK-BUD-1066 and TASK-BUD-1071",
-    "line-budget scanner focal test passed before commit: guardrails-tool-hygiene 15 tests",
-    "line_budget_snapshot pre-reload stayed watch with aboveExtract=0 aboveCritical=0"
+    "agent_run_status task-bud-1066-readonly-runner-diagnostic-canary -> found failed",
+    "agent_run_failure_classification -> silent-runner-failure, retryAllowed=no",
+    "agent_run_startup_diagnostic_packet -> structured-probe-first, canaryAllowed=no"
   ],
   "recent_commits": [
-    "5791082b fix(guardrails): scan all pi-stack ts line budgets",
-    "7c517d3b chore(board): record package-wide line budget scan"
+    "bea08575 feat(agents): add structured subprocess preflight logs",
+    "28166360 chore(board): record structured runner preflight"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1066",
     "canonical_links": [
       "task:TASK-BUD-1066",
-      "task:TASK-BUD-1074",
-      "commit:5791082b"
+      "task:TASK-BUD-1066-READONLY-RUNNER-DIAGNOSTIC-CANARY",
+      "commit:bea08575"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-13T13:45:46.658Z",
+    "generatedAtIso": "2026-05-13T14:17:56.642Z",
     "level": "ok",
-    "percent": 25,
+    "percent": 35,
     "action": "continue",
-    "recommendation": "commit-backlog-then-return-agent-lane",
+    "recommendation": "reload-before-runner-canary-or-continue-report-only-sdk-cache",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-13T13:45:46.658Z",
+      "atIso": "2026-05-13T14:17:56.642Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 25,
+      "percent": 35,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-backlog-then-return-agent-lane"
+      "recommendation": "reload-before-runner-canary-or-continue-report-only-sdk-cache"
     }
   ]
 }
