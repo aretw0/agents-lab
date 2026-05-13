@@ -1,58 +1,58 @@
 {
-  "timestamp": "2026-05-13T10:39:44.486Z",
-  "context": "Continued line-budget/test-surface hardening after user asked to proceed. Split two more over-budget smoke files. First, extracted registered [snip] xtract 7 -> 6, aboveCritical remains 0. [truncated:+467 chars]",
+  "timestamp": "2026-05-13T12:13:03.770Z",
+  "context": "Continued line-budget/test-surface hardening. Split four more over-extract test areas after the previous wave: (1) context-watchdog.test.ts h [snip] eExtract 3 -> 2. Critical remains zero. [truncated:+721 chars]",
   "current_tasks": [
     "TASK-BUD-1073"
   ],
   "next_actions": [
-    "Continue TASK-BUD-1073 by addressing remaining aboveExtract files. Current top rows: guardrail [snip] ilot-parsers.test.ts 1538. [truncated:+204 chars]",
-    "Prefer more test splits before extension-code extraction unless a code module seam is obvious.",
-    "Consider adding/using a stronger pre-edit gate after the line-budget debt is below extract threshold."
+    "Continue TASK-BUD-1073 with remaining aboveExtract files: packages/pi-stack/extensions/guardra [snip] ilot-parsers.test.ts 1538. [truncated:+88 chars]",
+    "Prefer splitting colony-pilot-parsers.test.ts next because it is test-only and likely low-risk [snip] or a deliberate code seam. [truncated:+35 chars]",
+    "After aboveExtract reaches only extension-code, decide whether to complete test split wave or [snip] w-up code extraction task. [truncated:+14 chars]"
   ],
   "blockers": [
-    "line_budget_snapshot still recommends extract: aboveExtract=6, aboveCritical=0.",
+    "line_budget_snapshot still recommends extract because aboveExtract=2, aboveCritical=0.",
     "No worker/provider dispatch authorized; worker/batch executor remains report-o [snip] firmation is provided. [truncated:+20 chars]"
   ],
   "recent_validation": [
-    "project-board focal: pnpm vitest run project-board-surface.test.ts project-board-tools.test.ts [snip] es passed, 64 tests passed [truncated:+9 chars]",
-    "project-board broader focal: guardrails-tool-hygiene + project-board pair + context-watchdog p [snip] s passed, 183 tests passed [truncated:+37 chars]",
-    "after project-board split: live line_budget_snapshot -> scanned=337 aboveWatch=14 aboveExtract=7 aboveCritical=0"
+    "context-watchdog trio -> 3 files passed, 62 tests passed",
+    "broader after context split -> 12 files passed, 227 tests passed",
+    "autonomy pair -> 2 files passed, 44 tests passed"
   ],
   "recent_commits": [
-    "82363efb test(board): split project board tool surface coverage",
-    "fa46d620 chore(board): record project board test split"
+    "e52aa408 test(context): split watchdog handoff bootstrap coverage",
+    "336eeeb3 chore(board): record context watchdog handoff split"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1073",
     "canonical_links": [
       "task:TASK-BUD-1073",
       "task:TASK-BUD-1072",
-      "commit:82363efb"
+      "commit:e52aa408"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-13T10:39:44.486Z",
+    "generatedAtIso": "2026-05-13T12:13:03.770Z",
     "level": "ok",
-    "percent": 40,
+    "percent": 51,
     "action": "continue",
-    "recommendation": "continue-remaining-aboveextract-test-splits-before-code-extraction",
+    "recommendation": "continue-colony-parser-split-next-or-checkpoint-before-extension-extraction",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-13T10:39:44.486Z",
+      "atIso": "2026-05-13T12:13:03.770Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 40,
+      "percent": 51,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-remaining-aboveextract-test-splits-before-code-extraction"
+      "recommendation": "continue-colony-parser-split-next-or-checkpoint-before-extension-extraction"
     }
   ]
 }
