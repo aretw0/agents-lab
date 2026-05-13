@@ -1,7 +1,37 @@
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "../../extensions/guardrails-core-agent-run-runtime";
+import { buildPiSubprocessPreflightLines } from "../../extensions/guardrails-core-agent-run-surface-runtime";
 
 describe("agent run runtime packets", () => {
+  it("builds structured subprocess preflight lines without model calls", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "agent-run-preflight-"));
+    writeFileSync(path.join(cwd, "declared.ts"), "export const ok = true;\n", "utf8");
+
+    const lines = buildPiSubprocessPreflightLines(cwd, {
+      command: process.execPath,
+      source: "current-node-entrypoint",
+      args: [
+        path.join(cwd, "pi-cli.js"),
+        "--no-session",
+        "--model",
+        "dashscope/qwen3-coder-plus",
+        "--tools",
+        "read,grep",
+        "--print",
+        "@declared.ts",
+        "@missing.ts",
+        "Return PASS/FAIL only.",
+      ],
+    });
+
+    expect(lines.some((line) => line.includes("preflight argvShape print=yes noSession=yes provider=dashscope model=qwen3-coder-plus toolsCount=2 printPayloadCount=3"))).toBe(true);
+    expect(lines.some((line) => line.includes("preflight attachments count=2 missing=1 firstMissing=missing.ts"))).toBe(true);
+    expect(lines.some((line) => line.includes("preflight prompt segments=1 chars=22"))).toBe(true);
+  });
+
   it("builds dry-first registry upsert packets without dispatch", () => {
     const dryRun = buildAgentRunRegistryUpsertPacket({
       runId: "run-upsert",

@@ -55,13 +55,42 @@ export function resolvePiSubprocessInvocation(preview: { command: string; args: 
   return { command: preview.command, args: preview.args, source: "preview-command" };
 }
 
+function flagValue(args: string[], flag: string): string | undefined {
+  const index = args.indexOf(flag);
+  if (index < 0) return undefined;
+  const value = args[index + 1];
+  return value && !value.startsWith("--") ? value : undefined;
+}
+
+function resolveAttachmentPath(cwd: string, attachmentArg: string): string {
+  const rawPath = attachmentArg.slice(1);
+  return path.isAbsolute(rawPath) ? rawPath : path.join(cwd, rawPath);
+}
+
 export function buildPiSubprocessPreflightLines(cwd: string, subprocess: { command: string; args: string[]; source: string }): string[] {
   const entrypoint = subprocess.source === "current-node-entrypoint" ? subprocess.args[0] : undefined;
+  const cliArgs = entrypoint ? subprocess.args.slice(1) : subprocess.args;
   const commandLooksPath = path.isAbsolute(subprocess.command) || /[\\/]/.test(subprocess.command);
+  const modelRef = flagValue(cliArgs, "--model") || "missing";
+  const slashIndex = modelRef.indexOf("/");
+  const provider = slashIndex > 0 ? modelRef.slice(0, slashIndex) : "missing";
+  const model = slashIndex > 0 ? modelRef.slice(slashIndex + 1) : modelRef;
+  const tools = (flagValue(cliArgs, "--tools") || "").split(",").map((tool) => tool.trim()).filter(Boolean);
+  const printIndex = cliArgs.indexOf("--print");
+  const printPayload = printIndex >= 0 ? cliArgs.slice(printIndex + 1) : [];
+  const attachments = printPayload.filter((arg) => arg.startsWith("@"));
+  const promptSegments = printPayload.filter((arg) => !arg.startsWith("@") && !arg.startsWith("--"));
+  const missingAttachments = attachments.filter((arg) => !existsSync(resolveAttachmentPath(cwd, arg)));
+  const firstMissing = missingAttachments[0]
+    ? path.relative(cwd, resolveAttachmentPath(cwd, missingAttachments[0])).replace(/\\/g, "/")
+    : "none";
   return [
     `[agent-runner] preflight platform=${process.platform} node=${process.version} cwdExists=${existsSync(cwd) ? "yes" : "no"}`,
     `[agent-runner] preflight commandExists=${commandLooksPath ? existsSync(subprocess.command) ? "yes" : "no" : "path-lookup"} command=${subprocess.command}`,
     entrypoint ? `[agent-runner] preflight entrypointExists=${existsSync(entrypoint) ? "yes" : "no"} entrypoint=${entrypoint}` : "[agent-runner] preflight entrypointExists=not-applicable",
+    `[agent-runner] preflight argvShape print=${printIndex >= 0 ? "yes" : "no"} noSession=${cliArgs.includes("--no-session") ? "yes" : "no"} provider=${provider} model=${model} toolsCount=${tools.length} printPayloadCount=${printPayload.length}`,
+    `[agent-runner] preflight attachments count=${attachments.length} missing=${missingAttachments.length} firstMissing=${firstMissing}`,
+    `[agent-runner] preflight prompt segments=${promptSegments.length} chars=${promptSegments.join("\n").length}`,
   ];
 }
 
