@@ -207,6 +207,7 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     requiresProcessIsolation ? "requiresProcessIsolation=yes" : undefined,
     requiresDirectEventStream ? "requiresDirectEventStream=yes" : undefined,
     "trustLadder=ooda",
+    "providerSequencing=configured-first",
     mutationRequested ? "mutationRequested=yes" : undefined,
     unexpectedDirty ? "unexpectedDirty=yes" : undefined,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,

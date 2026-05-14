@@ -783,6 +783,7 @@ describe("agent spawn readiness contract", () => {
     expect(sdkCandidate.summary).toContain("subprocessRetained=yes");
     expect(sdkCandidate.summary).toContain("sdkReplacement=no");
     expect(sdkCandidate.summary).toContain("trustLadder=ooda");
+    expect(sdkCandidate.summary).toContain("providerSequencing=configured-first");
     expect(sdkCandidate.nextActions.join(" ")).toContain("current configured/recommended provider/model");
     expect(sdkCandidate.nextActions.join(" ")).toContain("alternate provider/model canaries");
     expect(sdkCandidate.selectionRationale.join(" ")).toContain("SDK/in-process is the next diagnostic candidate");
