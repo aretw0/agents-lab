@@ -1,98 +1,58 @@
 {
-  "timestamp": "2026-05-14T16:19:38.830Z",
-  "context": "Reconciled worker-unblock lane after operator feedback about overly conservative stop. TASK-BUD-1071 has live SDK shared_evidence narrow read [snip] e labels/impact instead of obscure IDs. [truncated:+448 chars]",
+  "timestamp": "2026-05-14T16:55:32.982Z",
+  "context": "Focused on the previously blocked rung: SDK workers assuming one-file mutation. Exact worker dispatch could not proceed safely because live r [snip] ion coverage, validated, and committed. [truncated:+195 chars]",
   "current_tasks": [
-    "TASK-BUD-1075",
-    "TASK-BUD-1074",
-    "TASK-BUD-1072"
+    "TASK-BUD-1075"
   ],
   "next_actions": [
-    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
-    "Continue local-safe with a human-readable TASK-BUD-1066 decision packet: close as diagnostic c [snip] rovider/model remediation. [truncated:+69 chars]",
-    "Do not auto-close TASK-BUD-1071 or TASK-BUD-1068; board quality gate still has dependency blockers.",
-    "No worker/provider dispatch without exact one-run confirmation."
+    "Run /reload so live extension surfaces pick up SDK write/edit declared-file policy.",
+    "After reload, re-preview or dispatch exact one-run canary task-bud-1075-sdk-small-doc-mutation [snip] write/edit policy active. [truncated:+12 chars]",
+    "Parent-side follow/outcome must validate only docs/research/agent-runner-maturity-checkpoint-2 [snip] ched before any promotion. [truncated:+17 chars]"
   ],
   "blockers": [
-    "context-watch-checkpoint-required",
-    "No worker/provider dispatch without exact one-run confirmation.",
-    "No automatic macro task closure; close/keep/defer remains a human decision.",
-    "Future runtime extension changes require /reload before live-surface trust."
+    "Runtime extension change requires /reload before trusting live packet/dispatch surfaces.",
+    "No worker/provider dispatch without exact one-run confirmation after reload.",
+    "Broad mutation, multi-file mutation, and parallel fan-out remain needs-evidence."
   ],
   "recent_validation": [
-    "project-validate clean before checkpoint",
-    "line_budget_snapshot watch aboveExtract=0 aboveCritical=0",
-    "git diff --check passed before checkpoint"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack [snip] nt-spawn-readiness.test.ts [truncated:+26 chars]",
+    "project-validate clean",
+    "line_budget_snapshot watch aboveExtract=0 aboveCritical=0"
+  ],
+  "recent_commits": [
+    "f4749bf0 feat(agent-runner): scope sdk mutation tools"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1068",
+    "focus": "TASK-BUD-1075",
     "canonical_links": [
-      "task:TASK-BUD-1068",
-      "task:TASK-BUD-1071"
+      "task:TASK-BUD-1075",
+      "task:TASK-BUD-1075-SDK-SMALL-DOC-MUTATION-CANARY",
+      "commit:f4749bf0"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-14T14:10:01.347Z",
-    "level": "ok",
-    "percent": 39,
-    "action": "continue",
-    "recommendation": "continue-local-safe-reconciliation-then-return-to-worker-unblock",
+    "generatedAtIso": "2026-05-14T16:55:32.982Z",
+    "level": "checkpoint",
+    "percent": 31,
+    "action": "checkpoint-refresh",
+    "recommendation": "reload-then-run-one-file-mutation-canary",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-14T14:10:01.347Z",
+      "atIso": "2026-05-14T16:55:32.982Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 39,
+      "level": "checkpoint",
+      "percent": 31,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-local-safe-reconciliation-then-return-to-worker-unblock"
-    },
-    {
-      "atIso": "2026-05-14T14:39:04.741Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 55,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
-    },
-    {
-      "atIso": "2026-05-14T14:39:38.068Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 65,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
-    },
-    {
-      "atIso": "2026-05-14T16:15:46.662Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 55,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+      "recommendation": "reload-then-run-one-file-mutation-canary"
     }
-  ],
-  "updated_at": "2026-05-14T15:14:00.096Z"
+  ]
 }
