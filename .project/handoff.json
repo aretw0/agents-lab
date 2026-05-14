@@ -1,58 +1,65 @@
 {
-  "timestamp": "2026-05-13T15:25:25.227Z",
-  "context": "Continued local-safe TASK-BUD-1071 after auto-resume. First committed pending board evidence for TASK-BUD-1066 structured preflight canary. T [snip] llel SDK execution remains report-only. [truncated:+295 chars]",
+  "timestamp": "2026-05-14T00:23:48.594Z",
+  "context": "Official pi namespace migration resumed from handoff and completed as local workspace slice. Committed package/import/launcher migration to @ [snip] explicit mutation/read guard coverage. [truncated:+317 chars]",
   "current_tasks": [
-    "TASK-BUD-1071"
+    "PI-OFFICIAL-REPO-TRANSITION"
   ],
   "next_actions": [
-    "Run /reload before trusting live agent_run_sdk_readonly_batch_packet shape because runtime extension source changed.",
-    "After reload, live-preview the batch packet sharedEvidence bounds with an oversized/duplicate [snip] idence input; no dispatch. [truncated:+9 chars]",
-    "Continue TASK-BUD-1071 with report-only cache/fan-in hardening, or prepare TASK-BUD-1066 canar [snip] ne-run human confirmation. [truncated:+19 chars]"
+    "Review/push the migration commits if desired.",
+    "Do not mutate global npm packages or PATH unless the operator explicitly confirms global transition.",
+    "Keep TASK-BUD-1071 agent-runner auto-resume lane paused unless explicitly requested."
   ],
   "blockers": [
-    "No worker/provider dispatch authorized without exact one-run confirmation.",
-    "Runtime extension changed; /reload required before trusting latest live behavior.",
-    "Parallel SDK execution remains disabled/report-only."
+    "No global package install/uninstall or PATH mutation without explicit confirmation.",
+    "No worker/provider dispatch without exact one-run confirmation.",
+    "Runtime extension changes require /reload before trusting live tool behavior i [snip] he current pi process. [truncated:+3 chars]"
   ],
   "recent_validation": [
-    "pnpm vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts -> 1 file passed, 1 test passed",
-    "git diff --check passed",
-    "line_budget_snapshot recommendation=watch aboveExtract=0 aboveCritical=0"
+    "npx vitest run manifest-integrity/package-list/custom-footer/guardrails-bash/write-preview smo [snip] commit: 5 files, 94 tests [truncated:+22 chars]",
+    "node --test packages/pi-stack/test/read-guard.test.mjs passed: 24 tests",
+    "npm run pi:isolated:status -- --dry-run resolves @earendil-works local CLI and canonical paths unchanged"
   ],
   "recent_commits": [
-    "4752c132 chore(board): record structured preflight canary",
-    "3ec4bbe9 fix(agents): bound sdk batch shared evidence"
+    "a1ed18bf chore(pi): migrate to official earendil packages",
+    "5995e287 docs(pi): align upstream guardrails with official namespace"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1071",
+    "focus": "PI-OFFICIAL-REPO-TRANSITION",
     "canonical_links": [
+      "task:PI-OFFICIAL-REPO-TRANSIT [TRUNCATED:+3 CHARS]",
       "task:TASK-BUD-1071",
-      "task:TASK-BUD-1066",
-      "commit:4752c132"
+      "commit:a1ed18bf"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-13T15:25:25.227Z",
+    "generatedAtIso": "2026-05-14T00:23:48.594Z",
     "level": "ok",
+    "percent": 30,
     "action": "continue",
-    "recommendation": "reload-before-live-preview-or-continue-report-only",
+    "recommendation": "migration-slice-committed-review-or-push",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
+    "growth_maturity": {
+      "decision": "hold"
+    }
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-13T15:25:25.227Z",
+      "atIso": "2026-05-14T00:23:48.594Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 0,
+      "percent": 30,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-before-live-preview-or-continue-report-only"
+      "recommendation": "migration-slice-committed-review-or-push",
+      "growth_maturity": {
+        "decision": "hold"
+      }
     }
   ]
 }
