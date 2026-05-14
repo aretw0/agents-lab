@@ -1,4 +1,4 @@
-import { createGrepToolDefinition, createReadToolDefinition, type ToolDefinition } from "@earendil-works/pi-coding-agent";
+import { createEditToolDefinition, createGrepToolDefinition, createReadToolDefinition, createWriteToolDefinition, type ToolDefinition } from "@earendil-works/pi-coding-agent";
 import { existsSync, statSync } from "node:fs";
 import path from "node:path";
 
@@ -109,7 +109,7 @@ export interface SdkWorkerToolPolicyPlan {
   policySummary: string[];
 }
 
-export const DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOLS = ["read", "grep"] as const;
+export const DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOLS = ["read", "grep", "write", "edit"] as const;
 
 const DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOL_SET = new Set<string>(DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOLS);
 
@@ -148,6 +148,24 @@ export function buildDeclaredFileScopedSdkWorkerTools(input: {
         policyLabel: "declared-file-scope",
       }));
       policySummary.push("grep:path=>declared-files;glob=blocked");
+    } else if (toolName === "write") {
+      customTools.push(wrapToolDefinitionWithDeclaredPathPolicy(createWriteToolDefinition(input.cwd), {
+        cwd: input.cwd,
+        declaredFiles: input.declaredFiles,
+        pathFields: ["path"],
+        requiredPathFields: ["path"],
+        policyLabel: "declared-file-mutation-scope",
+      }));
+      policySummary.push("write:path=>declared-files");
+    } else if (toolName === "edit") {
+      customTools.push(wrapToolDefinitionWithDeclaredPathPolicy(createEditToolDefinition(input.cwd), {
+        cwd: input.cwd,
+        declaredFiles: input.declaredFiles,
+        pathFields: ["path"],
+        requiredPathFields: ["path"],
+        policyLabel: "declared-file-mutation-scope",
+      }));
+      policySummary.push("edit:path=>declared-files");
     }
   }
 

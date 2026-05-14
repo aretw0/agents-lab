@@ -16208,6 +16208,15 @@
       "method": "preview",
       "timestamp": "2026-05-14T15:53:24.364Z",
       "evidence": "Prepared the next worker-autonomy rung as an exact-confirmed SDK in-process one-file mutation canary. Run id `task-bud-1075-sdk-small-doc-mutation-canary` targets only `docs/research/agent-runner-maturity-checkpoint-2026-05.md`, updating the existing final marker line `small-mutation-runner-canary-target`. Packet returned decision=ready-for-human-decision, sdkMaturity=needs-evidence-mutation, sharedEvidence=2, dispatch=no, authorization=none. This is intentionally the next evidence rung after validated narrow read/grep; no worker/provider dispatch occurred."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1075-MUTATION-TOOL-POLICY-20260514",
+      "target": "TASK-BUD-1075",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-14T16:50:01.405Z",
+      "evidence": "Implemented the parent-side prerequisite for SDK one-file mutation canary: declared-file-scoped SDK worker policy now supports write/edit in addition to read/grep, while still blocking unsupported find/ls and constraining path to declared files. Validation passed: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` (2 files, 28 tests). Runtime reload is required before live packet/dispatch surfaces can trust the new write/edit policy."
     }
   ]
 }

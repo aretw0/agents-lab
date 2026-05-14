@@ -1,17 +1,19 @@
 {
-  "timestamp": "2026-05-14T14:39:38.068Z",
+  "timestamp": "2026-05-14T16:19:38.830Z",
   "context": "Reconciled worker-unblock lane after operator feedback about overly conservative stop. TASK-BUD-1071 has live SDK shared_evidence narrow read [snip] e labels/impact instead of obscure IDs. [truncated:+448 chars]",
   "current_tasks": [
-    "TASK-BUD-1071"
+    "TASK-BUD-1075",
+    "TASK-BUD-1074",
+    "TASK-BUD-1072"
   ],
   "next_actions": [
-    "Context-watch action: level=compact 65% (compact-now) · Compact now and continue from checkpoint.",
+    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
     "Continue local-safe with a human-readable TASK-BUD-1066 decision packet: close as diagnostic c [snip] rovider/model remediation. [truncated:+69 chars]",
     "Do not auto-close TASK-BUD-1071 or TASK-BUD-1068; board quality gate still has dependency blockers.",
     "No worker/provider dispatch without exact one-run confirmation."
   ],
   "blockers": [
-    "context-watch-compact-required",
+    "context-watch-checkpoint-required",
     "No worker/provider dispatch without exact one-run confirmation.",
     "No automatic macro task closure; close/keep/defer remains a human decision.",
     "Future runtime extension changes require /reload before live-surface trust."
@@ -77,6 +79,19 @@
       },
       "action": "compact-now",
       "recommendation": "Compact now and continue from checkpoint."
+    },
+    {
+      "atIso": "2026-05-14T16:15:46.662Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ],
   "updated_at": "2026-05-14T15:14:00.096Z"

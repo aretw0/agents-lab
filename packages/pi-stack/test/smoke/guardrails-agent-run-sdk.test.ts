@@ -193,7 +193,7 @@ describe("agent run SDK packet surfaces", () => {
       cwd: process.cwd(),
       declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
       timeoutMs: 90_000,
-      toolAllowlist: ["read", "grep", "find", "ls"],
+      toolAllowlist: ["read", "grep", "write", "edit", "find", "ls"],
       validationGateKnown: true,
       rollbackPlanKnown: true,
       budgetDecision: "ok",
@@ -204,6 +204,27 @@ describe("agent run SDK packet surfaces", () => {
     expect(unsupportedToolsBlocked.decision).toBe("blocked");
     expect(unsupportedToolsBlocked.recommendationCode).toBe("agent-run-sdk-blocked-tools");
     expect(unsupportedToolsBlocked.blockers).toContain("unsupported-tool-policy:find,ls");
+
+    const mutationCanaryReady = buildAgentRunSdkInProcessPacket({
+      runId: "sdk-one-file-mutation-canary",
+      goal: "Mutate only the declared file and stop.",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: ["docs/research/agent-runner-maturity-checkpoint-2026-05.md"],
+      timeoutMs: 90_000,
+      toolAllowlist: ["read", "write"],
+      sessionMode: "in-memory",
+      fileContract: "mutation",
+      validationGateKnown: true,
+      rollbackPlanKnown: true,
+      budgetDecision: "ok",
+      abortKnown: true,
+      eventStreamKnown: true,
+      finalOutputContractKnown: true,
+    });
+    expect(mutationCanaryReady.decision).toBe("ready-for-human-decision");
+    expect(mutationCanaryReady.blockers).not.toContain("unsupported-tool-policy:write");
+    expect(mutationCanaryReady.sdkMaturity.rung).toBe("needs-evidence-mutation");
 
     const cachePack = buildAgentRunSdkCachePackPacket({
       packId: "task-bud-1071-shared-evidence-pack",

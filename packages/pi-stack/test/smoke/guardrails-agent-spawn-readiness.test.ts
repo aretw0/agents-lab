@@ -951,12 +951,14 @@ describe("agent spawn readiness contract", () => {
     const plan = buildDeclaredFileScopedSdkWorkerTools({
       cwd,
       declaredFiles: ["packages/pi-stack/README.md"],
-      toolAllowlist: ["read", "grep", "find"],
+      toolAllowlist: ["read", "grep", "write", "edit", "find"],
     });
-    expect(plan.customTools.map((tool) => tool.name)).toEqual(["read", "grep"]);
+    expect(plan.customTools.map((tool) => tool.name)).toEqual(["read", "grep", "write", "edit"]);
     expect(plan.unsupportedTools).toEqual(["find"]);
     expect(plan.policySummary.join("\n")).toContain("read:path=>declared-files");
     expect(plan.policySummary.join("\n")).toContain("grep:path=>declared-files;glob=blocked");
+    expect(plan.policySummary.join("\n")).toContain("write:path=>declared-files");
+    expect(plan.policySummary.join("\n")).toContain("edit:path=>declared-files");
   });
 
   it("classifies runner failures before another worker retry", () => {
