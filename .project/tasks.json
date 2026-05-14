@@ -24003,6 +24003,33 @@
       ],
       "milestone": "agent-lane-stabilization-followup",
       "notes": "2026-05-13: Captured from operator feedback: if this tooling is meant for other pi users/projects, agents-lab must be its own user. Guardrail scoring should become configurable via normal user/project config rather than hardcoded local package assumptions. Keep after current stabilization focus on TASK-BUD-1066/TASK-BUD-1071 so agents can help reduce control-plane dependence.\n[provenance:human] source_task=TASK-BUD-1073 reason=Follow-up from line-budget hardening: package-wide scan is useful locally, but reusable tooling should dogfood user/project configuration."
+    },
+    {
+      "id": "TASK-BUD-1075",
+      "description": "[agent-worker-expansion/sdk-mutation] Validar e promover o primeiro degrau de worker SDK in-process com mutação pequena: um único arquivo declarado, escopo local-safe, validação parent-side e rollback explícito, sem liberar fan-out ou mutações amplas.",
+      "status": "in-progress",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1068",
+        "TASK-BUD-1071"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-surface-runtime.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Preparar packet/canary exato para SDK in-process mutation com um único arquivo alvo declarado e inputs read-only separados de mutation targets.",
+        "Canary só pode rodar com confirmação humana exata, budget fresh, rollback não destrutivo, validation gate conhecido e git clean antes/depois.",
+        "Outcome parent-side deve distinguir processState de contractDecision e bloquear touched files fora do alvo mutável.",
+        "Se passar, promover somente o envelope `one-file-small-mutation`; manter broad mutation, multi-file mutation e parallel fan-out como `needs-evidence`.",
+        "Registrar evidência operator-visible com rótulos humanos: o que o worker assumiu, o que o control-plane ainda validou, e qual próximo degrau continua bloqueado."
+      ],
+      "milestone": "agent-worker-expansion",
+      "notes": "Criada após decisão do operador em 2026-05-14: se ainda não estamos prontos para agentes assumirem mais trabalho, o foco deve virar justamente os degraus que permitem isso. Próximo degrau pragmático: SDK worker com mutação pequena de um arquivo, control-plane validando outcome/rollback/commit. [rationale:worker-autonomy] Isso descarrega mais execução do control-plane sem saltar direto para mutações amplas ou fan-out.\n2026-05-14: Prepared exact-confirmed SDK one-file mutation canary `task-bud-1075-sdk-small-doc-mutation-canary`. It targets only the dedicated doc marker line in `docs/research/agent-runner-maturity-checkpoint-2026-05.md`, returns `sdkMaturity=needs-evidence-mutation`, and keeps `dispatch=no` until exact confirmation. This is the focused next rung to make workers assume more execution without jumping to broad mutation or fan-out. Evidence: VERIF-TASK-BUD-1075-SDK-MUTATION-PREVIEW-20260514.",
+      "verification": "VERIF-TASK-BUD-1075-SDK-MUTATION-PREVIEW-20260514"
     }
   ]
 }
