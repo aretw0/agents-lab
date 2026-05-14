@@ -1,15 +1,17 @@
 {
-  "timestamp": "2026-05-14T01:51:56.750Z",
+  "timestamp": "2026-05-14T12:00:58.936Z",
   "context": "Resumed worker-unblock lane in local-safe/report-only mode. Implemented bounded shared_evidence attachments for single SDK in-process worker [snip] dispatch; no global npm/PATH mutation. [truncated:+178 chars]",
   "current_tasks": [
     "TASK-BUD-1071"
   ],
   "next_actions": [
+    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
     "Reload before trusting live extension surfaces for shared_evidence because runtime extension code changed.",
     "Optional next TASK-BUD-1071 slice: live-preview the updated agent_run_sdk_in_process_packet af [snip] ence, still execute=false. [truncated:+28 chars]",
     "Keep TASK-BUD-1066 runner retry blocked until fresh provider/budget evidence and exact one-run confirmation."
   ],
   "blockers": [
+    "context-watch-checkpoint-required",
     "No worker/provider dispatch without exact one-run confirmation.",
     "No global package install/uninstall or PATH mutation without explicit confirmation.",
     "Runtime extension changes require /reload before trusting live tool behavior."
@@ -49,6 +51,19 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "commit-local-slice-then-reload-before-live-preview"
+    },
+    {
+      "atIso": "2026-05-14T12:00:58.936Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ]
 }

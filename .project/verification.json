@@ -16145,6 +16145,15 @@
       "method": "inspect",
       "timestamp": "2026-05-14T11:53:20.715Z",
       "evidence": "Post-/reload live `agent_run_executor_strategy_packet` preview now shows provider sequencing in operator-facing summary: decision=sdk-in-process-candidate, preferred=pi-sdk-in-process, subprocessRetained=yes, sdkReplacement=no, subprocessBlindRetry=no, trustLadder=ooda, providerSequencing=configured-first, dispatch=no, authorization=none. Git was clean; project-validate clean; no worker/provider dispatch occurred."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-SHARED-EVIDENCE-POST-RELOAD-20260514",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-05-14T12:10:38.527Z",
+      "evidence": "Post-/reload live SDK shared_evidence previews: first `agent_run_sdk_in_process_packet` intentionally omitted SDK execution contracts and blocked fail-closed with blockers=tool-allowlist-missing|abort-contract-missing|event-stream-contract-missing|final-output-contract-missing while still showing sharedEvidence=2 and dispatch=no. Second preview supplied read/grep allowlist plus abort/event-stream/final-output contracts and returned decision=ready-for-human-decision, sharedEvidence=2, sdkMaturity=needs-evidence-broad-readonly, dispatch=no, authorization=none. `agent_run_sdk_in_process_dispatch` with execute=false returned decision=preview, dispatch=no. No worker/provider dispatch occurred."
     }
   ]
 }
