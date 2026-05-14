@@ -16154,6 +16154,15 @@
       "method": "inspect",
       "timestamp": "2026-05-14T12:10:38.527Z",
       "evidence": "Post-/reload live SDK shared_evidence previews: first `agent_run_sdk_in_process_packet` intentionally omitted SDK execution contracts and blocked fail-closed with blockers=tool-allowlist-missing|abort-contract-missing|event-stream-contract-missing|final-output-contract-missing while still showing sharedEvidence=2 and dispatch=no. Second preview supplied read/grep allowlist plus abort/event-stream/final-output contracts and returned decision=ready-for-human-decision, sharedEvidence=2, sdkMaturity=needs-evidence-broad-readonly, dispatch=no, authorization=none. `agent_run_sdk_in_process_dispatch` with execute=false returned decision=preview, dispatch=no. No worker/provider dispatch occurred."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-SHARED-EVIDENCE-NARROW-PREVIEW-20260514",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-05-14T12:19:51.019Z",
+      "evidence": "Post-/reload narrow SDK shared_evidence preview with two declared files and read/grep allowlist returned decision=ready-for-human-decision, sharedEvidence=2, sdkMaturity=validated-narrow-readgrep, dispatch=no, authorization=none. This confirms the intended mature rung is the narrow read/grep SDK packet shape; broader three-file read-only previews remain marked needs-evidence-broad-readonly. No worker/provider dispatch occurred."
     }
   ]
 }
