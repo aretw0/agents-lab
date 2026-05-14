@@ -46,6 +46,12 @@ export interface AgentRunExecutorStrategyPacketResult {
     unexpectedDirty: boolean;
   };
   selectionRationale: string[];
+  trustLadder: Array<{
+    oodaStage: "observe" | "orient" | "decide" | "act";
+    support: string;
+    confidence: "high" | "medium" | "low";
+    boundary: string;
+  }>;
   executorContracts: Array<{
     executor: AgentRunExecutorStrategyKind;
     purpose: string;
@@ -130,6 +136,33 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     subprocessMaturityProbe: canProbeSubprocessOffWindows ? "devcontainer-or-linux-canary" : subprocessStartupFailure && subprocessDiagnosticsAvailable ? "devcontainer-or-linux-canary" : "not-needed-yet",
   };
 
+  const trustLadder: AgentRunExecutorStrategyPacketResult["trustLadder"] = [
+    {
+      oodaStage: "observe",
+      support: "local deterministic sensors: git dirty state, route/budget evidence, registry, logs, outcome packets, line budget",
+      confidence: "high",
+      boundary: "read-only/report-only sensors do not authorize dispatch or closure by themselves",
+    },
+    {
+      oodaStage: "orient",
+      support: "report-only packets: executor strategy, SDK packet, startup diagnostic, cache pack, batch/fan-in preview",
+      confidence: "high",
+      boundary: "packets explain options and blockers; they remain authorization=none",
+    },
+    {
+      oodaStage: "decide",
+      support: "control-plane or human decision after fresh route evidence and board context",
+      confidence: "medium",
+      boundary: "exact one-run confirmation is still required for any provider/worker dispatch or provider experiment",
+    },
+    {
+      oodaStage: "act",
+      support: "small local edits/tests/commits and, when confirmed, one narrow SDK read-only worker under the validated read/grep envelope",
+      confidence: "medium",
+      boundary: "parallel fan-out, mutation workers, blind subprocess retry, and alternate provider/model canaries remain separate explicit decisions",
+    },
+  ];
+
   const executorContracts = [
     {
       executor: "pi-print-subprocess" as const,
@@ -172,6 +205,7 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     devcontainerAvailable ? "devcontainerAvailable=yes" : undefined,
     requiresProcessIsolation ? "requiresProcessIsolation=yes" : undefined,
     requiresDirectEventStream ? "requiresDirectEventStream=yes" : undefined,
+    "trustLadder=ooda",
     mutationRequested ? "mutationRequested=yes" : undefined,
     unexpectedDirty ? "unexpectedDirty=yes" : undefined,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
@@ -193,6 +227,7 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     executorPosture,
     selectionSignals,
     selectionRationale,
+    trustLadder,
     executorContracts,
     blockers,
     nextActions,

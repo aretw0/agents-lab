@@ -16100,6 +16100,15 @@
       "method": "inspect",
       "timestamp": "2026-05-14T02:16:42.016Z",
       "evidence": "Post-/reload live previews passed for TASK-BUD-1071 SDK shared evidence lane. `agent_run_sdk_in_process_packet` returned decision=ready-for-human-decision, sharedEvidence=1, sdkMaturity=validated-narrow-readgrep, dispatch=no. `agent_run_sdk_in_process_dispatch` with execute=false returned decision=preview, dispatch=no. Fresh route evidence: openai-codex/gpt-5.3-codex-spark ok generatedAt=2026-05-14T02:15:16.279Z. Git was clean before preview; no worker/provider dispatch occurred."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-OODA-TRUST-LADDER-20260514",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-14T03:10:20.031Z",
+      "evidence": "Added report-only OODA trust ladder to agent-run executor strategy packet. The packet now distinguishes Observe sensors, Orient packets, Decide human/control-plane gates, and Act boundaries: local edits/tests/commits and exact-confirmed narrow SDK read-only workers only; parallel fan-out, mutation workers, blind subprocess retry, and alternate provider/model canaries remain separate explicit decisions. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts => 27 tests passed; git diff --check passed; line_budget_snapshot remains watch with aboveExtract=0/aboveCritical=0. No worker/provider dispatch occurred."
     }
   ]
 }

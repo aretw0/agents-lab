@@ -778,8 +778,11 @@ describe("agent spawn readiness contract", () => {
       },
     });
     expect(sdkCandidate.executorContracts.map((contract) => contract.executor)).toEqual(["pi-print-subprocess", "pi-sdk-in-process"]);
+    expect(sdkCandidate.trustLadder.map((step) => step.oodaStage)).toEqual(["observe", "orient", "decide", "act"]);
+    expect(sdkCandidate.trustLadder.find((step) => step.oodaStage === "act")?.boundary).toContain("alternate provider/model canaries remain separate explicit decisions");
     expect(sdkCandidate.summary).toContain("subprocessRetained=yes");
     expect(sdkCandidate.summary).toContain("sdkReplacement=no");
+    expect(sdkCandidate.summary).toContain("trustLadder=ooda");
     expect(sdkCandidate.selectionRationale.join(" ")).toContain("SDK/in-process is the next diagnostic candidate");
 
     const timeoutSdkCandidate = buildAgentRunExecutorStrategyPacket({
