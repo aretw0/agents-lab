@@ -11,7 +11,7 @@ Current bounded evidence:
 - `ToolCallEvent` exposes `toolName`, `toolCallId` and `input`, but no confirmation field.
 - `ExtensionContext` in `tool_call` handlers exposes `ui.confirm`, but not a command-context `sendMessage` capability.
 - behavior-monitor `custom_messages` collection is text-only for current purposes; text-only custom messages are not sufficient trusted evidence.
-- Direct mutation of `node_modules/@mariozechner/pi-coding-agent` remains prohibited.
+- Direct mutation of `node_modules/@earendil-works/pi-coding-agent` and legacy `node_modules/@mariozechner/pi-coding-agent` remains prohibited.
 
 ## Required signal shape
 
@@ -84,7 +84,7 @@ Either option must preserve exact binding, TTL/single-use semantics, and no oper
 - parsing text from `custom_messages` as authorization;
 - accepting model-written confirmation text;
 - using stale or consumed confirmation evidence;
-- direct patching of `node_modules/@mariozechner/pi-coding-agent`;
+- direct patching of `node_modules/@earendil-works/pi-coding-agent` or legacy `node_modules/@mariozechner/pi-coding-agent`;
 - treating `decision=match` as dispatch permission.
 
 ## Current implementation references

@@ -10,7 +10,7 @@ Esta trilha é **report-only por padrão**: não atualiza dependências, não ed
 
 Use antes de qualquer uma destas ações:
 
-- atualizar `@mariozechner/pi-coding-agent`, extensões de terceiros ou pacote pi relacionado;
+- atualizar `@earendil-works/pi-coding-agent`, o namespace legado `@mariozechner/pi-coding-agent`, extensões de terceiros ou pacote pi relacionado;
 - explicar se uma regressão veio de código local, upstream Pi/TUI, lockfile ou dependência transitiva;
 - assimilar uma ideia/correção externa na stack local;
 - preparar release notes/blog com fronteira clara entre “nós mudamos” e “upstream/deps mudaram”.
@@ -28,7 +28,7 @@ Um relatório de atribuição deve registrar, de forma curta:
    - comando bounded usado para confirmar (`npm ls --depth=0`, `npm ls --workspaces --depth=0`, ou leitura direta de package.json)
 3. **Fonte da mudança**
    - `local-stack`: arquivos nossos em `packages/`, `scripts/`, `docs/`, `.pi/`, `.project`
-   - `upstream-pi`: `@mariozechner/pi-coding-agent`/TUI ou comportamento fora de extensão local
+   - `upstream-pi`: `@earendil-works/pi-coding-agent`/TUI, namespace legado `@mariozechner/pi-coding-agent`/TUI ou comportamento fora de extensão local
    - `third-party-package`: pacote pi/extensão/skill externa
    - `lockfile-resolution`: mudança sem alteração intencional de código, causada por resolução de lockfile
    - `mixed` ou `unknown` quando a evidência ainda não fecha
