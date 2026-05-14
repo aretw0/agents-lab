@@ -16091,6 +16091,15 @@
       "method": "test",
       "timestamp": "2026-05-14T01:43:29.747Z",
       "evidence": "Added bounded shared_evidence attachments to single SDK in-process worker packet/dispatch surfaces and runtime prompt. Single-worker packets now validate duplicate/oversized shared evidence, expose runSpec.sharedEvidence, summarize sharedEvidence count, and pass fresh cache hints into buildSdkScopedWorkerPrompt; read-only batch packets propagate shared evidence to worker packets. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts => 2 files, 28 tests passed; git diff --check passed; line_budget_snapshot remains watch with aboveExtract=0/aboveCritical=0. No worker/provider dispatch, no global package/PATH mutation."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-SHARED-EVIDENCE-LIVE-PREVIEW-20260514",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-05-14T02:16:42.016Z",
+      "evidence": "Post-/reload live previews passed for TASK-BUD-1071 SDK shared evidence lane. `agent_run_sdk_in_process_packet` returned decision=ready-for-human-decision, sharedEvidence=1, sdkMaturity=validated-narrow-readgrep, dispatch=no. `agent_run_sdk_in_process_dispatch` with execute=false returned decision=preview, dispatch=no. Fresh route evidence: openai-codex/gpt-5.3-codex-spark ok generatedAt=2026-05-14T02:15:16.279Z. Git was clean before preview; no worker/provider dispatch occurred."
     }
   ]
 }
