@@ -75,12 +75,14 @@ Do not forget the sequence already tried:
 6. A narrow synthesis worker read one doc and one board file, recommended the next SDK rung with cited board/doc evidence, and passed.
 7. A two-file code/test review stayed inside declared files but looped with zero output; do not retry that shape blindly.
 8. A one-file/named-symbol code review with tighter loop guards produced a parent-side patch recommendation and passed.
+9. A one-file SDK mutation canary with `read` + `write`, exact confirmation, parent-side follow/outcome validation, and a marker check completed and passed under TASK-BUD-1075.
 
 Use this ladder to unlock more work gradually:
 
 - **Ready now**: one or two declared files, `read/grep` only, explicit one-answer output shape, exact confirmation, follow/outcome validation, including real board-question checks, narrow cited synthesis, and one-file/named-symbol code review.
-- **Next rung**: parent-side implementation of a tiny guard/recommendation patch derived from the one-symbol review, with local tests before any worker mutation.
-- **Not ready yet**: broad read-only analysis, two-file open-ended code/test review, mutation, multi-worker, protected scope, or unattended provider dispatch.
+- **Ready now, mutation-limited**: one declared file, `read` plus `write`/`edit` only, exact confirmation, parent-side follow/outcome validation, touched-file check, and focal marker/test evidence.
+- **Next rung**: one more real-task one-file mutation canary before considering a two-file mutation packet.
+- **Not ready yet**: broad read-only analysis, two-file open-ended code/test review, multi-file mutation, multi-worker, protected scope, or unattended provider dispatch.
 
 When preparing a worker, prefer the next smallest rung that can answer the question. If the worker loops, bloats output, or reads old logs as fresh evidence, harden the packet/runner before expanding scope.
 
@@ -106,16 +108,18 @@ This lane can reduce operator interrupts by keeping a stocked queue of narrow, v
 
 For the current `TASK-BUD-1066` subprocess blocker, do **not** retry the worker blindly. The next local-safe step is the existing startup diagnostic packet's `startupProbePlan`: a report-only structured startup/provider probe plan that captures startup phases, stderr preservation, timeout budget, termination signal, elapsed time, and provider bootstrap evidence without a model call where possible. Each startup probe step is advisory only and keeps `modelCallAllowed=false` and `dispatchAllowed=false`.
 
-Run one more single-worker canary only after preparing a small mutation target with:
+One-file mutation is now a validated narrow rung only when all of these stay true:
 
-- one or two declared files;
+- exactly one declared mutable file;
+- `read` plus `write`/`edit` only;
+- exact one-run confirmation;
 - explicit non-destructive rollback;
 - focal validation command or marker check;
 - `agent_run_follow` as the finalizer;
 - `agent_run_outcome_packet` using registry `outputBytes` fallback;
 - parent-side board completion only after process and contract both pass.
 
-This is the next safe rung before considering broader worker autonomy.
+The next safe rung before broader worker autonomy is a second real-task one-file mutation canary, not multi-file mutation or fan-out.
 
 ## Small-mutation canary target
 

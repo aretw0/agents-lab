@@ -16235,6 +16235,24 @@
       "method": "worker-canary+parent-validation",
       "timestamp": "2026-05-14T17:31:14.977Z",
       "evidence": "Exact-confirmed SDK in-process one-file mutation canary `task-bud-1075-sdk-small-doc-mutation-canary` dispatched after reload and completed. Follow result: state=completed, outputBytes=1528. Parent-side validation: git touched only `docs/research/agent-runner-maturity-checkpoint-2026-05.md`; marker check passed for `small-mutation-runner-canary-target | 2026-05-14T10:18:00Z | TASK-BUD-1075 one-file marker mutation PASS`; `agent_run_outcome_packet` returned contract=pass, process=completed, declared=1, touched=1. This promotes only the `one-file-small-mutation` evidence rung; broad/multi-file mutation and parallel fan-out remain needs-evidence."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1075-SDK-MUTATION-RUNG-CODIFIED-20260514",
+      "target": "TASK-BUD-1075",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-14T17:50:19.542Z",
+      "evidence": "Codified the passed one-file SDK mutation canary into `buildAgentRunSdkInProcessPacket`: maturity rung `validated-one-file-mutation` is now exposed only for exactly one declared file with read plus write/edit tools and keeps multi-file mutation at `needs-evidence-mutation`. Updated the maturity checkpoint doc to distinguish ready mutation-limited vs not-ready multi-file/fan-out. Validation passed: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` (28 tests)."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-ARENA-DESIGN-SEED-20260514",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "design+marker-check",
+      "timestamp": "2026-05-14T17:54:25.481Z",
+      "evidence": "Seeded `docs/research/worker-provider-model-arena-2026-05.md` defining the provider/model worker arena: repeatable envelopes, explicit budget packet, outcome schema, and scoped promotion rule `(provider, model, envelope)`. Marker check passed for promotion scoping, `mutation-one-file-marker`, and no settings/routing/default-provider changes. This is report-only design; no provider/model calls were made."
     }
   ]
 }

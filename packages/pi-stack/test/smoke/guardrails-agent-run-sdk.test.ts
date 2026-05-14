@@ -224,7 +224,42 @@ describe("agent run SDK packet surfaces", () => {
     });
     expect(mutationCanaryReady.decision).toBe("ready-for-human-decision");
     expect(mutationCanaryReady.blockers).not.toContain("unsupported-tool-policy:write");
-    expect(mutationCanaryReady.sdkMaturity.rung).toBe("needs-evidence-mutation");
+    expect(mutationCanaryReady.sdkMaturity).toMatchObject({
+      rung: "validated-one-file-mutation",
+      validatedEnvelope: true,
+      maxDeclaredFilesValidated: 1,
+      supportedToolsValidated: ["read", "write", "edit"],
+    });
+    expect(mutationCanaryReady.nextActions.join("\n")).toContain("validated one-file mutation envelope");
+    expect(mutationCanaryReady.nextActions.join("\n")).toContain("do not promote broad mutation");
+    expect(mutationCanaryReady.sdkPreview.isolationNotes.join("\n")).toContain("Live-validated one-file mutation rung");
+
+    const multiFileMutationStillNeedsEvidence = buildAgentRunSdkInProcessPacket({
+      runId: "sdk-two-file-mutation-still-blocked",
+      goal: "Mutate two declared files and stop.",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      declaredFiles: [
+        "docs/research/agent-runner-maturity-checkpoint-2026-05.md",
+        "docs/research/single-worker-board-driven-lane-2026-05.md",
+      ],
+      timeoutMs: 90_000,
+      toolAllowlist: ["read", "write"],
+      sessionMode: "in-memory",
+      fileContract: "mutation",
+      validationGateKnown: true,
+      rollbackPlanKnown: true,
+      budgetDecision: "ok",
+      abortKnown: true,
+      eventStreamKnown: true,
+      finalOutputContractKnown: true,
+    });
+    expect(multiFileMutationStillNeedsEvidence.decision).toBe("ready-for-human-decision");
+    expect(multiFileMutationStillNeedsEvidence.sdkMaturity).toMatchObject({
+      rung: "needs-evidence-mutation",
+      validatedEnvelope: false,
+      maxDeclaredFilesValidated: 1,
+    });
 
     const cachePack = buildAgentRunSdkCachePackPacket({
       packId: "task-bud-1071-shared-evidence-pack",

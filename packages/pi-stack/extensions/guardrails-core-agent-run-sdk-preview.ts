@@ -6,6 +6,7 @@ export type AgentRunSdkPacketDecision = "ready-for-human-decision" | "blocked";
 export type AgentRunSdkFileContract = "read-only" | "mutation" | "unknown";
 export type AgentRunSdkMaturityRung =
   | "validated-narrow-readgrep"
+  | "validated-one-file-mutation"
   | "needs-evidence-broad-readonly"
   | "needs-evidence-code-review"
   | "needs-evidence-mutation"
@@ -183,10 +184,18 @@ function buildSdkMaturity(input: {
 }): AgentRunSdkInProcessPacketResult["sdkMaturity"] {
   const scope = input.declaredFiles.length === 0 ? "none" : input.declaredFiles.length <= 2 ? "narrow" : "broad";
   const toolsWithinValidatedEnvelope = input.toolAllowlist.length > 0 && input.toolAllowlist.every((tool) => tool === "read" || tool === "grep");
+  const mutationToolsWithinValidatedEnvelope = input.toolAllowlist.length > 0
+    && input.toolAllowlist.some((tool) => tool === "write" || tool === "edit")
+    && input.toolAllowlist.every((tool) => tool === "read" || tool === "write" || tool === "edit");
   const base = {
     scope,
     maxDeclaredFilesValidated: 2,
     supportedToolsValidated: ["read", "grep"],
+  } as const;
+  const mutationBase = {
+    scope,
+    maxDeclaredFilesValidated: 1,
+    supportedToolsValidated: ["read", "write", "edit"],
   } as const;
   if (input.blocked) {
     return {
@@ -197,11 +206,19 @@ function buildSdkMaturity(input: {
     };
   }
   if (input.fileContract === "mutation") {
+    if (input.declaredFiles.length === 1 && mutationToolsWithinValidatedEnvelope) {
+      return {
+        ...mutationBase,
+        rung: "validated-one-file-mutation",
+        validatedEnvelope: true,
+        recommendation: "ready for exact human decision under the validated one-file SDK mutation envelope: one declared file, read plus write/edit only, parent-side follow/outcome validation, and no fan-out",
+      };
+    }
     return {
-      ...base,
+      ...mutationBase,
       rung: "needs-evidence-mutation",
       validatedEnvelope: false,
-      recommendation: "keep mutation SDK workers behind separate validation, rollback, and exact-confirmation evidence",
+      recommendation: "keep multi-file, broad, or tool-expanded mutation SDK workers behind separate validation, rollback, and exact-confirmation evidence",
     };
   }
   if (input.fileContract === "read-only" && scope === "narrow" && toolsWithinValidatedEnvelope) {
@@ -395,17 +412,25 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     toolAllowlist,
     fileContract,
   });
-  const readyNextActions = sdkMaturity.validatedEnvelope
+  const readyNextActions = sdkMaturity.rung === "validated-one-file-mutation"
     ? [
-      "present this SDK/in-process packet for explicit human decision; the packet itself cannot dispatch",
-      "prefer the validated SDK safe envelope first: one or two declared files, read/grep only, strict final output contract, bounded timeout",
-      "after a failed two-file code/test review, retry only as one target file or one named symbol before expanding scope",
-      "prefer shared parent-side cache/evidence packs before repeated reads of stable logs, docs, or declared files",
-      "for parallel fan-out, prepare a separate read-only batch packet with shared cache/evidence and fan-in validation; do not start multiple workers from this single-worker packet",
-      "if separately implemented and confirmed, start exactly one SDK worker and record registry/log/outcome evidence",
-      "after completion, validate final output bytes and declared file scope from the parent",
+      "present this SDK/in-process mutation packet for explicit human decision; the packet itself cannot dispatch",
+      "use only the validated one-file mutation envelope: one declared file, read plus write/edit only, strict final output contract, bounded timeout",
+      "after completion, validate final output bytes, git touched-file scope, marker/check results, and agent_run_outcome_packet from the parent",
+      "do not promote broad mutation, multi-file mutation, protected scope, or parallel fan-out from this single-worker evidence rung",
+      "record operator-visible evidence before any board closure or commit",
     ]
-    : [
+    : sdkMaturity.validatedEnvelope
+      ? [
+        "present this SDK/in-process packet for explicit human decision; the packet itself cannot dispatch",
+        "prefer the validated SDK safe envelope first: one or two declared files, read/grep only, strict final output contract, bounded timeout",
+        "after a failed two-file code/test review, retry only as one target file or one named symbol before expanding scope",
+        "prefer shared parent-side cache/evidence packs before repeated reads of stable logs, docs, or declared files",
+        "for parallel fan-out, prepare a separate read-only batch packet with shared cache/evidence and fan-in validation; do not start multiple workers from this single-worker packet",
+        "if separately implemented and confirmed, start exactly one SDK worker and record registry/log/outcome evidence",
+        "after completion, validate final output bytes and declared file scope from the parent",
+      ]
+      : [
       "present this SDK/in-process packet as a new evidence rung, not as routine validated SDK use",
       sdkMaturity.recommendation,
       "if exact-confirmed anyway, start exactly one SDK worker and record registry/log/outcome evidence before expanding scope",
@@ -441,6 +466,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       "Failed evidence rung: two-file code/test review looped with zero output; shrink to one target file or one named symbol before retrying code/test review.",
       "Live-validated one-symbol review rung: one target file or named symbol can produce a parent-side patch recommendation without broadening scope.",
       "Next maturity rung: parent-side implementation of a tiny guard/recommendation patch derived from a one-symbol review, with local tests before any worker mutation; broad read-only scopes still need evidence because prior runs looped or bloated output.",
+      "Live-validated one-file mutation rung: one declared file with read plus write/edit only can run after exact confirmation, then parent-side follow/outcome/touched-file validation; broad mutation, multi-file mutation, and fan-out still need evidence.",
       "Use read-only tools for diagnostic canaries unless a mutation profile declares validation and rollback.",
       "Keep subprocess executor supported for stronger process isolation and argv-level diagnostics.",
     ],
