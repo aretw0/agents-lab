@@ -16253,6 +16253,24 @@
       "method": "design+marker-check",
       "timestamp": "2026-05-14T17:54:25.481Z",
       "evidence": "Seeded `docs/research/worker-provider-model-arena-2026-05.md` defining the provider/model worker arena: repeatable envelopes, explicit budget packet, outcome schema, and scoped promotion rule `(provider, model, envelope)`. Marker check passed for promotion scoping, `mutation-one-file-marker`, and no settings/routing/default-provider changes. This is report-only design; no provider/model calls were made."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-REPORT-ONLY-ARENA-PACKET-20260514",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-14T18:52:39.419Z",
+      "evidence": "Implemented the deterministic report-only provider/model arena packet: `buildAgentRunSdkProviderModelArenaPacket` expands providerModel + envelopes + explicit budget into exact SDK worker canary packets and scorecard/promotion contracts, with `paidModelCallsAllowed=false` and `dispatchAllowed=false`. Surfaced as `agent_run_sdk_provider_model_arena_packet` after reload. Validation passed: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` (28 tests). No provider/model call was made."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-ARENA-STEERING-EXTRACTED-20260514",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+marker-check",
+      "timestamp": "2026-05-14T19:47:56.854Z",
+      "evidence": "Persisted operator steering: the arena is a serial provider/model suite, not colony/swarm; capabilities are scoped to `(provider, model, envelope)`, and once a provider/model passes an envelope it may use that evidenced capability without rematuring unrelated envelopes. Extracted arena packet logic/surface into dedicated files to restore line budget. Validation passed: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` (28 tests); line_budget_snapshot returned recommendation=watch, aboveExtract=0, aboveCritical=0; marker check passed for not-colony and scoped reuse language."
     }
   ]
 }

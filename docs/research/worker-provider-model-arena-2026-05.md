@@ -8,6 +8,8 @@ The current worker maturity evidence is scoped to the provider/model that actual
 
 This arena turns the ladder into repeatable canaries with explicit budgets and comparable outcomes.
 
+This is **not** a colony/swarm abstraction. It is a serial test suite for model/provider capability evidence. The goal is to avoid hardcoded capability assumptions while still allowing a proven provider/model to use every envelope it has passed with evidence.
+
 ## Non-negotiable boundaries
 
 - No settings/routing/default-provider changes from arena runs.
@@ -15,6 +17,7 @@ This arena turns the ladder into repeatable canaries with explicit budgets and c
 - No automatic retry loops by default.
 - Paid/model calls require explicit operator approval with provider/model, max calls, timeout, and budget evidence.
 - Promotion is scoped to `(provider, model, envelope)`; passing one envelope/model does not promote another.
+- Once a provider/model passes an envelope, it may be used for that evidenced capability without rematuring the whole ladder.
 
 ## Envelopes
 
@@ -66,6 +69,8 @@ Each run records a row with:
 
 ## First implementation slice
 
+Implemented in source as `buildAgentRunSdkProviderModelArenaPacket` and surfaced as `agent_run_sdk_provider_model_arena_packet` after reload.
+
 1. Keep local smokes deterministic: no model call.
 2. Add report-only arena packet that expands a provider/model + envelope into exact run specs and budget gates.
 3. Seed fixtures for the five envelopes above.
@@ -84,3 +89,5 @@ A provider/model is eligible for a worker envelope only when:
 - evidence is recorded in board/verification.
 
 Promotion is always additive and scoped: `openai-codex/gpt-5.3-codex-spark` passing `mutation-one-file-marker` does not imply `dashscope/qwen3-coder-plus` or any other model has passed it.
+
+The positive rule is just as important: once a provider/model has passed an envelope, the control plane can use that provider/model for all capabilities covered by the passed envelopes, without re-running unrelated manual maturity exercises.

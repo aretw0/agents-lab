@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkProviderModelArenaPacket, buildAgentRunSdkReadOnlyBatchPacket } from "../../extensions/guardrails-core";
 
 describe("agent run SDK packet surfaces", () => {
   it("builds sdk in-process packet preview without dispatch", async () => {
@@ -260,6 +260,44 @@ describe("agent run SDK packet surfaces", () => {
       validatedEnvelope: false,
       maxDeclaredFilesValidated: 1,
     });
+
+    const arenaPacket = buildAgentRunSdkProviderModelArenaPacket({
+      arenaId: "arena-openai-spark-smoke",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      envelopes: ["readonly-one-file", "mutation-one-file-marker"],
+      maxCalls: 2,
+      timeoutMs: 90_000,
+      maxEstimatedCostUsd: 0.25,
+      budgetDecision: "ok",
+      budgetEvidence: "manual test budget evidence",
+    });
+    expect(arenaPacket).toMatchObject({
+      mode: "agent-run-sdk-provider-model-arena-packet",
+      dispatchAllowed: false,
+      paidModelCallsAllowed: false,
+      decision: "ready-for-human-decision",
+    });
+    expect(arenaPacket.arenaSpec.promotionScope).toBe("provider-model-envelope");
+    expect(arenaPacket.canaries).toHaveLength(2);
+    expect(arenaPacket.canaries.map((canary) => canary.envelope)).toEqual(["readonly-one-file", "mutation-one-file-marker"]);
+    expect(arenaPacket.canaries[1]?.packet.sdkMaturity.rung).toBe("validated-one-file-mutation");
+    expect(arenaPacket.promotionContract.join("\n")).toContain("passing one provider/model does not promote another provider/model");
+    expect(arenaPacket.budgetContract.join("\n")).toContain("never starts paid/model calls by itself");
+    expect(arenaPacket.summary).toContain("paidCalls=no");
+
+    const arenaBlocked = buildAgentRunSdkProviderModelArenaPacket({
+      arenaId: "arena-blocked",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      envelopes: ["readonly-one-file", "unknown-envelope"],
+      maxCalls: 1,
+      timeoutMs: 90_000,
+      maxEstimatedCostUsd: 0,
+      budgetDecision: "unknown",
+    });
+    expect(arenaBlocked.decision).toBe("blocked");
+    expect(arenaBlocked.blockers).toContain("unknown-envelope");
+    expect(arenaBlocked.blockers).toContain("max-estimated-cost-missing");
+    expect(arenaBlocked.blockers).toContain("budget-evidence-missing");
 
     const cachePack = buildAgentRunSdkCachePackPacket({
       packId: "task-bud-1071-shared-evidence-pack",
@@ -526,6 +564,22 @@ describe("agent run SDK packet surfaces", () => {
     expect(batchSurface.details?.mode).toBe("agent-run-sdk-readonly-batch-packet");
     expect(batchSurface.details?.parallelDispatchAllowed).toBe(false);
     expect(batchSurface.content?.[0]?.text).toContain("parallelDispatch=no");
+
+    const arenaToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_provider_model_arena_packet");
+    const arenaTool = arenaToolCall?.[0] as typeof batchTool;
+    const arenaSurface = arenaTool.execute("tc-sdk-arena-preview", {
+      arena_id: "arena-surface-openai-spark",
+      provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+      envelopes: ["readonly-one-file", "mutation-one-file-marker"],
+      max_calls: 2,
+      timeout_ms: 90_000,
+      max_estimated_cost_usd: 0.25,
+      budget_decision: "ok",
+      budget_evidence: "manual surface test budget evidence",
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
+    expect(arenaSurface.details?.mode).toBe("agent-run-sdk-provider-model-arena-packet");
+    expect(arenaSurface.content?.[0]?.text).toContain("paidCalls=no");
+    expect(arenaSurface.content?.[0]?.text).toContain("dispatch=no");
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_in_process_packet");
     const tool = toolCall?.[0] as {
       execute: (

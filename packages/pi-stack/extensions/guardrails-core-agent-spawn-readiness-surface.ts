@@ -7,6 +7,7 @@ import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readi
 import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 import { buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";
 import { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run-executor-strategy";
+import { registerAgentRunSdkProviderModelArenaTool } from "./guardrails-core-agent-run-sdk-arena-surface";
 import { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket } from "./guardrails-core-agent-run-sdk-preview";
 import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult } from "./guardrails-core-agent-run-runtime";
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
@@ -875,6 +876,8 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
     },
   });
+
+  registerAgentRunSdkProviderModelArenaTool(pi);
 
   pi.registerTool({
     name: "agent_run_sdk_in_process_packet",

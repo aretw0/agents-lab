@@ -1,58 +1,51 @@
 {
-  "timestamp": "2026-05-14T18:01:56.541Z",
-  "context": "Operator raised a portability concern: current worker maturity may depend on the provider/model that happened to cooperate. Continued local-s [snip] gs/routing/default providers by itself. [truncated:+268 chars]",
+  "timestamp": "2026-05-14T19:12:09.281Z",
+  "context": "Steering from operator must persist across compaction/session: this is not a colony/swarm lane. The desired capability is a reproducible prov [snip] extracted so it survives context churn. [truncated:+324 chars]",
   "current_tasks": [
     "TASK-BUD-1076"
   ],
   "next_actions": [
-    "Implement a report-only arena packet/tool that expands providerModel + envelope + budget into [snip] un specs without dispatch. [truncated:+14 chars]",
-    "Add deterministic unit/smoke fixtures for arena envelopes with no model calls.",
-    "Only after explicit budget/confirmation, run real arena canaries for another provider/model and compare scorecard rows."
+    "Persist the not-colony/provider-model-suite steering in the arena design doc and board evidence.",
+    "Extract arena packet code out of the oversized SDK preview file to restore line-budget watch.",
+    "Run focused smokes and commit the bounded slice."
   ],
   "blockers": [
     "No paid/model calls without explicit budget and exact confirmation.",
     "No settings/routing/default-provider changes from arena work.",
-    "Provider/model maturity remains scoped; one passing model does not promote another."
+    "Avoid colony/fan-out semantics; arena is a serial suite/harness scoped by provider/model/envelope."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack [snip] nt-spawn-readiness.test.ts [truncated:+26 chars]",
-    "safe_marker_check docs/research/worker-provider-model-arena-2026-05.md markers passed",
-    "project-validate clean"
-  ],
-  "recent_commits": [
-    "a49414c0 feat(agent-runner): codify provider model arena"
+    "steering checkpoint written before further refactor"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1076",
     "canonical_links": [
-      "task:TASK-BUD-1076",
-      "task:TASK-BUD-1075",
-      "commit:a49414c0"
+      "task:TASK-BUD-1076"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-14T18:01:56.541Z",
-    "level": "ok",
-    "percent": 39,
+    "generatedAtIso": "2026-05-14T19:12:09.281Z",
+    "level": "warn",
+    "percent": 46,
     "action": "continue",
-    "recommendation": "continue-arena-packet-design",
+    "recommendation": "persist-steering-then-extract-arena",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-14T18:01:56.541Z",
+      "atIso": "2026-05-14T19:12:09.281Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 39,
+      "level": "warn",
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-arena-packet-design"
+      "recommendation": "persist-steering-then-extract-arena"
     }
   ]
 }

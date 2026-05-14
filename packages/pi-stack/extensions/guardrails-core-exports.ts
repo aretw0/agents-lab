@@ -108,6 +108,8 @@ export { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run
 export type { AgentRunExecutorStrategyDecision, AgentRunExecutorStrategyInput, AgentRunExecutorStrategyKind, AgentRunExecutorStrategyPacketResult } from "./guardrails-core-agent-run-executor-strategy";
 export { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket } from "./guardrails-core-agent-run-sdk-preview";
 export type { AgentRunSdkCachePackPacketInput, AgentRunSdkCachePackPacketResult, AgentRunSdkFileContract, AgentRunSdkInProcessPacketInput, AgentRunSdkInProcessPacketResult, AgentRunSdkPacketDecision, AgentRunSdkReadOnlyBatchPacketInput, AgentRunSdkReadOnlyBatchPacketResult, AgentRunSdkSessionMode } from "./guardrails-core-agent-run-sdk-preview";
+export { buildAgentRunSdkProviderModelArenaPacket } from "./guardrails-core-agent-run-sdk-arena";
+export type { AgentRunSdkArenaEnvelope, AgentRunSdkProviderModelArenaPacketInput, AgentRunSdkProviderModelArenaPacketResult } from "./guardrails-core-agent-run-sdk-arena";
 export { buildDeclaredFileScopedSdkWorkerTools, DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOLS, evaluateDeclaredPathPolicy, findUnsupportedDeclaredFileScopedSdkWorkerTools, wrapToolDefinitionWithDeclaredPathPolicy } from "./guardrails-core-tool-policy";
 export type { DeclaredPathPolicy, SdkWorkerToolPolicyPlan, ToolPolicyDecision } from "./guardrails-core-tool-policy";
 export { buildToolkitContract } from "./guardrails-core-toolkit-contract";
