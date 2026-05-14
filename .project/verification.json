@@ -16136,6 +16136,15 @@
       "method": "test",
       "timestamp": "2026-05-14T11:11:34.975Z",
       "evidence": "Made provider/model sequencing visible in the executor strategy summary as providerSequencing=configured-first, so operator-facing output shows that the current configured/recommended provider/model should mature first before alternate provider/model canaries. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts => 27 tests passed; git diff --check passed; line_budget_snapshot remains watch with aboveExtract=0/aboveCritical=0. No worker/provider dispatch occurred. Live tool still needs /reload before the new summary marker appears."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-PROVIDER-SEQUENCING-LIVE-PREVIEW-20260514",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-05-14T11:53:20.715Z",
+      "evidence": "Post-/reload live `agent_run_executor_strategy_packet` preview now shows provider sequencing in operator-facing summary: decision=sdk-in-process-candidate, preferred=pi-sdk-in-process, subprocessRetained=yes, sdkReplacement=no, subprocessBlindRetry=no, trustLadder=ooda, providerSequencing=configured-first, dispatch=no, authorization=none. Git was clean; project-validate clean; no worker/provider dispatch occurred."
     }
   ]
 }
