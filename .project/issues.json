@@ -1170,8 +1170,7 @@
       "category": "issue",
       "priority": "high",
       "package": "pi-stack",
-      "source": "monitor",
-      "resolved_by": "18fbdda2 fix(agents): surface sdk declared files"
+      "source": "monitor"
     },
     {
       "id": "fragility-fragility-mozfkr4w",
@@ -1182,8 +1181,7 @@
       "category": "issue",
       "priority": "high",
       "package": "pi-stack",
-      "source": "monitor",
-      "resolved_by": "2ac9b83a fix(agents): record subprocess preflight evidence; next subprocess canary requires explicit confirmation"
+      "source": "monitor"
     }
   ]
 }
