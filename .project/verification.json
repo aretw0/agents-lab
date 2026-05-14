@@ -16181,6 +16181,24 @@
       "method": "canary",
       "timestamp": "2026-05-14T14:46:59.683Z",
       "evidence": "Exact-confirmed final subprocess diagnostic canary `task-bud-1066-final-subprocess-diagnostic-canary` ran on openai-codex/gpt-5.3-codex-spark with extension_isolation=inherit. Result: state=timed-out exitCode=124 after timeoutMs=90000; no files touched; log captured structured preflight before child start: command/entrypoint exist, argv shape print=yes noSession=yes provider=openai-codex model=gpt-5.3-codex-spark toolsCount=4 printPayloadCount=5, attachments count=4 missing=0, prompt chars=1368. Failure line: runner-timeout with outputBytes=0, stdoutBytes=0, stderrBytes=0, firstOutputElapsedMs=none, next probe should isolate provider/model-call/bootstrap hang. Classifier: runner-timeout, retryAllowed=no. Outcome contract failed for task implementation, but diagnostic acceptance is satisfied: evidence distinguishes this from prior silent-runner-failure/provider-unavailable and blocks blind retry."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1068-DUAL-EXECUTOR-ESTABLISHED-20260514",
+      "target": "TASK-BUD-1068",
+      "target_type": "task",
+      "status": "passed",
+      "method": "review",
+      "timestamp": "2026-05-14T15:13:59.727Z",
+      "evidence": "Closed as dual executor strategy established after dependency TASK-BUD-1066 completed. Evidence in lane: subprocess remains first-class with structured preflight/timeout diagnostics and no-blind-retry policy; SDK/in-process packet path has validated narrow read/grep maturity, exact-confirmation gates, fail-closed dirty/protected/budget behavior, OODA trust ladder, providerSequencing=configured-first, and live post-reload previews with dispatch=no. TASK-BUD-1066 final canary confirmed subprocess diagnostic capture; deeper bootstrap/provider/model-call remediation should be a separate task if pursued."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-CACHE-SHARED-EVIDENCE-COMPLETE-20260514",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "review",
+      "timestamp": "2026-05-14T15:16:10.707Z",
+      "evidence": "Closed SDK cache/economy/reliability slice after TASK-BUD-1068 dependency completed. Evidence in lane: report-only SDK cache pack, read-only batch preview, fan-in outcome packet, bounded shared_evidence attachments, oversized/duplicate evidence guards, worker prompt cache-first economy guidance, parent-side contracts, fail-closed missing SDK execution contracts, live post-reload preview with sharedEvidence=2, and validated narrow read/grep packet maturity. Parallel dispatch/mutation workers remain intentionally not enabled and should be separate tasks."
     }
   ]
 }
