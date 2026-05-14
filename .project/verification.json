@@ -16163,6 +16163,15 @@
       "method": "inspect",
       "timestamp": "2026-05-14T12:19:51.019Z",
       "evidence": "Post-/reload narrow SDK shared_evidence preview with two declared files and read/grep allowlist returned decision=ready-for-human-decision, sharedEvidence=2, sdkMaturity=validated-narrow-readgrep, dispatch=no, authorization=none. This confirms the intended mature rung is the narrow read/grep SDK packet shape; broader three-file read-only previews remain marked needs-evidence-broad-readonly. No worker/provider dispatch occurred."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1063-OPERATOR-STOP-CONTEXT-BACKLOG-20260514",
+      "target": "TASK-BUD-1063",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-05-14T14:06:59.709Z",
+      "evidence": "Existing backlog TASK-BUD-1063 was enriched rather than creating a duplicate. Added acceptance criteria for proactive stop/continuation briefs in already-authorized local-safe lanes: explain why the agent stopped instead of continuing, distinguish blocker vs conservative boundary, provide human-readable options with impact/preconditions, and test against IDs-only/git-clean-only final messages. This captures the operator feedback from the TASK-BUD-1071 pause. No runtime behavior changed yet."
     }
   ]
 }

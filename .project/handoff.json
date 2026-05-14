@@ -1,69 +1,54 @@
 {
-  "timestamp": "2026-05-14T12:00:58.936Z",
-  "context": "Resumed worker-unblock lane in local-safe/report-only mode. Implemented bounded shared_evidence attachments for single SDK in-process worker [snip] dispatch; no global npm/PATH mutation. [truncated:+178 chars]",
+  "timestamp": "2026-05-14T14:10:01.347Z",
+  "context": "Reconciled worker-unblock lane after operator feedback about overly conservative stop. TASK-BUD-1071 has live SDK shared_evidence narrow read [snip] e labels/impact instead of obscure IDs. [truncated:+448 chars]",
   "current_tasks": [
-    "TASK-BUD-1071"
+    "TASK-BUD-1068"
   ],
   "next_actions": [
-    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
-    "Reload before trusting live extension surfaces for shared_evidence because runtime extension code changed.",
-    "Optional next TASK-BUD-1071 slice: live-preview the updated agent_run_sdk_in_process_packet af [snip] ence, still execute=false. [truncated:+28 chars]",
-    "Keep TASK-BUD-1066 runner retry blocked until fresh provider/budget evidence and exact one-run confirmation."
+    "Continue local-safe with a human-readable TASK-BUD-1066 decision packet: close as diagnostic c [snip] rovider/model remediation. [truncated:+69 chars]",
+    "Do not auto-close TASK-BUD-1071 or TASK-BUD-1068; board quality gate still has dependency blockers.",
+    "No worker/provider dispatch without exact one-run confirmation."
   ],
   "blockers": [
-    "context-watch-checkpoint-required",
     "No worker/provider dispatch without exact one-run confirmation.",
-    "No global package install/uninstall or PATH mutation without explicit confirmation.",
-    "Runtime extension changes require /reload before trusting live tool behavior."
+    "No automatic macro task closure; close/keep/defer remains a human decision.",
+    "Future runtime extension changes require /reload before live-surface trust."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack [snip] > 2 files, 28 tests passed [truncated:+54 chars]",
-    "git diff --check => passed",
-    "line_budget_snapshot => recommendation=watch, aboveExtract=0, aboveCritical=0"
+    "project-validate clean before checkpoint",
+    "line_budget_snapshot watch aboveExtract=0 aboveCritical=0",
+    "git diff --check passed before checkpoint"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1071",
+    "focus": "TASK-BUD-1068",
     "canonical_links": [
-      "task:TASK-BUD-1071",
-      "task:TASK-BUD-1066"
+      "task:TASK-BUD-1068",
+      "task:TASK-BUD-1071"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-14T01:51:56.750Z",
-    "level": "checkpoint",
-    "percent": 42,
-    "action": "checkpoint-refresh",
-    "recommendation": "commit-local-slice-then-reload-before-live-preview",
+    "generatedAtIso": "2026-05-14T14:10:01.347Z",
+    "level": "ok",
+    "percent": 39,
+    "action": "continue",
+    "recommendation": "continue-local-safe-reconciliation-then-return-to-worker-unblock",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-14T01:51:56.750Z",
+      "atIso": "2026-05-14T14:10:01.347Z",
       "reason": "manual_checkpoint",
-      "level": "checkpoint",
-      "percent": 42,
+      "level": "ok",
+      "percent": 39,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-local-slice-then-reload-before-live-preview"
-    },
-    {
-      "atIso": "2026-05-14T12:00:58.936Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 55,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+      "recommendation": "continue-local-safe-reconciliation-then-return-to-worker-unblock"
     }
   ]
 }
