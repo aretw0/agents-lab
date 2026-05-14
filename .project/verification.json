@@ -16082,6 +16082,15 @@
       "method": "local-fix+focal-vitest+line-budget-preview",
       "timestamp": "2026-05-13T16:48:17.519Z",
       "evidence": "Refined route advisory blocked-provider semantics after live reload check showed a confusing state: recommendedScopeKey could be `openai-codex/gpt-5.3-codex-spark` while blockedProviders still listed `openai-codex` because the aggregate budget row was blocked. Providers now appear in blockedProviders only when all scopes for that provider are blocked; aggregate blocked rows can still appear in consideredProviders without masking an available configured model-specific scope. Runtime routing remains config-driven from routeModelRefs; grep over quota/handoff/panel runtime files found no hardcoded Spark/DashScope model names. Validation: `pnpm vitest run packages/pi-stack/test/smoke/quota-visibility-route-advisory.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts` -> 2 files passed, 48 tests passed; `git diff --check` passed; `line_budget_snapshot` recommendation=watch aboveExtract=0 aboveCritical=0."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1071-SDK-SINGLE-SHARED-EVIDENCE-20260514",
+      "target": "TASK-BUD-1071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-14T01:43:29.747Z",
+      "evidence": "Added bounded shared_evidence attachments to single SDK in-process worker packet/dispatch surfaces and runtime prompt. Single-worker packets now validate duplicate/oversized shared evidence, expose runSpec.sharedEvidence, summarize sharedEvidence count, and pass fresh cache hints into buildSdkScopedWorkerPrompt; read-only batch packets propagate shared evidence to worker packets. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts => 2 files, 28 tests passed; git diff --check passed; line_budget_snapshot remains watch with aboveExtract=0/aboveCritical=0. No worker/provider dispatch, no global package/PATH mutation."
     }
   ]
 }

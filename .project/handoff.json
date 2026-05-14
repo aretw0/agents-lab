@@ -1,65 +1,54 @@
 {
-  "timestamp": "2026-05-14T00:23:48.594Z",
-  "context": "Official pi namespace migration resumed from handoff and completed as local workspace slice. Committed package/import/launcher migration to @ [snip] explicit mutation/read guard coverage. [truncated:+317 chars]",
+  "timestamp": "2026-05-14T01:51:56.750Z",
+  "context": "Resumed worker-unblock lane in local-safe/report-only mode. Implemented bounded shared_evidence attachments for single SDK in-process worker [snip] dispatch; no global npm/PATH mutation. [truncated:+178 chars]",
   "current_tasks": [
-    "PI-OFFICIAL-REPO-TRANSITION"
+    "TASK-BUD-1071"
   ],
   "next_actions": [
-    "Review/push the migration commits if desired.",
-    "Do not mutate global npm packages or PATH unless the operator explicitly confirms global transition.",
-    "Keep TASK-BUD-1071 agent-runner auto-resume lane paused unless explicitly requested."
+    "Reload before trusting live extension surfaces for shared_evidence because runtime extension code changed.",
+    "Optional next TASK-BUD-1071 slice: live-preview the updated agent_run_sdk_in_process_packet af [snip] ence, still execute=false. [truncated:+28 chars]",
+    "Keep TASK-BUD-1066 runner retry blocked until fresh provider/budget evidence and exact one-run confirmation."
   ],
   "blockers": [
-    "No global package install/uninstall or PATH mutation without explicit confirmation.",
     "No worker/provider dispatch without exact one-run confirmation.",
-    "Runtime extension changes require /reload before trusting live tool behavior i [snip] he current pi process. [truncated:+3 chars]"
+    "No global package install/uninstall or PATH mutation without explicit confirmation.",
+    "Runtime extension changes require /reload before trusting live tool behavior."
   ],
   "recent_validation": [
-    "npx vitest run manifest-integrity/package-list/custom-footer/guardrails-bash/write-preview smo [snip] commit: 5 files, 94 tests [truncated:+22 chars]",
-    "node --test packages/pi-stack/test/read-guard.test.mjs passed: 24 tests",
-    "npm run pi:isolated:status -- --dry-run resolves @earendil-works local CLI and canonical paths unchanged"
-  ],
-  "recent_commits": [
-    "a1ed18bf chore(pi): migrate to official earendil packages",
-    "5995e287 docs(pi): align upstream guardrails with official namespace"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack [snip] > 2 files, 28 tests passed [truncated:+54 chars]",
+    "git diff --check => passed",
+    "line_budget_snapshot => recommendation=watch, aboveExtract=0, aboveCritical=0"
   ],
   "slice_memory": {
-    "focus": "PI-OFFICIAL-REPO-TRANSITION",
+    "focus": "TASK-BUD-1071",
     "canonical_links": [
-      "task:PI-OFFICIAL-REPO-TRANSIT [TRUNCATED:+3 CHARS]",
       "task:TASK-BUD-1071",
-      "commit:a1ed18bf"
+      "task:TASK-BUD-1066"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-14T00:23:48.594Z",
-    "level": "ok",
-    "percent": 30,
-    "action": "continue",
-    "recommendation": "migration-slice-committed-review-or-push",
+    "generatedAtIso": "2026-05-14T01:51:56.750Z",
+    "level": "checkpoint",
+    "percent": 42,
+    "action": "checkpoint-refresh",
+    "recommendation": "commit-local-slice-then-reload-before-live-preview",
     "stopStatus": "graceful",
     "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint.",
-    "growth_maturity": {
-      "decision": "hold"
-    }
+    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-14T00:23:48.594Z",
+      "atIso": "2026-05-14T01:51:56.750Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 30,
+      "level": "checkpoint",
+      "percent": 42,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "migration-slice-committed-review-or-push",
-      "growth_maturity": {
-        "decision": "hold"
-      }
+      "recommendation": "commit-local-slice-then-reload-before-live-preview"
     }
   ]
 }

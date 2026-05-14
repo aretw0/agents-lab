@@ -9,6 +9,7 @@ describe("agent run SDK packet surfaces", () => {
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
       cwd: process.cwd(),
       declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+      sharedEvidence: ["VERIF-TASK-BUD-1071-SDK-CACHE-PACK-LIVE-PREVIEW-20260513"],
       timeoutMs: 90_000,
       toolAllowlist: ["read", "grep"],
       sessionMode: "in-memory",
@@ -43,7 +44,9 @@ describe("agent run SDK packet surfaces", () => {
       toolSelection: ["read", "grep"],
     });
     expect(result.sdkPreview.abortContract).toContain("timeout calls session.abort()");
+    expect(result.runSpec.sharedEvidence).toEqual(["VERIF-TASK-BUD-1071-SDK-CACHE-PACK-LIVE-PREVIEW-20260513"]);
     expect(result.sdkPreview.finalOutputContract).toContain("require final output bytes > 0");
+    expect(result.sdkPreview.cacheEconomyContract.join("\n")).toContain("bounded to 20 items of 300 chars each");
     expect(result.sdkPreview.cacheEconomyContract.join("\n")).toContain("shared evidence pack");
     expect(result.sdkPreview.cacheEconomyContract.join("\n")).toContain("cache-hit/cache-miss");
     expect(result.sdkPreview.parallelReadOnlyContract.join("\n")).toContain("separate batch gate");
@@ -65,6 +68,7 @@ describe("agent run SDK packet surfaces", () => {
       maxDeclaredFilesValidated: 2,
       supportedToolsValidated: ["read", "grep"],
     });
+    expect(result.summary).toContain("sharedEvidence=1");
     expect(result.summary).toContain("sdkMaturity=validated-narrow-readgrep");
 
     const twoFileCodeReview = buildAgentRunSdkInProcessPacket({
@@ -318,6 +322,7 @@ describe("agent run SDK packet surfaces", () => {
     expect(batchPacket.cacheEconomyContract.join("\n")).toContain("bounded to 20 items of 300 chars each");
     expect(batchPacket.batchSpec.maxSharedEvidenceItems).toBe(20);
     expect(batchPacket.batchSpec.maxSharedEvidenceChars).toBe(300);
+    expect(batchPacket.workers[0]?.runSpec.sharedEvidence).toEqual(["VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512"]);
     expect(batchPacket.summary).toContain("parallelDispatch=no");
 
     const batchBlocked = buildAgentRunSdkReadOnlyBatchPacket({
@@ -480,6 +485,7 @@ describe("agent run SDK packet surfaces", () => {
       goal: "Preview SDK worker.",
       provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
       declared_files: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+      shared_evidence: ["VERIF-TASK-BUD-1071-SDK-CACHE-PACK-LIVE-PREVIEW-20260513"],
       timeout_ms: 90_000,
       tool_allowlist: ["read", "grep"],
       validation_gate_known: true,
@@ -492,6 +498,7 @@ describe("agent run SDK packet surfaces", () => {
       final_output_contract_known: true,
     }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
     expect(surfaceResult.details?.mode).toBe("agent-run-sdk-in-process-packet");
+    expect((surfaceResult.details?.runSpec as { sharedEvidence?: string[] })?.sharedEvidence).toEqual(["VERIF-TASK-BUD-1071-SDK-CACHE-PACK-LIVE-PREVIEW-20260513"]);
     expect(surfaceResult.details?.processStartAllowed).toBe(false);
     expect(surfaceResult.content?.[0]?.text).toContain("dispatch=no");
 

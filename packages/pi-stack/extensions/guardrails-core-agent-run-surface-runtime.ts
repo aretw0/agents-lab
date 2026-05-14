@@ -205,16 +205,23 @@ function formatSdkDeclaredFilesForPrompt(declaredFiles: string[]): string {
   return declaredFiles.map((file) => `- ${file}`).join("\n");
 }
 
-function buildSdkScopedWorkerPrompt(goal: string, declaredFiles: string[]): string {
+function formatSdkSharedEvidenceForPrompt(sharedEvidence: string[]): string {
+  return sharedEvidence.map((evidence) => `- ${evidence}`).join("\n");
+}
+
+function buildSdkScopedWorkerPrompt(goal: string, declaredFiles: string[], sharedEvidence: string[] = []): string {
   return [
     "Declared files (only these exact paths are allowed unless a declared entry is a directory):",
     formatSdkDeclaredFilesForPrompt(declaredFiles),
+    sharedEvidence.length > 0 ? "" : undefined,
+    sharedEvidence.length > 0 ? "Shared fresh evidence/cache hints (use these before rereading; report cache-hit/cache-miss in final output):" : undefined,
+    sharedEvidence.length > 0 ? formatSdkSharedEvidenceForPrompt(sharedEvidence) : undefined,
     "",
     "Tool cadence: inspect each declared file at most twice unless the result is clearly incomplete; then produce the final answer instead of continuing to search.",
     "If evidence is missing, report the missing evidence explicitly and stop.",
     "",
     goal,
-  ].join("\n");
+  ].filter((line): line is string => line !== undefined).join("\n");
 }
 
 function computeSdkLoopGuardLimits(toolAllowlist: string[], declaredFiles: string[]): { maxToolCalls: number; maxTurns: number } {
@@ -358,7 +365,7 @@ export function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInPro
         void session?.abort();
       }, packet.runSpec.timeoutMs);
       try {
-        await session.prompt(buildSdkScopedWorkerPrompt(packet.runSpec.goal, packet.runSpec.declaredFiles), { expandPromptTemplates: false, source: "extension" });
+        await session.prompt(buildSdkScopedWorkerPrompt(packet.runSpec.goal, packet.runSpec.declaredFiles, packet.runSpec.sharedEvidence), { expandPromptTemplates: false, source: "extension" });
       } finally {
         clearTimeout(timeout);
         outputBytes += appendAssistantOutput(logPath, outputCapture.streamedText, outputCapture);

@@ -17,6 +17,7 @@ export interface AgentRunSdkInProcessPacketInput {
   providerModelRef?: string;
   cwd?: string;
   declaredFiles?: string[];
+  sharedEvidence?: string[];
   timeoutMs?: number;
   toolAllowlist?: string[];
   sessionMode?: string;
@@ -72,6 +73,7 @@ export interface AgentRunSdkInProcessPacketResult {
     providerModelRef: string;
     cwd: string;
     declaredFiles: string[];
+    sharedEvidence: string[];
     timeoutMs: number;
     timeoutMinMs: number;
     timeoutMaxMs: number;
@@ -330,6 +332,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   const providerModelRef = normalizeText(input.providerModelRef);
   const cwd = normalizeText(input.cwd);
   const declaredFiles = normalizeFiles(input.declaredFiles);
+  const sharedEvidence = normalizeFiles(input.sharedEvidence);
   const timeoutMs = normalizePositiveInt(input.timeoutMs, 0);
   const toolAllowlist = normalizeFiles(input.toolAllowlist);
   const unsupportedPolicyTools = findUnsupportedDeclaredFileScopedSdkWorkerTools(toolAllowlist);
@@ -366,6 +369,13 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   if (!providerModelRef || !providerModelRef.includes("/")) block("agent-run-sdk-blocked-provider-model", "provider-model-ref-missing");
   if (!cwd) block("agent-run-sdk-blocked-cwd", "cwd-missing");
   if (declaredFiles.length === 0) block("agent-run-sdk-blocked-files", "declared-files-missing");
+  if (sharedEvidence.length > SDK_SHARED_EVIDENCE_MAX_ITEMS) block("agent-run-sdk-blocked-files", `shared-evidence-count-exceeds-max:${sharedEvidence.length}>${SDK_SHARED_EVIDENCE_MAX_ITEMS}`);
+  const seenSharedEvidence = new Set<string>();
+  for (const [index, evidence] of sharedEvidence.entries()) {
+    if (evidence.length > SDK_SHARED_EVIDENCE_MAX_CHARS) block("agent-run-sdk-blocked-files", `shared-evidence-too-large:${index + 1}:${evidence.length}>${SDK_SHARED_EVIDENCE_MAX_CHARS}`);
+    if (seenSharedEvidence.has(evidence)) block("agent-run-sdk-blocked-files", `duplicate-shared-evidence:${evidence}`);
+    seenSharedEvidence.add(evidence);
+  }
   if (timeoutMs < SDK_TIMEOUT_MIN_MS || timeoutMs > SDK_TIMEOUT_MAX_MS) block("agent-run-sdk-blocked-timeout", "timeout-out-of-bounds");
   if (toolAllowlist.length === 0) block("agent-run-sdk-blocked-tools", "tool-allowlist-missing");
   if (unsupportedPolicyTools.length > 0) block("agent-run-sdk-blocked-tools", `unsupported-tool-policy:${unsupportedPolicyTools.join(",")}`);
@@ -411,6 +421,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     abortContract: ["parent timeout owns AbortController", "timeout calls session.abort()", "registry records timed-out or aborted"],
     finalOutputContract: ["capture assistant text deltas", "require final output bytes > 0", "parent validates declared file scope after completion"],
     cacheEconomyContract: [
+      `shared evidence attachments are optional for single workers, but when present they are bounded to ${SDK_SHARED_EVIDENCE_MAX_ITEMS} items of ${SDK_SHARED_EVIDENCE_MAX_CHARS} chars each`,
       "parent should attach a bounded shared evidence pack before asking workers to reread stable logs, docs, or packet previews",
       "cache keys should include path plus freshness evidence such as git object, mtime/size, or explicit verification id",
       "worker goals should prefer cached summaries first and read only focal anchors when the cache is fresh",
@@ -454,6 +465,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       providerModelRef,
       cwd,
       declaredFiles,
+      sharedEvidence,
       timeoutMs,
       timeoutMinMs: SDK_TIMEOUT_MIN_MS,
       timeoutMaxMs: SDK_TIMEOUT_MAX_MS,
@@ -489,6 +501,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       `runId=${runId || "missing"}`,
       providerModelRef ? `model=${providerModelRef}` : undefined,
       `tools=${toolAllowlist.length}`,
+      sharedEvidence.length > 0 ? `sharedEvidence=${sharedEvidence.length}` : undefined,
       `session=${sessionMode}`,
       `sdkMaturity=${sdkMaturity.rung}`,
       unexpectedDirty ? "unexpectedDirty=yes" : undefined,
@@ -630,6 +643,7 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
   const unexpectedDirty = input.unexpectedDirty === true;
   const workers = workersInput.map((worker) => buildAgentRunSdkInProcessPacket({
     ...worker,
+    sharedEvidence: worker.sharedEvidence?.length ? worker.sharedEvidence : sharedEvidence,
     fileContract: "read-only",
     protectedScopeRequested: protectedScopeRequested || worker.protectedScopeRequested,
     unexpectedDirty: unexpectedDirty || worker.unexpectedDirty,
