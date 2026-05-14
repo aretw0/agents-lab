@@ -182,6 +182,7 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     ? [
       "Use SDK/in-process as the next diagnostic candidate, not as a replacement for subprocess.",
       "Keep subprocess as a first-class executor; mature it with startup diagnostics and/or a devcontainer/Linux canary before judging it unsuitable.",
+      "Mature the worker rung on the current configured/recommended provider/model before treating alternate provider/model canaries as separate explicit experiments with fresh route/budget evidence.",
       "Require exact runId confirmation before either executor starts a worker.",
     ]
     : decision === "subprocess-first"
