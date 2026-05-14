@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { structuredJsonRead, structuredJsonWrite, structuredRead, structuredWrite } from "./guardrails-core-structured-io";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";

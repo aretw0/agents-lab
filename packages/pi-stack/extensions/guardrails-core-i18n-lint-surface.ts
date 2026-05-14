@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { lintI18nUserFacingText } from "./guardrails-core-i18n-lint";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";

@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { evaluateDelegationLaneCapabilitySnapshot } from "./guardrails-core-autonomy-lane";
 import { buildDelegateOrExecuteDecisionPacket, buildDelegationRehearsalDecisionPacket } from "./guardrails-core-ops-calibration";
 import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan } from "./guardrails-core-background-process";

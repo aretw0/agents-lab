@@ -173,20 +173,16 @@ function buildCandidates() {
 	});
 
 	// 3) local workspace CLI via current node
-	const localCli = path.join(
-		ROOT,
-		"node_modules",
-		"@mariozechner",
-		"pi-coding-agent",
-		"dist",
-		"cli.js",
-	);
-	if (existsSync(localCli)) {
-		candidates.push({
-			label: "workspace-cli-js",
-			command: process.execPath,
-			prefixArgs: [localCli],
-		});
+	for (const scope of ["@earendil-works", "@mariozechner"]) {
+		const localCli = path.join(ROOT, "node_modules", scope, "pi-coding-agent", "dist", "cli.js");
+		if (existsSync(localCli)) {
+			candidates.push({
+				label: `workspace-cli-js (${scope})`,
+				command: process.execPath,
+				prefixArgs: [localCli],
+			});
+			break;
+		}
 	}
 
 	// 4) scoop fallback (helps WSL + Windows wrapper mismatch)
@@ -198,23 +194,26 @@ function buildCandidates() {
 			"current",
 			"node.exe",
 		);
-		const cliJs = path.join(
-			scoopRoot,
-			"persist",
-			"nodejs",
-			"bin",
-			"node_modules",
-			"@mariozechner",
-			"pi-coding-agent",
-			"dist",
-			"cli.js",
-		);
-		if (existsSync(nodeExe) && existsSync(cliJs)) {
-			candidates.push({
-				label: `scoop-cli-js (${scoopRoot})`,
-				command: nodeExe,
-				prefixArgs: [cliJs],
-			});
+		for (const scope of ["@earendil-works", "@mariozechner"]) {
+			const cliJs = path.join(
+				scoopRoot,
+				"persist",
+				"nodejs",
+				"bin",
+				"node_modules",
+				scope,
+				"pi-coding-agent",
+				"dist",
+				"cli.js",
+			);
+			if (existsSync(nodeExe) && existsSync(cliJs)) {
+				candidates.push({
+					label: `scoop-cli-js ${scope} (${scoopRoot})`,
+					command: nodeExe,
+					prefixArgs: [cliJs],
+				});
+				break;
+			}
 		}
 	}
 

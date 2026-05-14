@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { initTheme } from "@mariozechner/pi-coding-agent";
+import { initTheme } from "@earendil-works/pi-coding-agent";
 import {
 	buildWritePreview,
 	formatWritePreviewCollapsedLinesHint,

@@ -30,7 +30,7 @@ A engine primária deste laboratório é o **[pi](https://github.com/badlogic/pi
 - **Extensibilidade** — projetado para ser a fundação de outros sistemas (ex.: openclaw)
 - **Filosofia sólida** — convergência natural para o que uma engine de agentes precisa ser
 - **Ecossistema crescente** — [pacotes disponíveis](https://pi.dev/packages) em constante expansão
-- **Multi-provider** — suporta OpenAI, Anthropic, Google e outros via `@mariozechner/pi-ai`
+- **Multi-provider** — suporta OpenAI, Anthropic, Google e outros via `@earendil-works/pi-ai`
 
 ### Pacotes First-Party (`@aretw0/*`)
 
@@ -48,10 +48,10 @@ Este repositório é a fábrica onde a curadoria nasce. Os pacotes first-party s
 
 | Pacote | Descrição |
 |--------|-----------|
-| `@mariozechner/pi-ai` | API unificada multi-provider para LLMs |
-| `@mariozechner/pi-agent-core` | Runtime de agentes com tool calling e state management |
-| `@mariozechner/pi-coding-agent` | CLI de coding agent interativo |
-| `@mariozechner/pi-tui` | Terminal UI com renderização diferencial |
+| `@earendil-works/pi-ai` | API unificada multi-provider para LLMs |
+| `@earendil-works/pi-agent-core` | Runtime de agentes com tool calling e state management |
+| `@earendil-works/pi-coding-agent` | CLI de coding agent interativo |
+| `@earendil-works/pi-tui` | Terminal UI com renderização diferencial |
 | `@marcfargas/pi-test-harness` | Test harness para extensões pi |
 
 > **Nota:** Apesar do Pi ser a engine principal, a estrutura do laboratório é deliberadamente engine-agnóstica. Caso surjam implementações superiores, podemos migrar sem perder o trabalho acumulado.

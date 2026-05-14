@@ -37,14 +37,14 @@ const GLOBAL_AGENT_DIR = path.join(homedir(), ".pi", "agent");
 const LOCAL_SETTINGS = path.join(LOCAL_AGENT_DIR, "settings.json");
 const LOCAL_AUTH = path.join(LOCAL_AGENT_DIR, "auth.json");
 const GLOBAL_AUTH = path.join(GLOBAL_AGENT_DIR, "auth.json");
-const LOCAL_PI_CLI = path.join(
-	REPO_ROOT,
-	"node_modules",
-	"@mariozechner",
-	"pi-coding-agent",
-	"dist",
-	"cli.js",
-);
+const LOCAL_PI_CLI_CANDIDATES = [
+	path.join(REPO_ROOT, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js"),
+	path.join(REPO_ROOT, "node_modules", "@mariozechner", "pi-coding-agent", "dist", "cli.js"),
+];
+
+function resolveLocalPiCli() {
+	return LOCAL_PI_CLI_CANDIDATES.find((candidate) => existsSync(candidate));
+}
 
 function parseArgs(argv) {
 	const args = argv.slice(2);
@@ -414,7 +414,8 @@ function printStatus() {
 	const hasLocalSettings = existsSync(LOCAL_SETTINGS);
 	const hasLocalAuth = existsSync(LOCAL_AUTH);
 	const hasGlobalAuth = existsSync(GLOBAL_AUTH);
-	const hasLocalPiCli = existsSync(LOCAL_PI_CLI);
+	const localPiCli = resolveLocalPiCli();
+	const hasLocalPiCli = Boolean(localPiCli);
 	const canonicalSettings = canonicalizeLocalSettings({ dryRun: true });
 
 	console.log("pi isolated status");
@@ -428,6 +429,7 @@ function printStatus() {
 	console.log(`local auth:       ${hasLocalAuth ? "yes" : "no"}`);
 	console.log(`global auth:      ${hasGlobalAuth ? "yes" : "no"}`);
 	console.log(`local pi cli:     ${hasLocalPiCli ? "yes" : "no"}`);
+	if (localPiCli) console.log(`local cli path:   ${localPiCli}`);
 	console.log(`canonical paths:  ${canonicalSettings.changed ? "needs-normalization" : canonicalSettings.status}`);
 
 	const envValue = process.env.PI_CODING_AGENT_DIR;
@@ -491,14 +493,16 @@ function run() {
 		PI_CODING_AGENT_DIR: LOCAL_AGENT_DIR,
 	};
 
-	if (!existsSync(LOCAL_PI_CLI)) {
-		console.error(`pi-isolated: local cli ausente: ${LOCAL_PI_CLI}`);
+	const localPiCli = resolveLocalPiCli();
+	if (!localPiCli) {
+		console.error("pi-isolated: local cli ausente");
+		for (const candidate of LOCAL_PI_CLI_CANDIDATES) console.error(`  tried: ${candidate}`);
 		console.error("Dica: npm install (workspace root) para garantir resolução local determinística.");
 		process.exit(1);
 	}
 
 	const bin = process.execPath;
-	const launchArgs = [LOCAL_PI_CLI, ...opts.piArgs];
+	const launchArgs = [localPiCli, ...opts.piArgs];
 
 	const devPauseResult = opts.dev ? pauseLoopForDevSession(opts.dryRun) : "skipped";
 	const sessionResumeRequested = detectSessionResumeIntent(opts.piArgs);
@@ -513,7 +517,7 @@ function run() {
 			console.log(`  ${change.from} -> ${change.to}`);
 		}
 		console.log(`loop pause:       ${devPauseResult}`);
-		console.log(`local cli:        ${LOCAL_PI_CLI}`);
+		console.log(`local cli:        ${localPiCli}`);
 		console.log(`exec:             ${bin} ${launchArgs.join(" ")}`);
 		return;
 	}
@@ -548,7 +552,7 @@ function run() {
 	}
 
 	console.log(
-		`pi-isolated: launching local cli ${LOCAL_PI_CLI} with PI_CODING_AGENT_DIR=${LOCAL_AGENT_DIR}`,
+		`pi-isolated: launching local cli ${localPiCli} with PI_CODING_AGENT_DIR=${LOCAL_AGENT_DIR}`,
 	);
 
 	try {

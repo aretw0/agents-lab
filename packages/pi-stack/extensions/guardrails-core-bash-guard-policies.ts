@@ -14,10 +14,12 @@ const PI_ROOT_PATH_PATTERN =
   /(^|\s)(?:\.\/)?\.pi(?=\s|$|[|;&])|(^|\s)~\/\.pi(?=\s|$|[|;&])|(^|\s)[a-z]:\/users\/[^/\s]+\/\.pi(?=\s|$|[|;&])|(^|\s)\/mnt\/[a-z]\/users\/[^/\s]+\/\.pi(?=\s|$|[|;&])/i;
 const PI_ROOT_RECURSIVE_SCAN_TOOL_PATTERN =
   /\brg\b|\bgrep\b[\s\S]*\b--recursive\b|\bgrep\b[\s\S]*\s-[a-z]*r[a-z]*\b|\bfindstr\b[\s\S]*\s\/s\b/i;
-const UPSTREAM_PI_PACKAGE_PATH_PATTERN = /(?:^|[\s"'=:(]|\.\.?\/|[a-z]:\/|\/)(?:[^\s"']*\/)?node_modules\/@mariozechner\/pi-coding-agent(?:\/|$|[\s"')])/i;
+const UPSTREAM_PI_PACKAGE_PATH_PATTERN =
+  /(?:^|[\s"'=:(]|\.\.?\/|[a-z]:\/|\/)(?:[^\s"']*\/)?node_modules\/@(?:mariozechner|earendil-works)\/pi-coding-agent(?:\/|$|[\s"')])/i;
 const UPSTREAM_PI_MUTATION_TOOL_PATTERN =
   /\b(?:rm|rmdir|del|erase|mv|move|cp|copy|xcopy|robocopy|mkdir|touch|chmod|chown)\b|\bsed\b[\s\S]*\s-i\b|\bperl\b[\s\S]*\s-pi\b|\b(?:set-content|add-content|out-file)\b|\bgit\s+(?:checkout|restore|apply|reset)\b/i;
-const REDIRECT_TO_UPSTREAM_PI_PACKAGE_PATTERN = />{1,2}\s*["']?[^\s"']*node_modules\/@mariozechner\/pi-coding-agent(?:\/|$)/i;
+const REDIRECT_TO_UPSTREAM_PI_PACKAGE_PATTERN =
+  />{1,2}\s*["']?[^\s"']*node_modules\/@(?:mariozechner|earendil-works)\/pi-coding-agent(?:\/|$)/i;
 const SOURCE_MAP_PATH_PATTERN = /(?:^|[\s"'])(?:[^\s"'*]*\/)?[^\s"'*]+\.map(?:$|[\s"'|;)])/i;
 const SOURCE_MAP_CONTENT_TOOL_PATTERN = /\b(?:grep|rg|findstr|awk|sed|cat|tail|head|more|less)\b/i;
 const SOURCE_MAP_RECURSIVE_SCAN_ROOT_PATTERN = /(?:^|[\s"'])(?:\.\/)?(?:node_modules|dist|build|coverage)(?:$|[\s"'|;)])/i;
@@ -81,7 +83,7 @@ export function detectUpstreamPiPackageMutation(command: string): boolean {
 
 export function upstreamPiPackageMutationReason(): string {
   return [
-    "Blocked by guardrails-core (upstream_pi_package_mutation): do not mutate the original pi package under node_modules/@mariozechner/pi-coding-agent.",
+    "Blocked by guardrails-core (upstream_pi_package_mutation): do not mutate original pi packages under node_modules/@earendil-works/pi-coding-agent or node_modules/@mariozechner/pi-coding-agent.",
     "Use an extension, wrapper, controlled patch workflow, or upstream PR instead; bounded reads remain allowed.",
   ].join(" ");
 }

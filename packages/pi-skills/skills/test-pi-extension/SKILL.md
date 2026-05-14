@@ -16,7 +16,7 @@ O `@marcfargas/pi-test-harness` permite testar extensões pi com o runtime real 
 npm install --save-dev @marcfargas/pi-test-harness vitest
 ```
 
-Peer dependencies: `@mariozechner/pi-coding-agent`, `@mariozechner/pi-ai`, `@mariozechner/pi-agent-core`.
+Peer dependencies: `@earendil-works/pi-coding-agent`, `@earendil-works/pi-ai`, `@earendil-works/pi-agent-core`.
 
 ## Teste Básico
 

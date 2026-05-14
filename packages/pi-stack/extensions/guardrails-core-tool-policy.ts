@@ -1,4 +1,4 @@
-import { createGrepToolDefinition, createReadToolDefinition, type ToolDefinition } from "@mariozechner/pi-coding-agent";
+import { createGrepToolDefinition, createReadToolDefinition, type ToolDefinition } from "@earendil-works/pi-coding-agent";
 import { existsSync, statSync } from "node:fs";
 import path from "node:path";
 

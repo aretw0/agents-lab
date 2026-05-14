@@ -1,7 +1,7 @@
 import { homedir } from "node:os";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { createWriteToolDefinition, keyHint, keyText, rawKeyHint } from "@mariozechner/pi-coding-agent";
-import { Text } from "@mariozechner/pi-tui";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { createWriteToolDefinition, keyHint, keyText, rawKeyHint } from "@earendil-works/pi-coding-agent";
+import { Text } from "@earendil-works/pi-tui";
 
 const WRITE_PREVIEW_MAX_LINES = 10;
 const WRITE_PREVIEW_MAX_CHARS_PER_LINE = 240;

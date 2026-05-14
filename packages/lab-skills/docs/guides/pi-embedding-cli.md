@@ -62,7 +62,7 @@ meu-projeto/
 
 ```bash
 # 1. Instalar pi globalmente (uma vez)
-npm install -g @mariozechner/pi-coding-agent
+npm install -g @earendil-works/pi-coding-agent
 
 # 2. Clonar o projeto
 git clone https://github.com/meu-org/meu-projeto
@@ -119,7 +119,7 @@ packages/
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@mariozechner/pi-coding-agent": ">=0.1.0"
+    "@earendil-works/pi-coding-agent": ">=0.1.0"
   }
 }
 ```
@@ -127,7 +127,7 @@ packages/
 ### Entry point (`index.ts`)
 
 ```typescript
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import minhaExtensao from "./extensions/minha-extensao";
 
 // Registra todas as extensões do bundle

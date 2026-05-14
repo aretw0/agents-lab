@@ -6,7 +6,7 @@ Este diretório documenta análises, comparações e avaliações das diferentes
 
 ### Pi (engine principal)
 
-**Repositório:** [badlogic/pi-mono](https://github.com/badlogic/pi-mono)  
+**Repositório:** [badlogic/pi-mono](https://github.com/badlogic/pi-mono)
 **Status:** Engine primária do laboratório
 
 Pi é um toolkit para construção de agentes de IA e gerenciamento de LLMs. Sua filosofia de extensibilidade e sua convergência natural para os padrões do ecossistema de agentes o tornam a engine principal deste laboratório.
@@ -15,11 +15,11 @@ Pi é um toolkit para construção de agentes de IA e gerenciamento de LLMs. Sua
 
 | Pacote | Versão | Descrição |
 |--------|--------|-----------|
-| `@mariozechner/pi-ai` | latest | API unificada para LLMs (OpenAI, Anthropic, Google) |
-| `@mariozechner/pi-agent-core` | latest | Runtime de agentes com tool calling e streaming |
-| `@mariozechner/pi-coding-agent` | latest | Coding agent CLI interativo |
+| `@earendil-works/pi-ai` | latest | API unificada para LLMs (OpenAI, Anthropic, Google) |
+| `@earendil-works/pi-agent-core` | latest | Runtime de agentes com tool calling e streaming |
+| `@earendil-works/pi-coding-agent` | latest | Coding agent CLI interativo |
 | `@mariozechner/pi-web-ui` | latest | Web components para chat com IA |
-| `@mariozechner/pi-tui` | latest | Terminal UI com renderização diferencial |
+| `@earendil-works/pi-tui` | latest | Terminal UI com renderização diferencial |
 | `@mariozechner/pi-mom` | latest | Slack bot com delegação para pi coding agent |
 | `@mariozechner/pi-pods` | latest | CLI para gerenciar deployments vLLM |
 

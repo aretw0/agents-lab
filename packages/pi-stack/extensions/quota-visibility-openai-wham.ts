@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
-import { getAgentDir } from "@mariozechner/pi-coding-agent";
+import { getAgentDir } from "@earendil-works/pi-coding-agent";
 import { parseOpenAIWhamUsage, type OpenAIWhamUsageParseResult } from "./quota-visibility-model";
 
 const OPENAI_WHAM_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";

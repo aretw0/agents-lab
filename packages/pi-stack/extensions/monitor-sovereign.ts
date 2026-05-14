@@ -16,7 +16,7 @@ import { join } from "node:path";
 import type {
 	ExtensionAPI,
 	ExtensionContext,
-} from "@mariozechner/pi-coding-agent";
+} from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { matchesWhen, toPolicyFacts } from "./policy-primitive";
 import {

@@ -12,7 +12,7 @@
 import { existsSync, readdirSync, readFileSync, statfsSync, statSync } from "node:fs";
 import { cpus, freemem, loadavg, totalmem } from "node:os";
 import { basename, join } from "node:path";
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { readSettingsJson, writeHandoffJson } from "./context-watchdog-storage";
 

@@ -27,7 +27,7 @@ packages/minha-extension/
 ## Template Base
 
 ```typescript
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 export default function (pi: ExtensionAPI) {
   // Registrar tools, commands, eventos, etc.
@@ -101,9 +101,9 @@ pi.on("session_shutdown", async (event, ctx) => {
     "extensions": ["./index.ts"]
   },
   "peerDependencies": {
-    "@mariozechner/pi-coding-agent": "*",
-    "@mariozechner/pi-ai": "*",
-    "@mariozechner/pi-tui": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-tui": "*",
     "@sinclair/typebox": "*"
   }
 }
@@ -154,5 +154,5 @@ gh api repos/badlogic/pi-mono/contents/packages/coding-agent/examples/extensions
 
 Docs relevantes:
 - `docs/research/extension-factory-blueprint.md` — design da fábrica
-- A documentação completa do pi está em `@mariozechner/pi-coding-agent/docs/extensions.md`
+- A documentação completa do pi está em `@earendil-works/pi-coding-agent/docs/extensions.md`
 - Para temas, prompts e mais: ver as skills irmãs deste pacote (`/skill:create-pi-theme`, `/skill:create-pi-prompt`)

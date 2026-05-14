@@ -110,7 +110,7 @@ npm run pi:published   # pi carrega do npm
 
 ## Workflow isolado neste repositório
 
-No `agents-lab`, o fluxo de desenvolvimento local usa `npm run pi:dev`, que chama `scripts/pi-isolated.mjs --dev`, define `PI_CODING_AGENT_DIR=.sandbox/pi-agent` e carrega o CLI local em `node_modules/@mariozechner/pi-coding-agent/dist/cli.js`. Esse sandbox é estado derivado local e não deve ser tratado como configuração canônica do projeto.
+No `agents-lab`, o fluxo de desenvolvimento local usa `npm run pi:dev`, que chama `scripts/pi-isolated.mjs --dev`, define `PI_CODING_AGENT_DIR=.sandbox/pi-agent` e carrega o CLI local oficial em `node_modules/@earendil-works/pi-coding-agent/dist/cli.js`, com fallback temporário para o namespace legado `node_modules/@mariozechner/pi-coding-agent/dist/cli.js` durante a transição. Esse sandbox é estado derivado local e não deve ser tratado como configuração canônica do projeto.
 
 Regras práticas:
 
@@ -118,7 +118,7 @@ Regras práticas:
 - `.sandbox/pi-agent/settings.json` é derivado local e deve evitar paths absolutos específicos da máquina;
 - paths repo-local no sandbox devem ser normalizados para paths relativos portáveis;
 - depois de mudar extensões/tools carregadas, fazer `/reload` antes de validação live;
-- nunca editar diretamente o pacote upstream/original do pi em `node_modules/@mariozechner/pi-coding-agent`; use extensão, wrapper, patch controlado ou PR upstream;
+- nunca editar diretamente o pacote upstream/original do pi em `node_modules/@earendil-works/pi-coding-agent` ou `node_modules/@mariozechner/pi-coding-agent`; use extensão, wrapper, patch controlado ou PR upstream;
 - para diagnosticar fontes carregadas, verificar launcher, `PI_CODING_AGENT_DIR` e sourceInfo antes de culpar pacote publicado/global.
 
 ## Configuração do Projeto (.pi/settings.json)
@@ -163,7 +163,7 @@ Hack frágil que duplica deps e não resolve o tarball publicado.
 
 ### ❌ Editar o pacote upstream/original do pi
 
-Não altere diretamente `node_modules/@mariozechner/pi-coding-agent`. Correções locais devem virar extensão, wrapper, patch controlado e auditável, ou PR upstream.
+Não altere diretamente `node_modules/@earendil-works/pi-coding-agent` nem `node_modules/@mariozechner/pi-coding-agent`. Correções locais devem virar extensão, wrapper, patch controlado e auditável, ou PR upstream.
 
 ### ❌ Validar runtime sem reload
 

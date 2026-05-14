@@ -16,7 +16,7 @@ const SENSITIVE_PATHS = [
 ];
 
 const ALLOWED_OUTSIDE = [
-  ".pi", ".cache/checkouts", "node_modules/@mariozechner", "node_modules/@davidorex",
+  ".pi", ".cache/checkouts", "node_modules/@earendil-works", "node_modules/@mariozechner", "node_modules/@davidorex",
   "node_modules/@ifi", "node_modules/pi-lens", "node_modules/pi-web-access",
   "node_modules/mitsupi",
 ];
@@ -126,6 +126,7 @@ describe("isAllowedOutside", () => {
   });
 
   it("allows pi package paths", () => {
+    assert.ok(isAllowedOutside("node_modules/@earendil-works/pi-coding-agent/docs/extensions.md"));
     assert.ok(isAllowedOutside("node_modules/@mariozechner/pi-coding-agent/docs/extensions.md"));
     assert.ok(isAllowedOutside("node_modules/@davidorex/pi-behavior-monitors/agents/hedge.yaml"));
     assert.ok(isAllowedOutside("node_modules/@ifi/oh-pi-extensions/extensions/safe-guard.ts"));
@@ -195,6 +196,7 @@ describe("decision matrix", () => {
   it("pi/cache paths outside project → allowed-pi", () => {
     assert.equal(classify("/home/user/.pi/agent/settings.json"), "allowed-pi");
     assert.equal(classify("/home/user/.cache/checkouts/github.com/org/repo/README.md"), "allowed-pi");
+    assert.equal(classify("/usr/lib/node_modules/@earendil-works/pi-coding-agent/docs/x.md"), "allowed-pi");
     assert.equal(classify("/usr/lib/node_modules/@mariozechner/pi-coding-agent/docs/x.md"), "allowed-pi");
   });
 

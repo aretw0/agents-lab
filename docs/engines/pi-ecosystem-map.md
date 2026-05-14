@@ -20,10 +20,10 @@ O ecossistema Pi pode ser lido em cinco camadas:
 
 | Pacote | Papel | Observações |
 |--------|-------|-------------|
-| `@mariozechner/pi-ai` | API unificada para LLM providers | Abstrai providers e modelos, reduz lock-in de API |
-| `@mariozechner/pi-agent-core` | Runtime de agentes | Tool calling, streaming, estado e ciclo de vida |
-| `@mariozechner/pi-coding-agent` | CLI interativo | Superfície principal de uso para coding agent |
-| `@mariozechner/pi-tui` | Terminal UI | Base visual do agente em terminal |
+| `@earendil-works/pi-ai` | API unificada para LLM providers | Abstrai providers e modelos, reduz lock-in de API |
+| `@earendil-works/pi-agent-core` | Runtime de agentes | Tool calling, streaming, estado e ciclo de vida |
+| `@earendil-works/pi-coding-agent` | CLI interativo | Superfície principal de uso para coding agent |
+| `@earendil-works/pi-tui` | Terminal UI | Base visual do agente em terminal |
 | `@mariozechner/pi-web-ui` | Componentes web | Útil para experiências fora do terminal |
 
 ## Modelo de Extensibilidade

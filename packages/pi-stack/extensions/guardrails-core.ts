@@ -7,7 +7,7 @@
  * - read path protection (former read-guard)
  * - deterministic scoped web routing enforcement (former web-routing-guard)
  */
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { statSync } from "node:fs";
 import { createGuardrailsCoreAutoDrain, type GuardrailsCoreAutoDrainState } from "./guardrails-core-auto-drain";
 import { fileURLToPath } from "node:url";

@@ -24,7 +24,7 @@
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import {
 	COMMIT_HYGIENE_VERIFY_NUDGE_LINE,
 	DEFAULT_FRAGILITY_WHEN,

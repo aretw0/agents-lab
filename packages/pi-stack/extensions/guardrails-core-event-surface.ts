@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { parseBudgetOverrideReason } from "./colony-pilot";
 import { appendAuditEntry } from "./guardrails-core-confirmation-audit";
 import { buildBoardExecuteNextIntent, buildGuardrailsIntentSystemPrompt, encodeGuardrailsIntent, parseGuardrailsIntent, summarizeGuardrailsIntent } from "./guardrails-core-intent-bus";

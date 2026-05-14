@@ -16,12 +16,14 @@ export const SENSITIVE_PATHS = [
 ];
 
 export const UPSTREAM_PI_PACKAGE_MUTATION_BLOCKLIST = [
+  "node_modules/@earendil-works/pi-coding-agent",
   "node_modules/@mariozechner/pi-coding-agent",
 ];
 
 export const ALLOWED_OUTSIDE = [
   ".pi",
   ".cache/checkouts",
+  "node_modules/@earendil-works",
   "node_modules/@mariozechner",
   "node_modules/@davidorex",
   "node_modules/@ifi",

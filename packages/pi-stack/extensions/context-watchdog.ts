@@ -13,7 +13,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { resolveContextThresholds, type ContextThresholdOverrides } from "./custom-footer";
 import { buildAutoCompactDiagnostics, resolveAutoCompactCheckpointGate, resolveAutoCompactEffectiveIdle, resolveAutoCompactRetryDelayMs, isAutoCompactDeferralReason, shouldScheduleAutoCompactRetry, shouldTriggerAutoCompact, type ContextWatchAutoCompactDecision, type ContextWatchAutoCompactDiagnostics, type ContextWatchAutoCompactIdleState } from "./context-watchdog-auto-compact";
 import { DEFAULT_CONTEXT_WATCHDOG_CONFIG, deriveContextWatchThresholds, normalizeContextWatchdogConfig, type ContextWatchdogConfig, type ContextWatchThresholds } from "./context-watchdog-config";

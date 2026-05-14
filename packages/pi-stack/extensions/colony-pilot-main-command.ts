@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import type { HatchExperienceMode } from "./colony-pilot-hatch";
 import { capabilityGuidance, evaluateHatchReadiness, formatHatchReadiness, formatHatchRunbook } from "./colony-pilot-hatch";
 import type { PilotCapabilities, PilotState } from "./colony-pilot-runtime";

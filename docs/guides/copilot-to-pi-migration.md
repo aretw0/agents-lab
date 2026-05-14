@@ -24,7 +24,7 @@ Migrar em quatro passos:
 Pi é multiplataforma. No Windows, requer bash — Git for Windows é suficiente. Ver [guia de compatibilidade de plataforma](pi-platform-compatibility.md) para detalhes.
 
 ```bash
-npm install -g @mariozechner/pi-coding-agent
+npm install -g @earendil-works/pi-coding-agent
 ```
 
 Verificar instalação:

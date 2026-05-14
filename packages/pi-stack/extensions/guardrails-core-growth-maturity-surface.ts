@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { evaluateGrowthMaturityScorePacket } from "./guardrails-core-growth-maturity";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";

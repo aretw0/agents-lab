@@ -1,4 +1,4 @@
-import { truncateToWidth } from "@mariozechner/pi-tui";
+import { truncateToWidth } from "@earendil-works/pi-tui";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import customFooterExtension, {
 	buildFooterLines,

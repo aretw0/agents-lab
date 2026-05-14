@@ -20,7 +20,7 @@ import { join } from "node:path";
 import type {
 	ExtensionAPI,
 	ExtensionContext,
-} from "@mariozechner/pi-coding-agent";
+} from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { parseColonySignal, parseCommandInput } from "./colony-pilot";
 import {

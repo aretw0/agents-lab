@@ -1,4 +1,4 @@
-import { AuthStorage, createAgentSession, DefaultResourceLoader, getAgentDir, ModelRegistry, SessionManager, SettingsManager } from "@mariozechner/pi-coding-agent";
+import { AuthStorage, createAgentSession, DefaultResourceLoader, getAgentDir, ModelRegistry, SessionManager, SettingsManager } from "@earendil-works/pi-coding-agent";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type AgentRunSdkInProcessPacketResult } from "./guardrails-core-agent-run-sdk-preview";

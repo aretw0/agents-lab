@@ -5,7 +5,7 @@
 Pi é multiplataforma. Funciona em macOS, Linux, Windows e até Termux (Android). A instalação base é a mesma em todos os sistemas:
 
 ```bash
-npm install -g @mariozechner/pi-coding-agent
+npm install -g @earendil-works/pi-coding-agent
 ```
 
 O que muda entre plataformas são as dependências de shell e alguns atalhos de teclado.

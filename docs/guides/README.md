@@ -75,14 +75,14 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 
 - **Node.js** >= 22
 - **npm** >= 9
-- **Pi** instalado: `npm install -g @mariozechner/pi-coding-agent`
+- **Pi** instalado: `npm install -g @earendil-works/pi-coding-agent`
 - Chave de API de pelo menos um provider (GitHub Copilot, Anthropic, OpenAI, Google, etc.)
 
 ### Instalação Rápida
 
 ```bash
 # Instalar pi
-npm install -g @mariozechner/pi-coding-agent
+npm install -g @earendil-works/pi-coding-agent
 
 # Instalar a stack curada (via npm)
 pi install npm:@aretw0/pi-stack

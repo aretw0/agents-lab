@@ -31,9 +31,13 @@ describe("guardrails-core bash guard policies", () => {
     expect(detectHighRiskPiRootRecursiveScan('grep -RIn "quota" .pi')).toBe(true);
     expect(detectHighRiskPiRootRecursiveScan('grep -RIl "quota" .pi')).toBe(false);
 
+    expect(detectUpstreamPiPackageMutation("rm -rf node_modules/@earendil-works/pi-coding-agent/dist")).toBe(true);
     expect(detectUpstreamPiPackageMutation("rm -rf node_modules/@mariozechner/pi-coding-agent/dist")).toBe(true);
+    expect(detectUpstreamPiPackageMutation("echo patch > node_modules/@earendil-works/pi-coding-agent/dist/cli.js")).toBe(true);
     expect(detectUpstreamPiPackageMutation("echo patch > node_modules/@mariozechner/pi-coding-agent/dist/cli.js")).toBe(true);
+    expect(detectUpstreamPiPackageMutation("grep -n app.interrupt node_modules/@earendil-works/pi-coding-agent/dist/core/keybindings.js")).toBe(false);
     expect(detectUpstreamPiPackageMutation("grep -n app.interrupt node_modules/@mariozechner/pi-coding-agent/dist/core/keybindings.js")).toBe(false);
+    expect(isUpstreamPiPackagePath("node_modules/@earendil-works/pi-coding-agent/dist/cli.js", "/repo")).toBe(true);
     expect(isUpstreamPiPackagePath("node_modules/@mariozechner/pi-coding-agent/dist/cli.js", "/repo")).toBe(true);
     expect(isUpstreamPiPackagePath("node_modules/@davidorex/pi-project-workflows/index.js", "/repo")).toBe(false);
 
@@ -75,6 +79,7 @@ describe("guardrails-core bash guard policies", () => {
     expect(evaluateBashGuardPolicies("find .project -type f")).toBeUndefined();
     expect(evaluateBashGuardPolicies("ls -R .")?.id).toBe("wide-recursive-ls-scan");
     expect(evaluateBashGuardPolicies("ls -R .project")).toBeUndefined();
+    expect(evaluateBashGuardPolicies("rm -rf node_modules/@earendil-works/pi-coding-agent/dist")?.id).toBe("upstream-pi-package-mutation");
     expect(evaluateBashGuardPolicies("rm -rf node_modules/@mariozechner/pi-coding-agent/dist")?.id).toBe("upstream-pi-package-mutation");
     expect(evaluateBashGuardPolicies("git status")).toBeUndefined();
   });

@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import type { PilotCapabilities } from "./colony-pilot-runtime";
 import { missingCapabilities } from "./colony-pilot-runtime";
 import {
