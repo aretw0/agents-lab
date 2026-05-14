@@ -16172,6 +16172,15 @@
       "method": "inspect",
       "timestamp": "2026-05-14T14:06:59.709Z",
       "evidence": "Existing backlog TASK-BUD-1063 was enriched rather than creating a duplicate. Added acceptance criteria for proactive stop/continuation briefs in already-authorized local-safe lanes: explain why the agent stopped instead of continuing, distinguish blocker vs conservative boundary, provide human-readable options with impact/preconditions, and test against IDs-only/git-clean-only final messages. This captures the operator feedback from the TASK-BUD-1071 pause. No runtime behavior changed yet."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1066-FINAL-SUBPROCESS-CANARY-20260514",
+      "target": "TASK-BUD-1066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "canary",
+      "timestamp": "2026-05-14T14:46:59.683Z",
+      "evidence": "Exact-confirmed final subprocess diagnostic canary `task-bud-1066-final-subprocess-diagnostic-canary` ran on openai-codex/gpt-5.3-codex-spark with extension_isolation=inherit. Result: state=timed-out exitCode=124 after timeoutMs=90000; no files touched; log captured structured preflight before child start: command/entrypoint exist, argv shape print=yes noSession=yes provider=openai-codex model=gpt-5.3-codex-spark toolsCount=4 printPayloadCount=5, attachments count=4 missing=0, prompt chars=1368. Failure line: runner-timeout with outputBytes=0, stdoutBytes=0, stderrBytes=0, firstOutputElapsedMs=none, next probe should isolate provider/model-call/bootstrap hang. Classifier: runner-timeout, retryAllowed=no. Outcome contract failed for task implementation, but diagnostic acceptance is satisfied: evidence distinguishes this from prior silent-runner-failure/provider-unavailable and blocks blind retry."
     }
   ]
 }
