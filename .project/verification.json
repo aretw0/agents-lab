@@ -16217,6 +16217,15 @@
       "method": "test",
       "timestamp": "2026-05-14T16:50:01.405Z",
       "evidence": "Implemented the parent-side prerequisite for SDK one-file mutation canary: declared-file-scoped SDK worker policy now supports write/edit in addition to read/grep, while still blocking unsupported find/ls and constraining path to declared files. Validation passed: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` (2 files, 28 tests). Runtime reload is required before live packet/dispatch surfaces can trust the new write/edit policy."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1075-SDK-MUTATION-DISPATCH-BLOCKED-20260514",
+      "target": "TASK-BUD-1075",
+      "target_type": "task",
+      "status": "failed",
+      "method": "live-gate",
+      "timestamp": "2026-05-14T17:09:39.456Z",
+      "evidence": "Exact-confirmed dispatch attempt for `task-bud-1075-sdk-small-doc-mutation-canary` was safely blocked by live runtime: decision=blocked, dispatch=no, blockers=unsupported-tool-policy:write|sdk-packet-blocked. This confirms the source patch/test is committed but the current pi runtime has not reloaded the new declared-file-scoped write/edit policy. No worker process started and no mutation occurred. Next required operator action: run `/reload`, then re-issue the exact one-run confirmation for the same run id."
     }
   ]
 }
