@@ -16226,6 +16226,15 @@
       "method": "live-gate",
       "timestamp": "2026-05-14T17:09:39.456Z",
       "evidence": "Exact-confirmed dispatch attempt for `task-bud-1075-sdk-small-doc-mutation-canary` was safely blocked by live runtime: decision=blocked, dispatch=no, blockers=unsupported-tool-policy:write|sdk-packet-blocked. This confirms the source patch/test is committed but the current pi runtime has not reloaded the new declared-file-scoped write/edit policy. No worker process started and no mutation occurred. Next required operator action: run `/reload`, then re-issue the exact one-run confirmation for the same run id."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1075-SDK-ONE-FILE-MUTATION-PASS-20260514",
+      "target": "TASK-BUD-1075",
+      "target_type": "task",
+      "status": "passed",
+      "method": "worker-canary+parent-validation",
+      "timestamp": "2026-05-14T17:31:14.977Z",
+      "evidence": "Exact-confirmed SDK in-process one-file mutation canary `task-bud-1075-sdk-small-doc-mutation-canary` dispatched after reload and completed. Follow result: state=completed, outputBytes=1528. Parent-side validation: git touched only `docs/research/agent-runner-maturity-checkpoint-2026-05.md`; marker check passed for `small-mutation-runner-canary-target | 2026-05-14T10:18:00Z | TASK-BUD-1075 one-file marker mutation PASS`; `agent_run_outcome_packet` returned contract=pass, process=completed, declared=1, touched=1. This promotes only the `one-file-small-mutation` evidence rung; broad/multi-file mutation and parallel fan-out remain needs-evidence."
     }
   ]
 }

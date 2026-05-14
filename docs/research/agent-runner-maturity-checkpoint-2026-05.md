@@ -119,4 +119,4 @@ This is the next safe rung before considering broader worker autonomy.
 
 ## Small-mutation canary target
 
-small-mutation-runner-canary-target
+small-mutation-runner-canary-target | 2026-05-14T10:18:00Z | TASK-BUD-1075 one-file marker mutation PASS
