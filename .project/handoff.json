@@ -1,58 +1,58 @@
 {
-  "timestamp": "2026-05-14T16:55:32.982Z",
-  "context": "Focused on the previously blocked rung: SDK workers assuming one-file mutation. Exact worker dispatch could not proceed safely because live r [snip] ion coverage, validated, and committed. [truncated:+195 chars]",
+  "timestamp": "2026-05-14T18:01:56.541Z",
+  "context": "Operator raised a portability concern: current worker maturity may depend on the provider/model that happened to cooperate. Continued local-s [snip] gs/routing/default providers by itself. [truncated:+268 chars]",
   "current_tasks": [
-    "TASK-BUD-1075"
+    "TASK-BUD-1076"
   ],
   "next_actions": [
-    "Run /reload so live extension surfaces pick up SDK write/edit declared-file policy.",
-    "After reload, re-preview or dispatch exact one-run canary task-bud-1075-sdk-small-doc-mutation [snip] write/edit policy active. [truncated:+12 chars]",
-    "Parent-side follow/outcome must validate only docs/research/agent-runner-maturity-checkpoint-2 [snip] ched before any promotion. [truncated:+17 chars]"
+    "Implement a report-only arena packet/tool that expands providerModel + envelope + budget into [snip] un specs without dispatch. [truncated:+14 chars]",
+    "Add deterministic unit/smoke fixtures for arena envelopes with no model calls.",
+    "Only after explicit budget/confirmation, run real arena canaries for another provider/model and compare scorecard rows."
   ],
   "blockers": [
-    "Runtime extension change requires /reload before trusting live packet/dispatch surfaces.",
-    "No worker/provider dispatch without exact one-run confirmation after reload.",
-    "Broad mutation, multi-file mutation, and parallel fan-out remain needs-evidence."
+    "No paid/model calls without explicit budget and exact confirmation.",
+    "No settings/routing/default-provider changes from arena work.",
+    "Provider/model maturity remains scoped; one passing model does not promote another."
   ],
   "recent_validation": [
     "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack [snip] nt-spawn-readiness.test.ts [truncated:+26 chars]",
-    "project-validate clean",
-    "line_budget_snapshot watch aboveExtract=0 aboveCritical=0"
+    "safe_marker_check docs/research/worker-provider-model-arena-2026-05.md markers passed",
+    "project-validate clean"
   ],
   "recent_commits": [
-    "f4749bf0 feat(agent-runner): scope sdk mutation tools"
+    "a49414c0 feat(agent-runner): codify provider model arena"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1075",
+    "focus": "TASK-BUD-1076",
     "canonical_links": [
+      "task:TASK-BUD-1076",
       "task:TASK-BUD-1075",
-      "task:TASK-BUD-1075-SDK-SMALL-DOC-MUTATION-CANARY",
-      "commit:f4749bf0"
+      "commit:a49414c0"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-14T16:55:32.982Z",
-    "level": "checkpoint",
-    "percent": 31,
-    "action": "checkpoint-refresh",
-    "recommendation": "reload-then-run-one-file-mutation-canary",
+    "generatedAtIso": "2026-05-14T18:01:56.541Z",
+    "level": "ok",
+    "percent": 39,
+    "action": "continue",
+    "recommendation": "continue-arena-packet-design",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-14T16:55:32.982Z",
+      "atIso": "2026-05-14T18:01:56.541Z",
       "reason": "manual_checkpoint",
-      "level": "checkpoint",
-      "percent": 31,
+      "level": "ok",
+      "percent": 39,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-run-one-file-mutation-canary"
+      "recommendation": "continue-arena-packet-design"
     }
   ]
 }
