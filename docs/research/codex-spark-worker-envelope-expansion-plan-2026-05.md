@@ -33,7 +33,7 @@ These provide the biggest safe leverage for the pnpm/supply-chain P0.
 | --- | --- | --- | --- |
 | `readonly-three-file-inventory` | Inspect package-manager + workspace + CI snippet together. | `package.json`, `pnpm-workspace.yaml`, `.github/workflows/ci.yml`; tools `read,grep`; 5-bullet final output. | **Liberated** by `task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary`: completed, outputBytes=1139, no touched files, parent outcome contract=pass. |
 | `readonly-ci-cache-risk-scan` | Read CI workflow files and identify cache/release risk signals without changing CI. | `.github/workflows/ci.yml`, `.github/workflows/publish.yml`, `.github/workflows/release-draft.yml`; tools `read,grep`; risk table output. | **Liberated** by `task-bud-1076-codex-spark-readonly-ci-cache-risk-scan-canary`: completed, outputBytes=1766, no touched files, parent outcome contract=pass. Mutation still protected. |
-| `readonly-prior-art-packet-synthesis` | Compare cached prior-art/governance excerpts with local files. | One local prior-art/governance note + one/two package/CI files; tools `read,grep`; adopt/adapt/reject output. | Preview ready; worker can synthesize cached evidence with local repo facts if exact-confirmed and passed. |
+| `readonly-prior-art-packet-synthesis` | Compare cached prior-art/governance excerpts with local files. | One local prior-art/governance note + one/two package/CI files; tools `read,grep`; adopt/adapt/reject output. | **Liberated** by `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary`: completed, outputBytes=1848, no touched files, parent outcome contract=pass. Generalized shape: declared prior-art/governance evidence + local artifacts + ADOPT/ADAPT/REJECT/PARENT-CHECK output. |
 
 Completed canary:
 
@@ -63,8 +63,8 @@ Prepared generic expansion previews only:
 
 - `readonly-prior-art-packet-synthesis`
   - run id: `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary`
-  - exact phrase: `execute o sdk worker task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary`
-  - shape: declared prior-art/governance note + package/release files; ADOPT/ADAPT/REJECT/PARENT-CHECK output.
+  - result: completed with ADOPT/ADAPT/REJECT/PARENT-CHECK sections, outputBytes=1848, no touched files, parent outcome contract=pass
+  - reusable signal: Codex Spark can synthesize declared prior-art/governance evidence with local artifacts into adopt/adapt/reject decisions without inventing external facts or mutating files.
 - `readonly-two-file-bounded-patch-recommendation`
   - run id: `task-bud-1076-codex-spark-readonly-bounded-patch-recommendation-canary`
   - exact phrase: `execute o sdk worker task-bud-1076-codex-spark-readonly-bounded-patch-recommendation-canary`

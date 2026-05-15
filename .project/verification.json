@@ -16352,6 +16352,15 @@
       "method": "packet-previews+exact-confirmation-gates",
       "timestamp": "2026-05-15T16:00:34.469Z",
       "evidence": "Prepared three generic codex-spark expansion canary previews without dispatch: `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary` (ADOPT/ADAPT/REJECT/PARENT-CHECK output over declared governance/package/release files), `task-bud-1076-codex-spark-readonly-bounded-patch-recommendation-canary` (one source + one test, one parent-side recommendation, no edits), and `task-bud-1076-codex-spark-readonly-generic-risk-table-canary` (three declared artifacts, fixed risk table). All packets returned ready-for-human-decision with dispatch=no authorization=none. This stocks reusable envelopes rather than task-specific one-offs; exact confirmation remains required for each paid/model canary."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-PRIOR-ART-SYNTHESIS-PASS-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-confirmed-sdk-worker+outcome+marker-check",
+      "timestamp": "2026-05-15T17:24:08.082Z",
+      "evidence": "Exact-confirmed SDK worker `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary` dispatched for `openai-codex/gpt-5.3-codex-spark`. Scope: three declared files (`docs/guides/dependency-upstream-governance.md`, `package.json`, `.github/workflows/publish.yml`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary.sdk.log` shows completed state, required sections (`ADOPT`, `ADAPT`, `REJECT`, `PARENT-CHECK`), and outputBytes=1848. Parent validation: git clean, no touched files, safe_marker_check matched required sections/STOP/close markers, `agent_run_outcome_packet` returned contract=pass process=completed. This liberates `readonly-prior-art-packet-synthesis` for this provider/model only and records the generic pattern: declared prior-art/governance evidence plus local artifacts with fixed adopt/adapt/reject output; external research and mutation remain separate."
     }
   ]
 }
