@@ -1,51 +1,57 @@
 {
-  "timestamp": "2026-05-14T19:12:09.281Z",
-  "context": "Steering from operator must persist across compaction/session: this is not a colony/swarm lane. The desired capability is a reproducible prov [snip] extracted so it survives context churn. [truncated:+324 chars]",
+  "timestamp": "2026-05-14T19:51:13.075Z",
+  "context": "Stop intentionally for operator reload. Runtime extension files changed and were committed in e42e8182 feat(agent-runner): add provider model [snip] envelopes it has passed with evidence. [truncated:+329 chars]",
   "current_tasks": [
     "TASK-BUD-1076"
   ],
   "next_actions": [
-    "Persist the not-colony/provider-model-suite steering in the arena design doc and board evidence.",
-    "Extract arena packet code out of the oversized SDK preview file to restore line-budget watch.",
-    "Run focused smokes and commit the bounded slice."
+    "Operator should run /reload now.",
+    "After reload, preview agent_run_sdk_provider_model_arena_packet for a provider/model with expl [snip] exact budget confirmation. [truncated:+58 chars]",
+    "Continue TASK-BUD-1076 by adding scorecard persistence or deterministic arena fixtures; keep n [snip] lony/no-fan-out semantics. [truncated:+4 chars]"
   ],
   "blockers": [
-    "No paid/model calls without explicit budget and exact confirmation.",
-    "No settings/routing/default-provider changes from arena work.",
-    "Avoid colony/fan-out semantics; arena is a serial suite/harness scoped by provider/model/envelope."
+    "reload-required before trusting newly added arena live tool surface",
+    "No paid/model calls without explicit budget and exact confirmation",
+    "No settings/routing/default-provider changes from arena work"
   ],
   "recent_validation": [
-    "steering checkpoint written before further refactor"
+    "git clean before checkpoint",
+    "project-validate clean",
+    "line_budget_snapshot watch aboveExtract=0 aboveCritical=0"
+  ],
+  "recent_commits": [
+    "e42e8182 feat(agent-runner): add provider model arena packet"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1076",
     "canonical_links": [
-      "task:TASK-BUD-1076"
+      "task:TASK-BUD-1076",
+      "commit:e42e8182"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-14T19:12:09.281Z",
-    "level": "warn",
-    "percent": 46,
-    "action": "continue",
-    "recommendation": "persist-steering-then-extract-arena",
+    "generatedAtIso": "2026-05-14T19:51:13.075Z",
+    "level": "checkpoint",
+    "percent": 54,
+    "action": "checkpoint-refresh",
+    "recommendation": "reload-now-then-resume-arena-preview",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-14T19:12:09.281Z",
+      "atIso": "2026-05-14T19:51:13.075Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 46,
+      "level": "checkpoint",
+      "percent": 54,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "persist-steering-then-extract-arena"
+      "recommendation": "reload-now-then-resume-arena-preview"
     }
   ]
 }
