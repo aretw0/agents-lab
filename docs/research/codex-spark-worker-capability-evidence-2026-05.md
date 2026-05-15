@@ -24,7 +24,7 @@ Envelope labels should remain reusable capability descriptions. A canary may use
 
 ## Explicit non-promotions
 
-- True prior-art synthesis is **not** liberated by the `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary`; that run only validated declared local evidence synthesis. A prior-art envelope requires declared external/cached evidence with citations/permalinks and a no-weights-as-evidence rule. Model weights are not evidence.
+- True prior-art synthesis is **not** liberated by the `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary`; that run only validated declared local evidence synthesis. A prior-art envelope requires declared external/cached evidence with citations/permalinks and a no-weights-as-evidence rule. Model weights are not evidence. The next preview uses `docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md` as the declared evidence boundary.
 - Two-file open-ended code/test review is **not** liberated: `VERIF-TASK-BUD-1068-SDK-CODE-TEST-REVIEW-SMOKE-FAIL-20260511` failed safely with loop guard and zero output.
 - Multi-file mutation is **not** liberated.
 - Parallel SDK fan-out remains report-only; batch/cache/fan-in packets exist but do not dispatch.

@@ -16370,6 +16370,15 @@
       "method": "ledger-correction+scope-demotion",
       "timestamp": "2026-05-15T18:06:02.588Z",
       "evidence": "Corrected the previous promotion semantics after operator feedback: `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary` did not prove true prior-art synthesis because its declared inputs were local governance/package/release artifacts, not external/cached source-backed prior art. Demoted/renamed the liberated envelope to `readonly-declared-evidence-synthesis`. Marked true `readonly-prior-art-packet-synthesis` as not liberated until a declared external/cached evidence artifact with citations/permalinks is included. Added explicit rule: model weights are not evidence."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-SOURCE-BACKED-RESEARCH-PREVIEW-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "source-backed-evidence-cache+packet-preview",
+      "timestamp": "2026-05-15T19:25:29.852Z",
+      "evidence": "Created `docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md` with read-only fetched source-backed excerpts from pnpm docs, npm provenance docs, and GitHub Actions hardening/cache docs. The artifact explicitly states: model weights are not evidence, cited evidence bounds worker claims, and missing evidence must become PARENT-CHECK. Prepared exact-confirmed worker preview `task-bud-1076-codex-spark-readonly-source-backed-prior-art-synthesis-canary` over the evidence artifact plus `package.json` and `.github/workflows/publish.yml`; packet returned ready-for-human-decision with dispatch=no authorization=none. True prior-art/source-backed synthesis remains not liberated until this canary passes."
     }
   ]
 }
