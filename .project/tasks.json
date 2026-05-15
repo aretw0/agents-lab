@@ -24057,7 +24057,7 @@
         "Sem alteração de settings/routing/provider defaults e sem protected content; qualquer paid/model call exige confirmação explícita e orçamento preenchido."
       ],
       "milestone": "agent-worker-expansion",
-      "notes": "Capturado de feedback do operador em 2026-05-14: receio correto de que a maturidade atual dependa do provider/modelo que está cooperando. Precisamos de uma arena/suite com budgets para colocar diferentes modelos na roda e comparar sem reconstruir manualmente a escada do zero. [rationale:provider-portability] Maturidade de worker deve ser mensurável por envelope + provider/modelo, com casos reproduzíveis e orçamento explícito.\n2026-05-14: Seeded the arena design doc. The core decision is that worker maturity is scoped to `(provider, model, envelope)`, not global. The arena will use repeatable canary envelopes with explicit budgets and outcome scorecards so evaluating another provider/model is a rerun of the suite, not a manual rebuild of the ladder. Evidence: VERIF-TASK-BUD-1076-ARENA-DESIGN-SEED-20260514.\n2026-05-14: Implemented first deterministic arena primitive: `buildAgentRunSdkProviderModelArenaPacket` plus surface `agent_run_sdk_provider_model_arena_packet`. It is report-only, expands provider/model + envelopes + explicit budget into exact canary packets, and keeps paid/model calls and dispatch disabled. This addresses the portability concern without spending tokens yet. Evidence: VERIF-TASK-BUD-1076-REPORT-ONLY-ARENA-PACKET-20260514.\n2026-05-14: Persisted steering explicitly: arena is not colony/swarm; it is a serial provider/model suite. Maturity is scoped to `(provider, model, envelope)`, but once a provider/model passes an envelope it can use that evidenced capability without rematuring unrelated envelopes. Extracted arena implementation to dedicated files and restored line-budget watch. Evidence: VERIF-TASK-BUD-1076-ARENA-STEERING-EXTRACTED-20260514.\n2026-05-15: Incorporated operator steering that arena must not be isolated self-dialogue. Added prior-art discipline to design/source contract: start from external prior art, known harnesses, community findings, or cached source evidence when available; compare against local scorecards; adopt/adapt/reject external primitives explicitly; label unsupported claims as hypotheses. Evidence: VERIF-TASK-BUD-1076-PRIOR-ART-DISCIPLINE-20260515.",
+      "notes": "Capturado de feedback do operador em 2026-05-14: receio correto de que a maturidade atual dependa do provider/modelo que está cooperando. Precisamos de uma arena/suite com budgets para colocar diferentes modelos na roda e comparar sem reconstruir manualmente a escada do zero. [rationale:provider-portability] Maturidade de worker deve ser mensurável por envelope + provider/modelo, com casos reproduzíveis e orçamento explícito.\n2026-05-14: Seeded the arena design doc. The core decision is that worker maturity is scoped to `(provider, model, envelope)`, not global. The arena will use repeatable canary envelopes with explicit budgets and outcome scorecards so evaluating another provider/model is a rerun of the suite, not a manual rebuild of the ladder. Evidence: VERIF-TASK-BUD-1076-ARENA-DESIGN-SEED-20260514.\n2026-05-14: Implemented first deterministic arena primitive: `buildAgentRunSdkProviderModelArenaPacket` plus surface `agent_run_sdk_provider_model_arena_packet`. It is report-only, expands provider/model + envelopes + explicit budget into exact canary packets, and keeps paid/model calls and dispatch disabled. This addresses the portability concern without spending tokens yet. Evidence: VERIF-TASK-BUD-1076-REPORT-ONLY-ARENA-PACKET-20260514.\n2026-05-14: Persisted steering explicitly: arena is not colony/swarm; it is a serial provider/model suite. Maturity is scoped to `(provider, model, envelope)`, but once a provider/model passes an envelope it can use that evidenced capability without rematuring unrelated envelopes. Extracted arena implementation to dedicated files and restored line-budget watch. Evidence: VERIF-TASK-BUD-1076-ARENA-STEERING-EXTRACTED-20260514.\n2026-05-15: Incorporated operator steering that arena must not be isolated self-dialogue. Added prior-art discipline to design/source contract: start from external prior art, known harnesses, community findings, or cached source evidence when available; compare against local scorecards; adopt/adapt/reject external primitives explicitly; label unsupported claims as hypotheses. Evidence: VERIF-TASK-BUD-1076-PRIOR-ART-DISCIPLINE-20260515.\n2026-05-15: Operator steering: after arena has enough evidence to safely use codex-spark capabilities, prioritize the urgent supply-chain hardening lane (TASK-BUD-1078) with the same evidence-gated worker discipline. Arena maturity must help security work, not distract from it.",
       "verification": "VERIF-TASK-BUD-1076-PRIOR-ART-DISCIPLINE-20260515"
     },
     {
@@ -24082,7 +24082,38 @@
         "Não muda settings/perfis globais sem decisão humana explícita."
       ],
       "milestone": "agent-worker-arena",
-      "notes": "Criado a partir do steering do operador: nada deve ser feito no vácuo; usar arena como primeiro consumidor, mas extrair depois como primitiva/skill de laboratório reutilizável."
+      "notes": "Criado a partir do steering do operador: nada deve ser feito no vácuo; usar arena como primeiro consumidor, mas extrair depois como primitiva/skill de laboratório reutilizável.\n2026-05-15: Supply-chain steering confirms this should be a lab-wide reality-check primitive, not only arena discipline: security/package-manager decisions must start from external prior art and incident evidence before local design. TASK-BUD-1078 is the urgent first consumer after arena."
+    },
+    {
+      "id": "TASK-BUD-1078",
+      "description": "[p0/security/supply-chain] Avaliar e migrar o monorepo para pnpm com postura de blindagem contra supply-chain attacks, aplicando recursos de segurança do pnpm e hardening de CI/cache/release antes de confiar em installs/builds sensíveis.",
+      "status": "planned",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-1076",
+        "TASK-BUD-1077"
+      ],
+      "files": [
+        "package.json",
+        "package-lock.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        ".github/workflows/ci.yml",
+        ".github/workflows/publish.yml",
+        ".github/workflows/release-draft.yml",
+        "docs/guides/budget-governance.md"
+      ],
+      "acceptance_criteria": [
+        "Fazer intake prior-art com https://pnpm.io/pt/supply-chain-security e incidentes recentes de cache/CI/package-registry antes de alterar fluxo global.",
+        "Inventariar estado atual: package-lock presente, pnpm-workspace existente, ausência/presença de packageManager, uso de npm/npx em scripts e CI.",
+        "Definir plano de migração dry-first para pnpm: lockfile, packageManager/corepack, scripts equivalentes, CI local/remote, publish/release, rollback para npm se necessário.",
+        "Aplicar hardening pnpm relevante: lockfile frozen, scripts de lifecycle aprovados/limitados, mínimo necessário de trust/deps, auditoria de cache/store e política para dependências/transitivas.",
+        "Endurecer CI contra poisoning/cache: separar cache por lockfile/OS/node/package-manager, impedir PR não confiável de escrever cache/release artifacts, e validar permissões/secrets.",
+        "Validar local-safe com testes focais antes de qualquer mudança de publish/release; mudanças em CI/publish exigem decisão humana explícita por serem protected scope.",
+        "Registrar verificação e runbook de rollback; não executar installs remotos ou package-manager switch global sem confirmação explícita."
+      ],
+      "milestone": "supply-chain-hardening",
+      "notes": "Criado por steering do operador: worms e ataques de supply-chain tornam inseguro confiar em npm install; pnpm deve virar base de segurança, mas com prior-art/check de realidade e gates de protected scope."
     }
   ]
 }
