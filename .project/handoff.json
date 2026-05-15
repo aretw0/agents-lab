@@ -1,55 +1,58 @@
 {
-  "timestamp": "2026-05-15T02:48:11.538Z",
-  "context": "Assimilated operator steering: supply-chain hardening is urgent and must not be designed in a vacuum. Created TASK-BUD-1078 for pnpm migratio [snip] fore global package-manager/CI changes. [truncated:+307 chars]",
+  "timestamp": "2026-05-15T03:19:27.349Z",
+  "context": "Completed local-safe capability-ledger slice for TASK-BUD-1076 after reload. Existing evidence for openai-codex/gpt-5.3-codex-spark is now tr [snip] only; no dispatch/model call was made. [truncated:+281 chars]",
   "current_tasks": [
-    "TASK-BUD-1078"
+    "TASK-BUD-1076"
   ],
   "next_actions": [
-    "Operator should reload if still pending from fb1feb2f extension changes.",
-    "After reload, continue TASK-BUD-1076 only enough to make worker capability evidence useful, th [snip] 78 supply-chain hardening. [truncated:+25 chars]",
-    "For TASK-BUD-1078 first slice: read pnpm supply-chain security docs, inventory npm/npx usage a [snip] out explicit confirmation. [truncated:+126 chars]"
+    "If operator wants to run the missing failure-contract canary, they must provide exact phrase: [snip] rk-failure-contract-canary [truncated:+44 chars]",
+    "If not running the canary now, use the four liberated codex-spark envelopes for local-safe wor [snip] t confirmation per worker. [truncated:+48 chars]",
+    "Do not use workers for CI/publish/package-manager migration mutations without protected-scope authorization."
   ],
   "blockers": [
-    "CI/publish/package-manager migration is protected scope and needs explicit hum [snip] cision before mutation [truncated:+5 chars]",
-    "No installs/package-manager switch/global cache mutation without confirmation",
-    "No paid/model calls without explicit budget and exact confirmation"
+    "failure-contract not liberated until exact-confirmed canary passes",
+    "No paid/model calls without explicit budget and exact confirmation",
+    "Protected scopes remain blocked without explicit authorization"
   ],
   "recent_validation": [
-    "project-validate clean",
-    "line_budget_snapshot watch aboveExtract=0 aboveCritical=0",
-    "git diff check clean before checkpoint"
+    "agent_run_sdk_in_process_packet preview for failure-contract returned ready-for-human-decision [snip] atch=no authorization=none [truncated:+5 chars]",
+    "safe_marker_check passed for codex-spark ledger envelope rows and exact phrase",
+    "project-validate clean"
+  ],
+  "recent_commits": [
+    "6702aa79 docs(arena): record codex spark capability ledger"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1078",
+    "focus": "TASK-BUD-1076",
     "canonical_links": [
-      "task:TASK-BUD-1078",
       "task:TASK-BUD-1076",
-      "commit:fb1feb2f"
+      "task:TASK-BUD-1076-CODEX-SPARK-FAILURE-CONTRACT-CANARY",
+      "commit:6702aa79"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-15T02:48:11.538Z",
-    "level": "checkpoint",
-    "percent": 32,
-    "action": "checkpoint-refresh",
-    "recommendation": "reload-then-security-intake",
+    "generatedAtIso": "2026-05-15T03:19:27.349Z",
+    "level": "warn",
+    "percent": 39,
+    "action": "continue",
+    "recommendation": "await-exact-confirmation-for-failure-contract-or-proceed-to-p0-readonly-intake",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-15T02:48:11.538Z",
+      "atIso": "2026-05-15T03:19:27.349Z",
       "reason": "manual_checkpoint",
-      "level": "checkpoint",
-      "percent": 32,
+      "level": "warn",
+      "percent": 39,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "reload-then-security-intake"
+      "recommendation": "await-exact-confirmation-for-failure-contract-or-proceed-to-p0-readonly-intake"
     }
   ]
 }
