@@ -33,7 +33,7 @@ These provide the biggest safe leverage for the pnpm/supply-chain P0.
 | --- | --- | --- | --- |
 | `readonly-three-file-inventory` | Inspect package-manager + workspace + CI snippet together. | `package.json`, `pnpm-workspace.yaml`, `.github/workflows/ci.yml`; tools `read,grep`; 5-bullet final output. | **Liberated** by `task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary`: completed, outputBytes=1139, no touched files, parent outcome contract=pass. |
 | `readonly-ci-cache-risk-scan` | Read CI workflow files and identify cache/release risk signals without changing CI. | `.github/workflows/ci.yml`, `.github/workflows/publish.yml`, `.github/workflows/release-draft.yml`; tools `read,grep`; risk table output. | **Liberated** by `task-bud-1076-codex-spark-readonly-ci-cache-risk-scan-canary`: completed, outputBytes=1766, no touched files, parent outcome contract=pass. Mutation still protected. |
-| `readonly-prior-art-packet-synthesis` | Compare cached pnpm/security prior-art excerpts with local files. | One local prior-art note + one/two package/CI files; tools `read,grep`; adopt/adapt/reject output. | Worker can synthesize cached external evidence with local repo facts. |
+| `readonly-prior-art-packet-synthesis` | Compare cached prior-art/governance excerpts with local files. | One local prior-art/governance note + one/two package/CI files; tools `read,grep`; adopt/adapt/reject output. | Preview ready; worker can synthesize cached evidence with local repo facts if exact-confirmed and passed. |
 
 Completed canary:
 
@@ -56,8 +56,23 @@ These expand beyond simple synthesis but avoid broad open-ended code review, whi
 | Candidate envelope | Purpose | Canary shape | Guard |
 | --- | --- | --- | --- |
 | `readonly-monitor-fragility-hardening-scan` | Read monitor configuration/template/patterns and propose one bounded hardening recommendation for recurring false positives. | `.pi/monitors/fragility.monitor.json`, `.pi/monitors/fragility/classify.md`, `.pi/monitors/fragility.patterns.json`; tools `read,grep`; five-bullet output. | **Liberated** by `task-bud-1076-codex-spark-readonly-monitor-fragility-hardening-canary`: completed, outputBytes=1308, no touched files, parent outcome contract=pass. Generalized shape: declared config/policy files + fixed hardening bullets + no mutation. |
-| `readonly-two-file-bounded-patch-recommendation` | Recommend one parent-side patch from one source file + one related test/doc. | Two declared files, `read,grep`, final output with one patch recommendation and one risk. | Must avoid open-ended code/test review language; max one recommendation. |
-| `readonly-three-file-risk-table` | Produce a compact risk table across package/CI/docs. | Three declared files, `read,grep`, fixed table schema. | No patch instructions, no mutation, no install commands. |
+| `readonly-two-file-bounded-patch-recommendation` | Recommend one parent-side patch from one source file + one related test/doc. | Two declared files, `read,grep`, final output with one patch recommendation and one risk. | Preview ready; must avoid open-ended code/test review language; max one recommendation. |
+| `readonly-three-file-risk-table` | Produce a compact risk table across any three declared artifacts. | Three declared files, `read,grep`, fixed table schema. | Preview ready; no patch instructions, no mutation, no install commands. |
+
+Prepared generic expansion previews only:
+
+- `readonly-prior-art-packet-synthesis`
+  - run id: `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary`
+  - exact phrase: `execute o sdk worker task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary`
+  - shape: declared prior-art/governance note + package/release files; ADOPT/ADAPT/REJECT/PARENT-CHECK output.
+- `readonly-two-file-bounded-patch-recommendation`
+  - run id: `task-bud-1076-codex-spark-readonly-bounded-patch-recommendation-canary`
+  - exact phrase: `execute o sdk worker task-bud-1076-codex-spark-readonly-bounded-patch-recommendation-canary`
+  - shape: one source file + one related test, one parent-side recommendation, no edits.
+- `readonly-three-file-risk-table`
+  - run id: `task-bud-1076-codex-spark-readonly-generic-risk-table-canary`
+  - exact phrase: `execute o sdk worker task-bud-1076-codex-spark-readonly-generic-risk-table-canary`
+  - shape: any three declared artifacts, compact risk table, no commands or mutation.
 
 Completed monitor hardening canary:
 
