@@ -1237,6 +1237,17 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mp709j2b",
+      "title": "The agent responded with no substantive content, leaving the request unresolved without acknowledging any blocker.",
+      "body": "The agent responded with no substantive content, leaving the request unresolved without acknowledging any blocker.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }
