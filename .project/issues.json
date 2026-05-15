@@ -1226,6 +1226,17 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mp6xv4rc",
+      "title": "The agent produced an empty response to the user's action request, leaving the task unresolved without explanation or handoff.",
+      "body": "The agent produced an empty response to the user's action request, leaving the task unresolved without explanation or handoff.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }
