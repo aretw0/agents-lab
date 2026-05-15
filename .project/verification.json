@@ -16280,6 +16280,15 @@
       "method": "test+marker-check",
       "timestamp": "2026-05-15T02:17:00.731Z",
       "evidence": "Added arena prior-art discipline so provider/model capability decisions do not rely on isolated self-dialogue: new packet priorArtContract requires external prior art/community findings/cached evidence when available, source links or local evidence for borrowed benchmark designs, local comparison before broad promotion, and hypothesis labels for unsupported claims. Design doc now includes `## Prior-art discipline`. Validation passed: safe_marker_check matched prior-art markers; `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` passed 28 tests; line_budget_snapshot stayed watch aboveExtract=0 aboveCritical=0."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-CODEX-SPARK-CAPABILITY-LEDGER-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "evidence-ledger+packet-preview+marker-check",
+      "timestamp": "2026-05-15T03:10:38.385Z",
+      "evidence": "Translated existing codex-spark worker evidence into `docs/research/codex-spark-worker-capability-evidence-2026-05.md`: liberated envelopes for `openai-codex/gpt-5.3-codex-spark` are readonly-one-file, readonly-two-file-synthesis, readonly-one-symbol-review, and narrow mutation-one-file-marker. Explicit non-promotions remain broad two-file open-ended code/test review, multi-file mutation, fan-out, protected scopes, CI/publish/package-manager migration, and blind subprocess retry. Prepared missing failure-contract canary preview `task-bud-1076-codex-spark-failure-contract-canary`; live packet returned decision=ready-for-human-decision, dispatch=no, authorization=none, exact phrase `execute o sdk worker task-bud-1076-codex-spark-failure-contract-canary`. Marker check matched liberated/pending envelope rows; project-validate clean; line_budget_snapshot watch aboveExtract=0 aboveCritical=0."
     }
   ]
 }

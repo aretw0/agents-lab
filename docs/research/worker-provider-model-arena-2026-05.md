@@ -90,6 +90,10 @@ Implemented in source as `buildAgentRunSdkProviderModelArenaPacket` and surfaced
 5. Use the existing `agent_run_follow` + `agent_run_outcome_packet` for real runs.
 6. Emit a scorecard table; do not auto-promote settings/routing.
 
+## Current provider/model ledger
+
+The first local ledger for `openai-codex/gpt-5.3-codex-spark` lives in `docs/research/codex-spark-worker-capability-evidence-2026-05.md`. It records which envelopes are liberated from existing evidence and which still require exact-confirmed canaries.
+
 ## Promotion rule
 
 A provider/model is eligible for a worker envelope only when:
