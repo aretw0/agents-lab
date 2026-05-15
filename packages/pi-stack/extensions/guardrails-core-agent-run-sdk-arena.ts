@@ -59,6 +59,7 @@ export interface AgentRunSdkProviderModelArenaPacketResult {
   scorecardSchema: string[];
   budgetContract: string[];
   promotionContract: string[];
+  priorArtContract: string[];
   humanConfirmationPhrase: string;
   nextActions: string[];
   summary: string;
@@ -210,6 +211,13 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     "a proven provider/model may use every envelope it has passed with evidence",
     "settings/routing/default-provider changes are outside this arena packet",
   ];
+  const priorArtContract = [
+    "do not benchmark in isolation: start from external prior art, known harnesses, and community findings when available",
+    "record source links or local cached evidence for borrowed benchmark designs and primitives",
+    "compare local scorecard rows against external findings before broad promotion",
+    "adopt good external primitives only after local license, security, budget, and governance checks",
+    "mark unsupported claims as hypotheses instead of treating self-dialogue as evidence",
+  ];
 
   return {
     mode: "agent-run-sdk-provider-model-arena-packet",
@@ -241,10 +249,12 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     scorecardSchema,
     budgetContract,
     promotionContract,
+    priorArtContract,
     humanConfirmationPhrase: arenaId ? `approve arena budget ${arenaId}` : "",
     nextActions: decision === "ready-for-human-decision"
       ? [
         "review this arena packet and budget before any real model call",
+        "collect prior-art references before treating arena design choices as mature",
         "run canaries serially with exact one-run confirmations; this packet itself cannot dispatch",
         "record scorecard rows per provider/model/envelope before promotion",
       ]

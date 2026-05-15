@@ -283,6 +283,9 @@ describe("agent run SDK packet surfaces", () => {
     expect(arenaPacket.canaries[1]?.packet.sdkMaturity.rung).toBe("validated-one-file-mutation");
     expect(arenaPacket.promotionContract.join("\n")).toContain("passing one provider/model does not promote another provider/model");
     expect(arenaPacket.budgetContract.join("\n")).toContain("never starts paid/model calls by itself");
+    expect(arenaPacket.priorArtContract.join("\n")).toContain("do not benchmark in isolation");
+    expect(arenaPacket.priorArtContract.join("\n")).toContain("external prior art");
+    expect(arenaPacket.nextActions.join("\n")).toContain("collect prior-art references");
     expect(arenaPacket.summary).toContain("paidCalls=no");
 
     const arenaBlocked = buildAgentRunSdkProviderModelArenaPacket({

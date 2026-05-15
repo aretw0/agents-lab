@@ -10,6 +10,18 @@ This arena turns the ladder into repeatable canaries with explicit budgets and c
 
 This is **not** a colony/swarm abstraction. It is a serial test suite for model/provider capability evidence. The goal is to avoid hardcoded capability assumptions while still allowing a proven provider/model to use every envelope it has passed with evidence.
 
+## Prior-art discipline
+
+The arena must not become an isolated self-dialogue. Each new envelope or promotion rule should start from external prior art, known harnesses, community findings, or cached source evidence when available, then compare those findings with local scorecard rows.
+
+Required evidence before treating an arena decision as mature:
+
+- source links or local cached evidence for external benchmark designs and agent-runner primitives considered;
+- a short comparison between external findings and our local constraints;
+- explicit notes on which external primitive is adopted, adapted, or rejected;
+- license, security, budget, and governance checks for borrowed primitives;
+- unsupported claims labelled as hypotheses, not evidence.
+
 ## Non-negotiable boundaries
 
 - No settings/routing/default-provider changes from arena runs.
@@ -74,8 +86,9 @@ Implemented in source as `buildAgentRunSdkProviderModelArenaPacket` and surfaced
 1. Keep local smokes deterministic: no model call.
 2. Add report-only arena packet that expands a provider/model + envelope into exact run specs and budget gates.
 3. Seed fixtures for the five envelopes above.
-4. Use the existing `agent_run_follow` + `agent_run_outcome_packet` for real runs.
-5. Emit a scorecard table; do not auto-promote settings/routing.
+4. Attach a prior-art intake packet before broadening the envelope set.
+5. Use the existing `agent_run_follow` + `agent_run_outcome_packet` for real runs.
+6. Emit a scorecard table; do not auto-promote settings/routing.
 
 ## Promotion rule
 

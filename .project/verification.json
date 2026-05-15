@@ -16271,6 +16271,15 @@
       "method": "test+marker-check",
       "timestamp": "2026-05-14T19:47:56.854Z",
       "evidence": "Persisted operator steering: the arena is a serial provider/model suite, not colony/swarm; capabilities are scoped to `(provider, model, envelope)`, and once a provider/model passes an envelope it may use that evidenced capability without rematuring unrelated envelopes. Extracted arena packet logic/surface into dedicated files to restore line budget. Validation passed: `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` (28 tests); line_budget_snapshot returned recommendation=watch, aboveExtract=0, aboveCritical=0; marker check passed for not-colony and scoped reuse language."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-PRIOR-ART-DISCIPLINE-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+marker-check",
+      "timestamp": "2026-05-15T02:17:00.731Z",
+      "evidence": "Added arena prior-art discipline so provider/model capability decisions do not rely on isolated self-dialogue: new packet priorArtContract requires external prior art/community findings/cached evidence when available, source links or local evidence for borrowed benchmark designs, local comparison before broad promotion, and hypothesis labels for unsupported claims. Design doc now includes `## Prior-art discipline`. Validation passed: safe_marker_check matched prior-art markers; `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` passed 28 tests; line_budget_snapshot stayed watch aboveExtract=0 aboveCritical=0."
     }
   ]
 }

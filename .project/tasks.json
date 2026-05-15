@@ -24057,8 +24057,32 @@
         "Sem alteração de settings/routing/provider defaults e sem protected content; qualquer paid/model call exige confirmação explícita e orçamento preenchido."
       ],
       "milestone": "agent-worker-expansion",
-      "notes": "Capturado de feedback do operador em 2026-05-14: receio correto de que a maturidade atual dependa do provider/modelo que está cooperando. Precisamos de uma arena/suite com budgets para colocar diferentes modelos na roda e comparar sem reconstruir manualmente a escada do zero. [rationale:provider-portability] Maturidade de worker deve ser mensurável por envelope + provider/modelo, com casos reproduzíveis e orçamento explícito.\n2026-05-14: Seeded the arena design doc. The core decision is that worker maturity is scoped to `(provider, model, envelope)`, not global. The arena will use repeatable canary envelopes with explicit budgets and outcome scorecards so evaluating another provider/model is a rerun of the suite, not a manual rebuild of the ladder. Evidence: VERIF-TASK-BUD-1076-ARENA-DESIGN-SEED-20260514.\n2026-05-14: Implemented first deterministic arena primitive: `buildAgentRunSdkProviderModelArenaPacket` plus surface `agent_run_sdk_provider_model_arena_packet`. It is report-only, expands provider/model + envelopes + explicit budget into exact canary packets, and keeps paid/model calls and dispatch disabled. This addresses the portability concern without spending tokens yet. Evidence: VERIF-TASK-BUD-1076-REPORT-ONLY-ARENA-PACKET-20260514.\n2026-05-14: Persisted steering explicitly: arena is not colony/swarm; it is a serial provider/model suite. Maturity is scoped to `(provider, model, envelope)`, but once a provider/model passes an envelope it can use that evidenced capability without rematuring unrelated envelopes. Extracted arena implementation to dedicated files and restored line-budget watch. Evidence: VERIF-TASK-BUD-1076-ARENA-STEERING-EXTRACTED-20260514.",
-      "verification": "VERIF-TASK-BUD-1076-ARENA-STEERING-EXTRACTED-20260514"
+      "notes": "Capturado de feedback do operador em 2026-05-14: receio correto de que a maturidade atual dependa do provider/modelo que está cooperando. Precisamos de uma arena/suite com budgets para colocar diferentes modelos na roda e comparar sem reconstruir manualmente a escada do zero. [rationale:provider-portability] Maturidade de worker deve ser mensurável por envelope + provider/modelo, com casos reproduzíveis e orçamento explícito.\n2026-05-14: Seeded the arena design doc. The core decision is that worker maturity is scoped to `(provider, model, envelope)`, not global. The arena will use repeatable canary envelopes with explicit budgets and outcome scorecards so evaluating another provider/model is a rerun of the suite, not a manual rebuild of the ladder. Evidence: VERIF-TASK-BUD-1076-ARENA-DESIGN-SEED-20260514.\n2026-05-14: Implemented first deterministic arena primitive: `buildAgentRunSdkProviderModelArenaPacket` plus surface `agent_run_sdk_provider_model_arena_packet`. It is report-only, expands provider/model + envelopes + explicit budget into exact canary packets, and keeps paid/model calls and dispatch disabled. This addresses the portability concern without spending tokens yet. Evidence: VERIF-TASK-BUD-1076-REPORT-ONLY-ARENA-PACKET-20260514.\n2026-05-14: Persisted steering explicitly: arena is not colony/swarm; it is a serial provider/model suite. Maturity is scoped to `(provider, model, envelope)`, but once a provider/model passes an envelope it can use that evidenced capability without rematuring unrelated envelopes. Extracted arena implementation to dedicated files and restored line-budget watch. Evidence: VERIF-TASK-BUD-1076-ARENA-STEERING-EXTRACTED-20260514.\n2026-05-15: Incorporated operator steering that arena must not be isolated self-dialogue. Added prior-art discipline to design/source contract: start from external prior art, known harnesses, community findings, or cached source evidence when available; compare against local scorecards; adopt/adapt/reject external primitives explicitly; label unsupported claims as hypotheses. Evidence: VERIF-TASK-BUD-1076-PRIOR-ART-DISCIPLINE-20260515.",
+      "verification": "VERIF-TASK-BUD-1076-PRIOR-ART-DISCIPLINE-20260515"
+    },
+    {
+      "id": "TASK-BUD-1077",
+      "description": "[lab-primitive/reality-check] Cultivar uma primitiva/skill de laboratório para decisões não feitas no vácuo: todo desenho relevante deve começar por prior art, evidência externa/cached, comparação local e decisão adotar/adaptar/rejeitar antes de virar gate amplo.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-1076"
+      ],
+      "files": [
+        "packages/lab-skills/skills/cultivate-primitive/SKILL.md",
+        "packages/lab-skills/skills/control-plane-ops/SKILL.md",
+        "docs/primitives/primitive-proposal-template.md",
+        "docs/research/worker-provider-model-arena-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Define forma mínima da primitiva: skill, checklist/structured packet, ou convenção antes de extensão.",
+        "Registra critérios de uso: pesquisa/prior art obrigatória para arenas, roteamento, workers, governance e primitives; leve o suficiente para não bloquear fatias triviais.",
+        "Inclui campos de evidência: fontes externas/cached, comparação local, decisão adotar/adaptar/rejeitar, hipótese vs evidência, licença/segurança/budget/governança.",
+        "Adiciona validação local-safe ou marker-check sem chamadas remotas obrigatórias.",
+        "Não muda settings/perfis globais sem decisão humana explícita."
+      ],
+      "milestone": "agent-worker-arena",
+      "notes": "Criado a partir do steering do operador: nada deve ser feito no vácuo; usar arena como primeiro consumidor, mas extrair depois como primitiva/skill de laboratório reutilizável."
     }
   ]
 }
