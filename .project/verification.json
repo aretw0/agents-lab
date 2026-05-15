@@ -16379,6 +16379,24 @@
       "method": "source-backed-evidence-cache+packet-preview",
       "timestamp": "2026-05-15T19:25:29.852Z",
       "evidence": "Created `docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md` with read-only fetched source-backed excerpts from pnpm docs, npm provenance docs, and GitHub Actions hardening/cache docs. The artifact explicitly states: model weights are not evidence, cited evidence bounds worker claims, and missing evidence must become PARENT-CHECK. Prepared exact-confirmed worker preview `task-bud-1076-codex-spark-readonly-source-backed-prior-art-synthesis-canary` over the evidence artifact plus `package.json` and `.github/workflows/publish.yml`; packet returned ready-for-human-decision with dispatch=no authorization=none. True prior-art/source-backed synthesis remains not liberated until this canary passes."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-SOURCE-BACKED-SYNTHESIS-PASS-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-confirmed-sdk-worker+outcome+marker-check",
+      "timestamp": "2026-05-15T20:50:12.612Z",
+      "evidence": "Exact-confirmed SDK worker `task-bud-1076-codex-spark-readonly-source-backed-prior-art-synthesis-canary` dispatched for `openai-codex/gpt-5.3-codex-spark`. Scope: three declared files (`docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md`, `package.json`, `.github/workflows/publish.yml`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1076-codex-spark-readonly-source-backed-prior-art-synthesis-canary.sdk.log` shows completed state, required ADOPT/ADAPT/REJECT/PARENT-CHECK sections, missing-source claims routed to PARENT-CHECK, and outputBytes=2134. Parent validation: git clean, no touched files, safe_marker_check matched sections/source-doc/missing-evidence/STOP/close markers, `agent_run_outcome_packet` returned contract=pass process=completed. This liberates `readonly-source-backed-evidence-synthesis` for this provider/model only; autonomous worker web research remains not liberated."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-WEB-RESEARCH-CONTRACT-PREVIEW-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "packet-preview+arena-doctrine-update",
+      "timestamp": "2026-05-15T21:01:41.113Z",
+      "evidence": "Prepared next generic codex-spark arena preview for the research rung: `task-bud-1076-codex-spark-readonly-web-research-tool-contract-review-canary`. The preview reads local source-research skill and arena/evidence docs to define the contract needed before any worker receives curated web/source research tools. It does not grant web access; tools remain `read,grep`; packet returned ready-for-human-decision with dispatch=no authorization=none. Updated arena doctrine to clarify that the arena is the qualification ground for eventual delegated batches/swarms, and that source-backed synthesis over parent-curated packets does not promote autonomous web research."
     }
   ]
 }

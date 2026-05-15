@@ -10,6 +10,8 @@ This arena turns the ladder into repeatable canaries with explicit budgets and c
 
 This is **not** a colony/swarm abstraction. It is a serial test suite for model/provider capability evidence. The goal is to avoid hardcoded capability assumptions while still allowing a proven provider/model to use every envelope it has passed with evidence.
 
+Longer term, the arena is the qualification ground for safer worker scale-out: before the control plane can rely on a provider/model for swarms, delegated batches, or lower-friction execution, that provider/model must accumulate passed envelopes for the exact capabilities it will use. Swarm readiness is therefore additive and evidence-driven, not a switch flipped by model reputation or isolated success.
+
 ## Prior-art discipline
 
 The arena must not become an isolated self-dialogue. Each new envelope or promotion rule should start from external prior art, known harnesses, community findings, or cached source evidence when available, then compare those findings with local scorecard rows.
@@ -21,6 +23,19 @@ Required evidence before treating an arena decision as mature:
 - explicit notes on which external primitive is adopted, adapted, or rejected;
 - license, security, budget, and governance checks for borrowed primitives;
 - unsupported claims labelled as hypotheses, not evidence.
+
+## Capability ladder
+
+Arena envelopes should grow from narrow local read-only work toward stronger capabilities in explicit rungs:
+
+1. declared local file reading and synthesis;
+2. source-backed evidence synthesis over parent-curated packets;
+3. curated research with citations/permalinks and fail-closed missing-source behavior;
+4. bounded parent-side recommendations;
+5. tiny declared-file mutations with parent validation;
+6. eventually, delegated batches/swarms only after enough individual envelopes pass with stable observability and abort/outcome controls.
+
+Each rung must say what it does **not** promote. For example, source-backed synthesis over a parent-curated packet does not promote autonomous web research; one-file mutation does not promote multi-file mutation; serial canaries do not promote swarm execution.
 
 ## Non-negotiable boundaries
 

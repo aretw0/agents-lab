@@ -23,6 +23,7 @@ See `docs/research/codex-spark-worker-capability-evidence-2026-05.md` for eviden
 - `readonly-ci-cache-risk-scan`
 - `readonly-monitor-fragility-hardening-scan`
 - `readonly-declared-evidence-synthesis`
+- `readonly-source-backed-evidence-synthesis`
 
 ## Expansion waves
 
@@ -35,7 +36,8 @@ These provide the biggest safe leverage for the pnpm/supply-chain P0.
 | `readonly-three-file-inventory` | Inspect package-manager + workspace + CI snippet together. | `package.json`, `pnpm-workspace.yaml`, `.github/workflows/ci.yml`; tools `read,grep`; 5-bullet final output. | **Liberated** by `task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary`: completed, outputBytes=1139, no touched files, parent outcome contract=pass. |
 | `readonly-ci-cache-risk-scan` | Read CI workflow files and identify cache/release risk signals without changing CI. | `.github/workflows/ci.yml`, `.github/workflows/publish.yml`, `.github/workflows/release-draft.yml`; tools `read,grep`; risk table output. | **Liberated** by `task-bud-1076-codex-spark-readonly-ci-cache-risk-scan-canary`: completed, outputBytes=1766, no touched files, parent outcome contract=pass. Mutation still protected. |
 | `readonly-declared-evidence-synthesis` | Compare declared local evidence/governance excerpts with local files. | One local evidence/governance note + one/two package/CI files; tools `read,grep`; adopt/adapt/reject output. | **Liberated** by `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary`: completed, outputBytes=1848, no touched files, parent outcome contract=pass. Corrected promotion: declared-evidence synthesis only, not true prior-art research. |
-| `readonly-prior-art-packet-synthesis` | Compare real prior-art/cached external evidence with local files. | One declared external/cached evidence artifact with citations/permalinks + one/two local files; tools `read,grep`; adopt/adapt/reject output. | Preview ready with `docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md`; not liberated until exact-confirmed worker pass. Requires source-backed prior-art artifact; model weights are not evidence. |
+| `readonly-source-backed-evidence-synthesis` | Compare real prior-art/cached external evidence with local files. | One declared external/cached evidence artifact with citations/permalinks + one/two local files; tools `read,grep`; adopt/adapt/reject output. | **Liberated** by `task-bud-1076-codex-spark-readonly-source-backed-prior-art-synthesis-canary`: completed, outputBytes=2134, no touched files, parent outcome contract=pass. This is synthesis over parent-curated evidence, not worker web research. |
+| `readonly-web-research-with-citations` | Let a worker gather source evidence through a curated research tool. | Future allowlisted research tool + source/domain policy + citations/permalinks + fail-closed missing-source behavior. | **Not liberated**. Needed before workers can research independently instead of relying on parent-curated packets. First preview: `task-bud-1076-codex-spark-readonly-web-research-tool-contract-review-canary`. |
 
 Completed canary:
 
@@ -68,10 +70,15 @@ Prepared generic expansion previews only:
   - result: completed with ADOPT/ADAPT/REJECT/PARENT-CHECK sections, outputBytes=1848, no touched files, parent outcome contract=pass
   - correction: this did **not** prove prior-art synthesis, because the declared evidence was local governance/release material, not external/cached prior art. Treat it as declared-evidence synthesis only.
   - reusable signal: Codex Spark can synthesize declared evidence with local artifacts into adopt/adapt/reject decisions without mutating files.
-- `readonly-prior-art-packet-synthesis`
+- `readonly-source-backed-evidence-synthesis`
   - run id: `task-bud-1076-codex-spark-readonly-source-backed-prior-art-synthesis-canary`
-  - exact phrase: `execute o sdk worker task-bud-1076-codex-spark-readonly-source-backed-prior-art-synthesis-canary`
+  - result: completed with ADOPT/ADAPT/REJECT/PARENT-CHECK sections, outputBytes=2134, no touched files, parent outcome contract=pass
   - shape: declared source-backed evidence packet + local artifacts; ADOPT/ADAPT/REJECT/PARENT-CHECK output; model weights forbidden as evidence.
+  - non-promotion: worker autonomous web research remains not liberated because the worker only read a parent-curated evidence packet.
+- `readonly-web-research-tool-contract-review`
+  - run id: `task-bud-1076-codex-spark-readonly-web-research-tool-contract-review-canary`
+  - exact phrase: `execute o sdk worker task-bud-1076-codex-spark-readonly-web-research-tool-contract-review-canary`
+  - shape: read existing research skill/docs and propose the contract for a future curated worker web/source research tool; no web access yet.
 - `readonly-two-file-bounded-patch-recommendation`
   - run id: `task-bud-1076-codex-spark-readonly-bounded-patch-recommendation-canary`
   - exact phrase: `execute o sdk worker task-bud-1076-codex-spark-readonly-bounded-patch-recommendation-canary`
