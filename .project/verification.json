@@ -16316,6 +16316,15 @@
       "method": "exact-confirmed-sdk-worker+outcome+marker-check",
       "timestamp": "2026-05-15T12:02:15.668Z",
       "evidence": "Exact-confirmed SDK worker `task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary` dispatched for `openai-codex/gpt-5.3-codex-spark`. Scope: three declared files (`package.json`, `pnpm-workspace.yaml`, `.github/workflows/ci.yml`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary.sdk.log` shows completed state, final 5 required bullets (`package-manager-state`, `npm-npx-usage`, `pnpm-workspace-state`, `ci-cache-risk-signal`, `next-readonly-canary`), outputBytes=1139. Parent validation: git clean, no touched files, safe_marker_check matched required bullets/close marker, `agent_run_outcome_packet` returned contract=pass process=completed. This liberates the `readonly-three-file-inventory` envelope for this provider/model only."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-CI-CACHE-RISK-SCAN-PASS-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-confirmed-sdk-worker+outcome+marker-check",
+      "timestamp": "2026-05-15T13:02:46.890Z",
+      "evidence": "Exact-confirmed SDK worker `task-bud-1076-codex-spark-readonly-ci-cache-risk-scan-canary` dispatched for `openai-codex/gpt-5.3-codex-spark` after readiness checks. Scope: three declared workflow files (`.github/workflows/ci.yml`, `.github/workflows/publish.yml`, `.github/workflows/release-draft.yml`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1076-codex-spark-readonly-ci-cache-risk-scan-canary.sdk.log` shows completed state, risk table columns (`cache-risk-signal`, `release-risk-signal`, `secret-permission-signal`, `next-parent-check`), and outputBytes=1766. Parent validation: git clean, no touched files, safe_marker_check matched table/STOP/close markers, `agent_run_outcome_packet` returned contract=pass process=completed. This liberates the `readonly-ci-cache-risk-scan` envelope for this provider/model only; workflow mutation remains protected."
     }
   ]
 }
