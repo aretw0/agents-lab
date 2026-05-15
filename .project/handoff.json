@@ -1,58 +1,59 @@
 {
-  "timestamp": "2026-05-15T03:19:27.349Z",
-  "context": "Completed local-safe capability-ledger slice for TASK-BUD-1076 after reload. Existing evidence for openai-codex/gpt-5.3-codex-spark is now tr [snip] only; no dispatch/model call was made. [truncated:+281 chars]",
+  "timestamp": "2026-05-15T04:23:07.073Z",
+  "context": "After crash recovery, exact-confirmed SDK failure-contract canary ran and passed for openai-codex/gpt-5.3-codex-spark. All five current arena [snip] d subprocess retry remain not promoted. [truncated:+311 chars]",
   "current_tasks": [
     "TASK-BUD-1076"
   ],
   "next_actions": [
-    "If operator wants to run the missing failure-contract canary, they must provide exact phrase: [snip] rk-failure-contract-canary [truncated:+44 chars]",
-    "If not running the canary now, use the four liberated codex-spark envelopes for local-safe wor [snip] t confirmation per worker. [truncated:+48 chars]",
-    "Do not use workers for CI/publish/package-manager migration mutations without protected-scope authorization."
+    "Human decision: close TASK-BUD-1076 or keep open for scorecard persistence/automation polish.",
+    "Recommended next lane after closure/decision: start TASK-BUD-1078 supply-chain pnpm hardening [snip] nning read-only/dry-first. [truncated:+62 chars]",
+    "Do not use workers for protected-scope mutations without explicit authorization."
   ],
   "blockers": [
-    "failure-contract not liberated until exact-confirmed canary passes",
-    "No paid/model calls without explicit budget and exact confirmation",
-    "Protected scopes remain blocked without explicit authorization"
+    "Board no-auto-close: TASK-BUD-1076 has evidence but should be closed by explicit human decision",
+    "Protected scopes remain blocked without explicit authorization",
+    "No paid/model calls without explicit budget and exact confirmation"
   ],
   "recent_validation": [
-    "agent_run_sdk_in_process_packet preview for failure-contract returned ready-for-human-decision [snip] atch=no authorization=none [truncated:+5 chars]",
-    "safe_marker_check passed for codex-spark ledger envelope rows and exact phrase",
-    "project-validate clean"
+    "agent_run_follow terminal completed outputBytes=802 lines=12; log close outputBytes=211",
+    "safe_marker_check passed for failure-contract log markers and ledger markers",
+    "agent_run_outcome_packet contract=pass process=completed touched=0 outputBytes=211"
   ],
   "recent_commits": [
-    "6702aa79 docs(arena): record codex spark capability ledger"
+    "209a7038 docs(arena): liberate codex spark failure contract",
+    "3cc3c7c6 chore(board): record fragility monitor issue"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-1076",
     "canonical_links": [
       "task:TASK-BUD-1076",
-      "task:TASK-BUD-1076-CODEX-SPARK-FAILURE-CONTRACT-CANARY",
-      "commit:6702aa79"
+      "task:TASK-BUD-1078",
+      "commit:209a7038"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-15T03:19:27.349Z",
+    "generatedAtIso": "2026-05-15T04:23:07.073Z",
     "level": "warn",
-    "percent": 39,
+    "percent": 42,
     "action": "continue",
-    "recommendation": "await-exact-confirmation-for-failure-contract-or-proceed-to-p0-readonly-intake",
+    "recommendation": "ask-human-close-task-bud-1076-or-proceed-to-p0-readonly-intake",
     "stopStatus": "graceful",
     "stopSource": "agent",
     "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-15T03:19:27.349Z",
+      "atIso": "2026-05-15T04:23:07.073Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 39,
+      "percent": 42,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "await-exact-confirmation-for-failure-contract-or-proceed-to-p0-readonly-intake"
+      "recommendation": "ask-human-close-task-bud-1076-or-proceed-to-p0-readonly-intake"
     }
   ]
 }
