@@ -6,7 +6,15 @@ export type AgentRunSdkArenaEnvelope =
   | "readonly-two-file-synthesis"
   | "readonly-one-symbol-review"
   | "mutation-one-file-marker"
-  | "failure-contract";
+  | "failure-contract"
+  | "readonly-three-file-inventory"
+  | "readonly-ci-cache-risk-scan"
+  | "readonly-monitor-fragility-hardening-scan"
+  | "readonly-declared-evidence-synthesis"
+  | "readonly-source-backed-evidence-synthesis"
+  | "readonly-two-file-bounded-patch-recommendation"
+  | "readonly-three-file-risk-table"
+  | "readonly-web-research-tool-contract-review";
 
 export interface AgentRunSdkProviderModelArenaPacketInput {
   arenaId?: string;
@@ -83,7 +91,21 @@ function normalizePositiveInt(value: unknown, fallback = 0): number {
 }
 
 function normalizeArenaEnvelope(value: string): AgentRunSdkArenaEnvelope | undefined {
-  if (value === "readonly-one-file" || value === "readonly-two-file-synthesis" || value === "readonly-one-symbol-review" || value === "mutation-one-file-marker" || value === "failure-contract") return value;
+  if (
+    value === "readonly-one-file" ||
+    value === "readonly-two-file-synthesis" ||
+    value === "readonly-one-symbol-review" ||
+    value === "mutation-one-file-marker" ||
+    value === "failure-contract" ||
+    value === "readonly-three-file-inventory" ||
+    value === "readonly-ci-cache-risk-scan" ||
+    value === "readonly-monitor-fragility-hardening-scan" ||
+    value === "readonly-declared-evidence-synthesis" ||
+    value === "readonly-source-backed-evidence-synthesis" ||
+    value === "readonly-two-file-bounded-patch-recommendation" ||
+    value === "readonly-three-file-risk-table" ||
+    value === "readonly-web-research-tool-contract-review"
+  ) return value;
   return undefined;
 }
 
@@ -92,6 +114,70 @@ function defaultArenaEnvelopes(): AgentRunSdkArenaEnvelope[] {
 }
 
 function arenaCanarySpec(envelope: AgentRunSdkArenaEnvelope): { fileContract: AgentRunSdkFileContract; toolAllowlist: string[]; declaredFiles: string[]; goal: string } {
+  if (envelope === "readonly-three-file-inventory") {
+    return {
+      fileContract: "read-only",
+      toolAllowlist: ["read", "grep"],
+      declaredFiles: ["package.json", "pnpm-workspace.yaml", ".github/workflows/ci.yml"],
+      goal: "Arena suite canary: inspect three declared package/workspace/CI files and return exactly five inventory bullets; do not edit files or run commands.",
+    };
+  }
+  if (envelope === "readonly-ci-cache-risk-scan") {
+    return {
+      fileContract: "read-only",
+      toolAllowlist: ["read", "grep"],
+      declaredFiles: [".github/workflows/ci.yml", ".github/workflows/publish.yml", ".github/workflows/release-draft.yml"],
+      goal: "Arena suite canary: produce a fixed CI/cache/release risk table from three declared workflow files; do not edit files or run commands.",
+    };
+  }
+  if (envelope === "readonly-monitor-fragility-hardening-scan") {
+    return {
+      fileContract: "read-only",
+      toolAllowlist: ["read", "grep"],
+      declaredFiles: [".pi/monitors/fragility.monitor.json", ".pi/monitors/fragility/classify.md", ".pi/monitors/fragility.patterns.json"],
+      goal: "Arena suite canary: inspect declared monitor policy/config files and return fixed hardening bullets; do not edit files or run commands.",
+    };
+  }
+  if (envelope === "readonly-declared-evidence-synthesis") {
+    return {
+      fileContract: "read-only",
+      toolAllowlist: ["read", "grep"],
+      declaredFiles: ["docs/guides/dependency-upstream-governance.md", "package.json", ".github/workflows/publish.yml"],
+      goal: "Arena suite canary: synthesize declared local evidence with local artifacts into ADOPT/ADAPT/REJECT/PARENT-CHECK sections; do not claim external prior art, edit files, or run commands.",
+    };
+  }
+  if (envelope === "readonly-source-backed-evidence-synthesis") {
+    return {
+      fileContract: "read-only",
+      toolAllowlist: ["read", "grep"],
+      declaredFiles: ["docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md", "package.json", ".github/workflows/publish.yml"],
+      goal: "Arena suite canary: synthesize declared source-backed evidence with local artifacts into ADOPT/ADAPT/REJECT/PARENT-CHECK sections; missing-source claims go to PARENT-CHECK; do not use model weights as evidence, edit files, or run commands.",
+    };
+  }
+  if (envelope === "readonly-two-file-bounded-patch-recommendation") {
+    return {
+      fileContract: "read-only",
+      toolAllowlist: ["read", "grep"],
+      declaredFiles: ["packages/pi-stack/extensions/monitor-provider-patch.ts", "packages/pi-stack/test/monitor-provider-patch.test.mjs"],
+      goal: "Arena suite canary: read one source file and one related test and return one bounded parent-side patch recommendation plus one risk; do not edit files or run commands.",
+    };
+  }
+  if (envelope === "readonly-three-file-risk-table") {
+    return {
+      fileContract: "read-only",
+      toolAllowlist: ["read", "grep"],
+      declaredFiles: ["package.json", "packages/pi-stack/package.json", ".github/workflows/publish.yml"],
+      goal: "Arena suite canary: produce a compact fixed-schema risk table over three declared artifacts; do not edit files or run commands.",
+    };
+  }
+  if (envelope === "readonly-web-research-tool-contract-review") {
+    return {
+      fileContract: "read-only",
+      toolAllowlist: ["read", "grep"],
+      declaredFiles: ["packages/web-skills/skills/source-research/SKILL.md", "docs/research/worker-provider-model-arena-2026-05.md", "docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md"],
+      goal: "Arena suite canary: review declared local docs to define the contract for a future curated worker web/source research tool; do not use web, edit files, or run commands.",
+    };
+  }
   if (envelope === "readonly-two-file-synthesis") {
     return {
       fileContract: "read-only",

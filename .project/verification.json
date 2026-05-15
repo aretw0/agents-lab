@@ -16406,6 +16406,15 @@
       "method": "design-doc+blocked-packet-evidence+task-seed",
       "timestamp": "2026-05-15T21:39:32.991Z",
       "evidence": "Captured operator steering that the arena should become a controlled experiment harness rather than hand-run serial canaries. Added `docs/research/codex-spark-arena-suite-runner-2026-05.md` describing report-only-suite, serial-suite, bounded-batch-suite, and swarm-rehearsal-suite modes. Evidence from live report-only packet: current `agent_run_sdk_provider_model_arena_packet` blocked newer generic envelopes with `unknown-envelope`, proving the need for an expanded envelope registry/suite manifest layer. Seeded `TASK-BUD-1079` for bounded arena suite manifest/runner implementation. No paid/model calls, no suite dispatch, and no protected mutation occurred."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-EXPANDED-ARENA-ENVELOPE-REGISTRY-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke+project-validate",
+      "timestamp": "2026-05-15T23:25:25.869Z",
+      "evidence": "Expanded report-only arena packet envelope recognition beyond the original five to include current cultivated generic envelopes: readonly-three-file-inventory, readonly-ci-cache-risk-scan, readonly-monitor-fragility-hardening-scan, readonly-declared-evidence-synthesis, readonly-source-backed-evidence-synthesis, readonly-two-file-bounded-patch-recommendation, readonly-three-file-risk-table, and readonly-web-research-tool-contract-review. Added smoke coverage proving a 3-envelope expanded packet returns ready-for-human-decision while staying report-only. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed. Operator feedback recorded as TASK-BUD-1080: refactor verbose arenaCanarySpec into compact registry later."
     }
   ]
 }

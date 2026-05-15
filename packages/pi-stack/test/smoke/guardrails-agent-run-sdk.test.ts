@@ -288,6 +288,31 @@ describe("agent run SDK packet surfaces", () => {
     expect(arenaPacket.nextActions.join("\n")).toContain("collect prior-art references");
     expect(arenaPacket.summary).toContain("paidCalls=no");
 
+    const expandedArenaPacket = buildAgentRunSdkProviderModelArenaPacket({
+      arenaId: "arena-expanded-openai-spark-smoke",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      envelopes: [
+        "readonly-three-file-risk-table",
+        "readonly-source-backed-evidence-synthesis",
+        "readonly-web-research-tool-contract-review",
+      ],
+      maxCalls: 3,
+      timeoutMs: 45_000,
+      maxEstimatedCostUsd: 0.75,
+      budgetDecision: "ok",
+      budgetEvidence: "manual expanded suite budget evidence",
+    });
+    expect(expandedArenaPacket.decision).toBe("ready-for-human-decision");
+    expect(expandedArenaPacket.canaries.map((canary) => canary.envelope)).toEqual([
+      "readonly-three-file-risk-table",
+      "readonly-source-backed-evidence-synthesis",
+      "readonly-web-research-tool-contract-review",
+    ]);
+    expect(expandedArenaPacket.canaries[0]?.declaredFiles).toEqual(["package.json", "packages/pi-stack/package.json", ".github/workflows/publish.yml"]);
+    expect(expandedArenaPacket.canaries[1]?.declaredFiles).toContain("docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md");
+    expect(expandedArenaPacket.canaries[2]?.packet.runSpec.goal).toContain("do not use web");
+    expect(expandedArenaPacket.summary).toContain("envelopes=3");
+
     const arenaBlocked = buildAgentRunSdkProviderModelArenaPacket({
       arenaId: "arena-blocked",
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
