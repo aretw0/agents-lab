@@ -44,14 +44,21 @@ Completed canary:
   - result: completed with required risk table columns, outputBytes=1766, no touched files, parent outcome contract=pass
   - P0 risk signals found: `publish.yml` has medium cache/install risk and high release/secret impact (`npm publish`, `NPM_TOKEN`, `id-token: write`); `release-draft.yml` can write release metadata; `ci.yml` has low direct cache risk but still depends on external registry resolution.
 
-### Wave B — bounded recommendation envelopes
+### Wave B — monitor/recommendation envelopes
 
-These expand beyond simple synthesis but avoid broad open-ended code review, which previously failed.
+These expand beyond simple synthesis but avoid broad open-ended code review, which previously failed. The immediate target is using current monitor false positives to unlock a read-only monitor hardening envelope before P0.
 
 | Candidate envelope | Purpose | Canary shape | Guard |
 | --- | --- | --- | --- |
+| `readonly-monitor-fragility-hardening-scan` | Read monitor configuration/template/patterns and propose one bounded hardening recommendation for recurring false positives. | `.pi/monitors/fragility.monitor.json`, `.pi/monitors/fragility/classify.md`, `.pi/monitors/fragility.patterns.json`; tools `read,grep`; five-bullet output. | No monitor mutation during canary; recommendation only; exact confirmation required. |
 | `readonly-two-file-bounded-patch-recommendation` | Recommend one parent-side patch from one source file + one related test/doc. | Two declared files, `read,grep`, final output with one patch recommendation and one risk. | Must avoid open-ended code/test review language; max one recommendation. |
 | `readonly-three-file-risk-table` | Produce a compact risk table across package/CI/docs. | Three declared files, `read,grep`, fixed table schema. | No patch instructions, no mutation, no install commands. |
+
+Prepared monitor hardening preview only:
+
+- run id: `task-bud-1076-codex-spark-readonly-monitor-fragility-hardening-canary`
+  - maturity before run: `needs-evidence-broad-readonly`
+  - exact phrase if operator chooses to run it: `execute o sdk worker task-bud-1076-codex-spark-readonly-monitor-fragility-hardening-canary`
 
 ### Wave C — narrow mutation expansion
 

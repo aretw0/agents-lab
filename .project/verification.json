@@ -16325,6 +16325,15 @@
       "method": "exact-confirmed-sdk-worker+outcome+marker-check",
       "timestamp": "2026-05-15T13:02:46.890Z",
       "evidence": "Exact-confirmed SDK worker `task-bud-1076-codex-spark-readonly-ci-cache-risk-scan-canary` dispatched for `openai-codex/gpt-5.3-codex-spark` after readiness checks. Scope: three declared workflow files (`.github/workflows/ci.yml`, `.github/workflows/publish.yml`, `.github/workflows/release-draft.yml`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1076-codex-spark-readonly-ci-cache-risk-scan-canary.sdk.log` shows completed state, risk table columns (`cache-risk-signal`, `release-risk-signal`, `secret-permission-signal`, `next-parent-check`), and outputBytes=1766. Parent validation: git clean, no touched files, safe_marker_check matched table/STOP/close markers, `agent_run_outcome_packet` returned contract=pass process=completed. This liberates the `readonly-ci-cache-risk-scan` envelope for this provider/model only; workflow mutation remains protected."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-MONITOR-HARDENING-PREVIEW-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "packet-preview+marker-check",
+      "timestamp": "2026-05-15T14:09:36.740Z",
+      "evidence": "Prepared next codex-spark expansion canary for monitor hardening: `task-bud-1076-codex-spark-readonly-monitor-fragility-hardening-canary`. Scope: three declared monitor files (`.pi/monitors/fragility.monitor.json`, `.pi/monitors/fragility/classify.md`, `.pi/monitors/fragility.patterns.json`), tools `read,grep`, read-only contract, timeout 45000ms, five-bullet final output. Live packet returned decision=ready-for-human-decision, sdkMaturity=needs-evidence-broad-readonly, dispatch=no, authorization=none. This responds to recurring fragility false positives while still keeping the focus on expanding codex-spark worker envelopes. No worker dispatch or source mutation occurred."
     }
   ]
 }
