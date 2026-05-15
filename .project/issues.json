@@ -1182,6 +1182,17 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mp6cs3fk",
+      "title": "The agent produced an empty response to an action-oriented request, leaving the task unresolved without acknowledging any blockage.",
+      "body": "The agent produced an empty response to an action-oriented request, leaving the task unresolved without acknowledging any blockage.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }
