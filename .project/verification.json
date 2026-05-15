@@ -16289,6 +16289,15 @@
       "method": "evidence-ledger+packet-preview+marker-check",
       "timestamp": "2026-05-15T03:10:38.385Z",
       "evidence": "Translated existing codex-spark worker evidence into `docs/research/codex-spark-worker-capability-evidence-2026-05.md`: liberated envelopes for `openai-codex/gpt-5.3-codex-spark` are readonly-one-file, readonly-two-file-synthesis, readonly-one-symbol-review, and narrow mutation-one-file-marker. Explicit non-promotions remain broad two-file open-ended code/test review, multi-file mutation, fan-out, protected scopes, CI/publish/package-manager migration, and blind subprocess retry. Prepared missing failure-contract canary preview `task-bud-1076-codex-spark-failure-contract-canary`; live packet returned decision=ready-for-human-decision, dispatch=no, authorization=none, exact phrase `execute o sdk worker task-bud-1076-codex-spark-failure-contract-canary`. Marker check matched liberated/pending envelope rows; project-validate clean; line_budget_snapshot watch aboveExtract=0 aboveCritical=0."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-CODEX-SPARK-FAILURE-CONTRACT-PASS-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-confirmed-sdk-worker+outcome+marker-check",
+      "timestamp": "2026-05-15T04:15:33.445Z",
+      "evidence": "After crash recovery, exact-confirmed SDK worker `task-bud-1076-codex-spark-failure-contract-canary` dispatched for `openai-codex/gpt-5.3-codex-spark`. Scope: one declared file `docs/research/worker-provider-model-arena-2026-05.md`, tool allowlist `read`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1076-codex-spark-failure-contract-canary.sdk.log` shows one successful read, final output `FAIL; missing-evidence: no concrete external benchmark permalink...`, close state=completed outputBytes=211. Parent validation: git clean, no touched files, safe_marker_check matched failure output/close markers, `agent_run_outcome_packet` returned contract=pass process=completed recommendation=stop. This liberates the failure-contract envelope for this provider/model only."
     }
   ]
 }
