@@ -8,6 +8,8 @@ The goal is to unlock as many practical `openai-codex/gpt-5.3-codex-spark` worke
 
 Promotion remains scoped to this exact provider/model plus envelope. Each canary is serial, exact-confirmed, local-first, and parent-validated. No protected-scope mutation, no installs, no CI execution, no publish/release action, no fan-out auto-dispatch.
 
+Envelope names should describe reusable capability shapes, not one-off task ownership. Domain-specific canaries may start in CI/cache/monitor contexts, but promotion should be framed as generic bounded patterns such as multi-file risk tables, bounded hardening scans, and fixed-schema recommendations that can later be reused in other domains with the same gates.
+
 ## Already liberated
 
 See `docs/research/codex-spark-worker-capability-evidence-2026-05.md` for evidence. Current liberated envelopes:
@@ -17,6 +19,9 @@ See `docs/research/codex-spark-worker-capability-evidence-2026-05.md` for eviden
 - `readonly-one-symbol-review`
 - `mutation-one-file-marker`
 - `failure-contract`
+- `readonly-three-file-inventory`
+- `readonly-ci-cache-risk-scan`
+- `readonly-monitor-fragility-hardening-scan`
 
 ## Expansion waves
 
@@ -44,21 +49,23 @@ Completed canary:
   - result: completed with required risk table columns, outputBytes=1766, no touched files, parent outcome contract=pass
   - P0 risk signals found: `publish.yml` has medium cache/install risk and high release/secret impact (`npm publish`, `NPM_TOKEN`, `id-token: write`); `release-draft.yml` can write release metadata; `ci.yml` has low direct cache risk but still depends on external registry resolution.
 
-### Wave B — monitor/recommendation envelopes
+### Wave B — bounded risk/hardening/recommendation envelopes
 
-These expand beyond simple synthesis but avoid broad open-ended code review, which previously failed. The immediate target is using current monitor false positives to unlock a read-only monitor hardening envelope before P0.
+These expand beyond simple synthesis but avoid broad open-ended code review, which previously failed. The immediate target uses current monitor false positives to unlock a reusable read-only hardening-scan shape: inspect a small declared policy/config surface, identify the gap, and return one parent-side hardening recommendation plus one regression target.
 
 | Candidate envelope | Purpose | Canary shape | Guard |
 | --- | --- | --- | --- |
-| `readonly-monitor-fragility-hardening-scan` | Read monitor configuration/template/patterns and propose one bounded hardening recommendation for recurring false positives. | `.pi/monitors/fragility.monitor.json`, `.pi/monitors/fragility/classify.md`, `.pi/monitors/fragility.patterns.json`; tools `read,grep`; five-bullet output. | No monitor mutation during canary; recommendation only; exact confirmation required. |
+| `readonly-monitor-fragility-hardening-scan` | Read monitor configuration/template/patterns and propose one bounded hardening recommendation for recurring false positives. | `.pi/monitors/fragility.monitor.json`, `.pi/monitors/fragility/classify.md`, `.pi/monitors/fragility.patterns.json`; tools `read,grep`; five-bullet output. | **Liberated** by `task-bud-1076-codex-spark-readonly-monitor-fragility-hardening-canary`: completed, outputBytes=1308, no touched files, parent outcome contract=pass. Generalized shape: declared config/policy files + fixed hardening bullets + no mutation. |
 | `readonly-two-file-bounded-patch-recommendation` | Recommend one parent-side patch from one source file + one related test/doc. | Two declared files, `read,grep`, final output with one patch recommendation and one risk. | Must avoid open-ended code/test review language; max one recommendation. |
 | `readonly-three-file-risk-table` | Produce a compact risk table across package/CI/docs. | Three declared files, `read,grep`, fixed table schema. | No patch instructions, no mutation, no install commands. |
 
-Prepared monitor hardening preview only:
+Completed monitor hardening canary:
 
 - run id: `task-bud-1076-codex-spark-readonly-monitor-fragility-hardening-canary`
   - maturity before run: `needs-evidence-broad-readonly`
-  - exact phrase if operator chooses to run it: `execute o sdk worker task-bud-1076-codex-spark-readonly-monitor-fragility-hardening-canary`
+  - result: completed with five required bullets, outputBytes=1308, no touched files, parent outcome contract=pass
+  - reusable signal: Codex Spark can inspect a narrow declared policy/config surface and return a fixed-schema hardening recommendation without mutating runtime behavior.
+  - monitor-specific finding: the classifier prompt already contains an empty-output guard; the likely gap is lack of a parent-side intent gate before classification, with a regression target for read/inspect requests plus file-write context and non-empty assistant output.
 
 ### Wave C — narrow mutation expansion
 

@@ -16334,6 +16334,15 @@
       "method": "packet-preview+marker-check",
       "timestamp": "2026-05-15T14:09:36.740Z",
       "evidence": "Prepared next codex-spark expansion canary for monitor hardening: `task-bud-1076-codex-spark-readonly-monitor-fragility-hardening-canary`. Scope: three declared monitor files (`.pi/monitors/fragility.monitor.json`, `.pi/monitors/fragility/classify.md`, `.pi/monitors/fragility.patterns.json`), tools `read,grep`, read-only contract, timeout 45000ms, five-bullet final output. Live packet returned decision=ready-for-human-decision, sdkMaturity=needs-evidence-broad-readonly, dispatch=no, authorization=none. This responds to recurring fragility false positives while still keeping the focus on expanding codex-spark worker envelopes. No worker dispatch or source mutation occurred."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-MONITOR-HARDENING-PASS-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-confirmed-sdk-worker+outcome+marker-check",
+      "timestamp": "2026-05-15T15:05:49.487Z",
+      "evidence": "Exact-confirmed SDK worker `task-bud-1076-codex-spark-readonly-monitor-fragility-hardening-canary` dispatched for `openai-codex/gpt-5.3-codex-spark`. Scope: three declared monitor files (`.pi/monitors/fragility.monitor.json`, `.pi/monitors/fragility/classify.md`, `.pi/monitors/fragility.patterns.json`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1076-codex-spark-readonly-monitor-fragility-hardening-canary.sdk.log` shows completed state, required five bullets (`trigger-scope`, `existing-empty-output-guard`, `likely-false-positive-gap`, `one-parent-side-hardening-recommendation`, `regression-test-target`), and outputBytes=1308. Parent validation: git clean, no touched files, safe_marker_check matched required markers/STOP/close markers, `agent_run_outcome_packet` returned contract=pass process=completed. This liberates `readonly-monitor-fragility-hardening-scan` for this provider/model only and records the more general pattern: bounded declared policy/config hardening scan with fixed output schema; runtime monitor mutation remains separate."
     }
   ]
 }
