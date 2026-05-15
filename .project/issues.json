@@ -1193,6 +1193,17 @@
       "priority": "high",
       "package": "pi-stack",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mp6eziq9",
+      "title": "The agent responded with an empty message, leaving the user's request unresolved after the crash.",
+      "body": "The agent responded with an empty message, leaving the user's request unresolved after the crash.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "open",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor"
     }
   ]
 }

@@ -24,6 +24,10 @@ This file translates existing worker evidence into explicit capability envelopes
 - Protected scopes remain blocked without explicit human authorization: CI, publish, credentials, settings/routing/default-provider changes, package-manager migration, and remote execution.
 - Subprocess `pi-print-subprocess` remains first-class but is not liberated for blind retry after the recorded runner-timeout/zero-output diagnostic.
 
+## Expansion plan
+
+The next envelope wave lives in `docs/research/codex-spark-worker-envelope-expansion-plan-2026-05.md`. It aims to unlock broader but still bounded read-only P0 runway envelopes before starting package-manager hardening work.
+
 ## P0 supply-chain lane implication
 
 For `TASK-BUD-1078`, these capabilities can help only inside their proven envelopes:

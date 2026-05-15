@@ -16298,6 +16298,15 @@
       "method": "exact-confirmed-sdk-worker+outcome+marker-check",
       "timestamp": "2026-05-15T04:15:33.445Z",
       "evidence": "After crash recovery, exact-confirmed SDK worker `task-bud-1076-codex-spark-failure-contract-canary` dispatched for `openai-codex/gpt-5.3-codex-spark`. Scope: one declared file `docs/research/worker-provider-model-arena-2026-05.md`, tool allowlist `read`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1076-codex-spark-failure-contract-canary.sdk.log` shows one successful read, final output `FAIL; missing-evidence: no concrete external benchmark permalink...`, close state=completed outputBytes=211. Parent validation: git clean, no touched files, safe_marker_check matched failure output/close markers, `agent_run_outcome_packet` returned contract=pass process=completed recommendation=stop. This liberates the failure-contract envelope for this provider/model only."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-EXPANSION-WAVE-PLAN-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "plan+packet-preview+marker-check",
+      "timestamp": "2026-05-15T04:48:28.716Z",
+      "evidence": "Created `docs/research/codex-spark-worker-envelope-expansion-plan-2026-05.md` to continue unlocking practical codex-spark envelopes before TASK-BUD-1078. The plan defines Wave A read-only P0 runway candidates (`readonly-three-file-inventory`, `readonly-ci-cache-risk-scan`, `readonly-prior-art-packet-synthesis`), Wave B bounded recommendation candidates, and Wave C conservative mutation candidates. Prepared first report-only packet preview `task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary`; live packet returned decision=ready-for-human-decision, sdkMaturity=needs-evidence-broad-readonly, dispatch=no, authorization=none. Exact phrase captured in the plan. Marker check passed; project-validate clean; no worker dispatch occurred."
     }
   ]
 }
