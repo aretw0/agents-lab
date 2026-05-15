@@ -16307,6 +16307,15 @@
       "method": "plan+packet-preview+marker-check",
       "timestamp": "2026-05-15T04:48:28.716Z",
       "evidence": "Created `docs/research/codex-spark-worker-envelope-expansion-plan-2026-05.md` to continue unlocking practical codex-spark envelopes before TASK-BUD-1078. The plan defines Wave A read-only P0 runway candidates (`readonly-three-file-inventory`, `readonly-ci-cache-risk-scan`, `readonly-prior-art-packet-synthesis`), Wave B bounded recommendation candidates, and Wave C conservative mutation candidates. Prepared first report-only packet preview `task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary`; live packet returned decision=ready-for-human-decision, sdkMaturity=needs-evidence-broad-readonly, dispatch=no, authorization=none. Exact phrase captured in the plan. Marker check passed; project-validate clean; no worker dispatch occurred."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-THREE-FILE-INVENTORY-PASS-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-confirmed-sdk-worker+outcome+marker-check",
+      "timestamp": "2026-05-15T12:02:15.668Z",
+      "evidence": "Exact-confirmed SDK worker `task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary` dispatched for `openai-codex/gpt-5.3-codex-spark`. Scope: three declared files (`package.json`, `pnpm-workspace.yaml`, `.github/workflows/ci.yml`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary.sdk.log` shows completed state, final 5 required bullets (`package-manager-state`, `npm-npx-usage`, `pnpm-workspace-state`, `ci-cache-risk-signal`, `next-readonly-canary`), outputBytes=1139. Parent validation: git clean, no touched files, safe_marker_check matched required bullets/close marker, `agent_run_outcome_packet` returned contract=pass process=completed. This liberates the `readonly-three-file-inventory` envelope for this provider/model only."
     }
   ]
 }

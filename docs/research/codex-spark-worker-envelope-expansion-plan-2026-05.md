@@ -26,15 +26,19 @@ These provide the biggest safe leverage for the pnpm/supply-chain P0.
 
 | Candidate envelope | Purpose | Canary shape | Promotion if passed |
 | --- | --- | --- | --- |
-| `readonly-three-file-inventory` | Inspect package-manager + workspace + CI snippet together. | `package.json`, `pnpm-workspace.yaml`, `.github/workflows/ci.yml`; tools `read,grep`; 5-bullet final output. | Worker can inspect three declared local files for inventory/risk signals. |
+| `readonly-three-file-inventory` | Inspect package-manager + workspace + CI snippet together. | `package.json`, `pnpm-workspace.yaml`, `.github/workflows/ci.yml`; tools `read,grep`; 5-bullet final output. | **Liberated** by `task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary`: completed, outputBytes=1139, no touched files, parent outcome contract=pass. |
 | `readonly-ci-cache-risk-scan` | Read CI workflow files and identify cache/release risk signals without changing CI. | `.github/workflows/ci.yml`, `.github/workflows/publish.yml`, `.github/workflows/release-draft.yml`; tools `read,grep`; risk table output. | Worker can perform bounded read-only CI/cache/release risk scan; mutation still protected. |
 | `readonly-prior-art-packet-synthesis` | Compare cached pnpm/security prior-art excerpts with local files. | One local prior-art note + one/two package/CI files; tools `read,grep`; adopt/adapt/reject output. | Worker can synthesize cached external evidence with local repo facts. |
 
-Prepared previews only:
+Completed canary:
 
 - run id: `task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary`
   - maturity before run: `needs-evidence-broad-readonly`
-  - exact phrase if operator chooses to run it: `execute o sdk worker task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary`
+  - result: completed with five required bullets, outputBytes=1139, no touched files, parent outcome contract=pass
+  - P0 inventory signals found: package manager state is npm-centric/mixed, `pnpm-workspace.yaml` exists but is not operationally enforced, scripts/workflow use npm/npx, and CI installs with `npm install --no-fund --no-audit`.
+
+Prepared preview only:
+
 - run id: `task-bud-1076-codex-spark-readonly-ci-cache-risk-scan-canary`
   - maturity before run: `needs-evidence-broad-readonly`
   - exact phrase if operator chooses to run it: `execute o sdk worker task-bud-1076-codex-spark-readonly-ci-cache-risk-scan-canary`
