@@ -16397,6 +16397,15 @@
       "method": "packet-preview+arena-doctrine-update",
       "timestamp": "2026-05-15T21:01:41.113Z",
       "evidence": "Prepared next generic codex-spark arena preview for the research rung: `task-bud-1076-codex-spark-readonly-web-research-tool-contract-review-canary`. The preview reads local source-research skill and arena/evidence docs to define the contract needed before any worker receives curated web/source research tools. It does not grant web access; tools remain `read,grep`; packet returned ready-for-human-decision with dispatch=no authorization=none. Updated arena doctrine to clarify that the arena is the qualification ground for eventual delegated batches/swarms, and that source-backed synthesis over parent-curated packets does not promote autonomous web research."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-ARENA-SUITE-RUNNER-RUNWAY-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "design-doc+blocked-packet-evidence+task-seed",
+      "timestamp": "2026-05-15T21:39:32.991Z",
+      "evidence": "Captured operator steering that the arena should become a controlled experiment harness rather than hand-run serial canaries. Added `docs/research/codex-spark-arena-suite-runner-2026-05.md` describing report-only-suite, serial-suite, bounded-batch-suite, and swarm-rehearsal-suite modes. Evidence from live report-only packet: current `agent_run_sdk_provider_model_arena_packet` blocked newer generic envelopes with `unknown-envelope`, proving the need for an expanded envelope registry/suite manifest layer. Seeded `TASK-BUD-1079` for bounded arena suite manifest/runner implementation. No paid/model calls, no suite dispatch, and no protected mutation occurred."
     }
   ]
 }
