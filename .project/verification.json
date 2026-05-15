@@ -16361,6 +16361,15 @@
       "method": "exact-confirmed-sdk-worker+outcome+marker-check",
       "timestamp": "2026-05-15T17:24:08.082Z",
       "evidence": "Exact-confirmed SDK worker `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary` dispatched for `openai-codex/gpt-5.3-codex-spark`. Scope: three declared files (`docs/guides/dependency-upstream-governance.md`, `package.json`, `.github/workflows/publish.yml`), tools `read,grep`, read-only contract, timeout 45000ms. Log `.pi/reports/task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary.sdk.log` shows completed state, required sections (`ADOPT`, `ADAPT`, `REJECT`, `PARENT-CHECK`), and outputBytes=1848. Parent validation: git clean, no touched files, safe_marker_check matched required sections/STOP/close markers, `agent_run_outcome_packet` returned contract=pass process=completed. This liberates `readonly-prior-art-packet-synthesis` for this provider/model only and records the generic pattern: declared prior-art/governance evidence plus local artifacts with fixed adopt/adapt/reject output; external research and mutation remain separate."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-PRIOR-ART-CORRECTION-20260515",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "ledger-correction+scope-demotion",
+      "timestamp": "2026-05-15T18:06:02.588Z",
+      "evidence": "Corrected the previous promotion semantics after operator feedback: `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary` did not prove true prior-art synthesis because its declared inputs were local governance/package/release artifacts, not external/cached source-backed prior art. Demoted/renamed the liberated envelope to `readonly-declared-evidence-synthesis`. Marked true `readonly-prior-art-packet-synthesis` as not liberated until a declared external/cached evidence artifact with citations/permalinks is included. Added explicit rule: model weights are not evidence."
     }
   ]
 }

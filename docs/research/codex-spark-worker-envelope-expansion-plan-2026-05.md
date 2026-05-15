@@ -22,6 +22,7 @@ See `docs/research/codex-spark-worker-capability-evidence-2026-05.md` for eviden
 - `readonly-three-file-inventory`
 - `readonly-ci-cache-risk-scan`
 - `readonly-monitor-fragility-hardening-scan`
+- `readonly-declared-evidence-synthesis`
 
 ## Expansion waves
 
@@ -33,7 +34,8 @@ These provide the biggest safe leverage for the pnpm/supply-chain P0.
 | --- | --- | --- | --- |
 | `readonly-three-file-inventory` | Inspect package-manager + workspace + CI snippet together. | `package.json`, `pnpm-workspace.yaml`, `.github/workflows/ci.yml`; tools `read,grep`; 5-bullet final output. | **Liberated** by `task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary`: completed, outputBytes=1139, no touched files, parent outcome contract=pass. |
 | `readonly-ci-cache-risk-scan` | Read CI workflow files and identify cache/release risk signals without changing CI. | `.github/workflows/ci.yml`, `.github/workflows/publish.yml`, `.github/workflows/release-draft.yml`; tools `read,grep`; risk table output. | **Liberated** by `task-bud-1076-codex-spark-readonly-ci-cache-risk-scan-canary`: completed, outputBytes=1766, no touched files, parent outcome contract=pass. Mutation still protected. |
-| `readonly-prior-art-packet-synthesis` | Compare cached prior-art/governance excerpts with local files. | One local prior-art/governance note + one/two package/CI files; tools `read,grep`; adopt/adapt/reject output. | **Liberated** by `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary`: completed, outputBytes=1848, no touched files, parent outcome contract=pass. Generalized shape: declared prior-art/governance evidence + local artifacts + ADOPT/ADAPT/REJECT/PARENT-CHECK output. |
+| `readonly-declared-evidence-synthesis` | Compare declared local evidence/governance excerpts with local files. | One local evidence/governance note + one/two package/CI files; tools `read,grep`; adopt/adapt/reject output. | **Liberated** by `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary`: completed, outputBytes=1848, no touched files, parent outcome contract=pass. Corrected promotion: declared-evidence synthesis only, not true prior-art research. |
+| `readonly-prior-art-packet-synthesis` | Compare real prior-art/cached external evidence with local files. | One declared external/cached evidence artifact with citations/permalinks + one/two local files; tools `read,grep`; adopt/adapt/reject output. | **Not liberated yet**. Requires source-backed prior-art artifact; model weights are not evidence. |
 
 Completed canary:
 
@@ -61,10 +63,11 @@ These expand beyond simple synthesis but avoid broad open-ended code review, whi
 
 Prepared generic expansion previews only:
 
-- `readonly-prior-art-packet-synthesis`
+- `readonly-declared-evidence-synthesis`
   - run id: `task-bud-1076-codex-spark-readonly-prior-art-packet-synthesis-canary`
   - result: completed with ADOPT/ADAPT/REJECT/PARENT-CHECK sections, outputBytes=1848, no touched files, parent outcome contract=pass
-  - reusable signal: Codex Spark can synthesize declared prior-art/governance evidence with local artifacts into adopt/adapt/reject decisions without inventing external facts or mutating files.
+  - correction: this did **not** prove prior-art synthesis, because the declared evidence was local governance/release material, not external/cached prior art. Treat it as declared-evidence synthesis only.
+  - reusable signal: Codex Spark can synthesize declared evidence with local artifacts into adopt/adapt/reject decisions without mutating files.
 - `readonly-two-file-bounded-patch-recommendation`
   - run id: `task-bud-1076-codex-spark-readonly-bounded-patch-recommendation-canary`
   - exact phrase: `execute o sdk worker task-bud-1076-codex-spark-readonly-bounded-patch-recommendation-canary`
