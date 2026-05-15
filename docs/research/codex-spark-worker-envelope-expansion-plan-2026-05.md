@@ -30,11 +30,14 @@ These provide the biggest safe leverage for the pnpm/supply-chain P0.
 | `readonly-ci-cache-risk-scan` | Read CI workflow files and identify cache/release risk signals without changing CI. | `.github/workflows/ci.yml`, `.github/workflows/publish.yml`, `.github/workflows/release-draft.yml`; tools `read,grep`; risk table output. | Worker can perform bounded read-only CI/cache/release risk scan; mutation still protected. |
 | `readonly-prior-art-packet-synthesis` | Compare cached pnpm/security prior-art excerpts with local files. | One local prior-art note + one/two package/CI files; tools `read,grep`; adopt/adapt/reject output. | Worker can synthesize cached external evidence with local repo facts. |
 
-Prepared first preview only:
+Prepared previews only:
 
 - run id: `task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary`
-- maturity before run: `needs-evidence-broad-readonly`
-- exact phrase if operator chooses to run it: `execute o sdk worker task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary`
+  - maturity before run: `needs-evidence-broad-readonly`
+  - exact phrase if operator chooses to run it: `execute o sdk worker task-bud-1076-codex-spark-readonly-three-file-p0-inventory-canary`
+- run id: `task-bud-1076-codex-spark-readonly-ci-cache-risk-scan-canary`
+  - maturity before run: `needs-evidence-broad-readonly`
+  - exact phrase if operator chooses to run it: `execute o sdk worker task-bud-1076-codex-spark-readonly-ci-cache-risk-scan-canary`
 
 ### Wave B — bounded recommendation envelopes
 
