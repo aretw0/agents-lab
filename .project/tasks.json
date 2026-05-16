@@ -24128,12 +24128,12 @@
       ],
       "milestone": "worker-arena",
       "notes": "Related to TASK-BUD-1076. Created from operator steering: arena should mature into a controlled experiment harness that can evaluate provider/model capabilities with less manual serial work, eventually enabling safer worker batches/swarms.\n2026-05-15: First implementation slice landed locally: existing arena packet now emits a report-only suiteManifest with suite budget, serial parallelism=1, stopOn conditions, run ids, per-envelope validation, and fan-in validation. Serial-suite dispatcher remains intentionally blocked/not implemented. Evidence: VERIF-TASK-BUD-1079-REPORT-ONLY-SUITE-MANIFEST-20260515.",
-      "verification": "VERIF-TASK-BUD-1079-REPORT-ONLY-SUITE-MANIFEST-20260515"
+      "verification": "VERIF-TASK-BUD-1079-LIVE-EXPANDED-ARENA-PREVIEW-20260515"
     },
     {
       "id": "TASK-BUD-1080",
       "description": "Refactor verbose arena envelope specification code into a compact registry/manifest data structure before adding more suite-runner logic.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "acceptance_criteria": [
         "Arena envelope specs are represented as data entries rather than a long conditional chain.",
@@ -24142,7 +24142,8 @@
         "No dispatch behavior changes; report-only semantics remain unchanged."
       ],
       "milestone": "worker-arena",
-      "notes": "Seeded from operator feedback: `arenaCanarySpec` became too verbose during expanded envelope support. Keep as backlog cleanup before further arena-suite growth."
+      "notes": "Seeded from operator feedback: `arenaCanarySpec` became too verbose during expanded envelope support. Keep as backlog cleanup before further arena-suite growth.\nCompleted compact registry refactor. Validation evidence: VERIF-TASK-BUD-1080-ARENA-REGISTRY-REFACTOR-20260515. Next envelope growth should add registry entries rather than extending a verbose conditional chain.",
+      "verification": "VERIF-TASK-BUD-1080-ARENA-REGISTRY-REFACTOR-20260515"
     },
     {
       "id": "TASK-BUD-1081",
@@ -24170,7 +24171,21 @@
         "Add timeout/diagnostic guidance without forcing destructive restart."
       ],
       "milestone": "continuity-hardening",
-      "notes": "User feedback after forced compact/reload: reload appeared not to end; unclear whether tool/runtime hang or local machine slowness. Keep as diagnostic backlog for next occurrence; ask operator to capture phase/timing evidence if it repeats."
+      "notes": "User feedback after forced compact/reload: reload appeared not to end; unclear whether tool/runtime hang or local machine slowness. Keep as diagnostic backlog for next occurrence; ask operator to capture phase/timing evidence if it repeats.\n2026-05-15 follow-up: user retried reload and it did not hang this time. Keep diagnostic task open because the previous slow/unbounded reload remains unexplained; next occurrence should capture phase/timing evidence rather than assuming operator waited too little."
+    },
+    {
+      "id": "TASK-BUD-1083",
+      "description": "Add next generic non-readonly arena envelopes after compact registry refactor, starting with narrow one-file mutation/test-fix rungs and strict parent validation.",
+      "status": "planned",
+      "priority": "p1",
+      "acceptance_criteria": [
+        "Do not add more verbose condition-chain entries; use the compact registry from TASK-BUD-1080 first.",
+        "Add at least two non-readonly generic envelopes that are local-safe, exact-confirmed, one-file scoped, and parent-validated.",
+        "Candidate envelopes include one-file doc marker mutation, one-file test fixture update, and one-file code constant/config mutation with focused test/marker validation.",
+        "No protected scopes, package-manager/CI/publish changes, multi-file mutation, or parallel mutation are enabled by this task."
+      ],
+      "milestone": "worker-arena",
+      "notes": "Created from user steering: generic envelopes should not stay read-only-only. Keep expansion cautious: read-only is easy to batch; mutation requires touched-file validation, rollback, and exact confirmation."
     }
   ]
 }

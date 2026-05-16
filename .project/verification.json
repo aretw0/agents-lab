@@ -16424,6 +16424,24 @@
       "method": "local-smoke+project-validate",
       "timestamp": "2026-05-15T23:56:35.967Z",
       "evidence": "Added report-only suiteManifest to buildAgentRunSdkProviderModelArenaPacket. Manifest includes suiteId, providerModelRef, maxCalls, maxEstimatedCostUsd, timeoutMsPerRun, parallelism=1, stopOn, fanInValidation, runIds, and per-envelope validation plans. Existing behavior remains report-only: dispatchAllowed=false and paidModelCallsAllowed=false. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed. Serial-suite dispatch remains intentionally not implemented."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1079-LIVE-EXPANDED-ARENA-PREVIEW-20260515",
+      "target": "TASK-BUD-1079",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-report-only-tool-preview-after-reload",
+      "timestamp": "2026-05-16T00:25:45.718Z",
+      "evidence": "After user completed /reload, live agent_run_sdk_provider_model_arena_packet accepted expanded generic envelopes readonly-three-file-risk-table, readonly-source-backed-evidence-synthesis, and readonly-web-research-tool-contract-review. Result: decision=ready-for-human-decision, paidCalls=no, dispatch=no, maxCalls=3, maxCostUsd=0.75. Confirms runtime is using the expanded envelope registry and report-only suite manifest path."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1080-ARENA-REGISTRY-REFACTOR-20260515",
+      "target": "TASK-BUD-1080",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke+project-validate",
+      "timestamp": "2026-05-16T01:05:43.279Z",
+      "evidence": "Refactored verbose arenaCanarySpec conditional chain into ARENA_ENVELOPE_IDS plus ARENA_ENVELOPE_REGISTRY data entries. Registry entries expose fileContract, toolAllowlist, declaredFiles, goal, maturityNotes, and protectedScope. Arena canaries and suiteManifest now carry maturityNotes/protectedScope while preserving report-only semantics. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed."
     }
   ]
 }

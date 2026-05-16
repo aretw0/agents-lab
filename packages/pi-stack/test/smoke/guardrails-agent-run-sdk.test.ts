@@ -309,6 +309,8 @@ describe("agent run SDK packet surfaces", () => {
       "readonly-web-research-tool-contract-review",
     ]);
     expect(expandedArenaPacket.canaries[0]?.declaredFiles).toEqual(["package.json", "packages/pi-stack/package.json", ".github/workflows/publish.yml"]);
+    expect(expandedArenaPacket.canaries[0]?.maturityNotes).toContain("generic risk table");
+    expect(expandedArenaPacket.canaries[0]?.protectedScope).toBe(false);
     expect(expandedArenaPacket.canaries[1]?.declaredFiles).toContain("docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md");
     expect(expandedArenaPacket.canaries[2]?.packet.runSpec.goal).toContain("do not use web");
     expect(expandedArenaPacket.suiteManifest).toMatchObject({
@@ -321,6 +323,8 @@ describe("agent run SDK packet surfaces", () => {
         "arena-expanded-openai-spark-smoke-readonly-web-research-tool-contract-review",
       ],
     });
+    expect(expandedArenaPacket.suiteManifest.envelopes[1]?.maturityNotes).toContain("parent-curated source-backed synthesis");
+    expect(expandedArenaPacket.suiteManifest.envelopes[1]?.protectedScope).toBe(false);
     expect(expandedArenaPacket.suiteManifest.stopOn).toContain("unexpected-touched-file");
     expect(expandedArenaPacket.suiteManifest.fanInValidation.join("\n")).toContain("terminal outcome packet");
     expect(expandedArenaPacket.nextActions.join("\n")).toContain("report-only suite manifest");
