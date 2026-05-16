@@ -346,6 +346,25 @@ describe("agent run SDK packet surfaces", () => {
     expect(mutationArenaPacket.canaries[1]?.declaredFiles).toEqual(["packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts"]);
     expect(mutationArenaPacket.canaries[2]?.maturityNotes).toContain("generic one-file code/config mutation");
     expect(mutationArenaPacket.suiteManifest.envelopes[0]?.validation).toContain("touched files must stay within declared files");
+    expect(mutationArenaPacket.scorecardTemplate.artifactPath).toBe(".pi/reports/arena-mutation-openai-spark-smoke.scorecard.json");
+    expect(mutationArenaPacket.scorecardTemplate.rows).toHaveLength(3);
+    expect(mutationArenaPacket.scorecardTemplate.rows[0]).toMatchObject({
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      envelope: "mutation-one-file-doc-marker",
+      processState: "pending",
+      contractDecision: "pending",
+    });
+    expect(mutationArenaPacket.scorecardTemplate.requiredFields).toContain("contractDecision");
+    expect(mutationArenaPacket.fanInPlan).toMatchObject({
+      artifactPath: ".pi/reports/arena-mutation-openai-spark-smoke.fanin.json",
+      expectedRunIds: [
+        "arena-mutation-openai-spark-smoke-mutation-one-file-doc-marker",
+        "arena-mutation-openai-spark-smoke-mutation-one-file-test-fixture",
+        "arena-mutation-openai-spark-smoke-mutation-one-file-code-constant",
+      ],
+    });
+    expect(mutationArenaPacket.fanInPlan.requiredOutcomePackets[0]).toContain("agent_run_outcome_packet");
+    expect(mutationArenaPacket.fanInPlan.failClosedOn).toContain("contract-failure");
     expect(mutationArenaPacket.promotionContract.join("\n")).toContain("does not promote multi-file mutation");
 
     const arenaBlocked = buildAgentRunSdkProviderModelArenaPacket({

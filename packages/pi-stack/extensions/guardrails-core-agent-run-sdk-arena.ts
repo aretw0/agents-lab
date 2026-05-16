@@ -82,6 +82,30 @@ export interface AgentRunSdkProviderModelArenaPacketResult {
     packet: AgentRunSdkInProcessPacketResult;
   }>;
   scorecardSchema: string[];
+  scorecardTemplate: {
+    artifactPath: string;
+    requiredFields: string[];
+    rows: Array<{
+      providerModelRef: string;
+      envelope: AgentRunSdkArenaEnvelope;
+      runId: string;
+      processState: "pending";
+      contractDecision: "pending";
+      outputBytes: 0;
+      touchedFiles: string[];
+      latencyMs: null;
+      errorClass: "pending";
+      budgetEvidence: string;
+      estimatedCostUsd: null;
+    }>;
+  };
+  fanInPlan: {
+    artifactPath: string;
+    expectedRunIds: string[];
+    requiredOutcomePackets: string[];
+    passCriteria: string[];
+    failClosedOn: string[];
+  };
   suiteManifest: {
     mode: "report-only-suite";
     suiteId: string;
@@ -356,6 +380,32 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     "each worker output is non-empty and satisfies the envelope output contract",
     "scorecard rows are recorded per provider/model/envelope before promotion",
   ];
+  const scorecardArtifactPath = `.pi/reports/${arenaId || "arena"}.scorecard.json`;
+  const fanInArtifactPath = `.pi/reports/${arenaId || "arena"}.fanin.json`;
+  const scorecardTemplate = {
+    artifactPath: scorecardArtifactPath,
+    requiredFields: scorecardSchema,
+    rows: canaries.map((canary) => ({
+      providerModelRef,
+      envelope: canary.envelope,
+      runId: canary.runId,
+      processState: "pending" as const,
+      contractDecision: "pending" as const,
+      outputBytes: 0 as const,
+      touchedFiles: [] as string[],
+      latencyMs: null,
+      errorClass: "pending" as const,
+      budgetEvidence,
+      estimatedCostUsd: null,
+    })),
+  };
+  const fanInPlan = {
+    artifactPath: fanInArtifactPath,
+    expectedRunIds: canaries.map((canary) => canary.runId),
+    requiredOutcomePackets: canaries.map((canary) => `agent_run_outcome_packet:${canary.runId}`),
+    passCriteria: fanInValidation,
+    failClosedOn: suiteStopOn,
+  };
   const suiteManifest = {
     mode: "report-only-suite" as const,
     suiteId: arenaId,
@@ -431,6 +481,8 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     },
     canaries,
     scorecardSchema,
+    scorecardTemplate,
+    fanInPlan,
     suiteManifest,
     budgetContract,
     promotionContract,
@@ -442,7 +494,7 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
         "collect prior-art references before treating arena design choices as mature",
         "review the report-only suite manifest before any real model call",
         "run canaries serially with exact one-run confirmations; this packet itself cannot dispatch",
-        "record scorecard rows per provider/model/envelope before promotion",
+        "record scorecard/fan-in artifacts before promotion",
       ]
       : [
         "resolve arena packet blockers before any provider/model canary spend",

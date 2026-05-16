@@ -24127,8 +24127,8 @@
         "Parallel/batch mode remains disabled until separate evidence supports it."
       ],
       "milestone": "worker-arena",
-      "notes": "Related to TASK-BUD-1076. Created from operator steering: arena should mature into a controlled experiment harness that can evaluate provider/model capabilities with less manual serial work, eventually enabling safer worker batches/swarms.\n2026-05-15: First implementation slice landed locally: existing arena packet now emits a report-only suiteManifest with suite budget, serial parallelism=1, stopOn conditions, run ids, per-envelope validation, and fan-in validation. Serial-suite dispatcher remains intentionally blocked/not implemented. Evidence: VERIF-TASK-BUD-1079-REPORT-ONLY-SUITE-MANIFEST-20260515.",
-      "verification": "VERIF-TASK-BUD-1079-LIVE-EXPANDED-ARENA-PREVIEW-20260515"
+      "notes": "Related to TASK-BUD-1076. Created from operator steering: arena should mature into a controlled experiment harness that can evaluate provider/model capabilities with less manual serial work, eventually enabling safer worker batches/swarms.\n2026-05-15: First implementation slice landed locally: existing arena packet now emits a report-only suiteManifest with suite budget, serial parallelism=1, stopOn conditions, run ids, per-envelope validation, and fan-in validation. Serial-suite dispatcher remains intentionally blocked/not implemented. Evidence: VERIF-TASK-BUD-1079-REPORT-ONLY-SUITE-MANIFEST-20260515.\n2026-05-15: Added report-only scorecardTemplate and fanInPlan to arena packet. This gives the suite a persistent artifact shape/path and fan-in checklist without writing files or dispatching workers. Evidence: VERIF-TASK-BUD-1079-SCORECARD-FANIN-TEMPLATE-20260515.",
+      "verification": "VERIF-TASK-BUD-1079-SCORECARD-FANIN-TEMPLATE-20260515"
     },
     {
       "id": "TASK-BUD-1080",
@@ -24186,7 +24186,7 @@
       ],
       "milestone": "worker-arena",
       "notes": "Created from user steering: generic envelopes should not stay read-only-only. Keep expansion cautious: read-only is easy to batch; mutation requires touched-file validation, rollback, and exact confirmation.\nRationale for completion: report-only registry expansion only; no worker dispatch or protected mutation.\n[rationale:risk-control] Initial non-readonly arena expansion is safe to close because it only adds report-only registry entries and smoke coverage. It does not dispatch workers, broaden mutation beyond one declared file, alter protected scopes, or promote multi-file mutation. Future live mutation runs …\nCompleted initial non-readonly generic envelope expansion. This does not dispatch workers or promote multi-file/protected mutation; it only expands the report-only arena registry and suite manifest.",
-      "verification": "VERIF-TASK-BUD-1083-NONREADONLY-ARENA-ENVELOPES-20260515"
+      "verification": "VERIF-TASK-BUD-1083-LIVE-MUTATION-ENVELOPES-PREVIEW-20260515"
     }
   ]
 }
