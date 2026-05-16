@@ -24271,6 +24271,28 @@
       ],
       "milestone": "supply-chain-hardening",
       "notes": "Created as local-safe child slice of TASK-BUD-1078 so the promoted Codex Spark worker lane can help immediately without touching protected CI/publish scopes."
+    },
+    {
+      "id": "TASK-BUD-1088",
+      "description": "Implement exact-confirmed Codex Spark read-only batch/fan-out runner with fan-in outcome aggregation, so promoted workers can run in parallel safely instead of serially.",
+      "status": "planned",
+      "priority": "p0",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-surface-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Start from the existing ready read-only batch packet contract; do not dispatch unless exact batch confirmation matches.",
+        "Limit first runner to promoted Codex Spark read-only workers only, max 2-5 workers, read/grep tools, declared files, bounded timeout, abort/event/final-output contracts.",
+        "Register per-worker run ids/logs/status and expose bounded status/log/abort/follow surfaces before execution.",
+        "Fan-in must fail closed on missing output, touched files, protected scope, dirty state, budget blockers, or any worker contract failure.",
+        "No mutation, CI/publish/settings/routing changes, autonomous web research, or swarm recursion in this first batch runner.",
+        "Record aggregate verification evidence listing worker run ids and outcome decisions before using results for board closure."
+      ],
+      "milestone": "worker-lane",
+      "notes": "Created from user steering: stop treating serial worker canaries as the goal; evolve toward safe parallelism and colony-style effect with Codex Spark promoted envelopes."
     }
   ]
 }
