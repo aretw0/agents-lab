@@ -16487,6 +16487,15 @@
       "method": "local-smoke+project-validate",
       "timestamp": "2026-05-16T03:08:59.228Z",
       "evidence": "Added serialSuiteDispatchPlan to buildAgentRunSdkProviderModelArenaPacket. It is preview-only: mode=exact-confirmed-serial-suite-preview, dispatchAllowed=false, executeSupported=false, exact future humanConfirmationPhrase, deterministic runOrder, preflightChecks, and blockedUntil conditions. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed. This does not implement or authorize a serial-suite executor."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1079-SUITE-ARTIFACT-PLAN-20260516",
+      "target": "TASK-BUD-1079",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke+project-validate",
+      "timestamp": "2026-05-16T12:36:31.813Z",
+      "evidence": "Added suiteArtifactPlan to buildAgentRunSdkProviderModelArenaPacket. It is report-only: mode=report-only-artifact-write-preview, writeAllowed=false, applySupported=false, with deterministic suite-manifest, scorecard-template, and fanin-plan artifact paths plus operator steps. The plan explicitly says artifact persistence must not start workers and rows remain scoped to provider/model/envelope so future models prove capabilities independently. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed."
     }
   ]
 }

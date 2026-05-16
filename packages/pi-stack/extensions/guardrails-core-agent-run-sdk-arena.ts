@@ -115,6 +115,18 @@ export interface AgentRunSdkProviderModelArenaPacketResult {
     preflightChecks: string[];
     blockedUntil: string[];
   };
+  suiteArtifactPlan: {
+    mode: "report-only-artifact-write-preview";
+    writeAllowed: false;
+    applySupported: false;
+    artifacts: Array<{
+      kind: "suite-manifest" | "scorecard-template" | "fanin-plan";
+      path: string;
+      sourceField: "suiteManifest" | "scorecardTemplate" | "fanInPlan";
+      requiredBeforePromotion: boolean;
+    }>;
+    operatorSteps: string[];
+  };
   suiteManifest: {
     mode: "report-only-suite";
     suiteId: string;
@@ -460,6 +472,37 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
       protectedScope: canary.protectedScope,
     })),
   };
+  const suiteArtifactPlan = {
+    mode: "report-only-artifact-write-preview" as const,
+    writeAllowed: false as const,
+    applySupported: false as const,
+    artifacts: [
+      {
+        kind: "suite-manifest" as const,
+        path: `.pi/reports/${arenaId || "arena"}.manifest.json`,
+        sourceField: "suiteManifest" as const,
+        requiredBeforePromotion: true,
+      },
+      {
+        kind: "scorecard-template" as const,
+        path: scorecardArtifactPath,
+        sourceField: "scorecardTemplate" as const,
+        requiredBeforePromotion: true,
+      },
+      {
+        kind: "fanin-plan" as const,
+        path: fanInArtifactPath,
+        sourceField: "fanInPlan" as const,
+        requiredBeforePromotion: true,
+      },
+    ],
+    operatorSteps: [
+      "review suiteManifest, scorecardTemplate, and fanInPlan before writing artifacts",
+      "persist artifacts only through a separate exact-confirmed artifact writer or manual operator action",
+      "do not start workers as part of artifact persistence",
+      "keep artifact rows scoped to provider/model/envelope so future models prove capabilities independently",
+    ],
+  };
   const budgetContract = [
     "arena packet is report-only and never starts paid/model calls by itself",
     "each real run requires exact one-run confirmation plus the arena budget fields",
@@ -512,6 +555,7 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     scorecardTemplate,
     fanInPlan,
     serialSuiteDispatchPlan,
+    suiteArtifactPlan,
     suiteManifest,
     budgetContract,
     promotionContract,
@@ -523,6 +567,7 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
         "collect prior-art references before treating arena design choices as mature",
         "review the report-only suite manifest before any real model call",
         "use serialSuiteDispatchPlan only as a preview; this packet itself cannot dispatch",
+        "review suiteArtifactPlan before persisting suite artifacts; this packet itself cannot write files",
         "run canaries serially with exact one-run confirmations until a serial-suite executor exists",
         "record scorecard/fan-in artifacts before promotion",
       ]

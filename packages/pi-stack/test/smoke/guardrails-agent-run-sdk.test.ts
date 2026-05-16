@@ -378,7 +378,35 @@ describe("agent run SDK packet surfaces", () => {
     });
     expect(mutationArenaPacket.serialSuiteDispatchPlan.preflightChecks.join("\n")).toContain("operator confirmation exactly matches");
     expect(mutationArenaPacket.serialSuiteDispatchPlan.blockedUntil.join("\n")).toContain("serial-suite executor exists");
+    expect(mutationArenaPacket.suiteArtifactPlan).toMatchObject({
+      mode: "report-only-artifact-write-preview",
+      writeAllowed: false,
+      applySupported: false,
+      artifacts: [
+        {
+          kind: "suite-manifest",
+          path: ".pi/reports/arena-mutation-openai-spark-smoke.manifest.json",
+          sourceField: "suiteManifest",
+          requiredBeforePromotion: true,
+        },
+        {
+          kind: "scorecard-template",
+          path: ".pi/reports/arena-mutation-openai-spark-smoke.scorecard.json",
+          sourceField: "scorecardTemplate",
+          requiredBeforePromotion: true,
+        },
+        {
+          kind: "fanin-plan",
+          path: ".pi/reports/arena-mutation-openai-spark-smoke.fanin.json",
+          sourceField: "fanInPlan",
+          requiredBeforePromotion: true,
+        },
+      ],
+    });
+    expect(mutationArenaPacket.suiteArtifactPlan.operatorSteps.join("\n")).toContain("do not start workers");
+    expect(mutationArenaPacket.suiteArtifactPlan.operatorSteps.join("\n")).toContain("future models prove capabilities independently");
     expect(mutationArenaPacket.nextActions.join("\n")).toContain("serialSuiteDispatchPlan only as a preview");
+    expect(mutationArenaPacket.nextActions.join("\n")).toContain("suiteArtifactPlan before persisting");
     expect(mutationArenaPacket.promotionContract.join("\n")).toContain("does not promote multi-file mutation");
 
     const arenaBlocked = buildAgentRunSdkProviderModelArenaPacket({
