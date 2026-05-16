@@ -282,11 +282,64 @@ export interface AgentRunTaskStartPacketResult {
   summary: string;
 }
 
+export type CodexSparkPromotedEnvelope =
+  | "readonly-one-file"
+  | "readonly-two-file-synthesis"
+  | "readonly-one-symbol-review"
+  | "failure-contract"
+  | "readonly-three-file-inventory"
+  | "readonly-ci-cache-risk-scan"
+  | "readonly-monitor-fragility-hardening-scan"
+  | "readonly-declared-evidence-synthesis"
+  | "readonly-source-backed-evidence-synthesis"
+  | "mutation-one-file-marker";
+
+export interface CodexSparkPromotedWorkerPacketInput extends AgentRunTaskStartPacketInput {
+  envelope?: CodexSparkPromotedEnvelope | string;
+}
+
+export interface CodexSparkPromotedWorkerPacketResult {
+  mode: "codex-spark-promoted-worker-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  processStopAllowed: false;
+  requiresHumanDecision: true;
+  singleRunOnly: true;
+  providerModelRef: "openai-codex/gpt-5.3-codex-spark";
+  envelope: string;
+  promotion: "promoted" | "blocked";
+  decision: AgentRunStartDecision;
+  recommendationCode: AgentRunTaskStartPacketResult["recommendationCode"] | "codex-spark-promoted-worker-blocked-envelope";
+  blockers: string[];
+  promotedEnvelopes: CodexSparkPromotedEnvelope[];
+  taskStartPacket: AgentRunTaskStartPacketResult;
+  naturalUseContract: string[];
+  stillBlocked: string[];
+  humanConfirmationPhrase: string;
+  nextActions: string[];
+  summary: string;
+}
+
 const AGENT_RUN_START_TIMEOUT_MIN_MS = 5_000;
 const AGENT_RUN_START_TIMEOUT_MAX_MS = 180_000;
 const READ_ONLY_TOOL_ALLOWLIST = ["read", "grep", "find", "ls"];
 const MUTATION_TOOL_ALLOWLIST = [...READ_ONLY_TOOL_ALLOWLIST, "edit", "write"];
 const SUPPORTED_AGENT_RUN_TOOL_ALLOWLIST = [...MUTATION_TOOL_ALLOWLIST];
+const CODEX_SPARK_PROVIDER_MODEL_REF = "openai-codex/gpt-5.3-codex-spark" as const;
+const CODEX_SPARK_PROMOTED_ENVELOPES: CodexSparkPromotedEnvelope[] = [
+  "readonly-one-file",
+  "readonly-two-file-synthesis",
+  "readonly-one-symbol-review",
+  "failure-contract",
+  "readonly-three-file-inventory",
+  "readonly-ci-cache-risk-scan",
+  "readonly-monitor-fragility-hardening-scan",
+  "readonly-declared-evidence-synthesis",
+  "readonly-source-backed-evidence-synthesis",
+  "mutation-one-file-marker",
+];
 
 function normalizeText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -847,6 +900,15 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
   };
 }
 
+function normalizeCodexSparkPromotedEnvelope(value: unknown): CodexSparkPromotedEnvelope | "unknown" {
+  const text = normalizeText(value) || "readonly-one-file";
+  return CODEX_SPARK_PROMOTED_ENVELOPES.includes(text as CodexSparkPromotedEnvelope) ? text as CodexSparkPromotedEnvelope : "unknown";
+}
+
+function inferPromotedEnvelopeProfile(envelope: string): AgentInvocationProfile {
+  return envelope.startsWith("mutation-") ? "small-mutation" : "read-only-review";
+}
+
 export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput = {}): AgentRunTaskStartPacketResult {
   const taskPacket = buildAgentRunTaskPacket(input);
   const spec = taskPacket.invocationSpec;
@@ -926,6 +988,82 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
       `registry=${registryPreview.decision}`,
       `statusFound=${statusPreview.found ? "yes" : "no"}`,
       `budget=${spec.budgetDecision}`,
+      "dispatch=no",
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+    ].filter(Boolean).join(" "),
+  };
+}
+
+export function buildCodexSparkPromotedWorkerPacket(input: CodexSparkPromotedWorkerPacketInput = {}): CodexSparkPromotedWorkerPacketResult {
+  const requestedEnvelope = normalizeText(input.envelope) || "readonly-one-file";
+  const promotedEnvelope = normalizeCodexSparkPromotedEnvelope(requestedEnvelope);
+  const envelope = promotedEnvelope === "unknown" ? requestedEnvelope : promotedEnvelope;
+  const taskStartPacket = buildAgentRunTaskStartPacket({
+    ...input,
+    purpose: input.purpose || `codex-spark-${envelope}`,
+    profile: input.profile || inferPromotedEnvelopeProfile(envelope),
+    providerModelRef: CODEX_SPARK_PROVIDER_MODEL_REF,
+    budgetDecision: input.budgetDecision || "warn",
+    budgetEvidence: input.budgetEvidence || `Codex Spark promoted worker lane: envelope ${envelope} has arena evidence for bounded use; exact human confirmation is still required before dispatch.`,
+    budgetEvidenceSource: input.budgetEvidenceSource || "manual",
+    budgetEvidenceProvider: CODEX_SPARK_PROVIDER_MODEL_REF,
+    economyMode: input.economyMode || "critical",
+    tokenBudgetEvidence: input.tokenBudgetEvidence || input.budgetEvidence || "Codex Spark promoted lane; conserve output and stay within declared files.",
+    maxOutputLines: input.maxOutputLines ?? 20,
+  });
+  const blockers = [...taskStartPacket.blockers];
+  let recommendationCode: CodexSparkPromotedWorkerPacketResult["recommendationCode"] = taskStartPacket.recommendationCode;
+  if (promotedEnvelope === "unknown") {
+    blockers.push("codex-spark-envelope-not-promoted");
+    recommendationCode = "codex-spark-promoted-worker-blocked-envelope";
+  }
+  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const promotion = promotedEnvelope === "unknown" ? "blocked" : "promoted";
+
+  return {
+    mode: "codex-spark-promoted-worker-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    requiresHumanDecision: true,
+    singleRunOnly: true,
+    providerModelRef: CODEX_SPARK_PROVIDER_MODEL_REF,
+    envelope,
+    promotion,
+    decision,
+    recommendationCode,
+    blockers,
+    promotedEnvelopes: [...CODEX_SPARK_PROMOTED_ENVELOPES],
+    taskStartPacket,
+    naturalUseContract: [
+      "use Codex Spark by default for promoted local-safe envelopes instead of rebuilding arena packets manually",
+      "keep dispatch exact-confirmed and single-run only",
+      "keep declared files, bounded timeout, rollback, and parent-side outcome validation",
+      "record outcome evidence before expanding the envelope or closing the task",
+    ],
+    stillBlocked: [
+      "protected-scope mutation without explicit authorization",
+      "multi-file mutation beyond declared files",
+      "autonomous web research",
+      "swarm/fan-out or unbounded retry loops",
+      "settings/routing/default-provider changes",
+    ],
+    humanConfirmationPhrase: taskStartPacket.humanConfirmationPhrase,
+    nextActions: decision === "ready-for-human-decision"
+      ? [
+          "use this promoted packet instead of an arena canary for the next bounded Codex Spark worker",
+          "ask for the exact human confirmation phrase before dispatch",
+          "after execution, evaluate the outcome packet and append board evidence",
+        ]
+      : ["resolve promoted-worker blockers before any dispatch"],
+    summary: [
+      "codex-spark-promoted-worker-packet:",
+      `decision=${decision}`,
+      `envelope=${envelope || "unknown"}`,
+      `promotion=${promotion}`,
+      `task=${taskStartPacket.taskPacket.task.id || "unknown"}`,
       "dispatch=no",
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),

@@ -10,7 +10,7 @@ import { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run
 import { registerAgentRunSdkProviderModelArenaTool } from "./guardrails-core-agent-run-sdk-arena-surface";
 import { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkReadOnlyBatchPacket } from "./guardrails-core-agent-run-sdk-preview";
 import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult } from "./guardrails-core-agent-run-runtime";
-import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket } from "./guardrails-core-agent-run-start";
+import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildCodexSparkPromotedWorkerPacket } from "./guardrails-core-agent-run-start";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 import { readTasksBlockCached } from "./project-board-model";
 import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
@@ -397,6 +397,76 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_task_start_packet",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_codex_spark_promoted_worker_packet",
+    label: "Codex Spark Promoted Worker Packet",
+    description: "Report-only natural-use packet for Codex Spark envelopes already promoted by arena evidence. Defaults provider/model, budget posture, economy, registry/start/status/log/abort/outcome previews, and exact confirmation phrase. Never dispatches execution.",
+    parameters: Type.Object({
+      task_id: Type.String({ description: "Board task id to packetize for a promoted Codex Spark worker." }),
+      envelope: Type.Optional(Type.String({ description: "Arena-promoted envelope, e.g. readonly-one-file, readonly-three-file-inventory, readonly-source-backed-evidence-synthesis, mutation-one-file-marker." })),
+      purpose: Type.Optional(Type.String({ description: "Short purpose slug/label for the run id. Defaults from the envelope." })),
+      cwd: Type.Optional(Type.String({ description: "Worker cwd. Defaults to current workspace cwd." })),
+      timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds; defaults to existing task packet defaults." })),
+      budget_decision: Type.Optional(Type.String({ description: "Optional provider/model budget decision override. Defaults to warn for manual promoted-lane use." })),
+      budget_evidence: Type.Optional(Type.String({ description: "Optional scoped provider/model budget evidence override." })),
+      budget_evidence_source: Type.Optional(Type.String({ description: "Budget evidence source. Defaults to manual." })),
+      budget_evidence_generated_at_iso: Type.Optional(Type.String({ description: "ISO timestamp for structured budget evidence freshness checks." })),
+      budget_evidence_max_age_ms: Type.Optional(Type.Number({ description: "Optional max age for structured budget evidence freshness." })),
+      token_budget_evidence: Type.Optional(Type.String({ description: "Short quota/economy evidence for the worker prompt." })),
+      max_output_lines: Type.Optional(Type.Number({ description: "Bounded worker output line target. Defaults to 20." })),
+      extension_isolation: Type.Optional(Type.String({ description: "Extension isolation mode: minimal-no-extensions or inherit." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const taskId = typeof p.task_id === "string" ? p.task_id : "";
+      const cwd = resolveExecutionCwdParam(p.cwd, ctx.cwd);
+      const { block } = readTasksBlockCached(cwd);
+      const task = block.tasks.find((row) => row.id === taskId);
+      const basePacket = buildCodexSparkPromotedWorkerPacket({
+        taskId,
+        task,
+        envelope: typeof p.envelope === "string" ? p.envelope : undefined,
+        purpose: typeof p.purpose === "string" ? p.purpose : undefined,
+        cwd,
+        timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
+        budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
+        budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
+        budgetEvidenceSource: typeof p.budget_evidence_source === "string" ? p.budget_evidence_source : undefined,
+        budgetEvidenceGeneratedAtIso: typeof p.budget_evidence_generated_at_iso === "string" ? p.budget_evidence_generated_at_iso : undefined,
+        budgetEvidenceMaxAgeMs: typeof p.budget_evidence_max_age_ms === "number" ? p.budget_evidence_max_age_ms : undefined,
+        tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
+        maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
+        extensionIsolation: typeof p.extension_isolation === "string" ? p.extension_isolation : undefined,
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+      });
+      const existingEntry = readRegistryEntry(ctx.cwd, basePacket.taskStartPacket.taskPacket.invocationSpec.runId);
+      const result = buildCodexSparkPromotedWorkerPacket({
+        taskId,
+        task,
+        existingEntry,
+        envelope: typeof p.envelope === "string" ? p.envelope : undefined,
+        purpose: typeof p.purpose === "string" ? p.purpose : undefined,
+        cwd,
+        timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
+        budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
+        budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
+        budgetEvidenceSource: typeof p.budget_evidence_source === "string" ? p.budget_evidence_source : undefined,
+        budgetEvidenceGeneratedAtIso: typeof p.budget_evidence_generated_at_iso === "string" ? p.budget_evidence_generated_at_iso : undefined,
+        budgetEvidenceMaxAgeMs: typeof p.budget_evidence_max_age_ms === "number" ? p.budget_evidence_max_age_ms : undefined,
+        tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
+        maxOutputLines: typeof p.max_output_lines === "number" ? p.max_output_lines : undefined,
+        extensionIsolation: typeof p.extension_isolation === "string" ? p.extension_isolation : undefined,
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_codex_spark_promoted_worker_packet",
         summary: result.summary,
         details: result,
       });
