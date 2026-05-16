@@ -1,7 +1,8 @@
 import { type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildAgentRunSdkReadOnlyBatchPacket, type AgentRunSdkReadOnlyBatchPacketInput } from "./guardrails-core-agent-run-sdk-preview";
-import { readRegistryEntry, startSdkInProcessWorker } from "./guardrails-core-agent-run-surface-runtime";
+import { buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
+import { readLogTail, readRegistryEntry, startSdkInProcessWorker } from "./guardrails-core-agent-run-surface-runtime";
 import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
@@ -158,6 +159,79 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
       };
       return buildOperatorVisibleToolResponse({
         label: "agent_run_sdk_readonly_batch_dispatch",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_sdk_readonly_batch_status",
+    label: "Agent Run SDK Read-Only Batch Status",
+    description: "Read-only aggregate status/log-tail view for SDK read-only batch workers. Reuses the shared agent-run registry and per-worker logs; never starts or stops workers.",
+    parameters: Type.Object({
+      batch_id: Type.Optional(Type.String({ description: "Batch id for display only." })),
+      run_ids: Type.Optional(Type.Array(Type.String(), { description: "Worker run ids to aggregate." })),
+      max_lines: Type.Optional(Type.Number({ description: "Maximum log tail lines per worker, clamped to 0..80." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const batchId = typeof p.batch_id === "string" ? p.batch_id : "";
+      const runIds = Array.isArray(p.run_ids) ? p.run_ids.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0) : [];
+      const maxLinesInput = typeof p.max_lines === "number" && Number.isFinite(p.max_lines) ? Math.trunc(p.max_lines) : 20;
+      const maxLines = Math.max(0, Math.min(80, maxLinesInput));
+      const blockers = runIds.length === 0 ? ["run-ids-missing"] : [];
+      const rows = runIds.map((runId) => {
+        const entry = readRegistryEntry(ctx.cwd, runId);
+        const status = buildAgentRunStatus(runId, entry);
+        const logTail = entry?.logPath && maxLines > 0 ? readLogTail(entry.logPath, maxLines) : [];
+        return {
+          runId,
+          status,
+          logPath: entry?.logPath,
+          logTail,
+        };
+      });
+      const terminalStates = new Set(["completed", "failed", "timed-out", "aborted"]);
+      const runningCount = rows.filter((row) => row.status.state === "running").length;
+      const terminalCount = rows.filter((row) => terminalStates.has(row.status.state)).length;
+      const missingCount = rows.filter((row) => !row.status.found).length;
+      const staleCount = rows.filter((row) => row.status.stale).length;
+      const decision = blockers.length > 0 ? "blocked" : "ready";
+      const result = {
+        mode: "agent-run-sdk-readonly-batch-status" as const,
+        activation: "none" as const,
+        authorization: "none" as const,
+        dispatchAllowed: false,
+        processStartAllowed: false,
+        processStopAllowed: false,
+        decision,
+        blockers,
+        batchId,
+        runCount: runIds.length,
+        runningCount,
+        terminalCount,
+        missingCount,
+        staleCount,
+        rows,
+        fanInReady: runIds.length > 0 && missingCount === 0 && terminalCount === runIds.length,
+        summary: [
+          "agent-run-sdk-readonly-batch-status:",
+          `decision=${decision}`,
+          batchId ? `batchId=${batchId}` : undefined,
+          `runs=${runIds.length}`,
+          `running=${runningCount}`,
+          `terminal=${terminalCount}`,
+          missingCount > 0 ? `missing=${missingCount}` : undefined,
+          staleCount > 0 ? `stale=${staleCount}` : undefined,
+          `fanInReady=${runIds.length > 0 && missingCount === 0 && terminalCount === runIds.length ? "yes" : "no"}`,
+          "dispatch=no",
+          "authorization=none",
+          blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+        ].filter(Boolean).join(" "),
+      };
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_sdk_readonly_batch_status",
         summary: result.summary,
         details: result,
       });
