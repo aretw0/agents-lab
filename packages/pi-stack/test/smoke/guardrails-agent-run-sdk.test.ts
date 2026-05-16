@@ -365,6 +365,20 @@ describe("agent run SDK packet surfaces", () => {
     });
     expect(mutationArenaPacket.fanInPlan.requiredOutcomePackets[0]).toContain("agent_run_outcome_packet");
     expect(mutationArenaPacket.fanInPlan.failClosedOn).toContain("contract-failure");
+    expect(mutationArenaPacket.serialSuiteDispatchPlan).toMatchObject({
+      mode: "exact-confirmed-serial-suite-preview",
+      dispatchAllowed: false,
+      executeSupported: false,
+      humanConfirmationPhrase: "execute arena serial suite arena-mutation-openai-spark-smoke",
+      runOrder: [
+        "arena-mutation-openai-spark-smoke-mutation-one-file-doc-marker",
+        "arena-mutation-openai-spark-smoke-mutation-one-file-test-fixture",
+        "arena-mutation-openai-spark-smoke-mutation-one-file-code-constant",
+      ],
+    });
+    expect(mutationArenaPacket.serialSuiteDispatchPlan.preflightChecks.join("\n")).toContain("operator confirmation exactly matches");
+    expect(mutationArenaPacket.serialSuiteDispatchPlan.blockedUntil.join("\n")).toContain("serial-suite executor exists");
+    expect(mutationArenaPacket.nextActions.join("\n")).toContain("serialSuiteDispatchPlan only as a preview");
     expect(mutationArenaPacket.promotionContract.join("\n")).toContain("does not promote multi-file mutation");
 
     const arenaBlocked = buildAgentRunSdkProviderModelArenaPacket({

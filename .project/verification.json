@@ -16469,6 +16469,24 @@
       "method": "local-smoke+project-validate",
       "timestamp": "2026-05-16T02:40:30.606Z",
       "evidence": "Added report-only scorecardTemplate and fanInPlan to buildAgentRunSdkProviderModelArenaPacket. scorecardTemplate includes artifactPath, requiredFields, and one pending row per suite run with providerModelRef, envelope, runId, processState, contractDecision, outputBytes, touchedFiles, latencyMs, errorClass, budgetEvidence, and estimatedCostUsd. fanInPlan includes artifactPath, expectedRunIds, requiredOutcomePackets, passCriteria, and failClosedOn stop conditions. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed. No artifact write or dispatch is performed by this packet."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1079-LIVE-SCORECARD-FANIN-PREVIEW-20260515",
+      "target": "TASK-BUD-1079",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-report-only-tool-preview-after-reload",
+      "timestamp": "2026-05-16T03:08:59.074Z",
+      "evidence": "After user completed /reload, live agent_run_sdk_provider_model_arena_packet returned ready-for-human-decision for arena-scorecard-openai-spark-live-preview with readonly-three-file-risk-table plus mutation-one-file-doc-marker, maxCalls=2, paidCalls=no, dispatch=no. Confirms runtime has the scorecard/fan-in arena packet slice loaded. No worker dispatch occurred."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1079-SERIAL-SUITE-DISPATCH-PREVIEW-20260516",
+      "target": "TASK-BUD-1079",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke+project-validate",
+      "timestamp": "2026-05-16T03:08:59.228Z",
+      "evidence": "Added serialSuiteDispatchPlan to buildAgentRunSdkProviderModelArenaPacket. It is preview-only: mode=exact-confirmed-serial-suite-preview, dispatchAllowed=false, executeSupported=false, exact future humanConfirmationPhrase, deterministic runOrder, preflightChecks, and blockedUntil conditions. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed. This does not implement or authorize a serial-suite executor."
     }
   ]
 }

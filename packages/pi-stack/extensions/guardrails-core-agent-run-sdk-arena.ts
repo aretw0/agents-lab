@@ -106,6 +106,15 @@ export interface AgentRunSdkProviderModelArenaPacketResult {
     passCriteria: string[];
     failClosedOn: string[];
   };
+  serialSuiteDispatchPlan: {
+    mode: "exact-confirmed-serial-suite-preview";
+    dispatchAllowed: false;
+    executeSupported: false;
+    humanConfirmationPhrase: string;
+    runOrder: string[];
+    preflightChecks: string[];
+    blockedUntil: string[];
+  };
   suiteManifest: {
     mode: "report-only-suite";
     suiteId: string;
@@ -406,6 +415,25 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     passCriteria: fanInValidation,
     failClosedOn: suiteStopOn,
   };
+  const serialSuiteDispatchPlan = {
+    mode: "exact-confirmed-serial-suite-preview" as const,
+    dispatchAllowed: false as const,
+    executeSupported: false as const,
+    humanConfirmationPhrase: arenaId ? `execute arena serial suite ${arenaId}` : "",
+    runOrder: canaries.map((canary) => canary.runId),
+    preflightChecks: [
+      "arena packet decision is ready-for-human-decision",
+      "workspace dirty state matches the declared suite scope",
+      "provider/model budget evidence is fresh and scoped",
+      "operator confirmation exactly matches the suite phrase",
+      "parent-side validation and rollback are known for every envelope",
+    ],
+    blockedUntil: [
+      "first-party serial-suite executor exists and is tested",
+      "scorecard/fan-in artifacts are persisted intentionally",
+      "stop-on failure behavior is validated in a local smoke",
+    ],
+  };
   const suiteManifest = {
     mode: "report-only-suite" as const,
     suiteId: arenaId,
@@ -483,6 +511,7 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     scorecardSchema,
     scorecardTemplate,
     fanInPlan,
+    serialSuiteDispatchPlan,
     suiteManifest,
     budgetContract,
     promotionContract,
@@ -493,7 +522,8 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
         "review this arena packet and budget before any real model call",
         "collect prior-art references before treating arena design choices as mature",
         "review the report-only suite manifest before any real model call",
-        "run canaries serially with exact one-run confirmations; this packet itself cannot dispatch",
+        "use serialSuiteDispatchPlan only as a preview; this packet itself cannot dispatch",
+        "run canaries serially with exact one-run confirmations until a serial-suite executor exists",
         "record scorecard/fan-in artifacts before promotion",
       ]
       : [
