@@ -24250,6 +24250,27 @@
       "milestone": "worker-lane",
       "notes": "Created from user steering: arena must unlock practical agency with Codex Spark, not only produce control-plane artifacts. Related to TASK-BUD-1076/TASK-BUD-1079; dependency omitted because board gate classified direct coupling as protected.\n2026-05-16: Implemented the first Codex Spark promoted worker packet and surface. This is the practical bridge from arena evidence to natural worker usage: provider/model defaults, promoted envelope gate, exact-confirmed dispatch, outcome previews, and explicit still-blocked list. Evidence: VERIF-TASK-BUD-1086-CODEX-SPARK-PROMOTED-WORKER-PACKET-20260516.\n[rationale:risk-control] Promoting proven Codex Spark envelopes reduces control-plane manual work while retaining bounded controls: declared files, exact confirmation, budget/economy posture, rollback/outcome previews, and blocked-scope visibility.",
       "verification": "VERIF-TASK-BUD-1086-CODEX-SPARK-PROMOTED-WORKER-PACKET-20260516"
+    },
+    {
+      "id": "TASK-BUD-1087",
+      "description": "Read-only Codex Spark supply-chain intake over non-protected package-manager files and curated source-backed evidence before any pnpm/CI/publish mutation.",
+      "status": "planned",
+      "priority": "p0",
+      "files": [
+        "package.json",
+        "package-lock.json",
+        "pnpm-workspace.yaml",
+        "docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Use Codex Spark promoted read-only/source-backed synthesis envelope; no file mutation and no install/package-manager commands.",
+        "Inventory current package-manager state from declared files only: packageManager field, lockfiles, workspace config, npm/npx script hints if visible.",
+        "Synthesize ADOPT/ADAPT/REJECT/PARENT-CHECK recommendations from the curated pnpm supply-chain evidence packet and declared local files.",
+        "Explicitly separate local-safe package-file observations from still-protected CI/publish/cache/release follow-up.",
+        "Return concise PASS/FAIL with blockers and suggested next parent-side validation steps."
+      ],
+      "milestone": "supply-chain-hardening",
+      "notes": "Created as local-safe child slice of TASK-BUD-1078 so the promoted Codex Spark worker lane can help immediately without touching protected CI/publish scopes."
     }
   ]
 }
