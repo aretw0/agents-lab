@@ -24127,8 +24127,8 @@
         "Parallel/batch mode remains disabled until separate evidence supports it."
       ],
       "milestone": "worker-arena",
-      "notes": "Related to TASK-BUD-1076. Created from operator steering: arena should mature into a controlled experiment harness that can evaluate provider/model capabilities with less manual serial work, eventually enabling safer worker batches/swarms.\n2026-05-15: First implementation slice landed locally: existing arena packet now emits a report-only suiteManifest with suite budget, serial parallelism=1, stopOn conditions, run ids, per-envelope validation, and fan-in validation. Serial-suite dispatcher remains intentionally blocked/not implemented. Evidence: VERIF-TASK-BUD-1079-REPORT-ONLY-SUITE-MANIFEST-20260515.\n2026-05-15: Added report-only scorecardTemplate and fanInPlan to arena packet. This gives the suite a persistent artifact shape/path and fan-in checklist without writing files or dispatching workers. Evidence: VERIF-TASK-BUD-1079-SCORECARD-FANIN-TEMPLATE-20260515.\n2026-05-16: Added serialSuiteDispatchPlan preview. It exposes exact future confirmation phrase, run order, preflight checks, and blockedUntil conditions while keeping dispatchAllowed=false/executeSupported=false. Evidence: VERIF-TASK-BUD-1079-SERIAL-SUITE-DISPATCH-PREVIEW-20260516.\n2026-05-16: Added suiteArtifactPlan preview. It declares deterministic manifest/scorecard/fan-in artifact paths and operator steps while keeping writeAllowed=false/applySupported=false; no worker dispatch or file write is authorized by the packet. Evidence: VERIF-TASK-BUD-1079-SUITE-ARTIFACT-PLAN-20260516.\n2026-05-16: Added report-only arena artifact packet and tool surface. It previews manifest/scorecard/fan-in artifact payloads and bytes, but does not write files or start workers; apply=true is blocked until a real exact-confirmed writer exists. Evidence: VERIF-TASK-BUD-1079-ARTIFACT-PACKET-PREVIEW-20260516.",
-      "verification": "VERIF-TASK-BUD-1079-ARTIFACT-PACKET-PREVIEW-20260516"
+      "notes": "Related to TASK-BUD-1076. Created from operator steering: arena should mature into a controlled experiment harness that can evaluate provider/model capabilities with less manual serial work, eventually enabling safer worker batches/swarms.\n2026-05-15: First implementation slice landed locally: existing arena packet now emits a report-only suiteManifest with suite budget, serial parallelism=1, stopOn conditions, run ids, per-envelope validation, and fan-in validation. Serial-suite dispatcher remains intentionally blocked/not implemented. Evidence: VERIF-TASK-BUD-1079-REPORT-ONLY-SUITE-MANIFEST-20260515.\n2026-05-15: Added report-only scorecardTemplate and fanInPlan to arena packet. This gives the suite a persistent artifact shape/path and fan-in checklist without writing files or dispatching workers. Evidence: VERIF-TASK-BUD-1079-SCORECARD-FANIN-TEMPLATE-20260515.\n2026-05-16: Added serialSuiteDispatchPlan preview. It exposes exact future confirmation phrase, run order, preflight checks, and blockedUntil conditions while keeping dispatchAllowed=false/executeSupported=false. Evidence: VERIF-TASK-BUD-1079-SERIAL-SUITE-DISPATCH-PREVIEW-20260516.\n2026-05-16: Added suiteArtifactPlan preview. It declares deterministic manifest/scorecard/fan-in artifact paths and operator steps while keeping writeAllowed=false/applySupported=false; no worker dispatch or file write is authorized by the packet. Evidence: VERIF-TASK-BUD-1079-SUITE-ARTIFACT-PLAN-20260516.\n2026-05-16: Added report-only arena artifact packet and tool surface. It previews manifest/scorecard/fan-in artifact payloads and bytes, but does not write files or start workers; apply=true is blocked until a real exact-confirmed writer exists. Evidence: VERIF-TASK-BUD-1079-ARTIFACT-PACKET-PREVIEW-20260516.\n2026-05-16 incident follow-up: user reported reload trap from invalid schema for agent_run_sdk_provider_model_arena_artifact_packet. The local surface now uses Type.Object (operator fixed live), and smoke regression asserts agent_run_sdk_* registered tools expose object schemas. Evidence: VERIF-TASK-BUD-1079-ARENA-ARTIFACT-SCHEMA-REGRESSION-20260516.",
+      "verification": "VERIF-TASK-BUD-1079-ARENA-ARTIFACT-SCHEMA-REGRESSION-20260516"
     },
     {
       "id": "TASK-BUD-1080",
@@ -24205,6 +24205,29 @@
       ],
       "milestone": "worker-arena",
       "notes": "Created from user steering: after Codex Spark unlocks the harness, the same arena should put Dashscope/other models to the test with reusable capability proofs."
+    },
+    {
+      "id": "TASK-BUD-1085",
+      "description": "Harden pre/post reload and hatch gates so invalid tool schemas or extension registration failures fail early with cached validation evidence instead of trapping the live session after reload.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1082"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-post-reload-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-sdk-arena-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Add a lightweight cached validation signal for extension tool schemas so previously validated unchanged extension surfaces do not re-run heavy checks on every reload.",
+        "Fail closed or surface a clear pre/post-reload warning when a registered tool parameter schema is not a JSON object schema.",
+        "Cover hatch/pre-hatch/post-reload and compact-adjacent important events with bounded diagnostics rather than full-suite validation.",
+        "Preserve reload speed: avoid running all tests on every reload; use cache/fingerprint plus targeted validation for changed extension surfaces.",
+        "Record a rollback path that restores L1/manual operation if reload validation fails."
+      ],
+      "milestone": "continuity-hardening",
+      "notes": "Created from user incident: Type.Intersect in agent_run_sdk_provider_model_arena_artifact_packet produced invalid function schema during reload. User had to fix outside pi. Need cached pre/post-reload schema guard so reload either blocks/alerts before live trap or reuses prior validation for unchanged surfaces."
     }
   ]
 }

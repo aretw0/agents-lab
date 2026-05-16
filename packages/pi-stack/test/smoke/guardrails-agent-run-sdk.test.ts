@@ -652,6 +652,13 @@ describe("agent run SDK packet surfaces", () => {
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
     const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
     guardrailsCore(pi);
+    const registeredSdkTools = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls
+      .map(([tool]) => tool as { name?: string; parameters?: { type?: string; properties?: Record<string, unknown> } })
+      .filter((tool) => tool.name?.startsWith("agent_run_sdk_"));
+    expect(registeredSdkTools.length).toBeGreaterThan(0);
+    for (const tool of registeredSdkTools) {
+      expect(tool.parameters?.type, `${tool.name} parameters must be a JSON object schema`).toBe("object");
+    }
     const cachePackToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_cache_pack_packet");
     const cachePackTool = cachePackToolCall?.[0] as {
       execute: (
@@ -741,6 +748,14 @@ describe("agent run SDK packet surfaces", () => {
     expect(arenaSurface.content?.[0]?.text).toContain("paidCalls=no");
     expect(arenaSurface.content?.[0]?.text).toContain("dispatch=no");
     const arenaArtifactToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_provider_model_arena_artifact_packet");
+    expect(arenaArtifactToolCall?.[0]?.parameters).toMatchObject({
+      type: "object",
+      properties: {
+        arena_id: expect.any(Object),
+        apply: expect.any(Object),
+        operator_confirmation: expect.any(Object),
+      },
+    });
     const arenaArtifactTool = arenaArtifactToolCall?.[0] as typeof batchTool;
     const arenaArtifactSurface = arenaArtifactTool.execute("tc-sdk-arena-artifact-preview", {
       arena_id: "arena-surface-openai-spark",

@@ -16505,6 +16505,15 @@
       "method": "local-smoke+project-validate",
       "timestamp": "2026-05-16T13:04:58.999Z",
       "evidence": "Added buildAgentRunSdkProviderModelArenaArtifactPacket and tool surface agent_run_sdk_provider_model_arena_artifact_packet. It composes the arena packet into manifest/scorecard/fan-in artifact previews with payload byte counts while keeping writeAllowed=false, dispatchAllowed=false, paidModelCallsAllowed=false. apply=true is fail-closed with artifact-writer-not-implemented. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1079-ARENA-ARTIFACT-SCHEMA-REGRESSION-20260516",
+      "target": "TASK-BUD-1079",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke-regression",
+      "timestamp": "2026-05-16T14:31:39.796Z",
+      "evidence": "Added smoke regression asserting all registered agent_run_sdk_* tool parameter schemas are JSON Schema objects, and specifically agent_run_sdk_provider_model_arena_artifact_packet exposes Type.Object parameters with arena_id/apply/operator_confirmation properties. This guards the reload failure class where Type.Intersect produced an invalid function schema. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; project-validate clean."
     }
   ]
 }

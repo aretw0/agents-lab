@@ -60,13 +60,11 @@ export function registerAgentRunSdkProviderModelArenaTool(pi: ExtensionAPI): voi
     name: "agent_run_sdk_provider_model_arena_artifact_packet",
     label: "Agent Run SDK Provider/Model Arena Artifact Packet",
     description: "Report-only artifact preview for arena suite manifest, scorecard, and fan-in files. Never writes files, starts workers, or dispatches model calls.",
-    parameters: Type.Intersect([
-      arenaToolParameters,
-      Type.Object({
-        apply: Type.Optional(Type.Boolean({ description: "Preview only; true is blocked until an exact-confirmed writer exists." })),
-        operator_confirmation: Type.Optional(Type.String({ description: "Reserved for a future exact-confirmed artifact writer." })),
-      }),
-    ]),
+    parameters: Type.Object({
+      ...arenaToolParameters.properties,
+      apply: Type.Optional(Type.Boolean({ description: "Preview only; true is blocked until an exact-confirmed writer exists." })),
+      operator_confirmation: Type.Optional(Type.String({ description: "Reserved for a future exact-confirmed artifact writer." })),
+    }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const result = buildAgentRunSdkProviderModelArenaArtifactPacket({
