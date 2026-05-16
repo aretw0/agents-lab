@@ -330,6 +330,24 @@ describe("agent run SDK packet surfaces", () => {
     expect(expandedArenaPacket.nextActions.join("\n")).toContain("report-only suite manifest");
     expect(expandedArenaPacket.summary).toContain("envelopes=3");
 
+    const mutationArenaPacket = buildAgentRunSdkProviderModelArenaPacket({
+      arenaId: "arena-mutation-openai-spark-smoke",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      envelopes: ["mutation-one-file-doc-marker", "mutation-one-file-test-fixture", "mutation-one-file-code-constant"],
+      maxCalls: 3,
+      timeoutMs: 45_000,
+      maxEstimatedCostUsd: 0.75,
+      budgetDecision: "ok",
+      budgetEvidence: "manual one-file mutation suite budget evidence",
+    });
+    expect(mutationArenaPacket.decision).toBe("ready-for-human-decision");
+    expect(mutationArenaPacket.canaries.map((canary) => canary.fileContract)).toEqual(["mutation", "mutation", "mutation"]);
+    expect(mutationArenaPacket.canaries.every((canary) => canary.packet.sdkMaturity.rung === "validated-one-file-mutation")).toBe(true);
+    expect(mutationArenaPacket.canaries[1]?.declaredFiles).toEqual(["packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts"]);
+    expect(mutationArenaPacket.canaries[2]?.maturityNotes).toContain("generic one-file code/config mutation");
+    expect(mutationArenaPacket.suiteManifest.envelopes[0]?.validation).toContain("touched files must stay within declared files");
+    expect(mutationArenaPacket.promotionContract.join("\n")).toContain("does not promote multi-file mutation");
+
     const arenaBlocked = buildAgentRunSdkProviderModelArenaPacket({
       arenaId: "arena-blocked",
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",

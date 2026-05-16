@@ -24176,7 +24176,7 @@
     {
       "id": "TASK-BUD-1083",
       "description": "Add next generic non-readonly arena envelopes after compact registry refactor, starting with narrow one-file mutation/test-fix rungs and strict parent validation.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "acceptance_criteria": [
         "Do not add more verbose condition-chain entries; use the compact registry from TASK-BUD-1080 first.",
@@ -24185,7 +24185,8 @@
         "No protected scopes, package-manager/CI/publish changes, multi-file mutation, or parallel mutation are enabled by this task."
       ],
       "milestone": "worker-arena",
-      "notes": "Created from user steering: generic envelopes should not stay read-only-only. Keep expansion cautious: read-only is easy to batch; mutation requires touched-file validation, rollback, and exact confirmation."
+      "notes": "Created from user steering: generic envelopes should not stay read-only-only. Keep expansion cautious: read-only is easy to batch; mutation requires touched-file validation, rollback, and exact confirmation.\nRationale for completion: report-only registry expansion only; no worker dispatch or protected mutation.\n[rationale:risk-control] Initial non-readonly arena expansion is safe to close because it only adds report-only registry entries and smoke coverage. It does not dispatch workers, broaden mutation beyond one declared file, alter protected scopes, or promote multi-file mutation. Future live mutation runs …\nCompleted initial non-readonly generic envelope expansion. This does not dispatch workers or promote multi-file/protected mutation; it only expands the report-only arena registry and suite manifest.",
+      "verification": "VERIF-TASK-BUD-1083-NONREADONLY-ARENA-ENVELOPES-20260515"
     }
   ]
 }

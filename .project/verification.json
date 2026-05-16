@@ -16442,6 +16442,15 @@
       "method": "local-smoke+project-validate",
       "timestamp": "2026-05-16T01:05:43.279Z",
       "evidence": "Refactored verbose arenaCanarySpec conditional chain into ARENA_ENVELOPE_IDS plus ARENA_ENVELOPE_REGISTRY data entries. Registry entries expose fileContract, toolAllowlist, declaredFiles, goal, maturityNotes, and protectedScope. Arena canaries and suiteManifest now carry maturityNotes/protectedScope while preserving report-only semantics. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1083-NONREADONLY-ARENA-ENVELOPES-20260515",
+      "target": "TASK-BUD-1083",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke+project-validate",
+      "timestamp": "2026-05-16T01:54:47.134Z",
+      "evidence": "Added three generic non-readonly arena envelopes to the registry: mutation-one-file-doc-marker, mutation-one-file-test-fixture, and mutation-one-file-code-constant. Each remains local-safe/report-only at packet time, uses one declared file, mutation fileContract, read/write tool allowlist, protectedScope=false, and explicit maturity notes requiring parent touched-file/focused validation. Added smoke coverage proving the mutation suite packet is ready-for-human-decision, every canary reports validated-one-file-mutation, suiteManifest validation requires touched files to stay within declared files, and promotion contract still forbids multi-file mutation promotion. Validation passed: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed."
     }
   ]
 }
