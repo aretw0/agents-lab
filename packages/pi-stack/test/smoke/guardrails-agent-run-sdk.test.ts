@@ -753,6 +753,94 @@ describe("agent run SDK packet surfaces", () => {
     expect(batchSurface.details?.parallelDispatchAllowed).toBe(false);
     expect(batchSurface.content?.[0]?.text).toContain("parallelDispatch=no");
 
+    const batchDispatchToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_readonly_batch_dispatch");
+    expect(batchDispatchToolCall?.[0]?.parameters).toMatchObject({
+      type: "object",
+      properties: {
+        execute: expect.any(Object),
+        operator_confirmation: expect.any(Object),
+      },
+    });
+    const batchDispatchTool = batchDispatchToolCall?.[0] as typeof batchTool;
+    const batchDispatchPreview = batchDispatchTool.execute("tc-sdk-batch-dispatch-preview", {
+      batch_id: "task-bud-1071-sdk-readonly-batch-dispatch-preview",
+      shared_evidence: ["VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512"],
+      workers: [
+        {
+          run_id: "batch-dispatch-surface-worker-a",
+          goal: "Read one file and stop.",
+          provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+          declared_files: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+          timeout_ms: 45_000,
+          tool_allowlist: ["read", "grep"],
+          validation_gate_known: true,
+          rollback_plan_known: true,
+          budget_decision: "ok",
+          abort_known: true,
+          event_stream_known: true,
+          final_output_contract_known: true,
+        },
+        {
+          run_id: "batch-dispatch-surface-worker-b",
+          goal: "Read one file and stop.",
+          provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+          declared_files: ["packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"],
+          timeout_ms: 45_000,
+          tool_allowlist: ["read", "grep"],
+          validation_gate_known: true,
+          rollback_plan_known: true,
+          budget_decision: "ok",
+          abort_known: true,
+          event_stream_known: true,
+          final_output_contract_known: true,
+        },
+      ],
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
+    expect(batchDispatchPreview.details?.mode).toBe("agent-run-sdk-readonly-batch-dispatch");
+    expect(batchDispatchPreview.details?.processStartAllowed).toBe(false);
+    expect(batchDispatchPreview.details?.humanConfirmationPhrase).toBe("approve sdk readonly batch task-bud-1071-sdk-readonly-batch-dispatch-preview");
+    expect(batchDispatchPreview.content?.[0]?.text).toContain("decision=preview");
+    expect(batchDispatchPreview.content?.[0]?.text).toContain("parallelDispatch=no");
+
+    const batchDispatchMismatch = batchDispatchTool.execute("tc-sdk-batch-dispatch-mismatch", {
+      batch_id: "task-bud-1071-sdk-readonly-batch-dispatch-preview",
+      shared_evidence: ["VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512"],
+      workers: [
+        {
+          run_id: "batch-dispatch-surface-worker-a",
+          goal: "Read one file and stop.",
+          provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+          declared_files: ["packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts"],
+          timeout_ms: 45_000,
+          tool_allowlist: ["read", "grep"],
+          validation_gate_known: true,
+          rollback_plan_known: true,
+          budget_decision: "ok",
+          abort_known: true,
+          event_stream_known: true,
+          final_output_contract_known: true,
+        },
+        {
+          run_id: "batch-dispatch-surface-worker-b",
+          goal: "Read one file and stop.",
+          provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+          declared_files: ["packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"],
+          timeout_ms: 45_000,
+          tool_allowlist: ["read", "grep"],
+          validation_gate_known: true,
+          rollback_plan_known: true,
+          budget_decision: "ok",
+          abort_known: true,
+          event_stream_known: true,
+          final_output_contract_known: true,
+        },
+      ],
+      execute: true,
+      operator_confirmation: "wrong confirmation",
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
+    expect(batchDispatchMismatch.details?.processStartAllowed).toBe(false);
+    expect(batchDispatchMismatch.content?.[0]?.text).toContain("operator-confirmation-mismatch");
+
     const arenaToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_provider_model_arena_packet");
     const arenaTool = arenaToolCall?.[0] as typeof batchTool;
     const arenaSurface = arenaTool.execute("tc-sdk-arena-preview", {

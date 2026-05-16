@@ -16532,6 +16532,15 @@
       "method": "local-smoke+project-validate",
       "timestamp": "2026-05-16T17:25:19.412Z",
       "evidence": "Implemented a report-only natural-use Codex Spark promoted worker packet: buildCodexSparkPromotedWorkerPacket plus surface agent_run_codex_spark_promoted_worker_packet. It defaults provider/model to openai-codex/gpt-5.3-codex-spark, defaults budget posture/economy for promoted-lane use, composes registry/start/status/log/abort/outcome previews, lists promoted envelopes and still-blocked scopes, blocks unpromoted envelopes, and keeps dispatch/processStart=false with exact human confirmation required. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; project-validate clean; git diff --check passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1088-BATCH-DISPATCH-PREVIEW-20260516",
+      "target": "TASK-BUD-1088",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "timestamp": "2026-05-16T21:54:30.998Z",
+      "evidence": "Implemented control-plane-first agent_run_sdk_readonly_batch_dispatch surface in packages/pi-stack/extensions/guardrails-core-agent-run-sdk-batch-surface.ts. Dispatch preview remains processStartAllowed=false; execute=true with wrong confirmation blocks with operator-confirmation-mismatch; tool schemas remain JSON object schemas. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; project-validate clean; git diff --check passed; line_budget_snapshot now watch with aboveExtract=0."
     }
   ]
 }

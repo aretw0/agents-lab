@@ -24275,7 +24275,7 @@
     {
       "id": "TASK-BUD-1088",
       "description": "Implement exact-confirmed Codex Spark read-only batch/fan-out runner with fan-in outcome aggregation, so promoted workers can run in parallel safely instead of serially.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p0",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts",
@@ -24291,8 +24291,8 @@
         "No mutation, CI/publish/settings/routing changes, autonomous web research, or swarm recursion in this first batch runner.",
         "Record aggregate verification evidence listing worker run ids and outcome decisions before using results for board closure."
       ],
-      "milestone": "worker-lane",
-      "notes": "Created from user steering: stop treating serial worker canaries as the goal; evolve toward safe parallelism and colony-style effect with Codex Spark promoted envelopes.\n2026-05-16 steering: user clarified that worker primitives must be control-plane-first, not a parallel duplicated stack. Before implementing batch/fan-out, inspect existing primitives and reuse shared control-plane foundations for registry/status/log/abort/fan-in/state/verification wherever possible. Goal is long-term sustainable experimentation and staying close to community state of the art without concept drift.\n2026-05-16: Added control-plane-first worker primitive inventory before implementing batch runner. Key design: exact-confirmed read-only batch runner must compose existing batch packet, startSdkInProcessWorker, registry/log/status/abort, per-worker outcome packets, batch outcome packet, and board verification; do not create parallel worker-specific budget/scope/registry/log/outcome concepts. See docs/research/control-plane-first-worker-primitives-2026-05.md."
+      "milestone": "colony-readonly-batch-maturity",
+      "notes": "Created from user steering: stop treating serial worker canaries as the goal; evolve toward safe parallelism and colony-style effect with Codex Spark promoted envelopes.\n2026-05-16 steering: user clarified that worker primitives must be control-plane-first, not a parallel duplicated stack. Before implementing batch/fan-out, inspect existing primitives and reuse shared control-plane foundations for registry/status/log/abort/fan-in/state/verification wherever possible. Goal is long-term sustainable experimentation and staying close to community state of the art without concept drift.\n2026-05-16: Added control-plane-first worker primitive inventory before implementing batch runner. Key design: exact-confirmed read-only batch runner must compose existing batch packet, startSdkInProcessWorker, registry/log/status/abort, per-worker outcome packets, batch outcome packet, and board verification; do not create parallel worker-specific budget/scope/registry/log/outcome concepts. See docs/research/control-plane-first-worker-primitives-2026-05.md.\n2026-05-16: Milestone set to colony-readonly-batch-maturity. Iterate until read-only Codex Spark batch/fan-out has control-plane-first start/status/log/abort/fan-in maturity. Next implementation slice: exact-confirmed batch runner gate that reuses existing SDK worker runtime and registry/outcome primitives; no execution without exact confirmation."
     }
   ]
 }
