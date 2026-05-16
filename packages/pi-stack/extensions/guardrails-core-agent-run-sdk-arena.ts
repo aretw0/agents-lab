@@ -45,6 +45,36 @@ export interface AgentRunSdkProviderModelArenaPacketInput {
   unexpectedDirty?: boolean;
 }
 
+export interface AgentRunSdkProviderModelArenaArtifactPacketInput extends AgentRunSdkProviderModelArenaPacketInput {
+  apply?: boolean;
+  operatorConfirmation?: string;
+}
+
+export interface AgentRunSdkProviderModelArenaArtifactPacketResult {
+  mode: "agent-run-sdk-provider-model-arena-artifact-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  paidModelCallsAllowed: false;
+  writeAllowed: false;
+  requiresHumanDecision: true;
+  decision: "preview" | "blocked";
+  applyRequested: boolean;
+  blockers: string[];
+  arenaPacket: AgentRunSdkProviderModelArenaPacketResult;
+  artifactPreviews: Array<{
+    kind: "suite-manifest" | "scorecard-template" | "fanin-plan";
+    path: string;
+    sourceField: "suiteManifest" | "scorecardTemplate" | "fanInPlan";
+    bytes: number;
+    payload: unknown;
+  }>;
+  humanConfirmationPhrase: string;
+  nextActions: string[];
+  summary: string;
+}
+
 export interface AgentRunSdkProviderModelArenaPacketResult {
   mode: "agent-run-sdk-provider-model-arena-packet";
   activation: "none";
@@ -317,6 +347,70 @@ function defaultArenaEnvelopes(): AgentRunSdkArenaEnvelope[] {
 
 function arenaCanarySpec(envelope: AgentRunSdkArenaEnvelope): AgentRunSdkArenaEnvelopeSpec {
   return ARENA_ENVELOPE_REGISTRY[envelope];
+}
+
+function jsonSizeBytes(payload: unknown): number {
+  return JSON.stringify(payload, null, 2).length;
+}
+
+export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRunSdkProviderModelArenaArtifactPacketInput = {}): AgentRunSdkProviderModelArenaArtifactPacketResult {
+  const arenaPacket = buildAgentRunSdkProviderModelArenaPacket(input);
+  const applyRequested = input.apply === true;
+  const blockers = [...arenaPacket.blockers];
+  if (arenaPacket.decision !== "ready-for-human-decision") blockers.push("arena-packet-blocked");
+  if (applyRequested) blockers.push("artifact-writer-not-implemented");
+  const artifactPreviews = arenaPacket.suiteArtifactPlan.artifacts.map((artifact) => {
+    const payload = artifact.sourceField === "suiteManifest"
+      ? arenaPacket.suiteManifest
+      : artifact.sourceField === "scorecardTemplate"
+        ? arenaPacket.scorecardTemplate
+        : arenaPacket.fanInPlan;
+    return {
+      kind: artifact.kind,
+      path: artifact.path,
+      sourceField: artifact.sourceField,
+      bytes: jsonSizeBytes(payload),
+      payload,
+    };
+  });
+  const decision = blockers.length > 0 ? "blocked" : "preview";
+  const humanConfirmationPhrase = arenaPacket.arenaSpec.arenaId ? `persist arena artifacts ${arenaPacket.arenaSpec.arenaId}` : "";
+  return {
+    mode: "agent-run-sdk-provider-model-arena-artifact-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    paidModelCallsAllowed: false,
+    writeAllowed: false,
+    requiresHumanDecision: true,
+    decision,
+    applyRequested,
+    blockers,
+    arenaPacket,
+    artifactPreviews,
+    humanConfirmationPhrase,
+    nextActions: decision === "preview"
+      ? [
+        "review artifact previews before any persistence",
+        "persist artifacts only through a future exact-confirmed writer or manual operator action",
+        "do not start workers or model calls from this artifact packet",
+      ]
+      : [
+        "resolve artifact packet blockers before persistence",
+        "keep arena artifact persistence separate from worker dispatch",
+      ],
+    summary: [
+      "agent-run-sdk-provider-model-arena-artifact-packet:",
+      `decision=${decision}`,
+      `arenaId=${arenaPacket.arenaSpec.arenaId || "missing"}`,
+      `artifacts=${artifactPreviews.length}`,
+      `apply=${applyRequested ? "yes" : "no"}`,
+      "write=no",
+      "dispatch=no",
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+    ].filter(Boolean).join(" "),
+  };
 }
 
 export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProviderModelArenaPacketInput = {}): AgentRunSdkProviderModelArenaPacketResult {

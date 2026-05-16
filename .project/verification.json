@@ -16496,6 +16496,15 @@
       "method": "local-smoke+project-validate",
       "timestamp": "2026-05-16T12:36:31.813Z",
       "evidence": "Added suiteArtifactPlan to buildAgentRunSdkProviderModelArenaPacket. It is report-only: mode=report-only-artifact-write-preview, writeAllowed=false, applySupported=false, with deterministic suite-manifest, scorecard-template, and fanin-plan artifact paths plus operator steps. The plan explicitly says artifact persistence must not start workers and rows remain scoped to provider/model/envelope so future models prove capabilities independently. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1079-ARTIFACT-PACKET-PREVIEW-20260516",
+      "target": "TASK-BUD-1079",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke+project-validate",
+      "timestamp": "2026-05-16T13:04:58.999Z",
+      "evidence": "Added buildAgentRunSdkProviderModelArenaArtifactPacket and tool surface agent_run_sdk_provider_model_arena_artifact_packet. It composes the arena packet into manifest/scorecard/fan-in artifact previews with payload byte counts while keeping writeAllowed=false, dispatchAllowed=false, paidModelCallsAllowed=false. apply=true is fail-closed with artifact-writer-not-implemented. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed."
     }
   ]
 }

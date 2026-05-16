@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkProviderModelArenaPacket, buildAgentRunSdkReadOnlyBatchPacket } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaPacket, buildAgentRunSdkReadOnlyBatchPacket } from "../../extensions/guardrails-core";
 
 describe("agent run SDK packet surfaces", () => {
   it("builds sdk in-process packet preview without dispatch", async () => {
@@ -405,6 +405,42 @@ describe("agent run SDK packet surfaces", () => {
     });
     expect(mutationArenaPacket.suiteArtifactPlan.operatorSteps.join("\n")).toContain("do not start workers");
     expect(mutationArenaPacket.suiteArtifactPlan.operatorSteps.join("\n")).toContain("future models prove capabilities independently");
+    const artifactPacket = buildAgentRunSdkProviderModelArenaArtifactPacket({
+      arenaId: "arena-mutation-openai-spark-smoke",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      envelopes: ["mutation-one-file-doc-marker", "mutation-one-file-test-fixture", "mutation-one-file-code-constant"],
+      maxCalls: 3,
+      timeoutMs: 45_000,
+      maxEstimatedCostUsd: 0.75,
+      budgetDecision: "ok",
+      budgetEvidence: "manual one-file mutation suite budget evidence",
+    });
+    expect(artifactPacket).toMatchObject({
+      mode: "agent-run-sdk-provider-model-arena-artifact-packet",
+      decision: "preview",
+      writeAllowed: false,
+      dispatchAllowed: false,
+      applyRequested: false,
+      humanConfirmationPhrase: "persist arena artifacts arena-mutation-openai-spark-smoke",
+    });
+    expect(artifactPacket.artifactPreviews.map((artifact) => artifact.kind)).toEqual(["suite-manifest", "scorecard-template", "fanin-plan"]);
+    expect(artifactPacket.artifactPreviews[0]?.path).toBe(".pi/reports/arena-mutation-openai-spark-smoke.manifest.json");
+    expect(artifactPacket.artifactPreviews.every((artifact) => artifact.bytes > 0)).toBe(true);
+    expect(artifactPacket.nextActions.join("\n")).toContain("do not start workers");
+    const blockedArtifactApply = buildAgentRunSdkProviderModelArenaArtifactPacket({
+      arenaId: "arena-mutation-openai-spark-smoke",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      envelopes: ["mutation-one-file-doc-marker"],
+      maxCalls: 1,
+      timeoutMs: 45_000,
+      maxEstimatedCostUsd: 0.25,
+      budgetDecision: "ok",
+      budgetEvidence: "manual one-file mutation suite budget evidence",
+      apply: true,
+      operatorConfirmation: "persist arena artifacts arena-mutation-openai-spark-smoke",
+    });
+    expect(blockedArtifactApply.decision).toBe("blocked");
+    expect(blockedArtifactApply.blockers).toContain("artifact-writer-not-implemented");
     expect(mutationArenaPacket.nextActions.join("\n")).toContain("serialSuiteDispatchPlan only as a preview");
     expect(mutationArenaPacket.nextActions.join("\n")).toContain("suiteArtifactPlan before persisting");
     expect(mutationArenaPacket.promotionContract.join("\n")).toContain("does not promote multi-file mutation");
@@ -704,6 +740,21 @@ describe("agent run SDK packet surfaces", () => {
     expect(arenaSurface.details?.mode).toBe("agent-run-sdk-provider-model-arena-packet");
     expect(arenaSurface.content?.[0]?.text).toContain("paidCalls=no");
     expect(arenaSurface.content?.[0]?.text).toContain("dispatch=no");
+    const arenaArtifactToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_provider_model_arena_artifact_packet");
+    const arenaArtifactTool = arenaArtifactToolCall?.[0] as typeof batchTool;
+    const arenaArtifactSurface = arenaArtifactTool.execute("tc-sdk-arena-artifact-preview", {
+      arena_id: "arena-surface-openai-spark",
+      provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+      envelopes: ["readonly-one-file", "mutation-one-file-marker"],
+      max_calls: 2,
+      timeout_ms: 90_000,
+      max_estimated_cost_usd: 0.25,
+      budget_decision: "ok",
+      budget_evidence: "manual surface test budget evidence",
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
+    expect(arenaArtifactSurface.details?.mode).toBe("agent-run-sdk-provider-model-arena-artifact-packet");
+    expect(arenaArtifactSurface.content?.[0]?.text).toContain("write=no");
+    expect(arenaArtifactSurface.content?.[0]?.text).toContain("dispatch=no");
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_in_process_packet");
     const tool = toolCall?.[0] as {
       execute: (
