@@ -1,6 +1,8 @@
+import { mkdirSync, writeFileSync } from "node:fs";
+import * as path from "node:path";
 import { type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaPacket } from "./guardrails-core-agent-run-sdk-arena";
+import { buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaPacket, type AgentRunSdkProviderModelArenaArtifactPacketResult } from "./guardrails-core-agent-run-sdk-arena";
 import { resolveExecutionCwdParam } from "./guardrails-core-execution-context";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
@@ -27,6 +29,29 @@ function buildArenaInput(p: Record<string, unknown>, cwd: string) {
     protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
     unexpectedDirty: asOptionalBoolean(p.unexpected_dirty),
   };
+}
+
+function assertArenaArtifactPath(cwd: string, artifactPath: string): string {
+  const reportsRoot = path.resolve(cwd, ".pi", "reports");
+  const target = path.resolve(cwd, artifactPath);
+  const relative = path.relative(reportsRoot, target);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error(`arena artifact path escapes .pi/reports: ${artifactPath}`);
+  }
+  return target;
+}
+
+function persistArenaArtifactPreviews(cwd: string, packet: AgentRunSdkProviderModelArenaArtifactPacketResult): Array<{ path: string; bytes: number }> {
+  if (!packet.writeAllowed) return [];
+  const written: Array<{ path: string; bytes: number }> = [];
+  for (const artifact of packet.artifactPreviews) {
+    const target = assertArenaArtifactPath(cwd, artifact.path);
+    const payload = `${JSON.stringify(artifact.payload, null, 2)}\n`;
+    mkdirSync(path.dirname(target), { recursive: true });
+    writeFileSync(target, payload, "utf8");
+    written.push({ path: artifact.path, bytes: payload.length });
+  }
+  return written;
 }
 
 const arenaToolParameters = Type.Object({
@@ -59,19 +84,25 @@ export function registerAgentRunSdkProviderModelArenaTool(pi: ExtensionAPI): voi
   pi.registerTool({
     name: "agent_run_sdk_provider_model_arena_artifact_packet",
     label: "Agent Run SDK Provider/Model Arena Artifact Packet",
-    description: "Report-only artifact preview for arena suite manifest, scorecard, and fan-in files. Never writes files, starts workers, or dispatches model calls.",
+    description: "Exact-confirmed local artifact writer for arena suite manifest, scorecard, and fan-in files. Preview by default; never starts workers or dispatches model calls.",
     parameters: Type.Object({
       ...arenaToolParameters.properties,
-      apply: Type.Optional(Type.Boolean({ description: "Preview only; true is blocked until an exact-confirmed writer exists." })),
-      operator_confirmation: Type.Optional(Type.String({ description: "Reserved for a future exact-confirmed artifact writer." })),
+      apply: Type.Optional(Type.Boolean({ description: "When true, persist only previewed .pi/reports artifacts after exact confirmation." })),
+      operator_confirmation: Type.Optional(Type.String({ description: "Must exactly equal the packet humanConfirmationPhrase for apply=true." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const result = buildAgentRunSdkProviderModelArenaArtifactPacket({
+      const packet = buildAgentRunSdkProviderModelArenaArtifactPacket({
         ...buildArenaInput(p, ctx.cwd),
         apply: asOptionalBoolean(p.apply),
         operatorConfirmation: typeof p.operator_confirmation === "string" ? p.operator_confirmation : undefined,
       });
+      const persistedArtifacts = persistArenaArtifactPreviews(ctx.cwd, packet);
+      const result = {
+        ...packet,
+        persistedArtifacts,
+        summary: persistedArtifacts.length > 0 ? `${packet.summary} persisted=${persistedArtifacts.length}` : packet.summary,
+      };
       return buildOperatorVisibleToolResponse({ label: "agent_run_sdk_provider_model_arena_artifact_packet", summary: result.summary, details: result });
     },
   });

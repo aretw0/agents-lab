@@ -16514,6 +16514,15 @@
       "method": "local-smoke-regression",
       "timestamp": "2026-05-16T14:31:39.796Z",
       "evidence": "Added smoke regression asserting all registered agent_run_sdk_* tool parameter schemas are JSON Schema objects, and specifically agent_run_sdk_provider_model_arena_artifact_packet exposes Type.Object parameters with arena_id/apply/operator_confirmation properties. This guards the reload failure class where Type.Intersect produced an invalid function schema. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; project-validate clean."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1079-EXACT-CONFIRMED-ARTIFACT-WRITER-20260516",
+      "target": "TASK-BUD-1079",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke+project-validate",
+      "timestamp": "2026-05-16T16:16:41.091Z",
+      "evidence": "Promoted the arena artifact packet from preview-only to exact-confirmed local artifact writer: apply=false remains preview/write=no; apply=true with mismatched operator confirmation blocks; apply=true with exact humanConfirmationPhrase returns ready-to-apply/writeAllowed=true/authorization=explicit-human. The surface writes only previewed .pi/reports arena artifacts when packet.writeAllowed is true, and never starts workers or model calls. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; project-validate clean; git diff --check passed."
     }
   ]
 }

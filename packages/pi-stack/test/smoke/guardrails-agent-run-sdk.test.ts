@@ -437,10 +437,31 @@ describe("agent run SDK packet surfaces", () => {
       budgetDecision: "ok",
       budgetEvidence: "manual one-file mutation suite budget evidence",
       apply: true,
-      operatorConfirmation: "persist arena artifacts arena-mutation-openai-spark-smoke",
+      operatorConfirmation: "wrong confirmation",
     });
     expect(blockedArtifactApply.decision).toBe("blocked");
-    expect(blockedArtifactApply.blockers).toContain("artifact-writer-not-implemented");
+    expect(blockedArtifactApply.writeAllowed).toBe(false);
+    expect(blockedArtifactApply.blockers).toContain("operator-confirmation-mismatch");
+    const confirmedArtifactApply = buildAgentRunSdkProviderModelArenaArtifactPacket({
+      arenaId: "arena-mutation-openai-spark-smoke",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      envelopes: ["mutation-one-file-doc-marker"],
+      maxCalls: 1,
+      timeoutMs: 45_000,
+      maxEstimatedCostUsd: 0.25,
+      budgetDecision: "ok",
+      budgetEvidence: "manual one-file mutation suite budget evidence",
+      apply: true,
+      operatorConfirmation: "persist arena artifacts arena-mutation-openai-spark-smoke",
+    });
+    expect(confirmedArtifactApply).toMatchObject({
+      decision: "ready-to-apply",
+      authorization: "explicit-human",
+      writeAllowed: true,
+      dispatchAllowed: false,
+      paidModelCallsAllowed: false,
+    });
+    expect(confirmedArtifactApply.summary).toContain("write=yes");
     expect(mutationArenaPacket.nextActions.join("\n")).toContain("serialSuiteDispatchPlan only as a preview");
     expect(mutationArenaPacket.nextActions.join("\n")).toContain("suiteArtifactPlan before persisting");
     expect(mutationArenaPacket.promotionContract.join("\n")).toContain("does not promote multi-file mutation");

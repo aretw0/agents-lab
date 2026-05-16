@@ -53,13 +53,13 @@ export interface AgentRunSdkProviderModelArenaArtifactPacketInput extends AgentR
 export interface AgentRunSdkProviderModelArenaArtifactPacketResult {
   mode: "agent-run-sdk-provider-model-arena-artifact-packet";
   activation: "none";
-  authorization: "none";
+  authorization: "none" | "explicit-human";
   dispatchAllowed: false;
   processStartAllowed: false;
   paidModelCallsAllowed: false;
-  writeAllowed: false;
+  writeAllowed: boolean;
   requiresHumanDecision: true;
-  decision: "preview" | "blocked";
+  decision: "preview" | "ready-to-apply" | "blocked";
   applyRequested: boolean;
   blockers: string[];
   arenaPacket: AgentRunSdkProviderModelArenaPacketResult;
@@ -353,12 +353,19 @@ function jsonSizeBytes(payload: unknown): number {
   return JSON.stringify(payload, null, 2).length;
 }
 
+function isSafeArtifactArenaId(arenaId: string): boolean {
+  return /^[A-Za-z0-9._-]+$/.test(arenaId);
+}
+
 export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRunSdkProviderModelArenaArtifactPacketInput = {}): AgentRunSdkProviderModelArenaArtifactPacketResult {
   const arenaPacket = buildAgentRunSdkProviderModelArenaPacket(input);
   const applyRequested = input.apply === true;
   const blockers = [...arenaPacket.blockers];
+  const humanConfirmationPhrase = arenaPacket.arenaSpec.arenaId ? `persist arena artifacts ${arenaPacket.arenaSpec.arenaId}` : "";
+  const operatorConfirmation = normalizeText(input.operatorConfirmation);
   if (arenaPacket.decision !== "ready-for-human-decision") blockers.push("arena-packet-blocked");
-  if (applyRequested) blockers.push("artifact-writer-not-implemented");
+  if (arenaPacket.arenaSpec.arenaId && !isSafeArtifactArenaId(arenaPacket.arenaSpec.arenaId)) blockers.push("arena-artifact-id-unsafe");
+  if (applyRequested && operatorConfirmation !== humanConfirmationPhrase) blockers.push("operator-confirmation-mismatch");
   const artifactPreviews = arenaPacket.suiteArtifactPlan.artifacts.map((artifact) => {
     const payload = artifact.sourceField === "suiteManifest"
       ? arenaPacket.suiteManifest
@@ -373,16 +380,16 @@ export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRun
       payload,
     };
   });
-  const decision = blockers.length > 0 ? "blocked" : "preview";
-  const humanConfirmationPhrase = arenaPacket.arenaSpec.arenaId ? `persist arena artifacts ${arenaPacket.arenaSpec.arenaId}` : "";
+  const writeAllowed = applyRequested && blockers.length === 0;
+  const decision = blockers.length > 0 ? "blocked" : writeAllowed ? "ready-to-apply" : "preview";
   return {
     mode: "agent-run-sdk-provider-model-arena-artifact-packet",
     activation: "none",
-    authorization: "none",
+    authorization: writeAllowed ? "explicit-human" : "none",
     dispatchAllowed: false,
     processStartAllowed: false,
     paidModelCallsAllowed: false,
-    writeAllowed: false,
+    writeAllowed,
     requiresHumanDecision: true,
     decision,
     applyRequested,
@@ -393,20 +400,26 @@ export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRun
     nextActions: decision === "preview"
       ? [
         "review artifact previews before any persistence",
-        "persist artifacts only through a future exact-confirmed writer or manual operator action",
+        "set apply=true only with the exact human confirmation phrase when intentionally persisting artifacts",
         "do not start workers or model calls from this artifact packet",
       ]
-      : [
-        "resolve artifact packet blockers before persistence",
-        "keep arena artifact persistence separate from worker dispatch",
-      ],
+      : decision === "ready-to-apply"
+        ? [
+          "write only the previewed .pi/reports arena artifacts",
+          "do not start workers or model calls as part of artifact persistence",
+          "validate persisted artifacts before promotion",
+        ]
+        : [
+          "resolve artifact packet blockers before persistence",
+          "keep arena artifact persistence separate from worker dispatch",
+        ],
     summary: [
       "agent-run-sdk-provider-model-arena-artifact-packet:",
       `decision=${decision}`,
       `arenaId=${arenaPacket.arenaSpec.arenaId || "missing"}`,
       `artifacts=${artifactPreviews.length}`,
       `apply=${applyRequested ? "yes" : "no"}`,
-      "write=no",
+      `write=${writeAllowed ? "yes" : "no"}`,
       "dispatch=no",
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),
