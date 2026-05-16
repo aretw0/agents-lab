@@ -65,6 +65,26 @@ export interface AgentRunSdkProviderModelArenaPacketResult {
     packet: AgentRunSdkInProcessPacketResult;
   }>;
   scorecardSchema: string[];
+  suiteManifest: {
+    mode: "report-only-suite";
+    suiteId: string;
+    providerModelRef: string;
+    maxCalls: number;
+    maxEstimatedCostUsd: number;
+    timeoutMsPerRun: number;
+    parallelism: 1;
+    stopOn: string[];
+    fanInValidation: string[];
+    runIds: string[];
+    envelopes: Array<{
+      envelope: AgentRunSdkArenaEnvelope;
+      runId: string;
+      fileContract: AgentRunSdkFileContract;
+      toolAllowlist: string[];
+      declaredFiles: string[];
+      validation: string[];
+    }>;
+  };
   budgetContract: string[];
   promotionContract: string[];
   priorArtContract: string[];
@@ -284,6 +304,37 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
 
   const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
   const scorecardSchema = ["providerModelRef", "envelope", "processState", "contractDecision", "outputBytes", "touchedFiles", "latencyMs", "errorClass", "budgetEvidence", "estimatedCostUsd"];
+  const suiteStopOn = ["auth", "quota", "rate-limit", "timeout", "empty-output", "unexpected-touched-file", "contract-failure"];
+  const fanInValidation = [
+    "every run id in the suite manifest has a terminal outcome packet",
+    "all touched files are empty for read-only envelopes and within declared files for mutation envelopes",
+    "each worker output is non-empty and satisfies the envelope output contract",
+    "scorecard rows are recorded per provider/model/envelope before promotion",
+  ];
+  const suiteManifest = {
+    mode: "report-only-suite" as const,
+    suiteId: arenaId,
+    providerModelRef,
+    maxCalls,
+    maxEstimatedCostUsd,
+    timeoutMsPerRun: timeoutMs,
+    parallelism: 1 as const,
+    stopOn: suiteStopOn,
+    fanInValidation,
+    runIds: canaries.map((canary) => canary.runId),
+    envelopes: canaries.map((canary) => ({
+      envelope: canary.envelope,
+      runId: canary.runId,
+      fileContract: canary.fileContract,
+      toolAllowlist: canary.toolAllowlist,
+      declaredFiles: canary.declaredFiles,
+      validation: [
+        canary.fileContract === "read-only" ? "no touched files" : "touched files must stay within declared files",
+        "output bytes > 0",
+        "parent-side outcome packet required",
+      ],
+    })),
+  };
   const budgetContract = [
     "arena packet is report-only and never starts paid/model calls by itself",
     "each real run requires exact one-run confirmation plus the arena budget fields",
@@ -333,6 +384,7 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     },
     canaries,
     scorecardSchema,
+    suiteManifest,
     budgetContract,
     promotionContract,
     priorArtContract,
@@ -341,6 +393,7 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
       ? [
         "review this arena packet and budget before any real model call",
         "collect prior-art references before treating arena design choices as mature",
+        "review the report-only suite manifest before any real model call",
         "run canaries serially with exact one-run confirmations; this packet itself cannot dispatch",
         "record scorecard rows per provider/model/envelope before promotion",
       ]

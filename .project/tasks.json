@@ -24118,7 +24118,7 @@
     {
       "id": "TASK-BUD-1079",
       "description": "Implement bounded arena suite manifest/runner path so provider/model capability envelopes can be evaluated as a reproducible suite instead of hand-run serial canaries.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "acceptance_criteria": [
         "Report-only suite manifest packet supports the expanded generic envelope registry without dispatching paid/model calls.",
@@ -24127,7 +24127,8 @@
         "Parallel/batch mode remains disabled until separate evidence supports it."
       ],
       "milestone": "worker-arena",
-      "notes": "Related to TASK-BUD-1076. Created from operator steering: arena should mature into a controlled experiment harness that can evaluate provider/model capabilities with less manual serial work, eventually enabling safer worker batches/swarms."
+      "notes": "Related to TASK-BUD-1076. Created from operator steering: arena should mature into a controlled experiment harness that can evaluate provider/model capabilities with less manual serial work, eventually enabling safer worker batches/swarms.\n2026-05-15: First implementation slice landed locally: existing arena packet now emits a report-only suiteManifest with suite budget, serial parallelism=1, stopOn conditions, run ids, per-envelope validation, and fan-in validation. Serial-suite dispatcher remains intentionally blocked/not implemented. Evidence: VERIF-TASK-BUD-1079-REPORT-ONLY-SUITE-MANIFEST-20260515.",
+      "verification": "VERIF-TASK-BUD-1079-REPORT-ONLY-SUITE-MANIFEST-20260515"
     },
     {
       "id": "TASK-BUD-1080",

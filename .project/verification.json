@@ -16415,6 +16415,15 @@
       "method": "local-smoke+project-validate",
       "timestamp": "2026-05-15T23:25:25.869Z",
       "evidence": "Expanded report-only arena packet envelope recognition beyond the original five to include current cultivated generic envelopes: readonly-three-file-inventory, readonly-ci-cache-risk-scan, readonly-monitor-fragility-hardening-scan, readonly-declared-evidence-synthesis, readonly-source-backed-evidence-synthesis, readonly-two-file-bounded-patch-recommendation, readonly-three-file-risk-table, and readonly-web-research-tool-contract-review. Added smoke coverage proving a 3-envelope expanded packet returns ready-for-human-decision while staying report-only. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed. Operator feedback recorded as TASK-BUD-1080: refactor verbose arenaCanarySpec into compact registry later."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1079-REPORT-ONLY-SUITE-MANIFEST-20260515",
+      "target": "TASK-BUD-1079",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-smoke+project-validate",
+      "timestamp": "2026-05-15T23:56:35.967Z",
+      "evidence": "Added report-only suiteManifest to buildAgentRunSdkProviderModelArenaPacket. Manifest includes suiteId, providerModelRef, maxCalls, maxEstimatedCostUsd, timeoutMsPerRun, parallelism=1, stopOn, fanInValidation, runIds, and per-envelope validation plans. Existing behavior remains report-only: dispatchAllowed=false and paidModelCallsAllowed=false. Validation: project-validate clean; npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed. Serial-suite dispatch remains intentionally not implemented."
     }
   ]
 }

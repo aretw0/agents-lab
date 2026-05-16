@@ -311,6 +311,19 @@ describe("agent run SDK packet surfaces", () => {
     expect(expandedArenaPacket.canaries[0]?.declaredFiles).toEqual(["package.json", "packages/pi-stack/package.json", ".github/workflows/publish.yml"]);
     expect(expandedArenaPacket.canaries[1]?.declaredFiles).toContain("docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md");
     expect(expandedArenaPacket.canaries[2]?.packet.runSpec.goal).toContain("do not use web");
+    expect(expandedArenaPacket.suiteManifest).toMatchObject({
+      mode: "report-only-suite",
+      suiteId: "arena-expanded-openai-spark-smoke",
+      parallelism: 1,
+      runIds: [
+        "arena-expanded-openai-spark-smoke-readonly-three-file-risk-table",
+        "arena-expanded-openai-spark-smoke-readonly-source-backed-evidence-synthesis",
+        "arena-expanded-openai-spark-smoke-readonly-web-research-tool-contract-review",
+      ],
+    });
+    expect(expandedArenaPacket.suiteManifest.stopOn).toContain("unexpected-touched-file");
+    expect(expandedArenaPacket.suiteManifest.fanInValidation.join("\n")).toContain("terminal outcome packet");
+    expect(expandedArenaPacket.nextActions.join("\n")).toContain("report-only suite manifest");
     expect(expandedArenaPacket.summary).toContain("envelopes=3");
 
     const arenaBlocked = buildAgentRunSdkProviderModelArenaPacket({
