@@ -16586,6 +16586,24 @@
       "method": "smoke-test",
       "timestamp": "2026-05-17T03:23:32.081Z",
       "evidence": "Added agent_run_sdk_readonly_batch_abort dry-first aggregate abort surface. It composes buildAgentRunAbortPlan per run id, blocks missing runs, never dispatches starts, and only permits processStopAllowed when execute=true, operator_confirmed=true, all registered worker pids are running in cwd. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts passed; git diff --check passed; project-validate clean; line_budget_snapshot watch aboveExtract=0."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1087-CODEX-SPARK-NARROW-BATCH-FANOUT-20260517",
+      "target": "TASK-BUD-1087",
+      "target_type": "task",
+      "status": "passed",
+      "method": "exact-confirmed-readonly-sdk-batch",
+      "timestamp": "2026-05-17T04:36:44.560Z",
+      "evidence": "Exact-confirmed narrow read-only Codex Spark SDK batch ran 3 workers: task-bud-1087-package-json-workspace-inventory completed outputBytes=953; task-bud-1087-package-lock-inventory completed outputBytes=1762; task-bud-1087-pnpm-evidence-application completed outputBytes=1936. Fan-in decision=pass recommendation=promote with touched_files=[] for all workers, cache statuses miss/hit/hit, git dirty snapshot clean. Findings: workspace globs align between package.json and pnpm-workspace.yaml; package.json lacks packageManager; package-lock root metadata/direct devDependencies align; pnpm evidence partially applies but CI/provenance claims need workflow/lockfile-specific follow-up. No mutations performed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1088-CONTROL-PLANE-BATCH-RUNNER-20260517",
+      "target": "TASK-BUD-1088",
+      "target_type": "task",
+      "status": "passed",
+      "method": "implementation-smoke-and-live-batch",
+      "timestamp": "2026-05-17T04:55:37.971Z",
+      "evidence": "[rationale:risk-control] Implemented and live-validated control-plane-first read-only SDK batch runner surfaces: agent_run_sdk_readonly_batch_dispatch, status, fan_in_packet, and abort. Reuses existing SDK worker runtime, registry/log/status/follow/abort/outcome/batch-outcome primitives; no parallel registry or outcome semantics. Smoke tests passed for agent-run-sdk/task-packets/runtime; line budget aboveExtract=0; reload live checks passed; exact-confirmed TASK-BUD-1087 narrow batch dispatched 3 workers, all completed, status fanInReady=yes, fan-in decision=pass, git clean."
     }
   ]
 }
