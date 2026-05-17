@@ -8,6 +8,7 @@ import {
 	extractPackageNameFromSource,
 	isPilotPackageSource,
 	leanEnabledModels,
+	leanWatchdogConfig,
 } from "../pi-isolated.mjs";
 
 test("canonicalizePackageSourceForLocalAgent rewrites repo-local absolute paths", () => {
@@ -75,4 +76,22 @@ test("lean model scope stays intentionally small", () => {
 		"openai-codex/gpt-5.4-mini",
 		"dashscope/qwen3.6-flash",
 	]);
+});
+
+test("lean watchdog config preserves guard while tolerating startup transients", () => {
+	const config = leanWatchdogConfig();
+
+	assert.equal(config.enabled, true);
+	assert.equal(config.sampleIntervalMs, 10000);
+	assert.deepEqual(config.thresholds, {
+		cpuPercent: 90,
+		eventLoopMaxMs: 600,
+		eventLoopP99Ms: 300,
+		heapUsedMb: 1024,
+		rssMb: 1400,
+	});
+
+	const mutated = leanWatchdogConfig();
+	mutated.thresholds.eventLoopP99Ms = 999;
+	assert.equal(leanWatchdogConfig().thresholds.eventLoopP99Ms, 300);
 });

@@ -38,6 +38,7 @@ const GLOBAL_AGENT_DIR = path.join(homedir(), ".pi", "agent");
 const LOCAL_SETTINGS = path.join(LOCAL_AGENT_DIR, "settings.json");
 const LOCAL_AUTH = path.join(LOCAL_AGENT_DIR, "auth.json");
 const GLOBAL_AUTH = path.join(GLOBAL_AGENT_DIR, "auth.json");
+const GLOBAL_WATCHDOG_CONFIG = path.join(GLOBAL_AGENT_DIR, "extensions", "watchdog", "config.json");
 const LOCAL_PI_CLI_CANDIDATES = [
 	path.join(REPO_ROOT, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js"),
 	path.join(REPO_ROOT, "node_modules", "@mariozechner", "pi-coding-agent", "dist", "cli.js"),
@@ -351,6 +352,18 @@ const LEAN_ENABLED_MODELS = [
 	"dashscope/qwen3.6-flash",
 ];
 
+const LEAN_WATCHDOG_CONFIG = {
+	enabled: true,
+	sampleIntervalMs: 10000,
+	thresholds: {
+		cpuPercent: 90,
+		eventLoopMaxMs: 600,
+		eventLoopP99Ms: 300,
+		heapUsedMb: 1024,
+		rssMb: 1400,
+	},
+};
+
 function getPackageSource(entry) {
 	if (typeof entry === "string") return entry;
 	if (isRecord(entry) && typeof entry.source === "string") return entry.source;
@@ -383,6 +396,10 @@ export function isPilotPackageSource(source) {
 
 export function leanEnabledModels() {
 	return [...LEAN_ENABLED_MODELS];
+}
+
+export function leanWatchdogConfig() {
+	return JSON.parse(JSON.stringify(LEAN_WATCHDOG_CONFIG));
 }
 
 function setPackageSource(entry, source) {
@@ -505,6 +522,19 @@ function applyLocalRuntimeProfile({ pilot = false, dryRun = false } = {}) {
 	return { status: dryRun ? "dry-run" : "lean", changed: true, removed };
 }
 
+function ensureLeanWatchdogConfig({ dryRun = false } = {}) {
+	if (existsSync(GLOBAL_WATCHDOG_CONFIG)) {
+		return { status: "present", path: GLOBAL_WATCHDOG_CONFIG, changed: false };
+	}
+	if (dryRun) {
+		return { status: "would-create", path: GLOBAL_WATCHDOG_CONFIG, changed: true };
+	}
+
+	mkdirSync(path.dirname(GLOBAL_WATCHDOG_CONFIG), { recursive: true });
+	writeFileSync(GLOBAL_WATCHDOG_CONFIG, JSON.stringify(leanWatchdogConfig(), null, 2) + "\n", "utf8");
+	return { status: "created", path: GLOBAL_WATCHDOG_CONFIG, changed: true };
+}
+
 function maybeImportAuth(skip) {
 	if (skip) return "skipped";
 	if (existsSync(LOCAL_AUTH)) return "already-present";
@@ -610,6 +640,9 @@ function run() {
 	const runtimeProfile = opts.dev
 		? applyLocalRuntimeProfile({ pilot: opts.pilot, dryRun: opts.dryRun })
 		: { status: "not-dev", changed: false, removed: [] };
+	const watchdogConfig = opts.dev
+		? ensureLeanWatchdogConfig({ dryRun: opts.dryRun })
+		: { status: "not-dev", path: GLOBAL_WATCHDOG_CONFIG, changed: false };
 
 	const env = {
 		...process.env,
@@ -641,6 +674,10 @@ function run() {
 		console.log(`auth import:      ${authAction}`);
 		console.log(`settings canon:   ${canonicalSettings.status}`);
 		console.log(`runtime profile:  ${runtimeProfile.status}`);
+		console.log(`watchdog config:  ${watchdogConfig.status}`);
+		if (watchdogConfig.status !== "not-dev") {
+			console.log(`watchdog path:    ${watchdogConfig.path}`);
+		}
 		for (const removed of runtimeProfile.removed ?? []) {
 			console.log(`  removed pilot overlay: ${removed}`);
 		}
@@ -701,6 +738,9 @@ function run() {
 		}
 		if (runtimeProfile.status === "lean" || runtimeProfile.status === "dry-run") {
 			console.log("pi-isolated: runtime-profile=lean (pilot overlay off; use npm run pi:dev:pilot for colony/remote/workflows overlay)");
+		}
+		if (watchdogConfig.status === "created") {
+			console.log("pi-isolated: watchdog-config=lean (event-loop/RSS/heap guard calibrated for local dev)");
 		}
 		if (pressureReport?.signals?.length && pressureGate.reason === "new-session-advisory") {
 			console.log(`pi-isolated: pressure-advisory ${pressureReport.summary}`);
