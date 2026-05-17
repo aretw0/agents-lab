@@ -24,7 +24,7 @@ Classificação operacional (estabilidade long-run como critério principal):
 |---|---|---|
 | `custom-footer` | first-party e third-party coexistiam nominalmente | **Promover first-party** (third-party filtrado) |
 | `usage-tracker*` | semântica de quota conflitando com budget canônico | **Desativar overlap** (third-party filtrado) |
-| `watchdog` (oh-pi-extensions) vs `context-watchdog*` first-party | overlap semântico de sinais/cadência | **Promover first-party** + filtrar third-party |
+| `watchdog` (oh-pi-extensions) vs `context-watchdog*` first-party | overlap parcial; o third-party cobre pressão de runtime/event-loop/RSS/heap | **Manter third-party temporariamente** até existir watchdog first-party de performance |
 | `git`/`web-browser`/`librarian` skills duplicadas | já tratadas em filtros | **Manter winner first-party** |
 | planning/spec/workflow (semântico) | coexistência sem política final | **Manter temporário** (onda futura) |
 
@@ -45,8 +45,8 @@ Classificação operacional (estabilidade long-run como critério principal):
 Aplicação concreta nesta rodada:
 
 - `packages/pi-stack/install.mjs` (`FILTER_PATCHES`):
-  - adicionado filtro `!extensions/watchdog.ts` para `npm:@ifi/oh-pi-extensions`;
-  - rationale: winner first-party de contexto/cadência já está em `context-watchdog*`.
+  - filtros mantidos para `custom-footer`, `usage-tracker*`, `safe-guard` e `bg-process`;
+  - `extensions/watchdog.ts` foi mantido ativo: `context-watchdog*` cobre contexto/checkpoint/compactação, mas ainda não substitui detecção de pressão de runtime/event-loop/RSS/heap.
 
 Validação mínima de segurança:
 

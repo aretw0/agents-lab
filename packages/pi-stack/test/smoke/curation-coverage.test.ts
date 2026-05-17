@@ -42,8 +42,9 @@ describe("first-party curation coverage", () => {
       dispatchAllowed: false,
       mutationAllowed: false,
     });
-    expect(result.summary.filtered).toBeGreaterThanOrEqual(7);
+    expect(result.summary.filtered).toBeGreaterThanOrEqual(6);
     expect(result.summary.missingFilter).toBe(0);
+    expect(result.records.find((record) => record.id === "oh-pi-watchdog")?.evaluatedStatus).toBe("tracked");
     expect(result.records.find((record) => record.id === "oh-pi-bg-process-future")?.evaluatedStatus).toBe("needs-decision");
     expect(result.evidence).toContain("dispatch=no");
   });

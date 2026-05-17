@@ -83,7 +83,7 @@ describe("installer-filters", () => {
 		expect(entry.extensions).toContain("!extensions/custom-footer.ts");
 		expect(entry.extensions).toContain("!extensions/usage-tracker.ts");
 		expect(entry.extensions).toContain("!extensions/usage-tracker-providers.ts");
-		expect(entry.extensions).toContain("!extensions/watchdog.ts");
+		expect(entry.extensions).not.toContain("!extensions/watchdog.ts");
 		expect(entry.extensions).toContain("!extensions/safe-guard.ts");
 		expect(entry.extensions).toContain("!extensions/bg-process.ts");
 	});

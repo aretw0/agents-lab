@@ -114,7 +114,9 @@ export const FILTER_PATCHES = [
   {
     // oh-pi-extensions/custom-footer — replaced by @aretw0/pi-stack/extensions/custom-footer.ts
     // usage-tracker/usage-tracker-providers — replaced by quota-visibility budget status line
-    // watchdog — replaced by first-party context-watch stack (context-watchdog + auto-compact/resume)
+    // watchdog is intentionally retained: first-party context-watch handles
+    // context/checkpoint/compact policy, while oh-pi watchdog still covers
+    // event-loop/RSS/heap pressure until a first-party performance watchdog exists.
     // safe-guard — prompts on simple `rm -f`; local guardrails-core policy covers our bounded lane
     // bg-process — third-party lifecycle UI can emit noisy/undefined headers; use first-party background_process_* primitives
     // (usage-tracker showed "Google Subscription quota: 100%" for unlimited plans — misleading)
@@ -123,7 +125,6 @@ export const FILTER_PATCHES = [
       "!extensions/custom-footer.ts",
       "!extensions/usage-tracker.ts",
       "!extensions/usage-tracker-providers.ts",
-      "!extensions/watchdog.ts",
       "!extensions/safe-guard.ts",
       "!extensions/bg-process.ts",
     ],

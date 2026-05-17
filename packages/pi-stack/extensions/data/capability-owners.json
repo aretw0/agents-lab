@@ -167,14 +167,14 @@
       "curationCoverage": [
         {
           "id": "oh-pi-watchdog",
-          "coveredSurface": "context watchdog/auto-compact/resume policy",
+          "coveredSurface": "runtime performance watchdog for event-loop/RSS/heap pressure",
           "thirdPartyPackage": "@ifi/oh-pi-extensions",
           "thirdPartySurfaces": [
             "extensions/watchdog.ts"
           ],
-          "strategy": "suppress-by-filter",
-          "status": "filtered",
-          "reason": "first-party context-watch stack owns compact/resume policy for the curated profile."
+          "strategy": "keep",
+          "status": "tracked",
+          "reason": "first-party context-watch owns context/checkpoint/compact policy, but does not replace runtime performance pressure detection yet."
         }
       ]
     },
