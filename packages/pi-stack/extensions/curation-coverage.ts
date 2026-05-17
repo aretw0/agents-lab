@@ -63,11 +63,21 @@ export const CURATION_FILTER_PATCHES: FilterPatchLike[] = [
   {
     source: "npm:@ifi/oh-pi-extensions",
     extensions: [
+      "!extensions/answer.ts",
+      "!extensions/auto-session-name.ts",
+      "!extensions/auto-update.ts",
+      "!extensions/btw.ts",
+      "!extensions/compact-header.ts",
       "!extensions/custom-footer.ts",
+      "!extensions/external-editor.ts",
+      "!extensions/git-guard.ts",
+      "!extensions/scheduler.ts",
+      "!extensions/tool-metadata.ts",
       "!extensions/usage-tracker.ts",
       "!extensions/usage-tracker-providers.ts",
       "!extensions/safe-guard.ts",
       "!extensions/bg-process.ts",
+      "!extensions/worktree.ts",
     ],
   },
 ];

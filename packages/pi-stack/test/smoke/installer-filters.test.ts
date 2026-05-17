@@ -111,6 +111,9 @@ describe("installer-filters", () => {
 		for (const excluded of PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES) {
 			expect(entry.extensions).toContain(excluded);
 		}
+		expect(entry.extensions).toContain("!extensions/colony-pilot.ts");
+		expect(entry.extensions).toContain("!extensions/web-session-gateway.ts");
+		expect(entry.extensions).toContain("!extensions/monitor-sovereign.ts");
 	});
 
 	it("mantém lanes pesadas no stack-full", () => {
