@@ -345,6 +345,12 @@ const PILOT_PACKAGES = [
 	"@ifi/oh-pi-ant-colony",
 ];
 
+const LEAN_ENABLED_MODELS = [
+	"openai-codex/gpt-5.3-codex",
+	"openai-codex/gpt-5.4-mini",
+	"dashscope/qwen3.6-flash",
+];
+
 function getPackageSource(entry) {
 	if (typeof entry === "string") return entry;
 	if (isRecord(entry) && typeof entry.source === "string") return entry.source;
@@ -373,6 +379,10 @@ export function extractPackageNameFromSource(source) {
 export function isPilotPackageSource(source) {
 	const pkg = extractPackageNameFromSource(source);
 	return Boolean(pkg && PILOT_PACKAGES.includes(pkg));
+}
+
+export function leanEnabledModels() {
+	return [...LEAN_ENABLED_MODELS];
 }
 
 function setPackageSource(entry, source) {
@@ -474,8 +484,20 @@ function applyLocalRuntimeProfile({ pilot = false, dryRun = false } = {}) {
 		...settings,
 		packages,
 		runtimeProfile: "lean",
+		defaultProvider: "openai-codex",
+		defaultModel: "gpt-5.3-codex",
+		enabledModels: LEAN_ENABLED_MODELS,
 	};
-	const changed = removed.length > 0 || settings.runtimeProfile !== "lean";
+	const currentEnabledModels = Array.isArray(settings.enabledModels) ? settings.enabledModels : [];
+	const modelsChanged =
+		currentEnabledModels.length !== LEAN_ENABLED_MODELS.length ||
+		currentEnabledModels.some((value, index) => value !== LEAN_ENABLED_MODELS[index]);
+	const changed =
+		removed.length > 0 ||
+		settings.runtimeProfile !== "lean" ||
+		settings.defaultProvider !== "openai-codex" ||
+		settings.defaultModel !== "gpt-5.3-codex" ||
+		modelsChanged;
 	if (!changed) return { status: "lean", changed: false, removed };
 	if (!dryRun) {
 		writeFileSync(LOCAL_SETTINGS, JSON.stringify(next, null, 2) + "\n", "utf8");
