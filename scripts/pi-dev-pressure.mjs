@@ -154,6 +154,76 @@ function sumGraphKb(graph) {
   return Number((bytes / 1024).toFixed(1));
 }
 
+function normalizeSurfacePath(value) {
+  return String(value ?? "").replace(/\\/g, "/").replace(/^\.\//, "");
+}
+
+function extensionFilterSets(entry) {
+  const values = isRecord(entry) && Array.isArray(entry.extensions) ? entry.extensions : [];
+  const includes = new Set();
+  const excludes = new Set();
+  for (const value of values) {
+    if (typeof value !== "string") continue;
+    if (value.startsWith("!")) {
+      excludes.add(normalizeSurfacePath(value.slice(1)));
+      continue;
+    }
+    includes.add(normalizeSurfacePath(value));
+  }
+  return { includes, excludes };
+}
+
+function applyExtensionFilters(extensions, entry) {
+  const { includes, excludes } = extensionFilterSets(entry);
+  const normalized = extensions.map((extension) => ({
+    original: extension,
+    normalized: normalizeSurfacePath(extension),
+  }));
+  return normalized
+    .filter((extension) => includes.size === 0 || includes.has(extension.normalized))
+    .filter((extension) => !excludes.has(extension.normalized))
+    .map((extension) => extension.original);
+}
+
+function resolveConfiguredPackageRoot(cwd, settingsPath, source) {
+  if (typeof source !== "string") return undefined;
+  const raw = source.startsWith("npm:") ? source.slice("npm:".length) : source;
+  if (raw.startsWith(".") || raw.startsWith("/") || path.isAbsolute(raw)) {
+    const settingsDir = path.dirname(settingsPath);
+    return path.resolve(settingsDir, raw);
+  }
+  if (raw.startsWith("@") || /^[a-z0-9._-]+(?:\/[a-z0-9._-]+)?$/i.test(raw)) {
+    return path.join(cwd, "node_modules", raw);
+  }
+  return undefined;
+}
+
+function collectPackageEntrypointStats({ packageRoot, packageSource: source, settingsLabel, configuredEntry }) {
+  const packagePath = path.join(packageRoot, "package.json");
+  const pkg = readJsonIfExists(packagePath);
+  const extensions = Array.isArray(pkg?.pi?.extensions) ? pkg.pi.extensions : [];
+  const effectiveExtensions = applyExtensionFilters(extensions, configuredEntry);
+  return effectiveExtensions
+    .map((entry) => {
+      const entryPath = path.resolve(path.dirname(packagePath), entry);
+      if (!existsSync(entryPath)) return undefined;
+      const eagerGraph = collectImportGraph(entryPath, packageRoot);
+      const reachableGraph = collectImportGraph(entryPath, packageRoot, { includeDynamicImports: true });
+      return {
+        settings: settingsLabel,
+        package: source,
+        packageRoot,
+        entry,
+        files: eagerGraph.size,
+        kb: sumGraphKb(eagerGraph),
+        reachableFiles: reachableGraph.size,
+        reachableKb: sumGraphKb(reachableGraph),
+        lazyFiles: Math.max(0, reachableGraph.size - eagerGraph.size),
+      };
+    })
+    .filter(Boolean);
+}
+
 export function collectEntrypointStats(cwd = process.cwd()) {
   const packagePath = path.join(cwd, "packages", "pi-stack", "package.json");
   const pkg = readJsonIfExists(packagePath);
@@ -175,6 +245,30 @@ export function collectEntrypointStats(cwd = process.cwd()) {
       };
     })
     .sort((a, b) => b.kb - a.kb);
+}
+
+export function collectConfiguredEntrypointStats(cwd = process.cwd()) {
+  const settingsPaths = [
+    [".pi/settings.json", path.join(cwd, ".pi", "settings.json")],
+    [".sandbox/pi-agent/settings.json", path.join(cwd, ".sandbox", "pi-agent", "settings.json")],
+  ];
+  const rows = [];
+  for (const [label, filePath] of settingsPaths) {
+    const settings = readJsonIfExists(filePath);
+    const packages = Array.isArray(settings?.packages) ? settings.packages : [];
+    for (const entry of packages) {
+      const source = packageSource(entry);
+      const packageRoot = resolveConfiguredPackageRoot(cwd, filePath, source);
+      if (!source || !packageRoot || !existsSync(packageRoot)) continue;
+      rows.push(...collectPackageEntrypointStats({
+        packageRoot,
+        packageSource: source,
+        settingsLabel: label,
+        configuredEntry: entry,
+      }));
+    }
+  }
+  return rows.sort((a, b) => b.kb - a.kb);
 }
 
 export function buildEntrypointBudget(entrypoints, thresholds = DEFAULT_THRESHOLDS) {
@@ -305,6 +399,8 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   const sessionBudget = buildSessionBudget(sessions, thresholds);
   const entrypoints = collectEntrypointStats(cwd);
   const entrypointBudget = buildEntrypointBudget(entrypoints, thresholds);
+  const configuredEntrypoints = collectConfiguredEntrypointStats(cwd);
+  const configuredEntrypointBudget = buildEntrypointBudget(configuredEntrypoints, thresholds);
   const settings = collectSettingsStats(cwd);
   const loop = collectLoopState(cwd, options.now ?? new Date());
   const git = options.git === false ? { available: false, skipped: true } : collectGitDirtyStats(cwd);
@@ -318,15 +414,16 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   }
 
   const heaviestEntrypoint = entrypoints[0];
+  const heaviestConfiguredEntrypoint = configuredEntrypoints[0];
   if (
-    heaviestEntrypoint &&
-    (heaviestEntrypoint.kb >= thresholds.heavyEntrypointKb ||
-      heaviestEntrypoint.files >= thresholds.heavyEntrypointFiles)
+    heaviestConfiguredEntrypoint &&
+    (heaviestConfiguredEntrypoint.kb >= thresholds.heavyEntrypointKb ||
+      heaviestConfiguredEntrypoint.files >= thresholds.heavyEntrypointFiles)
   ) {
     signals.push({
       level: "warn",
-      code: "heavy-extension-entrypoint",
-      detail: `${heaviestEntrypoint.entry} files=${heaviestEntrypoint.files} kb=${heaviestEntrypoint.kb}`,
+      code: "heavy-configured-extension-entrypoint",
+      detail: `${heaviestConfiguredEntrypoint.package}:${heaviestConfiguredEntrypoint.entry} files=${heaviestConfiguredEntrypoint.files} kb=${heaviestConfiguredEntrypoint.kb}`,
     });
   }
 
@@ -346,7 +443,7 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   let recommendation = "continue";
   if (signals.some((signal) => signal.level === "block")) recommendation = "block-and-clean";
   else if (signals.some((signal) => signal.code === "large-resume-session")) recommendation = "new-session";
-  else if (signals.some((signal) => signal.code === "heavy-extension-entrypoint")) recommendation = "reduce-governance-surface";
+  else if (signals.some((signal) => signal.code === "heavy-configured-extension-entrypoint")) recommendation = "reduce-governance-surface";
   else if (signals.some((signal) => signal.code === "wide-dirty-scope")) recommendation = "checkpoint-and-commit";
 
   return {
@@ -358,11 +455,13 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
     sessions,
     sessionBudget,
     entrypointBudget,
+    configuredEntrypointBudget,
     entrypoints: entrypoints.slice(0, 10),
+    configuredEntrypoints: configuredEntrypoints.slice(0, 15).map(({ packageRoot: _packageRoot, ...row }) => row),
     settings,
     loop,
     git,
-    summary: `pi-dev-pressure: recommendation=${recommendation} signals=${signals.length} largestSessionMb=${largestSessionMb} heaviestEntrypoint=${heaviestEntrypoint?.entry ?? "n/a"}`,
+    summary: `pi-dev-pressure: recommendation=${recommendation} signals=${signals.length} largestSessionMb=${largestSessionMb} heaviestConfiguredEntrypoint=${heaviestConfiguredEntrypoint ? `${heaviestConfiguredEntrypoint.package}:${heaviestConfiguredEntrypoint.entry}` : "n/a"}`,
   };
 }
 
@@ -465,10 +564,22 @@ function printHuman(report) {
   for (const row of report.entrypoints.slice(0, 5)) {
     lines.push(`  - ${row.entry}: files=${row.files} kb=${row.kb}`);
   }
+  if (report.configuredEntrypoints?.length > 0) {
+    lines.push("- heaviest configured entrypoints:");
+    for (const row of report.configuredEntrypoints.slice(0, 8)) {
+      lines.push(`  - ${row.package}:${row.entry}: files=${row.files} kb=${row.kb} (${row.settings})`);
+    }
+  }
   if (report.entrypointBudget?.oversized?.length > 0) {
     lines.push(`- entrypoint budget: ${report.entrypointBudget.recommendation}`);
     for (const row of report.entrypointBudget.oversized.slice(0, 5)) {
       lines.push(`  - ${row.entry}: +${row.overFilesBy} files, +${row.overKbBy} KB`);
+    }
+  }
+  if (report.configuredEntrypointBudget?.oversized?.length > 0) {
+    lines.push(`- configured entrypoint budget: ${report.configuredEntrypointBudget.recommendation}`);
+    for (const row of report.configuredEntrypointBudget.oversized.slice(0, 5)) {
+      lines.push(`  - ${row.package}:${row.entry}: +${row.overFilesBy} files, +${row.overKbBy} KB`);
     }
   }
   return lines.join("\n");

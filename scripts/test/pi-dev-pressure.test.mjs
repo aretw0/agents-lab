@@ -7,6 +7,7 @@ import test from "node:test";
 import {
   buildPiDevPressureReport,
   buildEntrypointBudget,
+  collectConfiguredEntrypointStats,
   buildSessionBudget,
   buildSessionBudgetCleanupPlan,
   collectEntrypointStats,
@@ -133,6 +134,35 @@ test("collectEntrypointStats separates eager imports from dynamic reachable impo
     assert.equal(stats[0].reachableFiles, 3);
     assert.equal(stats[0].lazyFiles, 1);
     assert.ok(stats[0].reachableKb >= stats[0].kb);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("collectConfiguredEntrypointStats applies settings extension excludes", () => {
+  const cwd = makeWorkspace();
+  try {
+    const extRoot = createMinimalPiStack(cwd, [
+      "./extensions/core.ts",
+      "./extensions/guardrails-agent-run.ts",
+    ]);
+    writeFileSync(join(extRoot, "core.ts"), "export const core = true;\n", "utf8");
+    writeFileSync(join(extRoot, "guardrails-agent-run.ts"), "export const lane = true;\n", "utf8");
+    mkdirSync(join(cwd, ".pi"), { recursive: true });
+    writeJson(join(cwd, ".pi", "settings.json"), {
+      packages: [
+        {
+          source: "../packages/pi-stack",
+          extensions: ["!extensions/guardrails-agent-run.ts"],
+        },
+      ],
+    });
+
+    const stats = collectConfiguredEntrypointStats(cwd);
+
+    assert.deepEqual(stats.map((row) => row.entry), ["./extensions/core.ts"]);
+    assert.equal(stats[0].settings, ".pi/settings.json");
+    assert.equal(stats[0].package, "../packages/pi-stack");
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
