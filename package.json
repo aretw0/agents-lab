@@ -36,6 +36,7 @@
     "pi:isolated:help": "node scripts/pi-isolated.mjs help",
     "pi:isolated:reset": "node scripts/pi-isolated.mjs --reset",
     "pi:dev": "node scripts/pi-isolated.mjs --dev",
+    "pi:dev:pilot": "node scripts/pi-isolated.mjs --dev --pilot",
     "pi:dev:dry": "node scripts/pi-isolated.mjs --dev --dry-run",
     "pi:dev:resume": "node scripts/pi-isolated.mjs --dev --resume",
     "pi:loop:pause": "node scripts/pi-loop-pause.mjs",

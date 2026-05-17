@@ -5,6 +5,8 @@ import path from "node:path";
 import {
 	canonicalizePackageSourceForLocalAgent,
 	canonicalizeSettingsObjectForLocalAgent,
+	extractPackageNameFromSource,
+	isPilotPackageSource,
 } from "../pi-isolated.mjs";
 
 test("canonicalizePackageSourceForLocalAgent rewrites repo-local absolute paths", () => {
@@ -52,4 +54,16 @@ test("canonicalizeSettingsObjectForLocalAgent rewrites string and object package
 		"npm:@ifi/oh-pi-ant-colony",
 	]);
 	assert.equal(result.changes.length, 2);
+});
+
+test("pilot package detection covers npm and local node_modules sources", () => {
+	assert.equal(extractPackageNameFromSource("npm:@ifi/oh-pi-ant-colony"), "@ifi/oh-pi-ant-colony");
+	assert.equal(extractPackageNameFromSource("npm:@ifi/pi-web-remote@0.5.1"), "@ifi/pi-web-remote");
+	assert.equal(
+		extractPackageNameFromSource("../../node_modules/@davidorex/pi-project-workflows"),
+		"@davidorex/pi-project-workflows",
+	);
+	assert.equal(isPilotPackageSource("npm:@ifi/oh-pi-ant-colony"), true);
+	assert.equal(isPilotPackageSource("../../node_modules/@davidorex/pi-project-workflows"), true);
+	assert.equal(isPilotPackageSource("../packages/pi-stack"), false);
 });

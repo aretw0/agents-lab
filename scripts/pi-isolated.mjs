@@ -58,6 +58,7 @@ function parseArgs(argv) {
 		dryRun: false,
 		noAuthImport: false,
 		dev: false,
+		pilot: false,
 		forcePressure: false,
 		piArgs: [],
 	};
@@ -94,6 +95,10 @@ function parseArgs(argv) {
 		}
 		if (a === "--dev") {
 			out.dev = true;
+			continue;
+		}
+		if (a === "--pilot") {
+			out.pilot = true;
 			continue;
 		}
 		if (a === "--force-pressure") {
@@ -149,6 +154,7 @@ function printHelp() {
 		"  node scripts/pi-isolated.mjs [status|help|adopt-latest|canonicalize-settings] [--reset] [--dev] [--dry-run] [--no-auth-import] [-- <args do pi>]",
 		"",
 		"--dev: pausa o loop autônomo (stopCondition=manual-pause) antes de iniciar pi.",
+		"--pilot: mantém overlay pilot no sandbox local (@davidorex workflows, web-remote, ant-colony).",
 		"--force-pressure: permite iniciar --dev mesmo quando pi:dev:pressure:strict bloquear.",
 		"       Use 'npm run pi:loop:resume' para retomar a fábrica depois.",
 	].join("\n"));
@@ -333,10 +339,40 @@ function isRecord(value) {
 	return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
+const PILOT_PACKAGES = [
+	"@davidorex/pi-project-workflows",
+	"@ifi/pi-web-remote",
+	"@ifi/oh-pi-ant-colony",
+];
+
 function getPackageSource(entry) {
 	if (typeof entry === "string") return entry;
 	if (isRecord(entry) && typeof entry.source === "string") return entry.source;
 	return undefined;
+}
+
+export function extractPackageNameFromSource(source) {
+	if (typeof source !== "string") return undefined;
+	const normalized = source.replace(/\\/g, "/");
+	const npm = normalized.startsWith("npm:") ? normalized.slice("npm:".length) : normalized;
+	if (npm.startsWith("@")) {
+		const slash = npm.indexOf("/");
+		if (slash === -1) return undefined;
+		const versionAt = npm.indexOf("@", slash + 1);
+		return versionAt === -1 ? npm : npm.slice(0, versionAt);
+	}
+	for (const pkg of PILOT_PACKAGES) {
+		if (normalized.endsWith(`/node_modules/${pkg}`) || normalized.endsWith(`/node_modules/${pkg}/`)) {
+			return pkg;
+		}
+	}
+	const versionAt = npm.indexOf("@");
+	return versionAt === -1 ? npm : npm.slice(0, versionAt);
+}
+
+export function isPilotPackageSource(source) {
+	const pkg = extractPackageNameFromSource(source);
+	return Boolean(pkg && PILOT_PACKAGES.includes(pkg));
 }
 
 function setPackageSource(entry, source) {
@@ -404,6 +440,47 @@ function canonicalizeLocalSettings({ dryRun = false } = {}) {
 		writeFileSync(LOCAL_SETTINGS, JSON.stringify(result.settings, null, 2) + "\n", "utf8");
 	}
 	return { status: dryRun ? "dry-run" : "rewritten", changed: true, changes: result.changes };
+}
+
+function applyLocalRuntimeProfile({ pilot = false, dryRun = false } = {}) {
+	if (!existsSync(LOCAL_SETTINGS)) return { status: "missing", changed: false, removed: [] };
+	let settings;
+	try {
+		settings = JSON.parse(readFileSync(LOCAL_SETTINGS, "utf8"));
+	} catch {
+		return { status: "parse-error", changed: false, removed: [] };
+	}
+	if (!isRecord(settings) || !Array.isArray(settings.packages)) {
+		return { status: "no-packages", changed: false, removed: [] };
+	}
+
+	if (pilot) {
+		const next = { ...settings, runtimeProfile: "pilot" };
+		const changed = settings.runtimeProfile !== "pilot";
+		if (changed && !dryRun) {
+			writeFileSync(LOCAL_SETTINGS, JSON.stringify(next, null, 2) + "\n", "utf8");
+		}
+		return { status: changed ? (dryRun ? "dry-run" : "pilot") : "pilot", changed, removed: [] };
+	}
+
+	const removed = [];
+	const packages = settings.packages.filter((entry) => {
+		const source = getPackageSource(entry);
+		if (!isPilotPackageSource(source)) return true;
+		removed.push(source);
+		return false;
+	});
+	const next = {
+		...settings,
+		packages,
+		runtimeProfile: "lean",
+	};
+	const changed = removed.length > 0 || settings.runtimeProfile !== "lean";
+	if (!changed) return { status: "lean", changed: false, removed };
+	if (!dryRun) {
+		writeFileSync(LOCAL_SETTINGS, JSON.stringify(next, null, 2) + "\n", "utf8");
+	}
+	return { status: dryRun ? "dry-run" : "lean", changed: true, removed };
 }
 
 function maybeImportAuth(skip) {
@@ -508,6 +585,9 @@ function run() {
 	}
 
 	const canonicalSettings = canonicalizeLocalSettings({ dryRun: opts.dryRun });
+	const runtimeProfile = opts.dev
+		? applyLocalRuntimeProfile({ pilot: opts.pilot, dryRun: opts.dryRun })
+		: { status: "not-dev", changed: false, removed: [] };
 
 	const env = {
 		...process.env,
@@ -538,6 +618,10 @@ function run() {
 		console.log(`settings created: ${created ? "yes" : "no"}`);
 		console.log(`auth import:      ${authAction}`);
 		console.log(`settings canon:   ${canonicalSettings.status}`);
+		console.log(`runtime profile:  ${runtimeProfile.status}`);
+		for (const removed of runtimeProfile.removed ?? []) {
+			console.log(`  removed pilot overlay: ${removed}`);
+		}
 		for (const change of canonicalSettings.changes) {
 			console.log(`  ${change.from} -> ${change.to}`);
 		}
@@ -592,6 +676,9 @@ function run() {
 		}
 		if (sessionResumeRequested) {
 			console.log("pi-isolated: --resume retoma a sessão do pi; loop de fábrica continua pausado até npm run pi:loop:resume");
+		}
+		if (runtimeProfile.status === "lean" || runtimeProfile.status === "dry-run") {
+			console.log("pi-isolated: runtime-profile=lean (pilot overlay off; use npm run pi:dev:pilot for colony/remote/workflows overlay)");
 		}
 		if (pressureReport?.signals?.length && pressureGate.reason === "new-session-advisory") {
 			console.log(`pi-isolated: pressure-advisory ${pressureReport.summary}`);
