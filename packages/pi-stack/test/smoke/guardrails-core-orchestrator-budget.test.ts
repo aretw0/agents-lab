@@ -31,6 +31,7 @@ describe("guardrails-core orchestrator budget", () => {
 		expect(autoDrainSource).toContain("evaluateBoardLongRunReadiness");
 		expect(surfaceRegistrationSource).toContain("registerGuardrailsDeliverySurface(pi, appendAuditEntry)");
 		expect(surfaceRegistrationSource).toContain("registerGuardrailsSafeMutationSurface(pi, appendAuditEntry)");
+		expect(surfaceRegistrationSource).not.toContain("registerGuardrailsAgentSpawnReadinessSurface");
 		expect(toolCallGuardSource).toContain("evaluateBashGuardPolicies(command)");
 		expect(toolCallGuardSource).toContain("./guardrails-core-bash-guard-policies");
 		expect(source).not.toContain("SESSION_LOG_PATH_PATTERN");

@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore from "../../extensions/guardrails-core";
+import guardrailsAgentRun from "../../extensions/guardrails-agent-run";
 import { buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildCodexSparkPromotedWorkerPacket } from "../../extensions/guardrails-core-exports";
 
 describe("agent run task packet surfaces", () => {
@@ -295,8 +295,8 @@ describe("agent run task packet surfaces", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
-    guardrailsCore(pi);
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
 
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_task_packet");
     const tool = toolCall?.[0] as {
@@ -354,8 +354,8 @@ describe("agent run task packet surfaces", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
-    guardrailsCore(pi);
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
 
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_codex_spark_promoted_worker_packet");
     expect(toolCall?.[0]?.parameters?.type).toBe("object");
@@ -417,8 +417,8 @@ describe("agent run task packet surfaces", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
-    guardrailsCore(pi);
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
 
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_task_dispatch_check");
     const tool = toolCall?.[0] as {
@@ -504,8 +504,8 @@ describe("agent run task packet surfaces", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
-    guardrailsCore(pi);
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
 
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_task_dispatch");
     const tool = toolCall?.[0] as {
@@ -599,8 +599,8 @@ describe("agent run task packet surfaces", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
-    guardrailsCore(pi);
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
 
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_task_start_packet");
     const tool = toolCall?.[0] as {

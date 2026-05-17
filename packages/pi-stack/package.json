@@ -32,6 +32,7 @@
 			"./extensions/environment-doctor.ts",
 			"./extensions/claude-code-adapter.ts",
 			"./extensions/guardrails-core.ts",
+			"./extensions/guardrails-agent-run.ts",
 			"./extensions/scheduler-governance.ts",
 			"./extensions/stack-sovereignty.ts",
 			"./extensions/colony-pilot.ts",

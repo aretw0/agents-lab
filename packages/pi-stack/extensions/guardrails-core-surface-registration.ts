@@ -1,6 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import type { CommandRoutingProfile } from "./guardrails-core-shell-routing";
-import { registerGuardrailsAgentSpawnReadinessSurface } from "./guardrails-core-agent-spawn-readiness-surface";
 import { registerGuardrailsAutonomyLaneSurface } from "./guardrails-core-autonomy-lane-surface";
 import { registerGuardrailsBackgroundProcessSurface } from "./guardrails-core-background-process-surface";
 import { registerGuardrailsDeliverySurface } from "./guardrails-core-delivery-surface";
@@ -76,7 +75,6 @@ export function registerGuardrailsCoreSurfaces(input: GuardrailsCoreSurfaceRegis
 	registerGuardrailsValidationMethodSurface(pi);
 	registerGuardrailsToolHygieneSurface(pi);
 	registerGuardrailsGrowthMaturitySurface(pi);
-	registerGuardrailsAgentSpawnReadinessSurface(pi);
 	registerGuardrailsOpsCalibrationSurface(pi);
 	registerGuardrailsShellSpoofingScoreSurface(pi);
 	registerGuardrailsI18nLintSurface(pi);

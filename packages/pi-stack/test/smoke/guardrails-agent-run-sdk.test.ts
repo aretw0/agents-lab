@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore from "../../extensions/guardrails-core";
+import guardrailsAgentRun from "../../extensions/guardrails-agent-run";
 import { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaPacket, buildAgentRunSdkReadOnlyBatchPacket, buildAgentRunSdkReadOnlyBatchTaskPacket } from "../../extensions/guardrails-core-exports";
 
 describe("agent run SDK packet surfaces", () => {
@@ -720,8 +720,8 @@ describe("agent run SDK packet surfaces", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
-    guardrailsCore(pi);
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
     const registeredSdkTools = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls
       .map(([tool]) => tool as { name?: string; parameters?: { type?: string; properties?: Record<string, unknown> } })
       .filter((tool) => tool.name?.startsWith("agent_run_sdk_"));

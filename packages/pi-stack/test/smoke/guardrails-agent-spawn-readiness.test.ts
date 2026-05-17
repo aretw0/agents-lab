@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore from "../../extensions/guardrails-core";
+import guardrailsAgentRun from "../../extensions/guardrails-agent-run";
 import { buildAgentInvocationSpecPacket, buildAgentRunExecutorStrategyPacket, buildAgentRunOperatorPacket, buildAgentRunPlan, buildAgentRunStartPacket, buildAgentRunStartupDiagnosticPacket, buildDeclaredFileScopedSdkWorkerTools, buildToolkitContract, classifyAgentRunFailure, evaluateAgentSpawnReadiness, evaluateDeclaredPathPolicy, resolveExecutionCwdParam, resolveProviderExecutionBudgetEvidence, sameCwd } from "../../extensions/guardrails-core-exports";
 import { buildAgentRunAbortPlan } from "../../extensions/guardrails-core-agent-run-runtime";
 
@@ -544,9 +544,9 @@ describe("agent spawn readiness contract", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
 
-    guardrailsCore(pi);
+    guardrailsAgentRun(pi);
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_spawn_readiness_gate");
     const tool = toolCall?.[0] as {
       execute: (
@@ -590,8 +590,8 @@ describe("agent spawn readiness contract", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
-    guardrailsCore(pi);
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
 
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_start_packet");
     const tool = toolCall?.[0] as {
@@ -638,8 +638,8 @@ describe("agent spawn readiness contract", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
-    guardrailsCore(pi);
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
 
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_operator_packet");
     const tool = toolCall?.[0] as {
@@ -693,8 +693,8 @@ describe("agent spawn readiness contract", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
-    guardrailsCore(pi);
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
 
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_invocation_spec_packet");
     const tool = toolCall?.[0] as {
@@ -857,8 +857,8 @@ describe("agent spawn readiness contract", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
-    guardrailsCore(pi);
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_executor_strategy_packet");
     const tool = toolCall?.[0] as {
       execute: (
@@ -1166,8 +1166,8 @@ describe("agent spawn readiness contract", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
-    guardrailsCore(pi);
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
 
     const getTool = (name: string) => {
       const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === name);
@@ -1348,9 +1348,9 @@ describe("agent spawn readiness contract", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
 
-    guardrailsCore(pi);
+    guardrailsAgentRun(pi);
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_plan");
     const tool = toolCall?.[0] as {
       execute: (
