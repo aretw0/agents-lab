@@ -104,7 +104,8 @@ export function buildSessionBudget(sessions, thresholds = DEFAULT_THRESHOLDS) {
   };
 }
 
-const STATIC_IMPORT_RE = /(?:import|export)\s+(?:[^'"]*?from\s+)?["'](\.\.?\/[^"']+)["']|import\(["'](\.\.?\/[^"']+)["']\)/g;
+const STATIC_IMPORT_RE = /(?:import|export)\s+(?:[^'"]*?from\s+)?["'](\.\.?\/[^"']+)["']/g;
+const DYNAMIC_IMPORT_RE = /import\(\s*["'](\.\.?\/[^"']+)["']\s*\)/g;
 
 function resolveRelativeModule(specifier, baseFile) {
   const base = path.resolve(path.dirname(baseFile), specifier);
@@ -114,7 +115,7 @@ function resolveRelativeModule(specifier, baseFile) {
   return undefined;
 }
 
-function collectStaticImportGraph(entryFile, allowedRoot, seen = new Set()) {
+function collectImportGraph(entryFile, allowedRoot, options = {}, seen = new Set()) {
   const filePath = path.resolve(entryFile);
   if (seen.has(filePath)) return seen;
   const relativeToAllowedRoot = path.relative(path.resolve(allowedRoot), filePath);
@@ -131,11 +132,26 @@ function collectStaticImportGraph(entryFile, allowedRoot, seen = new Set()) {
   const importRe = new RegExp(STATIC_IMPORT_RE);
   let match;
   while ((match = importRe.exec(source))) {
-    const specifier = match[1] || match[2];
+    const specifier = match[1];
     const resolved = resolveRelativeModule(specifier, filePath);
-    if (resolved) collectStaticImportGraph(resolved, allowedRoot, seen);
+    if (resolved) collectImportGraph(resolved, allowedRoot, options, seen);
+  }
+
+  if (options.includeDynamicImports) {
+    const dynamicImportRe = new RegExp(DYNAMIC_IMPORT_RE);
+    while ((match = dynamicImportRe.exec(source))) {
+      const specifier = match[1];
+      const resolved = resolveRelativeModule(specifier, filePath);
+      if (resolved) collectImportGraph(resolved, allowedRoot, options, seen);
+    }
   }
   return seen;
+}
+
+function sumGraphKb(graph) {
+  let bytes = 0;
+  for (const filePath of graph) bytes += statSync(filePath).size;
+  return Number((bytes / 1024).toFixed(1));
 }
 
 export function collectEntrypointStats(cwd = process.cwd()) {
@@ -147,13 +163,15 @@ export function collectEntrypointStats(cwd = process.cwd()) {
   return extensions
     .map((entry) => {
       const entryPath = path.resolve(path.dirname(packagePath), entry);
-      const graph = collectStaticImportGraph(entryPath, extensionRoot);
-      let bytes = 0;
-      for (const filePath of graph) bytes += statSync(filePath).size;
+      const eagerGraph = collectImportGraph(entryPath, extensionRoot);
+      const reachableGraph = collectImportGraph(entryPath, extensionRoot, { includeDynamicImports: true });
       return {
         entry,
-        files: graph.size,
-        kb: Number((bytes / 1024).toFixed(1)),
+        files: eagerGraph.size,
+        kb: sumGraphKb(eagerGraph),
+        reachableFiles: reachableGraph.size,
+        reachableKb: sumGraphKb(reachableGraph),
+        lazyFiles: Math.max(0, reachableGraph.size - eagerGraph.size),
       };
     })
     .sort((a, b) => b.kb - a.kb);

@@ -107,7 +107,32 @@ test("collectEntrypointStats measures transitive local extension imports", () =>
     assert.equal(stats.length, 1);
     assert.equal(stats[0].entry, "./extensions/main.ts");
     assert.equal(stats[0].files, 2);
+    assert.equal(stats[0].reachableFiles, 2);
+    assert.equal(stats[0].lazyFiles, 0);
     assert.ok(stats[0].kb > 0);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("collectEntrypointStats separates eager imports from dynamic reachable imports", () => {
+  const cwd = makeWorkspace();
+  try {
+    const extRoot = createMinimalPiStack(cwd, ["./extensions/main.ts"]);
+    writeFileSync(
+      join(extRoot, "main.ts"),
+      'import { value } from "./helper";\nexport async function load() { return import("./lazy"); }\nexport const main = value;\n',
+      "utf8",
+    );
+    writeFileSync(join(extRoot, "helper.ts"), 'export const value = "ok";\n', "utf8");
+    writeFileSync(join(extRoot, "lazy.ts"), 'export const lazy = "cold";\n', "utf8");
+
+    const stats = collectEntrypointStats(cwd);
+
+    assert.equal(stats[0].files, 2);
+    assert.equal(stats[0].reachableFiles, 3);
+    assert.equal(stats[0].lazyFiles, 1);
+    assert.ok(stats[0].reachableKb >= stats[0].kb);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
