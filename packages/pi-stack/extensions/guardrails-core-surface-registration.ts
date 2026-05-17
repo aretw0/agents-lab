@@ -13,7 +13,6 @@ import {
 } from "./guardrails-core-lane-queue-surface";
 import { registerGuardrailsMacroRefactorSurface } from "./guardrails-core-macro-refactor-surface";
 import { registerGuardrailsMarkerCheckSurface } from "./guardrails-core-marker-check-surface";
-import { registerGuardrailsOpsCalibrationSurface } from "./guardrails-core-ops-calibration-surface";
 import { registerGuardrailsRecurringFailureSurface } from "./guardrails-core-recurring-failure-surface";
 import { registerGuardrailsRuntimeConfigSurface } from "./guardrails-core-runtime-config-surface";
 import { registerGuardrailsSafeMutationSurface } from "./guardrails-core-safe-mutation-surface";
@@ -75,7 +74,6 @@ export function registerGuardrailsCoreSurfaces(input: GuardrailsCoreSurfaceRegis
 	registerGuardrailsValidationMethodSurface(pi);
 	registerGuardrailsToolHygieneSurface(pi);
 	registerGuardrailsGrowthMaturitySurface(pi);
-	registerGuardrailsOpsCalibrationSurface(pi);
 	registerGuardrailsShellSpoofingScoreSurface(pi);
 	registerGuardrailsI18nLintSurface(pi);
 	registerGuardrailsBackgroundProcessSurface(pi);
