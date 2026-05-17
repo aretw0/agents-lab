@@ -16568,6 +16568,15 @@
       "method": "smoke-test",
       "timestamp": "2026-05-17T01:41:21.660Z",
       "evidence": "Added agent_run_sdk_readonly_batch_fan_in_packet to derive per-worker read-only outcomes from shared registry/log runtime with buildAgentRunOutcomePacket, then aggregate via buildAgentRunBatchOutcomePacket. Missing-run smoke fails closed without dispatch; schema remains object. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts passed; git diff --check passed; project-validate clean; line_budget_snapshot watch with aboveExtract=0."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1088-READONLY-BATCH-FAN-IN-LIVE-20260516",
+      "target": "TASK-BUD-1088",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-live-tool-preview",
+      "timestamp": "2026-05-17T02:21:52.643Z",
+      "evidence": "After reload, agent_run_sdk_readonly_batch_fan_in_packet loaded live and failed closed for nonexistent TASK-BUD-1087 narrow fanout runs: decision=fail, recommendation=ask-human, blockers included worker-process-not-completed/worker-output-missing for all 3 expected runs, dispatch=no authorization=none. agent_run_sdk_readonly_batch_status also loaded live and reported missing=3 fanInReady=no. No workers executed."
     }
   ]
 }
