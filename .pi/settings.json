@@ -8,36 +8,6 @@
     "../packages/pi-skills",
     "../packages/lab-skills",
     {
-      "source": "npm:@aretw0/pi-stack",
-      "extensions": [],
-      "skills": [],
-      "themes": []
-    },
-    {
-      "source": "npm:@aretw0/git-skills",
-      "extensions": [],
-      "skills": [],
-      "themes": []
-    },
-    {
-      "source": "npm:@aretw0/web-skills",
-      "extensions": [],
-      "skills": [],
-      "themes": []
-    },
-    {
-      "source": "npm:@aretw0/pi-skills",
-      "extensions": [],
-      "skills": [],
-      "themes": []
-    },
-    {
-      "source": "npm:@aretw0/lab-skills",
-      "extensions": [],
-      "skills": [],
-      "themes": []
-    },
-    {
       "source": "npm:@ifi/oh-pi-extensions",
       "extensions": [
         "!extensions/custom-footer.ts",

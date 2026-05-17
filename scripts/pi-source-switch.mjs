@@ -110,7 +110,7 @@ function getSource(entry) {
   return typeof entry === "string" ? entry : entry?.source;
 }
 
-function resolvePackageName(source) {
+export function resolvePackageName(source, settingsDir = path.dirname(getSettingsPath(false))) {
   if (!source) return undefined;
   // npm:@scope/name@version → @scope/name
   if (source.startsWith("npm:")) {
@@ -131,7 +131,6 @@ function resolvePackageName(source) {
     source.startsWith("../") ||
     /^[A-Z]:\\/.test(source)
   ) {
-    const settingsDir = path.dirname(getSettingsPath(false));
     const resolved = path.resolve(settingsDir, source);
     const pkgPath = path.join(resolved, "package.json");
     if (existsSync(pkgPath)) {
@@ -145,10 +144,14 @@ function resolvePackageName(source) {
   return undefined;
 }
 
-function buildLocalSources() {
+function toPortableRelativePath(fromDir, targetPath) {
+  return path.relative(fromDir, targetPath).split(path.sep).join("/");
+}
+
+function buildLocalSources(settingsDir) {
   const sources = new Map();
   for (const [name, dir] of WORKSPACE_PACKAGES) {
-    sources.set(name, path.resolve(dir));
+    sources.set(name, settingsDir ? toPortableRelativePath(settingsDir, path.resolve(dir)) : path.resolve(dir));
   }
   return sources;
 }
@@ -161,14 +164,21 @@ function buildPublishedSources() {
   return sources;
 }
 
-function rewritePackages(entries, desiredSources) {
+export function rewritePackages(entries, desiredSources, options = {}) {
+  const settingsDir = options.settingsDir ?? path.dirname(getSettingsPath(false));
   const remaining = new Set(desiredSources.keys());
   const result = [];
+  const seenManaged = new Set();
 
   for (const entry of entries) {
     const source = getSource(entry);
-    const name = resolvePackageName(source);
+    const name = resolvePackageName(source, settingsDir);
     if (name && desiredSources.has(name)) {
+      if (seenManaged.has(name)) {
+        remaining.delete(name);
+        continue;
+      }
+      seenManaged.add(name);
       remaining.delete(name);
       const newSource = desiredSources.get(name);
       // Preserve filter config if entry is an object
@@ -190,12 +200,12 @@ function rewritePackages(entries, desiredSources) {
   return result;
 }
 
-function printStatus(entries) {
+function printStatus(entries, settingsDir) {
   console.log("\nManaged package sources:\n");
   for (const [name] of WORKSPACE_PACKAGES) {
     const entry = entries.find((e) => {
       const src = getSource(e);
-      return resolvePackageName(src) === name;
+      return resolvePackageName(src, settingsDir) === name;
     });
     const source = entry ? getSource(entry) : "<not configured>";
     const isLocal =
@@ -209,43 +219,57 @@ function printStatus(entries) {
   }
 }
 
-const opts = parseArgs(process.argv);
-const settingsPath = getSettingsPath(opts.piLocal);
-const settings = loadSettings(settingsPath);
-const currentEntries = Array.isArray(settings.packages) ? settings.packages : [];
-const scope = opts.piLocal ? "project" : "user";
-
-if (opts.mode === "status") {
-  console.log(`\nSettings: ${settingsPath} (${scope})`);
-  printStatus(currentEntries);
-  process.exit(0);
+function isMain() {
+  return process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
 }
 
-const desiredSources =
-  opts.mode === "local" ? buildLocalSources() : buildPublishedSources();
-const nextEntries = rewritePackages(currentEntries, desiredSources);
+function run() {
+  const opts = parseArgs(process.argv);
+  const settingsPath = getSettingsPath(opts.piLocal);
+  const settings = loadSettings(settingsPath);
+  const currentEntries = Array.isArray(settings.packages) ? settings.packages : [];
+  const scope = opts.piLocal ? "project" : "user";
 
-console.log(`\nSwitching to ${opts.mode} mode (${scope} settings)`);
-console.log(`Settings: ${settingsPath}\n`);
+  if (opts.mode === "status") {
+    console.log(`\nSettings: ${settingsPath} (${scope})`);
+    printStatus(currentEntries, path.dirname(settingsPath));
+    process.exit(0);
+  }
 
-for (const [name] of WORKSPACE_PACKAGES) {
-  const oldEntry = currentEntries.find(
-    (e) => resolvePackageName(getSource(e)) === name
-  );
-  const oldSource = oldEntry ? getSource(oldEntry) : "<missing>";
-  const newSource = desiredSources.get(name);
-  const changed = oldSource !== newSource;
-  console.log(`  ${name}`);
-  console.log(`    ${oldSource}`);
-  console.log(`    → ${newSource} ${changed ? "⬅" : "(no change)"}`);
+  const desiredSources =
+    opts.mode === "local"
+      ? buildLocalSources(opts.piLocal ? path.dirname(settingsPath) : undefined)
+      : buildPublishedSources();
+  const nextEntries = rewritePackages(currentEntries, desiredSources, {
+    settingsDir: path.dirname(settingsPath),
+  });
+
+  console.log(`\nSwitching to ${opts.mode} mode (${scope} settings)`);
+  console.log(`Settings: ${settingsPath}\n`);
+
+  for (const [name] of WORKSPACE_PACKAGES) {
+    const oldEntry = currentEntries.find(
+      (e) => resolvePackageName(getSource(e), path.dirname(settingsPath)) === name
+    );
+    const oldSource = oldEntry ? getSource(oldEntry) : "<missing>";
+    const newSource = desiredSources.get(name);
+    const changed = oldSource !== newSource;
+    console.log(`  ${name}`);
+    console.log(`    ${oldSource}`);
+    console.log(`    → ${newSource} ${changed ? "⬅" : "(no change)"}`);
+  }
+
+  if (opts.dryRun) {
+    console.log("\nDry run — no changes written.");
+    process.exit(0);
+  }
+
+  const nextSettings = { ...settings, packages: nextEntries };
+  mkdirSync(path.dirname(settingsPath), { recursive: true });
+  writeFileSync(settingsPath, JSON.stringify(nextSettings, null, 2) + "\n");
+  console.log(`\n✅ Settings written. Restart pi to reload packages.`);
 }
 
-if (opts.dryRun) {
-  console.log("\nDry run — no changes written.");
-  process.exit(0);
+if (isMain()) {
+  run();
 }
-
-const nextSettings = { ...settings, packages: nextEntries };
-mkdirSync(path.dirname(settingsPath), { recursive: true });
-writeFileSync(settingsPath, JSON.stringify(nextSettings, null, 2) + "\n");
-console.log(`\n✅ Settings written. Restart pi to reload packages.`);
