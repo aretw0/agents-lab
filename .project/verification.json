@@ -16559,6 +16559,15 @@
       "method": "refactor-smoke",
       "timestamp": "2026-05-17T00:41:08.360Z",
       "evidence": "Extracted registry/status/failure/diagnostic/log/follow/outcome/batch-outcome/abort tool registrations from guardrails-core-agent-spawn-readiness-surface.ts into guardrails-core-agent-run-lifecycle-surface.ts. Spawn readiness surface reduced from 1391 to 1039 lines and registerTool count from 23 to 14; line_budget_snapshot remains watch with aboveExtract=0. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts passed; git diff --check passed; project-validate clean."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1088-READONLY-BATCH-FAN-IN-PACKET-20260516",
+      "target": "TASK-BUD-1088",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "timestamp": "2026-05-17T01:41:21.660Z",
+      "evidence": "Added agent_run_sdk_readonly_batch_fan_in_packet to derive per-worker read-only outcomes from shared registry/log runtime with buildAgentRunOutcomePacket, then aggregate via buildAgentRunBatchOutcomePacket. Missing-run smoke fails closed without dispatch; schema remains object. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts passed; git diff --check passed; project-validate clean; line_budget_snapshot watch with aboveExtract=0."
     }
   ]
 }

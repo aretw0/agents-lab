@@ -860,6 +860,23 @@ describe("agent run SDK packet surfaces", () => {
     }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
     expect(batchStatusBlocked.content?.[0]?.text).toContain("blockers=run-ids-missing");
 
+    const batchFanInToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_readonly_batch_fan_in_packet");
+    expect(batchFanInToolCall?.[0]?.parameters).toMatchObject({ type: "object" });
+    const batchFanInTool = batchFanInToolCall?.[0] as typeof batchTool;
+    const batchFanInMissing = batchFanInTool.execute("tc-sdk-batch-fan-in-missing", {
+      batch_id: "task-bud-1071-sdk-readonly-batch-dispatch-preview",
+      expected_run_ids: ["batch-dispatch-surface-worker-a", "batch-dispatch-surface-worker-b"],
+      cache_status_by_run: [
+        { run_id: "batch-dispatch-surface-worker-a", cache_status: "hit" },
+        { run_id: "batch-dispatch-surface-worker-b", cache_status: "miss" },
+      ],
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
+    expect(batchFanInMissing.details?.mode).toBe("agent-run-sdk-readonly-batch-fan-in-packet");
+    expect(batchFanInMissing.details?.processStartAllowed).toBe(false);
+    expect(batchFanInMissing.content?.[0]?.text).toContain("decision=fail");
+    expect(batchFanInMissing.content?.[0]?.text).toContain("worker-process-not-completed:batch-dispatch-surface-worker-a:unknown");
+    expect(batchFanInMissing.content?.[0]?.text).toContain("dispatch=no");
+
     const arenaToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_provider_model_arena_packet");
     const arenaTool = arenaToolCall?.[0] as typeof batchTool;
     const arenaSurface = arenaTool.execute("tc-sdk-arena-preview", {

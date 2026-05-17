@@ -1,8 +1,8 @@
 import { type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildAgentRunSdkReadOnlyBatchPacket, type AgentRunSdkReadOnlyBatchPacketInput } from "./guardrails-core-agent-run-sdk-preview";
-import { buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
-import { readLogTail, readRegistryEntry, startSdkInProcessWorker } from "./guardrails-core-agent-run-surface-runtime";
+import { buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
+import { readLogByteCount, readLogTail, readRegistryEntry, startSdkInProcessWorker } from "./guardrails-core-agent-run-surface-runtime";
 import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
@@ -232,6 +232,101 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
       };
       return buildOperatorVisibleToolResponse({
         label: "agent_run_sdk_readonly_batch_status",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_sdk_readonly_batch_fan_in_packet",
+    label: "Agent Run SDK Read-Only Batch Fan-In Packet",
+    description: "Report-only fan-in packet that derives per-worker outcomes from the shared registry/log runtime and aggregates them with the existing batch outcome contract. Never dispatches workers.",
+    parameters: Type.Object({
+      batch_id: Type.String({ description: "Batch id being aggregated." }),
+      expected_run_ids: Type.Optional(Type.Array(Type.String(), { description: "Run ids expected in the fan-in set." })),
+      cache_status_by_run: Type.Optional(Type.Array(Type.Object({
+        run_id: Type.Optional(Type.String({ description: "Worker run id." })),
+        cache_status: Type.Optional(Type.String({ description: "Cache status: hit, miss, or unknown." })),
+      }), { description: "Explicit cache evidence status per worker." })),
+      touched_files_by_run: Type.Optional(Type.Array(Type.Object({
+        run_id: Type.Optional(Type.String({ description: "Worker run id." })),
+        touched_files: Type.Optional(Type.Array(Type.String(), { description: "Files touched by this worker. Read-only batches expect none." })),
+      }), { description: "Optional observed touched files per worker." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope was involved." })),
+      unexpected_dirty: Type.Optional(Type.Boolean({ description: "Blocks when workspace dirty state was unexpected." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const expectedRunIds = asOptionalStringArray(p.expected_run_ids) ?? [];
+      const cacheRows = Array.isArray(p.cache_status_by_run) ? p.cache_status_by_run.filter((entry): entry is Record<string, unknown> => !!entry && typeof entry === "object") : [];
+      const touchedRows = Array.isArray(p.touched_files_by_run) ? p.touched_files_by_run.filter((entry): entry is Record<string, unknown> => !!entry && typeof entry === "object") : [];
+      const cacheStatusByRun = new Map(cacheRows.map((row) => [typeof row.run_id === "string" ? row.run_id : "", typeof row.cache_status === "string" ? row.cache_status : "unknown"]));
+      const touchedFilesByRun = new Map(touchedRows.map((row) => [typeof row.run_id === "string" ? row.run_id : "", asOptionalStringArray(row.touched_files) ?? []]));
+      const workerOutcomes = expectedRunIds.map((runId) => {
+        const entry = readRegistryEntry(ctx.cwd, runId);
+        const logOutputBytes = readLogByteCount(entry?.logPath);
+        const outputBytes = typeof entry?.outputBytes === "number" ? entry.outputBytes : logOutputBytes;
+        const outcome = buildAgentRunOutcomePacket({
+          runId,
+          entry,
+          touchedFiles: touchedFilesByRun.get(runId) ?? [],
+          outputBytes,
+          fileContract: "read-only",
+        });
+        return {
+          runId,
+          processState: outcome.processState,
+          contractDecision: outcome.contractDecision,
+          touchedFiles: outcome.touchedFiles,
+          markerFailures: outcome.markerFailures,
+          outputBytes: outcome.outputBytes,
+          cacheStatus: cacheStatusByRun.get(runId) ?? "unknown",
+          outcome,
+        };
+      });
+      const aggregate = buildAgentRunBatchOutcomePacket({
+        batchId: typeof p.batch_id === "string" ? p.batch_id : undefined,
+        expectedRunIds,
+        workerOutcomes: workerOutcomes.map((worker) => ({
+          runId: worker.runId,
+          processState: worker.processState,
+          contractDecision: worker.contractDecision,
+          touchedFiles: worker.touchedFiles,
+          markerFailures: worker.markerFailures,
+          outputBytes: worker.outputBytes,
+          cacheStatus: worker.cacheStatus,
+        })),
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+        unexpectedDirty: asOptionalBoolean(p.unexpected_dirty),
+      });
+      const result = {
+        mode: "agent-run-sdk-readonly-batch-fan-in-packet" as const,
+        activation: "none" as const,
+        authorization: "none" as const,
+        dispatchAllowed: false,
+        processStartAllowed: false,
+        processStopAllowed: false,
+        batchId: typeof p.batch_id === "string" ? p.batch_id : "",
+        expectedRunIds,
+        workerOutcomes,
+        aggregate,
+        decision: aggregate.decision,
+        recommendation: aggregate.recommendation,
+        blockers: aggregate.blockers,
+        summary: [
+          "agent-run-sdk-readonly-batch-fan-in:",
+          `decision=${aggregate.decision}`,
+          `recommendation=${aggregate.recommendation}`,
+          `batchId=${typeof p.batch_id === "string" ? p.batch_id : "unknown"}`,
+          `workers=${workerOutcomes.length}`,
+          aggregate.blockers.length > 0 ? `blockers=${aggregate.blockers.join("|")}` : undefined,
+          "dispatch=no",
+          "authorization=none",
+        ].filter(Boolean).join(" "),
+      };
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_sdk_readonly_batch_fan_in_packet",
         summary: result.summary,
         details: result,
       });
