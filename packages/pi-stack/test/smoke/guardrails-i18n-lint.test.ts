@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lintI18nUserFacingText } from "../../extensions/guardrails-core";
+import { lintI18nUserFacingText } from "../../extensions/guardrails-core-exports";
 import { registerGuardrailsI18nLintSurface } from "../../extensions/guardrails-core-i18n-lint-surface";
 
 describe("guardrails i18n user-facing lint", () => {

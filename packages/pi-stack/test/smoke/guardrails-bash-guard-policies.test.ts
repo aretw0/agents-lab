@@ -10,7 +10,7 @@ import {
   detectUpstreamPiPackageMutation,
   evaluateBashGuardPolicies,
   isUpstreamPiPackagePath,
-} from "../../extensions/guardrails-core";
+} from "../../extensions/guardrails-core-exports";
 
 describe("guardrails-core bash guard policies", () => {
   it("keeps bash guard detections in the extracted policy module", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluateColonyPromotionGate } from "../../extensions/guardrails-core";
+import { evaluateColonyPromotionGate } from "../../extensions/guardrails-core-exports";
 
 describe("colony promotion readiness gate", () => {
   it("returns ready-for-colony-gate only when background and agent-run signals are green", () => {

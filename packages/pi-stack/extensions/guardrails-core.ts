@@ -95,7 +95,6 @@ import {
   resolveGuardrailsPortConflictConfig,
   type GuardrailsPortConflictConfig,
 } from "./guardrails-core-web-routing";
-export * from "./guardrails-core-exports";
 export {
   computeLoopEvidenceReadiness,
   shouldRefreshLoopEvidenceFromRuntimeSnapshot,

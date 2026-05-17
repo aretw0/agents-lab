@@ -27,7 +27,7 @@ import {
   resolveValidationKnownCollectorResult,
   resolveValidationMethodPlan,
   reviewLocalSliceHumanConfirmedContract,
-} from "../../extensions/guardrails-core";
+} from "../../extensions/guardrails-core-exports";
 
 describe("guardrails-core hardening re-exports", () => {
   it("exposes operational hardening helpers through guardrails-core", () => {

@@ -3,7 +3,7 @@ import {
   detectPortConflict,
   extractExplicitPorts,
   looksLikeServerStartCommand,
-} from "../../extensions/guardrails-core";
+} from "../../extensions/guardrails-core-exports";
 
 describe("guardrails-core port conflict", () => {
   it("extractExplicitPorts captura padrões comuns", () => {

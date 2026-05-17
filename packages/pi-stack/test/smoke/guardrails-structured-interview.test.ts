@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveStructuredInterview } from "../../extensions/guardrails-core";
+import { resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
 import { registerGuardrailsStructuredInterviewSurface } from "../../extensions/guardrails-core-structured-interview-surface";
 
 describe("structured interview primitive", () => {

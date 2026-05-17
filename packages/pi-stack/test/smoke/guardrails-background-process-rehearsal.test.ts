@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluateBackgroundProcessRehearsal } from "../../extensions/guardrails-core";
+import { evaluateBackgroundProcessRehearsal } from "../../extensions/guardrails-core-exports";
 
 describe("background process rehearsal contract", () => {
   it("returns ready when minimum rehearsal evidence is complete", () => {

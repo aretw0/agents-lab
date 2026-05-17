@@ -8,7 +8,7 @@ import {
   resolveI18nArtifactIntent,
   resolveI18nIntentConfig,
   summarizeI18nIntentConfig,
-} from "../../extensions/guardrails-core";
+} from "../../extensions/guardrails-core-exports";
 
 const tmpRoots: string[] = [];
 

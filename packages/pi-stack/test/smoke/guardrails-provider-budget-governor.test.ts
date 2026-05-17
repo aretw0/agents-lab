@@ -3,7 +3,7 @@ import {
   detectProviderBudgetGovernorMisconfig,
   providerBudgetGovernorMisconfigReason,
   shouldAnnounceStrictInteractiveMode,
-} from "../../extensions/guardrails-core";
+} from "../../extensions/guardrails-core-exports";
 
 describe("guardrails-core provider-budget governor misconfig", () => {
   it("does not flag when governor is disabled", () => {

@@ -81,7 +81,7 @@ import {
   normalizeDispatchFailureFingerprint,
   computeIdenticalFailureStreak,
   shouldPauseOnIdenticalFailure,
-} from "../../extensions/guardrails-core";
+} from "../../extensions/guardrails-core-exports";
 
 describe("guardrails-core long-run intent queue", () => {
   it("uses safe defaults when settings are missing", () => {

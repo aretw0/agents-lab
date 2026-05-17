@@ -5,7 +5,7 @@ import {
 	structuredJsonWrite,
 	structuredRead,
 	structuredWrite,
-} from "../../extensions/guardrails-core";
+} from "../../extensions/guardrails-core-exports";
 
 describe("guardrails-core structured-io re-export", () => {
 	it("exposes structured I/O helpers via guardrails-core", () => {

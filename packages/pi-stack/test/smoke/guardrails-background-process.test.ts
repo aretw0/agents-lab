@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent } from "../../extensions/guardrails-core";
+import guardrailsCore from "../../extensions/guardrails-core";
+import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent } from "../../extensions/guardrails-core-exports";
 
 describe("background process control plan", () => {
   function makeMockPi(seedTools: Array<{ name: string; description?: string }> = []) {

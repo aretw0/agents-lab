@@ -4,7 +4,7 @@ import {
 	buildSafeLargeFileMutationResult,
 	assessStructuredQueryRisk,
 	buildStructuredQueryPlanResult,
-} from "../../extensions/guardrails-core";
+} from "../../extensions/guardrails-core-exports";
 
 describe("guardrails-core safe-mutation re-export", () => {
 	it("exposes safe-mutation helpers through guardrails-core surface", () => {

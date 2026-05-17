@@ -9,7 +9,7 @@ import {
   parseGuardrailsIntent,
   summarizeGuardrailsIntent,
   resolveGuardrailsIntentRuntimeDecision,
-} from "../../extensions/guardrails-core";
+} from "../../extensions/guardrails-core-exports";
 
 describe("guardrails-core intent bus", () => {
   it("round-trips board execute intent with canonical envelope", () => {

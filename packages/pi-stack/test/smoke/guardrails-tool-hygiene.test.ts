@@ -2,13 +2,14 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, {
+import guardrailsCore from "../../extensions/guardrails-core";
+import {
   buildAgentsAsToolsCalibrationScore,
   buildLineBudgetSnapshot,
   buildSyntaxHygieneSummary,
   buildToolHygieneScorecard,
   classifyToolHygiene,
-} from "../../extensions/guardrails-core";
+} from "../../extensions/guardrails-core-exports";
 
 describe("tool hygiene scorecard", () => {
   it("classifies protected long-run and scheduler tools as human-approval only", () => {

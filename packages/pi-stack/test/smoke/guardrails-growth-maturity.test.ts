@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { evaluateGrowthMaturityScorePacket } from "../../extensions/guardrails-core";
+import guardrailsCore from "../../extensions/guardrails-core";
+import { evaluateGrowthMaturityScorePacket } from "../../extensions/guardrails-core-exports";
 
 function makeMockPi() {
   const rawPi = {

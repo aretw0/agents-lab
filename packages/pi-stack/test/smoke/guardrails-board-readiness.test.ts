@@ -6,7 +6,7 @@ import {
   buildBoardExecuteTaskIntentText,
   buildBoardReadinessStatusLabel,
   evaluateBoardLongRunReadiness,
-} from "../../extensions/guardrails-core";
+} from "../../extensions/guardrails-core-exports";
 
 describe("guardrails-core board readiness", () => {
   function seedTasks(cwd: string, tasks: unknown[]): void {

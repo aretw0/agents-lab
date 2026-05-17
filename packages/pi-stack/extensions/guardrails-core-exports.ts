@@ -1,6 +1,7 @@
 export { normalizeCwdForCompare, resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
 
 export {
+  buildWideSingleFileSliceStatusLabel,
   resolveBloatSmellConfig,
   shouldEmitBloatSmellSignal,
   extractAssistantTextFromTurnMessage,
@@ -8,6 +9,10 @@ export {
   estimateCodeBloatFromWriteInput,
   buildTextBloatStatusLabel,
   buildCodeBloatStatusLabel,
+  evaluateCodeBloatSmell,
+  evaluateTextBloatSmell,
+  evaluateWideSingleFileSlice,
+  summarizeAssumptionText,
 } from "./guardrails-core-bloat";
 export {
   resolveLongRunIntentQueueConfig,
@@ -59,6 +64,14 @@ export {
   computeIdenticalFailureStreak,
   shouldPauseOnIdenticalFailure,
 } from "./guardrails-core-lane-queue";
+export {
+  buildGuardrailsRuntimeConfigSetResult,
+  buildPragmaticAutonomySystemPrompt,
+  coerceGuardrailsRuntimeConfigValue,
+  readGuardrailsRuntimeConfigSnapshot,
+  resolveGuardrailsRuntimeConfigSpec,
+  resolvePragmaticAutonomyConfig,
+} from "./guardrails-core-runtime-config";
 export {
   buildProviderRetryExhaustedActionLines,
   buildToolOutputOrphanRecoveryActionLines,
@@ -145,3 +158,31 @@ export {
   detectShellInlineCommandSensitiveMarkerCheck,
   evaluateTextMarkerCheck,
 } from "./guardrails-core-marker-check";
+export {
+  computeLoopEvidenceReadiness,
+  shouldRefreshLoopEvidenceFromRuntimeSnapshot,
+} from "./guardrails-core-lane-queue-evidence";
+export {
+  classifyRouting,
+  detectPortConflict,
+  extractDomains,
+  extractExplicitPorts,
+  hasInteractiveIntent,
+  isDisallowedBash,
+  looksLikeServerStartCommand,
+  readReservedSessionWebPort,
+  resolveGuardrailsPortConflictConfig,
+} from "./guardrails-core-web-routing";
+export {
+  detectProviderBudgetGovernorMisconfig,
+  providerBudgetGovernorMisconfigReason,
+} from "./guardrails-core-provider-budget-governor";
+export {
+  extractPathsFromBash,
+  isAllowedOutside,
+  isInsideCwd,
+  isSensitive,
+  isUpstreamPiPackagePath,
+  upstreamPiPackageMutationToolReason,
+} from "./guardrails-core-path-guard";
+export { shouldAnnounceStrictInteractiveMode } from "./guardrails-core-command-utils";
