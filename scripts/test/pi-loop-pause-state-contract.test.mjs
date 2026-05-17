@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { applyLoopControlToState } from "../pi-loop-pause.mjs";
+import { applyLoopControlToState, resolveLoopLeaseStatus } from "../pi-loop-pause.mjs";
 
 test("applyLoopControlToState pause sets mode and stop fields consistently", () => {
   const base = {
@@ -43,4 +43,21 @@ test("applyLoopControlToState resume preserves dispatch-failure boundary when de
   assert.equal(next.mode, "running");
   assert.equal(next.stopCondition, "dispatch-failure");
   assert.equal(next.stopReason, "dispatch-failure");
+});
+
+test("resolveLoopLeaseStatus classifies stale and fresh leases", () => {
+  const now = new Date("2026-05-17T12:00:00.000Z");
+
+  assert.deepEqual(
+    resolveLoopLeaseStatus({ leaseExpiresAtIso: "2026-05-17T11:59:59.000Z" }, now),
+    { known: true, expired: true, label: "expired" },
+  );
+  assert.deepEqual(
+    resolveLoopLeaseStatus({ leaseExpiresAtIso: "2026-05-17T12:00:01.000Z" }, now),
+    { known: true, expired: false, label: "fresh" },
+  );
+  assert.deepEqual(
+    resolveLoopLeaseStatus({}, now),
+    { known: false, expired: undefined, label: "unknown" },
+  );
 });

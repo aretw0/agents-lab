@@ -30,6 +30,7 @@ import { homedir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
+import { buildPiDevPressureReport, computeStrictFailures } from "./pi-dev-pressure.mjs";
 
 const REPO_ROOT = path.resolve(process.cwd());
 const LOCAL_AGENT_DIR = path.join(REPO_ROOT, ".sandbox", "pi-agent");
@@ -57,6 +58,7 @@ function parseArgs(argv) {
 		dryRun: false,
 		noAuthImport: false,
 		dev: false,
+		forcePressure: false,
 		piArgs: [],
 	};
 
@@ -92,6 +94,10 @@ function parseArgs(argv) {
 		}
 		if (a === "--dev") {
 			out.dev = true;
+			continue;
+		}
+		if (a === "--force-pressure") {
+			out.forcePressure = true;
 			continue;
 		}
 		if (a === "--") {
@@ -143,6 +149,7 @@ function printHelp() {
 		"  node scripts/pi-isolated.mjs [status|help|adopt-latest|canonicalize-settings] [--reset] [--dev] [--dry-run] [--no-auth-import] [-- <args do pi>]",
 		"",
 		"--dev: pausa o loop autônomo (stopCondition=manual-pause) antes de iniciar pi.",
+		"--force-pressure: permite iniciar --dev mesmo quando pi:dev:pressure:strict bloquear.",
 		"       Use 'npm run pi:loop:resume' para retomar a fábrica depois.",
 	].join("\n"));
 }
@@ -447,6 +454,20 @@ export function detectSessionResumeIntent(piArgs) {
 	return piArgs.some((arg) => typeof arg === "string" && arg.trim() === "--resume");
 }
 
+export function resolvePiDevPressureGate(report, { force = false, resume = false } = {}) {
+	const failures = computeStrictFailures(report);
+	if (failures.length === 0) {
+		return { allowed: true, failures, reason: "clean" };
+	}
+	if (force) {
+		return { allowed: true, failures, reason: "forced" };
+	}
+	if (!resume) {
+		return { allowed: true, failures, reason: "new-session-advisory" };
+	}
+	return { allowed: false, failures, reason: "strict-failures" };
+}
+
 function run() {
 	const opts = parseArgs(process.argv);
 
@@ -504,8 +525,12 @@ function run() {
 	const bin = process.execPath;
 	const launchArgs = [localPiCli, ...opts.piArgs];
 
-	const devPauseResult = opts.dev ? pauseLoopForDevSession(opts.dryRun) : "skipped";
 	const sessionResumeRequested = detectSessionResumeIntent(opts.piArgs);
+	const pressureReport = opts.dev ? buildPiDevPressureReport(REPO_ROOT) : undefined;
+	const pressureGate = pressureReport
+		? resolvePiDevPressureGate(pressureReport, { force: opts.forcePressure, resume: sessionResumeRequested })
+		: { allowed: true, failures: [], reason: "not-dev" };
+	let devPauseResult = opts.dev && opts.dryRun ? pauseLoopForDevSession(true) : "skipped";
 
 	if (opts.dryRun) {
 		console.log("pi isolated dry-run");
@@ -517,10 +542,29 @@ function run() {
 			console.log(`  ${change.from} -> ${change.to}`);
 		}
 		console.log(`loop pause:       ${devPauseResult}`);
+		if (pressureReport) {
+			console.log(`pressure:         ${pressureReport.recommendation} (${pressureGate.reason})`);
+			for (const signal of pressureReport.signals) {
+				console.log(`  [${signal.level}] ${signal.code}: ${signal.detail}`);
+			}
+		}
 		console.log(`local cli:        ${localPiCli}`);
 		console.log(`exec:             ${bin} ${launchArgs.join(" ")}`);
 		return;
 	}
+
+	if (!pressureGate.allowed) {
+		console.error("pi-isolated: bloqueado por pi:dev:pressure:strict");
+		console.error(`pi-isolated: ${pressureReport.summary}`);
+		for (const signal of pressureReport.signals) {
+			console.error(`  [${signal.level}] ${signal.code}: ${signal.detail}`);
+		}
+		console.error("pi-isolated: ação recomendada: iniciar sessão nova/limpa em vez de retomar runtime pesado.");
+		console.error("pi-isolated: override explícito para diagnóstico: npm run pi:dev -- --force-pressure");
+		process.exit(2);
+	}
+
+	devPauseResult = opts.dev ? pauseLoopForDevSession(false) : "skipped";
 
 	if (created || authAction === "imported") {
 		const notes = [];
@@ -548,6 +592,10 @@ function run() {
 		}
 		if (sessionResumeRequested) {
 			console.log("pi-isolated: --resume retoma a sessão do pi; loop de fábrica continua pausado até npm run pi:loop:resume");
+		}
+		if (pressureReport?.signals?.length && pressureGate.reason === "new-session-advisory") {
+			console.log(`pi-isolated: pressure-advisory ${pressureReport.summary}`);
+			console.log("pi-isolated: sessão nova permitida; resume pesado continua bloqueado.");
 		}
 	}
 

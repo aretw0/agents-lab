@@ -54,6 +54,21 @@ export function applyLoopControlToState(state, action) {
 	};
 }
 
+export function resolveLoopLeaseStatus(state, now = new Date()) {
+	const expiresAtMs = typeof state?.leaseExpiresAtIso === "string"
+		? Date.parse(state.leaseExpiresAtIso)
+		: NaN;
+	if (!Number.isFinite(expiresAtMs)) {
+		return { known: false, expired: undefined, label: "unknown" };
+	}
+	const expired = expiresAtMs < now.getTime();
+	return {
+		known: true,
+		expired,
+		label: expired ? "expired" : "fresh",
+	};
+}
+
 function printStatus(state) {
 	if (!state) {
 		console.log("pi:loop:status  loop state file não encontrado");
@@ -61,9 +76,12 @@ function printStatus(state) {
 		return;
 	}
 	const paused = state.stopCondition !== "none";
-	console.log(`pi:loop:status  stopCondition=${state.stopCondition}  mode=${state.mode}  health=${state.health}`);
-	console.log(`  ${paused ? "⏸  loop pausado" : "▶  loop ativo"}`);
+	const lease = resolveLoopLeaseStatus(state);
+	const activeLabel = !paused && lease.expired === true ? "⚠  loop stale (lease expirado)" : paused ? "⏸  loop pausado" : "▶  loop ativo";
+	console.log(`pi:loop:status  stopCondition=${state.stopCondition}  mode=${state.mode}  health=${state.health}  lease=${lease.label}`);
+	console.log(`  ${activeLabel}`);
 	console.log(`  atualizado: ${state.updatedAtIso ?? "(desconhecido)"}`);
+	if (lease.expired === true) console.log(`  lease expirou: ${state.leaseExpiresAtIso ?? "(desconhecido)"}`);
 	console.log(`  path: ${LOOP_STATE_PATH}`);
 }
 
