@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore from "../../extensions/guardrails-core";
+import guardrailsBackgroundProcess from "../../extensions/guardrails-background-process";
 import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent } from "../../extensions/guardrails-core-exports";
 
 describe("background process control plan", () => {
@@ -14,7 +14,7 @@ describe("background process control plan", () => {
       ...seedTools,
       ...(rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool),
     ]);
-    return rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    return rawPi as unknown as Parameters<typeof guardrailsBackgroundProcess>[0];
   }
 
   function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
@@ -209,7 +209,7 @@ describe("background process control plan", () => {
 
   it("infers readiness capability signals from available tooling and allows explicit override", async () => {
     const pi = makeMockPi([{ name: "bg_status", description: "background process status/log/stop" }]);
-    guardrailsCore(pi);
+    guardrailsBackgroundProcess(pi);
     const readinessTool = getTool(pi, "background_process_readiness_score");
 
     const inferred = await readinessTool.execute(
@@ -242,7 +242,7 @@ describe("background process control plan", () => {
 
   it("background_process_readiness_packet exposes unified blocked/ready-window guidance", async () => {
     const pi = makeMockPi([{ name: "bg_status", description: "background process status/log/stop" }]);
-    guardrailsCore(pi);
+    guardrailsBackgroundProcess(pi);
     const packetTool = getTool(pi, "background_process_readiness_packet");
 
     const blocked = await packetTool.execute(
@@ -339,7 +339,7 @@ describe("background process control plan", () => {
 
   it("exposes readiness/rehearsal/lifecycle classifiers as read-only tools", async () => {
     const pi = makeMockPi();
-    guardrailsCore(pi);
+    guardrailsBackgroundProcess(pi);
     const planTool = getTool(pi, "background_process_plan");
     const readinessTool = getTool(pi, "background_process_readiness_score");
     const rehearsalTool = getTool(pi, "background_process_rehearsal_gate");

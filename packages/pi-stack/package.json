@@ -35,6 +35,7 @@
 			"./extensions/guardrails-agent-run.ts",
 			"./extensions/guardrails-ops-calibration.ts",
 			"./extensions/guardrails-unattended-continuation.ts",
+			"./extensions/guardrails-background-process.ts",
 			"./extensions/scheduler-governance.ts",
 			"./extensions/stack-sovereignty.ts",
 			"./extensions/colony-pilot.ts",
