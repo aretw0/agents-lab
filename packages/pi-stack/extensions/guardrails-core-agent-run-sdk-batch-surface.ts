@@ -1,7 +1,7 @@
 import { type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildAgentRunSdkReadOnlyBatchPacket, type AgentRunSdkReadOnlyBatchPacketInput } from "./guardrails-core-agent-run-sdk-preview";
-import { buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
+import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
 import { readLogByteCount, readLogTail, readRegistryEntry, startSdkInProcessWorker } from "./guardrails-core-agent-run-surface-runtime";
 import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
@@ -232,6 +232,83 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
       };
       return buildOperatorVisibleToolResponse({
         label: "agent_run_sdk_readonly_batch_status",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_sdk_readonly_batch_abort",
+    label: "Agent Run SDK Read-Only Batch Abort",
+    description: "Dry-first abort plan for read-only SDK batch workers. execute=true requires operator_confirmed=true and only targets registered worker pids through the shared abort plan.",
+    parameters: Type.Object({
+      batch_id: Type.Optional(Type.String({ description: "Batch id for display only." })),
+      run_ids: Type.Optional(Type.Array(Type.String(), { description: "Worker run ids to abort." })),
+      execute: Type.Optional(Type.Boolean({ description: "When true, send SIGTERM only to registered worker pids after all gates pass." })),
+      operator_confirmed: Type.Optional(Type.Boolean({ description: "Explicit human confirmation for execute=true." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const batchId = typeof p.batch_id === "string" ? p.batch_id : "";
+      const runIds = Array.isArray(p.run_ids) ? p.run_ids.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0) : [];
+      const executeRequested = p.execute === true;
+      const operatorConfirmed = p.operator_confirmed === true;
+      const blockers = runIds.length === 0 ? ["run-ids-missing"] : [];
+      const plans = runIds.map((runId) => {
+        const entry = readRegistryEntry(ctx.cwd, runId);
+        return buildAgentRunAbortPlan({
+          runId,
+          entry,
+          execute: executeRequested,
+          operatorConfirmed,
+          cwdExpected: ctx.cwd,
+        });
+      });
+      for (const plan of plans) {
+        if (plan.decision === "blocked") blockers.push(...plan.blockers.map((blocker) => `${plan.runId || "unknown"}:${blocker}`));
+      }
+      const stopAllowed = executeRequested && blockers.length === 0 && plans.length > 0 && plans.every((plan) => plan.processStopAllowed && !!plan.pid);
+      const stoppedPids: number[] = [];
+      if (stopAllowed) {
+        for (const plan of plans) {
+          if (plan.pid) {
+            process.kill(plan.pid, "SIGTERM");
+            stoppedPids.push(plan.pid);
+          }
+        }
+      }
+      const decision = blockers.length > 0 ? "blocked" : stopAllowed ? "abort-ready" : "dry-run";
+      const result = {
+        mode: "agent-run-sdk-readonly-batch-abort" as const,
+        activation: "none" as const,
+        authorization: stopAllowed ? "explicit-human" as const : "none" as const,
+        dispatchAllowed: false,
+        processStartAllowed: false,
+        processStopAllowed: stopAllowed,
+        decision,
+        blockers,
+        batchId,
+        runIds,
+        executeRequested,
+        operatorConfirmed,
+        plans,
+        stoppedPids,
+        summary: [
+          "agent-run-sdk-readonly-batch-abort:",
+          `decision=${decision}`,
+          batchId ? `batchId=${batchId}` : undefined,
+          `runs=${runIds.length}`,
+          `execute=${executeRequested ? "yes" : "no"}`,
+          `processStopAllowed=${stopAllowed ? "yes" : "no"}`,
+          stoppedPids.length > 0 ? `stopped=${stoppedPids.length}` : undefined,
+          blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+          "dispatch=no",
+          `authorization=${stopAllowed ? "explicit-human" : "none"}`,
+        ].filter(Boolean).join(" "),
+      };
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_sdk_readonly_batch_abort",
         summary: result.summary,
         details: result,
       });

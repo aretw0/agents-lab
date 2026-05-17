@@ -860,6 +860,21 @@ describe("agent run SDK packet surfaces", () => {
     }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
     expect(batchStatusBlocked.content?.[0]?.text).toContain("blockers=run-ids-missing");
 
+    const batchAbortToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_readonly_batch_abort");
+    expect(batchAbortToolCall?.[0]?.parameters).toMatchObject({ type: "object" });
+    const batchAbortTool = batchAbortToolCall?.[0] as typeof batchTool;
+    const batchAbortMissing = batchAbortTool.execute("tc-sdk-batch-abort-missing", {
+      batch_id: "task-bud-1071-sdk-readonly-batch-dispatch-preview",
+      run_ids: ["batch-dispatch-surface-worker-a", "batch-dispatch-surface-worker-b"],
+      execute: true,
+      operator_confirmed: true,
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
+    expect(batchAbortMissing.details?.mode).toBe("agent-run-sdk-readonly-batch-abort");
+    expect(batchAbortMissing.details?.processStopAllowed).toBe(false);
+    expect(batchAbortMissing.content?.[0]?.text).toContain("decision=blocked");
+    expect(batchAbortMissing.content?.[0]?.text).toContain("run-not-found");
+    expect(batchAbortMissing.content?.[0]?.text).toContain("dispatch=no");
+
     const batchFanInToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_sdk_readonly_batch_fan_in_packet");
     expect(batchFanInToolCall?.[0]?.parameters).toMatchObject({ type: "object" });
     const batchFanInTool = batchFanInToolCall?.[0] as typeof batchTool;

@@ -16577,6 +16577,15 @@
       "method": "post-reload-live-tool-preview",
       "timestamp": "2026-05-17T02:21:52.643Z",
       "evidence": "After reload, agent_run_sdk_readonly_batch_fan_in_packet loaded live and failed closed for nonexistent TASK-BUD-1087 narrow fanout runs: decision=fail, recommendation=ask-human, blockers included worker-process-not-completed/worker-output-missing for all 3 expected runs, dispatch=no authorization=none. agent_run_sdk_readonly_batch_status also loaded live and reported missing=3 fanInReady=no. No workers executed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1088-READONLY-BATCH-ABORT-SURFACE-20260517",
+      "target": "TASK-BUD-1088",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "timestamp": "2026-05-17T03:23:32.081Z",
+      "evidence": "Added agent_run_sdk_readonly_batch_abort dry-first aggregate abort surface. It composes buildAgentRunAbortPlan per run id, blocks missing runs, never dispatches starts, and only permits processStopAllowed when execute=true, operator_confirmed=true, all registered worker pids are running in cwd. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts passed; git diff --check passed; project-validate clean; line_budget_snapshot watch aboveExtract=0."
     }
   ]
 }
