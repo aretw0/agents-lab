@@ -31,6 +31,9 @@ describe("guardrails-core orchestrator budget", () => {
 		expect(autoDrainSource).toContain("evaluateBoardLongRunReadiness");
 		expect(surfaceRegistrationSource).toContain("registerGuardrailsDeliverySurface(pi, appendAuditEntry)");
 		expect(surfaceRegistrationSource).toContain("registerGuardrailsSafeMutationSurface(pi, appendAuditEntry)");
+		expect(surfaceRegistrationSource).not.toContain("registerGuardrailsAutonomyLaneSurface");
+		expect(surfaceRegistrationSource).not.toContain("registerGuardrailsToolHygieneSurface");
+		expect(surfaceRegistrationSource).not.toContain("registerGuardrailsGrowthMaturitySurface");
 		expect(surfaceRegistrationSource).not.toContain("registerGuardrailsAgentSpawnReadinessSurface");
 		expect(surfaceRegistrationSource).not.toContain("registerGuardrailsOpsCalibrationSurface");
 		expect(surfaceRegistrationSource).not.toContain("registerGuardrailsUnattendedContinuationSurface");

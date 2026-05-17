@@ -78,9 +78,6 @@ export { shouldAnnounceStrictInteractiveMode } from "./guardrails-core-command-u
 import { registerGuardrailsCoreEventSurface } from "./guardrails-core-event-surface";
 import { registerGuardrailsCoreToolCallGuard } from "./guardrails-core-tool-call-guard";
 import { registerGuardrailsCoreSurfaces, type GuardrailsLaneQueueSurfaceRuntimeSnapshot } from "./guardrails-core-surface-registration";
-import {
-  isInsideCwd,
-} from "./guardrails-core-path-guard";
 export {
   extractPathsFromBash,
   isAllowedOutside,
@@ -675,7 +672,6 @@ export default function (pi: ExtensionAPI) {
   registerGuardrailsCoreSurfaces({
     pi,
     appendAuditEntry,
-    isInsideCwd,
     getShellRoutingProfile: () => shellRoutingProfile,
     onRuntimeConfigChanged: (ctx) => {
       longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);

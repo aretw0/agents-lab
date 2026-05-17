@@ -8,7 +8,8 @@
         "!extensions/guardrails-agent-run.ts",
         "!extensions/guardrails-ops-calibration.ts",
         "!extensions/guardrails-unattended-continuation.ts",
-        "!extensions/guardrails-background-process.ts"
+        "!extensions/guardrails-background-process.ts",
+        "!extensions/guardrails-core-extended-surfaces.ts"
       ]
     },
     "../packages/git-skills",
