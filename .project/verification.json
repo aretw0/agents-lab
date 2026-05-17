@@ -16604,6 +16604,24 @@
       "method": "implementation-smoke-and-live-batch",
       "timestamp": "2026-05-17T04:55:37.971Z",
       "evidence": "[rationale:risk-control] Implemented and live-validated control-plane-first read-only SDK batch runner surfaces: agent_run_sdk_readonly_batch_dispatch, status, fan_in_packet, and abort. Reuses existing SDK worker runtime, registry/log/status/follow/abort/outcome/batch-outcome primitives; no parallel registry or outcome semantics. Smoke tests passed for agent-run-sdk/task-packets/runtime; line budget aboveExtract=0; reload live checks passed; exact-confirmed TASK-BUD-1087 narrow batch dispatched 3 workers, all completed, status fanInReady=yes, fan-in decision=pass, git clean."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1089-DEV-PRESSURE-GUARD-20260517",
+      "target": "TASK-BUD-1089",
+      "target_type": "task",
+      "status": "passed",
+      "method": "external-launcher-smoke",
+      "timestamp": "2026-05-17T18:05:00.000Z",
+      "evidence": "Added report-only pi-dev-pressure script with session budget, entrypoint budget, settings/loop/git signals, cleanup dry-run/apply guarded to .sandbox/pi-agent/sessions, resume pressure gate in pi-isolated, pi:dev dry-run, and stale loop lease status. Removed one 206.89 MB isolated Pi session via guarded apply. Validation: node --test scripts/test/pi-dev-pressure.test.mjs scripts/test/pi-isolated-resume-intent.test.mjs scripts/test/pi-loop-pause-state-contract.test.mjs scripts/test/pi-runtime-artifact-audit.test.mjs scripts/test/pi-parity-curated-profile.test.mjs scripts/test/pi-parity-curation-gate.test.mjs passed; pi-dev-pressure strict no longer blocks after cleanup."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1090-SDK-TASK-BATCH-PACKETIZER-20260517",
+      "target": "TASK-BUD-1090",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "timestamp": "2026-05-17T18:05:00.000Z",
+      "evidence": "Added agent_run_sdk_readonly_batch_task_packet report-only tool and buildAgentRunSdkReadOnlyBatchTaskPacket helper. It derives narrow read-only workers from one board task, blocks protected scopes by default, returns exact future confirmation phrase, and never dispatches workers. Project board model is imported lazily inside execute to avoid adding board reads to initial hot path. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed."
     }
   ]
 }

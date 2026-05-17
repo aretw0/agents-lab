@@ -385,7 +385,7 @@
     {
       "id": "colony-c1-promotion",
       "description": "[RECOVERY:colony] Promover candidate da execução colony-c1 (c1|colony-mnzmi243-lk2d0) para materialização verificável no branch alvo.",
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         "colony-c1"
       ],
@@ -24295,6 +24295,59 @@
       "milestone": "colony-readonly-batch-maturity",
       "notes": "Created from user steering: stop treating serial worker canaries as the goal; evolve toward safe parallelism and colony-style effect with Codex Spark promoted envelopes.\n2026-05-16 steering: user clarified that worker primitives must be control-plane-first, not a parallel duplicated stack. Before implementing batch/fan-out, inspect existing primitives and reuse shared control-plane foundations for registry/status/log/abort/fan-in/state/verification wherever possible. Goal is long-term sustainable experimentation and staying close to community state of the art without concept drift.\n2026-05-16: Added control-plane-first worker primitive inventory before implementing batch runner. Key design: exact-confirmed read-only batch runner must compose existing batch packet, startSdkInProcessWorker, registry/log/status/abort, per-worker outcome packets, batch outcome packet, and board verification; do not create parallel worker-specific budget/scope/registry/log/outcome concepts. See docs/research/control-plane-first-worker-primitives-2026-05.md.\n2026-05-16: Milestone set to colony-readonly-batch-maturity. Iterate until read-only Codex Spark batch/fan-out has control-plane-first start/status/log/abort/fan-in maturity. Next implementation slice: exact-confirmed batch runner gate that reuses existing SDK worker runtime and registry/outcome primitives; no execution without exact confirmation.\n2026-05-16: Post-reload live validation: broad 2-worker TASK-BUD-1087 batch correctly blocked with worker-not-validated-envelope:needs-evidence-broad-readonly. Decomposed into validated narrow read/grep workers (<=2 declared files each) and agent_run_sdk_readonly_batch_dispatch preview returned decision=preview, workers=3, parallelDispatch=no, no execution. New fan-in packet implementation committed in 6fc5d705 and needs next /reload before live use.\n[rationale:risk-control] The batch runner is safe to complete because it is control-plane-first: it composes the existing SDK worker runtime, registry/log/status/follow/abort/outcome/batch-outcome primitives, keeps dispatch exact-confirmed, keeps fan-in report-only, and was live-validated with a narrow …\nCompleted after exact-confirmed live narrow batch run proved dispatch/status/fan-in path and abort surface was smoke-tested fail-closed.",
       "verification": "VERIF-TASK-BUD-1088-CONTROL-PLANE-BATCH-RUNNER-20260517"
+    },
+    {
+      "id": "TASK-BUD-1089",
+      "description": "Implement a P0 development velocity pressure primitive that detects when session/runtime/control-plane overhead is slowing development enough to require checkpoint, reduced governance surface, compact, new session, or cleanup.",
+      "status": "planned",
+      "priority": "p0",
+      "files": [
+        "docs/primitives/development-velocity-pressure.md",
+        "scripts/pi-dev-pressure.mjs",
+        "scripts/pi-isolated.mjs",
+        "scripts/pi-loop-pause.mjs",
+        "scripts/test/pi-dev-pressure.test.mjs",
+        "scripts/test/pi-isolated-resume-intent.test.mjs",
+        "scripts/test/pi-loop-pause-state-contract.test.mjs",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Define a report-only velocity pressure packet with context, dirty state, machine pressure, runtime/process age, dangling process count, board/tool-call pressure, and time since useful commit signals.",
+        "The primitive must never kill processes, reload, compact, dispatch workers, mutate settings, or clean disk; it only recommends continue/checkpoint-and-commit/reduce-governance-surface/compact/new-session/block-and-clean.",
+        "Add a lightweight operator protocol for high pressure: stop feature work, validate current dirty scope, commit/revert/stash, write minimal handoff, and prefer a clean session when needed.",
+        "Cover the primitive with deterministic tests for context-only pressure, dirty-scope pressure, disk/memory pressure, dangling-process pressure, and excessive ceremony/tool-call pressure.",
+        "Keep the implementation local-first and avoid reading the full board unless explicitly requested."
+      ],
+      "milestone": "ops-performance-governance",
+      "notes": "P0 from operator feedback on 2026-05-17: development became slower than a simpler devcontainer + Claude Code loop despite many guardrails. Treat velocity blindness as safety-critical, comparable to security: if the control plane slows work enough, it erodes trust and decision quality.\n2026-05-17 external Codex slice: added launcher-side pi-dev-pressure report, session budget cleanup dry-run/apply, resume pressure gate, pi:dev dry-run, and stale lease visibility. Committed as 9e529b55. Still in progress because full first-party runtime primitive/surface integration and broader signal coverage remain future slices.\n[provenance:human] source_task=none reason=unspecified"
+    },
+    {
+      "id": "TASK-BUD-1090",
+      "description": "Add a report-only board-task to narrow read-only SDK batch packetizer so proven fan-out can be prepared from task metadata without manually assembling every worker.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1088"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-run-sdk-preview.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-sdk-batch-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Expose a report-only task packetizer that reads one board task and derives a narrow read-only SDK batch packet without dispatching workers.",
+        "Default derived workers to 1-2 declared files, read/grep only, bounded timeout, explicit budget evidence, abort/event/final-output contracts, and exact future confirmation phrase.",
+        "Block protected task file scopes by default unless explicitly opted in.",
+        "Cover ready and protected-scope blocked cases in smoke tests.",
+        "Require exact-confirmed batch dispatch separately; this packetizer must not start workers."
+      ],
+      "milestone": "colony-readonly-batch-maturity",
+      "notes": "Created from current local-safe slice after TASK-BUD-1088: reduce manual batch assembly friction while preserving exact-confirmed dispatch and fan-in gates.\n[rationale:risk-control] The packetizer is safe because it is report-only, derives only narrow read-only workers from declared task files, blocks protected scopes by default, reuses the existing batch packet/dispatch/fan-in contracts, and never starts workers without the separate exact-confirmed dispatch surface.\nCompleted in 6c5fff36. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed.",
+      "verification": "VERIF-TASK-BUD-1090-SDK-TASK-BATCH-PACKETIZER-20260517"
     }
   ]
 }

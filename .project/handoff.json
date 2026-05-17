@@ -1,74 +1,60 @@
 {
-  "timestamp": "2026-05-15T14:25:09.774Z",
-  "context": "After crash recovery, exact-confirmed SDK failure-contract canary ran and passed for openai-codex/gpt-5.3-codex-spark. All five current arena [snip] d subprocess retry remain not promoted. [truncated:+311 chars]",
+  "timestamp": "2026-05-17T18:05:00.000Z",
+  "context": "External stabilization session after Pi runtime pressure made day-to-day work heavy. Session-budget blocker was removed, resume pressure is guarded, and SDK task batch packetizer was committed. Continue from Codex/local tests instead of relying on old Pi session resume.",
   "current_tasks": [
-    "TASK-BUD-1076"
+    "TASK-BUD-1089",
+    "TASK-BUD-1090"
   ],
   "next_actions": [
-    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
-    "Human decision: close TASK-BUD-1076 or keep open for scorecard persistence/automation polish.",
-    "Recommended next lane after closure/decision: start TASK-BUD-1078 supply-chain pnpm hardening [snip] nning read-only/dry-first. [truncated:+62 chars]",
-    "Do not use workers for protected-scope mutations without explicit authorization."
+    "Keep using npm run pi:dev:pressure and npm run pi:dev:dry before returning to Pi runtime.",
+    "Reduce governance hot path next: guardrails-core.ts is still over budget at files=150 kb=1806.",
+    "Treat context-watchdog as second diet target: files=72 kb=788.6.",
+    "Do not resume old Pi sessions; session budget blockers should be archived or deleted after checkpoint."
   ],
   "blockers": [
-    "context-watch-checkpoint-required",
-    "Board no-auto-close: TASK-BUD-1076 has evidence but should be closed by explicit human decision",
-    "Protected scopes remain blocked without explicit authorization",
-    "No paid/model calls without explicit budget and exact confirmation"
+    "guardrails-core hot path exceeds entrypoint budget",
+    "context-watchdog slightly exceeds entrypoint budget",
+    "loop lease is stale until a fresh Pi runtime owns it",
+    "settings contain 5 suppressed package entries to clean in a separate slice"
   ],
   "recent_validation": [
-    "agent_run_follow terminal completed outputBytes=802 lines=12; log close outputBytes=211",
-    "safe_marker_check passed for failure-contract log markers and ledger markers",
-    "agent_run_outcome_packet contract=pass process=completed touched=0 outputBytes=211"
+    "node --test scripts/test/pi-dev-pressure.test.mjs scripts/test/pi-isolated-resume-intent.test.mjs scripts/test/pi-loop-pause-state-contract.test.mjs scripts/test/pi-runtime-artifact-audit.test.mjs scripts/test/pi-parity-curated-profile.test.mjs scripts/test/pi-parity-curation-gate.test.mjs passed",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed",
+    "node scripts/pi-dev-pressure.mjs reports sessions count=0 and recommendation=reduce-governance-surface"
   ],
   "recent_commits": [
-    "209a7038 docs(arena): liberate codex spark failure contract",
-    "3cc3c7c6 chore(board): record fragility monitor issue"
+    "9e529b55 Add Pi dev pressure guard",
+    "6c5fff36 Add SDK task batch packetizer"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-1076",
+    "focus": "stabilize-pi-dev-runtime-pressure",
     "canonical_links": [
-      "task:TASK-BUD-1076",
-      "task:TASK-BUD-1078",
-      "commit:209a7038"
+      "task:TASK-BUD-1089",
+      "task:TASK-BUD-1090",
+      "commit:9e529b55",
+      "commit:6c5fff36"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-15T04:23:07.073Z",
-    "level": "warn",
-    "percent": 42,
-    "action": "continue",
-    "recommendation": "ask-human-close-task-bud-1076-or-proceed-to-p0-readonly-intake",
-    "stopStatus": "graceful",
-    "stopSource": "agent",
-    "stopSummary": "graceful source=agent; prior slice reported a bounded checkpoint."
+    "generatedAtIso": "2026-05-17T18:05:00.000Z",
+    "level": "checkpoint",
+    "percent": 0,
+    "action": "checkpoint-refresh",
+    "recommendation": "Continue with small external stabilization slices; commit each slice before returning to Pi runtime."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-15T04:23:07.073Z",
-      "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 42,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "checkpoint-refresh",
-      "recommendation": "ask-human-close-task-bud-1076-or-proceed-to-p0-readonly-intake"
-    },
-    {
-      "atIso": "2026-05-15T14:25:09.774Z",
-      "reason": "message_end",
+      "atIso": "2026-05-17T18:05:00.000Z",
+      "reason": "external-codex-checkpoint",
       "level": "checkpoint",
-      "percent": 55,
+      "percent": 0,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 55,
         "compactPct": 65
       },
-      "action": "write-checkpoint",
-      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+      "action": "checkpoint-refresh",
+      "recommendation": "Continue with small external stabilization slices; commit each slice before returning to Pi runtime."
     }
   ]
 }
