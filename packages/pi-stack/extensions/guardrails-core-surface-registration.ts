@@ -21,7 +21,6 @@ import { registerGuardrailsShellSpoofingScoreSurface } from "./guardrails-core-s
 import { registerGuardrailsStructuredInterviewSurface } from "./guardrails-core-structured-interview-surface";
 import { registerGuardrailsStructuredIoSurface } from "./guardrails-core-structured-io-surface";
 import { registerGuardrailsToolHygieneSurface } from "./guardrails-core-tool-hygiene-surface";
-import { registerGuardrailsUnattendedContinuationSurface } from "./guardrails-core-unattended-continuation-surface";
 import { registerGuardrailsUnattendedRehearsalSurface } from "./guardrails-core-unattended-rehearsal-surface";
 import { registerGuardrailsValidationMethodSurface } from "./guardrails-core-validation-method-surface";
 
@@ -69,7 +68,6 @@ export function registerGuardrailsCoreSurfaces(input: GuardrailsCoreSurfaceRegis
 	registerGuardrailsStructuredIoSurface(pi, appendAuditEntry, isInsideCwd);
 	registerGuardrailsStructuredInterviewSurface(pi);
 	registerGuardrailsAutonomyLaneSurface(pi);
-	registerGuardrailsUnattendedContinuationSurface(pi);
 	registerGuardrailsUnattendedRehearsalSurface(pi);
 	registerGuardrailsValidationMethodSurface(pi);
 	registerGuardrailsToolHygieneSurface(pi);
