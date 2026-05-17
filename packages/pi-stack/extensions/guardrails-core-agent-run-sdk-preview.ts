@@ -343,6 +343,54 @@ export interface AgentRunSdkReadOnlyBatchPacketResult {
   summary: string;
 }
 
+export interface AgentRunSdkReadOnlyBatchTaskInput {
+  taskId?: string;
+  task?: {
+    id?: string;
+    description?: string;
+    files?: string[];
+    verification?: string;
+  };
+  providerModelRef?: string;
+  cwd?: string;
+  maxWorkers?: number;
+  timeoutMs?: number;
+  budgetDecision?: ProviderExecutionBudgetDecision | string;
+  budgetEvidence?: string;
+  budgetEvidenceSource?: "route-advisory" | "provider-budget-snapshot" | "manual" | "unknown" | string;
+  budgetEvidenceProvider?: string;
+  includeProtectedScopes?: boolean;
+  protectedScopeRequested?: boolean;
+  unexpectedDirty?: boolean;
+}
+
+export interface AgentRunSdkReadOnlyBatchTaskResult {
+  mode: "agent-run-sdk-readonly-batch-task-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  parallelDispatchAllowed: false;
+  processStartAllowed: false;
+  processStopAllowed: false;
+  requiresHumanDecision: true;
+  decision: AgentRunSdkPacketDecision;
+  recommendationCode: "agent-run-sdk-readonly-batch-task-ready" | "agent-run-sdk-readonly-batch-task-blocked";
+  blockers: string[];
+  taskSpec: {
+    taskId: string;
+    fileCount: number;
+    protectedFileCount: number;
+    omittedFileCount: number;
+    includeProtectedScopes: boolean;
+  };
+  protectedFiles: string[];
+  omittedFiles: string[];
+  packet: AgentRunSdkReadOnlyBatchPacketResult;
+  humanConfirmationPhrase: string;
+  nextActions: string[];
+  summary: string;
+}
+
 export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacketInput = {}): AgentRunSdkInProcessPacketResult {
   const runId = normalizeText(input.runId);
   const goal = normalizeText(input.goal);
@@ -659,6 +707,34 @@ export function buildAgentRunSdkCachePackPacket(input: AgentRunSdkCachePackPacke
   };
 }
 
+function slugifyRunIdPart(value: string): string {
+  const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return slug.slice(0, 48) || "files";
+}
+
+function basenameWithoutExtension(filePath: string): string {
+  const normalized = filePath.replace(/\\/g, "/");
+  const base = normalized.split("/").filter(Boolean).pop() || normalized;
+  return base.replace(/\.[^.]+$/g, "") || base;
+}
+
+function isProtectedBatchTaskFile(filePath: string): boolean {
+  const normalized = filePath.replace(/\\/g, "/").replace(/^\.\//, "");
+  return normalized.startsWith(".github/")
+    || normalized === ".pi/settings.json"
+    || normalized.startsWith(".pi/settings")
+    || normalized.startsWith(".obsidian/")
+    || normalized.startsWith(".github/workflows/")
+    || normalized.includes("/credentials")
+    || normalized.includes("/secrets");
+}
+
+function chunkDeclaredFiles(files: string[], chunkSize: number): string[][] {
+  const chunks: string[][] = [];
+  for (let index = 0; index < files.length; index += chunkSize) chunks.push(files.slice(index, index + chunkSize));
+  return chunks;
+}
+
 export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBatchPacketInput = {}): AgentRunSdkReadOnlyBatchPacketResult {
   const batchId = normalizeText(input.batchId);
   const workersInput = Array.isArray(input.workers) ? input.workers : [];
@@ -769,6 +845,118 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
       `maxWorkers=${maxWorkers}`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
       "parallelDispatch=no",
+      "authorization=none",
+    ].filter(Boolean).join(" "),
+  };
+}
+
+export function buildAgentRunSdkReadOnlyBatchTaskPacket(input: AgentRunSdkReadOnlyBatchTaskInput = {}): AgentRunSdkReadOnlyBatchTaskResult {
+  const taskId = normalizeText(input.taskId || input.task?.id);
+  const description = normalizeText(input.task?.description);
+  const declaredFiles = normalizeFiles(input.task?.files);
+  const requestedMaxWorkers = normalizePositiveInt(input.maxWorkers, 3);
+  const maxWorkers = Math.max(2, Math.min(5, requestedMaxWorkers || 3));
+  const timeoutMs = normalizePositiveInt(input.timeoutMs, 90_000) || 90_000;
+  const providerModelRef = normalizeText(input.providerModelRef) || "openai-codex/gpt-5.3-codex-spark";
+  const cwd = normalizeText(input.cwd);
+  const includeProtectedScopes = input.includeProtectedScopes === true;
+  const protectedFiles = declaredFiles.filter(isProtectedBatchTaskFile);
+  const protectedScopeRequested = input.protectedScopeRequested === true || (protectedFiles.length > 0 && !includeProtectedScopes);
+  const unexpectedDirty = input.unexpectedDirty === true;
+  const chunks = chunkDeclaredFiles(declaredFiles, 2);
+  const omittedFiles = chunks.length > maxWorkers ? chunks.slice(maxWorkers).flat() : [];
+  const visibleChunks = chunks.slice(0, maxWorkers);
+  const baseRunId = slugifyRunIdPart(taskId || "task");
+  const sharedEvidence = [normalizeText(input.task?.verification) || `task:${taskId || "missing"}`];
+  const budgetDecision = input.budgetDecision || "warn";
+  const budgetEvidence = normalizeText(input.budgetEvidence)
+    || "task-derived read-only batch preview; exact human confirmation required before dispatch";
+  const budgetEvidenceSource = input.budgetEvidenceSource || "manual";
+  const budgetEvidenceProvider = normalizeText(input.budgetEvidenceProvider) || providerModelRef;
+  const workers = visibleChunks.map((files, index) => {
+    const label = slugifyRunIdPart(basenameWithoutExtension(files[files.length - 1] || `w${index + 1}`));
+    return {
+      runId: `${baseRunId}-readonly-w${index + 1}-${label}`,
+      goal: `Read only ${files.join(" and ")} for ${taskId || "the task"}. Return concise source-backed findings for the parent fan-in, report cache-hit/cache-miss, and perform no mutations.`,
+      providerModelRef,
+      cwd,
+      declaredFiles: files,
+      sharedEvidence,
+      timeoutMs,
+      toolAllowlist: ["read", "grep"],
+      sessionMode: "in-memory",
+      fileContract: "read-only",
+      validationGateKnown: true,
+      rollbackPlanKnown: true,
+      budgetDecision,
+      budgetEvidence,
+      budgetEvidenceSource,
+      budgetEvidenceProvider,
+      abortKnown: true,
+      eventStreamKnown: true,
+      finalOutputContractKnown: true,
+    } satisfies AgentRunSdkInProcessPacketInput;
+  });
+  const batchId = taskId ? `${baseRunId}-readonly-narrow-batch` : "";
+  const packet = buildAgentRunSdkReadOnlyBatchPacket({
+    batchId,
+    sharedEvidence,
+    maxWorkers,
+    workers,
+    protectedScopeRequested,
+    unexpectedDirty,
+  });
+  const blockers = [...packet.blockers];
+  if (!taskId) blockers.unshift("task-id-missing");
+  if (!input.task) blockers.unshift("task-not-found");
+  if (!description) blockers.push("task-description-missing");
+  if (declaredFiles.length === 0) blockers.push("task-files-missing");
+  if (omittedFiles.length > 0) blockers.push(`task-files-omitted:${omittedFiles.length}`);
+  if (protectedFiles.length > 0 && !includeProtectedScopes) blockers.push(`protected-task-files:${protectedFiles.length}`);
+  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  return {
+    mode: "agent-run-sdk-readonly-batch-task-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    parallelDispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    requiresHumanDecision: true,
+    decision,
+    recommendationCode: decision === "ready-for-human-decision" ? "agent-run-sdk-readonly-batch-task-ready" : "agent-run-sdk-readonly-batch-task-blocked",
+    blockers,
+    taskSpec: {
+      taskId,
+      fileCount: declaredFiles.length,
+      protectedFileCount: protectedFiles.length,
+      omittedFileCount: omittedFiles.length,
+      includeProtectedScopes,
+    },
+    protectedFiles,
+    omittedFiles,
+    packet,
+    humanConfirmationPhrase: packet.humanConfirmationPhrase,
+    nextActions: decision === "ready-for-human-decision"
+      ? [
+        "present the derived batch packet and exact confirmation phrase to the operator before any dispatch",
+        "if exact-confirmed later, use agent_run_sdk_readonly_batch_dispatch with the derived worker specs",
+        "after completion, use batch status and fan-in packet before any board verification or closure",
+      ]
+      : [
+        "resolve task-derived batch blockers before dispatch",
+        "split protected or broad scopes into explicit human-approved packets when needed",
+      ],
+    summary: [
+      "agent-run-sdk-readonly-batch-task-packet:",
+      `decision=${decision}`,
+      `task=${taskId || "missing"}`,
+      `files=${declaredFiles.length}`,
+      `workers=${workers.length}`,
+      protectedFiles.length > 0 ? `protectedFiles=${protectedFiles.length}` : undefined,
+      omittedFiles.length > 0 ? `omitted=${omittedFiles.length}` : undefined,
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+      "dispatch=no",
       "authorization=none",
     ].filter(Boolean).join(" "),
   };

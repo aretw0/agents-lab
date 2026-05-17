@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaPacket, buildAgentRunSdkReadOnlyBatchPacket } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket, buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaPacket, buildAgentRunSdkReadOnlyBatchPacket, buildAgentRunSdkReadOnlyBatchTaskPacket } from "../../extensions/guardrails-core";
 
 describe("agent run SDK packet surfaces", () => {
   it("builds sdk in-process packet preview without dispatch", async () => {
@@ -663,6 +663,54 @@ describe("agent run SDK packet surfaces", () => {
     expect(oversizedSharedEvidenceBatch.decision).toBe("blocked");
     expect(oversizedSharedEvidenceBatch.blockers).toContain("duplicate-shared-evidence:VERIF-DUPLICATE");
     expect(oversizedSharedEvidenceBatch.blockers).toContain("shared-evidence-too-large:3:301>300");
+
+    const taskBatchPacket = buildAgentRunSdkReadOnlyBatchTaskPacket({
+      taskId: "TASK-BUD-9999",
+      task: {
+        id: "TASK-BUD-9999",
+        description: "Derive a bounded read-only batch from task files.",
+        files: [
+          "package.json",
+          "pnpm-workspace.yaml",
+          "docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md",
+        ],
+        verification: "VERIF-TASK-BUD-9999-SEED",
+      },
+      cwd: process.cwd(),
+      budgetDecision: "ok",
+    });
+    expect(taskBatchPacket).toMatchObject({
+      mode: "agent-run-sdk-readonly-batch-task-packet",
+      decision: "ready-for-human-decision",
+      dispatchAllowed: false,
+      parallelDispatchAllowed: false,
+      taskSpec: {
+        taskId: "TASK-BUD-9999",
+        fileCount: 3,
+        protectedFileCount: 0,
+        omittedFileCount: 0,
+      },
+      humanConfirmationPhrase: "approve sdk readonly batch task-bud-9999-readonly-narrow-batch",
+    });
+    expect(taskBatchPacket.packet.workers).toHaveLength(2);
+    expect(taskBatchPacket.packet.workers[0]?.runSpec.declaredFiles).toEqual(["package.json", "pnpm-workspace.yaml"]);
+    expect(taskBatchPacket.packet.workers[1]?.runSpec.declaredFiles).toEqual(["docs/research/source-backed-pnpm-supply-chain-evidence-2026-05.md"]);
+    expect(taskBatchPacket.summary).toContain("dispatch=no");
+
+    const protectedTaskBatchPacket = buildAgentRunSdkReadOnlyBatchTaskPacket({
+      taskId: "TASK-BUD-PROTECTED",
+      task: {
+        id: "TASK-BUD-PROTECTED",
+        description: "Protected scopes need explicit opt-in.",
+        files: [".github/workflows/ci.yml", "package.json"],
+        verification: "VERIF-TASK-BUD-PROTECTED",
+      },
+      cwd: process.cwd(),
+      budgetDecision: "ok",
+    });
+    expect(protectedTaskBatchPacket.decision).toBe("blocked");
+    expect(protectedTaskBatchPacket.blockers).toContain("protected-scope-requested");
+    expect(protectedTaskBatchPacket.blockers).toContain("protected-task-files:1");
 
     const rawPi = {
       on: vi.fn(),

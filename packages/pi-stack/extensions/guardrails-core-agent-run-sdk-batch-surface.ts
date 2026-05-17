@@ -1,6 +1,6 @@
 import { type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { buildAgentRunSdkReadOnlyBatchPacket, type AgentRunSdkReadOnlyBatchPacketInput } from "./guardrails-core-agent-run-sdk-preview";
+import { buildAgentRunSdkReadOnlyBatchPacket, buildAgentRunSdkReadOnlyBatchTaskPacket, type AgentRunSdkReadOnlyBatchPacketInput } from "./guardrails-core-agent-run-sdk-preview";
 import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
 import { readLogByteCount, readLogTail, readRegistryEntry, startSdkInProcessWorker } from "./guardrails-core-agent-run-surface-runtime";
 import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
@@ -86,6 +86,51 @@ function sdkReadOnlyBatchParameters(extra: Record<string, unknown> = {}) {
 }
 
 export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
+  pi.registerTool({
+    name: "agent_run_sdk_readonly_batch_task_packet",
+    label: "Agent Run SDK Read-Only Batch Task Packet",
+    description: "Report-only board-task packetizer that derives a narrow read-only SDK batch from one .project task. Never dispatches workers; protected scopes block unless explicitly opted in.",
+    parameters: Type.Object({
+      task_id: Type.String({ description: "Board task id to derive a read-only batch packet from." }),
+      provider_model_ref: Type.Optional(Type.String({ description: "Provider/model ref for derived workers. Defaults to Codex Spark pilot model." })),
+      max_workers: Type.Optional(Type.Number({ description: "Maximum derived workers, clamped to 2..5." })),
+      timeout_ms: Type.Optional(Type.Number({ description: "Per-worker bounded timeout in milliseconds." })),
+      budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision for the derived worker specs." })),
+      budget_evidence: Type.Optional(Type.String({ description: "Scoped budget evidence for the derived worker specs." })),
+      budget_evidence_source: Type.Optional(Type.String({ description: "Budget evidence source." })),
+      budget_evidence_provider: Type.Optional(Type.String({ description: "Provider named by budget evidence." })),
+      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to protected task file scopes. Default false blocks .github/settings/.obsidian scopes." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
+      unexpected_dirty: Type.Optional(Type.Boolean({ description: "Blocks when workspace dirty state is unexpected." })),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const taskId = typeof p.task_id === "string" ? p.task_id : "";
+      const { readTasksBlockCached } = await import("./project-board-model");
+      const task = readTasksBlockCached(ctx.cwd).block.tasks.find((row) => row.id === taskId);
+      const result = buildAgentRunSdkReadOnlyBatchTaskPacket({
+        taskId,
+        task,
+        providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
+        cwd: ctx.cwd,
+        maxWorkers: typeof p.max_workers === "number" ? p.max_workers : undefined,
+        timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
+        budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
+        budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
+        budgetEvidenceSource: typeof p.budget_evidence_source === "string" ? p.budget_evidence_source : undefined,
+        budgetEvidenceProvider: typeof p.budget_evidence_provider === "string" ? p.budget_evidence_provider : undefined,
+        includeProtectedScopes: asOptionalBoolean(p.include_protected_scopes),
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+        unexpectedDirty: asOptionalBoolean(p.unexpected_dirty),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_sdk_readonly_batch_task_packet",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
   pi.registerTool({
     name: "agent_run_sdk_readonly_batch_packet",
     label: "Agent Run SDK Read-Only Batch Packet",
