@@ -56,6 +56,7 @@
 			"./extensions/monitor-sovereign.ts",
 			"./extensions/machine-maintenance.ts",
 			"./extensions/context-watchdog.ts",
+			"./extensions/context-watchdog-surfaces.ts",
 			"./extensions/write-preview-guard.ts",
 			"./extensions/custom-footer.ts"
 		],

@@ -4,7 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { readContextWatchFreshnessSignals } from "../../extensions/context-watchdog-freshness";
-import contextWatchdogExtension, {
+import contextWatchdogExtension from "../../extensions/context-watchdog";
+import {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
 	applyWarnCadenceEscalation,
@@ -87,7 +88,7 @@ import contextWatchdogExtension, {
 	shouldScheduleAutoCompactRetry,
 	shouldTriggerAutoCompact,
 	writeLocalSliceHandoffCheckpoint,
-} from "../../extensions/context-watchdog";
+} from "../../extensions/context-watchdog-exports";
 
 describe("context-watchdog", () => {
 	function makeMockPi() {

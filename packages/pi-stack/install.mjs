@@ -47,6 +47,7 @@ const INSTALL_PROFILES = {
 
 export const PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES = [
   "!extensions/guardrails-core-extended-surfaces.ts",
+  "!extensions/context-watchdog-surfaces.ts",
   "!extensions/guardrails-agent-run.ts",
   "!extensions/guardrails-ops-calibration.ts",
   "!extensions/guardrails-unattended-continuation.ts",

@@ -79,46 +79,14 @@ import {
 	handleAutoCompactError,
 } from "./context-watchdog-auto-compact-runtime";
 import { handlePostReloadAutoResume } from "./context-watchdog-post-reload-runtime";
-import { buildContextWatchdogApplyPreset, registerContextWatchdogStatusSurface } from "./context-watchdog-status-surface";
 import {
 	applyEmergencyContextWindowFallbackConfig,
-	composeAutoResumeSuppressionHint,
 	isContextWindowOverflowErrorMessage,
 	isProviderRequestTimeoutError,
 	persistContextWatchHandoffEvent,
 } from "./context-watchdog-runtime-helpers";
-export {
-	applyEmergencyContextWindowFallbackConfig,
-	composeAutoResumeSuppressionHint,
-	isContextWindowOverflowErrorMessage,
-	isProviderRequestTimeoutError,
-	persistContextWatchHandoffEvent,
-	writeLocalSliceHandoffCheckpoint,
-} from "./context-watchdog-runtime-helpers";
-export {
-	formatContextWatchCommandStatusSummary,
-	formatContextWatchCompactStageStatusSummary,
-	formatContextWatchDeterministicStopSummary,
-	formatContextWatchStatusToolSummary,
-	formatTimeoutPressureSummary,
-	resolveContextWatchAdaptiveStatusSummary,
-	resolveContextWatchCompactStageNextAction,
-} from "./context-watchdog-status-formatting";
 import {
-	clearAutoResumeAfterReloadIntent,
 	readAutoResumeAfterReloadIntent,
-	withAutoResumeAfterReloadIntent,
-	type AutoResumeAfterReloadIntent,
-} from "./context-watchdog-reload-intent";
-export {
-	clearAutoResumeAfterReloadIntent,
-	readAutoResumeAfterReloadIntent,
-	withAutoResumeAfterReloadIntent,
-} from "./context-watchdog-reload-intent";
-
-export type {
-	AutoResumeAfterReloadIntent,
-	AutoResumeAfterReloadIntentReason,
 } from "./context-watchdog-reload-intent";
 import {
 	buildContextWatchOperatorBrief,
@@ -129,15 +97,9 @@ import {
 	toOperatorTaskMnemonic,
 } from "./context-watchdog-operator-brief";
 import {
-	applyCheckpointTaskStatusFocus,
 	resolveHandoffGrowthMaturitySnapshot,
 	type HandoffGrowthMaturitySnapshot,
 } from "./context-watchdog-growth-checkpoint";
-export {
-	applyCheckpointTaskStatusFocus,
-	resolveHandoffGrowthMaturitySnapshot,
-} from "./context-watchdog-growth-checkpoint";
-export type { HandoffGrowthMaturitySnapshot } from "./context-watchdog-growth-checkpoint";
 import {
 	extractAutoResumePromptValue,
 	readContextWatchFreshnessSignals,
@@ -164,22 +126,6 @@ import {
 	type HandoffStopStatus,
 } from "./context-watchdog-handoff";
 import { formatContextWatchAutoResumePreviewSummary } from "./context-watchdog-continuation";
-export {
-	buildTurnBoundaryDecisionPacket,
-	consumeContextPreloadPack,
-	formatContextWatchAutoResumePreviewSummary,
-	formatContextWatchContinuationReadinessSummary,
-	formatContextWatchLocalSlicePreviewSummary,
-	formatContextWatchLocalSliceOperatorPacketPreviewSummary,
-	resolveContextWatchContinuationRecommendation,
-	TURN_BOUNDARY_DIRECTION_PROMPT,
-	type ContextPreloadProfile,
-	type ContextPreloadConsumeReport,
-	type ContextWatchContinuationRecommendationCode,
-	type TurnBoundaryDecision,
-	type TurnBoundaryDecisionPacket,
-	type TurnBoundaryReasonCode,
-} from "./context-watchdog-continuation";
 import {
 	buildAutoResumeDecisionSnapshot,
 	describeAutoResumeDispatchReason,
@@ -197,12 +143,10 @@ import {
 	type PreCompactReloadSignal,
 } from "./context-watchdog-resume";
 import {
-	applyContextWatchToHandoff,
 	contextWatchEventAgeMs,
 	latestContextWatchEvent,
 	resolveCompactCheckpointPersistence,
 	summarizeContextWatchEvent,
-	type ContextWatchHandoffEvent,
 	type ContextWatchHandoffReason,
 } from "./context-watchdog-handoff-events";
 import {
@@ -211,108 +155,6 @@ import {
 	writeHandoffJson,
 	writeProjectSettings,
 } from "./context-watchdog-storage";
-export {
-	applyContextWatchBootstrapToSettings,
-	applyContextWatchToHandoff,
-	assessLocalSliceHandoffBudget,
-	buildAutoCompactDiagnostics,
-	buildAutoResumePromptEnvelopeFromHandoff,
-	buildAutoResumePromptFromHandoff,
-	buildContextWatchBootstrapPlan,
-	buildLocalSliceHandoffCheckpoint,
-	LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS,
-	contextWatchActionForLevel,
-	contextWatchEventAgeMs,
-	deepMergeSettings,
-	deriveContextWatchThresholds,
-	evaluateContextWatch,
-	formatContextWatchStatus,
-	resolveContextWatchCompactStage,
-	handoffFreshnessAdvice,
-	handoffRefreshMode,
-	formatAutoResumeReloadHintShort,
-	resolveHandoffBoardReconciliation,
-	summarizeAutoResumePromptDiagnostics,
-	summarizeHandoffStopState,
-	latestContextWatchEvent,
-	resolveCompactCheckpointPersistence,
-	normalizeContextWatchdogConfig,
-	parseContextBootstrapPreset,
-	resolveAutoCompactCheckpointGate,
-	resolveAutoCompactEffectiveIdle,
-	resolveAutoCompactRetryDelayMs,
-	describeAutoResumeDispatchReason,
-	describeAutoResumeDispatchHint,
-	shouldNotifyAutoResumeSuppression,
-	resolveAutoResumeDispatchDecision,
-	resolvePreCompactReloadSignal,
-	resolveHandoffFreshness,
-	resolveHandoffPrepDecision,
-	shouldAnnounceContextWatch,
-	shouldAutoCheckpoint,
-	shouldEmitAutoResumeAfterCompact,
-	shouldRefreshHandoffBeforeAutoCompact,
-	shouldScheduleAutoCompactRetry,
-	shouldTriggerAutoCompact,
-	summarizeContextWatchEvent,
-	toAgeSec,
-	isAutoCompactDeferralReason,
-};
-
-export type {
-	ContextWatchAutoCompactDecision,
-	ContextWatchAutoCompactDiagnostics,
-	ContextWatchAutoCompactIdleState,
-	ContextWatchBootstrapPlan,
-	ContextWatchBootstrapPreset,
-	ContextWatchHandoffEvent,
-	ContextWatchHandoffReason,
-	ContextWatchdogConfig,
-	ContextWatchThresholds,
-	HandoffFreshnessLabel,
-	HandoffPrepReason,
-	HandoffRefreshMode,
-	HandoffStopSource,
-	HandoffStopStatus,
-	PreCompactReloadSignal,
-};
-
-export {
-	applyWarnCadenceEscalation,
-	describeContextWatchDeterministicStopHint,
-	formatContextWatchSteeringStatus,
-	resolveAutoCompactTimeoutPressureGuard,
-	resolveContextWatchAutoCompactTriggerOrigin,
-	resolveContextWatchDeterministicStopSignal,
-	resolveContextWatchOperatingCadence,
-	resolveContextWatchOperatorActionPlan,
-	resolveContextWatchOperatorSignal,
-	resolveContextWatchSignalNoiseExcessive,
-	resolveContextWatchSteeringDispatch,
-	resolveFinalTurnAnnouncementDispatch,
-	shouldEmitDeterministicStopSignal,
-} from "./context-watchdog-operator-signals";
-
-export type {
-	AutoCompactTimeoutPressureGuardDecision,
-	AutoCompactTimeoutPressureGuardReason,
-	ContextWatchAssessment,
-	ContextWatchAutoCompactTriggerOrigin,
-	ContextWatchDeterministicStopReason,
-	ContextWatchDeterministicStopSignal,
-	ContextWatchdogLevel,
-	ContextWatchOperatingCadence,
-	ContextWatchOperatingCadenceSignal,
-	ContextWatchOperatorActionKind,
-	ContextWatchOperatorActionPlan,
-	ContextWatchOperatorSignal,
-	ContextWatchOperatorSignalReason,
-	ContextWatchSteeringDelivery,
-	ContextWatchSteeringDispatch,
-	FinalTurnAnnouncementDispatch,
-	FinalTurnAnnouncementDispatchReason,
-} from "./context-watchdog-operator-signals";
-
 import {
 	reconcileAutoResumeHandoffFocus,
 	resolveAntiParalysisDispatch,
@@ -323,30 +165,6 @@ import {
 	resolveProgressPreservationSignal,
 	summarizeContextEconomySignal,
 	summarizeProgressPreservationSignal,
-} from "./context-watchdog-progress-signals";
-
-export {
-	reconcileAutoResumeHandoffFocus,
-	resolveAntiParalysisDispatch,
-	resolveCheckpointEvidenceReadyForCalmClose,
-	resolveContextEconomySignal,
-	resolvePreCompactCalmCloseSignal,
-	resolvePreCompactIdlePrepDispatch,
-	resolveProgressPreservationSignal,
-	summarizeContextEconomySignal,
-	summarizeProgressPreservationSignal,
-} from "./context-watchdog-progress-signals";
-
-export type {
-	AntiParalysisDispatchDecision,
-	AutoResumeHandoffFocusReconcileResult,
-	ContextEconomyOpportunityKind,
-	ContextEconomySignal,
-	PreCompactCalmCloseSignal,
-	PreCompactIdlePrepDispatch,
-	PreCompactIdlePrepDispatchReason,
-	ProgressPreservationSignal,
-	ProgressPreservationStatus,
 } from "./context-watchdog-progress-signals";
 
 const readContextWatchdogSourceMtimeMs = makeContextWatchdogSourceMtimeReader(import.meta.url);
@@ -973,64 +791,4 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		run(ctx, "message_end");
 	});
 
-	const statusRuntime = {
-		getConfig: () => config,
-		setConfig: (next: ContextWatchdogConfig) => { config = next; },
-		getThresholdOverrides: () => thresholdOverrides,
-		setThresholdOverrides: (next: ContextThresholdOverrides | undefined) => { thresholdOverrides = next; },
-		readContextThresholdOverrides,
-		buildAssessment: (ctx: ExtensionContext) => buildAssessment(ctx, config, thresholdOverrides),
-		run,
-		readTimeoutPressureState,
-		isReloadRequiredForSourceUpdate,
-		clearAutoCompactRetryTimer,
-		setLastAssessment: (assessment: ContextWatchAssessment | null) => { lastAssessment = assessment; },
-		getLastAutoCompactAt: () => lastAutoCompactAt,
-		getAutoCompactInFlight: () => autoCompactInFlight,
-		getAutoCompactRetryDueAt: () => autoCompactRetryDueAt,
-		hasAutoCompactRetryTimer: () => Boolean(autoCompactRetryTimer),
-		getLastAutoResumeDecision: () => lastAutoResumeDecision,
-		getLastAutoResumeAt: () => lastAutoResumeAt,
-		getLastSteeringSignal: () => lastSteeringSignal,
-		getCompactDeferCount: () => compactDeferCount,
-		getCompactDeferWindowStartedAt: () => compactDeferWindowStartedAt,
-		getLastAntiParalysisNotifyAt: () => lastAntiParalysisNotifyAt,
-		getAntiParalysisNotifyCountInWindow: () => antiParalysisNotifyCountInWindow,
-		getAnnouncementsInWindow,
-		getFinalTurnSuppressionsInWindow,
-		resetState: (ctx: ExtensionContext) => {
-			lastAssessment = null;
-			lastAnnouncedLevel = null;
-			lastAnnouncedAt = 0;
-			lastAutoCheckpointAt = 0;
-			lastAutoCompactAt = 0;
-			lastAutoResumeAt = 0;
-			lastAutoResumeDecision = null;
-			lastSteeringSignal = null;
-			autoCompactInFlight = false;
-			clearAutoCompactRetryTimer();
-			consecutiveWarnCount = 0;
-			compactDeferCount = 0;
-			compactDeferWindowStartedAt = 0;
-			compactForceWindowStartedAt = 0;
-			antiParalysisNotifyCountInWindow = 0;
-			lastAntiParalysisNotifyAt = 0;
-			lastPreCompactPrepNotifyAt = 0;
-			resetAnnouncementWindow();
-			lastDeterministicStopSignalAt = 0;
-			resetTimeoutPressure();
-		},
-		applyPreset: (ctx: ExtensionContext, presetInput?: unknown) => buildContextWatchdogApplyPreset(statusRuntime, ctx, presetInput),
-		constants: {
-			AUTO_COMPACT_RETRY_DELAY_MS,
-			SIGNAL_NOISE_WINDOW_MS,
-			SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
-			FINAL_TURN_CLOSE_HEADROOM_PCT,
-			CALM_CLOSE_DEFER_THRESHOLD,
-			ANTI_PARALYSIS_GRACE_WINDOW_MS,
-			ANTI_PARALYSIS_NOTIFY_COOLDOWN_MS,
-			ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW,
-		},
-	};
-	registerContextWatchdogStatusSurface(pi, statusRuntime);
 }

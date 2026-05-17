@@ -4,7 +4,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { readContextWatchFreshnessSignals } from "../../extensions/context-watchdog-freshness";
-import contextWatchdogExtension, {
+import contextWatchdogExtension from "../../extensions/context-watchdog";
+import contextWatchdogSurfacesExtension from "../../extensions/context-watchdog-surfaces";
+import {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
 	applyWarnCadenceEscalation,
@@ -87,7 +89,7 @@ import contextWatchdogExtension, {
 	shouldScheduleAutoCompactRetry,
 	shouldTriggerAutoCompact,
 	writeLocalSliceHandoffCheckpoint,
-} from "../../extensions/context-watchdog";
+} from "../../extensions/context-watchdog-exports";
 
 
 describe("context-watchdog tool surfaces", () => {
@@ -119,7 +121,7 @@ describe("context-watchdog tool surfaces", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-compact-stage-"));
 		try {
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_compact_stage_status");
 			const result = await tool.execute(
 				"tc-context-watch-compact-stage-status",
@@ -180,7 +182,7 @@ describe("context-watchdog tool surfaces", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-compact-stage-thresholds-"));
 		try {
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_compact_stage_status");
 			const result = await tool.execute(
 				"tc-context-watch-compact-stage-thresholds",
@@ -206,7 +208,7 @@ describe("context-watchdog tool surfaces", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-status-"));
 		try {
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_status");
 			const result = await tool.execute(
 				"tc-context-watch-status",
@@ -339,7 +341,7 @@ describe("context-watchdog tool surfaces", () => {
 				current_tasks: ["TASK-FOCUS"],
 			}, null, 2), "utf8");
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_status");
 			const result = await tool.execute(
 				"tc-context-watch-status-handoff-age",
@@ -371,7 +373,7 @@ describe("context-watchdog tool surfaces", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-status-command-noise-"));
 		try {
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const commandCall = (pi.registerCommand as ReturnType<typeof vi.fn>).mock.calls.find(([name]) => name === "context-watch");
 			const command = commandCall?.[1] as {
 				handler: (args: string, ctx: {
@@ -431,7 +433,7 @@ describe("context-watchdog tool surfaces", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-freshness-status-"));
 		try {
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_freshness_status");
 			const result = await tool.execute(
 				"tc-context-watch-freshness-status",
@@ -471,7 +473,7 @@ describe("context-watchdog tool surfaces", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-freshness-command-"));
 		try {
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const commandCall = (pi.registerCommand as ReturnType<typeof vi.fn>).mock.calls.find(([name]) => name === "context-watch");
 			const command = commandCall?.[1] as {
 				handler: (args: string, ctx: { cwd: string; ui: { notify: (msg: string, level?: string) => void; setStatus?: (k: string, v: string) => void } }) => Promise<void> | void;
@@ -511,7 +513,7 @@ describe("context-watchdog tool surfaces", () => {
 				{ id: "TASK-BUD-309", status: "completed" },
 			] }));
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_auto_resume_preview");
 			const schemaText = JSON.stringify((pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([registered]) => registered?.name === "context_watch_auto_resume_preview")?.[0]?.parameters ?? {});
 			expect(schemaText).not.toContain("taskStatusById");
@@ -564,7 +566,7 @@ describe("context-watchdog tool surfaces", () => {
 				{ id: "TASK-BUD-296", status: "planned", files: ["packages/pi-stack/extensions/context-watchdog-handoff.ts"] },
 			] }));
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_auto_resume_preview");
 			const result = await tool.execute("tc-auto-resume-active-focus", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 
@@ -601,7 +603,7 @@ describe("context-watchdog tool surfaces", () => {
 				{ id: "TASK-BUD-998", description: "local-safe docs cleanup", status: "planned", milestone: "signal-integrity-calibration", files: ["docs/research/local.md"] },
 			] }));
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_auto_resume_preview");
 			const result = await tool.execute("tc-auto-resume-protected-successor", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 
@@ -633,7 +635,7 @@ describe("context-watchdog tool surfaces", () => {
 				{ id: "TASK-BUD-998", description: "higher priority local-safe successor", status: "planned", priority: "p1", milestone: "signal-integrity-calibration", files: ["docs/research/local.md"] },
 			] }));
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_auto_resume_preview");
 			const result = await tool.execute("tc-auto-resume-p3-successor", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 
@@ -719,7 +721,7 @@ describe("context-watchdog tool surfaces", () => {
 			}));
 
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_preload_consume");
 			const result = await tool.execute(
 				"tc-context-preload-consume",
@@ -788,7 +790,7 @@ describe("context-watchdog tool surfaces", () => {
 				{ id: "TASK-BUD-321", status: "in-progress", description: "Continuation readiness smoke", files: ["packages/pi-stack/extensions/context-watchdog.ts"], acceptance_criteria: ["Smoke principal permanece verde."] },
 			] }));
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_continuation_readiness");
 			const schemaText = JSON.stringify((pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([registered]) => registered?.name === "context_watch_continuation_readiness")?.[0]?.parameters ?? {});
 			expect(schemaText).not.toContain("taskStatusById");
@@ -926,7 +928,7 @@ describe("context-watchdog tool surfaces", () => {
 			execFileSync("git", ["add", "."], { cwd, stdio: "ignore" });
 			execFileSync("git", ["commit", "-m", "init"], { cwd, stdio: "ignore" });
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_continuation_readiness");
 			const result = await tool.execute("tc-continuation-readiness-decision-none", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 			expect(result.content?.[0]?.text).toContain("decisionCue=none");
@@ -956,7 +958,7 @@ describe("context-watchdog tool surfaces", () => {
 			execFileSync("git", ["add", "."], { cwd: cwdCheckpoint, stdio: "ignore" });
 			execFileSync("git", ["commit", "-m", "init"], { cwd: cwdCheckpoint, stdio: "ignore" });
 			const piCheckpoint = makeMockPi();
-			contextWatchdogExtension(piCheckpoint);
+			contextWatchdogSurfacesExtension(piCheckpoint);
 			const tool = getTool(piCheckpoint, "turn_boundary_decision_packet");
 			const checkpointResult = await tool.execute("tc-turn-boundary-checkpoint", {}, undefined as unknown as AbortSignal, () => {}, { cwd: cwdCheckpoint });
 			expect(checkpointResult.content?.[0]?.text).toContain("turn-boundary-decision:");
@@ -1124,7 +1126,7 @@ describe("context-watchdog tool surfaces", () => {
 			execFileSync("git", ["add", "."], { cwd: cwdAskHuman, stdio: "ignore" });
 			execFileSync("git", ["commit", "-m", "init"], { cwd: cwdAskHuman, stdio: "ignore" });
 			const piAskHuman = makeMockPi();
-			contextWatchdogExtension(piAskHuman);
+			contextWatchdogSurfacesExtension(piAskHuman);
 			const tool = getTool(piAskHuman, "turn_boundary_decision_packet");
 			const askResult = await tool.execute("tc-turn-boundary-ask", {}, undefined as unknown as AbortSignal, () => {}, { cwd: cwdAskHuman });
 			expect(askResult.details?.decision).toBe("ask-human");
@@ -1179,7 +1181,7 @@ describe("context-watchdog tool surfaces", () => {
 				notes: "preview changed",
 			}] }));
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_local_slice_preview");
 			const schemaText = JSON.stringify((pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([registered]) => registered?.name === "context_watch_local_slice_preview")?.[0]?.parameters ?? {});
 			expect(schemaText).not.toContain("execute");
@@ -1307,7 +1309,7 @@ describe("context-watchdog tool surfaces", () => {
 				},
 			}));
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_local_slice_preview");
 			const result = await tool.execute("tc-local-slice-preview-post-reload", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 			expect(result.content?.[0]?.text).toContain("postReloadResume=pending");

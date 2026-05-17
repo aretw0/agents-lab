@@ -9,7 +9,8 @@
         "!extensions/guardrails-ops-calibration.ts",
         "!extensions/guardrails-unattended-continuation.ts",
         "!extensions/guardrails-background-process.ts",
-        "!extensions/guardrails-core-extended-surfaces.ts"
+        "!extensions/guardrails-core-extended-surfaces.ts",
+        "!extensions/context-watchdog-surfaces.ts"
       ]
     },
     "../packages/git-skills",

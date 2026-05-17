@@ -3,7 +3,9 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import contextWatchdogExtension, {
+import contextWatchdogExtension from "../../extensions/context-watchdog";
+import contextWatchdogSurfacesExtension from "../../extensions/context-watchdog-surfaces";
+import {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
 	applyWarnCadenceEscalation,
@@ -85,7 +87,7 @@ import contextWatchdogExtension, {
 	shouldScheduleAutoCompactRetry,
 	shouldTriggerAutoCompact,
 	writeLocalSliceHandoffCheckpoint,
-} from "../../extensions/context-watchdog";
+} from "../../extensions/context-watchdog-exports";
 
 describe("context-watchdog", () => {
 	function makeMockPi() {
@@ -116,7 +118,7 @@ describe("context-watchdog", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-bootstrap-"));
 		try {
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_bootstrap");
 			const result = await tool.execute(
 				"tc-context-watch-bootstrap",
@@ -140,7 +142,7 @@ describe("context-watchdog", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-"));
 		try {
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_checkpoint");
 			const result = await tool.execute(
 				"tc-context-watch-checkpoint",
@@ -205,7 +207,7 @@ describe("context-watchdog", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-growth-"));
 		try {
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_checkpoint");
 			const result = await tool.execute(
 				"tc-context-watch-checkpoint-growth",
@@ -242,7 +244,7 @@ describe("context-watchdog", () => {
 				{ id: "TASK-BUD-DONE", status: "completed" },
 			] }));
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_checkpoint");
 			const result = await tool.execute(
 				"tc-context-watch-checkpoint-completed",
@@ -272,7 +274,7 @@ describe("context-watchdog", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-stop-"));
 		try {
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_checkpoint");
 			await tool.execute(
 				"tc-context-watch-checkpoint-stop",
@@ -307,7 +309,7 @@ describe("context-watchdog", () => {
 			});
 			expect(seeded.ok).toBe(true);
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_checkpoint");
 			const result = await tool.execute(
 				"tc-context-watch-checkpoint-stale",
@@ -334,7 +336,7 @@ describe("context-watchdog", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-empty-"));
 		try {
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_checkpoint");
 			const result = await tool.execute(
 				"tc-context-watch-checkpoint-empty",

@@ -3,7 +3,9 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import contextWatchdogExtension, {
+import contextWatchdogExtension from "../../extensions/context-watchdog";
+import contextWatchdogSurfacesExtension from "../../extensions/context-watchdog-surfaces";
+import {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
 	applyWarnCadenceEscalation,
@@ -85,7 +87,7 @@ import contextWatchdogExtension, {
 	shouldScheduleAutoCompactRetry,
 	shouldTriggerAutoCompact,
 	writeLocalSliceHandoffCheckpoint,
-} from "../../extensions/context-watchdog";
+} from "../../extensions/context-watchdog-exports";
 
 describe("context-watchdog", () => {
 	function makeMockPi() {
@@ -128,7 +130,7 @@ describe("context-watchdog", () => {
 				},
 			}, null, 2), "utf8");
 			const pi = makeMockPi();
-			contextWatchdogExtension(pi);
+			contextWatchdogSurfacesExtension(pi);
 			const tool = getTool(pi, "context_watch_status");
 			const result = await tool.execute(
 				"tc-context-watch-status-post-reload-intent",
