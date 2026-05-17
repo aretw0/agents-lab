@@ -16550,6 +16550,15 @@
       "method": "smoke-test",
       "timestamp": "2026-05-16T22:44:04.320Z",
       "evidence": "Added agent_run_sdk_readonly_batch_status read-only aggregate status/log-tail surface. It reuses shared agent-run registry via buildAgentRunStatus/readRegistryEntry/readLogTail, never starts/stops workers, reports missing/running/terminal/stale counts and fanInReady. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts passed; git diff --check passed."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1088-LIFECYCLE-SURFACE-EXTRACTION-20260516",
+      "target": "TASK-BUD-1088",
+      "target_type": "task",
+      "status": "passed",
+      "method": "refactor-smoke",
+      "timestamp": "2026-05-17T00:41:08.360Z",
+      "evidence": "Extracted registry/status/failure/diagnostic/log/follow/outcome/batch-outcome/abort tool registrations from guardrails-core-agent-spawn-readiness-surface.ts into guardrails-core-agent-run-lifecycle-surface.ts. Spawn readiness surface reduced from 1391 to 1039 lines and registerTool count from 23 to 14; line_budget_snapshot remains watch with aboveExtract=0. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts passed; git diff --check passed; project-validate clean."
     }
   ]
 }
