@@ -213,6 +213,25 @@ function isSurfaceSuppressed(entry) {
   return keys.every((key) => Array.isArray(entry[key]) && entry[key].length === 0);
 }
 
+function countSuppressionFilters(packages, key) {
+  return packages.reduce((sum, entry) => {
+    if (!isRecord(entry) || !Array.isArray(entry[key])) return sum;
+    return sum + entry[key].filter((value) => typeof value === "string" && value.startsWith("!")).length;
+  }, 0);
+}
+
+function listSuppressedExtensions(packages) {
+  const out = [];
+  for (const entry of packages) {
+    if (!isRecord(entry) || !Array.isArray(entry.extensions)) continue;
+    const source = packageSource(entry) ?? "unknown";
+    for (const value of entry.extensions) {
+      if (typeof value === "string" && value.startsWith("!")) out.push(`${source}:${value}`);
+    }
+  }
+  return out;
+}
+
 export function collectSettingsStats(cwd = process.cwd()) {
   const settingsPaths = [
     [".pi/settings.json", path.join(cwd, ".pi", "settings.json")],
@@ -231,6 +250,10 @@ export function collectSettingsStats(cwd = process.cwd()) {
       localPackageCount: sources.filter((source) => source.startsWith(".") || source.startsWith("/")).length,
       npmPackageCount: sources.filter((source) => source.startsWith("npm:")).length,
       suppressedSurfaceCount: packages.filter(isSurfaceSuppressed).length,
+      extensionExcludeCount: countSuppressionFilters(packages, "extensions"),
+      skillExcludeCount: countSuppressionFilters(packages, "skills"),
+      themeExcludeCount: countSuppressionFilters(packages, "themes"),
+      suppressedExtensions: listSuppressedExtensions(packages),
       sources,
     };
   });
@@ -434,7 +457,7 @@ function printHuman(report) {
       lines.push(`  - [${row.level}] ${row.path}: ${row.mb} MB`);
     }
   }
-  lines.push(`- settings: ${report.settings.map((row) => `${row.path} packages=${row.packageCount} suppressed=${row.suppressedSurfaceCount}`).join("; ")}`);
+  lines.push(`- settings: ${report.settings.map((row) => `${row.path} packages=${row.packageCount} suppressed=${row.suppressedSurfaceCount} extExcludes=${row.extensionExcludeCount ?? 0}`).join("; ")}`);
   if (report.loop.exists) {
     lines.push(`- loop: mode=${report.loop.mode ?? "unknown"} health=${report.loop.health ?? "unknown"} stop=${report.loop.stopCondition ?? "unknown"} leaseExpired=${report.loop.leaseExpired ?? "unknown"}`);
   }

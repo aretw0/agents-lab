@@ -45,6 +45,35 @@ const INSTALL_PROFILES = {
   "stack-full": PACKAGES,
 };
 
+export const PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES = [
+  "!extensions/guardrails-agent-run.ts",
+  "!extensions/guardrails-ops-calibration.ts",
+  "!extensions/guardrails-unattended-continuation.ts",
+  "!extensions/guardrails-background-process.ts",
+];
+
+const PROFILE_FILTER_PATCHES = {
+  "strict-curated": [
+    {
+      source: "npm:@aretw0/pi-stack",
+      extensions: PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES,
+    },
+  ],
+  "curated-default": [
+    {
+      source: "npm:@aretw0/pi-stack",
+      extensions: PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES,
+    },
+  ],
+  "curated-runtime": [
+    {
+      source: "npm:@aretw0/pi-stack",
+      extensions: PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES,
+    },
+  ],
+  "stack-full": [],
+};
+
 export function resolveInstallPackageList(profile = DEFAULT_INSTALL_PROFILE) {
   const key = String(profile ?? DEFAULT_INSTALL_PROFILE).trim();
   if (!Object.prototype.hasOwnProperty.call(INSTALL_PROFILES, key)) {
@@ -493,13 +522,18 @@ export function applyFilterPatchesToSettings(settings, filterPatches = FILTER_PA
 	return { settings: nextSettings, changed };
 }
 
+export function buildFilterPatchesForProfile(profile = DEFAULT_INSTALL_PROFILE) {
+	const profilePatches = PROFILE_FILTER_PATCHES[profile] ?? [];
+	return [...FILTER_PATCHES, ...profilePatches];
+}
+
 /**
  * Apply filter patches to settings.json after install.
  * Converts plain source strings to filter objects for known conflicting packages.
  */
-function applyFilterPatches(settingsPath) {
+function applyFilterPatches(settingsPath, profile = DEFAULT_INSTALL_PROFILE) {
 	const settings = loadSettings(settingsPath);
-	const result = applyFilterPatchesToSettings(settings, FILTER_PATCHES);
+	const result = applyFilterPatchesToSettings(settings, buildFilterPatchesForProfile(profile));
 	if (result.changed) {
 		saveSettings(settingsPath, result.settings);
 	}
@@ -592,10 +626,10 @@ if (IS_MAIN) {
     if (!ok) failures++;
   }
 
-  // Apply filter patches to resolve known conflicts
-  const patched = applyFilterPatches(settingsPath);
+  // Apply filter patches to resolve known conflicts and profile-specific opt-ins.
+  const patched = applyFilterPatches(settingsPath, opts.profile);
   if (patched) {
-    console.log("\n🔧 Applied conflict filters (mitsupi/uv.ts excluded — conflicts with bg-process).");
+    console.log("\n🔧 Applied extension/skill filters for the selected profile.");
   }
 
   // Align behavior monitor classifier prompts only with explicit operator consent.

@@ -7,7 +7,12 @@
 import { describe, expect, it } from "vitest";
 
 const installModule = await import("../../install.mjs");
-const { applyFilterPatchesToSettings, FILTER_PATCHES } = installModule;
+const {
+	applyFilterPatchesToSettings,
+	buildFilterPatchesForProfile,
+	FILTER_PATCHES,
+	PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES,
+} = installModule;
 
 describe("installer-filters", () => {
 	it("converte entrada string de mitsupi em objeto com exclusão de uv.ts", () => {
@@ -91,5 +96,31 @@ describe("installer-filters", () => {
 		);
 		expect(changed).toBe(false);
 		expect(settings).toBe(input);
+	});
+
+	it("aplica filtros control-plane no @aretw0/pi-stack para perfis curados", () => {
+		const input = { packages: ["npm:@aretw0/pi-stack"] };
+		const { settings, changed } = applyFilterPatchesToSettings(
+			input,
+			buildFilterPatchesForProfile("strict-curated"),
+		);
+
+		expect(changed).toBe(true);
+		const entry = settings.packages[0];
+		expect(entry.source).toBe("npm:@aretw0/pi-stack");
+		for (const excluded of PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES) {
+			expect(entry.extensions).toContain(excluded);
+		}
+	});
+
+	it("mantém lanes pesadas no stack-full", () => {
+		const input = { packages: ["npm:@aretw0/pi-stack"] };
+		const { settings, changed } = applyFilterPatchesToSettings(
+			input,
+			buildFilterPatchesForProfile("stack-full"),
+		);
+
+		expect(changed).toBe(false);
+		expect(settings.packages[0]).toBe("npm:@aretw0/pi-stack");
 	});
 });

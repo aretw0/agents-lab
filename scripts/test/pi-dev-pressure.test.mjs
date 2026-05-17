@@ -158,6 +158,7 @@ test("collectSettingsStats counts suppressed package entries", () => {
     writeJson(join(cwd, ".pi", "settings.json"), {
       packages: [
         "../packages/pi-stack",
+        { source: "../packages/pi-stack", extensions: ["!extensions/guardrails-agent-run.ts"] },
         { source: "npm:@aretw0/pi-stack", extensions: [], skills: [], themes: [] },
       ],
     });
@@ -168,8 +169,12 @@ test("collectSettingsStats counts suppressed package entries", () => {
     const stats = collectSettingsStats(cwd);
 
     assert.equal(stats[0].path, ".pi/settings.json");
-    assert.equal(stats[0].packageCount, 2);
+    assert.equal(stats[0].packageCount, 3);
     assert.equal(stats[0].suppressedSurfaceCount, 1);
+    assert.equal(stats[0].extensionExcludeCount, 1);
+    assert.deepEqual(stats[0].suppressedExtensions, [
+      "../packages/pi-stack:!extensions/guardrails-agent-run.ts",
+    ]);
     assert.equal(stats[1].npmPackageCount, 1);
   } finally {
     rmSync(cwd, { recursive: true, force: true });

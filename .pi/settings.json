@@ -2,7 +2,15 @@
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.3-codex",
   "packages": [
-    "../packages/pi-stack",
+    {
+      "source": "../packages/pi-stack",
+      "extensions": [
+        "!extensions/guardrails-agent-run.ts",
+        "!extensions/guardrails-ops-calibration.ts",
+        "!extensions/guardrails-unattended-continuation.ts",
+        "!extensions/guardrails-background-process.ts"
+      ]
+    },
     "../packages/git-skills",
     "../packages/web-skills",
     "../packages/pi-skills",
