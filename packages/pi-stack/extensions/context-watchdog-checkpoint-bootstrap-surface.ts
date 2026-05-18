@@ -16,6 +16,14 @@ export interface ContextWatchdogCheckpointBootstrapSurfaceRuntime {
 	applyPreset(ctx: ExtensionContext, presetInput?: unknown): ContextWatchdogBootstrapApplyResult;
 }
 
+function hasStructuredOperatorApproval(value: unknown): boolean {
+	if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+	const row = value as Record<string, unknown>;
+	return row.packet_mode === "operator-approval-packet"
+		&& row.approved === true
+		&& row.approval_state === "approved";
+}
+
 export function registerContextWatchdogCheckpointBootstrapSurface(
 	pi: ExtensionAPI,
 	runtime: ContextWatchdogCheckpointBootstrapSurfaceRuntime,
@@ -122,12 +130,32 @@ export function registerContextWatchdogCheckpointBootstrapSurface(
 		parameters: Type.Object({
 			preset: Type.Optional(Type.String({ description: "control-plane | agent-worker" })),
 			apply: Type.Optional(Type.Boolean()),
+			operator_approval: Type.Optional(Type.Object({
+				packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
+				approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
+				approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
+			}, { description: "Structured operator approval envelope for apply=true." })),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-			const p = params as { preset?: string; apply?: boolean };
+			const p = params as { preset?: string; apply?: boolean; operator_approval?: unknown };
 			if (p.apply) {
+				const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
+				if (!structuredOperatorApproval) {
+					const plan = buildContextWatchBootstrapPlan(p.preset);
+					const details = {
+						...plan,
+						applied: false,
+						structuredOperatorApproval,
+						blockers: ["structured-operator-approval-missing"],
+					};
+					return buildOperatorVisibleToolResponse({
+						label: "context_watch_bootstrap",
+						summary: `context-watch-bootstrap: applied=no preset=${plan.preset} blockers=structured-operator-approval-missing`,
+						details,
+					});
+				}
 				const applied = runtime.applyPreset(ctx, p.preset);
-				const details = { ...applied, applied: true, reloadRequired: false };
+				const details = { ...applied, applied: true, structuredOperatorApproval, reloadRequired: false };
 				return buildOperatorVisibleToolResponse({
 					label: "context_watch_bootstrap",
 					summary: `context-watch-bootstrap: applied=yes preset=${applied.preset} notes=${applied.notes.length} reloadRequired=no`,

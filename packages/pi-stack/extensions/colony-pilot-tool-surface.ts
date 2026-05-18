@@ -33,6 +33,14 @@ import {
 	writeProjectSettings as writeProjectSettingsImpl,
 } from "./colony-pilot-settings";
 
+function hasStructuredOperatorApproval(value: unknown): boolean {
+	if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+	const row = value as Record<string, unknown>;
+	return row.packet_mode === "operator-approval-packet"
+		&& row.approved === true
+		&& row.approval_state === "approved";
+}
+
 export interface ColonyPilotToolSurfaceRuntime {
 	state: PilotState;
 	getModelPolicyConfig(): ColonyPilotModelPolicyConfig;
@@ -204,11 +212,17 @@ export function registerColonyPilotToolSurface(
 			"Show or apply project baseline settings for colony/web runtime governance.",
 		parameters: Type.Object({
 			apply: Type.Optional(Type.Boolean()),
+			operator_approval: Type.Optional(Type.Object({
+				packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
+				approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
+				approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
+			}, { description: "Structured operator approval envelope for apply=true." })),
 			profile: Type.Optional(Type.String({ description: "default | phase2" })),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx: ExtensionContext) {
-			const p = params as { apply?: boolean; profile?: string };
+			const p = params as { apply?: boolean; operator_approval?: unknown; profile?: string };
 			const apply = Boolean(p?.apply);
+			const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
 			const profile = resolveBaselineProfile(p?.profile);
 			const baseline = buildProjectBaselineSettings(profile);
 			if (!apply) {
@@ -224,6 +238,22 @@ export function registerColonyPilotToolSurface(
 						},
 					],
 					details: { profile, baseline },
+				};
+			}
+			if (!structuredOperatorApproval) {
+				return {
+					content: [
+						{
+							type: "text",
+							text: "colony_pilot_baseline: applied=no blockers=structured-operator-approval-missing",
+						},
+					],
+					details: {
+						applied: false,
+						profile,
+						structuredOperatorApproval,
+						blockers: ["structured-operator-approval-missing"],
+					},
 				};
 			}
 
@@ -242,6 +272,7 @@ export function registerColonyPilotToolSurface(
 				details: {
 					applied: true,
 					profile,
+					structuredOperatorApproval,
 					path: path.join(ctx.cwd, ".pi", "settings.json"),
 				},
 			};
