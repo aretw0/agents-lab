@@ -13,6 +13,7 @@ import {
   REALIGN_FOCUS_CODE,
   localStopProtectedFocusNextAction,
 } from "./guardrails-core-local-stop-guidance";
+import { normalizeTaskDependencyIds } from "./guardrails-core-task-contracts";
 
 export type AutonomyTaskSelectionReason =
   | "ready"
@@ -147,13 +148,6 @@ function clampSampleLimit(value: unknown): number {
   const raw = Number(value);
   if (!Number.isFinite(raw) || raw <= 0) return 5;
   return Math.max(1, Math.min(20, Math.floor(raw)));
-}
-
-function normalizeDependsOn(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value
-    .map((item) => normalizeTaskId(item))
-    .filter((item): item is string => Boolean(item));
 }
 
 function parsePriorityValue(value: unknown): number | undefined {
@@ -434,12 +428,12 @@ export function selectAutonomyLaneTask(
     ? rationaleReady.filter((task) => focusSet.has(normalizeTaskId(task.id) ?? ""))
     : rationaleReady;
   const blockedByDependencies = focusReady.filter((task) => {
-    const deps = normalizeDependsOn(task.depends_on);
+    const deps = normalizeTaskDependencyIds(task.depends_on);
     return deps.length > 0 && !deps.every((dep) => completed.has(dep));
   }).length;
   const eligible = focusReady
     .filter((task) => {
-      const deps = normalizeDependsOn(task.depends_on);
+      const deps = normalizeTaskDependencyIds(task.depends_on);
       return deps.every((dep) => completed.has(dep));
     })
     .sort(compareTasks);
@@ -488,7 +482,7 @@ export function selectAutonomyLaneTask(
 
   const hasEligibleOutsideFocus = focusTaskIds.length > 0 && rationaleReady
     .filter((task) => {
-      const deps = normalizeDependsOn(task.depends_on);
+      const deps = normalizeTaskDependencyIds(task.depends_on);
       return deps.every((dep) => completed.has(dep));
     })
     .some((task) => !focusSet.has(normalizeTaskId(task.id) ?? ""));
