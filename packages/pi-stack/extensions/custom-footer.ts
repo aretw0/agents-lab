@@ -39,33 +39,16 @@ import {
   type ContextThresholdOverrides,
   type ContextThresholds,
 } from "./custom-footer-context-thresholds";
+import { fmt, formatElapsed, hyperlink } from "./custom-footer-formatters";
 export {
   resolveContextThresholds,
   type ContextThresholdOverrides,
   type ContextThresholds,
 } from "./custom-footer-context-thresholds";
-
-export function hyperlink(url: string, text: string): string {
-  return `\x1b]8;;${url}\x07${text}\x1b]8;;\x07`;
-}
+export { fmt, formatElapsed, hyperlink } from "./custom-footer-formatters";
 
 export type PrInfo = { number: number; url: string };
 export type FooterUsageTotals = { input: number; output: number; cost: number };
-
-export function formatElapsed(ms: number): string {
-  const s = Math.floor(ms / 1000);
-  if (s < 60) return `${s}s`;
-  const m = Math.floor(s / 60);
-  const rs = s % 60;
-  if (m < 60) return `${m}m${rs > 0 ? `${rs}s` : ""}`;
-  const h = Math.floor(m / 60);
-  const rm = m % 60;
-  return `${h}h${rm > 0 ? `${rm}m` : ""}`;
-}
-
-export function fmt(n: number): string {
-  return n < 1000 ? `${n}` : `${(n / 1000).toFixed(1)}k`;
-}
 
 function accumulateAssistantUsage(totals: FooterUsageTotals, message: AssistantMessage): void {
   totals.input += Number(message.usage.input) || 0;
@@ -430,108 +413,27 @@ export default function customFooterExtension(pi: ExtensionAPI) {
     }
   });
 
-  // ── /status overlay ──────────────────────────────────────────────────────
-
-  function buildStatusLines(theme: { fg: (color: string, text: string) => string }): string[] {
-    const lines: string[] = [];
-    const sep = theme.fg("dim", " │ ");
-    const divider = theme.fg("dim", "─".repeat(60));
-
-    lines.push(theme.fg("accent", "╭─ Status ───────────────────────────────────────────────────╮"));
-    lines.push("");
-
-    // ── Model ──
-    const thinking = pi.getThinkingLevel();
-    const thinkLabel = thinking === "none" ? "off" : thinking;
-    const modelId = activeCtx?.model?.id ?? "no-model";
-    const modelProvider = (activeCtx?.model as Record<string, unknown> | undefined)?.["provider"];
-    const providerLabel = typeof modelProvider === "string" && modelProvider ? modelProvider : "unknown";
-    lines.push(`  ${theme.fg("accent", "Model")}${sep}${theme.fg("accent", modelId)}`);
-    lines.push(`  ${theme.fg("accent", "Provider")}${sep}${providerLabel}`);
-    lines.push(`  ${theme.fg("accent", "Thinking")}${sep}${thinkLabel}`);
-    lines.push("");
-
-    // ── Session ──
-    lines.push(`  ${divider}`);
-    const elapsed = formatElapsed(Date.now() - sessionStart);
-    lines.push(
-      `  ${theme.fg("accent", "Session")}${sep}${elapsed}${sep}${theme.fg("warning", `$${usageTotals.cost.toFixed(2)}`)}`,
-    );
-    lines.push(
-      `  ${theme.fg("accent", "Tokens")}${sep}${theme.fg("success", fmt(usageTotals.input))} in${sep}${theme.fg("warning", fmt(usageTotals.output))} out${sep}${theme.fg("dim", fmt(usageTotals.input + usageTotals.output))} total`,
-    );
-
-    // ── Context window ──
-    const usage = activeCtx?.getContextUsage?.();
-    if (usage) {
-      const pct = usage.percent ?? 0;
-      const thresholds = resolveContextThresholds(
-        typeof modelProvider === "string" && modelProvider ? modelProvider : null,
-        modelId,
-        contextThresholdOverrides,
-      );
-      const pctColor =
-        pct > thresholds.errorPct
-          ? "error"
-          : pct > thresholds.warningPct
-            ? "warning"
-            : "success";
-      const tokens = usage.tokens == null ? "?" : fmt(usage.tokens);
-      lines.push(
-        `  ${theme.fg("accent", "Context")}${sep}${theme.fg(pctColor, `${pct.toFixed(0)}% used`)}${sep}${tokens} / ${fmt(usage.contextWindow)} tokens`,
-      );
-    }
-    lines.push("");
-
-    // ── Workspace ──
-    lines.push(`  ${divider}`);
-    lines.push(`  ${theme.fg("accent", "Directory")}${sep}${process.cwd()}`);
-
-    const branch = activeFooterData?.getGitBranch?.();
-    if (branch) {
-      lines.push(`  ${theme.fg("accent", "Branch")}${sep}${theme.fg("accent", branch)}`);
-    }
-
-    if (cachedPr) {
-      const prLink = hyperlink(cachedPr.url, `#${cachedPr.number}`);
-      lines.push(
-        `  ${theme.fg("accent", "Pull Request")}${sep}${theme.fg("success", prLink)}${sep}${theme.fg("dim", cachedPr.url)}`,
-      );
-    }
-    lines.push("");
-
-    // ── Extension statuses ──
-    const statuses = activeFooterData?.getExtensionStatuses?.();
-    if (statuses && statuses.size > 0) {
-      lines.push(`  ${divider}`);
-      lines.push(`  ${theme.fg("accent", "Extension Statuses")}`);
-      lines.push("");
-      for (const [key, value] of statuses) {
-        lines.push(`  ${theme.fg("dim", key.padEnd(24))}${value}`);
-      }
-      const budgetLegend = formatFooterBudgetLegend(statuses.get("quota-budgets"));
-      if (budgetLegend.length > 0) {
-        lines.push("");
-        for (const line of budgetLegend) lines.push(`  ${theme.fg("dim", line)}`);
-      }
-      lines.push("");
-    }
-
-    lines.push(theme.fg("accent", "╰────────────────────────────────────────────────────────────╯"));
-    lines.push(theme.fg("dim", "  Press q/Esc/Space/Enter to close"));
-
-    return lines;
-  }
-
   pi.registerCommand("status", {
     description: "Show full status: provider, model, session, context, workspace, budget, PR",
     async handler(_args, ctx) {
       activeCtx = ctx;
+      const { buildStatusLines, fitStatusOverlayLines } = await import("./custom-footer-status-overlay");
       await ctx.ui.custom(
         (_tui, theme, _keybindings, done) => {
-          const lines = buildStatusLines(theme);
+          const statuses = activeFooterData?.getExtensionStatuses?.();
+          const lines = buildStatusLines({
+            sessionStart,
+            usageTotals,
+            thinkingLevel: pi.getThinkingLevel(),
+            activeCtx,
+            activeFooterData,
+            cachedPr,
+            contextThresholdOverrides,
+            budgetLegend: formatFooterBudgetLegend(statuses?.get("quota-budgets")),
+            cwd: process.cwd(),
+          }, theme);
           return {
-            render(width: number) { return lines.map((line) => truncateToWidth(line, width)); },
+            render(width: number) { return fitStatusOverlayLines(lines, width); },
             handleInput(data: string) {
               if (data === "q" || data === "\x1b" || data === "\r" || data === " ") done(undefined);
             },

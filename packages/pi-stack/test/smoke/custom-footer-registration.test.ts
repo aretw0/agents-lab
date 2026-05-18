@@ -12,6 +12,7 @@ import customFooterExtension, {
 	resolveContextThresholds,
 	resolveFooterDensity,
 } from "../../extensions/custom-footer";
+import { buildStatusLines, fitStatusOverlayLines } from "../../extensions/custom-footer-status-overlay";
 import { resetAuto, setMode } from "../../extensions/quota-panel";
 
 function makeMockPi() {
@@ -330,6 +331,34 @@ describe("custom-footer — buildFooterLines", () => {
 		for (const line of lines) {
 			expect(truncateToWidth(line, 48)).toBe(line);
 		}
+	});
+});
+
+describe("custom-footer — status overlay", () => {
+	it("builds bounded status lines with extension statuses and budget legend", () => {
+		const plainTheme = { fg: (_: string, text: string) => text };
+		const statuses = new Map<string, string>([["quota-budgets", "✓codex:12%"]]);
+		const lines = buildStatusLines({
+			sessionStart: Date.now() - 30_000,
+			usageTotals: { input: 1200, output: 300, cost: 0.02 },
+			thinkingLevel: "none",
+			activeCtx: {
+				model: { id: "gpt-test", provider: "openai" },
+				getContextUsage: () => ({ percent: 10, tokens: 1000, contextWindow: 10000 }),
+			} as any,
+			activeFooterData: {
+				getGitBranch: () => "main",
+				getExtensionStatuses: () => statuses,
+			} as any,
+			cachedPr: { number: 12, url: "https://example.test/pr/12" },
+			budgetLegend: ["quota footer legend"],
+			cwd: "/repo/agents-lab",
+		}, plainTheme);
+
+		expect(lines.join("\n")).toContain("Model");
+		expect(lines.join("\n")).toContain("quota-budgets");
+		expect(lines.join("\n")).toContain("quota footer legend");
+		expect(fitStatusOverlayLines(lines, 50).every((line) => line === truncateToWidth(line, 50))).toBe(true);
 	});
 });
 
