@@ -9,7 +9,7 @@
     "list": "npm ls --workspaces --depth=0",
     "test": "node --test packages/*/test/*.test.mjs",
     "test:smoke": "npx vitest run",
-    "ci:smoke:gate": "npm run test:smoke && npm run audit:sovereignty && npm run audit:sovereignty:diff && npm run repo:bloat:audit:strict",
+    "ci:smoke:gate": "npm run test:smoke && npm run audit:sovereignty && npm run audit:sovereignty:diff && npm run repo:complexity:strict && npm run repo:bloat:audit:strict",
     "ci:local:parity": "npm run ci:smoke:gate",
     "test:monitor:regression": "node --test packages/pi-stack/test/monitor-context-budget.test.mjs packages/pi-stack/test/monitor-gates-regression.test.mjs packages/pi-stack/test/monitor-chaos-policy.test.mjs packages/pi-stack/test/monitor-interference-matrix.test.mjs packages/pi-stack/test/monitor-profile-policy.test.mjs packages/pi-stack/test/monitor-provider-patch.test.mjs packages/pi-stack/test/monitor-replay-regression.test.mjs packages/pi-stack/test/tool-execute-signature.test.mjs",
     "gate:monitor:regression": "npm run test:monitor:regression --silent",

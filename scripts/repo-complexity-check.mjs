@@ -21,6 +21,12 @@ import { fileURLToPath } from "node:url";
 
 const DEFAULT_MAX_LINES = 1000;
 const MAX_SCAN_BYTES = 2 * 1024 * 1024; // 2MB por arquivo (defensivo)
+const LARGE_TRACKED_STATE_FILES = new Set([
+  ".project/issues.json",
+  ".project/tasks.json",
+  ".project/verification.json",
+  "package-lock.json",
+]);
 
 function parseArgs(argv) {
   const out = {
@@ -105,6 +111,14 @@ function shouldSkip(filePath) {
   return binaryExt.has(ext);
 }
 
+function largeFileExceptionNote(filePath) {
+  const normalized = filePath.replace(/\\/g, "/");
+  const matched = [...LARGE_TRACKED_STATE_FILES].find((allowed) => normalized === allowed || normalized.endsWith(`/${allowed}`));
+  if (!matched) return undefined;
+  if (matched === "package-lock.json") return "allowed:lockfile";
+  return "allowed:canonical-state";
+}
+
 function countLines(text) {
   if (text.length === 0) return 0;
   return text.split(/\r?\n/).length;
@@ -137,7 +151,7 @@ export function scanFiles(files, maxLines) {
 
     const lines = countLines(text);
     if (lines > maxLines) {
-      findings.push({ file, lines, size: st.size, note: "over-limit" });
+      findings.push({ file, lines, size: st.size, note: largeFileExceptionNote(file) ?? "over-limit" });
     }
   }
 
@@ -176,6 +190,8 @@ function main() {
   }
 
   const findings = scan(opts.maxLines, opts);
+  const blockingFindings = findings.filter((f) => f.note === "over-limit");
+  const allowedFindings = findings.filter((f) => f.note !== "over-limit");
   const scope = opts.changed ? "arquivo alterado" : "arquivo";
   const pluralScope = opts.changed ? "arquivo(s) alterado(s)" : "arquivo(s)";
 
@@ -183,8 +199,14 @@ function main() {
     console.log(JSON.stringify({ maxLines: opts.maxLines, changed: opts.changed, base: opts.base, total: findings.length, findings }, null, 2));
   } else if (findings.length === 0) {
     console.log(`complexity-check: OK (nenhum ${scope} > ${opts.maxLines} linhas)`);
+  } else if (blockingFindings.length === 0) {
+    console.log(`complexity-check: OK (${allowedFindings.length} ${pluralScope} grande(s) em exceção conhecida; nenhum bloqueante > ${opts.maxLines} linhas)`);
+    for (const f of allowedFindings.slice(0, 40)) {
+      const lines = f.lines == null ? "n/a" : String(f.lines);
+      console.log(`  - ${f.file} | lines=${lines} | size=${formatBytes(f.size)} | ${f.note}`);
+    }
   } else {
-    console.log(`complexity-check: ${findings.length} ${pluralScope} acima de ${opts.maxLines} linhas`);
+    console.log(`complexity-check: ${blockingFindings.length} ${pluralScope} bloqueante(s) acima de ${opts.maxLines} linhas (${allowedFindings.length} exceção(ões) conhecida(s))`);
     for (const f of findings.slice(0, 40)) {
       const lines = f.lines == null ? "n/a" : String(f.lines);
       console.log(`  - ${f.file} | lines=${lines} | size=${formatBytes(f.size)} | ${f.note}`);
@@ -194,7 +216,7 @@ function main() {
     }
   }
 
-  if (opts.strict && findings.some((f) => f.note === "over-limit")) {
+  if (opts.strict && blockingFindings.length > 0) {
     process.exit(2);
   }
 }
