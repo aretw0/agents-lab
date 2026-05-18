@@ -159,7 +159,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "agent_run_sdk_readonly_batch_dispatch",
     label: "Agent Run SDK Read-Only Batch Dispatch",
-    description: "First-party read-only SDK batch gate. Preview by default; execute=true requires exact batch confirmation and starts only ready read-only workers through the shared control-plane registry/log runtime.",
+    description: "First-party read-only SDK batch gate. Preview by default; execute=true requires structured operator approval and starts only ready read-only workers through the shared control-plane registry/log runtime.",
     parameters: sdkReadOnlyBatchParameters({
       execute: Type.Optional(Type.Boolean({ description: "When true, start all ready read-only workers after structured operator approval." })),
       operator_approval: Type.Optional(Type.Object({

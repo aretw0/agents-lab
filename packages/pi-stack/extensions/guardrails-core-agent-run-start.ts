@@ -97,7 +97,7 @@ export interface AgentRunStartPacketResult {
     args: string[];
     shellInterpolationAllowed: false;
   };
-  humanConfirmationPhrase: string;
+  operatorApprovalPrompt: string;
   nextActions: string[];
   summary: string;
 }
@@ -150,7 +150,7 @@ export interface AgentRunOperatorPacketResult {
   startPacket: AgentRunStartPacketResult;
   validationChecklist: string[];
   rollbackHint: string;
-  humanConfirmationPhrase: string;
+  operatorApprovalPrompt: string;
   summary: string;
 }
 
@@ -183,7 +183,7 @@ export interface AgentInvocationSpecPacketResult {
   };
   operatorPacket: AgentRunOperatorPacketResult;
   nextActions: string[];
-  humanConfirmationPhrase: string;
+  operatorApprovalPrompt: string;
   summary: string;
 }
 
@@ -250,7 +250,7 @@ export interface AgentRunTaskPacketResult {
   invocationSpec: AgentInvocationSpecPacketResult["invocationSpec"];
   validationChecklist: string[];
   rollback: string[];
-  humanConfirmationPhrase: string;
+  operatorApprovalPrompt: string;
   nextActions: string[];
   summary: string;
 }
@@ -285,7 +285,7 @@ export interface AgentRunTaskStartPacketResult {
   };
   abortPreview: ReturnType<typeof buildAgentRunAbortPlan>;
   outcomeChecklist: string[];
-  humanConfirmationPhrase: string;
+  operatorApprovalPrompt: string;
   nextActions: string[];
   summary: string;
 }
@@ -325,7 +325,7 @@ export interface CodexSparkPromotedWorkerPacketResult {
   taskStartPacket: AgentRunTaskStartPacketResult;
   naturalUseContract: string[];
   stillBlocked: string[];
-  humanConfirmationPhrase: string;
+  operatorApprovalPrompt: string;
   nextActions: string[];
   summary: string;
 }
@@ -469,7 +469,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
     goal || "goal-required",
   ];
   const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
-  const humanConfirmationPhrase = runId ? `execute o worker ${runId}` : "execute o worker <run-id>";
+  const operatorApprovalPrompt = runId ? `approve worker ${runId}` : "approve worker <run-id>";
 
   return {
     mode: "agent-run-start-packet",
@@ -511,10 +511,10 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       args: commandArgs,
       shellInterpolationAllowed: false,
     },
-    humanConfirmationPhrase,
+    operatorApprovalPrompt,
     nextActions: decision === "ready-for-human-decision"
       ? [
-          "ask the human/operator for the exact confirmation phrase before starting any worker",
+          "present the structured operator approval packet before starting any worker",
           "if confirmed, registry-upsert planned->running with pid/log/status before invoking the command preview as argv",
           budget.humanReviewRequired
             ? "budget evidence is manual/unknown; get explicit human review or prefer a fresh route-advisory/provider-budget snapshot before invocation"
@@ -615,7 +615,7 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
     startPacket,
     validationChecklist,
     rollbackHint: fileContract === "read-only" ? "read-only run: rollback is registry/log cleanup only; no file mutations expected" : "mutation run: rollback only declared/touched files after parent-side review",
-    humanConfirmationPhrase: startPacket.humanConfirmationPhrase,
+    operatorApprovalPrompt: startPacket.operatorApprovalPrompt,
     summary: [
       "agent-run-operator-packet:",
       `decision=${startPacket.decision}`,
@@ -692,14 +692,14 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
     operatorPacket,
     nextActions: decision === "ready-for-human-decision"
       ? [
-          "ask for the exact human confirmation phrase before execution",
+          "present the structured operator approval packet before execution",
           "registry-upsert running before invoking the execution preview",
           "execute through the typed invocation spec instead of hand-assembling argv",
           "preserve the economy contract in the worker prompt and reject output that ignores declared-file/output-line limits",
           "after exit, evaluate agent_run_outcome_packet with the declared file contract",
         ]
       : ["resolve invocation spec blockers before any dispatch"],
-    humanConfirmationPhrase: operatorPacket.humanConfirmationPhrase,
+    operatorApprovalPrompt: operatorPacket.operatorApprovalPrompt,
     summary: [
       "agent-invocation-spec-packet:",
       `decision=${decision}`,
@@ -798,11 +798,11 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
     invocationSpec: invocationSpecPacket.invocationSpec,
     validationChecklist,
     rollback,
-    humanConfirmationPhrase: invocationSpecPacket.humanConfirmationPhrase,
+    operatorApprovalPrompt: invocationSpecPacket.operatorApprovalPrompt,
     nextActions: decision === "ready-for-human-decision"
       ? [
           "show the typed invocation spec to the operator",
-          "require the exact human confirmation phrase before any dispatch",
+          "require structured operator approval before any dispatch",
           "if executed later, registry-upsert planned/running before subprocess start",
           "after exit, validate touched files, non-empty output, and acceptance criteria before board completion",
         ]
@@ -894,11 +894,11 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
       `touched files must be subset of: ${spec.declaredFiles.join(", ")}`,
       `dry outcome preview: ${dryOutcomePreview.summary}`,
     ],
-    humanConfirmationPhrase: taskPacket.humanConfirmationPhrase,
+    operatorApprovalPrompt: taskPacket.operatorApprovalPrompt,
     nextActions: decision === "ready-for-human-decision"
       ? [
           "show registry/start/status/log/abort/outcome previews to the operator",
-          "require exact human confirmation phrase before any dispatch",
+          "require structured operator approval before any dispatch",
           "if confirmed later, write registry planned/running before subprocess start",
           "after exit, run outcome packet before any board completion",
         ]
@@ -927,7 +927,7 @@ export function buildCodexSparkPromotedWorkerPacket(input: CodexSparkPromotedWor
     profile: input.profile || inferPromotedEnvelopeProfile(envelope),
     providerModelRef: CODEX_SPARK_PROVIDER_MODEL_REF,
     budgetDecision: input.budgetDecision || "warn",
-    budgetEvidence: input.budgetEvidence || `Codex Spark promoted worker lane: envelope ${envelope} has arena evidence for bounded use; exact human confirmation is still required before dispatch.`,
+    budgetEvidence: input.budgetEvidence || `Codex Spark promoted worker lane: envelope ${envelope} has arena evidence for bounded use; structured operator approval is still required before dispatch.`,
     budgetEvidenceSource: input.budgetEvidenceSource || "manual",
     budgetEvidenceProvider: CODEX_SPARK_PROVIDER_MODEL_REF,
     economyMode: input.economyMode || "critical",
@@ -962,7 +962,7 @@ export function buildCodexSparkPromotedWorkerPacket(input: CodexSparkPromotedWor
     taskStartPacket,
     naturalUseContract: [
       "use Codex Spark by default for promoted local-safe envelopes instead of rebuilding arena packets manually",
-      "keep dispatch exact-confirmed and single-run only",
+      "keep dispatch structured-approved and single-run only",
       "keep declared files, bounded timeout, rollback, and parent-side outcome validation",
       "record outcome evidence before expanding the envelope or closing the task",
     ],
@@ -973,11 +973,11 @@ export function buildCodexSparkPromotedWorkerPacket(input: CodexSparkPromotedWor
       "swarm/fan-out or unbounded retry loops",
       "settings/routing/default-provider changes",
     ],
-    humanConfirmationPhrase: taskStartPacket.humanConfirmationPhrase,
+    operatorApprovalPrompt: taskStartPacket.operatorApprovalPrompt,
     nextActions: decision === "ready-for-human-decision"
       ? [
           "use this promoted packet instead of an arena canary for the next bounded Codex Spark worker",
-          "ask for the exact human confirmation phrase before dispatch",
+          "require structured operator approval before dispatch",
           "after execution, evaluate the outcome packet and append board evidence",
         ]
       : ["resolve promoted-worker blockers before any dispatch"],

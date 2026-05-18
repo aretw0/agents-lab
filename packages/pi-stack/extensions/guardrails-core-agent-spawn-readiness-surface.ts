@@ -208,7 +208,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   pi.registerTool({
     name: "agent_run_task_packet",
     label: "Agent Run Task Packet",
-    description: "Report-only board-to-agent packetizer. Reads one .project task and derives a typed invocation spec, validation/rollback checklist, scoped budget evidence, and exact confirmation phrase. Never dispatches execution.",
+    description: "Report-only board-to-agent packetizer. Reads one .project task and derives a typed invocation spec, validation/rollback checklist, scoped budget evidence, and operator approval prompt. Never dispatches execution.",
     parameters: Type.Object({
       task_id: Type.String({ description: "Board task id to packetize." }),
       purpose: Type.Optional(Type.String({ description: "Short purpose slug/label for the run id. Defaults to task-packet." })),
@@ -324,7 +324,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   pi.registerTool({
     name: "agent_run_codex_spark_promoted_worker_packet",
     label: "Codex Spark Promoted Worker Packet",
-    description: "Report-only natural-use packet for Codex Spark envelopes already promoted by arena evidence. Defaults provider/model, budget posture, economy, registry/start/status/log/abort/outcome previews, and exact confirmation phrase. Never dispatches execution.",
+    description: "Report-only natural-use packet for Codex Spark envelopes already promoted by arena evidence. Defaults provider/model, budget posture, economy, registry/start/status/log/abort/outcome previews, and operator approval prompt. Never dispatches execution.",
     parameters: Type.Object({
       task_id: Type.String({ description: "Board task id to packetize for a promoted Codex Spark worker." }),
       envelope: Type.Optional(Type.String({ description: "Arena-promoted envelope, e.g. readonly-one-file, readonly-three-file-inventory, readonly-source-backed-evidence-synthesis, mutation-one-file-marker." })),

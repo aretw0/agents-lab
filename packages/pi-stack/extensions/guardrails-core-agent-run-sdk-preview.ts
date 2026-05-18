@@ -120,7 +120,7 @@ export interface AgentRunSdkInProcessPacketResult {
     isolationNotes: string[];
   };
   operatorApproval: OperatorApprovalPacket;
-  humanConfirmationPhrase: string;
+  operatorApprovalPrompt: string;
   nextActions: string[];
   rollbackHint: string;
   summary: string;
@@ -298,7 +298,7 @@ export interface AgentRunSdkCachePackPacketResult {
   cacheKeyContract: string[];
   freshnessContract: string[];
   workerUseContract: string[];
-  humanConfirmationPhrase: string;
+  operatorApprovalPrompt: string;
   nextActions: string[];
   summary: string;
 }
@@ -341,7 +341,7 @@ export interface AgentRunSdkReadOnlyBatchPacketResult {
   fanInContract: string[];
   cacheEconomyContract: string[];
   operatorApproval: OperatorApprovalPacket;
-  humanConfirmationPhrase: string;
+  operatorApprovalPrompt: string;
   nextActions: string[];
   summary: string;
 }
@@ -389,7 +389,7 @@ export interface AgentRunSdkReadOnlyBatchTaskResult {
   protectedFiles: string[];
   omittedFiles: string[];
   packet: AgentRunSdkReadOnlyBatchPacketResult;
-  humanConfirmationPhrase: string;
+  operatorApprovalPrompt: string;
   nextActions: string[];
   summary: string;
 }
@@ -456,7 +456,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   if (!finalOutputContractKnown) block("agent-run-sdk-blocked-final-output", "final-output-contract-missing");
 
   const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
-  const humanConfirmationPhrase = runId ? `execute o sdk worker ${runId}` : "";
+  const operatorApprovalPrompt = runId ? `approve sdk worker ${runId}` : "";
   const operatorApproval = buildOperatorApprovalPacket({
     intentKind: "worker-single-run",
     recommendedAction: runId ? `execute sdk worker ${runId}` : undefined,
@@ -513,7 +513,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     parallelReadOnlyContract: [
       "parallel SDK fan-out remains report-only until a separate batch gate exists; this single-worker packet never dispatches multiple workers",
       "eligible parallel workers must be independent, read-only, narrow, and limited to read/grep with strict final output contracts",
-      "batch confirmation must be exact for the batch id and still preserve per-worker run ids, logs, outcome packets, and abort visibility",
+      "batch approval must be structured for the batch id and still preserve per-worker run ids, logs, outcome packets, and abort visibility",
       "fan-in must validate every worker outcome before promotion and fail closed on mutation, protected scope, dirty state, budget blockers, or missing output",
     ],
     isolationNotes: [
@@ -575,7 +575,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     sdkMaturity,
     sdkPreview,
     operatorApproval,
-    humanConfirmationPhrase,
+    operatorApprovalPrompt,
     nextActions: decision === "ready-for-human-decision"
       ? readyNextActions
       : ["resolve blockers before any SDK/in-process worker implementation or dispatch", "keep subprocess route available; do not switch globally"],
@@ -692,7 +692,7 @@ export function buildAgentRunSdkCachePackPacket(input: AgentRunSdkCachePackPacke
     cacheKeyContract,
     freshnessContract,
     workerUseContract,
-    humanConfirmationPhrase: packId ? `approve sdk cache pack ${packId}` : "",
+    operatorApprovalPrompt: packId ? `approve sdk cache pack ${packId}` : "",
     nextActions: decision === "ready-for-human-decision"
       ? [
         "attach this cache pack to a future read-only SDK worker or batch packet only after structured operator approval",
@@ -791,7 +791,7 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
 
   const readyWorkerCount = workers.filter((worker) => worker.decision === "ready-for-human-decision" && worker.sdkMaturity.validatedEnvelope && worker.runSpec.fileContract === "read-only").length;
   const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
-  const humanConfirmationPhrase = batchId ? `approve sdk readonly batch ${batchId}` : "";
+  const operatorApprovalPrompt = batchId ? `approve sdk readonly batch ${batchId}` : "";
   const operatorApproval = buildOperatorApprovalPacket({
     intentKind: "worker-suite",
     suiteId: batchId,
@@ -847,7 +847,7 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
     fanInContract,
     cacheEconomyContract,
     operatorApproval,
-    humanConfirmationPhrase,
+    operatorApprovalPrompt,
     nextActions: decision === "ready-for-human-decision"
       ? [
         "present this read-only batch packet for structured operator approval; the packet itself cannot dispatch",
@@ -958,7 +958,7 @@ export function buildAgentRunSdkReadOnlyBatchTaskPacket(input: AgentRunSdkReadOn
     protectedFiles,
     omittedFiles,
     packet,
-    humanConfirmationPhrase: packet.humanConfirmationPhrase,
+    operatorApprovalPrompt: packet.operatorApprovalPrompt,
     nextActions: decision === "ready-for-human-decision"
       ? [
         "present the derived batch packet and operator approval packet before any dispatch",

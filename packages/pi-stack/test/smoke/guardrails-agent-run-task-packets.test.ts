@@ -56,7 +56,7 @@ describe("agent run task packet surfaces", () => {
     expect(result.invocationSpec.maxOutputLines).toBe(20);
     expect(result.invocationSpec.budgetEvidence).toContain("Spark budget usable");
     expect(result.invocationSpec.budgetEvidenceProvider).toBe("openai-codex/gpt-5.3-codex-spark");
-    expect(result.humanConfirmationPhrase).toBe("execute o worker task-bud-1010-task-packet");
+    expect(result.operatorApprovalPrompt).toBe("approve worker task-bud-1010-task-packet");
   });
 
   it("builds a natural-use Codex Spark packet for promoted envelopes", () => {
@@ -67,7 +67,7 @@ describe("agent run task packet surfaces", () => {
         description: "Use Codex Spark naturally for a bounded local-safe worker slice.",
         status: "planned",
         files: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
-        acceptance_criteria: ["returns promoted worker packet", "keeps exact-confirmed dispatch"],
+        acceptance_criteria: ["returns promoted worker packet", "keeps structured operator approval"],
       },
       cwd: process.cwd(),
       envelope: "readonly-source-backed-evidence-synthesis",

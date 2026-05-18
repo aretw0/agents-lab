@@ -222,7 +222,7 @@ describe("agent spawn readiness contract", () => {
         command: "pi",
         shellInterpolationAllowed: false,
       },
-      humanConfirmationPhrase: "execute o worker task-bud-990-stale-resume-review",
+      operatorApprovalPrompt: "approve worker task-bud-990-stale-resume-review",
     });
     expect(result.runSpec.budgetDecision).toBe("ok");
     expect(result.runSpec.extensionIsolation).toBe("minimal-no-extensions");

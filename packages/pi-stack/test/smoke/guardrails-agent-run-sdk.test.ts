@@ -36,7 +36,7 @@ describe("agent run SDK packet surfaces", () => {
       singleRunOnly: true,
       executorKind: "pi-sdk-in-process",
       decision: "ready-for-human-decision",
-      humanConfirmationPhrase: "execute o sdk worker task-bud-1068-sdk-preview-canary",
+      operatorApprovalPrompt: "approve sdk worker task-bud-1068-sdk-preview-canary",
     });
     expect(result.sdkPreview).toMatchObject({
       factory: "createAgentSession",
@@ -292,7 +292,7 @@ describe("agent run SDK packet surfaces", () => {
         maxSummaryChars: 600,
         maxEvidenceChars: 300,
       },
-      humanConfirmationPhrase: "approve sdk cache pack task-bud-1071-shared-evidence-pack",
+      operatorApprovalPrompt: "approve sdk cache pack task-bud-1071-shared-evidence-pack",
     });
     expect(cachePack.entries[0]?.summaryChars).toBe("SDK packet exposes report-only cache and batch contracts.".length);
     expect(cachePack.entries[0]?.evidenceChars).toBe("VERIF-TASK-BUD-1071-SDK-CACHE-PARALLEL-CONTRACT-20260512".length);
@@ -371,7 +371,7 @@ describe("agent run SDK packet surfaces", () => {
       dispatchAllowed: false,
       parallelDispatchAllowed: false,
       readyWorkerCount: 2,
-      humanConfirmationPhrase: "approve sdk readonly batch task-bud-1071-sdk-readonly-batch-preview",
+      operatorApprovalPrompt: "approve sdk readonly batch task-bud-1071-sdk-readonly-batch-preview",
     });
     expect(batchPacket.fanOutContract.join("\n")).toContain("never dispatches workers by itself");
     expect(batchPacket.fanInContract.join("\n")).toContain("cache-hit/cache-miss evidence");
@@ -472,7 +472,7 @@ describe("agent run SDK packet surfaces", () => {
         protectedFileCount: 0,
         omittedFileCount: 0,
       },
-      humanConfirmationPhrase: "approve sdk readonly batch task-bud-9999-readonly-narrow-batch",
+      operatorApprovalPrompt: "approve sdk readonly batch task-bud-9999-readonly-narrow-batch",
     });
     expect(taskBatchPacket.packet.workers).toHaveLength(2);
     expect(taskBatchPacket.packet.workers[0]?.runSpec.declaredFiles).toEqual(["package.json", "pnpm-workspace.yaml"]);
@@ -628,7 +628,7 @@ describe("agent run SDK packet surfaces", () => {
     }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
     expect(batchDispatchPreview.details?.mode).toBe("agent-run-sdk-readonly-batch-dispatch");
     expect(batchDispatchPreview.details?.processStartAllowed).toBe(false);
-    expect(batchDispatchPreview.details?.humanConfirmationPhrase).toBeUndefined();
+    expect(batchDispatchPreview.details?.operatorApprovalPrompt).toBeUndefined();
     expect(batchDispatchPreview.details?.packet?.operatorApproval?.decision).toBe("needs-structured-approval-signal");
     expect(batchDispatchPreview.content?.[0]?.text).toContain("decision=preview");
     expect(batchDispatchPreview.content?.[0]?.text).toContain("parallelDispatch=no");
@@ -812,7 +812,7 @@ describe("agent run SDK packet surfaces", () => {
     }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
     expect(dispatchPreview.details?.mode).toBe("agent-run-sdk-in-process-dispatch");
     expect(dispatchPreview.details?.processStartAllowed).toBe(false);
-    expect(dispatchPreview.details?.humanConfirmationPhrase).toBeUndefined();
+    expect(dispatchPreview.details?.operatorApprovalPrompt).toBeUndefined();
     expect(dispatchPreview.details?.packet?.operatorApproval?.decision).toBe("needs-structured-approval-signal");
     expect(dispatchPreview.content?.[0]?.text).toContain("decision=preview");
     expect(dispatchPreview.content?.[0]?.text).toContain("dispatch=no");
