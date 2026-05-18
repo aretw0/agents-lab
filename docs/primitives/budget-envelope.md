@@ -26,7 +26,7 @@ Estrutura mínima:
 
 1. nenhuma execução de swarm sem budget envelope explícito;
 2. toda execução gera evidência auditável (mínimo: consumo e janela);
-3. fechamento de envelope exige revisão humana.
+3. fechamento de envelope exige revisão do operador.
 
 ## Contrato canônico task/event (backend-agnostic v1)
 
@@ -78,5 +78,5 @@ Logo, para enforcement hard de custo, o caminho recomendado é o fluxo com `ant_
 
 1. adapter `.project tasks` ↔ lifecycle da colônia (start/progress/end);
 2. resumo de budget envelope no handoff da sessão;
-3. política de aprovação para exceder hardCap (human-in-the-loop);
+3. política de aprovação do operador para exceder hardCap;
 4. roteamento para modelos locais com envelopes separados por origem de custo.

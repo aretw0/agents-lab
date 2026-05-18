@@ -6,7 +6,7 @@ Contrato canônico para ingestão de conversas/threads de múltiplas plataformas
 
 - unificar eventos de conversa em formato único;
 - permitir triagem operacional reproduzível (`unlock-now` vs `later`);
-- preservar governança (`evidence`, `no-auto-close`, `human-in-the-loop`) independente da fonte.
+- preservar governança (`evidence`, `no-auto-close`, revisão do operador) independente da fonte.
 
 ## Entidade canônica (v1)
 
@@ -86,7 +86,7 @@ Contrato canônico para ingestão de conversas/threads de múltiplas plataformas
 
 - o schema descreve **ingestão**, não decide fechamento de task;
 - decisões continuam no board canônico (`.project/tasks`);
-- qualquer automação de estado precisa manter evidência e gate humano.
+- qualquer automação de estado precisa manter evidência e gate do operador.
 
 ## Status de adoção
 

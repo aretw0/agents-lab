@@ -4,7 +4,7 @@ Esta primitiva define o contrato local-first para futuros servers/processos gere
 
 ## Objetivo
 
-Permitir que o pi trabalhe com frontend, backend, workers e servidores de teste sem perder controle humano, sem processos órfãos, sem colisão de portas e sem despejar logs grandes no contexto.
+Permitir que o pi trabalhe com frontend, backend, workers e servidores de teste sem perder controle do operador, sem processos órfãos, sem colisão de portas e sem despejar logs grandes no contexto.
 
 ## Superfície inicial
 
@@ -117,7 +117,7 @@ Caminhos aceitos para integração futura:
 
 ## Stop/restart
 
-Restart destrutivo ou kill de processo existente exige aprovação humana explícita até haver evidência operacional suficiente. A primitiva de planejamento deve bloquear esse caso.
+Restart destrutivo ou kill de processo existente exige aprovação explícita do operador até haver evidência operacional suficiente. A primitiva de planejamento deve bloquear esse caso.
 
 ## Relação com trabalho ininterrupto
 

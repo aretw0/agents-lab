@@ -4,7 +4,7 @@ Status: proposta local-first para `TASK-BUD-437`.
 
 Objetivo: transformar brainstorming em insumo operacional de lane, com priorização e fatias sugeridas, sem executar mudanças.
 
-No contexto AFK (produção de baixa iteração humana), este packet é a principal fonte de material para evitar long-run sem backlog útil.
+No contexto AFK (produção de baixa interação do operador), este packet é a principal fonte de material para evitar long-run sem backlog útil.
 
 ## Invariantes
 
@@ -96,7 +96,7 @@ Saída esperada do preview:
 - lista `proposals[]` derivada de `selectedSlices`;
 - invariantes de segurança: `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`, `mode=report-only`.
 
-Origem da proposta deve ser visível no preview (`source=brainstorm|human|tangent-approved`). Materialização de task só ocorre após decisão humana explícita.
+Origem da proposta deve ser visível no preview (`source=brainstorm|human|tangent-approved`). Materialização de task só ocorre após decisão explícita do operador.
 
 ## Exemplo blocked/fail-closed
 
