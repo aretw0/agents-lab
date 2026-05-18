@@ -35,4 +35,4 @@ Use quando uma influência externa (repo, artigo, framework, referência) surgir
 
 1. Intake é preparação; não executa pesquisa externa por si.
 2. Intake não autoriza dispatch nem promoção automática.
-3. Cada decisão de promote continua exigindo confirmação humana explícita.
+3. Cada decisão de promote continua exigindo confirmação explícita do operador.

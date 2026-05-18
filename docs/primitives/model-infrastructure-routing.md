@@ -32,7 +32,7 @@ Este documento **não autoriza**:
 - uso de provider novo em protected scope;
 - scheduler/loop/offload/CI para execução de agentes.
 
-Qualquer uma dessas ações continua pertencendo a `TASK-BUD-849` com decisão humana explícita.
+Qualquer uma dessas ações continua pertencendo a `TASK-BUD-849` com decisão explícita do operador.
 
 ## 3. Tiers conceituais
 

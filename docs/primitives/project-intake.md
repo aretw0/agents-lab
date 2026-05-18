@@ -36,7 +36,7 @@ Saída (determinística):
 
 1. rodar intake report-only;
 2. confirmar perfil e primeira fatia;
-3. executar só após decisão humana/local gate;
+3. executar só após decisão do operador/local gate;
 4. manter checkpoint curto por fatia.
 
 ## Primeiro hatch em contexto novo

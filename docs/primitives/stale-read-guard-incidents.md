@@ -48,7 +48,7 @@ Preferred behavior:
 - whether the block came from upstream pi, pi-stack, third-party extension, editor integration, or Claude/Codex provider tooling;
 - exact tool call that was blocked;
 - whether a bounded re-read resolved it;
-- whether the file was changed by formatter, watcher, previous edit, or human.
+- whether the file was changed by formatter, watcher, previous edit, or operator.
 
 ## Relation to local stack work
 

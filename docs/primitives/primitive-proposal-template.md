@@ -58,5 +58,5 @@ Template canônico para propor uma nova primitiva sem inflar a stack com abstra�
 ### NO-GO
 - [ ] proposta sem owner;
 - [ ] nova superfície sem teste;
-- [ ] alteração protected sem decisão humana;
+- [ ] alteração protected sem decisão do operador;
 - [ ] custo operacional maior que o benefício esperado.

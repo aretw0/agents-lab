@@ -30,4 +30,4 @@ Fornecer leitura **report-only** da clareza/direção de planejamento no board p
 
 - Não cria/edita tasks.
 - Não fecha task automaticamente.
-- Não autoriza dispatch; apenas diagnóstico para decisão humana/operacional.
+- Não autoriza dispatch; apenas diagnóstico para decisão do operador.

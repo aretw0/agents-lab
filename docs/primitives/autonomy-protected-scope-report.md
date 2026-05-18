@@ -31,4 +31,4 @@ Resumo agregado:
 
 1. Sem mutação de board/tasks.
 2. Sem dispatch/autorização implícita.
-3. Diagnóstico curto para decisão humana e ajuste de heurística com baixo risco.
+3. Diagnóstico curto para decisão do operador e ajuste de heurística com baixo risco.
