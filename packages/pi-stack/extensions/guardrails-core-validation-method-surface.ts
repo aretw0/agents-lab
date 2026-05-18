@@ -1,11 +1,8 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { asBooleanWithDefault } from "./guardrails-core-param-normalizers";
 import { resolveValidationMethodPlan, type ValidationMethodKind } from "./guardrails-core-validation-method";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
-
-function asBool(value: unknown, fallback: boolean): boolean {
-  return typeof value === "boolean" ? value : fallback;
-}
 
 function normalizeKind(value: unknown): ValidationMethodKind {
   return value === "marker-check" || value === "focal-test" || value === "structured-read" || value === "unknown" ? value : "unknown";
@@ -29,12 +26,12 @@ export function registerGuardrailsValidationMethodSurface(pi: ExtensionAPI): voi
       const p = (params ?? {}) as Record<string, unknown>;
       const result = resolveValidationMethodPlan({
         kind: normalizeKind(p.kind),
-        safeMarkerToolAvailable: asBool(p.safe_marker_tool_available, true),
-        shellInlineRequested: asBool(p.shell_inline_requested, false),
-        commandSensitiveMarkers: asBool(p.command_sensitive_markers, false),
-        touchesProtectedScope: asBool(p.touches_protected_scope, false),
-        needsMutation: asBool(p.needs_mutation, false),
-        focalGateKnown: asBool(p.focal_gate_known, false),
+        safeMarkerToolAvailable: asBooleanWithDefault(p.safe_marker_tool_available, true),
+        shellInlineRequested: asBooleanWithDefault(p.shell_inline_requested, false),
+        commandSensitiveMarkers: asBooleanWithDefault(p.command_sensitive_markers, false),
+        touchesProtectedScope: asBooleanWithDefault(p.touches_protected_scope, false),
+        needsMutation: asBooleanWithDefault(p.needs_mutation, false),
+        focalGateKnown: asBooleanWithDefault(p.focal_gate_known, false),
       });
       return buildOperatorVisibleToolResponse({
         label: "validation_method_plan",

@@ -1,16 +1,8 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { asBooleanWithDefault, asNumberWithDefault } from "./guardrails-core-param-normalizers";
 import { resolveRecurringFailureHardening } from "./guardrails-core-recurring-failure";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
-
-function asBool(value: unknown, fallback: boolean): boolean {
-  return typeof value === "boolean" ? value : fallback;
-}
-
-function asNumber(value: unknown, fallback: number): number {
-  const raw = Number(value);
-  return Number.isFinite(raw) ? raw : fallback;
-}
 
 export function registerGuardrailsRecurringFailureSurface(pi: ExtensionAPI): void {
   pi.registerTool({
@@ -28,12 +20,12 @@ export function registerGuardrailsRecurringFailureSurface(pi: ExtensionAPI): voi
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
       const result = resolveRecurringFailureHardening({
-        occurrenceCount: asNumber(p.occurrence_count, 0),
-        hasDocumentedRule: asBool(p.has_documented_rule, false),
-        hasPrimitive: asBool(p.has_primitive, false),
-        hasRegressionTest: asBool(p.has_regression_test, false),
-        hasRuntimeGuard: asBool(p.has_runtime_guard, false),
-        oldPathStillAvailable: asBool(p.old_path_still_available, true),
+        occurrenceCount: asNumberWithDefault(p.occurrence_count, 0),
+        hasDocumentedRule: asBooleanWithDefault(p.has_documented_rule, false),
+        hasPrimitive: asBooleanWithDefault(p.has_primitive, false),
+        hasRegressionTest: asBooleanWithDefault(p.has_regression_test, false),
+        hasRuntimeGuard: asBooleanWithDefault(p.has_runtime_guard, false),
+        oldPathStillAvailable: asBooleanWithDefault(p.old_path_still_available, true),
       });
       return buildOperatorVisibleToolResponse({
         label: "recurring_failure_hardening_plan",

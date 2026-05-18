@@ -17,9 +17,10 @@ import {
   type LocalSliceOperatorDecisionKind,
   type UnattendedContinuationContextLevel,
 } from "./guardrails-core-unattended-continuation";
+import { asBooleanWithDefault } from "./guardrails-core-param-normalizers";
 
 function asBool(value: unknown, fallback: boolean): boolean {
-  return typeof value === "boolean" ? value : fallback;
+  return asBooleanWithDefault(value, fallback);
 }
 
 function normalizeContextLevel(value: unknown): UnattendedContinuationContextLevel {

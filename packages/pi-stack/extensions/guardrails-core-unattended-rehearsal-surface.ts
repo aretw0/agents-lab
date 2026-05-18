@@ -1,16 +1,8 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { asBooleanWithDefault, asNumberWithDefault } from "./guardrails-core-param-normalizers";
 import { evaluateUnattendedRehearsalGate, summarizeUnattendedRehearsalGate } from "./guardrails-core-unattended-rehearsal";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
-
-function asBool(value: unknown, fallback: boolean): boolean {
-  return typeof value === "boolean" ? value : fallback;
-}
-
-function asNumber(value: unknown, fallback: number): number {
-  const raw = Number(value);
-  return Number.isFinite(raw) ? raw : fallback;
-}
 
 export function registerGuardrailsUnattendedRehearsalSurface(pi: ExtensionAPI): void {
   pi.registerTool({
@@ -29,13 +21,13 @@ export function registerGuardrailsUnattendedRehearsalSurface(pi: ExtensionAPI): 
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
       const gate = evaluateUnattendedRehearsalGate({
-        completedLocalSlices: asNumber(p.completed_local_slices, 0),
-        focusPreserved: asBool(p.focus_preserved, false),
-        focalSmokeGreen: asBool(p.focal_smoke_green, false),
-        smallCommits: asBool(p.small_commits, false),
-        handoffFresh: asBool(p.handoff_fresh, false),
-        protectedScopeAutoSelections: asNumber(p.protected_scope_auto_selections, 0),
-        unresolvedBlockers: asNumber(p.unresolved_blockers, 0),
+        completedLocalSlices: asNumberWithDefault(p.completed_local_slices, 0),
+        focusPreserved: asBooleanWithDefault(p.focus_preserved, false),
+        focalSmokeGreen: asBooleanWithDefault(p.focal_smoke_green, false),
+        smallCommits: asBooleanWithDefault(p.small_commits, false),
+        handoffFresh: asBooleanWithDefault(p.handoff_fresh, false),
+        protectedScopeAutoSelections: asNumberWithDefault(p.protected_scope_auto_selections, 0),
+        unresolvedBlockers: asNumberWithDefault(p.unresolved_blockers, 0),
       });
       const result = { ...gate, summary: summarizeUnattendedRehearsalGate(gate) };
       return buildOperatorVisibleToolResponse({

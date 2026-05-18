@@ -5,29 +5,14 @@ import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPl
 import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
 import { consumeContextPreloadPack } from "./context-watchdog-continuation";
 import { buildUnavailableGitDirtySnapshot, readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
-import { asOptionalBoolean } from "./guardrails-core-param-normalizers";
-
-function asBool(value: unknown, fallback: boolean): boolean {
-  return typeof value === "boolean" ? value : fallback;
-}
-
-function asNumber(value: unknown, fallback: number): number {
-  const raw = Number(value);
-  return Number.isFinite(raw) ? raw : fallback;
-}
-
-function asStringArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
-}
-
-function asOptionalNumber(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-
-function asOptionalString(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
-}
+import {
+  asBooleanWithDefault,
+  asNonEmptyStringArray,
+  asNumberWithDefault,
+  asOptionalBoolean,
+  asOptionalNonEmptyString,
+  asOptionalNumber,
+} from "./guardrails-core-param-normalizers";
 
 function pickEnumValue<T extends string>(value: unknown, allowed: readonly T[]): T | undefined {
   return typeof value === "string" && allowed.includes(value as T) ? value as T : undefined;
@@ -126,37 +111,37 @@ function buildDelegationRunwayCue(p: Record<string, unknown>, cwd: string): Dele
   const capability = evaluateDelegationLaneCapabilitySnapshot({
     preloadDecision: pickEnumValue(p.delegation_preload_decision, ["use-pack", "fallback-canonical"]) ?? freshness.preloadDecision,
     dirtySignal: pickEnumValue(p.delegation_dirty_signal, ["clean", "dirty", "unknown"]) ?? freshness.dirtySignal,
-    monitorClassifyFailures: asNumber(p.monitor_classify_failures, 0),
-    subagentsReady: asBool(p.subagents_ready, true),
+    monitorClassifyFailures: asNumberWithDefault(p.monitor_classify_failures, 0),
+    subagentsReady: asBooleanWithDefault(p.subagents_ready, true),
   });
 
   const delegatePacket = buildDelegateOrExecuteDecisionPacket({
     capabilityDecision: pickEnumValue(p.delegation_capability_decision, ["ready", "needs-evidence", "blocked"]) ?? capability.decision,
-    capabilityRecommendationCode: asOptionalString(p.delegation_capability_recommendation_code) ?? capability.recommendationCode,
-    capabilityBlockers: asStringArray(p.delegation_capability_blockers).length > 0
-      ? asStringArray(p.delegation_capability_blockers)
+    capabilityRecommendationCode: asOptionalNonEmptyString(p.delegation_capability_recommendation_code) ?? capability.recommendationCode,
+    capabilityBlockers: asNonEmptyStringArray(p.delegation_capability_blockers).length > 0
+      ? asNonEmptyStringArray(p.delegation_capability_blockers)
       : capability.blockers,
-    capabilityEvidenceGaps: asStringArray(p.delegation_capability_evidence_gaps).length > 0
-      ? asStringArray(p.delegation_capability_evidence_gaps)
+    capabilityEvidenceGaps: asNonEmptyStringArray(p.delegation_capability_evidence_gaps).length > 0
+      ? asNonEmptyStringArray(p.delegation_capability_evidence_gaps)
       : capability.evidenceGaps,
     mixDecision: pickEnumValue(p.delegation_mix_decision, ["ready", "needs-evidence"]) ?? "needs-evidence",
     mixScore: asOptionalNumber(p.delegation_mix_score) ?? 0,
-    mixRecommendationCode: asOptionalString(p.delegation_mix_recommendation_code) ?? "delegation-mix-needs-evidence",
+    mixRecommendationCode: asOptionalNonEmptyString(p.delegation_mix_recommendation_code) ?? "delegation-mix-needs-evidence",
     mixDelegationEvents: asOptionalNumber(p.delegation_mix_delegation_events) ?? 0,
     mixSwarmEvents: asOptionalNumber(p.delegation_mix_swarm_events) ?? 0,
   });
 
   const rehearsalPacket = buildDelegationRehearsalDecisionPacket({
     capabilityDecision: pickEnumValue(p.delegation_capability_decision, ["ready", "needs-evidence", "blocked"]) ?? capability.decision,
-    capabilityRecommendationCode: asOptionalString(p.delegation_capability_recommendation_code) ?? capability.recommendationCode,
-    capabilityBlockers: asStringArray(p.delegation_capability_blockers).length > 0
-      ? asStringArray(p.delegation_capability_blockers)
+    capabilityRecommendationCode: asOptionalNonEmptyString(p.delegation_capability_recommendation_code) ?? capability.recommendationCode,
+    capabilityBlockers: asNonEmptyStringArray(p.delegation_capability_blockers).length > 0
+      ? asNonEmptyStringArray(p.delegation_capability_blockers)
       : capability.blockers,
     mixDecision: pickEnumValue(p.delegation_mix_decision, ["ready", "needs-evidence"]) ?? "needs-evidence",
     mixScore: asOptionalNumber(p.delegation_mix_score) ?? 0,
     mixDelegationEvents: asOptionalNumber(p.delegation_mix_delegation_events) ?? 0,
     autoAdvanceDecision: pickEnumValue(p.delegation_auto_advance_decision, ["eligible", "blocked"]) ?? "blocked",
-    autoAdvanceBlockedReasons: asStringArray(p.delegation_auto_advance_blocked_reasons),
+    autoAdvanceBlockedReasons: asNonEmptyStringArray(p.delegation_auto_advance_blocked_reasons),
     telemetryDecision: pickEnumValue(p.delegation_telemetry_decision, ["ready", "needs-evidence"]) ?? "needs-evidence",
     telemetryScore: asOptionalNumber(p.delegation_telemetry_score) ?? 0,
     telemetryBlockedRatePct: asOptionalNumber(p.delegation_telemetry_blocked_rate_pct) ?? 100,
@@ -225,13 +210,13 @@ function buildBackgroundRunwayCue(
   const rehearsal = evaluateBackgroundProcessRehearsal({
     readinessScore: readiness.score,
     readinessRecommendationCode: readiness.recommendationCode,
-    lifecycleClassified: asBool(p.background_lifecycle_classified, false),
+    lifecycleClassified: asBooleanWithDefault(p.background_lifecycle_classified, false),
     stopSourceCoveragePct: asOptionalNumber(p.background_stop_source_coverage_pct),
-    rollbackPlanKnown: asBool(p.background_rollback_plan_known, false),
+    rollbackPlanKnown: asBooleanWithDefault(p.background_rollback_plan_known, false),
     rehearsalSlices: asOptionalNumber(p.background_rehearsal_slices),
-    unresolvedBlockers: asNumber(p.background_unresolved_blockers, 0),
-    destructiveRestartRequested: asBool(p.background_destructive_restart_requested, false),
-    protectedScopeRequested: asBool(p.background_protected_scope_requested, false),
+    unresolvedBlockers: asNumberWithDefault(p.background_unresolved_blockers, 0),
+    destructiveRestartRequested: asBooleanWithDefault(p.background_destructive_restart_requested, false),
+    protectedScopeRequested: asBooleanWithDefault(p.background_protected_scope_requested, false),
   });
 
   const blockers = [...new Set([

@@ -3,21 +3,13 @@ import { Type } from "@sinclair/typebox";
 import { readFileSync } from "node:fs";
 import { relative, resolve, sep } from "node:path";
 import { evaluateTextMarkerCheck } from "./guardrails-core-marker-check";
+import { asBooleanWithDefault, asStringArray } from "./guardrails-core-param-normalizers";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
-
-function asBool(value: unknown, fallback: boolean): boolean {
-  return typeof value === "boolean" ? value : fallback;
-}
 
 function isInsideCwd(filePath: string, cwd: string): boolean {
   const resolved = resolve(cwd, filePath);
   const rel = relative(cwd, resolved);
   return !rel.startsWith("..") && !rel.startsWith(sep);
-}
-
-function asStringArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((item): item is string => typeof item === "string");
 }
 
 export function registerGuardrailsMarkerCheckSurface(pi: ExtensionAPI): void {
@@ -55,9 +47,9 @@ export function registerGuardrailsMarkerCheckSurface(pi: ExtensionAPI): void {
       const result = evaluateTextMarkerCheck({
         text,
         markers: asStringArray(p.markers),
-        normalizeAccents: asBool(p.normalize_accents, false),
-        caseSensitive: asBool(p.case_sensitive, true),
-        forbidCommandSensitiveMarkers: asBool(p.forbid_command_sensitive_markers, true),
+        normalizeAccents: asBooleanWithDefault(p.normalize_accents, false),
+        caseSensitive: asBooleanWithDefault(p.case_sensitive, true),
+        forbidCommandSensitiveMarkers: asBooleanWithDefault(p.forbid_command_sensitive_markers, true),
       });
       return buildOperatorVisibleToolResponse({
         label: "safe_marker_check",

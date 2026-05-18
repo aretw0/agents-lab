@@ -8,23 +8,22 @@ import {
 import { readProjectTasksBlock, type ProjectTaskItem } from "./colony-pilot-task-sync";
 import { resolveHandoffFreshness, type HandoffFreshnessLabel } from "./context-watchdog-handoff";
 import { readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
+import { asBooleanWithDefault, asNonEmptyStringArray, asNumberWithDefault } from "./guardrails-core-param-normalizers";
 
 export function normalizeContextLevel(value: unknown): AutonomyContextLevel {
   return value === "compact" || value === "checkpoint" || value === "warn" || value === "ok" ? value : "ok";
 }
 
 export function asBool(value: unknown, fallback: boolean): boolean {
-  return typeof value === "boolean" ? value : fallback;
+  return asBooleanWithDefault(value, fallback);
 }
 
 export function asNumber(value: unknown, fallback: number): number {
-  const raw = Number(value);
-  return Number.isFinite(raw) ? raw : fallback;
+  return asNumberWithDefault(value, fallback);
 }
 
 export function asStringArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+  return asNonEmptyStringArray(value);
 }
 
 const DEFAULT_HANDOFF_FRESH_MAX_AGE_MS = 30 * 60 * 1000;
