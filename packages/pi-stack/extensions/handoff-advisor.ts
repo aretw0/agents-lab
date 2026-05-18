@@ -39,6 +39,14 @@ function extractProviderRuntimeError(event: unknown): { provider?: string; error
   return { provider, errorMessage };
 }
 
+function hasStructuredOperatorApproval(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const row = value as Record<string, unknown>;
+  return row.packet_mode === "operator-approval-packet"
+    && row.approved === true
+    && row.approval_state === "approved";
+}
+
 // ---------------------------------------------------------------------------
 // Score types
 // ---------------------------------------------------------------------------
@@ -255,7 +263,7 @@ export default function handoffAdvisorExtension(pi: ExtensionAPI) {
       "Deterministic control plane handoff advisor.",
       "Combines budget pressure (quota-visibility) + provider availability (provider-readiness)",
       "to recommend the next provider when current is at WARN/BLOCK.",
-      "execute=true: opt-in execute path — calls pi.setModel and audits the decision.",
+      "execute=true with structured operator approval: opt-in execute path — calls pi.setModel and audits the decision.",
       "noAutoSwitch default — execute must be explicitly requested.",
     ].join(" "),
     parameters: Type.Object({
@@ -263,20 +271,28 @@ export default function handoffAdvisorExtension(pi: ExtensionAPI) {
         Type.String({ description: "Currently active provider (used to exclude from candidates). Optional." })
       ),
       execute: Type.Optional(
-        Type.Boolean({ description: "If true, apply the recommended provider switch via pi.setModel. Audited." })
+        Type.Boolean({ description: "If true, apply the recommended provider switch via pi.setModel after structured operator approval. Audited." })
+      ),
+      operator_approval: Type.Optional(
+        Type.Object({
+          packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
+          approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
+          approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
+        }, { description: "Structured operator approval envelope for execute=true." })
       ),
       reason: Type.Optional(
         Type.String({ description: "Human-readable reason for the switch, stored in audit log." })
       ),
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-      const p = params as { current_provider?: string; execute?: boolean; reason?: string };
+      const p = params as { current_provider?: string; execute?: boolean; reason?: string; operator_approval?: unknown };
       const advisory = await buildHandoffAdvisory(ctx.cwd, p.current_provider);
+      const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
 
       let executed = false;
       let executedModelRef: string | undefined;
 
-      if (p.execute === true && advisory.recommended?.modelRef && advisory.recommended.modelRef !== "(no routeModelRef configured)") {
+      if (p.execute === true && structuredOperatorApproval && advisory.recommended?.modelRef && advisory.recommended.modelRef !== "(no routeModelRef configured)") {
         const [provider, modelId] = advisory.recommended.modelRef.split("/");
         const model = ctx.modelRegistry.find(provider, modelId);
         if (model) {
@@ -296,7 +312,14 @@ export default function handoffAdvisorExtension(pi: ExtensionAPI) {
         });
       }
 
-      const result: HandoffExecutionResult = { executed, executedModelRef, reason: p.reason, advisory };
+      const result: HandoffExecutionResult & { structuredOperatorApproval: boolean; blockers: string[] } = {
+        executed,
+        executedModelRef,
+        reason: p.reason,
+        advisory,
+        structuredOperatorApproval,
+        blockers: p.execute === true && !structuredOperatorApproval ? ["structured-operator-approval-missing"] : [],
+      };
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,
@@ -321,29 +344,6 @@ export default function handoffAdvisorExtension(pi: ExtensionAPI) {
 
       const advisory = await buildHandoffAdvisory(ctx.cwd, currentProvider);
 
-      let executed = false;
-      let executedModelRef: string | undefined;
-
-      if (execute && advisory.recommended?.modelRef && advisory.recommended.modelRef !== "(no routeModelRef configured)") {
-        const [provider, modelId] = advisory.recommended.modelRef.split("/");
-        const model = ctx.modelRegistry.find(provider, modelId);
-        if (model) {
-          executed = await pi.setModel(model);
-          if (executed) executedModelRef = advisory.recommended.modelRef;
-        }
-
-        pi.appendEntry("handoff-advisor.route-execution", {
-          atIso: new Date().toISOString(),
-          currentProvider: advisory.currentProvider,
-          recommendedProvider: advisory.recommended.provider,
-          executedModelRef,
-          executed,
-          reason,
-          currentState: advisory.currentState,
-          score: advisory.candidates.find((c) => c.provider === advisory.recommended?.provider)?.score,
-        });
-      }
-
       const lines: string[] = [
         "handoff advisor",
         `generated: ${advisory.generatedAtIso.slice(0, 19)}Z`,
@@ -360,7 +360,7 @@ export default function handoffAdvisorExtension(pi: ExtensionAPI) {
         }
         lines.push(`  reason:  ${advisory.recommended.reason.slice(0, 120)}`);
         if (execute) {
-          lines.push(`  executed: ${executed ? `YES → ${executedModelRef}` : "NO (model not found in registry)"}`);
+          lines.push("  executed: NO (use handoff_advisor tool with operator_approval for model switches)");
           if (reason) lines.push(`  rationale: ${reason}`);
         }
       } else {
@@ -381,6 +381,8 @@ export default function handoffAdvisorExtension(pi: ExtensionAPI) {
 
       if (!execute) {
         lines.push("", "noAutoSwitch: true — pass --execute to apply.");
+      } else {
+        lines.push("", "structuredApprovalRequired: true");
       }
 
       ctx.ui.notify(

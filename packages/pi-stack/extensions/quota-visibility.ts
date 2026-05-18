@@ -426,6 +426,14 @@ function parseBooleanFlag(tokens: string[], ...flags: string[]): boolean {
 	return flags.some((f) => set.has(f.toLowerCase()));
 }
 
+function hasStructuredOperatorApproval(value: unknown): boolean {
+	if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+	const row = value as Record<string, unknown>;
+	return row.packet_mode === "operator-approval-packet"
+		&& row.approved === true
+		&& row.approval_state === "approved";
+}
+
 export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 	const cache = new Map<string, { at: number; value: QuotaStatus }>();
 
@@ -699,13 +707,18 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 		name: "quota_visibility_route",
 		label: "Quota Visibility Route Advisory",
 		description:
-			"Deterministic provider routing advisory (cheap|balanced|reliable) with optional explicit execute path.",
+			"Deterministic provider routing advisory (cheap|balanced|reliable) with optional structured-approval execute path.",
 		parameters: Type.Object({
 			days: Type.Optional(Type.Number({ minimum: 1, maximum: 90 })),
 			profile: Type.Optional(
 				Type.String({ description: "cheap | balanced | reliable" }),
 			),
 			execute: Type.Optional(Type.Boolean()),
+			operator_approval: Type.Optional(Type.Object({
+				packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
+				approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
+				approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
+			}, { description: "Structured operator approval envelope for execute=true." })),
 			reason: Type.Optional(Type.String()),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -713,6 +726,7 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 				days?: number;
 				profile?: string;
 				execute?: boolean;
+				operator_approval?: unknown;
 				reason?: string;
 			};
 			const status = await getStatus(ctx, { days: p.days });
@@ -725,7 +739,9 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 
 			let executed = false;
 			let executedModelRef: string | undefined;
-			if (p.execute === true && advisory.recommendedProvider) {
+			const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
+			const blockers = p.execute === true && !structuredOperatorApproval ? ["structured-operator-approval-missing"] : [];
+			if (p.execute === true && structuredOperatorApproval && advisory.recommendedProvider) {
 				const modelRef =
 					settings.routeModelRefs?.[advisory.recommendedProvider];
 				if (modelRef) {
@@ -748,7 +764,7 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 				});
 			}
 
-			const payload = { advisory, executed, executedModelRef };
+			const payload = { advisory, executed, executedModelRef, structuredOperatorApproval, blockers };
 			const outputPolicy = resolveQuotaToolOutputPolicy(readSettings(ctx.cwd));
 			return {
 				content: [
@@ -761,7 +777,7 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 						),
 					},
 				],
-				details: { advisory, executed, executedModelRef },
+				details: payload,
 			};
 		},
 	});
@@ -870,57 +886,11 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 					preferredScopeKeys: Object.values(settings.routeModelRefs ?? {}),
 				});
 
-				let executed = false;
-				let executedModelRef: string | undefined;
-
-				if (execute && advisory.recommendedProvider) {
-					const modelRef =
-						settings.routeModelRefs?.[advisory.recommendedProvider];
-					if (!modelRef) {
-						ctx.ui.notify(
-							[
-								formatRouteAdvisory(advisory),
-								"",
-								`execute solicitado, mas routeModelRefs.${advisory.recommendedProvider} não está configurado em .pi/settings.json`,
-								'Exemplo: piStack.quotaVisibility.routeModelRefs.{"openai-codex":"openai-codex/gpt-5.3-codex"}',
-							].join("\n"),
-							"warning",
-						);
-						return;
-					}
-
-					const [provider, modelId] = modelRef.split("/");
-					const model = ctx.modelRegistry.find(provider, modelId);
-					if (!model) {
-						ctx.ui.notify(
-							[
-								formatRouteAdvisory(advisory),
-								"",
-								`execute solicitado, mas modelRef '${modelRef}' não foi encontrado no modelRegistry.`,
-							].join("\n"),
-							"warning",
-						);
-						return;
-					}
-
-					executed = await pi.setModel(model);
-					if (executed) executedModelRef = modelRef;
-
-					pi.appendEntry("quota-visibility.route-execution", {
-						atIso: new Date().toISOString(),
-						profile,
-						advisory,
-						executed,
-						executedModelRef,
-						trigger: "slash-command",
-					});
-				}
-
 				const lines = [formatRouteAdvisory(advisory)];
 				if (execute) {
 					lines.push(
 						"",
-						`execute: ${executed ? `applied ${executedModelRef}` : "requested but not applied"}`,
+						"execute: blocked; use quota_visibility_route tool with operator_approval for model switches",
 					);
 				} else {
 					lines.push(
