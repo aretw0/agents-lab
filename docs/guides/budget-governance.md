@@ -41,7 +41,7 @@ Template operacional (report-only) para registrar pacote de evidência:
 npm run offload:evidence:template -- --task TASK-BUD-134 --decision defer
 ```
 
-Controles humanos mínimos na lane protegida (sempre explícitos):
+Controles mínimos do operador na lane protegida (sempre explícitos):
 - `cancel`: interromper execução remota quando custo/qualidade/governança desviarem;
 - `retry`: repetir somente com motivo curto + gate focal definido;
 - `override`: exceção auditável, com validade curta e rollback já declarado.
@@ -111,7 +111,7 @@ Diagnóstico operacional recomendado em ambiente com plugins extras:
 `piStack.colonyPilot.projectTaskSync` (opt-in) permite sincronizar eventos de colônia para `.project/tasks`:
 - criar task no launch;
 - anexar progresso por sinal;
-- refletir estado terminal como candidato (com fechamento humano).
+- refletir estado terminal como candidato (com fechamento pelo operador).
 Exemplo:
 
 ```json
@@ -191,7 +191,7 @@ Isso permite pesquisar e desenvolver sem confundir ausência de pacote com ausê
 3. Abrir/atualizar task em `.project/tasks.json`.
 4. Rodar execução com budget (`ant_colony` com `maxCost` quando for swarm).
 5. Coletar evidência (`/usage`, `/quota-visibility export`).
-6. Revisar resultados com humano antes de fechar tasks.
+6. Revisar resultados com o operador antes de fechar tasks.
 
 > Para disciplina operacional completa (cleanroom, promoção de candidate e reconciliação de drift), ver também: [`swarm-cleanroom-protocol.md`](./swarm-cleanroom-protocol.md).
 
@@ -203,7 +203,7 @@ Para fronteira explícita entre baseline agnóstico e estilos opt-in: [`opt-in-l
 
 Para esta iniciativa: **não fechar task automaticamente** no fim da sessão.
 
-Fechamento só após etapa de revisão com você (humano), validando:
+Fechamento só após etapa de revisão com o operador, validando:
 - o que foi criado;
 - o que foi concluído;
 - o que ficou pendente/risco.

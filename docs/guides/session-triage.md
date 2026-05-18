@@ -20,7 +20,7 @@ Antes de rodar triagem, escolha o modo de operação:
    - manter sistema atual do usuário (Markdown/Obsidian, DB/API, automação/web);
    - triagem continua útil para organizar backlog, sem migração forçada.
 
-3. **canônico + espelho humano (opt-in)**
+3. **canônico + espelho do operador (opt-in)**
    - `.project` segue oficial;
    - projeção para vault Markdown renderizável (referência: https://github.com/aretw0/vault-seed).
 
@@ -93,7 +93,7 @@ idea: Converter brainstorming de sessão em task draft revisável
 Contrato do inbox:
 - normaliza cada ideia para `ideaInbox.proposals[]`;
 - cada proposal contém `taskDraft.status=planned`, `acceptance_criteria` mínima e `references` para a origem;
-- `decisionGate` sempre exige revisão humana, verificação e `noAutoClose`;
+- `decisionGate` sempre exige revisão do operador, verificação e `noAutoClose`;
 - o script **não escreve** em `.project/tasks` nem promove prioridade automaticamente.
 
 Exemplo no repositório:
@@ -200,7 +200,7 @@ Referência da primitiva: `docs/primitives/capability-gap-claim.md`.
 - `.project/tasks` continua clock oficial
 - sem auto-close de tarefas estratégicas
 - evidência obrigatória para marcar entrega
-- revisão humana final
+- revisão do operador final
 
 ## Tidy up seguro
 

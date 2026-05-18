@@ -21,8 +21,8 @@ Cinco eventos no ciclo de vida de uma task executada por agente:
 |--------|---------|------------------------|
 | `start` | Task passa para `in-progress` | Abrir issue com título = task ID + descrição curta |
 | `progress` | Nota adicionada à task (evidência parcial) | Comentar na issue com snapshot de progresso |
-| `review` | Task candidata a fechamento (evidência completa, aguarda humano) | Abrir PR ou label `needs-review` na issue |
-| `done` | Human fecha task (`completed`) | Fechar issue/PR + registrar evidência no body |
+| `review` | Task candidata a fechamento (evidência completa, aguarda operador) | Abrir PR ou label `needs-review` na issue |
+| `done` | Operador fecha task (`completed`) | Fechar issue/PR + registrar evidência no body |
 | `recovery` | Task `blocked` ou evidence gap — promotion criada | Reabrir issue ou criar issue filha de recovery |
 
 Estes eventos são **agnósticos de provider** — qualquer runner que consuma `.project/tasks.json` pode implementá-los.
@@ -102,7 +102,7 @@ Workflow que monitora push em `.project/tasks.json` e executa o sync automaticam
 
 - Esta spec cobre apenas o **contrato** — não a implementação completa do sync.
 - O board (`.project/tasks.json`) é sempre fonte de verdade; GitHub é uma projeção.
-- Human-in-the-loop permanece obrigatório para fechamento de tasks estratégicas.
+- Revisão do operador permanece obrigatória para fechamento de tasks estratégicas.
 - Automação de fechamento via CI é explicitamente proibida sem override auditável.
 
 ---
