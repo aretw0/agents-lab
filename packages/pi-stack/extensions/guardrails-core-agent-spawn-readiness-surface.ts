@@ -461,7 +461,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const executeRequested = p.execute === true;
       const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
       const blockers = [...packet.blockers];
-      if (packet.decision !== "ready-for-human-decision") blockers.push("task-start-packet-blocked");
+      if (packet.decision !== "ready-for-operator-decision") blockers.push("task-start-packet-blocked");
       if (existingEntry?.state === "running") blockers.push("run-already-running");
       if (executeRequested && !sameCwd(cwd, ctx.cwd)) blockers.push("execute-cwd-mismatch");
       if (executeRequested && !structuredOperatorApproval) blockers.push("structured-operator-approval-missing");
@@ -562,7 +562,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         dispatchAllowed,
         processStartAllowed: dispatchAllowed,
         processStopAllowed: false,
-        requiresHumanDecision: true,
+        requiresOperatorDecision: true,
         singleRunOnly: true,
         decision,
         blockers,
@@ -805,7 +805,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const existingEntry = packet.runSpec.runId ? readRegistryEntry(ctx.cwd, packet.runSpec.runId) : undefined;
       const workerLaneReadiness = evaluateAgentWorkerLaneReadiness(ctx.cwd);
       const blockers = [...packet.blockers];
-      if (packet.decision !== "ready-for-human-decision") blockers.push("sdk-packet-blocked");
+      if (packet.decision !== "ready-for-operator-decision") blockers.push("sdk-packet-blocked");
       if (executeRequested && !workerLaneReadiness.singleWorkerAllowed) blockers.push("worker-lane-single-worker-not-ready");
       if (existingEntry?.state === "running") blockers.push("run-already-running");
       if (executeRequested && !sameCwd(packet.runSpec.cwd, ctx.cwd)) blockers.push("execute-cwd-mismatch");
@@ -820,7 +820,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         dispatchAllowed,
         processStartAllowed: dispatchAllowed,
         processStopAllowed: false,
-        requiresHumanDecision: true,
+        requiresOperatorDecision: true,
         singleRunOnly: true,
         decision,
         blockers,

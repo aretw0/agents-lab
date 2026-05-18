@@ -157,7 +157,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
       const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
       const workerLaneReadiness = evaluateAgentWorkerLaneReadiness(ctx.cwd);
       const blockers = [...packet.blockers];
-      if (packet.decision !== "ready-for-human-decision") blockers.push("batch-packet-blocked");
+      if (packet.decision !== "ready-for-operator-decision") blockers.push("batch-packet-blocked");
       if (executeRequested && !workerLaneReadiness.multiWorkerRehearsalCandidate) blockers.push("worker-lane-multi-worker-not-ready");
       if (executeRequested && !structuredOperatorApproval) blockers.push("structured-operator-approval-missing");
       for (const worker of packet.workers) {
@@ -178,7 +178,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
         parallelDispatchAllowed,
         processStartAllowed: parallelDispatchAllowed,
         processStopAllowed: false,
-        requiresHumanDecision: true,
+        requiresOperatorDecision: true,
         decision,
         blockers,
         executeRequested,

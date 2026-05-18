@@ -20,7 +20,7 @@ describe("agent run SDK arena packets", () => {
       mode: "agent-run-sdk-provider-model-arena-packet",
       dispatchAllowed: false,
       paidModelCallsAllowed: false,
-      decision: "ready-for-human-decision",
+      decision: "ready-for-operator-decision",
     });
     expect(arenaPacket.arenaSpec.promotionScope).toBe("provider-model-envelope");
     expect(arenaPacket.canaries).toHaveLength(2);
@@ -47,7 +47,7 @@ describe("agent run SDK arena packets", () => {
       budgetDecision: "ok",
       budgetEvidence: "manual expanded suite budget evidence",
     });
-    expect(expandedArenaPacket.decision).toBe("ready-for-human-decision");
+    expect(expandedArenaPacket.decision).toBe("ready-for-operator-decision");
     expect(expandedArenaPacket.canaries.map((canary) => canary.envelope)).toEqual([
       "readonly-three-file-risk-table",
       "readonly-source-backed-evidence-synthesis",
@@ -85,7 +85,7 @@ describe("agent run SDK arena packets", () => {
       budgetDecision: "ok",
       budgetEvidence: "manual one-file mutation suite budget evidence",
     });
-    expect(mutationArenaPacket.decision).toBe("ready-for-human-decision");
+    expect(mutationArenaPacket.decision).toBe("ready-for-operator-decision");
     expect(mutationArenaPacket.canaries.map((canary) => canary.fileContract)).toEqual(["mutation", "mutation", "mutation"]);
     expect(mutationArenaPacket.canaries.every((canary) => canary.packet.sdkMaturity.rung === "validated-one-file-mutation")).toBe(true);
     expect(mutationArenaPacket.canaries[1]?.declaredFiles).toEqual(["packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts"]);

@@ -32,10 +32,10 @@ describe("agent run SDK packet surfaces", () => {
       dispatchAllowed: false,
       processStartAllowed: false,
       processStopAllowed: false,
-      requiresHumanDecision: true,
+      requiresOperatorDecision: true,
       singleRunOnly: true,
       executorKind: "pi-sdk-in-process",
-      decision: "ready-for-human-decision",
+      decision: "ready-for-operator-decision",
       operatorApprovalPrompt: "approve sdk worker task-bud-1068-sdk-preview-canary",
     });
     expect(result.sdkPreview).toMatchObject({
@@ -90,7 +90,7 @@ describe("agent run SDK packet surfaces", () => {
       eventStreamKnown: true,
       finalOutputContractKnown: true,
     });
-    expect(twoFileCodeReview.decision).toBe("ready-for-human-decision");
+    expect(twoFileCodeReview.decision).toBe("ready-for-operator-decision");
     expect(twoFileCodeReview.sdkMaturity).toMatchObject({
       rung: "needs-evidence-code-review",
       validatedEnvelope: false,
@@ -139,7 +139,7 @@ describe("agent run SDK packet surfaces", () => {
       eventStreamKnown: true,
       finalOutputContractKnown: true,
     });
-    expect(broadReadOnly.decision).toBe("ready-for-human-decision");
+    expect(broadReadOnly.decision).toBe("ready-for-operator-decision");
     expect(broadReadOnly.sdkMaturity).toMatchObject({
       rung: "needs-evidence-broad-readonly",
       validatedEnvelope: false,
@@ -223,7 +223,7 @@ describe("agent run SDK packet surfaces", () => {
       eventStreamKnown: true,
       finalOutputContractKnown: true,
     });
-    expect(mutationCanaryReady.decision).toBe("ready-for-human-decision");
+    expect(mutationCanaryReady.decision).toBe("ready-for-operator-decision");
     expect(mutationCanaryReady.blockers).not.toContain("unsupported-tool-policy:write");
     expect(mutationCanaryReady.sdkMaturity).toMatchObject({
       rung: "validated-one-file-mutation",
@@ -255,7 +255,7 @@ describe("agent run SDK packet surfaces", () => {
       eventStreamKnown: true,
       finalOutputContractKnown: true,
     });
-    expect(multiFileMutationStillNeedsEvidence.decision).toBe("ready-for-human-decision");
+    expect(multiFileMutationStillNeedsEvidence.decision).toBe("ready-for-operator-decision");
     expect(multiFileMutationStillNeedsEvidence.sdkMaturity).toMatchObject({
       rung: "needs-evidence-mutation",
       validatedEnvelope: false,
@@ -282,7 +282,7 @@ describe("agent run SDK packet surfaces", () => {
     });
     expect(cachePack).toMatchObject({
       mode: "agent-run-sdk-cache-pack-packet",
-      decision: "ready-for-human-decision",
+      decision: "ready-for-operator-decision",
       dispatchAllowed: false,
       packSpec: {
         entryCount: 2,
@@ -367,7 +367,7 @@ describe("agent run SDK packet surfaces", () => {
     });
     expect(batchPacket).toMatchObject({
       mode: "agent-run-sdk-readonly-batch-packet",
-      decision: "ready-for-human-decision",
+      decision: "ready-for-operator-decision",
       dispatchAllowed: false,
       parallelDispatchAllowed: false,
       readyWorkerCount: 2,
@@ -463,7 +463,7 @@ describe("agent run SDK packet surfaces", () => {
     });
     expect(taskBatchPacket).toMatchObject({
       mode: "agent-run-sdk-readonly-batch-task-packet",
-      decision: "ready-for-human-decision",
+      decision: "ready-for-operator-decision",
       dispatchAllowed: false,
       parallelDispatchAllowed: false,
       taskSpec: {

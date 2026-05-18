@@ -38,9 +38,9 @@ describe("agent run task packet surfaces", () => {
       dispatchAllowed: false,
       processStartAllowed: false,
       processStopAllowed: false,
-      requiresHumanDecision: true,
+      requiresOperatorDecision: true,
       singleRunOnly: true,
-      decision: "ready-for-human-decision",
+      decision: "ready-for-operator-decision",
       blockers: [],
     });
     expect(result.invocationSpec.runId).toBe("task-bud-1010-task-packet");
@@ -80,8 +80,8 @@ describe("agent run task packet surfaces", () => {
       dispatchAllowed: false,
       processStartAllowed: false,
       processStopAllowed: false,
-      requiresHumanDecision: true,
-      decision: "ready-for-human-decision",
+      requiresOperatorDecision: true,
+      decision: "ready-for-operator-decision",
       promotion: "promoted",
       blockers: [],
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
@@ -206,8 +206,8 @@ describe("agent run task packet surfaces", () => {
       dispatchAllowed: false,
       processStartAllowed: false,
       processStopAllowed: false,
-      requiresHumanDecision: true,
-      decision: "ready-for-human-decision",
+      requiresOperatorDecision: true,
+      decision: "ready-for-operator-decision",
       blockers: [],
     });
     expect(result.taskPacket.mode).toBe("agent-run-task-packet");
@@ -244,7 +244,7 @@ describe("agent run task packet surfaces", () => {
       extensionIsolation: "inherit",
     });
 
-    expect(result.decision).toBe("ready-for-human-decision");
+    expect(result.decision).toBe("ready-for-operator-decision");
     expect(result.taskPacket.invocationSpec.extensionIsolation).toBe("inherit");
     expect(result.startPreview.args).not.toContain("--no-extensions");
     expect(result.startPreview.args).not.toContain("--no-skills");
@@ -327,8 +327,8 @@ describe("agent run task packet surfaces", () => {
     expect(result.details?.mode).toBe("agent-run-task-packet");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.processStartAllowed).toBe(false);
-    expect(result.details?.decision).toBe("ready-for-human-decision");
-    expect(result.content?.[0]?.text).toContain("agent-run-task-packet: decision=ready-for-human-decision");
+    expect(result.details?.decision).toBe("ready-for-operator-decision");
+    expect(result.content?.[0]?.text).toContain("agent-run-task-packet: decision=ready-for-operator-decision");
     expect(result.content?.[0]?.text).toContain("dispatch=no");
   });
 
@@ -383,8 +383,8 @@ describe("agent run task packet surfaces", () => {
     expect(result.details?.mode).toBe("codex-spark-promoted-worker-packet");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.processStartAllowed).toBe(false);
-    expect(result.details?.decision).toBe("ready-for-human-decision");
-    expect(result.content?.[0]?.text).toContain("codex-spark-promoted-worker-packet: decision=ready-for-human-decision");
+    expect(result.details?.decision).toBe("ready-for-operator-decision");
+    expect(result.content?.[0]?.text).toContain("codex-spark-promoted-worker-packet: decision=ready-for-operator-decision");
     expect(result.content?.[0]?.text).toContain("dispatch=no");
   });
 
@@ -545,8 +545,8 @@ describe("agent run task packet surfaces", () => {
     expect(result.details?.mode).toBe("agent-run-task-start-packet");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.processStartAllowed).toBe(false);
-    expect(result.details?.decision).toBe("ready-for-human-decision");
-    expect(result.content?.[0]?.text).toContain("agent-run-task-start-packet: decision=ready-for-human-decision");
+    expect(result.details?.decision).toBe("ready-for-operator-decision");
+    expect(result.content?.[0]?.text).toContain("agent-run-task-start-packet: decision=ready-for-operator-decision");
     expect(result.content?.[0]?.text).toContain("dispatch=no");
   });
 });

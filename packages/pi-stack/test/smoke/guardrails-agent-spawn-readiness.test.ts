@@ -213,10 +213,10 @@ describe("agent spawn readiness contract", () => {
       dispatchAllowed: false,
       processStartAllowed: false,
       processStopAllowed: false,
-      requiresHumanDecision: true,
+      requiresOperatorDecision: true,
       singleRunOnly: true,
-      decision: "ready-for-human-decision",
-      recommendationCode: "agent-run-start-ready-for-human-decision",
+      decision: "ready-for-operator-decision",
+      recommendationCode: "agent-run-start-ready-for-operator-decision",
       blockers: [],
       commandPreview: {
         command: "pi",
@@ -279,9 +279,9 @@ describe("agent spawn readiness contract", () => {
       authorization: "none",
       dispatchAllowed: false,
       processStartAllowed: false,
-      requiresHumanDecision: true,
+      requiresOperatorDecision: true,
       singleRunOnly: true,
-      decision: "ready-for-human-decision",
+      decision: "ready-for-operator-decision",
       blockers: [],
     });
     expect(result.runSpec.runId).toBe("task-bud-998-ergonomic-wrapper-review");
@@ -324,9 +324,9 @@ describe("agent spawn readiness contract", () => {
       authorization: "none",
       dispatchAllowed: false,
       processStartAllowed: false,
-      requiresHumanDecision: true,
+      requiresOperatorDecision: true,
       singleRunOnly: true,
-      decision: "ready-for-human-decision",
+      decision: "ready-for-operator-decision",
       blockers: [],
     });
     expect(readOnly.invocationSpec.profile).toBe("read-only-review");
@@ -361,7 +361,7 @@ describe("agent spawn readiness contract", () => {
       validation: ["npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts --reporter=dot"],
       rollback: ["git restore packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
     });
-    expect(mutationReady.decision).toBe("ready-for-human-decision");
+    expect(mutationReady.decision).toBe("ready-for-operator-decision");
     expect(mutationReady.invocationSpec.fileContract).toBe("mutation");
     const mutationToolsIndex = mutationReady.invocationSpec.executionPreview.args.indexOf("--tools") + 1;
     expect(mutationReady.invocationSpec.executionPreview.args[mutationToolsIndex]).toContain("edit");
@@ -443,7 +443,7 @@ describe("agent spawn readiness contract", () => {
       budgetEvidenceProvider: "dashscope",
       budgetEvidenceGeneratedAtIso: generatedAtIso,
     });
-    expect(ready.decision).toBe("ready-for-human-decision");
+    expect(ready.decision).toBe("ready-for-operator-decision");
     expect(ready.runSpec).toMatchObject({
       budgetEvidenceSource: "route-advisory",
       budgetEvidenceFreshness: "fresh",
@@ -626,8 +626,8 @@ describe("agent spawn readiness contract", () => {
     expect(result.details?.mode).toBe("agent-run-start-packet");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.processStartAllowed).toBe(false);
-    expect(result.details?.decision).toBe("ready-for-human-decision");
-    expect(result.content?.[0]?.text).toContain("agent-run-start-packet: decision=ready-for-human-decision");
+    expect(result.details?.decision).toBe("ready-for-operator-decision");
+    expect(result.content?.[0]?.text).toContain("agent-run-start-packet: decision=ready-for-operator-decision");
     expect(result.content?.[0]?.text).not.toContain('"commandPreview"');
   });
 
@@ -679,10 +679,10 @@ describe("agent spawn readiness contract", () => {
     expect(result.details?.mode).toBe("agent-run-operator-packet");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.processStartAllowed).toBe(false);
-    expect(result.details?.decision).toBe("ready-for-human-decision");
+    expect(result.details?.decision).toBe("ready-for-operator-decision");
     expect((result.details as { runSpec?: { economyMode?: string; maxOutputLines?: number } })?.runSpec?.economyMode).toBe("critical");
     expect((result.details as { runSpec?: { economyMode?: string; maxOutputLines?: number } })?.runSpec?.maxOutputLines).toBe(18);
-    expect(result.content?.[0]?.text).toContain("agent-run-operator-packet: decision=ready-for-human-decision");
+    expect(result.content?.[0]?.text).toContain("agent-run-operator-packet: decision=ready-for-operator-decision");
     expect(result.content?.[0]?.text).not.toContain('"commandPreview"');
   });
 
@@ -736,10 +736,10 @@ describe("agent spawn readiness contract", () => {
     expect(result.details?.mode).toBe("agent-invocation-spec-packet");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.processStartAllowed).toBe(false);
-    expect(result.details?.decision).toBe("ready-for-human-decision");
+    expect(result.details?.decision).toBe("ready-for-operator-decision");
     expect((result.details as { invocationSpec?: { economyMode?: string; maxOutputLines?: number } })?.invocationSpec?.economyMode).toBe("conserve");
     expect((result.details as { invocationSpec?: { economyMode?: string; maxOutputLines?: number } })?.invocationSpec?.maxOutputLines).toBe(24);
-    expect(result.content?.[0]?.text).toContain("agent-invocation-spec-packet: decision=ready-for-human-decision");
+    expect(result.content?.[0]?.text).toContain("agent-invocation-spec-packet: decision=ready-for-operator-decision");
     expect(result.content?.[0]?.text).not.toContain('"executionPreview"');
   });
 

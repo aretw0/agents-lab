@@ -11,7 +11,7 @@ import { resolveProviderExecutionBudgetEvidence, type ProviderExecutionBudgetDec
 import { buildToolkitContract, type ToolkitCapability, type ToolkitContractProfile, type ToolkitContractResult } from "./guardrails-core-toolkit-contract";
 
 export type AgentRunExecutorKind = "pi-print-subprocess";
-export type AgentRunStartDecision = "ready-for-human-decision" | "blocked";
+export type AgentRunStartDecision = "ready-for-operator-decision" | "blocked";
 export type AgentRunBudgetDecision = ProviderExecutionBudgetDecision;
 export type AgentRunOperatorFileContract = "read-only" | "mutation";
 export type AgentInvocationProfile = "read-only-review" | "small-mutation" | "test-fix" | "research";
@@ -49,11 +49,11 @@ export interface AgentRunStartPacketResult {
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   singleRunOnly: true;
   decision: AgentRunStartDecision;
   recommendationCode:
-    | "agent-run-start-ready-for-human-decision"
+    | "agent-run-start-ready-for-operator-decision"
     | "agent-run-start-blocked-run-id"
     | "agent-run-start-blocked-executor"
     | "agent-run-start-blocked-goal"
@@ -132,7 +132,7 @@ export interface AgentRunOperatorPacketResult {
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   singleRunOnly: true;
   decision: AgentRunStartDecision;
   recommendationCode: AgentRunStartPacketResult["recommendationCode"];
@@ -167,7 +167,7 @@ export interface AgentInvocationSpecPacketResult {
   authorization: "none";
   dispatchAllowed: false;
   processStartAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   singleRunOnly: true;
   decision: AgentRunStartDecision;
   recommendationCode: AgentRunStartPacketResult["recommendationCode"] | "agent-invocation-spec-blocked-profile" | "agent-invocation-spec-blocked-validation" | "agent-invocation-spec-blocked-rollback" | "agent-invocation-spec-blocked-economy" | "agent-invocation-spec-blocked-toolkit";
@@ -224,7 +224,7 @@ export interface AgentRunTaskPacketResult {
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   singleRunOnly: true;
   decision: AgentRunStartDecision;
   recommendationCode:
@@ -266,7 +266,7 @@ export interface AgentRunTaskStartPacketResult {
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   singleRunOnly: true;
   decision: AgentRunStartDecision;
   recommendationCode:
@@ -313,7 +313,7 @@ export interface CodexSparkPromotedWorkerPacketResult {
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   singleRunOnly: true;
   providerModelRef: "openai-codex/gpt-5.3-codex-spark";
   envelope: string;
@@ -428,7 +428,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
     : undefined;
 
   const blockers: string[] = [];
-  let recommendationCode: AgentRunStartPacketResult["recommendationCode"] = "agent-run-start-ready-for-human-decision";
+  let recommendationCode: AgentRunStartPacketResult["recommendationCode"] = "agent-run-start-ready-for-operator-decision";
 
   const block = (code: AgentRunStartPacketResult["recommendationCode"], blocker: string) => {
     if (blockers.length === 0) recommendationCode = code;
@@ -468,7 +468,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
     ...declaredFiles.map((file) => `@${file}`),
     goal || "goal-required",
   ];
-  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   const operatorApprovalPrompt = runId ? `approve worker ${runId}` : "approve worker <run-id>";
 
   return {
@@ -478,7 +478,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     singleRunOnly: true,
     decision,
     recommendationCode,
@@ -512,7 +512,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       shellInterpolationAllowed: false,
     },
     operatorApprovalPrompt,
-    nextActions: decision === "ready-for-human-decision"
+    nextActions: decision === "ready-for-operator-decision"
       ? [
           "present the structured operator approval packet before starting any worker",
           "if confirmed, registry-upsert planned->running with pid/log/status before invoking the command preview as argv",
@@ -596,7 +596,7 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     singleRunOnly: true,
     decision: startPacket.decision,
     recommendationCode: startPacket.recommendationCode,
@@ -665,8 +665,8 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
     for (const blocker of toolkitContract.blockers) block("agent-invocation-spec-blocked-toolkit", `toolkit-contract:${blocker}`);
   }
 
-  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
-  if (decision === "ready-for-human-decision") recommendationCode = "agent-run-start-ready-for-human-decision";
+  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
+  if (decision === "ready-for-operator-decision") recommendationCode = "agent-run-start-ready-for-operator-decision";
 
   return {
     mode: "agent-invocation-spec-packet",
@@ -674,7 +674,7 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
     authorization: "none",
     dispatchAllowed: false,
     processStartAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     singleRunOnly: true,
     decision,
     recommendationCode,
@@ -690,7 +690,7 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
       executionPreview: operatorPacket.startPacket.commandPreview,
     },
     operatorPacket,
-    nextActions: decision === "ready-for-human-decision"
+    nextActions: decision === "ready-for-operator-decision"
       ? [
           "present the structured operator approval packet before execution",
           "registry-upsert running before invoking the execution preview",
@@ -769,8 +769,8 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
   if (acceptanceCriteria.length === 0) block("agent-run-task-blocked-acceptance-criteria", "task-acceptance-criteria-missing");
   if (protectedScopeDetected) block("agent-run-task-blocked-protected-scope", "protected-scope-requested");
 
-  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
-  if (decision === "ready-for-human-decision") recommendationCode = "agent-run-start-ready-for-human-decision";
+  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
+  if (decision === "ready-for-operator-decision") recommendationCode = "agent-run-start-ready-for-operator-decision";
 
   return {
     mode: "agent-run-task-packet",
@@ -779,7 +779,7 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     singleRunOnly: true,
     decision,
     recommendationCode,
@@ -799,7 +799,7 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
     validationChecklist,
     rollback,
     operatorApprovalPrompt: invocationSpecPacket.operatorApprovalPrompt,
-    nextActions: decision === "ready-for-human-decision"
+    nextActions: decision === "ready-for-operator-decision"
       ? [
           "show the typed invocation spec to the operator",
           "require structured operator approval before any dispatch",
@@ -861,8 +861,8 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
     recommendationCode = "agent-run-task-start-blocked-task-packet";
     blockers.push("task-packet-blocked");
   }
-  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
-  if (decision === "ready-for-human-decision") recommendationCode = "agent-run-start-ready-for-human-decision";
+  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
+  if (decision === "ready-for-operator-decision") recommendationCode = "agent-run-start-ready-for-operator-decision";
 
   return {
     mode: "agent-run-task-start-packet",
@@ -871,7 +871,7 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     singleRunOnly: true,
     decision,
     recommendationCode,
@@ -895,7 +895,7 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
       `dry outcome preview: ${dryOutcomePreview.summary}`,
     ],
     operatorApprovalPrompt: taskPacket.operatorApprovalPrompt,
-    nextActions: decision === "ready-for-human-decision"
+    nextActions: decision === "ready-for-operator-decision"
       ? [
           "show registry/start/status/log/abort/outcome previews to the operator",
           "require structured operator approval before any dispatch",
@@ -940,7 +940,7 @@ export function buildCodexSparkPromotedWorkerPacket(input: CodexSparkPromotedWor
     blockers.push("codex-spark-envelope-not-promoted");
     recommendationCode = "codex-spark-promoted-worker-blocked-envelope";
   }
-  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   const promotion = promotedEnvelope === "unknown" ? "blocked" : "promoted";
 
   return {
@@ -950,7 +950,7 @@ export function buildCodexSparkPromotedWorkerPacket(input: CodexSparkPromotedWor
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     singleRunOnly: true,
     providerModelRef: CODEX_SPARK_PROVIDER_MODEL_REF,
     envelope,
@@ -974,7 +974,7 @@ export function buildCodexSparkPromotedWorkerPacket(input: CodexSparkPromotedWor
       "settings/routing/default-provider changes",
     ],
     operatorApprovalPrompt: taskStartPacket.operatorApprovalPrompt,
-    nextActions: decision === "ready-for-human-decision"
+    nextActions: decision === "ready-for-operator-decision"
       ? [
           "use this promoted packet instead of an arena canary for the next bounded Codex Spark worker",
           "require structured operator approval before dispatch",

@@ -59,7 +59,7 @@ export interface AgentRunSdkProviderModelArenaArtifactPacketResult {
   processStartAllowed: false;
   paidModelCallsAllowed: false;
   writeAllowed: boolean;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   decision: "preview" | "ready-to-apply" | "blocked";
   applyRequested: boolean;
   structuredOperatorApproval: boolean;
@@ -84,10 +84,10 @@ export interface AgentRunSdkProviderModelArenaPacketResult {
   processStartAllowed: false;
   processStopAllowed: false;
   paidModelCallsAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   executorKind: "pi-sdk-in-process";
   decision: AgentRunSdkPacketDecision;
-  recommendationCode: "agent-run-sdk-provider-model-arena-ready-for-human-decision" | "agent-run-sdk-provider-model-arena-blocked";
+  recommendationCode: "agent-run-sdk-provider-model-arena-ready-for-operator-decision" | "agent-run-sdk-provider-model-arena-blocked";
   blockers: string[];
   arenaSpec: {
     arenaId: string;
@@ -363,7 +363,7 @@ export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRun
   const applyRequested = input.apply === true;
   const blockers = [...arenaPacket.blockers];
   const structuredOperatorApproval = hasStructuredOperatorApproval(input.operatorApproval);
-  if (arenaPacket.decision !== "ready-for-human-decision") blockers.push("arena-packet-blocked");
+  if (arenaPacket.decision !== "ready-for-operator-decision") blockers.push("arena-packet-blocked");
   if (arenaPacket.arenaSpec.arenaId && !isSafeArtifactArenaId(arenaPacket.arenaSpec.arenaId)) blockers.push("arena-artifact-id-unsafe");
   if (applyRequested && !structuredOperatorApproval) blockers.push("structured-operator-approval-missing");
   const artifactPreviews = arenaPacket.suiteArtifactPlan.artifacts.map((artifact) => {
@@ -390,7 +390,7 @@ export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRun
     processStartAllowed: false,
     paidModelCallsAllowed: false,
     writeAllowed,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     decision,
     applyRequested,
     structuredOperatorApproval,
@@ -496,10 +496,10 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     };
   });
   for (const canary of canaries) {
-    if (canary.packet.decision !== "ready-for-human-decision") blockers.push(`canary-blocked:${canary.envelope}`);
+    if (canary.packet.decision !== "ready-for-operator-decision") blockers.push(`canary-blocked:${canary.envelope}`);
   }
 
-  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   const scorecardSchema = ["providerModelRef", "envelope", "processState", "contractDecision", "outputBytes", "touchedFiles", "latencyMs", "errorClass", "budgetEvidence", "estimatedCostUsd"];
   const suiteStopOn = ["auth", "quota", "rate-limit", "timeout", "empty-output", "unexpected-touched-file", "contract-failure"];
   const fanInValidation = [
@@ -541,7 +541,7 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     operatorApprovalPrompt: arenaId ? `approve arena serial suite ${arenaId}` : "",
     runOrder: canaries.map((canary) => canary.runId),
     preflightChecks: [
-      "arena packet decision is ready-for-human-decision",
+      "arena packet decision is ready-for-operator-decision",
       "workspace dirty state matches the declared suite scope",
       "provider/model budget evidence is fresh and scoped",
       "structured operator approval is present for the suite run",
@@ -639,10 +639,10 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     processStartAllowed: false,
     processStopAllowed: false,
     paidModelCallsAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     executorKind: "pi-sdk-in-process",
     decision,
-    recommendationCode: decision === "ready-for-human-decision" ? "agent-run-sdk-provider-model-arena-ready-for-human-decision" : "agent-run-sdk-provider-model-arena-blocked",
+    recommendationCode: decision === "ready-for-operator-decision" ? "agent-run-sdk-provider-model-arena-ready-for-operator-decision" : "agent-run-sdk-provider-model-arena-blocked",
     blockers,
     arenaSpec: {
       arenaId,
@@ -668,7 +668,7 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     promotionContract,
     priorArtContract,
     operatorApprovalPrompt: arenaId ? `approve arena budget ${arenaId}` : "",
-    nextActions: decision === "ready-for-human-decision"
+    nextActions: decision === "ready-for-operator-decision"
       ? [
         "review this arena packet and budget before any real model call",
         "collect prior-art references before treating arena design choices as mature",

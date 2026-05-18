@@ -3,7 +3,7 @@ import { buildOperatorApprovalPacket, type OperatorApprovalPacket } from "./guar
 import { findUnsupportedDeclaredFileScopedSdkWorkerTools } from "./guardrails-core-tool-policy";
 
 export type AgentRunSdkSessionMode = "in-memory" | "run-session-dir" | "unknown";
-export type AgentRunSdkPacketDecision = "ready-for-human-decision" | "blocked";
+export type AgentRunSdkPacketDecision = "ready-for-operator-decision" | "blocked";
 export type AgentRunSdkFileContract = "read-only" | "mutation" | "unknown";
 export type AgentRunSdkMaturityRung =
   | "validated-narrow-readgrep"
@@ -46,12 +46,12 @@ export interface AgentRunSdkInProcessPacketResult {
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   singleRunOnly: true;
   executorKind: "pi-sdk-in-process";
   decision: AgentRunSdkPacketDecision;
   recommendationCode:
-    | "agent-run-sdk-ready-for-human-decision"
+    | "agent-run-sdk-ready-for-operator-decision"
     | "agent-run-sdk-blocked-run-id"
     | "agent-run-sdk-blocked-goal"
     | "agent-run-sdk-blocked-provider-model"
@@ -270,9 +270,9 @@ export interface AgentRunSdkCachePackPacketResult {
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   decision: AgentRunSdkPacketDecision;
-  recommendationCode: "agent-run-sdk-cache-pack-ready-for-human-decision" | "agent-run-sdk-cache-pack-blocked";
+  recommendationCode: "agent-run-sdk-cache-pack-ready-for-operator-decision" | "agent-run-sdk-cache-pack-blocked";
   blockers: string[];
   packSpec: {
     packId: string;
@@ -320,10 +320,10 @@ export interface AgentRunSdkReadOnlyBatchPacketResult {
   parallelDispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   executorKind: "pi-sdk-in-process";
   decision: AgentRunSdkPacketDecision;
-  recommendationCode: "agent-run-sdk-readonly-batch-ready-for-human-decision" | "agent-run-sdk-readonly-batch-blocked";
+  recommendationCode: "agent-run-sdk-readonly-batch-ready-for-operator-decision" | "agent-run-sdk-readonly-batch-blocked";
   blockers: string[];
   batchSpec: {
     batchId: string;
@@ -375,7 +375,7 @@ export interface AgentRunSdkReadOnlyBatchTaskResult {
   parallelDispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   decision: AgentRunSdkPacketDecision;
   recommendationCode: "agent-run-sdk-readonly-batch-task-ready" | "agent-run-sdk-readonly-batch-task-blocked";
   blockers: string[];
@@ -424,7 +424,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   });
 
   const blockers: string[] = [];
-  let recommendationCode: AgentRunSdkInProcessPacketResult["recommendationCode"] = "agent-run-sdk-ready-for-human-decision";
+  let recommendationCode: AgentRunSdkInProcessPacketResult["recommendationCode"] = "agent-run-sdk-ready-for-operator-decision";
   const block = (code: AgentRunSdkInProcessPacketResult["recommendationCode"], blocker: string) => {
     if (blockers.length === 0) recommendationCode = code;
     blockers.push(blocker);
@@ -455,7 +455,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   if (!eventStreamKnown) block("agent-run-sdk-blocked-event-stream", "event-stream-contract-missing");
   if (!finalOutputContractKnown) block("agent-run-sdk-blocked-final-output", "final-output-contract-missing");
 
-  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   const operatorApprovalPrompt = runId ? `approve sdk worker ${runId}` : "";
   const operatorApproval = buildOperatorApprovalPacket({
     intentKind: "worker-single-run",
@@ -537,7 +537,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     singleRunOnly: true,
     executorKind: "pi-sdk-in-process",
     decision,
@@ -576,7 +576,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     sdkPreview,
     operatorApproval,
     operatorApprovalPrompt,
-    nextActions: decision === "ready-for-human-decision"
+    nextActions: decision === "ready-for-operator-decision"
       ? readyNextActions
       : ["resolve blockers before any SDK/in-process worker implementation or dispatch", "keep subprocess route available; do not switch globally"],
     rollbackHint: declaredFiles.length > 0 ? `restore/remove only declared files: ${declaredFiles.join(", ")}` : "no rollback target is safe until declaredFiles is provided",
@@ -647,7 +647,7 @@ export function buildAgentRunSdkCachePackPacket(input: AgentRunSdkCachePackPacke
   const freshCount = entries.filter((entry) => entry.freshness === "fresh").length;
   const staleCount = entries.filter((entry) => entry.freshness === "stale").length;
   const unknownCount = entries.filter((entry) => entry.freshness === "unknown").length;
-  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   const cacheKeyContract = [
     "cache keys should include pack id, entry id, path when present, and freshness evidence",
     "path-backed entries should cite git object, mtime/size, or verification id evidence before workers trust the summary",
@@ -672,9 +672,9 @@ export function buildAgentRunSdkCachePackPacket(input: AgentRunSdkCachePackPacke
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     decision,
-    recommendationCode: decision === "ready-for-human-decision" ? "agent-run-sdk-cache-pack-ready-for-human-decision" : "agent-run-sdk-cache-pack-blocked",
+    recommendationCode: decision === "ready-for-operator-decision" ? "agent-run-sdk-cache-pack-ready-for-operator-decision" : "agent-run-sdk-cache-pack-blocked",
     blockers,
     packSpec: {
       packId,
@@ -693,7 +693,7 @@ export function buildAgentRunSdkCachePackPacket(input: AgentRunSdkCachePackPacke
     freshnessContract,
     workerUseContract,
     operatorApprovalPrompt: packId ? `approve sdk cache pack ${packId}` : "",
-    nextActions: decision === "ready-for-human-decision"
+    nextActions: decision === "ready-for-operator-decision"
       ? [
         "attach this cache pack to a future read-only SDK worker or batch packet only after structured operator approval",
         "keep worker prompts narrow and require cache-hit/cache-miss evidence in final output",
@@ -784,13 +784,13 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
     seenRunIds.add(runId);
   }
   for (const worker of workers) {
-    if (worker.decision !== "ready-for-human-decision") blockers.push(`worker-blocked:${worker.runSpec.runId || "missing"}`);
+    if (worker.decision !== "ready-for-operator-decision") blockers.push(`worker-blocked:${worker.runSpec.runId || "missing"}`);
     if (!worker.sdkMaturity.validatedEnvelope) blockers.push(`worker-not-validated-envelope:${worker.runSpec.runId || "missing"}:${worker.sdkMaturity.rung}`);
     if (worker.runSpec.fileContract !== "read-only") blockers.push(`worker-not-readonly:${worker.runSpec.runId || "missing"}`);
   }
 
-  const readyWorkerCount = workers.filter((worker) => worker.decision === "ready-for-human-decision" && worker.sdkMaturity.validatedEnvelope && worker.runSpec.fileContract === "read-only").length;
-  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const readyWorkerCount = workers.filter((worker) => worker.decision === "ready-for-operator-decision" && worker.sdkMaturity.validatedEnvelope && worker.runSpec.fileContract === "read-only").length;
+  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   const operatorApprovalPrompt = batchId ? `approve sdk readonly batch ${batchId}` : "";
   const operatorApproval = buildOperatorApprovalPacket({
     intentKind: "worker-suite",
@@ -826,10 +826,10 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
     parallelDispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     executorKind: "pi-sdk-in-process",
     decision,
-    recommendationCode: decision === "ready-for-human-decision" ? "agent-run-sdk-readonly-batch-ready-for-human-decision" : "agent-run-sdk-readonly-batch-blocked",
+    recommendationCode: decision === "ready-for-operator-decision" ? "agent-run-sdk-readonly-batch-ready-for-operator-decision" : "agent-run-sdk-readonly-batch-blocked",
     blockers,
     batchSpec: {
       batchId,
@@ -848,7 +848,7 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
     cacheEconomyContract,
     operatorApproval,
     operatorApprovalPrompt,
-    nextActions: decision === "ready-for-human-decision"
+    nextActions: decision === "ready-for-operator-decision"
       ? [
         "present this read-only batch packet for structured operator approval; the packet itself cannot dispatch",
         "if a future executor is implemented, start at most the listed independent workers and preserve per-worker outcome validation",
@@ -935,7 +935,7 @@ export function buildAgentRunSdkReadOnlyBatchTaskPacket(input: AgentRunSdkReadOn
   if (declaredFiles.length === 0) blockers.push("task-files-missing");
   if (omittedFiles.length > 0) blockers.push(`task-files-omitted:${omittedFiles.length}`);
   if (protectedFiles.length > 0 && !includeProtectedScopes) blockers.push(`protected-task-files:${protectedFiles.length}`);
-  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const decision: AgentRunSdkPacketDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   return {
     mode: "agent-run-sdk-readonly-batch-task-packet",
     activation: "none",
@@ -944,9 +944,9 @@ export function buildAgentRunSdkReadOnlyBatchTaskPacket(input: AgentRunSdkReadOn
     parallelDispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     decision,
-    recommendationCode: decision === "ready-for-human-decision" ? "agent-run-sdk-readonly-batch-task-ready" : "agent-run-sdk-readonly-batch-task-blocked",
+    recommendationCode: decision === "ready-for-operator-decision" ? "agent-run-sdk-readonly-batch-task-ready" : "agent-run-sdk-readonly-batch-task-blocked",
     blockers,
     taskSpec: {
       taskId,
@@ -959,7 +959,7 @@ export function buildAgentRunSdkReadOnlyBatchTaskPacket(input: AgentRunSdkReadOn
     omittedFiles,
     packet,
     operatorApprovalPrompt: packet.operatorApprovalPrompt,
-    nextActions: decision === "ready-for-human-decision"
+    nextActions: decision === "ready-for-operator-decision"
       ? [
         "present the derived batch packet and operator approval packet before any dispatch",
         "if structured-approved later, use agent_run_sdk_readonly_batch_dispatch with the derived worker specs",
