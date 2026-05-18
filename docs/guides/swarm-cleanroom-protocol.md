@@ -25,7 +25,7 @@ Antes de operar qualquer swarm, entenda os dois planos de estado:
 
 1. o artefato está no branch alvo (git commit ou patch aplicado), **e**
 2. o `.project/tasks.json` foi atualizado com evidência, **e**
-3. a task foi submetida para revisão humana (status `in-progress` como candidato, não `completed`).
+3. a task foi submetida para revisão do operador (status `in-progress` como candidato, não `completed`).
 
 A causa raiz dos "candidates órfãos" (como c1–c4 nesta sessão) é tratar o sinal efêmero como conclusão. O board versionado é o único árbitro.
 
@@ -33,7 +33,7 @@ A causa raiz dos "candidates órfãos" (como c1–c4 nesta sessão) é tratar o 
 
 ## Invariantes (não negociar)
 
-- **No auto-close**: tasks estratégicas só fecham com revisão humana.
+- **No auto-close**: tasks estratégicas só fecham com revisão do operador.
 - **Evidência obrigatória**: sem inventário + validação, sem promoção para done.
 - **Board canônico**: `.project/tasks` é o relógio macro oficial.
 - **Mudança reversível**: toda alteração crítica deve ter caminho de rollback.
@@ -106,7 +106,7 @@ O protocolo deve funcionar além de `ant_colony`.
 | `ant_colony` (local) | `colony-pilot` + sinais de sessão | start/progress/end + evidência de materialização |
 | scheduler prompt (soft patrol) | loop recorrente em sessão ativa | classificação GO/condicional/NO-GO + deltas de risco |
 | CI runner (GitHub/Gitea/local CI) | job não interativo | evento `review/done/recovery` + inventário + validação |
-| fluxo manual (sem swarm) | operação humana assistida | atualização direta em `.project/tasks` com evidência |
+| fluxo manual (sem swarm) | operação assistida pelo operador | atualização direta em `.project/tasks` com evidência |
 
 Invariantes de compatibilidade:
 1. `no-auto-close` continua valendo para tasks estratégicas;
@@ -168,7 +168,7 @@ Se delivery não materializou (`patch-artifact` / `report-only` / evidence gap):
    - recuperar/aplicar patch no branch alvo;
    - rodar smoke/regressão;
    - anexar evidência;
-   - encaminhar para revisão humana.
+   - encaminhar para revisão do operador.
 3. Nunca deixar `candidate-only` sem task filha de promoção.
 
 ---

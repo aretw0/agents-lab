@@ -4,7 +4,7 @@ Status: contrato local-first para `TASK-BUD-420`. Esta primitiva desenha a revis
 
 ## Objetivo
 
-Transformar um candidate de colony em uma decisão humana curta e auditável:
+Transformar um candidate de colony em uma decisão curta e auditável do operador:
 
 - **promote** — o operador quer abrir uma fatia protegida separada para materializar o candidate;
 - **skip** — o candidate não deve ser promovido agora;
@@ -25,7 +25,7 @@ Qualquer implementação futura de `colony_promotion_decision_packet` deve decla
 - `commitAllowed=false`
 - `authorization=none`
 
-Um packet verde pode dizer “pronto para decisão humana”. Ele nunca diz “pronto para promover automaticamente”.
+Um packet verde pode dizer “pronto para decisão do operador”. Ele nunca diz “pronto para promover automaticamente”.
 
 ## Entradas mínimas
 
@@ -94,11 +94,11 @@ Quando faltar evidência essencial:
 }
 ```
 
-## Semântica das opções humanas
+## Semântica das Opções do Operador
 
 ### `promote`
 
-Sinaliza intenção humana para criar ou iniciar uma **nova fatia protegida separada**. Antes de qualquer materialização, essa fatia precisa declarar arquivos, staging, commit, validação e rollback próprios. O packet original não executa essa transição.
+Sinaliza intenção do operador para criar ou iniciar uma **nova fatia protegida separada**. Antes de qualquer materialização, essa fatia precisa declarar arquivos, staging, commit, validação e rollback próprios. O packet original não executa essa transição.
 
 ### `skip`
 
@@ -120,7 +120,7 @@ Sem esses sinais, a decisão deve permanecer `keep-report-only` com blocker expl
 
 ## Relação com nudge-free/local continuity
 
-Este packet é uma boa fatia para continuidade local sem empurrão porque prepara uma decisão humana sem tocar escopo protegido. Ele também é uma barreira: se a próxima ação útil for materializar promotion, o loop deve parar e pedir decisão explícita.
+Este packet é uma boa fatia para continuidade local sem empurrão porque prepara uma decisão do operador sem tocar escopo protegido. Ele também é uma barreira: se a próxima ação útil for materializar promotion, o loop deve parar e pedir decisão explícita.
 
 Regras:
 
