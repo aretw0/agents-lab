@@ -21,12 +21,12 @@ test("classifyRootScript marks distributed wrappers", () => {
 	assert.equal(row.targetSurface, "subagent-readiness");
 });
 
-test("classifyRootScript marks promotion candidates against shipped surfaces", () => {
+test("classifyRootScript marks promoted dev pressure as distributed wrapper", () => {
 	const row = classifyRootScript("pi:dev:pressure", "node scripts/pi-dev-pressure.mjs", shipped);
 
-	assert.equal(row.category, "promotion-candidate");
+	assert.equal(row.category, "distributed-wrapper");
 	assert.equal(row.targetSurface, "environment-doctor");
-	assert.equal(row.recommendedAction, "add-or-consolidate-distributed-command-tool");
+	assert.equal(row.recommendedAction, "fold-wrapper-into-extension-or-doc-as-lab-shortcut");
 });
 
 test("classifyRootScript keeps ci and release scripts internal", () => {
@@ -36,10 +36,7 @@ test("classifyRootScript keeps ci and release scripts internal", () => {
 
 test("buildUserSurfaceAudit exposes grouped promotion targets", () => {
 	const audit = buildUserSurfaceAudit(process.cwd(), new Date("2026-05-18T00:00:00.000Z"));
-	const environmentDoctor = audit.promotionGroups.find((group) => group.targetSurface === "environment-doctor");
-
 	assert.equal(audit.generatedAtIso, "2026-05-18T00:00:00.000Z");
-	assert.ok(environmentDoctor);
-	assert.ok(environmentDoctor.scripts.includes("pi:dev:pressure"));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "subagent-readiness"));
+	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "environment-doctor" && group.scripts.includes("pi:dev:pressure")));
 });

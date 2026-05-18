@@ -67,6 +67,11 @@ const DISTRIBUTED_WRAPPERS = [
 		surface: "monitor-summary",
 		reason: "monitor runtime summaries are distributed; stability evidence/gates may deserve a first-party tool",
 	},
+	{
+		match: /^pi:dev:pressure/,
+		surface: "environment-doctor",
+		reason: "dev pressure diagnostics are distributed through environment-doctor; root script remains a local startup wrapper",
+	},
 ];
 
 const PROMOTION_CANDIDATES = [
@@ -79,11 +84,6 @@ const PROMOTION_CANDIDATES = [
 		match: /^pi:artifact:audit/,
 		target: "safe-boot",
 		reason: "runtime artifact hygiene is safety behavior useful to installed users",
-	},
-	{
-		match: /^pi:dev:pressure/,
-		target: "environment-doctor",
-		reason: "startup pressure diagnostics are user-facing runtime health checks",
 	},
 	{
 		match: /^ops:disk/,
