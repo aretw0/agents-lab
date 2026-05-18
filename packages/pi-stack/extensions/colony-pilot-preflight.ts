@@ -1,12 +1,15 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import type { PilotCapabilities } from "./colony-pilot-runtime";
 import { missingCapabilities } from "./colony-pilot-runtime";
-import {
-	formatMachineMaintenanceGate,
-	readMachineMaintenanceGate,
-	type MachineMaintenanceGate,
-	type MachineMaintenanceSeverity,
-} from "./machine-maintenance";
+
+type MachineMaintenanceSeverity = "ok" | "warn" | "pause" | "block" | "unknown";
+interface MachineMaintenanceGateLike {
+	severity: MachineMaintenanceSeverity;
+	action: string;
+	canStartLongRun: boolean;
+	blockers: string[];
+	recommendation: string;
+}
 
 export interface ColonyPilotPreflightConfig {
 	enabled: boolean;
@@ -22,7 +25,7 @@ export interface ColonyPilotPreflightResult {
 	missingExecutables: string[];
 	missingCapabilities: Array<keyof PilotCapabilities>;
 	machineMaintenance?: Pick<
-		MachineMaintenanceGate,
+		MachineMaintenanceGateLike,
 		"severity" | "action" | "canStartLongRun" | "blockers" | "recommendation"
 	>;
 	failures: string[];
@@ -158,6 +161,7 @@ export async function runColonyPilotPreflight(
 
 	let machineMaintenance: ColonyPilotPreflightResult["machineMaintenance"];
 	if (config.enforceMachineMaintenance) {
+		const { formatMachineMaintenanceGate, readMachineMaintenanceGate } = await import("./machine-maintenance");
 		const gate = readMachineMaintenanceGate(cwd);
 		machineMaintenance = {
 			severity: gate.severity,
