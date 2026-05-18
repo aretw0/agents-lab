@@ -4,6 +4,8 @@ export interface ColonyPromotionGateInput {
   backgroundReadinessScore?: number;
   backgroundReadinessCode?: string;
   agentRunDecision?: string;
+  workerLaneStage?: string;
+  workerLaneColonyPromotionAllowed?: boolean;
   liveReloadCompleted?: boolean;
   protectedScopeRequested?: boolean;
 }
@@ -19,6 +21,7 @@ export interface ColonyPromotionGateResult {
     | "colony-gate-ready"
     | "colony-gate-keep-report-only-background"
     | "colony-gate-keep-report-only-agent-run"
+    | "colony-gate-keep-report-only-worker-lane"
     | "colony-gate-keep-report-only-reload"
     | "colony-gate-keep-report-only-protected";
   recommendation: string;
@@ -26,11 +29,13 @@ export interface ColonyPromotionGateResult {
   signals: {
     backgroundReady: boolean;
     agentRunReady: boolean;
+    workerLaneColonyPromotionAllowed: boolean;
     liveReloadCompleted: boolean;
     protectedScopeRequested: boolean;
     backgroundReadinessScore: number;
     backgroundReadinessCode: string;
     agentRunDecision: string;
+    workerLaneStage: string;
   };
   summary: string;
 }
@@ -48,6 +53,10 @@ export function evaluateColonyPromotionGate(input: ColonyPromotionGateInput = {}
   const agentRunDecision = typeof input.agentRunDecision === "string" && input.agentRunDecision.trim().length > 0
     ? input.agentRunDecision.trim()
     : "unknown";
+  const workerLaneStage = typeof input.workerLaneStage === "string" && input.workerLaneStage.trim().length > 0
+    ? input.workerLaneStage.trim()
+    : "unknown";
+  const workerLaneColonyPromotionAllowed = input.workerLaneColonyPromotionAllowed === true;
   const liveReloadCompleted = input.liveReloadCompleted === true;
   const protectedScopeRequested = input.protectedScopeRequested === true;
 
@@ -74,6 +83,10 @@ export function evaluateColonyPromotionGate(input: ColonyPromotionGateInput = {}
     blockers.push("agent-run-readiness-signal-missing");
     recommendationCode = "colony-gate-keep-report-only-agent-run";
     recommendation = "agent-run readiness is not green; validate single-agent bounded run before colony promotion.";
+  } else if (!workerLaneColonyPromotionAllowed) {
+    blockers.push("worker-lane-colony-promotion-not-ready");
+    recommendationCode = "colony-gate-keep-report-only-worker-lane";
+    recommendation = "worker lane does not permit colony promotion; keep report-only until fan-in, abort, and evidence gates are explicit.";
   }
 
   const decision: ColonyPromotionGateDecision = blockers.length > 0 ? "keep-report-only" : "ready-for-colony-gate";
@@ -91,11 +104,13 @@ export function evaluateColonyPromotionGate(input: ColonyPromotionGateInput = {}
     signals: {
       backgroundReady,
       agentRunReady,
+      workerLaneColonyPromotionAllowed,
       liveReloadCompleted,
       protectedScopeRequested,
       backgroundReadinessScore,
       backgroundReadinessCode,
       agentRunDecision,
+      workerLaneStage,
     },
     summary: [
       "colony-promotion-gate:",
@@ -103,6 +118,7 @@ export function evaluateColonyPromotionGate(input: ColonyPromotionGateInput = {}
       `code=${recommendationCode}`,
       `backgroundReady=${backgroundReady ? "yes" : "no"}`,
       `agentRunReady=${agentRunReady ? "yes" : "no"}`,
+      `workerLaneColony=${workerLaneColonyPromotionAllowed ? "yes" : "no"}`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),
   };

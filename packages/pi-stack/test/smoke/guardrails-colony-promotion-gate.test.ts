@@ -7,6 +7,8 @@ describe("colony promotion readiness gate", () => {
       backgroundReadinessScore: 85,
       backgroundReadinessCode: "background-process-readiness-strong",
       agentRunDecision: "ready-for-agent-run",
+      workerLaneStage: "multi-worker-fan-in-operational",
+      workerLaneColonyPromotionAllowed: true,
       liveReloadCompleted: true,
       protectedScopeRequested: false,
     });
@@ -28,6 +30,7 @@ describe("colony promotion readiness gate", () => {
       backgroundReadinessScore: 59,
       backgroundReadinessCode: "background-process-readiness-needs-capabilities",
       agentRunDecision: "ready-for-agent-run",
+      workerLaneColonyPromotionAllowed: true,
       liveReloadCompleted: true,
     });
 
@@ -47,5 +50,21 @@ describe("colony promotion readiness gate", () => {
     expect(result.decision).toBe("keep-report-only");
     expect(result.recommendationCode).toBe("colony-gate-keep-report-only-agent-run");
     expect(result.blockers).toContain("agent-run-readiness-signal-missing");
+  });
+
+  it("keeps report-only when worker lane does not allow colony promotion", () => {
+    const result = evaluateColonyPromotionGate({
+      backgroundReadinessScore: 85,
+      backgroundReadinessCode: "background-process-readiness-strong",
+      agentRunDecision: "ready-for-agent-run",
+      workerLaneStage: "single-worker-operational",
+      workerLaneColonyPromotionAllowed: false,
+      liveReloadCompleted: true,
+    });
+
+    expect(result.decision).toBe("keep-report-only");
+    expect(result.recommendationCode).toBe("colony-gate-keep-report-only-worker-lane");
+    expect(result.blockers).toContain("worker-lane-colony-promotion-not-ready");
+    expect(result.signals.workerLaneStage).toBe("single-worker-operational");
   });
 });
