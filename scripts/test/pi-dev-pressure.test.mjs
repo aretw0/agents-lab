@@ -189,6 +189,37 @@ test("curated custom-footer keeps optional panels out of eager graph", () => {
   assert.ok(footer.reachableFiles > footer.files, "lazy panel/status modules should remain reachable but cold");
 });
 
+test("configured guardrails-core stays within hot-path budget", () => {
+  const stats = collectConfiguredEntrypointStats(process.cwd());
+  const core = stats.find((row) =>
+    row.package === "../packages/pi-stack" && row.entry === "./extensions/guardrails-core.ts"
+  );
+
+  assert.ok(core, "configured guardrails-core entrypoint should be measured");
+  assert.ok(core.files <= 45, `guardrails-core eager graph has ${core.files} files`);
+  assert.ok(core.kb <= 400, `guardrails-core eager graph is ${core.kb}kb`);
+});
+
+test("collectEntrypointStats ignores type-only imports in eager graph", () => {
+  const cwd = makeWorkspace();
+  try {
+    const extRoot = createMinimalPiStack(cwd, ["./extensions/main.ts"]);
+    writeFileSync(
+      join(extRoot, "main.ts"),
+      'import type { ColdType } from "./type-only";\nexport const main = "hot";\n',
+      "utf8",
+    );
+    writeFileSync(join(extRoot, "type-only.ts"), 'export interface ColdType { value: string; }\n', "utf8");
+
+    const stats = collectEntrypointStats(cwd);
+
+    assert.equal(stats[0].files, 1);
+    assert.equal(stats[0].reachableFiles, 1);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("collectSettingsStats counts suppressed package entries", () => {
   const cwd = makeWorkspace();
   try {

@@ -104,7 +104,7 @@ export function buildSessionBudget(sessions, thresholds = DEFAULT_THRESHOLDS) {
   };
 }
 
-const STATIC_IMPORT_RE = /(?:import|export)\s+(?:[^'"]*?from\s+)?["'](\.\.?\/[^"']+)["']/g;
+const STATIC_IMPORT_RE = /(?:import\s+(?!type\b)|export\s+(?!type\b))(?:[^'"]*?from\s+)?["'](\.\.?\/[^"']+)["']/g;
 const DYNAMIC_IMPORT_RE = /import\(\s*["'](\.\.?\/[^"']+)["']\s*\)/g;
 
 function resolveRelativeModule(specifier, baseFile) {
