@@ -100,7 +100,7 @@ export interface AgentRunStartupDiagnosticPacketResult {
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   runId: string;
   providerModelRef?: string;
   decision: AgentRunStartupDiagnosticDecision;
@@ -536,7 +536,7 @@ export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagn
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     runId: classification.runId,
     ...(providerModelRef ? { providerModelRef } : {}),
     decision,
