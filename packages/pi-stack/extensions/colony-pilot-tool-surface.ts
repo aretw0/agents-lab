@@ -33,6 +33,7 @@ import {
 	writeProjectSettings as writeProjectSettingsImpl,
 } from "./colony-pilot-settings";
 import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
+import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
 
 export interface ColonyPilotToolSurfaceRuntime {
 	state: PilotState;
@@ -205,11 +206,7 @@ export function registerColonyPilotToolSurface(
 			"Show or apply project baseline settings for colony/web runtime governance.",
 		parameters: Type.Object({
 			apply: Type.Optional(Type.Boolean()),
-			operator_approval: Type.Optional(Type.Object({
-				packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
-				approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
-				approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
-			}, { description: "Structured operator approval envelope for apply=true." })),
+			operator_approval: operatorApprovalParameter("Structured operator approval envelope for apply=true."),
 			profile: Type.Optional(Type.String({ description: "default | phase2" })),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx: ExtensionContext) {

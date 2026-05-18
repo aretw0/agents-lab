@@ -7,6 +7,7 @@ import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunO
 import { isTerminalAgentRunState, readLogByteCount, readLogTail, readRegistryEntry, sleepMs, writeRegistryEntry } from "./guardrails-core-agent-run-surface-runtime";
 import { resolveExecutionCwdParam } from "./guardrails-core-execution-context";
 import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-param-normalizers";
+import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asMarkerResults(value: unknown): AgentRunMarkerResult[] | undefined {
@@ -340,11 +341,7 @@ export function registerAgentRunLifecycleTools(pi: ExtensionAPI): void {
     parameters: Type.Object({
       run_id: Type.String({ description: "Agent run id." }),
       execute: Type.Optional(Type.Boolean({ description: "When true, send SIGTERM to the registered worker pid after gates pass." })),
-      operator_approval: Type.Optional(Type.Object({
-        packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
-        approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
-        approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
-      }, { description: "Structured operator approval envelope." })),
+      operator_approval: operatorApprovalParameter(),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;

@@ -4,6 +4,7 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { Type } from "@sinclair/typebox";
 import { structuredJsonRead, structuredJsonWrite, structuredRead, structuredWrite } from "./guardrails-core-structured-io";
 import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
+import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export type GuardrailsAuditAppender = (
@@ -59,11 +60,7 @@ export function registerGuardrailsStructuredIoSurface(
 			], { description: "read | set | remove" }),
 			payload: Type.Optional(Type.Any()),
 			dryRun: Type.Optional(Type.Boolean()),
-			operator_approval: Type.Optional(Type.Object({
-				packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
-				approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
-				approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
-			}, { description: "Structured operator approval envelope for dryRun=false." })),
+			operator_approval: operatorApprovalParameter("Structured operator approval envelope for dryRun=false."),
 			maxTouchedLines: Type.Optional(Type.Integer({ minimum: 1 })),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -197,11 +194,7 @@ export function registerGuardrailsStructuredIoSurface(
 			], { description: "read | set | remove" }),
 			payload: Type.Optional(Type.Any()),
 			dryRun: Type.Optional(Type.Boolean()),
-			operator_approval: Type.Optional(Type.Object({
-				packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
-				approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
-				approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
-			}, { description: "Structured operator approval envelope for dryRun=false." })),
+			operator_approval: operatorApprovalParameter("Structured operator approval envelope for dryRun=false."),
 			maxTouchedLines: Type.Optional(Type.Integer({ minimum: 1 })),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {

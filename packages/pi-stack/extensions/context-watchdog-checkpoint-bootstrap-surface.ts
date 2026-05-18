@@ -3,6 +3,7 @@ import { Type } from "@sinclair/typebox";
 import { buildContextWatchBootstrapPlan } from "./context-watchdog-bootstrap";
 import { writeLocalSliceHandoffCheckpoint } from "./context-watchdog-runtime-helpers";
 import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
+import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export interface ContextWatchdogBootstrapApplyResult {
@@ -123,11 +124,7 @@ export function registerContextWatchdogCheckpointBootstrapSurface(
 		parameters: Type.Object({
 			preset: Type.Optional(Type.String({ description: "control-plane | agent-worker" })),
 			apply: Type.Optional(Type.Boolean()),
-			operator_approval: Type.Optional(Type.Object({
-				packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
-				approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
-				approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
-			}, { description: "Structured operator approval envelope for apply=true." })),
+			operator_approval: operatorApprovalParameter("Structured operator approval envelope for apply=true."),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
 			const p = params as { preset?: string; apply?: boolean; operator_approval?: unknown };

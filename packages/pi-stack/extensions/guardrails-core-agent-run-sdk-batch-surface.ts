@@ -7,6 +7,7 @@ import { evaluateAgentWorkerLaneReadiness } from "./guardrails-core-agent-worker
 import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
 import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-param-normalizers";
+import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function sdkReadOnlyBatchWorkerSchema() {
@@ -147,11 +148,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
     description: "First-party read-only SDK batch gate. Preview by default; execute=true requires structured operator approval and starts only ready read-only workers through the shared control-plane registry/log runtime.",
     parameters: sdkReadOnlyBatchParameters({
       execute: Type.Optional(Type.Boolean({ description: "When true, start all ready read-only workers after structured operator approval." })),
-      operator_approval: Type.Optional(Type.Object({
-        packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
-        approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
-        approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
-      }, { description: "Structured operator approval envelope." })),
+      operator_approval: operatorApprovalParameter(),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -293,11 +290,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
       batch_id: Type.Optional(Type.String({ description: "Batch id for display only." })),
       run_ids: Type.Optional(Type.Array(Type.String(), { description: "Worker run ids to abort." })),
       execute: Type.Optional(Type.Boolean({ description: "When true, send SIGTERM only to registered worker pids after all gates pass." })),
-      operator_approval: Type.Optional(Type.Object({
-        packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
-        approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
-        approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
-      }, { description: "Structured operator approval envelope." })),
+      operator_approval: operatorApprovalParameter(),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;

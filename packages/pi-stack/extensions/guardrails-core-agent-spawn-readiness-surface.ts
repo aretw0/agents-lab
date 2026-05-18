@@ -12,6 +12,7 @@ import { registerAgentRunLifecycleTools } from "./guardrails-core-agent-run-life
 import { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket } from "./guardrails-core-agent-run-sdk-preview";
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildCodexSparkPromotedWorkerPacket } from "./guardrails-core-agent-run-start";
 import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
+import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 import { readTasksBlockCached } from "./project-board-model";
 import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
@@ -407,11 +408,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       extension_isolation: Type.Optional(Type.String({ description: "Extension isolation mode: minimal-no-extensions or inherit. Defaults to minimal-no-extensions unless a custom provider requires inherited extensions." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
       execute: Type.Optional(Type.Boolean({ description: "When true, dispatch the subprocess only after all gates pass and structured operator approval is present." })),
-      operator_approval: Type.Optional(Type.Object({
-        packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
-        approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
-        approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
-      }, { description: "Structured operator approval envelope." })),
+      operator_approval: operatorApprovalParameter(),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -774,11 +771,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
       unexpected_dirty: Type.Optional(Type.Boolean({ description: "Blocks when workspace dirty state is unexpected." })),
       execute: Type.Optional(Type.Boolean({ description: "When true, start exactly one SDK worker after structured operator approval." })),
-      operator_approval: Type.Optional(Type.Object({
-        packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
-        approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
-        approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
-      }, { description: "Structured operator approval envelope." })),
+      operator_approval: operatorApprovalParameter(),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;

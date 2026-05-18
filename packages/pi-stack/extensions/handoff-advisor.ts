@@ -28,6 +28,7 @@ import {
 } from "./quota-visibility";
 import { readProjectSettings } from "./context-watchdog-storage";
 import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
+import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
 import { buildProviderReadinessMatrix } from "./provider-readiness";
 
 const RATE_LIMIT_RE = /(\b429\b|rate.?limit|too many requests|quota\s*exceeded|capacity\s*reached|resource\s*exhausted)/i;
@@ -266,13 +267,7 @@ export default function handoffAdvisorExtension(pi: ExtensionAPI) {
       execute: Type.Optional(
         Type.Boolean({ description: "If true, apply the recommended provider switch via pi.setModel after structured operator approval. Audited." })
       ),
-      operator_approval: Type.Optional(
-        Type.Object({
-          packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
-          approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
-          approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
-        }, { description: "Structured operator approval envelope for execute=true." })
-      ),
+      operator_approval: operatorApprovalParameter("Structured operator approval envelope for execute=true."),
       reason: Type.Optional(
         Type.String({ description: "Human-readable reason for the switch, stored in audit log." })
       ),

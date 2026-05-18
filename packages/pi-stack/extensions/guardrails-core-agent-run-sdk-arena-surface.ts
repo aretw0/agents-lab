@@ -5,6 +5,7 @@ import { Type } from "@sinclair/typebox";
 import { buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaPacket, type AgentRunSdkProviderModelArenaArtifactPacketResult } from "./guardrails-core-agent-run-sdk-arena";
 import { resolveExecutionCwdParam } from "./guardrails-core-execution-context";
 import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-param-normalizers";
+import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function buildArenaInput(p: Record<string, unknown>, cwd: string) {
@@ -80,11 +81,7 @@ export function registerAgentRunSdkProviderModelArenaTool(pi: ExtensionAPI): voi
     parameters: Type.Object({
       ...arenaToolParameters.properties,
       apply: Type.Optional(Type.Boolean({ description: "When true, persist only previewed .pi/reports artifacts after structured operator approval." })),
-      operator_approval: Type.Optional(Type.Object({
-        packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
-        approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
-        approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
-      }, { description: "Structured operator approval envelope." })),
+      operator_approval: operatorApprovalParameter(),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
