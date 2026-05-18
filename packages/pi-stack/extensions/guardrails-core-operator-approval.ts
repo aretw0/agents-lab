@@ -9,13 +9,12 @@ export type OperatorApprovalInteraction =
   | "none"
   | "yes-no"
   | "choice"
-  | "suite-approval"
-  | "exact-text-fallback";
+  | "suite-approval";
 
 export type OperatorApprovalDecision =
   | "not-required"
   | "ready-for-structured-approval"
-  | "needs-exact-text-fallback"
+  | "needs-structured-approval-signal"
   | "blocked";
 
 export type OperatorApprovalPacketInput = {
@@ -27,7 +26,6 @@ export type OperatorApprovalPacketInput = {
   maxCalls?: number;
   maxCostUsd?: number;
   parallelism?: number;
-  exactConfirmationPhrase?: string;
   structuredConfirmationAvailable?: boolean;
   protectedScopeRequested?: boolean;
   destructiveActionRequested?: boolean;
@@ -37,12 +35,11 @@ export type OperatorApprovalPacket = {
   mode: "operator-approval-packet";
   decision: OperatorApprovalDecision;
   interaction: OperatorApprovalInteraction;
-  authorization: "none";
+  approvalState: "not-required" | "pending-operator" | "blocked";
+  authorizationEffect: "none";
   dispatchAllowed: false;
   acceptsShortAnswer: boolean;
   requiresStructuredSignal: boolean;
-  exactTextFallbackRequired: boolean;
-  exactConfirmationPhrase?: string;
   prompt: string;
   recommendedAction?: string;
   allowedResponses: string[];
@@ -97,7 +94,6 @@ const AUDIT_CONTRACT = {
 
 export function buildOperatorApprovalPacket(input: OperatorApprovalPacketInput): OperatorApprovalPacket {
   const structuredConfirmationAvailable = input.structuredConfirmationAvailable === true;
-  const exactPhrase = normalizeApprovalText(input.exactConfirmationPhrase, 220);
   const recommendedAction = normalizeApprovalText(input.recommendedAction, 180);
   const options = normalizeApprovalOptions(input.options);
   const blockers: string[] = [];
@@ -109,19 +105,18 @@ export function buildOperatorApprovalPacket(input: OperatorApprovalPacketInput):
     return {
       mode: "operator-approval-packet",
       decision: "blocked",
-      interaction: "exact-text-fallback",
-      authorization: "none",
+      interaction: "yes-no",
+      approvalState: "blocked",
+      authorizationEffect: "none",
       dispatchAllowed: false,
       acceptsShortAnswer: false,
       requiresStructuredSignal: true,
-      exactTextFallbackRequired: true,
-      exactConfirmationPhrase: exactPhrase,
       prompt: "Approval blocked until intent kind matches the requested risk.",
       recommendedAction,
-      allowedResponses: exactPhrase ? [exactPhrase] : [],
+      allowedResponses: [],
       blockers,
       auditContract: AUDIT_CONTRACT,
-      summary: `operator-approval-packet: decision=blocked interaction=exact-text-fallback shortAnswer=no structured=yes exactFallback=yes blockers=${blockers.join("|")} dispatch=no authorization=none`,
+      summary: `operator-approval-packet: decision=blocked approvalState=blocked interaction=yes-no shortAnswer=no structured=yes blockers=${blockers.join("|")} dispatch=no authorizationEffect=none`,
     };
   }
 
@@ -130,17 +125,17 @@ export function buildOperatorApprovalPacket(input: OperatorApprovalPacketInput):
       mode: "operator-approval-packet",
       decision: "not-required",
       interaction: "none",
-      authorization: "none",
+      approvalState: "not-required",
+      authorizationEffect: "none",
       dispatchAllowed: false,
       acceptsShortAnswer: true,
       requiresStructuredSignal: false,
-      exactTextFallbackRequired: false,
       prompt: recommendedAction ? `Proceed with local-safe work: ${recommendedAction}` : "Proceed with local-safe work.",
       recommendedAction,
       allowedResponses: ["prossiga", "continue", "sim"],
       blockers: [],
       auditContract: AUDIT_CONTRACT,
-      summary: "operator-approval-packet: decision=not-required interaction=none shortAnswer=yes structured=no exactFallback=no dispatch=no authorization=none",
+      summary: "operator-approval-packet: decision=not-required approvalState=not-required interaction=none shortAnswer=yes structured=no dispatch=no authorizationEffect=none",
     };
   }
 
@@ -151,20 +146,20 @@ export function buildOperatorApprovalPacket(input: OperatorApprovalPacketInput):
         mode: "operator-approval-packet",
         decision: "ready-for-structured-approval",
         interaction: "suite-approval",
-        authorization: "none",
+        approvalState: "pending-operator",
+        authorizationEffect: "none",
         dispatchAllowed: false,
         acceptsShortAnswer: true,
         requiresStructuredSignal: true,
-        exactTextFallbackRequired: false,
         prompt,
         recommendedAction,
         allowedResponses: ["approve", "decline"],
         blockers: [],
         auditContract: AUDIT_CONTRACT,
-        summary: "operator-approval-packet: decision=ready-for-structured-approval interaction=suite-approval shortAnswer=yes structured=yes exactFallback=no dispatch=no authorization=none",
+        summary: "operator-approval-packet: decision=ready-for-structured-approval approvalState=pending-operator interaction=suite-approval shortAnswer=yes structured=yes dispatch=no authorizationEffect=none",
       };
     }
-    return exactTextFallback(prompt, recommendedAction, exactPhrase);
+    return needsStructuredSignal("suite-approval", prompt, recommendedAction);
   }
 
   if (input.intentKind === "worker-single-run") {
@@ -175,20 +170,20 @@ export function buildOperatorApprovalPacket(input: OperatorApprovalPacketInput):
         mode: "operator-approval-packet",
         decision: "ready-for-structured-approval",
         interaction,
-        authorization: "none",
+        approvalState: "pending-operator",
+        authorizationEffect: "none",
         dispatchAllowed: false,
         acceptsShortAnswer: true,
         requiresStructuredSignal: true,
-        exactTextFallbackRequired: false,
         prompt,
         recommendedAction,
         allowedResponses: options.length > 1 ? options : ["sim", "nao"],
         blockers: [],
         auditContract: AUDIT_CONTRACT,
-        summary: `operator-approval-packet: decision=ready-for-structured-approval interaction=${interaction} shortAnswer=yes structured=yes exactFallback=no dispatch=no authorization=none`,
+        summary: `operator-approval-packet: decision=ready-for-structured-approval approvalState=pending-operator interaction=${interaction} shortAnswer=yes structured=yes dispatch=no authorizationEffect=none`,
       };
     }
-    return exactTextFallback(prompt, recommendedAction, exactPhrase);
+    return needsStructuredSignal("yes-no", prompt, recommendedAction);
   }
 
   const prompt = input.intentKind === "destructive" ? "Confirm destructive action?" : "Confirm protected action?";
@@ -197,42 +192,41 @@ export function buildOperatorApprovalPacket(input: OperatorApprovalPacketInput):
       mode: "operator-approval-packet",
       decision: "ready-for-structured-approval",
       interaction: "yes-no",
-      authorization: "none",
+      approvalState: "pending-operator",
+      authorizationEffect: "none",
       dispatchAllowed: false,
       acceptsShortAnswer: true,
       requiresStructuredSignal: true,
-      exactTextFallbackRequired: false,
       prompt,
       recommendedAction,
       allowedResponses: ["confirm", "decline"],
       blockers: [],
       auditContract: AUDIT_CONTRACT,
-      summary: "operator-approval-packet: decision=ready-for-structured-approval interaction=yes-no shortAnswer=yes structured=yes exactFallback=no dispatch=no authorization=none",
+      summary: "operator-approval-packet: decision=ready-for-structured-approval approvalState=pending-operator interaction=yes-no shortAnswer=yes structured=yes dispatch=no authorizationEffect=none",
     };
   }
-  return exactTextFallback(prompt, recommendedAction, exactPhrase);
+  return needsStructuredSignal("yes-no", prompt, recommendedAction);
 }
 
-function exactTextFallback(
+function needsStructuredSignal(
+  interaction: Exclude<OperatorApprovalInteraction, "none">,
   prompt: string,
   recommendedAction: string | undefined,
-  exactPhrase: string | undefined,
 ): OperatorApprovalPacket {
   return {
     mode: "operator-approval-packet",
-    decision: "needs-exact-text-fallback",
-    interaction: "exact-text-fallback",
-    authorization: "none",
+    decision: "needs-structured-approval-signal",
+    interaction,
+    approvalState: "blocked",
+    authorizationEffect: "none",
     dispatchAllowed: false,
     acceptsShortAnswer: false,
     requiresStructuredSignal: true,
-    exactTextFallbackRequired: true,
-    exactConfirmationPhrase: exactPhrase,
     prompt,
     recommendedAction,
-    allowedResponses: exactPhrase ? [exactPhrase] : [],
-    blockers: exactPhrase ? [] : ["exact-confirmation-phrase-missing"],
+    allowedResponses: [],
+    blockers: ["structured-confirmation-signal-missing"],
     auditContract: AUDIT_CONTRACT,
-    summary: `operator-approval-packet: decision=needs-exact-text-fallback interaction=exact-text-fallback shortAnswer=no structured=yes exactFallback=yes${exactPhrase ? "" : " blockers=exact-confirmation-phrase-missing"} dispatch=no authorization=none`,
+    summary: `operator-approval-packet: decision=needs-structured-approval-signal approvalState=blocked interaction=${interaction} shortAnswer=no structured=yes blockers=structured-confirmation-signal-missing dispatch=no authorizationEffect=none`,
   };
 }

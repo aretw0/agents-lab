@@ -45,9 +45,10 @@ describe("human confirmation audit plan", () => {
     });
 
     expect(result.decision).toBe("not-required");
+    expect(result.approvalState).toBe("not-required");
+    expect(result.authorizationEffect).toBe("none");
     expect(result.interaction).toBe("none");
     expect(result.acceptsShortAnswer).toBe(true);
-    expect(result.exactTextFallbackRequired).toBe(false);
     expect(result.allowedResponses).toContain("prossiga");
     expect(result.dispatchAllowed).toBe(false);
   });
@@ -60,22 +61,22 @@ describe("human confirmation audit plan", () => {
     });
 
     expect(structured.decision).toBe("ready-for-structured-approval");
+    expect(structured.approvalState).toBe("pending-operator");
+    expect(structured.authorizationEffect).toBe("none");
     expect(structured.interaction).toBe("yes-no");
     expect(structured.acceptsShortAnswer).toBe(true);
-    expect(structured.exactTextFallbackRequired).toBe(false);
 
     const fallback = buildOperatorApprovalPacket({
       intentKind: "worker-single-run",
       recommendedAction: "execute sdk worker sdk-one",
       structuredConfirmationAvailable: false,
-      exactConfirmationPhrase: "execute o sdk worker sdk-one",
     });
 
-    expect(fallback.decision).toBe("needs-exact-text-fallback");
-    expect(fallback.interaction).toBe("exact-text-fallback");
+    expect(fallback.decision).toBe("needs-structured-approval-signal");
+    expect(fallback.interaction).toBe("yes-no");
     expect(fallback.acceptsShortAnswer).toBe(false);
-    expect(fallback.exactTextFallbackRequired).toBe(true);
-    expect(fallback.allowedResponses).toEqual(["execute o sdk worker sdk-one"]);
+    expect(fallback.allowedResponses).toEqual([]);
+    expect(fallback.blockers).toContain("structured-confirmation-signal-missing");
   });
 
   it("supports suite approval as one bounded operator decision", () => {
@@ -106,6 +107,7 @@ describe("human confirmation audit plan", () => {
     });
 
     expect(result.decision).toBe("blocked");
+    expect(result.approvalState).toBe("blocked");
     expect(result.acceptsShortAnswer).toBe(false);
     expect(result.blockers).toContain("protected-scope-requires-protected-intent");
   });

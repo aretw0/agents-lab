@@ -26,13 +26,14 @@ describe("agent run operator approval packets", () => {
 
     expect(packet.operatorApproval).toMatchObject({
       mode: "operator-approval-packet",
-      decision: "needs-exact-text-fallback",
-      interaction: "exact-text-fallback",
+      decision: "needs-structured-approval-signal",
+      approvalState: "blocked",
+      interaction: "yes-no",
       acceptsShortAnswer: false,
       dispatchAllowed: false,
-      exactConfirmationPhrase: "execute o sdk worker sdk-approval-single",
     });
-    expect(packet.operatorApproval.allowedResponses).toEqual(["execute o sdk worker sdk-approval-single"]);
+    expect(packet.operatorApproval.blockers).toContain("structured-confirmation-signal-missing");
+    expect(packet.operatorApproval.allowedResponses).toEqual([]);
   });
 
   it("attaches suite fallback approval to read-only batch packets", () => {
@@ -47,11 +48,11 @@ describe("agent run operator approval packets", () => {
 
     expect(packet.operatorApproval).toMatchObject({
       mode: "operator-approval-packet",
-      decision: "needs-exact-text-fallback",
-      interaction: "exact-text-fallback",
+      decision: "needs-structured-approval-signal",
+      approvalState: "blocked",
+      interaction: "suite-approval",
       acceptsShortAnswer: false,
       dispatchAllowed: false,
-      exactConfirmationPhrase: "approve sdk readonly batch sdk-approval-batch",
     });
     expect(packet.operatorApproval.prompt).toContain("sdk-approval-batch");
     expect(packet.operatorApproval.prompt).toContain("maxCalls=2");

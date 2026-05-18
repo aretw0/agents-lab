@@ -460,7 +460,6 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   const operatorApproval = buildOperatorApprovalPacket({
     intentKind: "worker-single-run",
     recommendedAction: runId ? `execute sdk worker ${runId}` : undefined,
-    exactConfirmationPhrase: humanConfirmationPhrase,
     structuredConfirmationAvailable: false,
     protectedScopeRequested,
   });
@@ -799,7 +798,6 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
     providerModelRef: workers[0]?.runSpec.providerModelRef,
     maxCalls: workers.length,
     parallelism: Math.min(workers.length, maxWorkers),
-    exactConfirmationPhrase: humanConfirmationPhrase,
     structuredConfirmationAvailable: false,
     protectedScopeRequested,
   });
