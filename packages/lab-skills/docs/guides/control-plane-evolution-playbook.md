@@ -4,6 +4,8 @@ Objetivo: evoluir de forma segura do control-plane local para delegação e, só
 
 Distribuição operacional: o núcleo deste playbook também viaja como skill versionada em `packages/lab-skills/skills/control-plane-ops/SKILL.md` para reduzir drift entre documentação local e comportamento dos agentes.
 
+Radar estratégico relacionado: `docs/research/linux-agent-primitives-radar-2026.md` (limpeza -> pesquisa -> escalabilidade com gates de promoção local-safe).
+
 ## Princípios
 
 1. **Playbook-first**: consolidar contrato operacional antes de ampliar arquitetura.
@@ -35,6 +37,65 @@ Distribuição operacional: o núcleo deste playbook também viaja como skill ve
   - contratos de handoff e evidência padronizados entre instâncias;
   - telemetria mínima comum (status/readiness/budget/health);
   - runbook de contenção para isolar instância degradada sem parar o ecossistema.
+
+## Workload matrix — local vs remoto (GitHub Actions/offload protegido)
+
+Objetivo: usar runners remotos como acelerador, sem substituir governança local-first.
+
+### Fica local por default
+- triagem de task, decisão de prioridade e fechamento canônico no board;
+- microfatias de implementação com blast radius pequeno;
+- qualquer alteração de escopo protegido sem autorização explícita.
+
+### Elegível para runner remoto (canário bounded)
+- testes pesados ou longos que saturam host local;
+- validações paralelas de baixa ambiguidade (mesmo gate local, mesma métrica);
+- jobs de preparo/reporte com artefato auditável (sem auto-promote).
+
+### Não elegível para offload automático
+- publish/release final;
+- mutações de settings/governança sem decisão humana;
+- ações destrutivas/irreversíveis.
+
+## Trilha de evidência para offload (board/handoff)
+
+Cada run remota deve registrar, no mínimo:
+- `task`, `owner`, `decision(promote|defer)`;
+- `workflow`, `runId`, `result`, `artifacts`;
+- `expectedValue`, `focalValidationGate`, `rollbackPlan`.
+
+Template prático local:
+
+```bash
+npm run offload:evidence:template -- --task TASK-BUD-134 --decision defer
+```
+
+## Steer/intervenção humana (cancel/retry/override)
+
+- **cancel**: parar run quando custo/qualidade/governança saírem do envelope.
+- **retry**: repetir apenas com motivo curto + gate focal explícito.
+- **override**: exceção auditável e temporária, com rollback já definido.
+
+Sem esse trio de controles, a recomendação padrão é `defer`.
+
+## Release lane (v0.8.0) — draft primeiro, publish gateado
+
+Fluxo end-to-end recomendado:
+1. preparar versão (`changeset version`) e validar alinhamento de versões nos pacotes;
+2. gerar notas/checklist de readiness (local artifact);
+3. criar **draft release** manual para revisão humana;
+4. publicar somente após gates canônicos + decisão explícita.
+
+Automação mínima existente:
+- `publish.yml` mantém publish gateado por tag semver + smoke/test/verify/audits;
+- `release-draft.yml` prepara draft release manual com artefato de notas;
+- `npm run release:readiness:v0.8.0` gera checklist local canônico em `.artifacts/release-readiness/`.
+
+Checklist de readiness v0.8.0 (board/handoff):
+- versões de pacotes alinhadas;
+- CI/publish/release-draft prontos e auditáveis;
+- decisão humana explícita de `draft` -> `publish`;
+- rollback documentado para falha pós-corte.
 
 ## Inspirado por `tuts-agentic-ai-examples`
 
@@ -118,17 +179,57 @@ Rollout:
 Rollback (voltar para estabilidade local):
 - se houver oscilação de readiness/budget, pausar delegação e voltar para execução direta até 2 ciclos limpos.
 
+#### Operação noturna local-safe (batch 3–5 fatias, hard-intent)
+
+Contrato operacional para rodar sem check-in entre tasks elegíveis:
+1. iniciar com `autonomy_lane_next_task` e `autonomy_lane_auto_advance_snapshot`;
+2. executar uma fatia curta por vez (commit + checkpoint);
+3. permitir auto-advance apenas quando snapshot `decision=eligible`;
+4. manter parada imediata quando snapshot `decision=blocked`.
+
+Stop conditions mínimos (formato curto):
+- `stop: protected`;
+- `stop: risk`;
+- `stop: reload-required`;
+- `stop: validation-failed-or-unknown`;
+- `stop: no-eligible-local-safe-successor`.
+
+Rollback padrão AFK:
+- ação: pausar auto-advance, manter foco explícito e voltar para uma fatia manual bounded;
+- evidência: registrar blocker no board + `context_watch_checkpoint`;
+- saída: retomar auto-advance só após blocker limpo e smoke focal verde.
+
 ### Modo 2 (delegação descartável)
+
+Gate de entrada — simple-delegate rehearsal bounded:
+1. `simple_delegate_rehearsal_packet.decision == ready`;
+2. foco local-safe já estável (batch 3–5 concluído com checkpoint/commit por fatia);
+3. sem blockers hard-intent (`protected`, `risk`, `reload-required`, `validation-failed-or-unknown`);
+4. escopo protegido continua opt-in humano (nenhum auto-dispatch).
+
+Canário protegido de capacidade externa (GitHub Actions/offload) — pré-condições:
+1. declarar valor esperado do canário (throughput/custo/tempo) com métrica observável;
+2. declarar validação focal obrigatória antes/depois (mesmo gate local para comparação);
+3. declarar rollback explícito e não-destrutivo (`git revert <commit>` + retorno imediato ao caminho local);
+4. registrar envelope mínimo no board/handoff: `task`, `maxCost`, `owner`, `evidence`, `decision=promote|defer`;
+5. manter `dispatch=no` até decisão humana explícita de promote.
 
 Rollout canário:
 1. escolher 1 task curta com critérios claros;
-2. spawn controlado (`ant_colony` com `maxAnts` baixo + `maxCost` curto);
+2. executar rehearsal report-first (sem dispatch automático) e só então avaliar execução delegada bounded;
 3. exigir evidência no parent antes de nova delegação;
 4. encerrar worker após entrega (não manter sessão longa do worker).
 
 Rollback:
-- trigger: `FAILED` recorrente, `BUDGET_EXCEEDED`, ou ausência de evidência canônica;
+- trigger: `FAILED` recorrente, `BUDGET_EXCEEDED`, blocked-rate alto no telemetry, ou ausência de evidência canônica;
 - ação: descer para Modo 1 por 1 janela operacional (sem novas delegações) e corrigir causa raiz.
+
+Runbook curto — rehearsal real (1 task):
+1. **start**: usar `simple_delegate_rehearsal_start_packet`; só avançar quando `decision=ready-for-human-decision` e houver go humano explícito;
+2. **monitor**: manter execução bounded e parar no primeiro `stop: protected|risk|reload-required|validation-failed-or-unknown`;
+3. **abort**: em blocker, encerrar rehearsal no mesmo slice, sem promover próxima task automaticamente;
+4. **rollback**: aplicar rollback não-destrutivo declarado, registrar evidência no board e checkpoint curto;
+5. **postflight**: registrar decisão `go/no-go` para próxima fatia antes de qualquer novo start.
 
 ### Modo 3 (federação)
 

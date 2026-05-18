@@ -69,6 +69,15 @@ Monitores continuam baseline **leves e provider-aware**. Qualquer prática inspi
 
 `mdt` não participa da decisão de monitor: quando adotado, deve apenas checar drift de documentação/snippets de policy que descrevem os monitores.
 
+### Taxonomia rápida: warning de sessão vs issue de monitor
+
+Quando o operador disser “o warning está atrapalhando a conversa”, assumir primeiro que ele está falando de **warning runtime da sessão** (notify/status), não de issue persistido.
+
+- warning runtime: calibrar em `context-watch`/guardrails de conversa (dedupe, cooldown, severidade);
+- issue de monitor: tratar como trilha histórica para hardening, sem confundir com UX imediata da sessão.
+
+Essa distinção evita falso positivo de diagnóstico e reduz ciclos de correção no lugar errado.
+
 ### Comando principal
 
 > Convenção do laboratório: não criar “doctor” paralelo por domínio.  

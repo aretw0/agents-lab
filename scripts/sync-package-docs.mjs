@@ -31,6 +31,7 @@ export const PACKAGE_DOCS = {
       "colony-provider-model-governance.md",
       "i18n-intents.md",
       "monitor-overrides.md",
+      "quota-visibility.md",
       "scheduler-governance.md",
       "stack-sovereignty-user-guide.md",
     ],
