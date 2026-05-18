@@ -506,7 +506,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   pi.registerTool({
     name: "agent_run_task_dispatch",
     label: "Agent Run Task Dispatch",
-    description: "First-party task-runner gate. Preview by default; execute=true requires exact human confirmation phrase and starts only one registered pi subprocess. Never auto-dispatches.",
+    description: "First-party task-runner gate. Preview by default; execute=true requires structured operator approval and starts only one registered pi subprocess. Never auto-dispatches.",
     parameters: Type.Object({
       task_id: Type.String({ description: "Board task id to packetize and optionally dispatch." }),
       purpose: Type.Optional(Type.String({ description: "Short purpose slug/label for the run id. Defaults to task-packet." })),
@@ -525,8 +525,12 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       max_output_lines: Type.Optional(Type.Number({ description: "Bounded worker output line target for economy contract. Defaults to 20." })),
       extension_isolation: Type.Optional(Type.String({ description: "Extension isolation mode: minimal-no-extensions or inherit. Defaults to minimal-no-extensions unless a custom provider requires inherited extensions." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
-      execute: Type.Optional(Type.Boolean({ description: "When true, dispatch the subprocess only after all gates pass and operator_confirmation matches exactly." })),
-      operator_confirmation: Type.Optional(Type.String({ description: "Must exactly equal the packet humanConfirmationPhrase for execute=true." })),
+      execute: Type.Optional(Type.Boolean({ description: "When true, dispatch the subprocess only after all gates pass and structured operator approval is present." })),
+      operator_approval: Type.Optional(Type.Object({
+        packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
+        approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
+        approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
+      }, { description: "Structured operator approval envelope." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -577,12 +581,12 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       const executeRequested = p.execute === true;
-      const operatorConfirmation = typeof p.operator_confirmation === "string" ? p.operator_confirmation : "";
+      const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
       const blockers = [...packet.blockers];
       if (packet.decision !== "ready-for-human-decision") blockers.push("task-start-packet-blocked");
       if (existingEntry?.state === "running") blockers.push("run-already-running");
       if (executeRequested && !sameCwd(cwd, ctx.cwd)) blockers.push("execute-cwd-mismatch");
-      if (executeRequested && operatorConfirmation !== packet.humanConfirmationPhrase) blockers.push("operator-confirmation-mismatch");
+      if (executeRequested && !structuredOperatorApproval) blockers.push("structured-operator-approval-missing");
       const dispatchAllowed = executeRequested && blockers.length === 0;
       let pid: number | undefined;
       let registryEntry = packet.registryPreview.entry;
@@ -685,11 +689,11 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         decision,
         blockers,
         executeRequested,
+        structuredOperatorApproval,
         runId: packet.taskPacket.invocationSpec.runId,
         pid,
         packet,
         registryEntry,
-        humanConfirmationPhrase: packet.humanConfirmationPhrase,
         summary: [
           "agent-run-task-dispatch:",
           `decision=${decision}`,

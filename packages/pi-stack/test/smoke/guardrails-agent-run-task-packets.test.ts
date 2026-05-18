@@ -475,17 +475,17 @@ describe("agent run task packet surfaces", () => {
     expect(blocked.details?.wouldDispatchAfterExplicitExecute).toBe(false);
   });
 
-  it("exposes agent_run_task_dispatch as preview-only by default and blocks confirmation mismatch", async () => {
+  it("exposes agent_run_task_dispatch as preview-only by default and requires structured approval", async () => {
     const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-task-dispatch-"));
     mkdirSync(path.join(tmp, ".project"), { recursive: true });
     writeFileSync(path.join(tmp, ".project", "tasks.json"), JSON.stringify({
       tasks: [
         {
           id: "TASK-BUD-1014",
-          description: "Implement exact-confirmation dispatch gate.",
+          description: "Implement structured-approval dispatch gate.",
           status: "planned",
           files: ["packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts"],
-          acceptance_criteria: ["preview by default", "confirmation mismatch blocks"],
+          acceptance_criteria: ["preview by default", "missing structured approval blocks"],
         },
         {
           id: "TASK-PROTECTED",
@@ -534,10 +534,11 @@ describe("agent run task packet surfaces", () => {
     expect(existsSync(path.join(tmp, ".pi", "reports", "agent-runs.json"))).toBe(false);
     expect(preview.content?.[0]?.text).toContain("dispatch=no");
 
-    const mismatch = await tool.execute("tc-agent-run-task-dispatch-mismatch", { ...commonParams, execute: true, operator_confirmation: "wrong phrase" }, undefined as unknown as AbortSignal, () => {}, { cwd: tmp });
-    expect(mismatch.details?.decision).toBe("blocked");
-    expect(mismatch.details?.dispatchAllowed).toBe(false);
-    expect((mismatch.details?.blockers as string[])).toContain("operator-confirmation-mismatch");
+    const missingApproval = await tool.execute("tc-agent-run-task-dispatch-missing-approval", { ...commonParams, execute: true }, undefined as unknown as AbortSignal, () => {}, { cwd: tmp });
+    expect(missingApproval.details?.decision).toBe("blocked");
+    expect(missingApproval.details?.dispatchAllowed).toBe(false);
+    expect((missingApproval.details?.blockers as string[])).toContain("structured-operator-approval-missing");
+    expect(missingApproval.details?.structuredOperatorApproval).toBe(false);
     expect(existsSync(path.join(tmp, ".pi", "reports", "agent-runs.json"))).toBe(false);
 
     const protectedScope = await tool.execute(
