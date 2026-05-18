@@ -418,7 +418,7 @@ export function registerContextWatchdogContinuationSurface(
 		name: "context_watch_local_slice_operator_packet_preview",
 		label: "Context Watch Local Slice Operator Packet Preview",
 		description:
-			"Read-only operator packet composing continuation readiness, local-slice preview, decision packet, and human contract review. Never dispatches execution and defaults human confirmation to missing.",
+			"Read-only operator packet composing continuation readiness, local-slice preview, decision packet, and operator contract review. Never dispatches execution and defaults operator decision to missing.",
 		parameters: Type.Object({}),
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const config = runtime.getConfig();

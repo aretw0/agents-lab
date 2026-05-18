@@ -159,10 +159,10 @@ describe("guardrails unattended continuation", () => {
       activation: "none",
       authorization: "none",
       dispatchAllowed: false,
-      requiresHumanDecision: true,
+      requiresOperatorDecision: true,
       singleSliceOnly: true,
-      decision: "ready-for-human-decision",
-      summary: "local-slice-dispatch-decision-packet: decision=ready-for-human-decision dispatch=no reasons=preview-ready,contracts-present,human-decision-required authorization=none",
+      decision: "ready-for-operator-decision",
+      summary: "local-slice-dispatch-decision-packet: decision=ready-for-operator-decision dispatch=no reasons=preview-ready,contracts-present,operator-decision-required authorization=none",
     });
     expect(blockedByPreview).toMatchObject({
       decision: "blocked",

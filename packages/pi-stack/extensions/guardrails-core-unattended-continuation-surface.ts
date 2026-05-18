@@ -28,7 +28,7 @@ function normalizeContextLevel(value: unknown): UnattendedContinuationContextLev
 }
 
 function normalizePacketDecision(value: unknown): LocalSliceCanaryDispatchPacketDecision {
-  return value === "ready-for-human-decision" ? "ready-for-human-decision" : "blocked";
+  return value === "ready-for-operator-decision" ? "ready-for-operator-decision" : "blocked";
 }
 
 function normalizeOperatorDecision(value: unknown): LocalSliceOperatorDecisionKind {
@@ -437,9 +437,9 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
     label: "One-Slice Operator Contract Review",
     description: "Read-only review for a proposed operator-approved local-slice local execution contract. Never dispatches execution; always keeps dispatchAllowed=false and executorApproved=false.",
     parameters: Type.Object({
-      packet_decision: Type.String({ description: "Decision from local-slice decision packet: ready-for-human-decision | blocked." }),
+      packet_decision: Type.String({ description: "Decision from local-slice decision packet: ready-for-operator-decision | blocked." }),
       packet_dispatch_allowed: Type.Boolean({ description: "Must be false; packet evidence never authorizes dispatch." }),
-      packet_requires_human_decision: Type.Boolean({ description: "Must be true." }),
+      packet_requires_operator_decision: Type.Boolean({ description: "Must be true." }),
       packet_single_slice_only: Type.Boolean({ description: "Must be true." }),
       packet_activation: Type.Optional(Type.String({ description: "Expected none." })),
       packet_authorization: Type.Optional(Type.String({ description: "Expected none." })),
@@ -467,7 +467,7 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
         decisionPacket: {
           decision: normalizePacketDecision(p.packet_decision),
           dispatchAllowed: asBool(p.packet_dispatch_allowed, false) as false,
-          requiresHumanDecision: asBool(p.packet_requires_human_decision, false),
+          requiresOperatorDecision: asBool(p.packet_requires_operator_decision, false),
           singleSliceOnly: asBool(p.packet_single_slice_only, false),
           activation: (p.packet_activation === "none" ? "none" : String(p.packet_activation ?? "unknown")) as "none",
           authorization: (p.packet_authorization === "none" ? "none" : String(p.packet_authorization ?? "unknown")) as "none",

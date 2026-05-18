@@ -290,7 +290,7 @@ describe("context-watchdog decision surfaces", () => {
 			expect(operatorSchemaText).not.toContain("dispatch");
 			const operatorResult = await operatorTool.execute("tc-local-slice-operator-packet", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 
-			expect(result.content?.[0]?.text).toBe("context-watch-local-slice-canary-preview: decision=prepare-local-slice prepare=yes stop=yes singleSliceOnly=yes packet=ready-for-human-decision dispatch=no reasons=readiness-green|single-slice-only authorization=none");
+			expect(result.content?.[0]?.text).toBe("context-watch-local-slice-canary-preview: decision=prepare-local-slice prepare=yes stop=yes singleSliceOnly=yes packet=ready-for-operator-decision dispatch=no reasons=readiness-green|single-slice-only authorization=none");
 			expect(result.content?.[0]?.text).not.toContain("postReloadResume=");
 			expect(result.content?.[0]?.text).not.toContain("packetReasons=");
 			expect(result.details).toMatchObject({
@@ -312,12 +312,12 @@ describe("context-watchdog decision surfaces", () => {
 					activation: "none",
 					authorization: "none",
 					dispatchAllowed: false,
-					requiresHumanDecision: true,
+					requiresOperatorDecision: true,
 					singleSliceOnly: true,
-					decision: "ready-for-human-decision",
+					decision: "ready-for-operator-decision",
 				},
 			});
-			expect(operatorResult.content?.[0]?.text).toBe("context-watch-local-slice-operator-packet: readiness=yes preview=prepare-local-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=operator-decision-missing authorization=none");
+			expect(operatorResult.content?.[0]?.text).toBe("context-watch-local-slice-operator-packet: readiness=yes preview=prepare-local-slice packet=ready-for-operator-decision contract=blocked dispatch=no executor=no reasons=operator-decision-missing authorization=none");
 			expect(operatorResult.details).toMatchObject({
 				effect: "none",
 				mode: "read-only-operator-packet",
@@ -327,7 +327,7 @@ describe("context-watchdog decision surfaces", () => {
 				executorApproved: false,
 				readinessReady: true,
 				decisionPacket: {
-					decision: "ready-for-human-decision",
+					decision: "ready-for-operator-decision",
 					dispatchAllowed: false,
 				},
 				contractReview: {
@@ -345,7 +345,7 @@ describe("context-watchdog decision surfaces", () => {
 				notes: "preview changed without files",
 			}] }));
 			const missingFilesOperatorResult = await operatorTool.execute("tc-local-slice-operator-packet-missing-files", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
-			expect(missingFilesOperatorResult.content?.[0]?.text).toBe("context-watch-local-slice-operator-packet: readiness=yes preview=prepare-local-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=operator-decision-missing|declared-files-missing authorization=none");
+			expect(missingFilesOperatorResult.content?.[0]?.text).toBe("context-watch-local-slice-operator-packet: readiness=yes preview=prepare-local-slice packet=ready-for-operator-decision contract=blocked dispatch=no executor=no reasons=operator-decision-missing|declared-files-missing authorization=none");
 			expect(missingFilesOperatorResult.details.contractReview).toMatchObject({
 				decision: "blocked",
 				dispatchAllowed: false,
@@ -365,12 +365,12 @@ describe("context-watchdog decision surfaces", () => {
 			expect(formatContextWatchLocalSliceOperatorPacketPreviewSummary({
 				readinessReady: true,
 				previewDecision: "prepare-local-slice",
-				packetDecision: "ready-for-human-decision",
+				packetDecision: "ready-for-operator-decision",
 				contractDecision: "blocked",
 				dispatchAllowed: false,
 				executorApproved: false,
 				contractReasons: ["operator-decision-missing"],
-			})).toBe("context-watch-local-slice-operator-packet: readiness=yes preview=prepare-local-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=operator-decision-missing authorization=none");
+			})).toBe("context-watch-local-slice-operator-packet: readiness=yes preview=prepare-local-slice packet=ready-for-operator-decision contract=blocked dispatch=no executor=no reasons=operator-decision-missing authorization=none");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

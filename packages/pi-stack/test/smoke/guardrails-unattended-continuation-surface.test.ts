@@ -465,9 +465,9 @@ describe("guardrails unattended continuation surface", () => {
 
     const reviewTool = tools.find((tool) => tool.name === "local_slice_operator_contract_review");
     const ready = reviewTool?.execute("call-ready", {
-      packet_decision: "ready-for-human-decision",
+      packet_decision: "ready-for-operator-decision",
       packet_dispatch_allowed: false,
-      packet_requires_human_decision: true,
+      packet_requires_operator_decision: true,
       packet_single_slice_only: true,
       packet_activation: "none",
       packet_authorization: "none",
@@ -484,9 +484,9 @@ describe("guardrails unattended continuation surface", () => {
       stop_contract_known: true,
     });
     const blocked = reviewTool?.execute("call-blocked", {
-      packet_decision: "ready-for-human-decision",
+      packet_decision: "ready-for-operator-decision",
       packet_dispatch_allowed: true,
-      packet_requires_human_decision: true,
+      packet_requires_operator_decision: true,
       packet_single_slice_only: true,
       packet_activation: "none",
       packet_authorization: "none",

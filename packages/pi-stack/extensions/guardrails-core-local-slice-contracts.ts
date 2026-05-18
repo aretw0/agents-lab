@@ -29,7 +29,7 @@ export interface LocalSliceCanaryPlan {
   recommendation: string;
 }
 
-export type LocalSliceCanaryDispatchPacketDecision = "ready-for-human-decision" | "blocked";
+export type LocalSliceCanaryDispatchPacketDecision = "ready-for-operator-decision" | "blocked";
 export type LocalSliceCanaryOperatorIntent = "none" | "review" | "execute-local-slice";
 export type LocalSliceOperatorDecisionKind = "missing" | "generic" | "explicit-task-action";
 export type LocalSliceOperatorApprovedContractDecision = "contract-ready-no-executor" | "blocked";
@@ -53,7 +53,7 @@ export interface LocalSliceCanaryDispatchDecisionPacket {
   activation: "none";
   authorization: "none";
   dispatchAllowed: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   singleSliceOnly: true;
   decision: LocalSliceCanaryDispatchPacketDecision;
   reasons: string[];
@@ -62,7 +62,7 @@ export interface LocalSliceCanaryDispatchDecisionPacket {
 }
 
 export interface LocalSliceOperatorApprovedContractInput {
-  decisionPacket: Pick<LocalSliceCanaryDispatchDecisionPacket, "decision" | "dispatchAllowed" | "requiresHumanDecision" | "singleSliceOnly" | "activation" | "authorization">;
+  decisionPacket: Pick<LocalSliceCanaryDispatchDecisionPacket, "decision" | "dispatchAllowed" | "requiresOperatorDecision" | "singleSliceOnly" | "activation" | "authorization">;
   operatorDecision: LocalSliceOperatorDecisionKind;
   singleFocus: boolean;
   localSafeScope: boolean;
@@ -223,7 +223,7 @@ export function buildLocalSliceCanaryDispatchDecisionPacket(input: LocalSliceCan
       activation: "none",
       authorization: "none",
       dispatchAllowed: false,
-      requiresHumanDecision: true,
+      requiresOperatorDecision: true,
       singleSliceOnly: true,
       decision: "blocked",
       reasons,
@@ -238,11 +238,11 @@ export function buildLocalSliceCanaryDispatchDecisionPacket(input: LocalSliceCan
     activation: "none",
     authorization: "none",
     dispatchAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     singleSliceOnly: true,
-    decision: "ready-for-human-decision",
-    reasons: ["preview-ready", "contracts-present", "human-decision-required"],
-    summary: "local-slice-dispatch-decision-packet: decision=ready-for-human-decision dispatch=no reasons=preview-ready,contracts-present,human-decision-required authorization=none",
+    decision: "ready-for-operator-decision",
+    reasons: ["preview-ready", "contracts-present", "operator-decision-required"],
+    summary: "local-slice-dispatch-decision-packet: decision=ready-for-operator-decision dispatch=no reasons=preview-ready,contracts-present,operator-decision-required authorization=none",
     recommendation: "Present this packet to the operator; do not dispatch until a separate execution path is explicitly authorized.",
   };
 }
@@ -335,9 +335,9 @@ export function reviewLocalSliceOperatorApprovedContract(input: LocalSliceOperat
   const reasons: string[] = [];
   const blockedRequests: string[] = [];
 
-  if (input.decisionPacket.decision !== "ready-for-human-decision") reasons.push("packet-not-ready");
+  if (input.decisionPacket.decision !== "ready-for-operator-decision") reasons.push("packet-not-ready");
   if (input.decisionPacket.dispatchAllowed !== false) reasons.push("packet-dispatch-not-false");
-  if (!input.decisionPacket.requiresHumanDecision) reasons.push("human-decision-not-required");
+  if (!input.decisionPacket.requiresOperatorDecision) reasons.push("operator-decision-not-required");
   if (!input.decisionPacket.singleSliceOnly) reasons.push("single-slice-contract-missing");
   if (input.decisionPacket.activation !== "none") reasons.push(`packet-activation-${input.decisionPacket.activation}`);
   if (input.decisionPacket.authorization !== "none") reasons.push(`packet-authorization-${input.decisionPacket.authorization}`);
