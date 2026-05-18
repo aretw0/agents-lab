@@ -231,7 +231,7 @@ export function registerAgentRunLifecycleTools(pi: ExtensionAPI): void {
         pollIntervalMs,
         maxLines,
         lines,
-        recommendation: terminal ? "build-outcome-packet" : decision === "timeout" ? "poll-again-or-wait" : "ask-human",
+        recommendation: terminal ? "build-outcome-packet" : decision === "timeout" ? "poll-again-or-wait" : "ask-operator",
         summary: [
           "agent-run-follow:",
           `decision=${decision}`,

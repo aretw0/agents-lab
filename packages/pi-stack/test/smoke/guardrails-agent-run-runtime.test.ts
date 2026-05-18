@@ -290,7 +290,7 @@ describe("agent run runtime packets", () => {
       ],
     });
     expect(blocked.decision).toBe("partial");
-    expect(blocked.recommendation).toBe("ask-human");
+    expect(blocked.recommendation).toBe("ask-operator");
     expect(blocked.blockers).toContain("worker-cache-status-unknown:worker-a");
     expect(blocked.blockers).toContain("worker-process-not-completed:worker-b:failed");
     expect(blocked.blockers).toContain("worker-contract-not-pass:worker-b:fail");

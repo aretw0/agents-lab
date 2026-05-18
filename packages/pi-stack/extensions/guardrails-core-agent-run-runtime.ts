@@ -4,7 +4,7 @@ import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approv
 export type AgentRunState = "planned" | "running" | "completed" | "failed" | "timed-out" | "aborted" | "unknown";
 export type AgentRunAbortDecision = "dry-run" | "abort-ready" | "blocked";
 export type AgentRunContractDecision = "pass" | "partial" | "fail";
-export type AgentRunOutcomeRecommendation = "stop" | "retry-once" | "ask-human";
+export type AgentRunOutcomeRecommendation = "stop" | "retry-once" | "ask-operator";
 export type AgentRunRegistryUpsertDecision = "dry-run" | "write-ready" | "blocked";
 
 export interface AgentRunRegistryEntry {
@@ -168,7 +168,7 @@ export interface AgentRunBatchOutcomeResult {
   processStartAllowed: false;
   processStopAllowed: false;
   decision: AgentRunContractDecision;
-  recommendation: "promote" | "ask-human";
+  recommendation: "promote" | "ask-operator";
   recommendationCode: "agent-run-batch-outcome-pass" | "agent-run-batch-outcome-partial" | "agent-run-batch-outcome-fail";
   blockers: string[];
   batchId: string;
@@ -419,35 +419,35 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
 
   if (!found) {
     contractDecision = "fail";
-    recommendation = "ask-human";
+    recommendation = "ask-operator";
     recommendationCode = "agent-run-outcome-fail-missing-run";
   } else if (processState !== "completed") {
     contractDecision = "fail";
-    recommendation = processState === "timed-out" ? "retry-once" : "ask-human";
+    recommendation = processState === "timed-out" ? "retry-once" : "ask-operator";
     recommendationCode = "agent-run-outcome-fail-process-state";
   } else if (outputBytes === 0) {
     contractDecision = "fail";
-    recommendation = "ask-human";
+    recommendation = "ask-operator";
     recommendationCode = "agent-run-outcome-fail-empty-output";
   } else if (fileContract === "read-only" && touchedFiles.length > 0) {
     contractDecision = "fail";
-    recommendation = "ask-human";
+    recommendation = "ask-operator";
     recommendationCode = "agent-run-outcome-fail-read-only-touched-files";
   } else if (unexpectedFiles.length > 0) {
     contractDecision = "fail";
-    recommendation = "ask-human";
+    recommendation = "ask-operator";
     recommendationCode = "agent-run-outcome-fail-unexpected-files";
   } else if (touchedFiles.length > 0 && missingDeclaredFiles.length > 0) {
     contractDecision = "fail";
-    recommendation = "ask-human";
+    recommendation = "ask-operator";
     recommendationCode = "agent-run-outcome-fail-missing-declared-files";
   } else if (markerFailures.length > 0) {
     contractDecision = "fail";
-    recommendation = "ask-human";
+    recommendation = "ask-operator";
     recommendationCode = "agent-run-outcome-fail-marker";
   } else if (fileContract === "mutation" && touchedFiles.length === 0) {
     contractDecision = "partial";
-    recommendation = "ask-human";
+    recommendation = "ask-operator";
     recommendationCode = "agent-run-outcome-partial-no-touched-files";
     blockers.push("touched-files-not-provided");
   }
@@ -547,13 +547,13 @@ export function buildAgentRunBatchOutcomePacket(input: AgentRunBatchOutcomeInput
   const cacheMisses = workerSummaries.filter((worker) => worker.cacheStatus === "miss").length;
   const cacheUnknown = workerSummaries.filter((worker) => worker.cacheStatus === "unknown").length;
   const decision: AgentRunContractDecision = blockers.length === 0 ? "pass" : passedWorkerCount > 0 ? "partial" : "fail";
-  const recommendation = decision === "pass" ? "promote" : "ask-human";
+  const recommendation = decision === "pass" ? "promote" : "ask-operator";
   const recommendationCode: AgentRunBatchOutcomeResult["recommendationCode"] = decision === "pass" ? "agent-run-batch-outcome-pass" : decision === "partial" ? "agent-run-batch-outcome-partial" : "agent-run-batch-outcome-fail";
   const fanInContract = [
     "batch outcome aggregation is report-only and never authorizes worker dispatch",
     "all expected workers must be completed, contract=pass, outputBytes>0, read-only clean, and marker-clean before promotion",
     "cache-hit/cache-miss evidence must be explicit for every worker; unknown cache status blocks promotion",
-    "any failed, missing, touched-file, protected-scope, dirty-state, or missing-output signal requires human review",
+    "any failed, missing, touched-file, protected-scope, dirty-state, or missing-output signal requires operator review",
   ];
   const summary = [
     "agent-run-batch-outcome:",
