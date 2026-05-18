@@ -65,7 +65,7 @@ function greenInput() {
 }
 
 describe("guardrails unattended continuation", () => {
-  it("plans self-reload/autoresume as read-only human decision evidence", () => {
+  it("plans self-reload/autoresume as read-only operator decision evidence", () => {
     const ready = resolveSelfReloadAutoresumeCanaryPlan({
       optIn: true,
       reloadRequired: true,
@@ -81,7 +81,7 @@ describe("guardrails unattended continuation", () => {
       stopConditionsClear: true,
       contextLevel: "ok",
     });
-    expect(ready.decision).toBe("ready-for-human-decision");
+    expect(ready.decision).toBe("ready-for-operator-decision");
     expect(ready.reloadAllowed).toBe(false);
     expect(ready.autoResumeDispatchAllowed).toBe(false);
     expect(ready.dispatchAllowed).toBe(false);
@@ -125,7 +125,7 @@ describe("guardrails unattended continuation", () => {
       contextLevel: "ok",
     });
     expect(notNeeded.decision).toBe("not-needed");
-    expect(notNeeded.requiresHumanDecision).toBe(false);
+    expect(notNeeded.requiresOperatorDecision).toBe(false);
   });
 
   it("builds a no-execution decision packet for local-slice dispatch", () => {

@@ -241,7 +241,7 @@ export interface NudgeFreeLoopMeasuredPacketTrust {
 }
 
 export type NudgeFreeLoopCanaryDecision = "ready" | "defer" | "blocked";
-export type SelfReloadAutoresumeCanaryDecision = "ready-for-human-decision" | "not-needed" | "blocked";
+export type SelfReloadAutoresumeCanaryDecision = "ready-for-operator-decision" | "not-needed" | "blocked";
 
 export interface SelfReloadAutoresumeCanaryInput {
   optIn: boolean;
@@ -272,7 +272,7 @@ export interface SelfReloadAutoresumeCanaryPlan {
   dispatchAllowed: false;
   reloadAllowed: false;
   autoResumeDispatchAllowed: false;
-  requiresHumanDecision: boolean;
+  requiresOperatorDecision: boolean;
   decision: SelfReloadAutoresumeCanaryDecision;
   reasons: string[];
   summary: string;

@@ -569,7 +569,7 @@ describe("guardrails unattended continuation surface", () => {
       remote_or_offload_requested: true,
     });
 
-    expect(ready?.content?.[0]?.text).toContain("self-reload-autoresume-canary: decision=ready-for-human-decision reload=no autoResume=no dispatch=no");
+    expect(ready?.content?.[0]?.text).toContain("self-reload-autoresume-canary: decision=ready-for-operator-decision reload=no autoResume=no dispatch=no");
     expect(ready?.details).toMatchObject({
       effect: "none",
       mode: "advisory",
@@ -578,7 +578,7 @@ describe("guardrails unattended continuation surface", () => {
       dispatchAllowed: false,
       reloadAllowed: false,
       autoResumeDispatchAllowed: false,
-      requiresHumanDecision: true,
+      requiresOperatorDecision: true,
     });
     expect(blocked?.content?.[0]?.text).toContain("decision=blocked reload=no autoResume=no dispatch=no");
     expect(blocked?.content?.[0]?.text).toContain("blockedRequests=remote-or-offload");
