@@ -24,11 +24,12 @@ describe("agent run dispatch readiness gates", () => {
         event_stream_known: true,
         final_output_contract_known: true,
         execute: true,
-        operator_confirmation: "execute o sdk worker sdk-single-readiness-gated",
+        operator_approval: structuredApproval(),
       }, undefined, () => {}, { cwd });
 
       expect(result.details?.processStartAllowed).toBe(false);
       expect(result.details?.blockers).toContain("worker-lane-single-worker-not-ready");
+      expect(result.details?.blockers).not.toContain("structured-operator-approval-missing");
       expect(result.details?.workerLaneReadiness).toMatchObject({
         stage: "needs-evidence",
         singleWorkerAllowed: false,
@@ -52,17 +53,48 @@ describe("agent run dispatch readiness gates", () => {
           readyWorker("sdk-batch-readiness-b", "package.json"),
         ],
         execute: true,
-        operator_confirmation: "approve sdk readonly batch sdk-batch-readiness-gated",
+        operator_approval: structuredApproval(),
       }, undefined, () => {}, { cwd });
 
       expect(result.details?.processStartAllowed).toBe(false);
       expect(result.details?.blockers).toContain("worker-lane-multi-worker-not-ready");
+      expect(result.details?.blockers).not.toContain("structured-operator-approval-missing");
       expect(result.details?.workerLaneReadiness).toMatchObject({
         stage: "single-worker-evidence-ready-board-open",
         singleWorkerAllowed: true,
         multiWorkerRehearsalCandidate: false,
         dispatchAllowed: false,
       });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("blocks SDK dispatch when structured operator approval is missing", () => {
+    const cwd = mkdtempProject("pi-agent-missing-approval-");
+    try {
+      seedCompletedSingleWorkerEvidence(cwd);
+      const pi = registerAgentRun();
+      const tool = findTool(pi, "agent_run_sdk_in_process_dispatch");
+      const result = tool.execute("tc-sdk-missing-approval", {
+        run_id: "sdk-missing-approval",
+        goal: "Read one file and stop.",
+        provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+        declared_files: ["README.md"],
+        timeout_ms: 45_000,
+        tool_allowlist: ["read", "grep"],
+        validation_gate_known: true,
+        rollback_plan_known: true,
+        budget_decision: "ok",
+        abort_known: true,
+        event_stream_known: true,
+        final_output_contract_known: true,
+        execute: true,
+      }, undefined, () => {}, { cwd });
+
+      expect(result.details?.processStartAllowed).toBe(false);
+      expect(result.details?.blockers).toContain("structured-operator-approval-missing");
+      expect(result.details?.structuredOperatorApproval).toBe(false);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -138,6 +170,29 @@ function seedBoardOpenSingleWorkerEvidence(cwd: string): void {
     "single-worker\n",
     "utf8",
   );
+}
+
+function seedCompletedSingleWorkerEvidence(cwd: string): void {
+  seedBoardOpenSingleWorkerEvidence(cwd);
+  writeFileSync(
+    join(cwd, ".project", "tasks.json"),
+    `${JSON.stringify({
+      tasks: [
+        { id: "TASK-BUD-1066", description: "subprocess", status: "completed" },
+        { id: "TASK-BUD-1068", description: "executor", status: "completed" },
+        { id: "TASK-BUD-1075", description: "mutation canary", status: "completed" },
+      ],
+    }, null, 2)}\n`,
+    "utf8",
+  );
+}
+
+function structuredApproval(): Record<string, unknown> {
+  return {
+    packet_mode: "operator-approval-packet",
+    approved: true,
+    approval_state: "approved",
+  };
 }
 
 function readyWorker(runId: string, file: string): Record<string, unknown> {

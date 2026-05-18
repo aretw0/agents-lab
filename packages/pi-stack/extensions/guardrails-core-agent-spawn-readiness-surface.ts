@@ -19,6 +19,14 @@ import { appendAgentRunLogLine, buildPiSubprocessPreflightLines, createAgentRunC
 export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): void {
   registerAgentRunBasicTools(pi);
 
+  function hasStructuredOperatorApproval(value: unknown): boolean {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+    const row = value as Record<string, unknown>;
+    return row.packet_mode === "operator-approval-packet"
+      && row.approved === true
+      && row.approval_state === "approved";
+  }
+
   pi.registerTool({
     name: "agent_run_start_packet",
     label: "Agent Run Start Packet",
@@ -880,8 +888,12 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       final_output_contract_known: Type.Optional(Type.Boolean({ description: "Whether final output bytes/contract is known." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scope is requested." })),
       unexpected_dirty: Type.Optional(Type.Boolean({ description: "Blocks when workspace dirty state is unexpected." })),
-      execute: Type.Optional(Type.Boolean({ description: "When true, start exactly one SDK worker after exact confirmation." })),
-      operator_confirmation: Type.Optional(Type.String({ description: "Must exactly equal the packet humanConfirmationPhrase for execute=true." })),
+      execute: Type.Optional(Type.Boolean({ description: "When true, start exactly one SDK worker after structured operator approval." })),
+      operator_approval: Type.Optional(Type.Object({
+        packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
+        approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
+        approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
+      }, { description: "Structured operator approval envelope." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -911,7 +923,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         unexpectedDirty: asOptionalBoolean(p.unexpected_dirty),
       });
       const executeRequested = p.execute === true;
-      const operatorConfirmation = typeof p.operator_confirmation === "string" ? p.operator_confirmation : "";
+      const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
       const existingEntry = packet.runSpec.runId ? readRegistryEntry(ctx.cwd, packet.runSpec.runId) : undefined;
       const workerLaneReadiness = evaluateAgentWorkerLaneReadiness(ctx.cwd);
       const blockers = [...packet.blockers];
@@ -919,7 +931,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       if (executeRequested && !workerLaneReadiness.singleWorkerAllowed) blockers.push("worker-lane-single-worker-not-ready");
       if (existingEntry?.state === "running") blockers.push("run-already-running");
       if (executeRequested && !sameCwd(packet.runSpec.cwd, ctx.cwd)) blockers.push("execute-cwd-mismatch");
-      if (executeRequested && operatorConfirmation !== packet.humanConfirmationPhrase) blockers.push("operator-confirmation-mismatch");
+      if (executeRequested && !structuredOperatorApproval) blockers.push("structured-operator-approval-missing");
       const dispatchAllowed = executeRequested && blockers.length === 0;
       const started = dispatchAllowed ? startSdkInProcessWorker(ctx.cwd, packet) : undefined;
       const decision = dispatchAllowed ? "dispatched" : blockers.length > 0 ? "blocked" : "preview";
@@ -935,10 +947,10 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         decision,
         blockers,
         executeRequested,
+        structuredOperatorApproval,
         runId: packet.runSpec.runId,
         logPath: started?.logPath,
         packet,
-        humanConfirmationPhrase: packet.humanConfirmationPhrase,
         summary: [
           "agent-run-sdk-in-process-dispatch:",
           `decision=${decision}`,

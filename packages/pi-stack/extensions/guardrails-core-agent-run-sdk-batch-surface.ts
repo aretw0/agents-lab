@@ -16,6 +16,14 @@ function asOptionalStringArray(value: unknown): string[] | undefined {
   return value.filter((entry): entry is string => typeof entry === "string");
 }
 
+function hasStructuredOperatorApproval(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const row = value as Record<string, unknown>;
+  return row.packet_mode === "operator-approval-packet"
+    && row.approved === true
+    && row.approval_state === "approved";
+}
+
 function sdkReadOnlyBatchWorkerSchema() {
   return Type.Object({
     run_id: Type.Optional(Type.String({ description: "SDK worker run id." })),
@@ -153,19 +161,23 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
     label: "Agent Run SDK Read-Only Batch Dispatch",
     description: "First-party read-only SDK batch gate. Preview by default; execute=true requires exact batch confirmation and starts only ready read-only workers through the shared control-plane registry/log runtime.",
     parameters: sdkReadOnlyBatchParameters({
-      execute: Type.Optional(Type.Boolean({ description: "When true, start all ready read-only workers after exact batch confirmation." })),
-      operator_confirmation: Type.Optional(Type.String({ description: "Must exactly equal the packet humanConfirmationPhrase for execute=true." })),
+      execute: Type.Optional(Type.Boolean({ description: "When true, start all ready read-only workers after structured operator approval." })),
+      operator_approval: Type.Optional(Type.Object({
+        packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
+        approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
+        approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
+      }, { description: "Structured operator approval envelope." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const packet = buildAgentRunSdkReadOnlyBatchPacket(parseSdkReadOnlyBatchPacketInput(p, ctx.cwd));
       const executeRequested = p.execute === true;
-      const operatorConfirmation = typeof p.operator_confirmation === "string" ? p.operator_confirmation : "";
+      const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
       const workerLaneReadiness = evaluateAgentWorkerLaneReadiness(ctx.cwd);
       const blockers = [...packet.blockers];
       if (packet.decision !== "ready-for-human-decision") blockers.push("batch-packet-blocked");
       if (executeRequested && !workerLaneReadiness.multiWorkerRehearsalCandidate) blockers.push("worker-lane-multi-worker-not-ready");
-      if (executeRequested && operatorConfirmation !== packet.humanConfirmationPhrase) blockers.push("operator-confirmation-mismatch");
+      if (executeRequested && !structuredOperatorApproval) blockers.push("structured-operator-approval-missing");
       for (const worker of packet.workers) {
         if (executeRequested && !sameCwd(worker.runSpec.cwd, ctx.cwd)) blockers.push(`worker-cwd-mismatch:${worker.runSpec.runId || "missing"}`);
         const existingEntry = worker.runSpec.runId ? readRegistryEntry(ctx.cwd, worker.runSpec.runId) : undefined;
@@ -188,12 +200,12 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
         decision,
         blockers,
         executeRequested,
+        structuredOperatorApproval,
         batchId: packet.batchSpec.batchId,
         workerRunIds: packet.workers.map((worker) => worker.runSpec.runId),
         startedWorkers,
         packet,
         workerLaneReadiness,
-        humanConfirmationPhrase: packet.humanConfirmationPhrase,
         fanInNextAction: "after workers finish, call agent_run_outcome_packet per worker and agent_run_batch_outcome_packet for aggregate fan-in",
         summary: [
           "agent-run-sdk-readonly-batch-dispatch:",
