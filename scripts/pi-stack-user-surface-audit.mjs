@@ -77,6 +77,11 @@ const DISTRIBUTED_WRAPPERS = [
 		surface: "machine-maintenance",
 		reason: "disk pressure and cleanup planning are distributed through machine-maintenance; root scripts keep explicit apply wrappers",
 	},
+	{
+		match: /^context:preload:consume/,
+		surface: "context-watchdog",
+		reason: "context preload consumption is already distributed through context_preload_consume; pack generation remains a promotion candidate",
+	},
 ];
 
 const PROMOTION_CANDIDATES = [

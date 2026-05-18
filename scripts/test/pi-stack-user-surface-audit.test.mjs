@@ -36,6 +36,13 @@ test("classifyRootScript marks disk ops as machine-maintenance wrappers", () => 
 	assert.equal(row.targetSurface, "machine-maintenance");
 });
 
+test("classifyRootScript marks context preload consume as existing watchdog wrapper", () => {
+	const row = classifyRootScript("context:preload:consume:worker", "node scripts/context-preload-consume.mjs --profile agent-worker-lean --json", shipped);
+
+	assert.equal(row.category, "distributed-wrapper");
+	assert.equal(row.targetSurface, "context-watchdog");
+});
+
 test("classifyRootScript keeps ci and release scripts internal", () => {
 	assert.equal(classifyRootScript("ci:smoke:gate", "npm run test:smoke", shipped).category, "repo-internal");
 	assert.equal(classifyRootScript("release", "changeset version", shipped).category, "repo-internal");
@@ -47,4 +54,5 @@ test("buildUserSurfaceAudit exposes grouped promotion targets", () => {
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "subagent-readiness"));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "environment-doctor" && group.scripts.includes("pi:dev:pressure")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "machine-maintenance" && group.scripts.includes("ops:disk:check")));
+	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "context-watchdog" && group.scripts.includes("context:preload:consume")));
 });
