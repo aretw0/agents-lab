@@ -13,6 +13,7 @@ import {
   type PendingHumanConfirmedAction,
   type TrustedHumanConfirmationEvidence,
 } from "../../extensions/guardrails-core-human-confirmation";
+import { buildOperatorApprovalPacket } from "../../extensions/guardrails-core-operator-approval";
 
 const pendingDelete: PendingHumanConfirmedAction = {
   actionKind: "destructive",
@@ -37,6 +38,78 @@ const trustedEvidence: TrustedHumanConfirmationEvidence = {
 };
 
 describe("human confirmation audit plan", () => {
+  it("does not require approval for local-safe work and accepts short steering", () => {
+    const result = buildOperatorApprovalPacket({
+      intentKind: "local-safe",
+      recommendedAction: "run focal tests and continue the refactor",
+    });
+
+    expect(result.decision).toBe("not-required");
+    expect(result.interaction).toBe("none");
+    expect(result.acceptsShortAnswer).toBe(true);
+    expect(result.exactTextFallbackRequired).toBe(false);
+    expect(result.allowedResponses).toContain("prossiga");
+    expect(result.dispatchAllowed).toBe(false);
+  });
+
+  it("uses short yes/no for worker runs only with structured confirmation", () => {
+    const structured = buildOperatorApprovalPacket({
+      intentKind: "worker-single-run",
+      recommendedAction: "execute sdk worker sdk-one",
+      structuredConfirmationAvailable: true,
+    });
+
+    expect(structured.decision).toBe("ready-for-structured-approval");
+    expect(structured.interaction).toBe("yes-no");
+    expect(structured.acceptsShortAnswer).toBe(true);
+    expect(structured.exactTextFallbackRequired).toBe(false);
+
+    const fallback = buildOperatorApprovalPacket({
+      intentKind: "worker-single-run",
+      recommendedAction: "execute sdk worker sdk-one",
+      structuredConfirmationAvailable: false,
+      exactConfirmationPhrase: "execute o sdk worker sdk-one",
+    });
+
+    expect(fallback.decision).toBe("needs-exact-text-fallback");
+    expect(fallback.interaction).toBe("exact-text-fallback");
+    expect(fallback.acceptsShortAnswer).toBe(false);
+    expect(fallback.exactTextFallbackRequired).toBe(true);
+    expect(fallback.allowedResponses).toEqual(["execute o sdk worker sdk-one"]);
+  });
+
+  it("supports suite approval as one bounded operator decision", () => {
+    const result = buildOperatorApprovalPacket({
+      intentKind: "worker-suite",
+      suiteId: "arena-openai-spark",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      maxCalls: 3,
+      maxCostUsd: 0.25,
+      parallelism: 1,
+      structuredConfirmationAvailable: true,
+    });
+
+    expect(result.decision).toBe("ready-for-structured-approval");
+    expect(result.interaction).toBe("suite-approval");
+    expect(result.acceptsShortAnswer).toBe(true);
+    expect(result.prompt).toContain("arena-openai-spark");
+    expect(result.prompt).toContain("maxCalls=3");
+    expect(result.prompt).toContain("maxCostUsd=0.25");
+    expect(result.dispatchAllowed).toBe(false);
+  });
+
+  it("blocks risk mismatch instead of accepting a casual approval", () => {
+    const result = buildOperatorApprovalPacket({
+      intentKind: "worker-single-run",
+      protectedScopeRequested: true,
+      structuredConfirmationAvailable: true,
+    });
+
+    expect(result.decision).toBe("blocked");
+    expect(result.acceptsShortAnswer).toBe(false);
+    expect(result.blockers).toContain("protected-scope-requires-protected-intent");
+  });
+
   it("classifies observed TUI confirmation without monitor-visible evidence as an audit gap", () => {
     const result = resolveHumanConfirmationAuditPlan({
       actionKind: "destructive",

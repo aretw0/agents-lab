@@ -129,6 +129,8 @@ export type { AgentRunSdkArenaEnvelope, AgentRunSdkProviderModelArenaArtifactPac
 export { buildDeclaredFileScopedSdkWorkerTools, DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOLS, evaluateDeclaredPathPolicy, findUnsupportedDeclaredFileScopedSdkWorkerTools, wrapToolDefinitionWithDeclaredPathPolicy } from "./guardrails-core-tool-policy";
 export type { DeclaredPathPolicy, SdkWorkerToolPolicyPlan, ToolPolicyDecision } from "./guardrails-core-tool-policy";
 export { buildToolkitContract } from "./guardrails-core-toolkit-contract";
+export { buildOperatorApprovalPacket } from "./guardrails-core-operator-approval";
+export type { OperatorApprovalDecision, OperatorApprovalIntentKind, OperatorApprovalInteraction, OperatorApprovalPacket, OperatorApprovalPacketInput } from "./guardrails-core-operator-approval";
 export { buildTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationEvidence, extractTrustedHumanConfirmationEvidenceFromEnvelope, recordTrustedHumanConfirmationUiDecision, resolveHumanConfirmationAuditPlan, resolveHumanConfirmationEvidenceMatch, resolveHumanConfirmationImplementationChannelPlan, resolveHumanConfirmationRuntimeConsumptionPlan, resolveHumanConfirmationSignalSourcePlan } from "./guardrails-core-human-confirmation";
 export { resolveMonitorClassifyFailureReadiness } from "./monitor-observability";
 export { evaluateUnattendedRehearsalGate, formatUnattendedRehearsalSliceEvidence, summarizeUnattendedRehearsalGate, validateUnattendedRehearsalSliceEvidence } from "./guardrails-core-unattended-rehearsal";

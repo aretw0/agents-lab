@@ -6,7 +6,9 @@ describe("human confirmation implementation channel surface", () => {
     const pi = { registerTool: vi.fn() } as any;
     registerGuardrailsHumanConfirmationSurface(pi);
 
-    const tool = pi.registerTool.mock.calls[0][0];
+    const tool = pi.registerTool.mock.calls
+      .map(([registered]) => registered)
+      .find((registered) => registered.name === "human_confirmation_implementation_channel_plan");
     expect(tool.name).toBe("human_confirmation_implementation_channel_plan");
     expect(tool.description).toContain("Never enables destructive dialogs");
 
@@ -25,7 +27,9 @@ describe("human confirmation implementation channel surface", () => {
   it("blocks prohibited runtime enablement and direct node_modules patches", () => {
     const pi = { registerTool: vi.fn() } as any;
     registerGuardrailsHumanConfirmationSurface(pi);
-    const tool = pi.registerTool.mock.calls[0][0];
+    const tool = pi.registerTool.mock.calls
+      .map(([registered]) => registered)
+      .find((registered) => registered.name === "human_confirmation_implementation_channel_plan");
 
     const result = tool.execute("call-1", {
       direct_node_modules_patch_requested: true,
@@ -35,5 +39,28 @@ describe("human confirmation implementation channel surface", () => {
     expect(result.details.reasons).toContain("direct-node-modules-patch-prohibited");
     expect(result.details.reasons).toContain("destructive-runtime-enable-requires-separate-authorization");
     expect(result.details.dispatchAllowed).toBe(false);
+  });
+
+  it("registers an operator approval packet tool", () => {
+    const pi = { registerTool: vi.fn() } as any;
+    registerGuardrailsHumanConfirmationSurface(pi);
+    const tool = pi.registerTool.mock.calls
+      .map(([registered]) => registered)
+      .find((registered) => registered.name === "operator_approval_packet");
+
+    const result = tool.execute("call-approval", {
+      intent_kind: "worker-suite",
+      suite_id: "arena-openai-spark",
+      provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+      max_calls: 3,
+      max_cost_usd: 0.25,
+      parallelism: 1,
+      structured_confirmation_available: true,
+    });
+
+    expect(result.details.interaction).toBe("suite-approval");
+    expect(result.details.acceptsShortAnswer).toBe(true);
+    expect(result.details.dispatchAllowed).toBe(false);
+    expect(result.content[0].text).toContain("interaction=suite-approval");
   });
 });
