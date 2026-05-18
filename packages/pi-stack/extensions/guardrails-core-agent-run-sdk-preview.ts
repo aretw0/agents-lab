@@ -213,7 +213,7 @@ function buildSdkMaturity(input: {
         ...mutationBase,
         rung: "validated-one-file-mutation",
         validatedEnvelope: true,
-        recommendation: "ready for exact human decision under the validated one-file SDK mutation envelope: one declared file, read plus write/edit only, parent-side follow/outcome validation, and no fan-out",
+        recommendation: "ready for structured operator approval under the validated one-file SDK mutation envelope: one declared file, read plus write/edit only, parent-side follow/outcome validation, and no fan-out",
       };
     }
     return {
@@ -236,7 +236,7 @@ function buildSdkMaturity(input: {
       ...base,
       rung: "validated-narrow-readgrep",
       validatedEnvelope: true,
-      recommendation: "ready for exact human decision under the validated one/two-file read/grep envelope, including real board-question checks, narrow cited synthesis, and one-file/named-symbol code review",
+      recommendation: "ready for structured operator approval under the validated one/two-file read/grep envelope, including real board-question checks, narrow cited synthesis, and one-file/named-symbol code review",
     };
   }
   return {
@@ -472,7 +472,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   });
   const readyNextActions = sdkMaturity.rung === "validated-one-file-mutation"
     ? [
-      "present this SDK/in-process mutation packet for explicit human decision; the packet itself cannot dispatch",
+      "present this SDK/in-process mutation packet for structured operator approval; the packet itself cannot dispatch",
       "use only the validated one-file mutation envelope: one declared file, read plus write/edit only, strict final output contract, bounded timeout",
       "after completion, validate final output bytes, git touched-file scope, marker/check results, and agent_run_outcome_packet from the parent",
       "do not promote broad mutation, multi-file mutation, protected scope, or parallel fan-out from this single-worker evidence rung",
@@ -480,7 +480,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
     ]
     : sdkMaturity.validatedEnvelope
       ? [
-        "present this SDK/in-process packet for explicit human decision; the packet itself cannot dispatch",
+      "present this SDK/in-process packet for structured operator approval; the packet itself cannot dispatch",
         "prefer the validated SDK safe envelope first: one or two declared files, read/grep only, strict final output contract, bounded timeout",
         "after a failed two-file code/test review, retry only as one target file or one named symbol before expanding scope",
         "prefer shared parent-side cache/evidence packs before repeated reads of stable logs, docs, or declared files",
@@ -491,7 +491,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       : [
       "present this SDK/in-process packet as a new evidence rung, not as routine validated SDK use",
       sdkMaturity.recommendation,
-      "if exact-confirmed anyway, start exactly one SDK worker and record registry/log/outcome evidence before expanding scope",
+      "if structured-approved anyway, start exactly one SDK worker and record registry/log/outcome evidence before expanding scope",
       "after completion, validate final output bytes and declared file scope from the parent",
     ];
   const sdkPreview = {
@@ -517,14 +517,14 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       "fan-in must validate every worker outcome before promotion and fail closed on mutation, protected scope, dirty state, budget blockers, or missing output",
     ],
     isolationNotes: [
-      "SDK/in-process shares the parent Node.js process; use only after report-only packet and exact confirmation.",
+      "SDK/in-process shares the parent Node.js process; use only after report-only packet and structured operator approval.",
       "Live-validated safe envelope: narrow read-only diagnostics with one or two declared files, read/grep only, explicit final output contract, follow, and outcome validation.",
       "Live-validated board-question rung: narrow read-only diagnostics can answer a real board question from one or two declared files when constrained to read/grep and strict final output.",
       "Live-validated synthesis rung: narrow read-only diagnostics can produce a one-sentence recommendation with cited board/doc evidence from one or two declared files.",
       "Failed evidence rung: two-file code/test review looped with zero output; shrink to one target file or one named symbol before retrying code/test review.",
       "Live-validated one-symbol review rung: one target file or named symbol can produce a parent-side patch recommendation without broadening scope.",
       "Next maturity rung: parent-side implementation of a tiny guard/recommendation patch derived from a one-symbol review, with local tests before any worker mutation; broad read-only scopes still need evidence because prior runs looped or bloated output.",
-      "Live-validated one-file mutation rung: one declared file with read plus write/edit only can run after exact confirmation, then parent-side follow/outcome/touched-file validation; broad mutation, multi-file mutation, and fan-out still need evidence.",
+      "Live-validated one-file mutation rung: one declared file with read plus write/edit only can run after structured operator approval, then parent-side follow/outcome/touched-file validation; broad mutation, multi-file mutation, and fan-out still need evidence.",
       "Use read-only tools for diagnostic canaries unless a mutation profile declares validation and rollback.",
       "Keep subprocess executor supported for stronger process isolation and argv-level diagnostics.",
     ],
@@ -695,7 +695,7 @@ export function buildAgentRunSdkCachePackPacket(input: AgentRunSdkCachePackPacke
     humanConfirmationPhrase: packId ? `approve sdk cache pack ${packId}` : "",
     nextActions: decision === "ready-for-human-decision"
       ? [
-        "attach this cache pack to a future read-only SDK worker or batch packet only after explicit human decision",
+        "attach this cache pack to a future read-only SDK worker or batch packet only after structured operator approval",
         "keep worker prompts narrow and require cache-hit/cache-miss evidence in final output",
         "regenerate or block the pack if git state becomes unexpected dirty before fan-out",
       ]
@@ -804,7 +804,7 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
   const fanOutContract = [
     "batch packet is report-only and never dispatches workers by itself",
     "all workers must be independent, read-only, narrow, and validated under the read/grep SDK envelope",
-    "future execution must preserve per-worker run ids, logs, timeouts, abort visibility, and exact confirmation for the batch id",
+    "future execution must preserve per-worker run ids, logs, timeouts, abort visibility, and structured operator approval for the batch id",
   ];
   const fanInContract = [
     "parent must collect every worker outcome before using the batch result",
@@ -850,7 +850,7 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
     humanConfirmationPhrase,
     nextActions: decision === "ready-for-human-decision"
       ? [
-        "present this read-only batch packet for explicit human decision; the packet itself cannot dispatch",
+        "present this read-only batch packet for structured operator approval; the packet itself cannot dispatch",
         "if a future executor is implemented, start at most the listed independent workers and preserve per-worker outcome validation",
         "after fan-in, record aggregate verification before promoting any result",
       ]
@@ -892,7 +892,7 @@ export function buildAgentRunSdkReadOnlyBatchTaskPacket(input: AgentRunSdkReadOn
   const sharedEvidence = [normalizeText(input.task?.verification) || `task:${taskId || "missing"}`];
   const budgetDecision = input.budgetDecision || "warn";
   const budgetEvidence = normalizeText(input.budgetEvidence)
-    || "task-derived read-only batch preview; exact human confirmation required before dispatch";
+    || "task-derived read-only batch preview; structured operator approval required before dispatch";
   const budgetEvidenceSource = input.budgetEvidenceSource || "manual";
   const budgetEvidenceProvider = normalizeText(input.budgetEvidenceProvider) || providerModelRef;
   const workers = visibleChunks.map((files, index) => {
@@ -961,8 +961,8 @@ export function buildAgentRunSdkReadOnlyBatchTaskPacket(input: AgentRunSdkReadOn
     humanConfirmationPhrase: packet.humanConfirmationPhrase,
     nextActions: decision === "ready-for-human-decision"
       ? [
-        "present the derived batch packet and exact confirmation phrase to the operator before any dispatch",
-        "if exact-confirmed later, use agent_run_sdk_readonly_batch_dispatch with the derived worker specs",
+        "present the derived batch packet and operator approval packet before any dispatch",
+        "if structured-approved later, use agent_run_sdk_readonly_batch_dispatch with the derived worker specs",
         "after completion, use batch status and fan-in packet before any board verification or closure",
       ]
       : [
