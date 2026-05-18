@@ -42,7 +42,7 @@ Entidades obrigatórias:
 
 1. **Backend-agnostic**: regra vale igual em `.project`, GitHub/Gitea, Markdown/Obsidian, SQLite.
 2. **Runner-agnostic**: sessão local, TUI/WEB, CI runner.
-3. **No auto-close estratégico**: conclusão final depende de decisão humana quando gate exigir.
+3. **No auto-close estratégico**: conclusão final depende de decisão do operador quando gate exigir.
 4. **Evidência obrigatória**: sem evidência mínima, estado final deve cair em `recovery-required`.
 5. **Replay idempotente**: reprocessar eventos não corrompe estado.
 
@@ -69,7 +69,7 @@ Resultado: mesmas regras de governança em qualquer adapter.
 | `.project` (local atual) | JSON blocks (`tasks/verification/handoff`) | referência canônica no workspace | baseline first-party local |
 | First-party future backend | API/DB first-party | deve preservar mesmas entidades/transições | semântica > tecnologia |
 | GitHub/Gitea trackers | issues/projects/milestones | mapear task/event/evidence por campos/labels/comments | requer política de sync e conflito |
-| Markdown/Obsidian | notas + frontmatter/checklists | task/event/evidence projetados em markdown estruturado | ótimo para captura/inbox e espelho humano |
+| Markdown/Obsidian | notas + frontmatter/checklists | task/event/evidence projetados em markdown estruturado | ótimo para captura/inbox e espelho do operador |
 | SQLite/local app | tabelas/event journal | replay + auditoria robusta | útil para runners e automação local |
 
 ---
@@ -110,7 +110,7 @@ Para continuidade sob pressão de contexto, a stack expõe sinais read-only de e
 - `context_watch_compact_stage_status` (estágio `normal|graceful-stop|force-compact`, reload gate e próximo passo determinístico);
 - `auto_advance_hard_intent_telemetry` (evidência agregada de auto-advance `eligible|blocked` + reason codes fail-closed).
 
-Essas superfícies mantêm `authorization=none` e `dispatchAllowed=false`, servindo como base de decisão humana/operador sem auto-dispatch.
+Essas superfícies mantêm `authorization=none` e `dispatchAllowed=false`, servindo como base de decisão do operador sem auto-dispatch.
 
 ### Sinal rastreável de estagnação
 
@@ -122,7 +122,7 @@ Campos mínimos do sinal:
 - `reasonCode`: `no-stagnation | context-pressure-repeat`;
 - `eventCount`: número de eventos recentes compatíveis com estagnação;
 - `evidence`: blockers/snapshots recentes, incluindo checkpoint/compact/reload quando presentes;
-- `humanActionRequired`: `true` quando o limiar exigir pausa e replanejamento humano.
+- `humanActionRequired`: `true` quando o limiar exigir pausa e replanejamento pelo operador.
 
 Regra local-safe atual: repetição de blockers transitórios de contexto (`context-watch-*`, checkpoint/compact/reload) por múltiplas janelas gera `pause-human-replan` advisory no `local_continuity_audit`. O sinal não autoriza dispatch, não conclui task e não cria auto-advance; ele congela a progressão automática até checkpoint/replanejamento explícito.
 
@@ -137,4 +137,4 @@ Evidência de implementação atual:
 1. versionar formalmente o schema do contrato (`task/event/intent/evidence`);
 2. publicar mapa translacional de adapters (campo por campo);
 3. validar round-trip em pelo menos 2 adapters (ex.: `.project` + Markdown/Obsidian);
-4. promover decision packet para fechamento humano em tasks estratégicas.
+4. promover decision packet para fechamento pelo operador em tasks estratégicas.

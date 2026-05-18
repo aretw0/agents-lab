@@ -1,6 +1,6 @@
 # Perfil local de continuidade sem empurrão do control-plane
 
-Status: perfil operacional local-first para `TASK-BUD-421`; não é uma nova primitive e não troca o vocabulário canônico. “Overnight” é só um cenário/alias de uso para a direção já existente de `nudge-free` / `local continuity audit`: continuar fatias locais sem empurrão constante, com checkpoint, validação e stop conditions. Não ativa scheduler, remote/offload, GitHub Actions, subagentes, swarms ou promotion de colony. Serve para preparar o board e pacotes de decisão para atuação humana posterior.
+Status: perfil operacional local-first para `TASK-BUD-421`; não é uma nova primitive e não troca o vocabulário canônico. “Overnight” é só um cenário/alias de uso para a direção já existente de `nudge-free` / `local continuity audit`: continuar fatias locais sem empurrão constante, com checkpoint, validação e stop conditions. Não ativa scheduler, remote/offload, GitHub Actions, subagentes, swarms ou promotion de colony. Serve para preparar o board e pacotes de decisão para atuação posterior do operador.
 
 ## Martelo das primitivas
 
@@ -9,7 +9,7 @@ A decisão canônica é **não criar uma família nova de loops**. O control-pla
 | Primitiva | Papel | Estado operacional |
 | --- | --- | --- |
 | `local_continuity_audit` | Ler o estado local e dizer se existe uma próxima fatia local-safe. | Read-only/advisory; não executa. |
-| `nudge_free_loop_canary` | Avaliar se uma continuação sem empurrão humano poderia ser segura. | Read-only/advisory; boolean humano não libera `ready`. |
+| `nudge_free_loop_canary` | Avaliar se uma continuação sem empurrão do operador poderia ser segura. | Read-only/advisory; boolean do operador não libera `ready`. |
 | `context_watch_checkpoint` | Gravar handoff curto entre fatias e antes de compact/pausa. | Mutação bounded de checkpoint; não despacha execução. |
 | `autonomy_lane_next_task` | Selecionar conservadoramente uma task local-safe do board. | Read-only; `no-eligible-tasks` é stop condition. |
 | `autonomy_lane_auto_advance_snapshot` | Auditar decisão hard-intent de auto-advance após `focus-complete` (`eligible` vs `blocked`). | Report-only/read-only; fail-closed para protected/risk/reload/validation unknown. |
@@ -24,7 +24,7 @@ Quando houver intenção de testar delegação, a transição é via `delegation
 
 Abastecimento mínimo para runs AFK:
 - manter 3–7 fatias local-safe prontas no board;
-- semeadura via `lane_brainstorm_packet` + `lane_brainstorm_seed_preview` com decisão humana explícita;
+- semeadura via `lane_brainstorm_packet` + `lane_brainstorm_seed_preview` com decisão explícita do operador;
 - quando ficar abaixo do mínimo, emitir `stop: backlog-material-insuficiente` e priorizar materialização antes de continuar.
 
 ## Objetivo
@@ -33,12 +33,12 @@ O perfil local de continuidade deve adiantar trabalho que o control-plane já sa
 
 - triage do board;
 - decomposição de macro-tasks em side quests;
-- decision packets para escolhas humanas;
+- decision packets para escolhas do operador;
 - pesquisa bounded já explicitamente selecionada;
 - consolidação de handoff/verification/checkpoint;
 - redução de ambiguidade para o operador atuar no dia seguinte.
 
-Ele não deve tentar “fazer tudo”. A meta da manhã seguinte é: board limpo, opções claras, riscos classificados e tarefas humanas prováveis separadas.
+Ele não deve tentar “fazer tudo”. A meta da manhã seguinte é: board limpo, opções claras, riscos classificados e tarefas prováveis do operador separadas.
 
 ## Rota de modelo/provedor
 
@@ -73,7 +73,7 @@ Para um primeiro batch controlado, o tamanho recomendado é pequeno:
 - máximo de 1 novo primitive design por batch;
 - commit por fatia;
 - checkpoint após cada fatia;
-- handoff final com `focus`, `done`, `blocked`, `next human decisions`.
+- handoff final com `focus`, `done`, `blocked`, `next operator decisions`.
 
 Isso evita acordar com um branch grande, difuso ou difícil de revisar.
 
@@ -116,7 +116,7 @@ Parar e registrar checkpoint quando ocorrer:
 - `autonomy_lane_next_task` retorna `no-eligible-tasks`;
 - dirty state inesperado aparece;
 - `machine_maintenance_status` sinaliza pressão relevante de memória/disco/CPU (e swap quando disponível);
-- decisão humana real é necessária.
+- decisão real do operador é necessária.
 
 ## Pacote de maturidade para run local longa (report-only)
 
@@ -145,7 +145,7 @@ O pacote de handoff final deve responder:
 
 - quais fatias foram concluídas;
 - quais commits foram criados;
-- quais decisões humanas ficaram prontas;
+- quais decisões do operador ficaram prontas;
 - quais tarefas estão bloqueadas e por quê;
 - qual é a próxima ação segura;
 - o que explicitamente não foi autorizado.
@@ -182,7 +182,7 @@ Campos mínimos do template material-first:
 - `blockers`: razões de parada objetivas (`none` quando vazio);
 - `next`: próxima ação segura e curta.
 
-Esse template é intencionalmente compacto para reduzir atrito em runs AFK e manter a decisão humana explícita no retorno.
+Esse template é intencionalmente compacto para reduzir atrito em runs AFK e manter a decisão do operador explícita no retorno.
 
 ## Primeiro foco recomendado
 
@@ -191,7 +191,7 @@ Antes de usar colônias, subagentes ou swarms, o primeiro batch local sem empurr
 1. preparar packets de decisão para backlog protegido/ambíguo;
 2. decompor inspirations bounded em primitives pequenas;
 3. inventariar candidates de colony em modo read-only;
-4. deixar o board pronto para decisões humanas, sem aplicar candidates.
+4. deixar o board pronto para decisões do operador, sem aplicar candidates.
 
 O sucesso desse cenário não é um nome novo nem uma automação nova: é o operador conseguir voltar depois de um período longo e escolher rapidamente entre decisões já preparadas, sem encontrar automação irreversível já executada.
 
@@ -216,7 +216,7 @@ Defaults sane para `agents-lab` quando o operador não disser o contrário:
 - quota é recurso de trabalho do projeto: consumir de forma econômica, mas usar as cotas disponíveis em vez de parar por micro-autorização;
 - na ausência de restrição explícita, o control-plane deve avaliar ROI/produtividade e revelar capacidades úteis disponíveis, incluindo mas não limitado a workers, quando elas reduzem tempo, risco ou carga cognitiva;
 - falta de explicitude deve acionar discoverability e entrevista curta de perfil/limites, não passividade: explicar o potencial de aproveitamento, sugerir o perfil provável e pedir só o alinhamento que falta;
-- quando a escala exigir consentimento humano, usar entrevista curta com a autorização provável em vez de despejar detalhes de implementação; ferramentas, workers e outras capacidades são meios para entregar trabalho;
+- quando a escala exigir consentimento do operador, usar entrevista curta com a autorização provável em vez de despejar detalhes de implementação; ferramentas, workers e outras capacidades são meios para entregar trabalho;
 - DashScope deve ter rota/fallback por modelo quando uma cota específica saturar;
 - OpenAI Codex Spark é bom candidato para workers enquanto houver cota específica disponível;
 - OpenAI normal deve ser preservado para o control-plane quando fizer sentido, com fallback governado para Qwen/DashScope quando houver pressão;
