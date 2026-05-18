@@ -1,6 +1,6 @@
 # Doutrina operacional do control-plane unattended
 
-Este guia consolida as opiniões operacionais que devem orientar o agente quando estiver trabalhando em modo local-first, com pouco atrito humano, sem perder governança. Para nomenclatura canônica e aliases, use `docs/guides/control-plane-glossary.md` antes de criar novos termos ou surfaces.
+Este guia consolida as opiniões operacionais que devem orientar o agente quando estiver trabalhando em modo local-first, com pouco atrito do operador, sem perder governança. Para nomenclatura canônica e aliases, use `docs/guides/control-plane-glossary.md` antes de criar novos termos ou surfaces.
 
 ## Norte
 
@@ -8,13 +8,13 @@ O objetivo não é automatizar tudo. O objetivo é manter trabalho contínuo, or
 
 ## Taxonomia de warning operacional (sessão vs monitor)
 
-Para reduzir ruído e evitar resposta errada ao steer humano:
+Para reduzir ruído e evitar resposta errada ao steer do operador:
 
 - **warning de sessão/conversa**: aparece no runtime da sessão (ex.: `context-watch`, guidance de final-turn, notify de compact/reload). É sinal de experiência operacional imediata e deve ser calibrado por utilidade/ruído.
 - **issue de monitor**: registro persistido em `.project/issues` por classifiers/monitores. É trilha histórica de qualidade/governança, não necessariamente ruído da sessão atual.
 
 Regra prática:
-1. se o steer humano apontar ruído **na conversa**, priorizar ajuste no runtime da sessão (dedupe/cooldown/severidade adequada);
+1. se o steer do operador apontar ruído **na conversa**, priorizar ajuste no runtime da sessão (dedupe/cooldown/severidade adequada);
 2. não tratar issue de monitor como prova de ruído da sessão sem evidência runtime;
 3. quando houver confusão entre os dois, registrar nota curta no board para manter a taxonomia explícita.
 
@@ -51,7 +51,7 @@ Se 2+ itens falharem, a ação padrão é **decompor** (nova task/side quest) ou
 
 Quando uma task ficar parked por escopo protegido, usar um texto curto e canônico no board para reduzir variação semântica:
 
-`[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.`
+`[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco explícito do operador.`
 
 Regras:
 
@@ -69,13 +69,13 @@ Condições de início da rodada (milestone):
 2. validação focal da primeira fatia é conhecida;
 3. rollback da fatia é explícito.
 
-Condições para continuar sem nova interação humana:
+Condições para continuar sem nova interação do operador:
 
 1. fatia anterior fechou com validação focal e evidência curta;
 2. próximo `nextTaskId` do mesmo milestone continua local-safe;
 3. nenhum stop reason canônico foi acionado.
 
-Para perfil de baixa interação humana, encadear múltiplas fatias local-safe no mesmo milestone até stop condition real ou boundary de compactação, sem criar nomenclatura paralela.
+Para perfil de baixa interação do operador, encadear múltiplas fatias local-safe no mesmo milestone até stop condition real ou boundary de compactação, sem criar nomenclatura paralela.
 
 Playbook curto para esse modo:
 
@@ -85,7 +85,7 @@ Playbook curto para esse modo:
 
 Regra de desacoplamento de planejamento: task local-safe não deve depender diretamente de task `protected-parked-*`; quando isso acontecer, replanejar dependências para pré-condição local-safe ou manter a task no fluxo protected.
 
-Stop reasons canônicos (interação humana obrigatória):
+Stop reasons canônicos (interação do operador obrigatória):
 
 - `NO_ELIGIBLE_LOCAL_SAFE`
 - `PROTECTED_SCOPE_REQUIRED`
@@ -114,7 +114,7 @@ Para uma run maior sem perder governança, usar faixa de operação bounded:
 - wave size de 4-6 tasks concluídas por rodada;
 - no máximo 1 task `in-progress` no board por vez;
 - cada task com blast radius curto (referência: até 4 arquivos e mudança pequena/reversível);
-- no máximo 3 waves antes de checkpoint humano explícito para recalibrar foco.
+- no máximo 3 waves antes de checkpoint explícito do operador para recalibrar foco.
 
 Gates de avanço entre waves:
 
@@ -174,7 +174,7 @@ Guardrails de execução:
 - sem mudança de contrato externo durante extração anti-inchaço;
 - smoke focal obrigatório por fatia;
 - rollback simples e imediato;
-- sem auto-dispatch: promoção de wave continua decisão humana.
+- sem auto-dispatch: promoção de wave continua decisão do operador.
 
 ### Calibração de substrato operacional (background + agents-as-tools)
 
@@ -195,7 +195,7 @@ Regras de segurança dessa calibração:
 
 ### Contrato canário protected (uma fatia)
 
-Quando houver decisão humana para experimentar escopo protected, a execução deve começar em **uma única fatia canário** com contrato explícito e bounded.
+Quando houver decisão do operador para experimentar escopo protected, a execução deve começar em **uma única fatia canário** com contrato explícito e bounded.
 
 Checklist obrigatório antes de editar:
 
@@ -209,13 +209,13 @@ Stop conditions canônicas do canário:
 - falha de validação focal;
 - falta de rollback explícito;
 - violação de escopo declarado;
-- necessidade de segunda fatia protected sem nova decisão humana.
+- necessidade de segunda fatia protected sem nova decisão do operador.
 
-O canário é evidência de viabilidade, não promoção automática de escopo: cada nova fatia protected requer confirmação humana renovada.
+O canário é evidência de viabilidade, não promoção automática de escopo: cada nova fatia protected requer confirmação renovada do operador.
 
-## Controle humano, cancelamento e blast radius
+## Controle do Operador, Cancelamento e Blast Radius
 
-Confiabilidade de cancelamento é pré-condição para qualquer modo longo ou unattended mais forte. Um `Esc` que não interrompe de forma previsível deve ser tratado como incidente de controle humano, não como detalhe de UX. Até a causa estar classificada, a operação continua limitada a fatias locais, bounded e supervisionadas.
+Confiabilidade de cancelamento é pré-condição para qualquer modo longo ou unattended mais forte. Um `Esc` que não interrompe de forma previsível deve ser tratado como incidente de controle do operador, não como detalhe de UX. Até a causa estar classificada, a operação continua limitada a fatias locais, bounded e supervisionadas.
 
 A investigação deve separar três camadas antes de atribuir culpa:
 
@@ -234,7 +234,7 @@ Checklist source-aware para `pi:dev`:
 - listar somente os pacotes carregados que podem tocar input (`registerShortcut`, `setEditorComponent`, `onTerminalInput`, overlays) com busca curta e sem source maps;
 - separar “tecla não chegou ao TUI” de “abort foi chamado, mas a operação não respeitou o sinal”.
 
-Em ferramentas locais que executam subprocessos, `AbortSignal` deve ser repassado para a camada de execução (`pi.exec`/equivalente), mesmo quando há timeout. Timeout é limite temporal; cancelamento é controle humano imediato. Se uma ferramenta longa não propaga o sinal, classifique como risco de controle humano antes de habilitar uso unattended forte.
+Em ferramentas locais que executam subprocessos, `AbortSignal` deve ser repassado para a camada de execução (`pi.exec`/equivalente), mesmo quando há timeout. Timeout é limite temporal; cancelamento é controle imediato do operador. Se uma ferramenta longa não propaga o sinal, classifique como risco de controle do operador antes de habilitar uso unattended forte.
 
 Status local da auditoria de cancelamento:
 
@@ -250,7 +250,7 @@ Pacote upstream/original do pi é superfície protegida. O repositório pode ler
 
 Skills confiáveis também são superfície de leitura operacional. Em devcontainers ou instalações globais, `SKILL.md` pode viver fora do workspace (por exemplo, em `~/.npm-global/lib/node_modules/@aretw0/...-skills/skills/<nome>/SKILL.md`). Leituras bounded de documentação Markdown dentro de roots de skills confiáveis não devem interromper o runtime com prompt de “leitura fora do projeto”; execução, instalação, scans recursivos e leituras arbitrárias fora do root da skill continuam exigindo bloqueio ou aprovação explícita.
 
-Também existe controle humano sobre o tamanho do diagnóstico. Investigações live não devem abrir saídas grandes, source maps ou scans amplos que empurrem a sessão para auto-compact. Use leitura por arquivo/offset, `head` estrito, `--exclude='*.map'` quando buscar em dependências, `safe_marker_check`/structured-read quando couber, e registre apenas a síntese operacional no board/handoff. Estouro de contexto por diagnóstico é incidente separado e deve virar hardening, não ruído aceito. O guardrail bloqueia scans de blast radius sobre source maps: leitura direta de `*.map` com ferramentas de conteúdo e varreduras recursivas em `node_modules`/`dist`/`build`/`coverage` sem exclusão explícita de `*.map` devem falhar antes de despejar saída no contexto.
+Também existe controle do operador sobre o tamanho do diagnóstico. Investigações live não devem abrir saídas grandes, source maps ou scans amplos que empurrem a sessão para auto-compact. Use leitura por arquivo/offset, `head` estrito, `--exclude='*.map'` quando buscar em dependências, `safe_marker_check`/structured-read quando couber, e registre apenas a síntese operacional no board/handoff. Estouro de contexto por diagnóstico é incidente separado e deve virar hardening, não ruído aceito. O guardrail bloqueia scans de blast radius sobre source maps: leitura direta de `*.map` com ferramentas de conteúdo e varreduras recursivas em `node_modules`/`dist`/`build`/`coverage` sem exclusão explícita de `*.map` devem falhar antes de despejar saída no contexto.
 
 Pesquisa remota bounded deve usar helper versionado, não receitas frágeis com variáveis shell embutidas. Para cache de repositórios de referência, prefira `bash packages/git-skills/skills/git-checkout-cache/checkout.sh <repo> --path-only`; para validar sem rede, use `--dry-run --path-only`. Evite comandos do tipo `CACHE=...; echo $CACHE` no `bash` tool, pois alguns harnesses podem interpolar `$VAR` antes de o comando chegar ao shell. Se o helper não estiver disponível, use caminhos literais curtos ou registre blocker Ops; não deixe uma falha de cache contaminar a conclusão da pesquisa principal.
 
@@ -264,7 +264,7 @@ Janela mínima para assimilar influência externa (report-only, sem dispatch):
 - **maturidade de validação** acima do piso (default 80% de cobertura em tasks local-safe);
 - **sem bloqueio operacional crítico** (workspace sujo/reload pendente/readiness local bloqueada).
 
-Quando o critério não fecha, a decisão padrão é `defer` (continuar throughput local-safe). Use `autonomy_lane_influence_assimilation_packet` para obter packet determinístico `ready-window|defer|blocked` com `authorization=none`. Mesmo em `ready-window`, a assimilação permanece protected e exige foco/decisão humana explícita.
+Quando o critério não fecha, a decisão padrão é `defer` (continuar throughput local-safe). Use `autonomy_lane_influence_assimilation_packet` para obter packet determinístico `ready-window|defer|blocked` com `authorization=none`. Mesmo em `ready-window`, a assimilação permanece protected e exige foco/decisão explícita do operador.
 
 Bloqueios de stale-read (`File modified since read`) em ambientes de usuário devem virar incidente de triage, não desligamento de proteção. A política é falhar fechado para mutações com modelo mental defasado, mas oferecer recuperação mínima: re-read bounded do arquivo exato e re-aplicar a edição com anchors frescos. Se o bloqueio vier de superfície first-party/recomendada e for falso bloqueio com auto-format, criar teste/regra sem aceitar texto livre como prova de conteúdo atual. Ver `docs/primitives/stale-read-guard-incidents.md`.
 
@@ -282,10 +282,10 @@ Matriz go/no-go para trabalho ininterrupto local:
 | ferramenta passiva/read-only com timeout curto e saída limitada | pode continuar localmente | não prova cancelamento de long-run |
 | subprocesso longo com `AbortSignal` propagado, timeout, checkpoint fresco e fallback documentado | candidato a rehearsal local bounded | ainda não autoriza loop/scheduler/remote |
 | slash command/interativo sem contrato explícito de cancelamento | no-go para unattended forte | usar apenas com operador presente |
-| `Esc` não chega ao TUI ou não aciona abort | no-go para long-run | registrar camada terminal/TUI e usar fallback humano |
+| `Esc` não chega ao TUI ou não aciona abort | no-go para long-run | registrar camada terminal/TUI e usar fallback do operador |
 | ferramenta ignora abort ou deixa subprocesso órfão | no-go até correção/teste | criar task de hardening antes de promover |
 
-Critério mínimo para promover além de rehearsal bounded: pelo menos um caminho local de execução longa precisa ter cancelamento testado, fallback humano claro, checkpoint prévio, saída limitada e decisão explícita do operador. Sem isso, o trabalho pode continuar em fatias locais pequenas, mas não em modo unattended forte.
+Critério mínimo para promover além de rehearsal bounded: pelo menos um caminho local de execução longa precisa ter cancelamento testado, fallback claro do operador, checkpoint prévio, saída limitada e decisão explícita do operador. Sem isso, o trabalho pode continuar em fatias locais pequenas, mas não em modo unattended forte.
 
 ### Pacote de maturidade da run local longa (report-only)
 
@@ -307,9 +307,9 @@ Interpretação:
 
 Esse pacote mede maturidade operacional; ele não autoriza automaticamente scheduler, CI, remote/offload ou executor forte.
 
-### Confirmação humana auditável
+### Confirmação Auditável do Operador
 
-Confirmação humana para ação destrutiva/protegida precisa ser evidência auditável, não apenas sensação de UI. Se o operador aceitou um diálogo real da TUI, mas o monitor/guard posterior não vê evidência confiável no `tool_call`, em `custom_messages` ou em audit entry de origem runtime, classifique como **gap upstream pi/TUI → monitor**, preserve o bloqueio fail-closed e registre a incompatibilidade. Não relaxe `unauthorized-action` só porque a conversa contém uma frase de confirmação: isso é spoofable e não deve autorizar destructive/protected execution.
+Confirmação do operador para ação destrutiva/protegida precisa ser evidência auditável, não apenas sensação de UI. Se o operador aceitou um diálogo real da TUI, mas o monitor/guard posterior não vê evidência confiável no `tool_call`, em `custom_messages` ou em audit entry de origem runtime, classifique como **gap upstream pi/TUI → monitor**, preserve o bloqueio fail-closed e registre a incompatibilidade. Não relaxe `unauthorized-action` só porque a conversa contém uma frase de confirmação: isso é spoofable e não deve autorizar destructive/protected execution.
 
 O contrato mínimo para usar confirmação como evidência futura é:
 
@@ -339,9 +339,9 @@ Curadoria atual (decisão explícita): remover `@ifi/oh-pi-extensions/extensions
 
 Antes de qualquer loop grande, a stack deve tratar tools expostas como superfície de risco. A primitiva `tool_hygiene_scorecard` é read-only e classifica tools como `advisory`, `measured`, `operational`, `protected` ou `development`, sinalizando flags como mutação, scheduler, remote/CI, settings/profile, subprocesso e override manual. O resultado mantém `authorization=none` e `dispatchAllowed=false`.
 
-A promoção é conservadora: tools advisory/measured podem permanecer visíveis para fatias locais bounded; tools operational exigem evidência medida e vínculo explícito com task; tools protected exigem aprovação humana e não entram em auto-dispatch; tools de development com subprocesso devem ser ocultadas/desabilitadas antes de loops longos salvo debugging explícito. O scorecard é evidência de higiene, não permissão para executar.
+A promoção é conservadora: tools advisory/measured podem permanecer visíveis para fatias locais bounded; tools operational exigem evidência medida e vínculo explícito com task; tools protected exigem aprovação do operador e não entram em auto-dispatch; tools de development com subprocesso devem ser ocultadas/desabilitadas antes de loops longos salvo debugging explícito. O scorecard é evidência de higiene, não permissão para executar.
 
-Snapshot local de 2026-05-01 antes do rehearsal: `tool_hygiene_scorecard` listou 102 tools, com 47 advisory, 44 measured, 5 operational e 6 protected; 8 requerem aprovação humana e nenhuma está marcada para esconder automaticamente antes de loop longo. Decisão de curadoria para rehearsal local: manter tools advisory/measured visíveis para fatias bounded; permitir tools operational de board/checkpoint apenas com task/verificação explícitas; manter `ant_colony`, `claude_code_execute`, `schedule_prompt`, `safe_boot`, `governance_profile` e `handoff_advisor` como protected/no-auto-dispatch. `stack_sovereignty_status` apontou 3 riscos médios e um overlap ativo `oh-pi-bg-process-future` com `strategy=needs-decision`; nenhuma capability third-party deve ser removida/suprimida automaticamente sem decisão explícita. Isso é go para rehearsal local bounded, mas no-go para unattended forte sem decisão posterior sobre overlaps de background/scheduler/runtime.
+Snapshot local de 2026-05-01 antes do rehearsal: `tool_hygiene_scorecard` listou 102 tools, com 47 advisory, 44 measured, 5 operational e 6 protected; 8 requerem aprovação do operador e nenhuma está marcada para esconder automaticamente antes de loop longo. Decisão de curadoria para rehearsal local: manter tools advisory/measured visíveis para fatias bounded; permitir tools operational de board/checkpoint apenas com task/verificação explícitas; manter `ant_colony`, `claude_code_execute`, `schedule_prompt`, `safe_boot`, `governance_profile` e `handoff_advisor` como protected/no-auto-dispatch. `stack_sovereignty_status` apontou 3 riscos médios e um overlap ativo `oh-pi-bg-process-future` com `strategy=needs-decision`; nenhuma capability third-party deve ser removida/suprimida automaticamente sem decisão explícita. Isso é go para rehearsal local bounded, mas no-go para unattended forte sem decisão posterior sobre overlaps de background/scheduler/runtime.
 
 ## Roteamento local de cota
 
@@ -374,13 +374,13 @@ Patch preview seguro neste estado é **no-op**: Anthropic não aparece como prov
 
 Retorno ao perfil Codex também é manual: usar `/model` ou `quota_visibility_route({ "profile": "balanced", "execute": true })` somente quando o operador pedir explicitamente e quando o advisor ainda mostrar `openai-codex` em `ok`. Classificadores/monitores leves permanecem no caminho Codex enquanto houver cota; se Codex entrar em WARN/BLOCK, registrar handoff advisory e pedir decisão em vez de auto-switch.
 
-## Entrevistas estruturadas e gaps humanos
+## Entrevistas Estruturadas e Gaps do Operador
 
-Gaps humanos devem ser preenchidos por contrato backend-first antes de qualquer UI. A primitiva `structured_interview_plan` recebe uma lista de perguntas com ids estáveis, tipo, obrigatoriedade, opções, defaults e flags `allowUnknown`/`allowSkip`; recebe respostas parciais; valida sequencialmente; e devolve `complete`, `needs-human-answer` ou `invalid` com `nextQuestionId` e evidência compacta.
+Gaps do operador devem ser preenchidos por contrato backend-first antes de qualquer UI. A primitiva `structured_interview_plan` recebe uma lista de perguntas com ids estáveis, tipo, obrigatoriedade, opções, defaults e flags `allowUnknown`/`allowSkip`; recebe respostas parciais; valida sequencialmente; e devolve `complete`, `needs-human-answer` ou `invalid` com `nextQuestionId` e evidência compacta.
 
 Essa primitiva é deliberadamente UI-independent: não abre formulário, não agenda repetição, não despacha executor e mantém `authorization=none` e `dispatchAllowed=false`. TUI, web, Telegram ou forms podem ser adaptadores futuros sobre o mesmo contrato, mas não são a fonte de verdade. Defaults, `unknown` e `skip` só contam quando declarados no schema da pergunta; escolhas inválidas e skips não autorizados falham fechado.
 
-Use esse contrato para preencher lacunas de decisão em revisão humana, contrato one-slice, no-auto-close e gates de execução local. Um resultado `complete` é evidência estruturada, não permissão operacional automática.
+Use esse contrato para preencher lacunas de decisão em revisão do operador, contrato one-slice, no-auto-close e gates de execução local. Um resultado `complete` é evidência estruturada, não permissão operacional automática.
 
 ## Settings canônico e overlays derivados
 
@@ -476,7 +476,7 @@ Remote/offload só vem depois de scorecard local verde e intenção explícita d
 
 ### Contrato hard-intent para auto-advance da lane AFK (low-iteration)
 
-A continuidade entre tasks local-safe não deve depender de “soft intent” implícito. Aqui, **AFK** significa produção com baixa iteração humana (away from keyboard), independente de horário. O contrato runtime da lane AFK é:
+A continuidade entre tasks local-safe não deve depender de “soft intent” implícito. Aqui, **AFK** significa produção com baixa iteração do operador (away from keyboard), independente de horário. O contrato runtime da lane AFK é:
 
 1. quando o foco do handoff termina (`focus-complete`), a seleção pode auto-avançar para a próxima task elegível da mesma lane/milestone;
 2. o auto-advance é **fail-closed**;
@@ -488,7 +488,7 @@ Bloqueios críticos mínimos:
 - `reload-required` ou workspace não limpo;
 - `validation-failed-or-unknown`.
 
-Quando bloqueado, a recomendação deve voltar para escolha explícita de foco humano (`choose-next-focus`) com motivo auditável no texto/recommendationCode.
+Quando bloqueado, a recomendação deve voltar para escolha explícita de foco do operador (`choose-next-focus`) com motivo auditável no texto/recommendationCode.
 
 No uso AFK, opere em batch pequeno (3–5 fatias) com `commit + checkpoint` por fatia. Se qualquer blocker hard-intent aparecer, pare no mesmo slice e registre linha curta de stop (`stop: <motivo>`) antes de retomar.
 
@@ -497,7 +497,7 @@ No uso AFK, opere em batch pequeno (3–5 fatias) com `commit + checkpoint` por 
 A próxima promoção após estabilizar a lane local-safe deve passar por packet report-only explícito (`simple_delegate_rehearsal_packet`). Para reduzir ambiguidade de leitura, primeiro consulte `delegation_readiness_status_packet` (agora com `operationalRunway` consolidando delegação + background em `local-execute|simple-delegate|defer` e blockers normalizados) e depois confirme no packet de rehearsal. O gate mínimo:
 - `decision=ready-simple-delegate` no status unificado **e** `decision=ready` no packet composto (capability + mix + auto-advance telemetry);
 - blockers vazios;
-- escopo protegido ainda opt-in humano.
+- escopo protegido ainda opt-in do operador.
 
 Se o packet retornar `needs-evidence|blocked`, a regra é não promover. Continuar em local-safe até o próximo checkpoint com evidência adicional.
 
@@ -519,13 +519,13 @@ simple_delegate_rehearsal_start_packet {
 
 Interpretação operacional:
 - `decision=blocked`: manter lane local-safe e fechar gaps de rehearsal/capability;
-- `decision=ready-for-human-decision`: canário apto para decisão humana explícita (`start|abort|defer`), sem auto-dispatch.
+- `decision=ready-for-human-decision`: canário apto para decisão explícita do operador (`start|abort|defer`), sem auto-dispatch.
 
 ### Material-first para long run AFK
 
 Controle e auditoria não bastam sem material. Antes de tentar um ciclo AFK longo, garantir abastecimento explícito do board:
 - gerar ideias com `lane_brainstorm_packet` (report-only);
-- revisar semeadura com `lane_brainstorm_seed_preview` (decisão humana explícita);
+- revisar semeadura com `lane_brainstorm_seed_preview` (decisão explícita do operador);
 - materializar um lote local-safe curto e verificável no board;
 - manter estoque operacional de **3–7 fatias** local-safe prontas.
 
@@ -546,7 +546,7 @@ Decisão operacional no batch lane:
 2. **quando checkpointar:** após cada slice concluído (commit pequeno + checkpoint bounded) ou antes de fronteira de compact;
 3. **quando pausar para decisão estratégica:** qualquer blocker hard-intent, necessidade de escopo protegido, ou conflito entre caminhos estratégicos.
 
-Quando a lane cair em `no-eligible-tasks`, ler `seedingGuidance` no `autonomy_lane_status` (mesmos sinais de `seedWhy` + `seedPriority`) para decisão rápida. O próprio `summary` do status também deve carregar esse cue curto (`code/next/queue` + `seedCount/seedWhy/seedPriority` quando houver) para reduzir nudge operacional, e o `nextAction` pode vir enriquecido com diretiva direta (`seed <n> local-safe ...`). Além disso, acompanhar `influenceWindowCue` e `protectedReadyCue` no status para saber quando a janela protected está `ready-window` com candidato elegível, sem abrir packet separado a cada ciclo. Quando quiser um gatilho único, usar `decisionCue` (`seed-local-safe-required` ou `protected-focus-ready`) para saber se há decisão humana pendente. Em compact com `reload-required`, tratar supressão de auto-resume como defer temporário: persistir intent no handoff e reavaliar dispatch após `/reload`, mantendo gates de checkpoint/board/queue fail-closed; quando houver intent pendente, `context_watch_status`, `context_watch_continuation_readiness` e `context_watch_one_slice_canary_preview` devem sinalizar `postReloadResume=pending` no summary curto. Se precisar detalhe completo, usar `autonomy_lane_material_seed_packet` (`seed-now|wait|blocked`) e `autonomy_lane_influence_assimilation_packet`. Ao reseedar, registrar `seedWhy`/`reseedJustification`, `seedPriority` e `seedCount` no fechamento curto para manter motivo auditável e prioridade de longo prazo explícita.
+Quando a lane cair em `no-eligible-tasks`, ler `seedingGuidance` no `autonomy_lane_status` (mesmos sinais de `seedWhy` + `seedPriority`) para decisão rápida. O próprio `summary` do status também deve carregar esse cue curto (`code/next/queue` + `seedCount/seedWhy/seedPriority` quando houver) para reduzir nudge operacional, e o `nextAction` pode vir enriquecido com diretiva direta (`seed <n> local-safe ...`). Além disso, acompanhar `influenceWindowCue` e `protectedReadyCue` no status para saber quando a janela protected está `ready-window` com candidato elegível, sem abrir packet separado a cada ciclo. Quando quiser um gatilho único, usar `decisionCue` (`seed-local-safe-required` ou `protected-focus-ready`) para saber se há decisão pendente do operador. Em compact com `reload-required`, tratar supressão de auto-resume como defer temporário: persistir intent no handoff e reavaliar dispatch após `/reload`, mantendo gates de checkpoint/board/queue fail-closed; quando houver intent pendente, `context_watch_status`, `context_watch_continuation_readiness` e `context_watch_one_slice_canary_preview` devem sinalizar `postReloadResume=pending` no summary curto. Se precisar detalhe completo, usar `autonomy_lane_material_seed_packet` (`seed-now|wait|blocked`) e `autonomy_lane_influence_assimilation_packet`. Ao reseedar, registrar `seedWhy`/`reseedJustification`, `seedPriority` e `seedCount` no fechamento curto para manter motivo auditável e prioridade de longo prazo explícita.
 
 Stop condition para estoque baixo:
 - `stop: backlog-material-insuficiente`.
@@ -563,23 +563,23 @@ Após fechar uma macro-task de calibração, não puxe backlog protegido só par
 Regra de continuidade: `no-eligible-tasks` é um stop condition local, não convite para invadir protected scope. O agente deve escolher uma destas saídas auditáveis:
 
 1. criar/decompor uma nova fatia local-safe explícita, com arquivos, validação e rollback claros;
-2. pedir decisão humana para promover backlog protegido/ambíguo;
+2. pedir decisão do operador para promover backlog protegido/ambíguo;
 3. deferir e registrar checkpoint quando não houver próxima fatia local-safe útil.
 
-Promotion/recovery de colony exige inventário/validação própria e revisão humana; GitHub Actions, release, remote/offload e publish exigem tarefa protegida explícita; research/config inspiration só entra como inspiração bounded quando for selecionada pelo operador. Nenhuma dessas classes deve ser selecionada por continuidade automática local.
+Promotion/recovery de colony exige inventário/validação própria e revisão do operador; GitHub Actions, release, remote/offload e publish exigem tarefa protegida explícita; research/config inspiration só entra como inspiração bounded quando for selecionada pelo operador. Nenhuma dessas classes deve ser selecionada por continuidade automática local.
 
-A exceção local-safe é preparar um packet read-only, como `docs/primitives/colony-promotion-decision-packet.md`, para um único candidate `*-promotion`. Esse packet pode inventariar arquivos, validação focal, riscos e opções humanas `promote`/`skip`/`defer`, mas deve preservar `mutationAllowed=false`, `dispatchAllowed=false` e `authorization=none`. Se a opção humana for `promote`, a materialização continua sendo uma fatia protegida separada, nunca uma continuação automática do packet.
+A exceção local-safe é preparar um packet read-only, como `docs/primitives/colony-promotion-decision-packet.md`, para um único candidate `*-promotion`. Esse packet pode inventariar arquivos, validação focal, riscos e opções do operador `promote`/`skip`/`defer`, mas deve preservar `mutationAllowed=false`, `dispatchAllowed=false` e `authorization=none`. Se a opção do operador for `promote`, a materialização continua sendo uma fatia protegida separada, nunca uma continuação automática do packet.
 
 Pacote de decisão local de 2026-05-01 para o backlog restante:
 
 | Classe | Exemplos no board | Decisão segura |
 | --- | --- | --- |
-| Colony promotion/recovery | `colony-c1-promotion`, `colony-c2-promotion`, `colony-c-123-promotion`, `colony-c-ret-1-promotion` | Não promover automaticamente. Exigir inventário de arquivos, validação focal e revisão humana antes de materializar candidate no branch alvo. |
+| Colony promotion/recovery | `colony-c1-promotion`, `colony-c2-promotion`, `colony-c-123-promotion`, `colony-c-ret-1-promotion` | Não promover automaticamente. Exigir inventário de arquivos, validação focal e revisão do operador antes de materializar candidate no branch alvo. |
 | Remote/CI/release | `TASK-BUD-134`, `TASK-BUD-136` | Escopo protegido. Só entra com tarefa/decisão explícita, rollback, budget de custo/tempo e sem auto-dispatch. |
 | Inspiração/research/config | `TASK-BUD-162`, `TASK-BUD-268` | Opt-in bounded. Não iniciar pesquisa externa ampla nem mutar config; primeiro criar pergunta/artefato local claro. |
-| Dependentes/bloqueadas | tarefas planejadas com `depends_on` não resolvido | Não selecionar até dependencies concluídas ou reescopadas por decisão humana. |
+| Dependentes/bloqueadas | tarefas planejadas com `depends_on` não resolvido | Não selecionar até dependencies concluídas ou reescopadas por decisão do operador. |
 
-Próximas decisões humanas possíveis, sem executar escopo protegido:
+Próximas decisões do operador possíveis, sem executar escopo protegido:
 
 1. autorizar uma revisão bounded de um único `*-promotion` de colony, começando por inventário read-only e decision packet, sem aplicar no branch;
 2. autorizar uma lane protegida para CI/release/remote com contrato próprio;
@@ -634,7 +634,7 @@ Um `ready=yes` em `context_watch_continuation_readiness` é evidência read-only
 
 A primeira prova verde local só vale quando as condições observáveis estão limpas: baseline canônico de settings já decidido, escopos protegidos fora do foco default, foco `in-progress` pequeno/local-safe, checkpoint fresco sem blockers reais, git state esperado, validation conhecida e smoke/readiness focal passando. Se qualquer uma dessas condições cair, o gate deve voltar a falhar fechado.
 
-Rehearsal local medido de 2026-05-01: `unattended_rehearsal_gate` retornou `ready=yes`, `decision=ready-for-canary`, `score=6/6` para 5 fatias locais concluídas com foco preservado, smoke focal verde, commits pequenos, handoff fresco, 0 seleções automáticas de escopo protegido e 0 blockers locais restantes. Esse sinal é suficiente para considerar o rehearsal local dos blockers resolvido, mas não fecha sozinho a macro-task multi-modo: `local_continuity_audit` e `context_watch_continuation_readiness` continuaram `ready=no` porque o foco amplo `TASK-BUD-153` ainda referencia escopo protegido `.github/workflows/ci.yml`. Portanto, a próxima promoção precisa de decisão humana de reescopo/fechamento ou tarefa explícita para o canal protegido; nada disso autoriza scheduler, remote/offload ou GitHub Actions automático.
+Rehearsal local medido de 2026-05-01: `unattended_rehearsal_gate` retornou `ready=yes`, `decision=ready-for-canary`, `score=6/6` para 5 fatias locais concluídas com foco preservado, smoke focal verde, commits pequenos, handoff fresco, 0 seleções automáticas de escopo protegido e 0 blockers locais restantes. Esse sinal é suficiente para considerar o rehearsal local dos blockers resolvido, mas não fecha sozinho a macro-task multi-modo: `local_continuity_audit` e `context_watch_continuation_readiness` continuaram `ready=no` porque o foco amplo `TASK-BUD-153` ainda referencia escopo protegido `.github/workflows/ci.yml`. Portanto, a próxima promoção precisa de decisão do operador de reescopo/fechamento ou tarefa explícita para o canal protegido; nada disso autoriza scheduler, remote/offload ou GitHub Actions automático.
 
 Use essa prova como critério de maturidade para desenhar o próximo canário, não como atalho para ativar automação. A promoção de `ready=yes` para execução unattended exige tarefa separada, autorização explícita, rollback e contrato de parada.
 
@@ -665,7 +665,7 @@ context_watch_one_slice_canary_preview: decision=prepare-one-slice prepare=yes s
 turn_boundary_decision_packet: ... growthDecision=go|hold|needs-evidence growthCode=... authorization=none
 ```
 
-Leia essa saída como evidência graduada, não como permissão. `ready=yes` diz que os fatos locais observados estão verdes. `prepare=yes` diz que a próxima fatia poderia ser preparada. `packet=ready-for-human-decision` diz que há material suficiente para uma decisão humana futura. `growthDecision=...` explicita se o boundary está em faixa de expansão (`go`) ou estabilização (`hold|needs-evidence`). `dispatch=no` é a fronteira dura: nenhuma execução pode começar por essa preview.
+Leia essa saída como evidência graduada, não como permissão. `ready=yes` diz que os fatos locais observados estão verdes. `prepare=yes` diz que a próxima fatia poderia ser preparada. `packet=ready-for-human-decision` diz que há material suficiente para uma decisão futura do operador. `growthDecision=...` explicita se o boundary está em faixa de expansão (`go`) ou estabilização (`hold|needs-evidence`). `dispatch=no` é a fronteira dura: nenhuma execução pode começar por essa preview.
 
 `stop=yes` e `oneSliceOnly=yes` são parte do contrato de segurança. Mesmo um futuro caminho explicitamente autorizado deve parar depois de uma fatia, registrar validação, commit e checkpoint, e só considerar outra iteração com contrato separado de repetição/cooldown/cancelamento.
 
@@ -685,9 +685,9 @@ A maturidade para trabalho ininterrupto seguro deve ser acumulada por rehearsal 
 
 O próximo gate de maturidade para operar por períodos longos é um rehearsal de uma fatia por disparo: selecionar uma fatia local-safe, declarar rollback, executar só arquivos reversíveis, validar com gate conhecido, commitar escopo intencional, registrar board/checkpoint e parar. O sucesso de uma fatia não autoriza a próxima; repetição exige contrato separado.
 
-Use `unattended_rehearsal_gate` apenas como evidência advisory/read-only. Um resultado `ready=yes` ou `ready-for-canary` nesse gate significa que a sequência local tem maturidade suficiente para discutir um canário controlado; não autoriza scheduler, self-reload, remote/offload, GitHub Actions, repetição automática ou execução sem decisão humana.
+Use `unattended_rehearsal_gate` apenas como evidência advisory/read-only. Um resultado `ready=yes` ou `ready-for-canary` nesse gate significa que a sequência local tem maturidade suficiente para discutir um canário controlado; não autoriza scheduler, self-reload, remote/offload, GitHub Actions, repetição automática ou execução sem decisão do operador.
 
-A fronteira de desbloqueio de potencial acumulado é: aumentar a capacidade de preparar, diagnosticar e fechar fatias com menos ambiguidade, mantendo controle humano sobre qualquer dispatch. Enquanto não houver tarefa separada com autorização explícita, rollback, limite de tempo/custo, cancelamento, cooldown e stop conditions, o modo ininterrupto permanece rehearsal local supervisionado.
+A fronteira de desbloqueio de potencial acumulado é: aumentar a capacidade de preparar, diagnosticar e fechar fatias com menos ambiguidade, mantendo controle do operador sobre qualquer dispatch. Enquanto não houver tarefa separada com autorização explícita, rollback, limite de tempo/custo, cancelamento, cooldown e stop conditions, o modo ininterrupto permanece rehearsal local supervisionado.
 
 Antes de qualquer executor, repetition ou scheduler depender de `.project` como autoridade operacional forte, use a estratégia em `docs/guides/project-canonical-pipeline.md#estratégia-de-longo-prazo-para-project`: `.project` é adapter local-first atual, hard intent apenas em lanes locais com ownership claro, e soft evidence/cache quando houver múltiplos escritores, adapters externos, CI/remote/offload ou stale focus.
 
@@ -697,9 +697,9 @@ Tarefas pequenas/local-safe podem fechar com verificação focal simples. Tarefa
 
 Use uma checagem bounded/read-only de qualidade de ticket antes de fechar tarefas amplas. O sinal deve distinguir rigidez útil de burocracia: `small-task-no-dependencies-ok` é aceitável para tarefas pequenas, enquanto `macro-task-missing-dependencies`, dependência inexistente, verificação parcial usada como fechamento ou tarefa concluída sem verificação passada bloqueiam fechamento automático e exigem decomposição ou decisão explícita.
 
-### Contrato design-only de execução humana confirmada
+### Contrato Design-Only de Execução Confirmada pelo Operador
 
-A próxima fronteira antes de qualquer executor é um contrato explícito para uma única fatia local confirmada por humano. Esse contrato ainda é design-only: ele define condições mínimas, mas não cria executor aprovado.
+A próxima fronteira antes de qualquer executor é um contrato explícito para uma única fatia local confirmada pelo operador. Esse contrato ainda é design-only: ele define condições mínimas, mas não cria executor aprovado.
 
 Pré-condições mínimas:
 
@@ -712,7 +712,7 @@ Pré-condições mínimas:
 7. checkpoint obrigatório após a fatia;
 8. stop obrigatório após uma fatia, mesmo se outra oportunidade estiver pronta.
 
-A confirmação humana precisa nomear a tarefa e a ação, por exemplo: “autorizo executar uma fatia local para TASK-BUD-XYZ com os arquivos listados”. Uma frase genérica como “pode seguir” continua sendo autorização para continuar rehearsal/control-plane, não autorização para um executor.
+A confirmação do operador precisa nomear a tarefa e a ação, por exemplo: “autorizo executar uma fatia local para TASK-BUD-XYZ com os arquivos listados”. Uma frase genérica como “pode seguir” continua sendo autorização para continuar rehearsal/control-plane, não autorização para um executor.
 
 Mesmo com confirmação explícita, o contrato só cobre uma fatia local. Ele não cobre scheduler, repetição automática, self-reload, remote/offload, GitHub Actions, publish, `.pi/settings.json`, `.github`, `.obsidian`, manutenção destrutiva de git ou qualquer escopo protegido. Cada um desses itens exige tarefa, gate e autorização separados.
 
@@ -728,7 +728,7 @@ Caminho verde atual, ainda sem executor:
 context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none
 ```
 
-Leia isso como: os fatos locais estão verdes, a fatia pode ser preparada, há decision packet suficiente para decisão humana, mas o contrato segue bloqueado porque a confirmação humana explícita não está presente. `dispatch=no` e `executor=no` continuam sendo fronteiras duras.
+Leia isso como: os fatos locais estão verdes, a fatia pode ser preparada, há decision packet suficiente para decisão do operador, mas o contrato segue bloqueado porque a confirmação explícita do operador não está presente. `dispatch=no` e `executor=no` continuam sendo fronteiras duras.
 
 Caminho fail-closed por validação desconhecida:
 
@@ -754,7 +754,7 @@ Implementar um executor one-slice só entra na fila quando todos os critérios a
 
 1. estratégia de `.project` resolvida para a lane atual: hard intent local ou soft evidence/cache com ownership claro;
 2. `context_watch_one_slice_operator_packet_preview` live-validado em caminhos verde, fail-closed e missing-files;
-3. contrato humano explícito definido por tarefa e ação, não confirmação genérica;
+3. contrato explícito do operador definido por tarefa e ação, não confirmação genérica;
 4. arquivos declarados e rollback não destrutivo para cada arquivo;
 5. validação conhecida antes da edição;
 6. escopo de staging/commit fechado e pequeno;
@@ -810,7 +810,7 @@ Quando a lane travar, aplicar ordem curta e bounded:
 Regras de custo:
 - evitar scans pesados por default (ex.: `du`/`find`/`ls -R` amplos sem limite/escopo);
 - preferir diagnóstico read-only e comandos bounded;
-- manutenção destrutiva de git continua opt-in com decisão humana explícita.
+- manutenção destrutiva de git continua opt-in com decisão explícita do operador.
 - quando possível, deixar o bash guard bloquear padrões amplos e refazer com escopo + depth/timeout explícitos.
 
 Paridade local↔CI (anti-drift):
@@ -878,7 +878,7 @@ A evolução “delegar mais e executar menos” segue wave local-safe explícit
 Contrato desta lane:
 - primeiro consolidar snapshot/score/packet read-only com recommendationCode estável;
 - depois formalizar runbook e checklist operacional por estágio;
-- só discutir promoção de estágio com evidência verde e decisão humana explícita para qualquer escopo protected.
+- só discutir promoção de estágio com evidência verde e decisão explícita do operador para qualquer escopo protected.
 
 Runbook por estágio (delegar mais, executar menos):
 
@@ -890,7 +890,7 @@ Runbook por estágio (delegar mais, executar menos):
 2. **Estágio simple-delegate (bounded)**
    - usar `delegate_or_execute_decision_packet` + `delegation_readiness_status_packet`;
    - só aceitar recomendação `simple-delegate` quando status unificado estiver `decision=ready-simple-delegate` e sem blockers;
-   - continuar sem auto-dispatch (decisão humana explícita permanece obrigatória).
+   - continuar sem auto-dispatch (decisão explícita do operador permanece obrigatória).
 
 3. **Estágio swarm rehearsal (pré-protected)**
    - só abrir discussão após evidência repetida de estágio 2 estável;
@@ -948,7 +948,7 @@ O objetivo é evitar soft guidance repetida: se o agente continua esbarrando no 
 
 ## Lane ativa de desacoplamento (maio/2026)
 
-Para manter self-improvement contínuo com pouca intervenção humana, usar a lane em:
+Para manter self-improvement contínuo com pouca intervenção do operador, usar a lane em:
 
 - `docs/research/control-plane-decoupling-lane-2026-05.md`
 

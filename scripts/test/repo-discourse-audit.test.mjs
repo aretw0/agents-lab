@@ -12,6 +12,15 @@ test("classifyDiscourseText ignores historical research data", () => {
   assert.equal(findings.length, 0);
 });
 
+test("classifyDiscourseText ignores generated package guide copies", () => {
+  const findings = classifyDiscourseText(
+    "packages/lab-skills/docs/guides/control-plane-operating-doctrine.md",
+    "human approval in generated copy",
+  );
+
+  assert.equal(findings.length, 0);
+});
+
 test("classifyDiscourseText reports legacy human terminology in canonical docs", () => {
   const findings = classifyDiscourseText(
     "docs/guides/control-plane-glossary.md",
@@ -19,6 +28,28 @@ test("classifyDiscourseText reports legacy human terminology in canonical docs",
   );
 
   assert.deepEqual(findings.map((finding) => finding.rule), ["legacy-human-term"]);
+});
+
+test("classifyDiscourseText ignores legacy terms inside inline code", () => {
+  const findings = classifyDiscourseText(
+    "docs/guides/control-plane-operating-doctrine.md",
+    "`ready-for-human-decision` and `human-confirmation-evidence` are runtime ids.",
+  );
+
+  assert.equal(findings.length, 0);
+});
+
+test("classifyDiscourseText ignores legacy terms inside fenced code", () => {
+  const findings = classifyDiscourseText(
+    "docs/guides/control-plane-operating-doctrine.md",
+    [
+      "```text",
+      "packet=ready-for-human-decision reasons=human-confirmation-missing",
+      "```",
+    ].join("\n"),
+  );
+
+  assert.equal(findings.length, 0);
 });
 
 test("classifyDiscourseText reports aspirational language in canonical docs", () => {

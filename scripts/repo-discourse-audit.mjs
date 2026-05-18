@@ -47,6 +47,7 @@ function isDiscourseSurface(filePath) {
   if (p.startsWith("docs/guides/")) return true;
   if (p.startsWith("docs/primitives/")) return true;
   if (p.startsWith("docs/architecture/")) return true;
+  if (/^packages\/[^/]+\/docs\/guides\//.test(p)) return false;
   if (/^packages\/[^/]+\/(skills|docs)\//.test(p)) return true;
   if (p.startsWith("packages/pi-stack/extensions/") && /\.(ts|md)$/.test(p)) return true;
   return false;
@@ -63,10 +64,17 @@ export function classifyDiscourseText(filePath, text, rules = RULES) {
   if (!isDiscourseSurface(normalized) || !shouldScanText(normalized)) return findings;
 
   const lines = String(text ?? "").split(/\r?\n/);
+  let inCodeFence = false;
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index];
+    if (/^\s*```/.test(line)) {
+      inCodeFence = !inCodeFence;
+      continue;
+    }
+    if (inCodeFence) continue;
+    const prose = stripMarkdownCode(line);
     for (const rule of rules) {
-      if (!rule.pattern.test(line)) continue;
+      if (!rule.pattern.test(prose)) continue;
       findings.push({
         path: normalized,
         line: index + 1,
@@ -78,6 +86,10 @@ export function classifyDiscourseText(filePath, text, rules = RULES) {
     }
   }
   return findings;
+}
+
+function stripMarkdownCode(line) {
+  return String(line ?? "").replace(/`[^`]*`/g, "");
 }
 
 function parseArgs(argv) {
