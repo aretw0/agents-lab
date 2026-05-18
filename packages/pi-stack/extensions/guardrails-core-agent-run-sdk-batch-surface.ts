@@ -3,6 +3,7 @@ import { Type } from "@sinclair/typebox";
 import { buildAgentRunSdkReadOnlyBatchPacket, buildAgentRunSdkReadOnlyBatchTaskPacket, type AgentRunSdkReadOnlyBatchPacketInput } from "./guardrails-core-agent-run-sdk-preview";
 import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
 import { readLogByteCount, readLogTail, readRegistryEntry, startSdkInProcessWorker } from "./guardrails-core-agent-run-surface-runtime";
+import { evaluateAgentWorkerLaneReadiness } from "./guardrails-core-agent-worker-lane";
 import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
@@ -160,8 +161,10 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
       const packet = buildAgentRunSdkReadOnlyBatchPacket(parseSdkReadOnlyBatchPacketInput(p, ctx.cwd));
       const executeRequested = p.execute === true;
       const operatorConfirmation = typeof p.operator_confirmation === "string" ? p.operator_confirmation : "";
+      const workerLaneReadiness = evaluateAgentWorkerLaneReadiness(ctx.cwd);
       const blockers = [...packet.blockers];
       if (packet.decision !== "ready-for-human-decision") blockers.push("batch-packet-blocked");
+      if (executeRequested && !workerLaneReadiness.multiWorkerRehearsalCandidate) blockers.push("worker-lane-multi-worker-not-ready");
       if (executeRequested && operatorConfirmation !== packet.humanConfirmationPhrase) blockers.push("operator-confirmation-mismatch");
       for (const worker of packet.workers) {
         if (executeRequested && !sameCwd(worker.runSpec.cwd, ctx.cwd)) blockers.push(`worker-cwd-mismatch:${worker.runSpec.runId || "missing"}`);
@@ -189,6 +192,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
         workerRunIds: packet.workers.map((worker) => worker.runSpec.runId),
         startedWorkers,
         packet,
+        workerLaneReadiness,
         humanConfirmationPhrase: packet.humanConfirmationPhrase,
         fanInNextAction: "after workers finish, call agent_run_outcome_packet per worker and agent_run_batch_outcome_packet for aggregate fan-in",
         summary: [
@@ -198,6 +202,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
           `workers=${packet.workers.length}`,
           `execute=${executeRequested ? "yes" : "no"}`,
           `parallelDispatch=${parallelDispatchAllowed ? "yes" : "no"}`,
+          `workerLane=${workerLaneReadiness.stage}`,
           startedWorkers.length > 0 ? `started=${startedWorkers.length}` : undefined,
           blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
         ].filter(Boolean).join(" "),

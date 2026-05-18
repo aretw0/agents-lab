@@ -5,6 +5,7 @@ import path from "node:path";
 import { Type } from "@sinclair/typebox";
 import { asOptionalBoolean, asOptionalStringArray, registerAgentRunBasicTools } from "./guardrails-core-agent-run-basic-surface";
 import { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run-executor-strategy";
+import { evaluateAgentWorkerLaneReadiness } from "./guardrails-core-agent-worker-lane";
 import { registerAgentRunSdkProviderModelArenaTool } from "./guardrails-core-agent-run-sdk-arena-surface";
 import { registerAgentRunSdkReadOnlyBatchTools } from "./guardrails-core-agent-run-sdk-batch-surface";
 import { registerAgentRunLifecycleTools } from "./guardrails-core-agent-run-lifecycle-surface";
@@ -912,8 +913,10 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const executeRequested = p.execute === true;
       const operatorConfirmation = typeof p.operator_confirmation === "string" ? p.operator_confirmation : "";
       const existingEntry = packet.runSpec.runId ? readRegistryEntry(ctx.cwd, packet.runSpec.runId) : undefined;
+      const workerLaneReadiness = evaluateAgentWorkerLaneReadiness(ctx.cwd);
       const blockers = [...packet.blockers];
       if (packet.decision !== "ready-for-human-decision") blockers.push("sdk-packet-blocked");
+      if (executeRequested && !workerLaneReadiness.singleWorkerAllowed) blockers.push("worker-lane-single-worker-not-ready");
       if (existingEntry?.state === "running") blockers.push("run-already-running");
       if (executeRequested && !sameCwd(packet.runSpec.cwd, ctx.cwd)) blockers.push("execute-cwd-mismatch");
       if (executeRequested && operatorConfirmation !== packet.humanConfirmationPhrase) blockers.push("operator-confirmation-mismatch");
@@ -942,14 +945,15 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
           `runId=${packet.runSpec.runId || "unknown"}`,
           `execute=${executeRequested ? "yes" : "no"}`,
           `dispatch=${dispatchAllowed ? "yes" : "no"}`,
-          started?.logPath ? `logPath=${started.logPath}` : undefined,
+        started?.logPath ? `logPath=${started.logPath}` : undefined,
+          `workerLane=${workerLaneReadiness.stage}`,
           blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
         ].filter(Boolean).join(" "),
       };
       return buildOperatorVisibleToolResponse({
         label: "agent_run_sdk_in_process_dispatch",
         summary: result.summary,
-        details: result,
+        details: { ...result, workerLaneReadiness },
       });
     },
   });
