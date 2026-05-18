@@ -32,14 +32,7 @@ import {
 	readProjectSettings as readProjectSettingsImpl,
 	writeProjectSettings as writeProjectSettingsImpl,
 } from "./colony-pilot-settings";
-
-function hasStructuredOperatorApproval(value: unknown): boolean {
-	if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-	const row = value as Record<string, unknown>;
-	return row.packet_mode === "operator-approval-packet"
-		&& row.approved === true
-		&& row.approval_state === "approved";
-}
+import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 
 export interface ColonyPilotToolSurfaceRuntime {
 	state: PilotState;

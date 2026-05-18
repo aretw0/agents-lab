@@ -1,4 +1,5 @@
 import { sameCwd } from "./guardrails-core-execution-context";
+import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 
 export type AgentRunState = "planned" | "running" | "completed" | "failed" | "timed-out" | "aborted" | "unknown";
 export type AgentRunAbortDecision = "dry-run" | "abort-ready" | "blocked";
@@ -224,14 +225,6 @@ export interface AgentRunAbortPlanResult {
 
 function normalizeText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
-}
-
-function hasStructuredOperatorApproval(value: unknown): boolean {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const row = value as Record<string, unknown>;
-  return row.packet_mode === "operator-approval-packet"
-    && row.approved === true
-    && row.approval_state === "approved";
 }
 
 function normalizePid(value: unknown): number | undefined {

@@ -11,6 +11,7 @@ import { registerAgentRunSdkReadOnlyBatchTools } from "./guardrails-core-agent-r
 import { registerAgentRunLifecycleTools } from "./guardrails-core-agent-run-lifecycle-surface";
 import { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket } from "./guardrails-core-agent-run-sdk-preview";
 import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildCodexSparkPromotedWorkerPacket } from "./guardrails-core-agent-run-start";
+import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 import { readTasksBlockCached } from "./project-board-model";
 import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
@@ -18,14 +19,6 @@ import { appendAgentRunLogLine, buildPiSubprocessPreflightLines, createAgentRunC
 
 export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): void {
   registerAgentRunBasicTools(pi);
-
-  function hasStructuredOperatorApproval(value: unknown): boolean {
-    if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-    const row = value as Record<string, unknown>;
-    return row.packet_mode === "operator-approval-packet"
-      && row.approved === true
-      && row.approval_state === "approved";
-  }
 
   pi.registerTool({
     name: "agent_run_start_packet",

@@ -2,9 +2,23 @@ import { describe, expect, it } from "vitest";
 import {
   buildAgentRunSdkInProcessPacket,
   buildAgentRunSdkReadOnlyBatchPacket,
+  hasStructuredOperatorApproval,
 } from "../../extensions/guardrails-core-exports";
 
 describe("agent run operator approval packets", () => {
+  it("validates structured operator approval envelopes with one shared primitive", () => {
+    expect(hasStructuredOperatorApproval({
+      packet_mode: "operator-approval-packet",
+      approved: true,
+      approval_state: "approved",
+    })).toBe(true);
+    expect(hasStructuredOperatorApproval({
+      packet_mode: "operator-approval-packet",
+      approved: true,
+      approval_state: "pending",
+    })).toBe(false);
+  });
+
   it("attaches structured operator approval requirements to SDK single-worker packets", () => {
     const packet = buildAgentRunSdkInProcessPacket({
       runId: "sdk-approval-single",

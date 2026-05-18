@@ -2,6 +2,7 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { Type } from "@sinclair/typebox";
 import { buildContextWatchBootstrapPlan } from "./context-watchdog-bootstrap";
 import { writeLocalSliceHandoffCheckpoint } from "./context-watchdog-runtime-helpers";
+import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export interface ContextWatchdogBootstrapApplyResult {
@@ -14,14 +15,6 @@ export interface ContextWatchdogBootstrapApplyResult {
 export interface ContextWatchdogCheckpointBootstrapSurfaceRuntime {
 	isReloadRequiredForSourceUpdate(): boolean;
 	applyPreset(ctx: ExtensionContext, presetInput?: unknown): ContextWatchdogBootstrapApplyResult;
-}
-
-function hasStructuredOperatorApproval(value: unknown): boolean {
-	if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-	const row = value as Record<string, unknown>;
-	return row.packet_mode === "operator-approval-packet"
-		&& row.approved === true
-		&& row.approval_state === "approved";
 }
 
 export function registerContextWatchdogCheckpointBootstrapSurface(

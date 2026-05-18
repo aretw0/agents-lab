@@ -52,6 +52,14 @@ export type OperatorApprovalPacket = {
   summary: string;
 };
 
+export function hasStructuredOperatorApproval(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const row = value as Record<string, unknown>;
+  return row.packet_mode === "operator-approval-packet"
+    && row.approved === true
+    && row.approval_state === "approved";
+}
+
 function normalizePositiveNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : undefined;
 }

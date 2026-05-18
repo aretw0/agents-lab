@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { structuredJsonRead, structuredJsonWrite, structuredRead, structuredWrite } from "./guardrails-core-structured-io";
+import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export type GuardrailsAuditAppender = (
@@ -31,14 +32,6 @@ function buildStructuredIoToolResponse(label: string, details: Record<string, un
 		summary: summaryParts.join(" "),
 		details,
 	});
-}
-
-function hasStructuredOperatorApproval(value: unknown): boolean {
-	if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-	const row = value as Record<string, unknown>;
-	return row.packet_mode === "operator-approval-packet"
-		&& row.approved === true
-		&& row.approval_state === "approved";
 }
 
 export function registerGuardrailsStructuredIoSurface(

@@ -20,6 +20,7 @@ import type {
 	ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 import { extractCopilotBillingUsageEvents } from "./quota-visibility-billing";
 import { loadCopilotBillingUsageEvents } from "./quota-visibility-copilot-billing";
 import { estimateHardPathwayMitigation } from "./quota-visibility-hard-pathway";
@@ -424,14 +425,6 @@ function parseRoutingProfile(raw?: string): RoutingProfile {
 function parseBooleanFlag(tokens: string[], ...flags: string[]): boolean {
 	const set = new Set(tokens.map((t) => t.trim().toLowerCase()));
 	return flags.some((f) => set.has(f.toLowerCase()));
-}
-
-function hasStructuredOperatorApproval(value: unknown): boolean {
-	if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-	const row = value as Record<string, unknown>;
-	return row.packet_mode === "operator-approval-packet"
-		&& row.approved === true
-		&& row.approval_state === "approved";
 }
 
 export default function quotaVisibilityExtension(pi: ExtensionAPI) {

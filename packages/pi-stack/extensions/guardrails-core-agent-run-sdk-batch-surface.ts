@@ -5,6 +5,7 @@ import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunO
 import { readLogByteCount, readLogTail, readRegistryEntry, startSdkInProcessWorker } from "./guardrails-core-agent-run-surface-runtime";
 import { evaluateAgentWorkerLaneReadiness } from "./guardrails-core-agent-worker-lane";
 import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
+import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
@@ -14,14 +15,6 @@ function asOptionalBoolean(value: unknown): boolean | undefined {
 function asOptionalStringArray(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
   return value.filter((entry): entry is string => typeof entry === "string");
-}
-
-function hasStructuredOperatorApproval(value: unknown): boolean {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const row = value as Record<string, unknown>;
-  return row.packet_mode === "operator-approval-packet"
-    && row.approved === true
-    && row.approval_state === "approved";
 }
 
 function sdkReadOnlyBatchWorkerSchema() {

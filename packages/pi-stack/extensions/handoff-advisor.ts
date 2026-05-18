@@ -27,6 +27,7 @@ import {
   type RoutingProfile,
 } from "./quota-visibility";
 import { readProjectSettings } from "./context-watchdog-storage";
+import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 import { buildProviderReadinessMatrix } from "./provider-readiness";
 
 const RATE_LIMIT_RE = /(\b429\b|rate.?limit|too many requests|quota\s*exceeded|capacity\s*reached|resource\s*exhausted)/i;
@@ -37,14 +38,6 @@ function extractProviderRuntimeError(event: unknown): { provider?: string; error
   const provider = typeof msg?.provider === "string" ? msg.provider : undefined;
   const errorMessage = typeof msg?.errorMessage === "string" ? msg.errorMessage : undefined;
   return { provider, errorMessage };
-}
-
-function hasStructuredOperatorApproval(value: unknown): boolean {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const row = value as Record<string, unknown>;
-  return row.packet_mode === "operator-approval-packet"
-    && row.approved === true
-    && row.approval_state === "approved";
 }
 
 // ---------------------------------------------------------------------------

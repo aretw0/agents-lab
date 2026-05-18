@@ -1,5 +1,6 @@
 import { resolveProviderExecutionBudgetEvidence, type ProviderExecutionBudgetDecision } from "./guardrails-core-provider-budget-evidence";
 import { buildAgentRunSdkInProcessPacket, type AgentRunSdkFileContract, type AgentRunSdkInProcessPacketResult, type AgentRunSdkPacketDecision } from "./guardrails-core-agent-run-sdk-preview";
+import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 
 const ARENA_ENVELOPE_IDS = [
   "readonly-one-file",
@@ -355,14 +356,6 @@ function jsonSizeBytes(payload: unknown): number {
 
 function isSafeArtifactArenaId(arenaId: string): boolean {
   return /^[A-Za-z0-9._-]+$/.test(arenaId);
-}
-
-function hasStructuredOperatorApproval(value: unknown): boolean {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const row = value as Record<string, unknown>;
-  return row.packet_mode === "operator-approval-packet"
-    && row.approved === true
-    && row.approval_state === "approved";
 }
 
 export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRunSdkProviderModelArenaArtifactPacketInput = {}): AgentRunSdkProviderModelArenaArtifactPacketResult {
