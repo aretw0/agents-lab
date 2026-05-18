@@ -120,6 +120,16 @@ const PROMOTION_CANDIDATES = [
 		target: "stack-sovereignty",
 		reason: "repo complexity budget is stack quality governance, not only lab convenience",
 	},
+	{
+		match: /^repo:bloat:audit/,
+		target: "stack-sovereignty",
+		reason: "repo bloat audit is stack quality governance for artifact hygiene",
+	},
+	{
+		match: /^repo:discourse:audit/,
+		target: "stack-sovereignty",
+		reason: "repo discourse audit is stack quality governance for operator-facing semantics",
+	},
 ];
 
 const INTERNAL_FAMILIES = new Set([

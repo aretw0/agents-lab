@@ -1,8 +1,8 @@
 # Stack Sovereignty Audit (latest)
 
-Generated: 2026-05-18T18:07:26.248Z
-Registry: C:\Users\aretw\Documents\GitHub\agents-lab\packages\pi-stack\extensions\data\capability-owners.json
-Settings: C:\Users\aretw\Documents\GitHub\agents-lab\.pi\settings.json
+Generated: deterministic-latest
+Registry: packages/pi-stack/extensions/data/capability-owners.json
+Settings: .pi/settings.json
 Mode: strict
 
 ## Summary

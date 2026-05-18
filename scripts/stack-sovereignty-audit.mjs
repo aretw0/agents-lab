@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, relative, resolve } from "node:path";
 import process from "node:process";
 import { FIRST_PARTY, THIRD_PARTY, PACKAGES } from "../packages/pi-stack/package-list.mjs";
 
@@ -121,8 +121,13 @@ function evaluateCapabilities(registry, installedSet) {
   return rows;
 }
 
-function buildReport({ registryPath, settingsPath, strict, curatedUniverse, installedPackages, rows, blockers }) {
-  const now = new Date().toISOString();
+function displayPath(filePath, cwd = process.cwd()) {
+  const rel = relative(cwd, filePath).replace(/\\/g, "/");
+  if (rel && !rel.startsWith("../") && rel !== "..") return rel;
+  return filePath.replace(/\\/g, "/");
+}
+
+function buildReport({ registryPath, settingsPath, strict, curatedUniverse, installedPackages, rows, blockers, cwd = process.cwd() }) {
   const summary = {
     total: rows.length,
     ownerMissing: rows.filter((r) => r.status === "owner-missing").length,
@@ -133,9 +138,9 @@ function buildReport({ registryPath, settingsPath, strict, curatedUniverse, inst
   return [
     "# Stack Sovereignty Audit (latest)",
     "",
-    `Generated: ${now}`,
-    `Registry: ${registryPath}`,
-    `Settings: ${settingsPath}${existsSync(settingsPath) ? "" : " (not found, using curated package universe)"}`,
+    "Generated: deterministic-latest",
+    `Registry: ${displayPath(registryPath, cwd)}`,
+    `Settings: ${displayPath(settingsPath, cwd)}${existsSync(settingsPath) ? "" : " (not found, using curated package universe)"}`,
     `Mode: ${strict ? "strict" : "non-strict"}`,
     "",
     "## Summary",
@@ -207,6 +212,7 @@ function main() {
     installedPackages: [...installedSet],
     rows,
     blockers,
+    cwd: process.cwd(),
   });
 
   mkdirSync(dirname(args.out), { recursive: true });
