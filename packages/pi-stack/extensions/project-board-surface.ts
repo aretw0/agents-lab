@@ -28,7 +28,6 @@ import {
   buildTaskRationaleNote,
   hasRationaleText,
   hasTaskRationale,
-  invalidateProjectBlockCaches,
   isRationaleSensitiveTask,
   isRationaleSensitiveVerification,
   normalizeBoundedText,
@@ -55,8 +54,6 @@ import {
   summarizeRationaleConsistency,
   summarizeTaskRationale,
   summarizeVerificationRationale,
-  tasksPath,
-  verificationPath,
   writeVerificationBlock,
   type BoardRationaleConsistency,
   type BoardRationaleConsistencySummary,
@@ -67,7 +64,6 @@ import {
   type BoardVerificationSyncResult,
   type ProjectTaskStatus,
   type ProjectVerificationStatus,
-  type TaskRecord,
   type TasksBlock,
   type VerificationBlock,
   type VerificationRecord,
@@ -135,7 +131,11 @@ import {
   compactTaskCompleteToolResult,
   compactVerificationAppendToolResult,
 } from "./project-board-tool-formatting";
+import { buildProjectVerificationBackfillPlan } from "./project-board-verification-backfill";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
+
+export { buildProjectVerificationBackfillPlan } from "./project-board-verification-backfill";
+export type { ProjectVerificationBackfillPlan } from "./project-board-verification-backfill";
 
 export {
   queryProjectTasks,
@@ -533,6 +533,31 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       "Report-only dependency hygiene score with coupling/consistency/traceability dimensions.",
     parameters: dependencyHygieneScoreParameters,
     execute: executeDependencyHygieneScore,
+  });
+
+  const verificationBackfillParameters = Type.Object({
+    dry_run: Type.Optional(Type.Boolean({ description: "Preview only by default; set false to persist task/verification backfill." })),
+    prefix: Type.Optional(Type.String({ description: "Verification id prefix for generated legacy entries. Default VER-LEGACY-." })),
+  });
+
+  pi.registerTool({
+    name: "board_verification_backfill_plan",
+    label: "Board Verification Backfill Plan",
+    description:
+      "Dry-first schema integrity backfill for completed tasks missing verification refs. Applies only when dry_run=false.",
+    parameters: verificationBackfillParameters,
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as { dry_run?: boolean; prefix?: string };
+      const details = buildProjectVerificationBackfillPlan(ctx.cwd, {
+        dryRun: p.dry_run !== false,
+        prefix: p.prefix,
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "board_verification_backfill_plan",
+        summary: details.summary,
+        details,
+      });
+    },
   });
 
   const verificationAppendParameters = Type.Object({

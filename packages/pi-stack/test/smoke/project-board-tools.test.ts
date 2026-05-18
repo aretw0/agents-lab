@@ -9,6 +9,7 @@ import projectBoardSurfaceExtension, {
   buildBoardPlanningClarityScore,
   buildBoardDependencyHealthSnapshot,
   buildBoardDependencyHygieneScore,
+  buildProjectVerificationBackfillPlan,
   completeProjectTaskBoardWithVerification,
   createProjectTaskBoard,
   queryProjectTasks,
@@ -832,6 +833,61 @@ describe("project-board tool surfaces", () => {
 
       expect((result.details as any)?.ok).toBe(false);
       expect((result.details as any)?.reason).toBe("missing-task-id");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_verification_backfill_plan is dry-first and can apply legacy verification refs", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-backfill-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(
+        join(cwd, ".project", "tasks.json"),
+        `${JSON.stringify({
+          tasks: [
+            { id: "TASK-DONE", description: "legacy done", status: "completed" },
+            { id: "TASK-OK", description: "done with verification", status: "completed", verification: "VER-OK" },
+          ],
+        }, null, 2)}\n`,
+        "utf8",
+      );
+      writeFileSync(
+        join(cwd, ".project", "verification.json"),
+        `${JSON.stringify({
+          verifications: [
+            { id: "VER-OK", target: "TASK-OK", target_type: "task", status: "passed", method: "test", evidence: "ok", timestamp: "2026-05-01T00:00:00.000Z" },
+          ],
+        }, null, 2)}\n`,
+        "utf8",
+      );
+
+      const dry = buildProjectVerificationBackfillPlan(cwd, { dryRun: true, nowIso: "2026-05-01T00:00:00.000Z" });
+      expect(dry.pendingWithoutVerification).toBe(1);
+      expect(dry.patchedTasks).toBe(0);
+
+      const applied = buildProjectVerificationBackfillPlan(cwd, { dryRun: false, nowIso: "2026-05-01T00:00:00.000Z" });
+      expect(applied.patchedTasks).toBe(1);
+      expect(applied.addedVerifications).toBe(1);
+
+      const tasks = JSON.parse(readFileSync(join(cwd, ".project", "tasks.json"), "utf8"));
+      const verifications = JSON.parse(readFileSync(join(cwd, ".project", "verification.json"), "utf8"));
+      expect(tasks.tasks.find((task: any) => task.id === "TASK-DONE")?.verification).toBe("VER-LEGACY-TASK-DONE");
+      expect(verifications.verifications.some((verification: any) => verification.id === "VER-LEGACY-TASK-DONE")).toBe(true);
+
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const tool = getTool(pi, "board_verification_backfill_plan");
+      const result = await tool.execute(
+        "tc-backfill",
+        { dry_run: true },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(String((result as any).content?.[0]?.text ?? "")).toContain("project-verification-backfill:");
+      expect((result.details as any)?.apply).toBe(false);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

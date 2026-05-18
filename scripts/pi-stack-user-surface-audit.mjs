@@ -92,6 +92,11 @@ const DISTRIBUTED_WRAPPERS = [
 		surface: "guardrails-core",
 		reason: "loop evidence strict/milestone readiness is distributed through guardrails_loop_evidence_readiness",
 	},
+	{
+		match: /^project:verification/,
+		surface: "project-board-surface",
+		reason: "project verification integrity backfill is distributed through board_verification_backfill_plan",
+	},
 ];
 
 const PROMOTION_CANDIDATES = [
@@ -104,11 +109,6 @@ const PROMOTION_CANDIDATES = [
 		match: /^pi:artifact:audit/,
 		target: "safe-boot",
 		reason: "runtime artifact hygiene is safety behavior useful to installed users",
-	},
-	{
-		match: /^project:verification/,
-		target: "project-board-surface",
-		reason: "project board verification hygiene is useful to installed project users",
 	},
 	{
 		match: /^scheduler:next/,
