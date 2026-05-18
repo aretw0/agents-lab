@@ -21,7 +21,7 @@ Use esta skill quando a tarefa envolver long-runs, board-first, continuidade, ha
 ## Paridade guide-skill
 
 Guide canônico: docs/guides/control-plane-operating-doctrine.md
-Paridade mínima: controle humano de cancelamento; blast radius diagnóstico; leitura de skills confiáveis; higiene de tools; processos em background; no-go para strong unattended sem cancelamento testado
+Paridade mínima: controle do operador para cancelamento; blast radius diagnóstico; leitura de skills confiáveis; higiene de tools; processos em background; no-go para strong unattended sem cancelamento testado
 Última revisão de paridade: 2026-04-30
 
 Use esta skill como superfície de descoberta. O guide canônico continua sendo a fonte de detalhes, mas as regras abaixo são hard intent operacional para qualquer fatia local-first.
@@ -41,7 +41,7 @@ Use esta skill como superfície de descoberta. O guide canônico continua sendo 
 ## Hard stops recentes da doutrina
 
 - Não tratar `ready`, `complete` ou scorecards como autorização de dispatch.
-- Não iniciar loop/scheduler/remote/offload/strong unattended sem cancelamento long-run testado, fallback humano claro, checkpoint e decisão explícita.
+- Não iniciar loop/scheduler/remote/offload/strong unattended sem cancelamento long-run testado, fallback claro do operador, checkpoint e decisão explícita.
 - Não mutar pacote upstream/original do pi; usar extensão, wrapper, patch controlado ou PR upstream.
 - Não fazer diagnóstico que despeje source maps/bundles/logs grandes; usar leitura bounded, filename/count-only ou exclusão explícita de `*.map`.
 - Não iniciar servers/processos em background automaticamente até existir primitiva com owner/workspace/session, port lock, tail bounded e cleanup.

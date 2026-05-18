@@ -68,7 +68,7 @@ Independente do modelo:
 Para modelo D/message adapter:
 - [ ] Capability map explícito (`supported|degraded|unsupported`) entre TUI/Web e o canal.
 - [ ] Comandos remotos viram intents canônicos (`board.execute-task`, checkpoint, status) com auditoria; nunca editam `.project` diretamente.
-- [ ] Fechamento de task continua exigindo `verification` e, para no-auto-close/estratégicas, decisão humana explícita.
+- [ ] Fechamento de task continua exigindo `verification` e, para no-auto-close/estratégicas, decisão explícita do operador.
 - [ ] Limitações do canal (mensagem truncada, atraso, falta de rich UI, anexos) têm fallback para TUI/Web/local handoff.
 
 ### 4) Validar

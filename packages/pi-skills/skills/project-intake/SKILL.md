@@ -40,4 +40,4 @@ defina gate focal e rollback, e mantenha saída curta (sem escopo protegido auto
 
 ## Hard stop
 
-Se o próximo passo exigir CI/remote/publish/settings/protected scope, pare e peça foco humano explícito.
+Se o próximo passo exigir CI/remote/publish/settings/protected scope, pare e peça foco explícito do operador.

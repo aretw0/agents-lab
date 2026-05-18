@@ -126,7 +126,7 @@ pi.on("session_shutdown", async (event, ctx) => {
 | Necessidade | API |
 |---|---|
 | Tool para o LLM chamar | `pi.registerTool()` |
-| Comando `/slash` para o humano | `pi.registerCommand()` |
+| Comando `/slash` para o operador | `pi.registerCommand()` |
 | Atalho de teclado | `pi.registerShortcut()` |
 | Mensagem injetada no contexto | `pi.sendMessage()` |
 | Widget no TUI | `ctx.ui.setWidget()` / `ctx.ui.setStatus()` |

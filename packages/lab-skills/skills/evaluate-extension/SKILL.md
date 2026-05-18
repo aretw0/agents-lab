@@ -61,7 +61,7 @@ Extensões de baixa qualidade existem no ecossistema. Sinais de alerta:
 
 - Sem README ou com README genérico
 - Sem testes ou CI
-- Código gerado por LLM sem curadoria humana visível
+- Código gerado por LLM sem curadoria visível de pessoas
 - Registra tools genéricas demais (ex.: "do anything")
 - Conflita com ferramentas built-in sem motivo claro
 - Sem licença explícita

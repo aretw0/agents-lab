@@ -39,7 +39,7 @@ Permitido por padrão:
 - fazer busca/fetch de documentação pública;
 - classificar ids por família;
 - escrever docs/packets report-only;
-- preparar decision packet que ainda exige aprovação humana.
+- preparar decision packet que ainda exige aprovação do operador.
 
 ## Fluxo recomendado
 

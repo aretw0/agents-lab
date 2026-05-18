@@ -288,7 +288,7 @@ function buildFlags(tool: ToolHygieneInputTool): string[] {
   if (includesAny(name, ["remote", "github_actions"]) || (!noDispatch && includesAny(text, ["remote", "offload", "github actions", " ci ", " pr ", " mr "]))) flags.push("remote-or-ci");
   if (includesAny(name, ["settings", "profile", "safe_boot", "governance_profile"]) || (!noDispatch && includesAny(text, ["settings", "profile", "safe-core", "snapshot", "restore"]))) flags.push("settings-or-profile");
   if (includesAny(text, ["execute", "subprocess", "bash", "shell", "command"])) flags.push("subprocess-or-command");
-  if (!noDispatch && includesAny(text, ["execute=true", "execute path", "apply", "confirmed", "human approval", "manual approval", "approval required"])) flags.push("manual-override-like");
+  if (!noDispatch && includesAny(text, ["execute=true", "execute path", "apply", "confirmed", "operator approval", "manual approval", "approval required"])) flags.push("manual-override-like");
   if (includesAny(text, ["dry-run", "dry run", "read-only", "advisory", "side-effect-free", "never authorizes", "never dispatches"])) flags.push("advisory-safe-language");
   if (includesAny(name, ["ant_colony", "schedule_prompt", "claude_code_execute"])) flags.push("long-run-capable");
 

@@ -52,7 +52,7 @@ function resolveProjectTaskDependencyRecommendation(blockers: string[]): {
   if (blockers.includes("local-safe-depends-on-protected")) {
     return {
       recommendationCode: "dependency-update-blocked-protected-coupling",
-      recommendation: "Replaneje para remover acoplamento local-safe -> protected ou promova a task para fluxo protected com decisão humana explícita.",
+      recommendation: "Replaneje para remover acoplamento local-safe -> protected ou promova a task para fluxo protected com decisão explícita do operador.",
     };
   }
   if (blockers.includes("dependency-cycle")) {
