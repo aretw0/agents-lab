@@ -197,7 +197,7 @@ describe("project-board tool surfaces", () => {
       );
 
       expect((result.details as any)?.noAutoClose).toBe(true);
-      expect((result.details as any)?.readyForHumanDecision).toBe(true);
+      expect((result.details as any)?.readyForOperatorDecision).toBe(true);
       expect((result.details as any)?.options).toEqual(["close", "keep-open", "defer"]);
       expect((result.details as any)?.evidence?.[0]?.verificationId).toBe("VER-1");
       expect(String((result as any)?.content?.[0]?.text ?? "")).toContain("decision-packet:");

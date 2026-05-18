@@ -31,7 +31,7 @@ export interface ProjectTaskDecisionPacket {
   taskId: string;
   task?: ProjectTaskBoardRow;
   noAutoClose: true;
-  readyForHumanDecision: boolean;
+  readyForOperatorDecision: boolean;
   recommendedDecision: "close" | "keep-open" | "defer";
   options: Array<"close" | "keep-open" | "defer">;
   evidence: Array<{
@@ -54,7 +54,7 @@ export function buildProjectTaskDecisionPacket(cwd: string, taskIdInput: string)
       reason: "missing-task-id",
       taskId,
       noAutoClose: true,
-      readyForHumanDecision: false,
+      readyForOperatorDecision: false,
       recommendedDecision: "defer",
       options: ["close", "keep-open", "defer"],
       evidence: [],
@@ -74,7 +74,7 @@ export function buildProjectTaskDecisionPacket(cwd: string, taskIdInput: string)
       reason: "task-not-found",
       taskId,
       noAutoClose: true,
-      readyForHumanDecision: false,
+      readyForOperatorDecision: false,
       recommendedDecision: "defer",
       options: ["close", "keep-open", "defer"],
       evidence: [],
@@ -103,10 +103,10 @@ export function buildProjectTaskDecisionPacket(cwd: string, taskIdInput: string)
   const risks: string[] = [];
   if (isRationaleSensitiveTask(task) && !hasTaskRationale(task, verificationsById)) risks.push("missing-rationale-for-sensitive-task");
   if (resolveTaskRationaleConsistency(task, verificationsById) === "mismatch") risks.push("rationale-consistency-mismatch");
-  if (blockers.length === 0 && risks.length > 0) risks.push("human-review-before-close");
+  if (blockers.length === 0 && risks.length > 0) risks.push("operator-review-before-close");
 
-  const readyForHumanDecision = blockers.length === 0 && hasPassedVerification;
-  const recommendedDecision = readyForHumanDecision ? "close" : "defer";
+  const readyForOperatorDecision = blockers.length === 0 && hasPassedVerification;
+  const recommendedDecision = readyForOperatorDecision ? "close" : "defer";
   const taskRow = queryProjectTasks(cwd, { search: taskId, limit: 1 }).rows.find((row) => row.id === taskId);
   const evidence = evidenceRows.map((row) => ({
     verificationId: row.id,
@@ -115,8 +115,8 @@ export function buildProjectTaskDecisionPacket(cwd: string, taskIdInput: string)
     timestamp: row.timestamp,
     evidence: shortText(row.evidence, 220),
   }));
-  const summary = readyForHumanDecision
-    ? `decision-packet: ${taskId} has passed verification evidence; ask human to close, keep-open, or defer.`
+  const summary = readyForOperatorDecision
+    ? `decision-packet: ${taskId} has passed verification evidence; ask operator to close, keep-open, or defer.`
     : `decision-packet: ${taskId} is not ready for close; defer until blockers are resolved.`;
 
   return {
@@ -124,7 +124,7 @@ export function buildProjectTaskDecisionPacket(cwd: string, taskIdInput: string)
     taskId,
     task: taskRow,
     noAutoClose: true,
-    readyForHumanDecision,
+    readyForOperatorDecision,
     recommendedDecision,
     options: ["close", "keep-open", "defer"],
     evidence,
