@@ -179,6 +179,15 @@ test("buildEntrypointBudget classifies hot-path bloat candidates", () => {
   assert.equal(budget.recommendation, "split-hot-path-or-move-diagnostics-behind-opt-in");
 });
 
+test("curated custom-footer keeps optional panels out of eager graph", () => {
+  const stats = collectEntrypointStats(process.cwd());
+  const footer = stats.find((row) => row.entry === "./extensions/custom-footer.ts");
+
+  assert.ok(footer, "custom-footer entrypoint should be measured");
+  assert.ok(footer.files <= 25, `custom-footer eager graph has ${footer.files} files`);
+  assert.ok(footer.kb <= 200, `custom-footer eager graph is ${footer.kb}kb`);
+  assert.ok(footer.reachableFiles > footer.files, "lazy panel/status modules should remain reachable but cold");
+});
 
 test("collectSettingsStats counts suppressed package entries", () => {
   const cwd = makeWorkspace();
