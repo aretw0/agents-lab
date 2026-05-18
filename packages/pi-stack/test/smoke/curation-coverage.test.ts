@@ -14,6 +14,25 @@ describe("first-party curation coverage", () => {
     expect(CURATION_FILTER_PATCHES).toEqual(FILTER_PATCHES);
   });
 
+  it("requires every installer suppression to have curation coverage", () => {
+    const registry = readCurationCoverageRegistry();
+    const covered = new Set(
+      registry.records.flatMap((record) =>
+        record.thirdPartySurfaces.map((surface) => `${record.thirdPartyPackage}:${surface}`),
+      ),
+    );
+    const suppressed = FILTER_PATCHES.flatMap((patch: { source?: string; extensions?: string[]; skills?: string[] }) => {
+      const pkg = typeof patch.source === "string" && patch.source.startsWith("npm:")
+        ? patch.source.slice(4)
+        : patch.source;
+      return [...(patch.extensions ?? []), ...(patch.skills ?? [])]
+        .filter((surface) => surface.startsWith("!"))
+        .map((surface) => `${pkg}:${surface.slice(1)}`);
+    });
+
+    expect(suppressed.filter((surface) => !covered.has(surface))).toEqual([]);
+  });
+
   it("reads coverage records from capability owners registry", () => {
     const registry = readCurationCoverageRegistry();
 
@@ -42,10 +61,10 @@ describe("first-party curation coverage", () => {
       dispatchAllowed: false,
       mutationAllowed: false,
     });
-    expect(result.summary.filtered).toBeGreaterThanOrEqual(9);
+    expect(result.summary.filtered).toBeGreaterThanOrEqual(12);
     expect(result.summary.missingFilter).toBe(0);
     expect(result.records.find((record) => record.id === "oh-pi-watchdog")?.evaluatedStatus).toBe("tracked");
-    expect(result.records.find((record) => record.id === "oh-pi-bg-process-future")?.evaluatedStatus).toBe("needs-decision");
+    expect(result.records.find((record) => record.id === "oh-pi-bg-process-future")?.evaluatedStatus).toBe("filtered");
     expect(result.evidence).toContain("dispatch=no");
   });
 

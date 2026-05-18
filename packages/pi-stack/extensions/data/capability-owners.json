@@ -13,7 +13,20 @@
         "@ifi/oh-pi-extensions"
       ],
       "coexistencePolicy": "policy-first-party-engine-third-party",
-      "defaultAction": "consolidate"
+      "defaultAction": "consolidate",
+      "curationCoverage": [
+        {
+          "id": "oh-pi-scheduler-ui-policy",
+          "coveredSurface": "scheduler ownership and visible task governance",
+          "thirdPartyPackage": "@ifi/oh-pi-extensions",
+          "thirdPartySurfaces": [
+            "extensions/scheduler.ts"
+          ],
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "scheduler-governance owns scheduler policy and avoids competing visible runtime task ownership in curated installs."
+        }
+      ]
     },
     {
       "id": "monitor-provider-governance",
@@ -217,6 +230,17 @@
           "strategy": "keep",
           "status": "tracked",
           "reason": "first-party context-watch owns context/checkpoint/compact policy, but does not replace runtime performance pressure detection yet."
+        },
+        {
+          "id": "oh-pi-safe-guard",
+          "coveredSurface": "destructive command guard presentation",
+          "thirdPartyPackage": "@ifi/oh-pi-extensions",
+          "thirdPartySurfaces": [
+            "extensions/safe-guard.ts"
+          ],
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "guardrails-core owns first-party safety policy; safe-guard prompts on simple shell cases and adds competing operator friction in curated installs."
         }
       ]
     },
@@ -278,9 +302,9 @@
           "thirdPartySurfaces": [
             "extensions/bg-process.ts"
           ],
-          "strategy": "needs-decision",
-          "status": "tracked",
-          "reason": "third-party bg-process remains useful while first-party background process control is planning-only; revisit when launch/stop/restart registry exists."
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "third-party bg-process lifecycle UI can emit noisy headers in curated installs; first-party background process control remains the decision surface while runtime launch/stop registry matures."
         }
       ]
     },
