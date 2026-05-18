@@ -82,6 +82,11 @@ const DISTRIBUTED_WRAPPERS = [
 		surface: "context-watchdog",
 		reason: "context preload consumption is already distributed through context_preload_consume; pack generation remains a promotion candidate",
 	},
+	{
+		match: /^git:dirty:snapshot/,
+		surface: "guardrails-core",
+		reason: "git dirty snapshots are already distributed through git_dirty_snapshot and /git-dirty",
+	},
 ];
 
 const PROMOTION_CANDIDATES = [
@@ -109,11 +114,6 @@ const PROMOTION_CANDIDATES = [
 		match: /^scheduler:next/,
 		target: "scheduler-governance",
 		reason: "scheduler next-task selection is already a governance concern",
-	},
-	{
-		match: /^git:dirty:snapshot/,
-		target: "guardrails-core",
-		reason: "dirty-scope snapshots support safe mutation/commit hygiene",
 	},
 	{
 		match: /^repo:complexity/,
