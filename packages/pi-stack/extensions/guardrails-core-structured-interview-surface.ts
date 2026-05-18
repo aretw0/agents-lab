@@ -1,3 +1,7 @@
+/**
+ * @capability-id runtime-guardrails
+ * @capability-criticality high
+ */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { resolveStructuredInterview, type StructuredInterviewAnswer, type StructuredInterviewQuestion } from "./guardrails-core-structured-interview";

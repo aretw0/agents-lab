@@ -1,13 +1,13 @@
 # Stack Sovereignty Audit (latest)
 
-Generated: 2026-05-18T17:51:50.821Z
+Generated: 2026-05-18T18:02:31.189Z
 Registry: C:\Users\aretw\Documents\GitHub\agents-lab\packages\pi-stack\extensions\data\capability-owners.json
 Settings: C:\Users\aretw\Documents\GitHub\agents-lab\.pi\settings.json
 Mode: strict
 
 ## Summary
 
-- capabilities: 11
+- capabilities: 16
 - ownerMissing: 0
 - coexisting: 5
 - highRisk: 0
@@ -22,11 +22,16 @@ Mode: strict
 | monitor-provider-governance | high | @aretw0/pi-stack | owned | - | consolidate | low |
 | colony-runtime-governance | medium | @aretw0/pi-stack | owned | - | consolidate | low |
 | global-runtime-doctor | high | @aretw0/pi-stack | owned | - | maintain | low |
-| quota-visibility-ops | medium | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | maintain | low |
+| context-watchdog | medium | @aretw0/pi-stack | owned | - | maintain | low |
+| quota-visibility-ops | high | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | maintain | medium |
+| quota-alerts | high | @aretw0/pi-stack | owned | - | maintain | low |
+| handoff-advisor | high | @aretw0/pi-stack | owned | - | maintain | low |
 | web-research-policy | medium | @aretw0/web-skills | owned | - | filter-migrate | low |
 | stack-sovereignty-governance | high | @aretw0/pi-stack | owned | - | maintain | low |
+| project-board-surface | medium | @aretw0/pi-stack | owned | - | maintain | low |
 | runtime-guardrails | high | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | consolidate | medium |
 | session-web-observability | medium | @aretw0/pi-stack | owned | - | maintain | low |
+| session-analytics | medium | @aretw0/pi-stack | owned | - | maintain | low |
 | background-process-control | high | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | consolidate | medium |
 | pi-session-presentation | low | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | consolidate | low |
 

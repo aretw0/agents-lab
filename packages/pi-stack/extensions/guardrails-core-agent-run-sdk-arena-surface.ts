@@ -1,3 +1,7 @@
+/**
+ * @capability-id runtime-guardrails
+ * @capability-criticality high
+ */
 import { mkdirSync, writeFileSync } from "node:fs";
 import * as path from "node:path";
 import { type ExtensionAPI } from "@earendil-works/pi-coding-agent";

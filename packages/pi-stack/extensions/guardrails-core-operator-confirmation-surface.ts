@@ -1,3 +1,7 @@
+/**
+ * @capability-id runtime-guardrails
+ * @capability-criticality high
+ */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { resolveOperatorConfirmationImplementationChannelPlan } from "./guardrails-core-operator-confirmation";

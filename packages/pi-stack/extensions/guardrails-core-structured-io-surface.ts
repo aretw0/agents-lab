@@ -1,3 +1,7 @@
+/**
+ * @capability-id runtime-guardrails
+ * @capability-criticality high
+ */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";

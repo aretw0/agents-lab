@@ -55,9 +55,19 @@
       "defaultAction": "maintain"
     },
     {
+      "id": "context-watchdog",
+      "name": "Context window advisory and checkpointing",
+      "criticality": "medium",
+      "primaryPackage": "@aretw0/pi-stack",
+      "secondaryPackages": [],
+      "conflictsWithPackages": [],
+      "coexistencePolicy": "single-owner",
+      "defaultAction": "maintain"
+    },
+    {
       "id": "quota-visibility-ops",
       "name": "Quota visibility operations",
-      "criticality": "medium",
+      "criticality": "high",
       "primaryPackage": "@aretw0/pi-stack",
       "secondaryPackages": [
         "@ifi/oh-pi-extensions",
@@ -83,6 +93,26 @@
           "reason": "quota-visibility is first-party and avoids misleading unlimited-plan provider quota output."
         }
       ]
+    },
+    {
+      "id": "quota-alerts",
+      "name": "Proactive quota exhaustion alerts",
+      "criticality": "high",
+      "primaryPackage": "@aretw0/pi-stack",
+      "secondaryPackages": [],
+      "conflictsWithPackages": [],
+      "coexistencePolicy": "single-owner",
+      "defaultAction": "maintain"
+    },
+    {
+      "id": "handoff-advisor",
+      "name": "Provider handoff advisor",
+      "criticality": "high",
+      "primaryPackage": "@aretw0/pi-stack",
+      "secondaryPackages": [],
+      "conflictsWithPackages": [],
+      "coexistencePolicy": "single-owner",
+      "defaultAction": "maintain"
     },
     {
       "id": "web-research-policy",
@@ -152,6 +182,18 @@
       "defaultAction": "maintain"
     },
     {
+      "id": "project-board-surface",
+      "name": "Project board query/update surface",
+      "criticality": "medium",
+      "primaryPackage": "@aretw0/pi-stack",
+      "secondaryPackages": [
+        "@davidorex/pi-project-workflows"
+      ],
+      "conflictsWithPackages": [],
+      "coexistencePolicy": "first-party-surface-third-party-state",
+      "defaultAction": "maintain"
+    },
+    {
       "id": "runtime-guardrails",
       "name": "Runtime guardrails and tool-call safety policy",
       "criticality": "high",
@@ -190,6 +232,16 @@
         "@ifi/pi-web-remote"
       ],
       "coexistencePolicy": "coexist-with-boundaries",
+      "defaultAction": "maintain"
+    },
+    {
+      "id": "session-analytics",
+      "name": "Session analytics query surface",
+      "criticality": "medium",
+      "primaryPackage": "@aretw0/pi-stack",
+      "secondaryPackages": [],
+      "conflictsWithPackages": [],
+      "coexistencePolicy": "single-owner",
       "defaultAction": "maintain"
     },
     {

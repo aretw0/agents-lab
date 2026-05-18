@@ -1,3 +1,7 @@
+/**
+ * @capability-id context-watchdog
+ * @capability-criticality medium
+ */
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildContextWatchBootstrapPlan } from "./context-watchdog-bootstrap";

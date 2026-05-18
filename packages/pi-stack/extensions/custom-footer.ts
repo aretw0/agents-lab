@@ -1,7 +1,7 @@
 /**
  * custom-footer — pi-stack owned footer and /status overlay.
- * @capability-id custom-footer
- * @capability-criticality medium
+ * @capability-id pi-session-presentation
+ * @capability-criticality low
  *
  * Fork of @ifi/oh-pi-extensions/extensions/custom-footer.ts.
  * Differences from upstream:

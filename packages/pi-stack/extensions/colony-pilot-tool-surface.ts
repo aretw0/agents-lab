@@ -1,3 +1,7 @@
+/**
+ * @capability-id colony-runtime-governance
+ * @capability-criticality medium
+ */
 import path from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
