@@ -1,12 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import {
-  analyzeQuota,
-  parseProviderBudgets,
-  safeNum,
-  type ProviderBudgetMap,
-  type ProviderBudgetStatus,
-} from "./quota-visibility";
+import { parseProviderBudgets, safeNum } from "./quota-visibility-model";
+import type {
+  ProviderBudgetMap,
+  ProviderBudgetStatus,
+} from "./quota-visibility-types";
 
 export interface ProviderBudgetGovernorConfig {
   enabled: boolean;
@@ -114,6 +112,7 @@ export async function resolveProviderBudgetGovernorSnapshot(
     return { snapshot: cache.snapshot, cache };
   }
 
+  const { analyzeQuota } = await import("./quota-visibility");
   const status = await analyzeQuota({
     days: config.lookbackDays,
     weeklyQuotaTokens: quota.weeklyQuotaTokens,
