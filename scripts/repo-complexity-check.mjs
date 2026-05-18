@@ -9,6 +9,7 @@
  * Uso:
  *   node scripts/repo-complexity-check.mjs
  *   node scripts/repo-complexity-check.mjs --max-lines 800 --strict
+ *   node scripts/repo-complexity-check.mjs --changed --strict
  *   node scripts/repo-complexity-check.mjs --json
  */
 
@@ -16,6 +17,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 
 const DEFAULT_MAX_LINES = 1000;
 const MAX_SCAN_BYTES = 2 * 1024 * 1024; // 2MB por arquivo (defensivo)
@@ -25,6 +27,8 @@ function parseArgs(argv) {
     maxLines: DEFAULT_MAX_LINES,
     strict: false,
     json: false,
+    changed: false,
+    base: "HEAD",
     help: false,
   };
 
@@ -32,7 +36,13 @@ function parseArgs(argv) {
     const arg = argv[i];
     if (arg === "--strict") out.strict = true;
     else if (arg === "--json") out.json = true;
+    else if (arg === "--changed") out.changed = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
+    else if (arg === "--base") {
+      const value = String(argv[++i] ?? "").trim();
+      if (!value) throw new Error("--base inválido");
+      out.base = value;
+    }
     else if (arg === "--max-lines") {
       const n = Number(argv[++i]);
       if (!Number.isFinite(n) || n <= 0) throw new Error("--max-lines inválido");
@@ -52,6 +62,7 @@ function printHelp() {
     "Uso:",
     "  node scripts/repo-complexity-check.mjs",
     "  node scripts/repo-complexity-check.mjs --max-lines 800 --strict",
+    "  node scripts/repo-complexity-check.mjs --changed --strict",
     "  node scripts/repo-complexity-check.mjs --json",
   ].join("\n"));
 }
@@ -59,6 +70,20 @@ function printHelp() {
 function listTrackedFiles() {
   const out = execFileSync("git", ["ls-files", "-z"], { encoding: "utf8" });
   return out.split("\u0000").filter(Boolean);
+}
+
+function splitZeroList(value) {
+  return String(value ?? "").split("\u0000").filter(Boolean);
+}
+
+function unique(values) {
+  return [...new Set(values)];
+}
+
+function listChangedFiles(base) {
+  const changed = splitZeroList(execFileSync("git", ["diff", "--name-only", "-z", "--diff-filter=ACMRT", base, "--"], { encoding: "utf8" }));
+  const untracked = splitZeroList(execFileSync("git", ["ls-files", "--others", "--exclude-standard", "-z"], { encoding: "utf8" }));
+  return unique([...changed, ...untracked]);
 }
 
 function shouldSkip(filePath) {
@@ -85,11 +110,10 @@ function countLines(text) {
   return text.split(/\r?\n/).length;
 }
 
-function scan(maxLines) {
-  const tracked = listTrackedFiles();
+export function scanFiles(files, maxLines) {
   const findings = [];
 
-  for (const file of tracked) {
+  for (const file of files) {
     if (shouldSkip(file)) continue;
 
     let st;
@@ -126,6 +150,11 @@ function scan(maxLines) {
   return findings;
 }
 
+function scan(maxLines, options = {}) {
+  const files = options.changed ? listChangedFiles(options.base ?? "HEAD") : listTrackedFiles();
+  return scanFiles(files, maxLines);
+}
+
 function formatBytes(n) {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
@@ -146,14 +175,16 @@ function main() {
     return;
   }
 
-  const findings = scan(opts.maxLines);
+  const findings = scan(opts.maxLines, opts);
+  const scope = opts.changed ? "arquivo alterado" : "arquivo";
+  const pluralScope = opts.changed ? "arquivo(s) alterado(s)" : "arquivo(s)";
 
   if (opts.json) {
-    console.log(JSON.stringify({ maxLines: opts.maxLines, total: findings.length, findings }, null, 2));
+    console.log(JSON.stringify({ maxLines: opts.maxLines, changed: opts.changed, base: opts.base, total: findings.length, findings }, null, 2));
   } else if (findings.length === 0) {
-    console.log(`complexity-check: OK (nenhum arquivo > ${opts.maxLines} linhas)`);
+    console.log(`complexity-check: OK (nenhum ${scope} > ${opts.maxLines} linhas)`);
   } else {
-    console.log(`complexity-check: ${findings.length} arquivo(s) acima de ${opts.maxLines} linhas`);
+    console.log(`complexity-check: ${findings.length} ${pluralScope} acima de ${opts.maxLines} linhas`);
     for (const f of findings.slice(0, 40)) {
       const lines = f.lines == null ? "n/a" : String(f.lines);
       console.log(`  - ${f.file} | lines=${lines} | size=${formatBytes(f.size)} | ${f.note}`);
@@ -168,4 +199,6 @@ function main() {
   }
 }
 
-main();
+if (fileURLToPath(import.meta.url) === path.resolve(process.argv[1] ?? "")) {
+  main();
+}
