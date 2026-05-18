@@ -821,7 +821,7 @@ describe("context-watchdog tool surfaces", () => {
 				recommendationCode: "refresh-focus-checkpoint",
 				nextAction: expect.stringContaining("refresh handoff focus/checkpoint"),
 				decisionCue: {
-					humanDecisionNeeded: true,
+					operatorDecisionNeeded: true,
 					reasonCode: "seed-local-safe-required",
 					recommendedAction: "seed-local-safe",
 				},
@@ -932,8 +932,8 @@ describe("context-watchdog tool surfaces", () => {
 			const tool = getTool(pi, "context_watch_continuation_readiness");
 			const result = await tool.execute("tc-continuation-readiness-decision-none", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 			expect(result.content?.[0]?.text).toContain("decisionCue=none");
-			expect((result.details as { decisionCue?: { reasonCode?: string; humanDecisionNeeded?: boolean } } | undefined)?.decisionCue?.reasonCode).toBe("none");
-			expect((result.details as { decisionCue?: { reasonCode?: string; humanDecisionNeeded?: boolean } } | undefined)?.decisionCue?.humanDecisionNeeded).toBe(false);
+			expect((result.details as { decisionCue?: { reasonCode?: string; operatorDecisionNeeded?: boolean } } | undefined)?.decisionCue?.reasonCode).toBe("none");
+			expect((result.details as { decisionCue?: { reasonCode?: string; operatorDecisionNeeded?: boolean } } | undefined)?.decisionCue?.operatorDecisionNeeded).toBe(false);
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

@@ -145,12 +145,12 @@ export function registerContextWatchdogContinuationSurface(
 			const materialReadiness = buildAfkMaterialReadinessSnapshot(ctx.cwd, focusTasks);
 			const decisionCue = materialReadiness.decision === "continue"
 				? {
-					humanDecisionNeeded: false,
+					operatorDecisionNeeded: false,
 					reasonCode: "none",
 					recommendedAction: ready ? "continue-local-safe" : "stabilize-local-safe",
 				}
 				: {
-					humanDecisionNeeded: true,
+					operatorDecisionNeeded: true,
 					reasonCode: "seed-local-safe-required",
 					recommendedAction: "seed-local-safe",
 				};
