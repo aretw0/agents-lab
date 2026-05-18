@@ -187,7 +187,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
             suggestedSeedCount: packet.suggestedSeedCount,
             seedWhy: packet.reseedJustification.reasonCode,
             seedPriority: packet.reseedPriority.code,
-            humanActionRequired: packet.humanActionRequired,
+            operatorActionRequired: packet.operatorActionRequired,
             summary: packet.summary,
           };
         })()
@@ -224,20 +224,20 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       };
       const decisionCue = !selection.ready && seedingGuidance?.decision === "seed-now"
         ? {
-          humanDecisionNeeded: true,
+          operatorDecisionNeeded: true,
           reasonCode: "seed-local-safe-required",
           recommendedAction: "seed-local-safe",
           nextCandidateTaskId: undefined as string | undefined,
         }
         : influenceWindowCue.decision === "ready-window" && protectedReadyCue.decision === "ready"
           ? {
-            humanDecisionNeeded: true,
+            operatorDecisionNeeded: true,
             reasonCode: "protected-focus-ready",
             recommendedAction: "open-protected-focus",
             nextCandidateTaskId: protectedReadyCue.nextProtectedTaskId,
           }
           : {
-            humanDecisionNeeded: false,
+            operatorDecisionNeeded: false,
             reasonCode: "none",
             recommendedAction: selection.ready ? "continue-local-safe" : "stabilize-local-safe",
             nextCandidateTaskId: selection.nextTaskId,

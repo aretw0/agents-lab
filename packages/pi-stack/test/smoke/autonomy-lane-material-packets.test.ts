@@ -281,7 +281,7 @@ describe("autonomy lane material packets", () => {
     expect((result?.details.reseedPriority as { code?: string } | undefined)?.code).toBe("stock-health");
     expect(String(result?.details.summary ?? "")).toContain("seedWhy=stock-below-target");
     expect(String(result?.details.summary ?? "")).toContain("seedPriority=stock-health");
-    expect(result?.details.humanActionRequired).toBe(true);
+    expect(result?.details.operatorActionRequired).toBe(true);
     expect((result?.details.seedTemplates as Array<unknown>) ?? []).toHaveLength(0);
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
@@ -318,7 +318,7 @@ describe("autonomy lane material packets", () => {
     expect((result?.details.reseedJustification as { reasonCode?: string; required?: boolean } | undefined)?.reasonCode).toBe("bootstrap-focus-missing");
     expect((result?.details.reseedJustification as { reasonCode?: string; required?: boolean } | undefined)?.required).toBe(true);
     expect((result?.details.reseedPriority as { code?: string } | undefined)?.code).toBe("continuity-bootstrap");
-    expect(result?.details.humanActionRequired).toBe(true);
+    expect(result?.details.operatorActionRequired).toBe(true);
     expect((result?.details.blockedReasons as string[])).toContain("focus-missing");
     expect(Array.isArray(result?.details.seedTemplates)).toBe(true);
     expect((result?.details.seedTemplates as Array<unknown>).length).toBeGreaterThan(0);
@@ -518,14 +518,14 @@ describe("autonomy lane material packets", () => {
 
     const influenceCue = (result?.details.influenceWindowCue as { decision?: string; window?: string; recommendationCode?: string } | undefined);
     const protectedReadyCue = (result?.details.protectedReadyCue as { decision?: string; eligibleProtectedCount?: number; nextProtectedTaskId?: string } | undefined);
-    const decisionCue = (result?.details.decisionCue as { humanDecisionNeeded?: boolean; reasonCode?: string; recommendedAction?: string; nextCandidateTaskId?: string } | undefined);
+    const decisionCue = (result?.details.decisionCue as { operatorDecisionNeeded?: boolean; reasonCode?: string; recommendedAction?: string; nextCandidateTaskId?: string } | undefined);
     expect(influenceCue?.decision).toBe("ready-window");
     expect(influenceCue?.window).toBe("open");
     expect(influenceCue?.recommendationCode).toBe("influence-assimilation-ready-window-open");
     expect(protectedReadyCue?.decision).toBe("ready");
     expect(protectedReadyCue?.eligibleProtectedCount).toBe(1);
     expect(protectedReadyCue?.nextProtectedTaskId).toBe("TASK-PROTECTED-1");
-    expect(decisionCue?.humanDecisionNeeded).toBe(true);
+    expect(decisionCue?.operatorDecisionNeeded).toBe(true);
     expect(decisionCue?.reasonCode).toBe("protected-focus-ready");
     expect(decisionCue?.recommendedAction).toBe("open-protected-focus");
     expect(decisionCue?.nextCandidateTaskId).toBe("TASK-PROTECTED-1");

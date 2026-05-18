@@ -89,7 +89,7 @@ export function buildIterationReminder(
     seedWhy?: string;
     seedPriority?: string;
     suggestedSeedCount?: number;
-    humanActionRequired?: boolean;
+    operatorActionRequired?: boolean;
   },
 ): AutonomyIterationReminder {
   if (handoffFreshnessLabel === "stale") {

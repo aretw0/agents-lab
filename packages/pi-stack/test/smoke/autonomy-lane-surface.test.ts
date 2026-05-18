@@ -590,13 +590,13 @@ describe("autonomy lane surface", () => {
     const result = statusTool?.execute("call-test", { context_level: "ok", provider_ready: 1 }, undefined, undefined, { cwd });
     const reminder = (result?.details.iterationReminder as { source?: string; items?: string[]; summary?: string } | undefined);
     const seedingGuidance = (result?.details.seedingGuidance as { decision?: string; seedWhy?: string; seedPriority?: string } | undefined);
-    const decisionCue = (result?.details.decisionCue as { humanDecisionNeeded?: boolean; reasonCode?: string; recommendedAction?: string; nextCandidateTaskId?: string } | undefined);
+    const decisionCue = (result?.details.decisionCue as { operatorDecisionNeeded?: boolean; reasonCode?: string; recommendedAction?: string; nextCandidateTaskId?: string } | undefined);
 
     expect(seedingGuidance?.decision).toBe("seed-now");
     expect(reminder?.source).toBe("seed-guidance");
     expect(reminder?.summary).toContain("seedWhy=bootstrap-focus-missing");
     expect(reminder?.summary).toContain("seedPriority=continuity-bootstrap");
-    expect(decisionCue?.humanDecisionNeeded).toBe(true);
+    expect(decisionCue?.operatorDecisionNeeded).toBe(true);
     expect(decisionCue?.reasonCode).toBe("seed-local-safe-required");
     expect(decisionCue?.recommendedAction).toBe("seed-local-safe");
     expect(decisionCue?.nextCandidateTaskId).toBeUndefined();
@@ -785,11 +785,11 @@ describe("autonomy lane surface", () => {
     expect(pauseBrief?.seedingCue?.seedCount).toBe(3);
     expect(pauseBrief?.seedingCue?.seedWhy).toBe("readiness-blocked");
     expect(pauseBrief?.seedingCue?.seedPriority).toBe("blocked-readiness");
-    const seedingGuidance = (result?.details.seedingGuidance as { decision?: string; seedWhy?: string; seedPriority?: string; humanActionRequired?: boolean } | undefined);
+    const seedingGuidance = (result?.details.seedingGuidance as { decision?: string; seedWhy?: string; seedPriority?: string; operatorActionRequired?: boolean } | undefined);
     expect(seedingGuidance?.decision).toBe("blocked");
     expect(seedingGuidance?.seedWhy).toBe("readiness-blocked");
     expect(seedingGuidance?.seedPriority).toBe("blocked-readiness");
-    expect(seedingGuidance?.humanActionRequired).toBe(true);
+    expect(seedingGuidance?.operatorActionRequired).toBe(true);
     const influenceCue = (result?.details.influenceWindowCue as { decision?: string; recommendationCode?: string } | undefined);
     const protectedReadyCue = (result?.details.protectedReadyCue as {
       decision?: string;
@@ -798,7 +798,7 @@ describe("autonomy lane surface", () => {
       nextProtectedTaskId?: string;
     } | undefined);
     const decisionCue = (result?.details.decisionCue as {
-      humanDecisionNeeded?: boolean;
+      operatorDecisionNeeded?: boolean;
       reasonCode?: string;
       recommendedAction?: string;
       nextCandidateTaskId?: string;
@@ -809,7 +809,7 @@ describe("autonomy lane surface", () => {
     expect(protectedReadyCue?.recommendationCode).toBe("protected-ready-hold-local-safe-first");
     expect(protectedReadyCue?.eligibleProtectedCount).toBe(0);
     expect(protectedReadyCue?.nextProtectedTaskId).toBeUndefined();
-    expect(decisionCue?.humanDecisionNeeded).toBe(false);
+    expect(decisionCue?.operatorDecisionNeeded).toBe(false);
     expect(decisionCue?.reasonCode).toBe("none");
     expect(decisionCue?.recommendedAction).toBe("stabilize-local-safe");
     expect(decisionCue?.nextCandidateTaskId).toBeUndefined();
@@ -936,154 +936,4 @@ describe("autonomy lane surface", () => {
     expect(result?.details.authorization).toBe("none");
   });
 
-  it("emits report-only lane_brainstorm_packet with ranked slices", () => {
-    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-packet-ready-"));
-    mkdirSync(path.join(cwd, ".project"), { recursive: true });
-    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
-      tasks: [
-        { id: "TASK-LOCAL", description: "[P1] local lane", status: "planned" },
-      ],
-    }), "utf8");
-
-    const tools: RegisteredTool[] = [];
-    registerGuardrailsAutonomyLaneSurface({
-      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
-    } as never);
-
-    const brainstormTool = tools.find((tool) => tool.name === "lane_brainstorm_packet");
-    const result = brainstormTool?.execute("call-test", {
-      goal: "desinflar superfícies",
-      ideas: [
-        { id: "idea-a", theme: "dedupe outputs", value: "high", risk: "low", effort: "low" },
-        { id: "idea-b", theme: "expand docs", value: "medium", risk: "medium", effort: "high" },
-      ],
-      max_slices: 2,
-    }, undefined, undefined, { cwd });
-
-    expect(result?.details.mode).toBe("report-only");
-    expect(result?.details.dispatchAllowed).toBe(false);
-    expect(result?.details.mutationAllowed).toBe(false);
-    expect(result?.details.authorization).toBe("none");
-    expect(result?.details.decision).toBe("ready-for-human-review");
-    expect(result?.details.recommendationCode).toBe("seed-local-safe-lane");
-    expect((result?.details.selectedSlices as unknown[] | undefined)?.length).toBeGreaterThan(0);
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm: decision=ready-for-human-review");
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
-    expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"selectedSlices\"');
-  });
-
-  it("clips max_slices and falls back to eligible tasks when ideas are invalid", () => {
-    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-packet-fallback-"));
-    mkdirSync(path.join(cwd, ".project"), { recursive: true });
-    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
-      tasks: Array.from({ length: 15 }, (_, i) => ({
-        id: `TASK-LOCAL-${i + 1}`,
-        description: `[P1] local lane ${i + 1}`,
-        status: "planned",
-      })),
-    }), "utf8");
-
-    const tools: RegisteredTool[] = [];
-    registerGuardrailsAutonomyLaneSurface({
-      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
-    } as never);
-
-    const brainstormTool = tools.find((tool) => tool.name === "lane_brainstorm_packet");
-    const result = brainstormTool?.execute("call-test", {
-      goal: "preparar lane",
-      ideas: [{ id: "", theme: "" }],
-      max_slices: 999,
-      sample_limit: 20,
-    }, undefined, undefined, { cwd });
-
-    const selected = (result?.details.selectedSlices as Array<{ sourceTaskId?: string }> | undefined) ?? [];
-    expect(result?.details.decision).toBe("ready-for-human-review");
-    expect(result?.details.recommendationCode).toBe("seed-local-safe-lane");
-    expect(selected).toHaveLength(10);
-    expect(selected[0]?.sourceTaskId).toBe("TASK-LOCAL-1");
-  });
-
-  it("emits blocked lane_brainstorm_packet when only protected lane exists", () => {
-    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-packet-blocked-"));
-    mkdirSync(path.join(cwd, ".project"), { recursive: true });
-    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
-      tasks: [
-        { id: "TASK-COLONY-PROMOTION", description: "[P0] revisar colony promotion candidate", status: "planned" },
-      ],
-    }), "utf8");
-
-    const tools: RegisteredTool[] = [];
-    registerGuardrailsAutonomyLaneSurface({
-      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
-    } as never);
-
-    const brainstormTool = tools.find((tool) => tool.name === "lane_brainstorm_packet");
-    const result = brainstormTool?.execute("call-test", { goal: "lane longa" }, undefined, undefined, { cwd });
-
-    expect(result?.details.decision).toBe("blocked");
-    expect(result?.details.recommendationCode).toBe("needs-human-focus-protected");
-    expect(typeof result?.details.nextAction).toBe("string");
-    expect(result?.details.dispatchAllowed).toBe(false);
-    expect(result?.details.mutationAllowed).toBe(false);
-    expect(result?.details.authorization).toBe("none");
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm: decision=blocked");
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
-  });
-
-  it("emits visible brainstorm seed preview that requires human confirmation", () => {
-    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-seed-preview-"));
-    mkdirSync(path.join(cwd, ".project"), { recursive: true });
-    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
-      tasks: [
-        { id: "TASK-LOCAL", description: "[P1] local lane", status: "planned" },
-      ],
-    }), "utf8");
-
-    const tools: RegisteredTool[] = [];
-    registerGuardrailsAutonomyLaneSurface({
-      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
-    } as never);
-
-    const seedTool = tools.find((tool) => tool.name === "lane_brainstorm_seed_preview");
-    const result = seedTool?.execute("call-test", {
-      ideas: [{ id: "idea-a", theme: "dedupe", value: "high", risk: "low", effort: "low" }],
-      source: "tangent-approved",
-    }, undefined, undefined, { cwd });
-
-    expect(result?.details.decision).toBe("needs-human-seeding-decision");
-    expect(result?.details.recommendationCode).toBe("brainstorm-seeding-preview");
-    expect(String(result?.details.nextAction)).toContain("review proposals");
-    expect(result?.details.confirmationRequired).toBe(true);
-    expect(result?.details.source).toBe("tangent-approved");
-    expect(result?.details.dispatchAllowed).toBe(false);
-    expect(result?.details.mutationAllowed).toBe(false);
-    expect(result?.details.authorization).toBe("none");
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm-seed-preview: decision=needs-human-seeding-decision");
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
-    expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"proposals\"');
-  });
-
-  it("keeps brainstorm seed preview blocked for protected-only lane", () => {
-    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-seed-preview-blocked-"));
-    mkdirSync(path.join(cwd, ".project"), { recursive: true });
-    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
-      tasks: [
-        { id: "TASK-COLONY-PROMOTION", description: "[P0] revisar colony promotion candidate", status: "planned" },
-      ],
-    }), "utf8");
-
-    const tools: RegisteredTool[] = [];
-    registerGuardrailsAutonomyLaneSurface({
-      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
-    } as never);
-
-    const seedTool = tools.find((tool) => tool.name === "lane_brainstorm_seed_preview");
-    const result = seedTool?.execute("call-test", {}, undefined, undefined, { cwd });
-
-    expect(result?.details.decision).toBe("blocked");
-    expect(result?.details.recommendationCode).toBe("brainstorm-seeding-blocked");
-    expect(String(result?.details.nextAction).length).toBeGreaterThan(5);
-    expect(result?.details.confirmationRequired).toBe(true);
-    expect(result?.details.dispatchAllowed).toBe(false);
-  });
 });

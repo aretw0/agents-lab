@@ -329,7 +329,7 @@ export function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: stri
   let decision: "seed-now" | "wait" | "blocked" = "wait";
   let recommendationCode = "afk-material-seed-wait-stock-healthy";
   let nextAction = "defer seeding; continue bounded AFK slice and re-check material packet after checkpoint.";
-  let humanActionRequired = false;
+  let operatorActionRequired = false;
   let seedTemplates: ReturnType<typeof buildBootstrapSeedTemplates> = [];
 
   if (readiness.decision === "blocked") {
@@ -347,19 +347,19 @@ export function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: stri
       decision = "seed-now";
       recommendationCode = "afk-material-seed-now-bootstrap";
       nextAction = `run lane_brainstorm_packet + lane_brainstorm_seed_preview and decide bootstrap seeding for up to ${suggestedSeedCount} slices.`;
-      humanActionRequired = true;
+      operatorActionRequired = true;
       seedTemplates = buildBootstrapSeedTemplates({ suggestedSeedCount, maxSeedSlices });
     } else {
       decision = "blocked";
       recommendationCode = "afk-material-seed-blocked-readiness";
       nextAction = "resolve readiness blockers before triggering seeding flow.";
-      humanActionRequired = true;
+      operatorActionRequired = true;
     }
   } else if (readiness.decision === "seed-backlog") {
     decision = "seed-now";
     recommendationCode = "afk-material-seed-now-low-stock";
     nextAction = `run lane_brainstorm_packet + lane_brainstorm_seed_preview and decide seeding for up to ${suggestedSeedCount} slices.`;
-    humanActionRequired = true;
+    operatorActionRequired = true;
   }
 
   const reseedJustification = buildReseedJustification({
@@ -386,7 +386,7 @@ export function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: stri
     `suggestedSeedCount=${suggestedSeedCount}`,
     `seedWhy=${reseedJustification.reasonCode}`,
     `seedPriority=${reseedPriority.code}`,
-    `humanActionRequired=${humanActionRequired ? "yes" : "no"}`,
+    `operatorActionRequired=${operatorActionRequired ? "yes" : "no"}`,
     "authorization=none",
   ].join(" ");
 
@@ -395,7 +395,7 @@ export function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: stri
     decision,
     recommendationCode,
     nextAction,
-    humanActionRequired,
+    operatorActionRequired,
     suggestedSeedCount,
     maxSeedSlices,
     readiness,
