@@ -295,7 +295,7 @@ function extractIdeaCandidatesFromText(text, source) {
         status: "planned",
         description: title,
         acceptance_criteria: [
-          "Human review confirms priority/scope before autonomous execution.",
+          "Operator review confirms priority/scope before autonomous execution.",
           "Origin reference remains attached to the promoted task.",
           "No auto-close or aggressive priority promotion is applied by the inbox pipeline.",
         ],
@@ -345,7 +345,7 @@ function collectIdeaInbox({ ideaSources, sessions }) {
   return {
     proposalCount: deduped.length,
     reviewRequired: deduped.length > 0,
-    promotionPolicy: "draft-planned-task-only; human-review-required; no-auto-close; no-aggressive-priority",
+    promotionPolicy: "draft-planned-task-only; operator-review-required; no-auto-close; no-aggressive-priority",
     proposals: deduped,
   };
 }
@@ -831,7 +831,7 @@ function renderHuman(report) {
     for (const item of report.ideaInbox.proposals) {
       lines.push(`- ${item.id}: ${item.title}`);
       lines.push(`  - source: ${item.source.kind}:${item.source.ref}:${item.source.line}`);
-      lines.push("  - gate: human-review + verification + no-auto-close");
+      lines.push("  - gate: operator-review + verification + no-auto-close");
     }
   }
   lines.push("");

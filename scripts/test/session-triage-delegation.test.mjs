@@ -158,7 +158,7 @@ test("session-triage extracts idea inbox proposals from markdown and canonical e
     const report = runTriage({ workspace, eventsPath, extraArgs: ["--ideas", ideasPath] });
     assert.equal(report.ideaInbox.proposalCount, 3);
     assert.equal(report.ideaInbox.reviewRequired, true);
-    assert.match(report.ideaInbox.promotionPolicy, /human-review-required/);
+    assert.match(report.ideaInbox.promotionPolicy, /operator-review-required/);
     for (const proposal of report.ideaInbox.proposals) {
       assert.equal(proposal.taskDraft.status, "planned");
       assert.equal(proposal.decisionGate.requiresHumanApproval, true);

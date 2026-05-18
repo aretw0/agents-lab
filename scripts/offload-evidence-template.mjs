@@ -62,7 +62,7 @@ function buildMarkdown(args) {
     "- [ ] append evidence in .project/verification",
     "- [ ] add concise note in .project/tasks",
     "- [ ] refresh .project/handoff with next action",
-    "- [ ] keep protected scope as explicit human-governed",
+    "- [ ] keep protected scope as explicit operator-governed",
     "",
   ].join("\n");
 }

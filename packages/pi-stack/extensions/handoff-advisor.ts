@@ -8,7 +8,7 @@
  * Why this exists vs quota_visibility_route:
  *   - quota_visibility_route only uses budget signal.
  *   - handoff-advisor adds availability/health signal and produces an
- *     explicit switch command the human can confirm, not just a recommendation.
+ *     explicit switch command the operator can confirm, not just a recommendation.
  *
  * noAutoSwitch invariant: this tool NEVER switches provider automatically.
  * It only recommends and produces a confirming command hint.
@@ -194,7 +194,7 @@ export async function buildHandoffAdvisory(
     recommended = {
       provider: next.provider,
       modelRef: next.modelRef,
-      // Explicit switch hint — human confirms before running
+      // Explicit switch hint — operator confirms before running
       switchCommand: `quota_visibility_route({ "profile": "balanced", "execute": true })`,
       reason: [
         `${next.provider} has lowest combined score (budget:${next.budgetState} + readiness:${next.readiness} = ${next.score}).`,
@@ -269,7 +269,7 @@ export default function handoffAdvisorExtension(pi: ExtensionAPI) {
       ),
       operator_approval: operatorApprovalParameter("Structured operator approval envelope for execute=true."),
       reason: Type.Optional(
-        Type.String({ description: "Human-readable reason for the switch, stored in audit log." })
+        Type.String({ description: "Operator-readable reason for the switch, stored in audit log." })
       ),
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {

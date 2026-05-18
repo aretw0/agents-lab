@@ -2,7 +2,7 @@
  * session-analytics — queryable session log primitive for swarms and agents.
  *
  * Why this exists:
- * - session-triage.mjs is a CLI tool for human operators.
+ * - session-triage.mjs is a CLI tool for operators.
  * - Swarms need a machine-callable API: structured query params, JSON output.
  * - Makes the session log a first-class data source queryable from the Control Plane.
  *

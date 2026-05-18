@@ -279,7 +279,7 @@ function readCanonicalState(workspace) {
   };
 }
 
-function printHuman(report) {
+function printOperatorReadable(report) {
   const lines = [];
   lines.push("# Context Preload Pack");
   lines.push("");
@@ -353,8 +353,8 @@ function main() {
     return;
   }
 
-  const human = printHuman(report);
-  console.log(human);
+  const operatorReadable = printOperatorReadable(report);
+  console.log(operatorReadable);
   if (args.write) {
     console.log(`\nwritten: ${outPath.replace(/\\/g, "/")}`);
   }

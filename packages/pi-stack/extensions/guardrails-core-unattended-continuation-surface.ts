@@ -507,7 +507,7 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
       cooldown_ready: Type.Boolean({ description: "Whether reload/autoresume cooldown would allow a canary." }),
       auto_resume_preview_ready: Type.Boolean({ description: "Whether auto-resume preview is readable and bounded." }),
       pending_messages_clear: Type.Boolean({ description: "Whether no pending messages would be interrupted." }),
-      recent_steer_clear: Type.Boolean({ description: "Whether no recent human steer should suppress resume." }),
+      recent_steer_clear: Type.Boolean({ description: "Whether no recent operator steer should suppress resume." }),
       lane_queue_clear: Type.Boolean({ description: "Whether deferred lane queue is empty." }),
       stop_conditions_clear: Type.Boolean({ description: "Whether no real stop condition is present." }),
       context_level: Type.Optional(Type.Union([Type.Literal("ok"), Type.Literal("warn"), Type.Literal("checkpoint"), Type.Literal("compact")])),

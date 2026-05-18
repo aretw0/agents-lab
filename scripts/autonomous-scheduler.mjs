@@ -4,7 +4,7 @@
  * autonomous-scheduler — supervised autonomous task execution planner.
  *
  * Why this exists:
- * - Reduce micro-prompting: human approves strategy once, agent executes
+ * - Reduce micro-prompting: operator approves strategy once, agent executes
  *   the next eligible task without per-task instruction.
  * - Implements the selection algorithm from agent-driver-charter.md.
  * - Dry-run by default — never launches anything without --execute flag.
@@ -21,8 +21,8 @@
  *   - Board has unresolved P0 blockers with no unlockable path
  *   - Budget arg <= 0
  *
- * Human-in-the-loop:
- *   --execute only emits the goal prompt to stdout so the human pastes it
+ * Operator-in-the-loop:
+ *   --execute only emits the goal prompt to stdout so the operator pastes it
  *   into the pi session. The scheduler never invokes ant_colony directly.
  */
 
@@ -236,7 +236,7 @@ function main() {
     return;
   }
 
-  // Human-readable output
+  // Operator-readable output
   process.stdout.write("autonomous-scheduler\n");
   process.stdout.write(`mode: ${result.mode}\n`);
   process.stdout.write(`board: ${summary.byStatus.planned} planned | ${summary.byStatus["in-progress"]} in-progress | ${summary.byStatus.blocked} blocked | ${summary.byStatus.completed} completed\n`);
@@ -247,7 +247,7 @@ function main() {
 
   if (!next) {
     process.stdout.write("STOP: no eligible tasks found.\n");
-    process.stdout.write("Check: are all P0 depends_on completed? Are there blocked tasks needing human attention?\n");
+    process.stdout.write("Check: are all P0 depends_on completed? Are there blocked tasks needing operator attention?\n");
     process.exitCode = 0;
     return;
   }

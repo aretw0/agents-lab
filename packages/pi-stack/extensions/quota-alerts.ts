@@ -7,7 +7,7 @@
  *   3. Weekly window pressure (projected usage approaching hard cap)
  *
  * Overage consent: when a provider is BLOCK, the alert explicitly requires
- * human consent before using paid overage/credits. Never auto-charges.
+ * operator consent before using paid overage/credits. Never auto-charges.
  *
  * @capability-id quota-alerts
  * @capability-criticality high
@@ -302,7 +302,7 @@ export default function quotaAlertsExtension(pi: ExtensionAPI) {
     description: [
       "Proactive quota exhaustion alerts: budget WARN/BLOCK, 429 streak detection, window pressure.",
       "Returns structured alert list with severity and actionable recommendations.",
-      "No auto-switch — all alerts require human action.",
+      "No auto-switch — all alerts require operator action.",
     ].join(" "),
     parameters: Type.Object({
       lookback_hours: Type.Optional(

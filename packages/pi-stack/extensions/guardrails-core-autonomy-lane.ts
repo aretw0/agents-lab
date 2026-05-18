@@ -164,7 +164,7 @@ export function evaluateAutonomyLaneReadiness(input: AutonomyLaneReadinessInput)
       allowedWork: "none",
       stopReasons,
       steering,
-      nextAction: "stop, persist handoff, and require human or recovery lane before autonomous continuation.",
+      nextAction: "stop, persist handoff, and require operator or recovery lane before autonomous continuation.",
     };
   }
 

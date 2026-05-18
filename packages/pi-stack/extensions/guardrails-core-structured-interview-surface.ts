@@ -15,7 +15,7 @@ export function registerGuardrailsStructuredInterviewSurface(pi: ExtensionAPI): 
   pi.registerTool({
     name: "structured_interview_plan",
     label: "Structured Interview Plan",
-    description: "Backend-first structured interview/form primitive for sequential human gap filling. Read-only, UI-independent, and never authorizes dispatch.",
+    description: "Backend-first structured interview/form primitive for sequential operator gap filling. Read-only, UI-independent, and never authorizes dispatch.",
     parameters: Type.Object({
       questions: Type.Array(Type.Object({
         id: Type.String({ description: "Stable question id." }),
