@@ -59,7 +59,6 @@ function parseArgs(argv) {
 		dryRun: false,
 		noAuthImport: false,
 		dev: false,
-		pilot: false,
 		forcePressure: false,
 		piArgs: [],
 	};
@@ -96,10 +95,6 @@ function parseArgs(argv) {
 		}
 		if (a === "--dev") {
 			out.dev = true;
-			continue;
-		}
-		if (a === "--pilot") {
-			out.pilot = true;
 			continue;
 		}
 		if (a === "--force-pressure") {
@@ -155,7 +150,6 @@ function printHelp() {
 		"  node scripts/pi-isolated.mjs [status|help|adopt-latest|canonicalize-settings] [--reset] [--dev] [--dry-run] [--no-auth-import] [-- <args do pi>]",
 		"",
 		"--dev: pausa o loop autônomo (stopCondition=manual-pause) antes de iniciar pi.",
-		"--pilot: mantém overlay pilot no sandbox local (@davidorex workflows, web-remote, ant-colony).",
 		"--force-pressure: permite iniciar --dev mesmo quando pi:dev:pressure:strict bloquear.",
 		"       Use 'npm run pi:loop:resume' para retomar a fábrica depois.",
 	].join("\n"));
@@ -340,7 +334,7 @@ function isRecord(value) {
 	return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-const PILOT_PACKAGES = [
+const COLD_CAPABILITY_PACKAGES = [
 	"@davidorex/pi-project-workflows",
 	"@ifi/pi-web-remote",
 	"@ifi/oh-pi-ant-colony",
@@ -380,7 +374,7 @@ export function extractPackageNameFromSource(source) {
 		const versionAt = npm.indexOf("@", slash + 1);
 		return versionAt === -1 ? npm : npm.slice(0, versionAt);
 	}
-	for (const pkg of PILOT_PACKAGES) {
+	for (const pkg of COLD_CAPABILITY_PACKAGES) {
 		if (normalized.endsWith(`/node_modules/${pkg}`) || normalized.endsWith(`/node_modules/${pkg}/`)) {
 			return pkg;
 		}
@@ -389,9 +383,9 @@ export function extractPackageNameFromSource(source) {
 	return versionAt === -1 ? npm : npm.slice(0, versionAt);
 }
 
-export function isPilotPackageSource(source) {
+export function isColdCapabilityPackageSource(source) {
 	const pkg = extractPackageNameFromSource(source);
-	return Boolean(pkg && PILOT_PACKAGES.includes(pkg));
+	return Boolean(pkg && COLD_CAPABILITY_PACKAGES.includes(pkg));
 }
 
 export function leanEnabledModels() {
@@ -469,7 +463,7 @@ function canonicalizeLocalSettings({ dryRun = false } = {}) {
 	return { status: dryRun ? "dry-run" : "rewritten", changed: true, changes: result.changes };
 }
 
-function applyLocalRuntimeProfile({ pilot = false, dryRun = false } = {}) {
+function applyLocalRuntimeProfile({ dryRun = false } = {}) {
 	if (!existsSync(LOCAL_SETTINGS)) return { status: "missing", changed: false, removed: [] };
 	let settings;
 	try {
@@ -481,26 +475,17 @@ function applyLocalRuntimeProfile({ pilot = false, dryRun = false } = {}) {
 		return { status: "no-packages", changed: false, removed: [] };
 	}
 
-	if (pilot) {
-		const next = { ...settings, runtimeProfile: "pilot" };
-		const changed = settings.runtimeProfile !== "pilot";
-		if (changed && !dryRun) {
-			writeFileSync(LOCAL_SETTINGS, JSON.stringify(next, null, 2) + "\n", "utf8");
-		}
-		return { status: changed ? (dryRun ? "dry-run" : "pilot") : "pilot", changed, removed: [] };
-	}
-
 	const removed = [];
 	const packages = settings.packages.filter((entry) => {
 		const source = getPackageSource(entry);
-		if (!isPilotPackageSource(source)) return true;
+		if (!isColdCapabilityPackageSource(source)) return true;
 		removed.push(source);
 		return false;
 	});
 	const next = {
 		...settings,
 		packages,
-		runtimeProfile: "lean",
+		runtimeProfile: "control-plane",
 		defaultProvider: "openai-codex",
 		defaultModel: "gpt-5.3-codex",
 		enabledModels: LEAN_ENABLED_MODELS,
@@ -511,15 +496,15 @@ function applyLocalRuntimeProfile({ pilot = false, dryRun = false } = {}) {
 		currentEnabledModels.some((value, index) => value !== LEAN_ENABLED_MODELS[index]);
 	const changed =
 		removed.length > 0 ||
-		settings.runtimeProfile !== "lean" ||
+		settings.runtimeProfile !== "control-plane" ||
 		settings.defaultProvider !== "openai-codex" ||
 		settings.defaultModel !== "gpt-5.3-codex" ||
 		modelsChanged;
-	if (!changed) return { status: "lean", changed: false, removed };
+	if (!changed) return { status: "control-plane", changed: false, removed };
 	if (!dryRun) {
 		writeFileSync(LOCAL_SETTINGS, JSON.stringify(next, null, 2) + "\n", "utf8");
 	}
-	return { status: dryRun ? "dry-run" : "lean", changed: true, removed };
+	return { status: dryRun ? "dry-run" : "control-plane", changed: true, removed };
 }
 
 function ensureLeanWatchdogConfig({ dryRun = false } = {}) {
@@ -638,7 +623,7 @@ function run() {
 
 	const canonicalSettings = canonicalizeLocalSettings({ dryRun: opts.dryRun });
 	const runtimeProfile = opts.dev
-		? applyLocalRuntimeProfile({ pilot: opts.pilot, dryRun: opts.dryRun })
+		? applyLocalRuntimeProfile({ dryRun: opts.dryRun })
 		: { status: "not-dev", changed: false, removed: [] };
 	const watchdogConfig = opts.dev
 		? ensureLeanWatchdogConfig({ dryRun: opts.dryRun })
@@ -679,7 +664,7 @@ function run() {
 			console.log(`watchdog path:    ${watchdogConfig.path}`);
 		}
 		for (const removed of runtimeProfile.removed ?? []) {
-			console.log(`  removed pilot overlay: ${removed}`);
+			console.log(`  removed eager capability package: ${removed}`);
 		}
 		for (const change of canonicalSettings.changes) {
 			console.log(`  ${change.from} -> ${change.to}`);
@@ -736,8 +721,8 @@ function run() {
 		if (sessionResumeRequested) {
 			console.log("pi-isolated: --resume retoma a sessão do pi; loop de fábrica continua pausado até npm run pi:loop:resume");
 		}
-		if (runtimeProfile.status === "lean" || runtimeProfile.status === "dry-run") {
-			console.log("pi-isolated: runtime-profile=lean (pilot overlay off; use npm run pi:dev:pilot for colony/remote/workflows overlay)");
+		if (runtimeProfile.status === "control-plane" || runtimeProfile.status === "dry-run") {
+			console.log("pi-isolated: runtime-profile=control-plane (capabilities cold; activate expensive work by explicit intent)");
 		}
 		if (watchdogConfig.status === "created") {
 			console.log("pi-isolated: watchdog-config=lean (event-loop/RSS/heap guard calibrated for local dev)");

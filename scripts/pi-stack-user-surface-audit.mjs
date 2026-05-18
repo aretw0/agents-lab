@@ -41,7 +41,6 @@ function main() {
 		.filter(([name]) =>
 			name.startsWith("monitor:") ||
 			name.startsWith("subagent:") ||
-			name.startsWith("pi:pilot:") ||
 			name.startsWith("session:")
 		)
 		.map(([name, cmd]) => ({ name, cmd }))

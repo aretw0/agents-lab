@@ -61,7 +61,7 @@ describe("subagent-readiness extension", () => {
 
 	it("returns actionable recommendation hints by check name", () => {
 		expect(recommendationForReadinessCheck("colony-min-complete-signals")).toContain("COMPLETE");
-		expect(recommendationForReadinessCheck("pilot-package:@ifi/oh-pi-ant-colony")).toContain("pi:pilot:on:project");
+		expect(recommendationForReadinessCheck("capability-package:@ifi/oh-pi-ant-colony")).toContain("pacotes de capability");
 	});
 
 	it("subagent_readiness_status emits summary-first content with details preserved", async () => {
@@ -117,7 +117,7 @@ describe("subagent-readiness extension", () => {
 		}
 	});
 
-	it("strict readiness passes with complete signal and required pilot packages", () => {
+	it("strict readiness passes with complete signal and required capability packages", () => {
 		const dir = makeWorkspace();
 		try {
 			writeFileSync(
@@ -388,7 +388,7 @@ describe("subagent-readiness extension", () => {
 		}
 	});
 
-	it("strict readiness blocks when pilot packages are missing", () => {
+	it("strict readiness blocks when capability packages are missing", () => {
 		const dir = makeWorkspace();
 		try {
 			writeFileSync(
@@ -418,11 +418,11 @@ describe("subagent-readiness extension", () => {
 
 			expect(result.ready).toBe(false);
 			expect(
-				result.blockedReasons.some((r) => r.includes("pilot-package:@ifi/oh-pi-ant-colony")),
+				result.blockedReasons.some((r) => r.includes("capability-package:@ifi/oh-pi-ant-colony")),
 			).toBe(true);
 			expect(
 				result.blockedRecommendations.some(
-					(r) => r.check.includes("pilot-package:@ifi/oh-pi-ant-colony") && r.recommendation.includes("pi:pilot:on:project"),
+					(r) => r.check.includes("capability-package:@ifi/oh-pi-ant-colony") && r.recommendation.includes("pacotes de capability"),
 				),
 			).toBe(true);
 		} finally {

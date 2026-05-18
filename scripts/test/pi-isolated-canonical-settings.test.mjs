@@ -6,7 +6,7 @@ import {
 	canonicalizePackageSourceForLocalAgent,
 	canonicalizeSettingsObjectForLocalAgent,
 	extractPackageNameFromSource,
-	isPilotPackageSource,
+	isColdCapabilityPackageSource,
 	leanEnabledModels,
 	leanWatchdogConfig,
 } from "../pi-isolated.mjs";
@@ -58,16 +58,16 @@ test("canonicalizeSettingsObjectForLocalAgent rewrites string and object package
 	assert.equal(result.changes.length, 2);
 });
 
-test("pilot package detection covers npm and local node_modules sources", () => {
+test("cold capability package detection covers npm and local node_modules sources", () => {
 	assert.equal(extractPackageNameFromSource("npm:@ifi/oh-pi-ant-colony"), "@ifi/oh-pi-ant-colony");
 	assert.equal(extractPackageNameFromSource("npm:@ifi/pi-web-remote@0.5.1"), "@ifi/pi-web-remote");
 	assert.equal(
 		extractPackageNameFromSource("../../node_modules/@davidorex/pi-project-workflows"),
 		"@davidorex/pi-project-workflows",
 	);
-	assert.equal(isPilotPackageSource("npm:@ifi/oh-pi-ant-colony"), true);
-	assert.equal(isPilotPackageSource("../../node_modules/@davidorex/pi-project-workflows"), true);
-	assert.equal(isPilotPackageSource("../packages/pi-stack"), false);
+	assert.equal(isColdCapabilityPackageSource("npm:@ifi/oh-pi-ant-colony"), true);
+	assert.equal(isColdCapabilityPackageSource("../../node_modules/@davidorex/pi-project-workflows"), true);
+	assert.equal(isColdCapabilityPackageSource("../packages/pi-stack"), false);
 });
 
 test("lean model scope stays intentionally small", () => {

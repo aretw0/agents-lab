@@ -14,7 +14,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
-const STRICT_REQUIRED_PILOT_PACKAGES = [
+const STRICT_REQUIRED_CAPABILITY_PACKAGES = [
 	"@ifi/oh-pi-ant-colony",
 	"@ifi/pi-web-remote",
 ];
@@ -35,7 +35,7 @@ type SubagentReadinessOptions = {
 	maxFailedSignals?: number;
 	maxBudgetExceededSignals?: number;
 	minCompleteSignals?: number;
-	requirePilotPackages?: string[];
+	requireCapabilityPackages?: string[];
 };
 
 type Check = {
@@ -55,7 +55,7 @@ type SubagentReadinessResult = {
 		maxFailedSignals: number;
 		maxBudgetExceededSignals: number;
 		minCompleteSignals: number;
-		requirePilotPackages: string[];
+		requireCapabilityPackages: string[];
 		lookbackDays: number;
 		sessionLimit: number;
 		tailBytes: number;
@@ -102,8 +102,8 @@ function normalizeOptions(input: SubagentReadinessOptions | undefined): Required
 		minCompleteSignals: Number.isFinite(input?.minCompleteSignals)
 			? Math.max(0, Math.floor(Number(input?.minCompleteSignals)))
 			: 0,
-		requirePilotPackages: Array.isArray(input?.requirePilotPackages)
-			? input!.requirePilotPackages.filter((x): x is string => typeof x === "string" && x.trim().length > 0)
+		requireCapabilityPackages: Array.isArray(input?.requireCapabilityPackages)
+			? input!.requireCapabilityPackages.filter((x): x is string => typeof x === "string" && x.trim().length > 0)
 			: [],
 	};
 
@@ -112,8 +112,8 @@ function normalizeOptions(input: SubagentReadinessOptions | undefined): Required
 		if (!Number.isFinite(input?.limit)) {
 			out.limit = Math.max(out.limit, 3);
 		}
-		out.requirePilotPackages = [
-			...new Set([...out.requirePilotPackages, ...STRICT_REQUIRED_PILOT_PACKAGES]),
+		out.requireCapabilityPackages = [
+			...new Set([...out.requireCapabilityPackages, ...STRICT_REQUIRED_CAPABILITY_PACKAGES]),
 		];
 	}
 
@@ -361,8 +361,8 @@ export function recommendationForReadinessCheck(checkName: string): string {
 	if (checkName === "colony-min-complete-signals") {
 		return "Execute ao menos uma run controlada com COMPLETE auditável no recorte atual de sessões.";
 	}
-	if (checkName.startsWith("pilot-package:")) {
-		return "Habilite pacotes de pilot obrigatórios e rode /reload (atalho: npm run pi:pilot:on:project).";
+	if (checkName.startsWith("capability-package:")) {
+		return "Habilite os pacotes de capability necessários e rode /reload.";
 	}
 	return "Rever threshold/configuração e repetir gate em janela controlada.";
 }
@@ -459,10 +459,10 @@ export function runSubagentReadiness(
 		},
 	];
 
-	for (const pkg of opts.requirePilotPackages) {
+	for (const pkg of opts.requireCapabilityPackages) {
 		const found = allPackages.has(pkg);
 		checks.push({
-			name: `pilot-package:${pkg}`,
+			name: `capability-package:${pkg}`,
 			pass: found,
 			actual: found ? "present" : "missing",
 			expected: "present",
@@ -490,7 +490,7 @@ export function runSubagentReadiness(
 			maxFailedSignals: opts.maxFailedSignals,
 			maxBudgetExceededSignals: opts.maxBudgetExceededSignals,
 			minCompleteSignals: opts.minCompleteSignals,
-			requirePilotPackages: opts.requirePilotPackages,
+			requireCapabilityPackages: opts.requireCapabilityPackages,
 			lookbackDays: opts.days,
 			sessionLimit: opts.limit,
 			tailBytes: opts.tailBytes,
@@ -540,7 +540,7 @@ export default function subagentReadinessExtension(pi: ExtensionAPI) {
 		name: "subagent_readiness_status",
 		label: "Subagent Readiness Status",
 		description:
-			"Deterministic subagent readiness gate (monitor stability + colony signals + pilot package scope).",
+			"Deterministic subagent readiness gate (monitor stability + colony signals + capability package scope).",
 		parameters: Type.Object({
 			strict: Type.Optional(Type.Boolean()),
 			source: Type.Optional(Type.String({ description: "auto | isolated | global" })),
@@ -552,7 +552,7 @@ export default function subagentReadinessExtension(pi: ExtensionAPI) {
 			maxFailedSignals: Type.Optional(Type.Number()),
 			maxBudgetExceededSignals: Type.Optional(Type.Number()),
 			minCompleteSignals: Type.Optional(Type.Number()),
-			requirePilotPackages: Type.Optional(Type.Array(Type.String())),
+			requireCapabilityPackages: Type.Optional(Type.Array(Type.String())),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
 			const result = runSubagentReadiness(ctx.cwd, params as SubagentReadinessOptions);

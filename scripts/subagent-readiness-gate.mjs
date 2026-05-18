@@ -9,7 +9,7 @@
  * Combina 3 eixos:
  * 1) estabilidade de classify (monitor-stability-evidence)
  * 2) saúde recente de sinais de colônia (session-triage)
- * 3) presença de pacotes de capability para pilot/swarm
+ * 3) presença de pacotes de capability para workers/swarms
  *
  * Uso:
  *   node scripts/subagent-readiness-gate.mjs
@@ -23,7 +23,7 @@ import path from "node:path";
 import process from "node:process";
 import { spawnSync } from "node:child_process";
 
-const STRICT_REQUIRED_PILOT_PACKAGES = [
+const STRICT_REQUIRED_CAPABILITY_PACKAGES = [
 	"@ifi/oh-pi-ant-colony",
 	"@ifi/pi-web-remote",
 ];
@@ -39,7 +39,7 @@ function parseArgs(argv) {
 		maxFailedSignals: 0,
 		maxBudgetExceededSignals: 0,
 		minCompleteSignals: 0,
-		requirePilotPackages: [],
+		requireCapabilityPackages: [],
 		strict: false,
 		writeReport: false,
 	};
@@ -106,9 +106,9 @@ function parseArgs(argv) {
 			out.minCompleteSignals = Math.floor(n);
 			continue;
 		}
-		if (arg === "--require-pilot-packages") {
+		if (arg === "--require-capability-packages") {
 			const value = String(argv[++i] ?? "").trim();
-			out.requirePilotPackages = value
+			out.requireCapabilityPackages = value
 				.split(",")
 				.map((v) => v.trim())
 				.filter(Boolean);
@@ -141,8 +141,8 @@ function parseArgs(argv) {
 
 	if (out.strict) {
 		out.minCompleteSignals = Math.max(out.minCompleteSignals, 1);
-		out.requirePilotPackages = [
-			...new Set([...out.requirePilotPackages, ...STRICT_REQUIRED_PILOT_PACKAGES]),
+		out.requireCapabilityPackages = [
+			...new Set([...out.requireCapabilityPackages, ...STRICT_REQUIRED_CAPABILITY_PACKAGES]),
 		];
 	}
 
@@ -269,11 +269,11 @@ function evaluateChecks(opts, evidence, triage, packageEval) {
 		},
 	];
 
-	if (opts.requirePilotPackages.length > 0) {
-		for (const pkg of opts.requirePilotPackages) {
+	if (opts.requireCapabilityPackages.length > 0) {
+		for (const pkg of opts.requireCapabilityPackages) {
 			const found = packageEval.allPackages.has(pkg);
 			checks.push({
-				name: `pilot-package:${pkg}`,
+				name: `capability-package:${pkg}`,
 				pass: found,
 				actual: found ? "present" : "missing",
 				expected: "present",
@@ -352,7 +352,7 @@ function main() {
 			maxFailedSignals: opts.maxFailedSignals,
 			maxBudgetExceededSignals: opts.maxBudgetExceededSignals,
 			minCompleteSignals: opts.minCompleteSignals,
-			requirePilotPackages: opts.requirePilotPackages,
+			requireCapabilityPackages: opts.requireCapabilityPackages,
 			lookbackDays: opts.days,
 			sessionLimit: opts.limit,
 		},
