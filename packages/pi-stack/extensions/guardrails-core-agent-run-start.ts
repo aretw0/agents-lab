@@ -1,4 +1,12 @@
 import { buildAgentRunAbortPlan, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunRegistryEntry } from "./guardrails-core-agent-run-runtime";
+import {
+  buildTaskPacketGoal,
+  buildTaskRollback,
+  buildTaskValidationChecklist,
+  detectProtectedAgentTaskScope,
+  detectRawBoardAgentTaskScope,
+} from "./guardrails-core-agent-run-task-packet-helpers";
+import { buildEconomyGoalPrefix, buildEconomyInstructions, normalizeEconomyMode, normalizeMaxOutputLines } from "./guardrails-core-agent-run-worker-economy";
 import { resolveProviderExecutionBudgetEvidence, type ProviderExecutionBudgetDecision } from "./guardrails-core-provider-budget-evidence";
 import { buildToolkitContract, type ToolkitCapability, type ToolkitContractProfile, type ToolkitContractResult } from "./guardrails-core-toolkit-contract";
 
@@ -376,93 +384,8 @@ function normalizeInvocationProfile(value: unknown): AgentInvocationProfile | "u
   return value === "read-only-review" || value === "small-mutation" || value === "test-fix" || value === "research" ? value : "unknown";
 }
 
-function normalizeEconomyMode(value: unknown): AgentInvocationEconomyMode {
-  return value === "standard" || value === "critical" || value === "conserve" ? value : "conserve";
-}
-
-function normalizeMaxOutputLines(value: unknown, mode: AgentInvocationEconomyMode): number {
-  const fallback = mode === "critical" ? 20 : mode === "conserve" ? 40 : 80;
-  const requested = normalizePositiveInt(value, fallback);
-  return Math.max(5, Math.min(120, requested || fallback));
-}
-
-function buildEconomyInstructions(mode: AgentInvocationEconomyMode, maxOutputLines: number): string[] {
-  const base = [
-    "use only declared files unless the parent explicitly expands scope",
-    "avoid broad scans, dependency installs, remote calls, and repeated context restatement",
-    `keep final output concise: <=${maxOutputLines} lines unless reporting a hard blocker`,
-    "prefer exact file/line evidence over narrative explanation",
-    "stop and report missing context instead of exploring outside the declared scope",
-  ];
-  return mode === "standard" ? base.slice(0, 3) : base;
-}
-
-function buildEconomyGoalPrefix(mode: AgentInvocationEconomyMode, maxOutputLines: number, tokenBudgetEvidence: string): string {
-  const evidence = tokenBudgetEvidence ? ` Token budget evidence: ${tokenBudgetEvidence}.` : "";
-  return `Worker economy contract (${mode}): use declared files only; avoid broad scans; avoid restating context; keep output <=${maxOutputLines} lines.${evidence}`;
-}
-
 function sanitizeRunIdPart(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-}
-
-function detectRawBoardAgentTaskScope(files: string[]): boolean {
-  const rawBoardFiles = new Set([
-    ".project/tasks.json",
-    ".project/verification.json",
-    ".project/issues.json",
-    ".project/handoff.json",
-  ]);
-  return files.map((file) => file.replace(/\\/g, "/").toLowerCase()).some((file) => rawBoardFiles.has(file));
-}
-
-function detectProtectedAgentTaskScope(files: string[], description: string): boolean {
-  const protectedPrefixes = [
-    ".github/",
-    ".pi/settings.json",
-    ".sandbox/",
-    ".obsidian/",
-    "node_modules/",
-  ];
-  const protectedTextMarkers = [
-    " publish",
-    " release",
-    " ci",
-    " github actions",
-    " settings",
-    " credential",
-    " secret",
-    " remote ",
-  ];
-  const normalizedFiles = files.map((file) => file.replace(/\\/g, "/").toLowerCase());
-  if (normalizedFiles.some((file) => protectedPrefixes.some((prefix) => file === prefix.replace(/\/$/, "") || file.startsWith(prefix)))) return true;
-  const text = ` ${description.toLowerCase()} `;
-  return protectedTextMarkers.some((marker) => text.includes(marker));
-}
-
-function buildTaskPacketGoal(task: AgentRunTaskPacketTaskLike, acceptanceCriteria: string[]): string {
-  const description = normalizeText(task.description);
-  const criteria = acceptanceCriteria.map((criterion, index) => `${index + 1}. ${criterion}`).join("\n");
-  return [
-    `Implement board task ${normalizeText(task.id)} as one bounded first-party agent slice.`,
-    `Task description: ${description}`,
-    criteria ? `Acceptance criteria:\n${criteria}` : "Acceptance criteria: missing; stop and report blocker.",
-    "Stay within declared files. Do not dispatch other workers. Do not change settings, CI, publish, credentials, or remote state.",
-    "Return PASS/FAIL, files touched, validation evidence, and blockers only.",
-  ].join("\n\n");
-}
-
-function buildTaskValidationChecklist(taskId: string, acceptanceCriteria: string[], files: string[]): string[] {
-  return [
-    `board task ${taskId} remains the single focus`,
-    ...acceptanceCriteria.map((criterion) => `acceptance criterion: ${criterion}`),
-    `touched files must be a subset of: ${files.join(", ")}`,
-    "parent-side outcome packet must reject empty output even when process exit succeeds",
-  ];
-}
-
-function buildTaskRollback(files: string[]): string[] {
-  return files.length > 0 ? [`git restore ${files.join(" ")}`] : [];
 }
 
 export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): AgentRunStartPacketResult {
