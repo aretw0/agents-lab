@@ -87,8 +87,8 @@ export interface AgentRunStartPacketResult {
     budgetEvidenceProvider?: string;
     budgetEvidenceGeneratedAtIso?: string;
     budgetEvidenceFreshness: "fresh" | "stale" | "missing" | "not-required";
-    budgetEvidenceConsistency: "consistent" | "mismatch" | "needs-human-review";
-    budgetEvidenceHumanReviewRequired: boolean;
+    budgetEvidenceConsistency: "consistent" | "mismatch" | "needs-operator-review";
+    budgetEvidenceOperatorReviewRequired: boolean;
     protectedScopeRequested: boolean;
     toolkitContract?: ToolkitContractResult["contract"] & { blockers: string[]; decision: ToolkitContractResult["decision"] };
   };
@@ -502,7 +502,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       ...(budget.generatedAtIso ? { budgetEvidenceGeneratedAtIso: budget.generatedAtIso } : {}),
       budgetEvidenceFreshness: budget.freshness,
       budgetEvidenceConsistency: budget.consistency,
-      budgetEvidenceHumanReviewRequired: budget.humanReviewRequired,
+      budgetEvidenceOperatorReviewRequired: budget.operatorReviewRequired,
       protectedScopeRequested,
       ...(toolkitContract ? { toolkitContract: { ...toolkitContract.contract, blockers: toolkitContract.blockers, decision: toolkitContract.decision } } : {}),
     },
@@ -516,8 +516,8 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       ? [
           "present the structured operator approval packet before starting any worker",
           "if confirmed, registry-upsert planned->running with pid/log/status before invoking the command preview as argv",
-          budget.humanReviewRequired
-            ? "budget evidence is manual/unknown; get explicit human review or prefer a fresh route-advisory/provider-budget snapshot before invocation"
+          budget.operatorReviewRequired
+            ? "budget evidence is manual/unknown; get explicit operator review or prefer a fresh route-advisory/provider-budget snapshot before invocation"
             : "preserve fresh structured provider/model budget evidence with the run record before invocation",
           "prefer minimal-no-extensions isolation for provider-native workers unless a custom provider requires inherited extensions",
           "after exit, update registry and run parent-side outcome packet; empty output is a contract failure",

@@ -90,8 +90,8 @@ export interface AgentRunSdkInProcessPacketResult {
     budgetEvidenceProvider?: string;
     budgetEvidenceGeneratedAtIso?: string;
     budgetEvidenceFreshness: "fresh" | "stale" | "missing" | "not-required";
-    budgetEvidenceConsistency: "consistent" | "mismatch" | "needs-human-review";
-    budgetEvidenceHumanReviewRequired: boolean;
+    budgetEvidenceConsistency: "consistent" | "mismatch" | "needs-operator-review";
+    budgetEvidenceOperatorReviewRequired: boolean;
     abortKnown: boolean;
     eventStreamKnown: boolean;
     finalOutputContractKnown: boolean;
@@ -565,7 +565,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       budgetEvidenceGeneratedAtIso: budget.generatedAtIso,
       budgetEvidenceFreshness: budget.freshness,
       budgetEvidenceConsistency: budget.consistency,
-      budgetEvidenceHumanReviewRequired: budget.humanReviewRequired,
+      budgetEvidenceOperatorReviewRequired: budget.operatorReviewRequired,
       abortKnown,
       eventStreamKnown,
       finalOutputContractKnown,

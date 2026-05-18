@@ -448,7 +448,7 @@ describe("agent spawn readiness contract", () => {
       budgetEvidenceSource: "route-advisory",
       budgetEvidenceFreshness: "fresh",
       budgetEvidenceConsistency: "consistent",
-      budgetEvidenceHumanReviewRequired: false,
+      budgetEvidenceOperatorReviewRequired: false,
     });
 
     const stale = buildAgentRunStartPacket({

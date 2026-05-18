@@ -1,7 +1,7 @@
 export type ProviderExecutionBudgetDecision = "ok" | "warn" | "blocked" | "unknown";
 export type ProviderExecutionBudgetEvidenceSource = "route-advisory" | "provider-budget-snapshot" | "manual" | "unknown";
 export type ProviderExecutionBudgetFreshness = "fresh" | "stale" | "missing" | "not-required";
-export type ProviderExecutionBudgetConsistency = "consistent" | "mismatch" | "needs-human-review";
+export type ProviderExecutionBudgetConsistency = "consistent" | "mismatch" | "needs-operator-review";
 
 export interface ProviderExecutionBudgetEvidenceInput {
   budgetDecision?: ProviderExecutionBudgetDecision | string;
@@ -24,7 +24,7 @@ export interface ProviderExecutionBudgetEvidence {
   generatedAtIso?: string;
   freshness: ProviderExecutionBudgetFreshness;
   consistency: ProviderExecutionBudgetConsistency;
-  humanReviewRequired: boolean;
+  operatorReviewRequired: boolean;
   readyForExecution: boolean;
   blockers: string[];
 }
@@ -85,8 +85,8 @@ export function resolveProviderExecutionBudgetEvidence(input: ProviderExecutionB
       : provider && expectedProvider && providerFromModelRef(provider) !== expectedProvider
         ? "mismatch"
         : "consistent"
-    : "needs-human-review";
-  const humanReviewRequired = !hasStructuredSource;
+    : "needs-operator-review";
+  const operatorReviewRequired = !hasStructuredSource;
   const blockers: string[] = [];
 
   if (decision === "unknown") blockers.push("budget-decision-missing");
@@ -105,7 +105,7 @@ export function resolveProviderExecutionBudgetEvidence(input: ProviderExecutionB
     ...(generatedAtIso ? { generatedAtIso } : {}),
     freshness,
     consistency,
-    humanReviewRequired,
+    operatorReviewRequired,
     readyForExecution: blockers.length === 0,
     blockers,
   };
