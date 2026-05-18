@@ -1,4 +1,9 @@
 import { readProjectTasksArray } from "./context-watchdog-operator-brief";
+import {
+	taskHasLocalProtectedSignal,
+	taskHasLocalRiskSignal,
+	taskValidationGateKnown,
+} from "./guardrails-core-task-contracts";
 
 export type AfkMaterialReadinessDecision = "continue" | "seed-backlog" | "blocked";
 
@@ -18,48 +23,17 @@ export interface AfkMaterialReadinessSnapshot {
 	};
 }
 
-function taskHasProtectedSignalForAfkMaterial(task: { description?: unknown; files?: unknown }): boolean {
-	const files = Array.isArray(task.files) ? task.files.filter((item): item is string => typeof item === "string") : [];
-	const haystack = [typeof task.description === "string" ? task.description : "", ...files].join("\n").toLowerCase();
-	return /(\.github\/|\.obsidian\/|\.pi\/settings\.json|\bgithub actions\b|\bremote\b|\bpublish\b|https?:\/\/|\bci\b)/i.test(haystack);
-}
-
-function taskHasRiskSignalForAfkMaterial(task: { description?: unknown; notes?: unknown; acceptance_criteria?: unknown; files?: unknown }): boolean {
-	if (taskHasProtectedSignalForAfkMaterial(task)) return true;
-	const files = Array.isArray(task.files) ? task.files.filter((item): item is string => typeof item === "string") : [];
-	if (files.length >= 9) return true;
-	const acceptance = Array.isArray(task.acceptance_criteria)
-		? task.acceptance_criteria.filter((item): item is string => typeof item === "string")
-		: [];
-	const text = [
-		typeof task.description === "string" ? task.description : "",
-		typeof task.notes === "string" ? task.notes : "",
-		...acceptance,
-		...files,
-	].join("\n").toLowerCase();
-	return /\b(delete|destroy|drop\s+table|rm\s+-rf|force\s+push|destructive|irreversible|dangerous)\b/i.test(text);
-}
-
-function taskValidationGateKnownForAfkMaterial(task: { description?: unknown; acceptance_criteria?: unknown; files?: unknown }): boolean {
-	const files = Array.isArray(task.files) ? task.files.filter((item): item is string => typeof item === "string") : [];
-	const acceptance = Array.isArray(task.acceptance_criteria)
-		? task.acceptance_criteria.filter((item): item is string => typeof item === "string")
-		: [];
-	const text = [typeof task.description === "string" ? task.description : "", ...acceptance, ...files].join("\n").toLowerCase();
-	return /(smoke|test|spec|vitest|marker-check|inspection|lint|typecheck|build)/i.test(text);
-}
-
 export function buildAfkMaterialReadinessSnapshot(cwd: string, focusTasks: string, minReadySlices = 3, targetSlices = 7): AfkMaterialReadinessSnapshot {
 	const tasks = readProjectTasksArray(cwd)
 		.filter((task): task is Record<string, unknown> => Boolean(task) && typeof task === "object");
 	const candidates = tasks.filter((task) => {
 		const status = typeof task.status === "string" ? task.status : "";
 		if (status !== "in-progress" && status !== "planned") return false;
-		if (taskHasProtectedSignalForAfkMaterial(task)) return false;
-		if (taskHasRiskSignalForAfkMaterial(task)) return false;
+		if (taskHasLocalProtectedSignal(task)) return false;
+		if (taskHasLocalRiskSignal(task)) return false;
 		return true;
 	});
-	const validationKnown = candidates.filter((task) => taskValidationGateKnownForAfkMaterial(task));
+	const validationKnown = candidates.filter((task) => taskValidationGateKnown(task));
 
 	const focusIds = focusTasks === "none-listed"
 		? []
@@ -83,7 +57,7 @@ export function buildAfkMaterialReadinessSnapshot(cwd: string, focusTasks: strin
 			blockedReasons.push("focus-task-not-found");
 			continue;
 		}
-		if (!taskValidationGateKnownForAfkMaterial(task)) blockedReasons.push("focus-validation-unknown");
+		if (!taskValidationGateKnown(task)) blockedReasons.push("focus-validation-unknown");
 	}
 
 	const minReady = Math.max(1, Math.min(20, Math.floor(minReadySlices)));

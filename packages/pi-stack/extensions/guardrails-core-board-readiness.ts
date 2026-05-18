@@ -7,6 +7,7 @@ import {
   buildBoardExecuteNextIntent,
   encodeGuardrailsIntent,
 } from "./guardrails-core-intent-bus";
+import { normalizeTaskDependencyIds, normalizeTaskId } from "./guardrails-core-task-contracts";
 
 export interface BoardLongRunReadiness {
   ready: boolean;
@@ -31,18 +32,6 @@ function clampSampleLimit(value: unknown, fallback = 3): number {
   const raw = Number(value);
   if (!Number.isFinite(raw) || raw <= 0) return fallback;
   return Math.max(1, Math.min(20, Math.floor(raw)));
-}
-
-function normalizeTaskId(value: unknown): string | undefined {
-  const id = typeof value === "string" ? value.trim() : "";
-  return id.length > 0 ? id : undefined;
-}
-
-function normalizeDependsOn(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value
-    .map((v) => (typeof v === "string" ? v.trim() : ""))
-    .filter((v) => v.length > 0);
 }
 
 function getStatusCounts(tasks: ProjectTaskItem[]): BoardLongRunReadiness["totals"] {
@@ -108,14 +97,14 @@ export function evaluateBoardLongRunReadiness(
   });
   const eligible = planned
     .filter((task) => {
-      const deps = normalizeDependsOn(task.depends_on);
+      const deps = normalizeTaskDependencyIds(task.depends_on);
       if (deps.length === 0) return true;
       return deps.every((dep) => completed.has(dep));
     })
     .sort(compareEligibleTasks);
 
   const blockedByDependencies = planned.filter((task) => {
-    const deps = normalizeDependsOn(task.depends_on);
+    const deps = normalizeTaskDependencyIds(task.depends_on);
     return deps.length > 0 && !deps.every((dep) => completed.has(dep));
   }).length;
 

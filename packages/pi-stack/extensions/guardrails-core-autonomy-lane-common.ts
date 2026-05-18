@@ -9,6 +9,13 @@ import { readProjectTasksBlock, type ProjectTaskItem } from "./colony-pilot-task
 import { resolveHandoffFreshness, type HandoffFreshnessLabel } from "./context-watchdog-handoff";
 import { readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
 import { asBooleanWithDefault, asNonEmptyStringArray, asNumberWithDefault } from "./guardrails-core-param-normalizers";
+import {
+  normalizeTaskDependencyIds,
+  normalizeTaskId as normalizeOptionalTaskId,
+  taskHasLocalProtectedSignal,
+  taskHasLocalRiskSignal,
+  taskValidationGateKnown as taskContractValidationGateKnown,
+} from "./guardrails-core-task-contracts";
 
 export function normalizeContextLevel(value: unknown): AutonomyContextLevel {
   return value === "compact" || value === "checkpoint" || value === "warn" || value === "ok" ? value : "ok";
@@ -246,7 +253,7 @@ export function resolveFocusTaskIds(p: Record<string, unknown>, cwd: string): { 
 }
 
 export function normalizeTaskId(value: unknown): string {
-  return typeof value === "string" ? value.trim() : "";
+  return normalizeOptionalTaskId(value) ?? "";
 }
 
 export function findTaskById(tasks: ProjectTaskItem[], taskId: string): ProjectTaskItem | undefined {
@@ -342,20 +349,15 @@ export function buildAutonomyOperatorPauseBrief(input: {
 }
 
 export function taskHasProtectedSignal(task: ProjectTaskItem): boolean {
-  const haystack = [task.description, ...(task.files ?? [])].join("\n").toLowerCase();
-  return /(\.github\/|\.obsidian\/|\.pi\/settings\.json|\bgithub actions\b|\bremote\b|\bpublish\b|https?:\/\/|\bci\b)/i.test(haystack);
+  return taskHasLocalProtectedSignal(task);
 }
 
 export function taskHasRiskSignal(task: ProjectTaskItem): boolean {
-  const text = [task.description, task.notes ?? "", ...(task.acceptance_criteria ?? []), ...(task.files ?? [])].join("\n").toLowerCase();
-  if (taskHasProtectedSignal(task)) return true;
-  if ((task.files?.length ?? 0) >= 9) return true;
-  return /\b(delete|destroy|drop\s+table|rm\s+-rf|force\s+push|destructive|irreversible|dangerous)\b/i.test(text);
+  return taskHasLocalRiskSignal(task);
 }
 
 export function taskValidationGateKnown(task: ProjectTaskItem): boolean {
-  const text = [task.description, ...(task.acceptance_criteria ?? []), ...(task.files ?? [])].join("\n").toLowerCase();
-  return /(smoke|test|spec|vitest|marker-check|inspection|lint|typecheck|build)/i.test(text);
+  return taskContractValidationGateKnown(task);
 }
 
 export function workspaceLooksClean(cwd: string): boolean {
@@ -385,8 +387,5 @@ export function resolveAutoAdvanceFailClosedReasons(input: {
 }
 
 export function normalizeDependsOn(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value
-    .map((item) => normalizeTaskId(item))
-    .filter((item): item is string => Boolean(item));
+  return normalizeTaskDependencyIds(value);
 }
