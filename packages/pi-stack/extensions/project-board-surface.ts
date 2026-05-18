@@ -299,7 +299,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     acceptance_criteria: Type.Optional(Type.Array(Type.String(), { description: "Optional bounded acceptance criteria." })),
     milestone: Type.Optional(Type.String({ description: "Optional milestone label." })),
     note: Type.Optional(Type.String({ description: "Optional initial note." })),
-    provenance_origin: Type.Optional(Type.String({ description: "Optional provenance origin: brainstorm | human | tangent-approved." })),
+    provenance_origin: Type.Optional(Type.String({ description: "Optional provenance origin: brainstorm | operator | tangent-approved." })),
     source_task_id: Type.Optional(Type.String({ description: "Optional source task id for emergent/tangent work." })),
     source_reason: Type.Optional(Type.String({ description: "Optional bounded reason describing why emergent work was created." })),
   });

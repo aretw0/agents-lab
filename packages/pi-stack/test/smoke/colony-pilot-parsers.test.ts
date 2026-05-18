@@ -955,7 +955,7 @@ describe("colony-pilot parsers", () => {
 		expect(lines.join("\n")).toContain("fix:");
 	});
 
-	it("colonyPhaseToProjectTaskStatus respeita human close", () => {
+	it("colonyPhaseToProjectTaskStatus respeita operator close", () => {
 		expect(colonyPhaseToProjectTaskStatus("running", true)).toBe("in-progress");
 		expect(colonyPhaseToProjectTaskStatus("completed", true)).toBe(
 			"in-progress",

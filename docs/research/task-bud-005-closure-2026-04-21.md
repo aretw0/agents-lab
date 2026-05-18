@@ -5,7 +5,7 @@ Implementar adapter inicial opt-in para sincronizar eventos de colônia com `.pr
 
 ## Entregas
 - Comportamento opt-in de criação no launch validado (`createOnLaunch`).
-- Fluxo candidate/human-close validado (`requireHumanClose=true` mantém `completed` em `in-progress` com nota de candidato).
+- Fluxo candidate/operator-close validado (`requireOperatorClose=true` mantém `completed` em `in-progress` com nota de candidato).
 - Base single-writer/atômica já endurecida no task-sync (suporte operacional da trilha).
 
 ## Evidência de teste

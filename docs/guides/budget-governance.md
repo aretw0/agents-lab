@@ -137,7 +137,7 @@ Exemplo:
         "trackProgress": true,
         "markTerminalState": true,
         "taskIdPrefix": "colony",
-        "requireHumanClose": true,
+        "requireOperatorClose": true,
         "maxNoteLines": 20
       }
     }
@@ -148,8 +148,8 @@ Exemplo:
 ### Política single-board clock (v1)
 - `.project/tasks` é a fonte oficial macro (planejamento/governança/versionamento).
 - Estado efêmero da colônia (runtime/worktree/tasks internas) é apenas execução operacional.
-- Sync start/progress/end atualiza o board oficial, mas não substitui revisão humana de fechamento.
-- `requireHumanClose=true` mantém `completed` em estado candidato (`in-progress`) até verificação explícita.
+- Sync start/progress/end atualiza o board oficial, mas não substitui revisão do operador de fechamento.
+- `requireOperatorClose=true` mantém `completed` em estado candidato (`in-progress`) até verificação explícita.
 
 ### Projeção de status (TUI + WEB)
 - **Semântica compartilhada**: status `board-clock` derivado de `.project/tasks` (`ip/blk/plan`).

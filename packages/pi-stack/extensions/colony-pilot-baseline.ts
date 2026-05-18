@@ -70,7 +70,7 @@ export function buildProjectBaselineSettings(
 					trackProgress: true,
 					markTerminalState: true,
 					taskIdPrefix: "colony",
-					requireHumanClose: true,
+					requireOperatorClose: true,
 					maxNoteLines: 20,
 					autoQueueRecoveryOnCandidate: true,
 					recoveryTaskSuffix: "promotion",

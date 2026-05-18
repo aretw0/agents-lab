@@ -331,12 +331,12 @@ export function normalizeStringArray(value: unknown, maxItems: number, maxItemLe
   return out.length > 0 ? out : undefined;
 }
 
-export type BoardTaskProvenanceOrigin = "brainstorm" | "human" | "tangent-approved";
+export type BoardTaskProvenanceOrigin = "brainstorm" | "operator" | "tangent-approved";
 
 export function normalizeTaskProvenanceOrigin(value: unknown): BoardTaskProvenanceOrigin | undefined {
   if (typeof value !== "string") return undefined;
   const normalized = value.trim().toLowerCase();
-  if (normalized === "brainstorm" || normalized === "human" || normalized === "tangent-approved") {
+  if (normalized === "brainstorm" || normalized === "operator" || normalized === "tangent-approved") {
     return normalized;
   }
   return undefined;

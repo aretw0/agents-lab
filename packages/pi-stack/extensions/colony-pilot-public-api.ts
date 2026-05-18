@@ -116,12 +116,12 @@ export const formatDeliveryPolicyEvaluation =
 
 export function colonyPhaseToProjectTaskStatus(
 	phase: ColonyPhase,
-	requireHumanClose: boolean,
+	requireOperatorClose: boolean,
 ): "planned" | "in-progress" | "completed" | "blocked" {
 	if (phase === "failed" || phase === "aborted" || phase === "budget_exceeded")
 		return "blocked";
 	if (phase === "completed")
-		return requireHumanClose ? "in-progress" : "completed";
+		return requireOperatorClose ? "in-progress" : "completed";
 	return "in-progress";
 }
 

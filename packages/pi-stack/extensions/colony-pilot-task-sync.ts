@@ -40,7 +40,7 @@ export interface ColonyTaskSyncConfigShape {
 	trackProgress: boolean;
 	markTerminalState: boolean;
 	taskIdPrefix: string;
-	requireHumanClose: boolean;
+	requireOperatorClose: boolean;
 	maxNoteLines: number;
 	recoveryTaskSuffix: string;
 }
@@ -238,9 +238,9 @@ function normalizeMilestoneLabel(input: unknown): string | undefined {
 
 function colonyPhaseToProjectTaskStatus(
 	phase: ColonyPhase,
-	requireHumanClose: boolean,
+	requireOperatorClose: boolean,
 ): ProjectTaskStatus {
-	const eventType = colonyPhaseToCanonicalTaskEventType(phase, requireHumanClose);
+	const eventType = colonyPhaseToCanonicalTaskEventType(phase, requireOperatorClose);
 	if (!eventType) return "in-progress";
 	return canonicalTaskEventTypeToProjectTaskStatus(eventType);
 }
@@ -253,7 +253,7 @@ export type CanonicalTaskEventType =
 	| "done_verified"
 	| "recovery";
 
-export type CanonicalTaskEventSource = "colony" | "scheduler" | "human" | "ci";
+export type CanonicalTaskEventSource = "colony" | "scheduler" | "operator" | "ci";
 
 export interface CanonicalTaskEvent {
 	eventId: string;
@@ -266,12 +266,12 @@ export interface CanonicalTaskEvent {
 
 export function colonyPhaseToCanonicalTaskEventType(
 	phase: ColonyPhase,
-	requireHumanClose: boolean,
+	requireOperatorClose: boolean,
 ): CanonicalTaskEventType | undefined {
 	if (phase === "launched") return "start";
 	if (phase === "running" || phase === "scouting") return "progress";
 	if (phase === "task_done") return "review";
-	if (phase === "completed") return requireHumanClose ? "done_candidate" : "done_verified";
+	if (phase === "completed") return requireOperatorClose ? "done_candidate" : "done_verified";
 	if (phase === "failed" || phase === "aborted" || phase === "budget_exceeded") {
 		return "recovery";
 	}
@@ -336,14 +336,14 @@ export function normalizeCanonicalEvidenceRefs(input: unknown): string[] | undef
 export function buildCanonicalTaskEventFromColonySignal(options: {
 	taskId: string;
 	signal: { phase: ColonyPhase; id: string };
-	requireHumanClose: boolean;
+	requireOperatorClose: boolean;
 	timestamp?: string;
 	source?: CanonicalTaskEventSource;
 	evidenceRefs?: string[];
 }): CanonicalTaskEvent | undefined {
 	const type = colonyPhaseToCanonicalTaskEventType(
 		options.signal.phase,
-		options.requireHumanClose,
+		options.requireOperatorClose,
 	);
 	if (!type) return undefined;
 	const timestamp = options.timestamp ?? new Date().toISOString();
@@ -386,7 +386,7 @@ export function upsertProjectTaskFromColonySignal(
 	const idx = block.tasks.findIndex((t) => t.id === taskId);
 	const nextStatus = colonyPhaseToProjectTaskStatus(
 		signal.phase,
-		cfg.requireHumanClose,
+		cfg.requireOperatorClose,
 	);
 	const isTerminal =
 		signal.phase === "completed" ||
@@ -398,8 +398,8 @@ export function upsertProjectTaskFromColonySignal(
 	const milestone = normalizeMilestoneLabel(options.milestone);
 
 	const line =
-		signal.phase === "completed" && cfg.requireHumanClose
-			? `[${now}] colony ${signal.id} phase=completed (candidate only, aguardando revisão humana)`
+		signal.phase === "completed" && cfg.requireOperatorClose
+			? `[${now}] colony ${signal.id} phase=completed (candidate only, aguardando revisão do operador)`
 			: `[${now}] colony ${signal.id} phase=${signal.phase}`;
 
 	if (idx === -1) {
@@ -475,7 +475,7 @@ export function ensureRecoveryTaskForCandidate(
 	const checklist = [
 		"Coletar inventário final de arquivos alterados e validar se aplica ao branch alvo.",
 		"Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
-		"Promover candidate para revisão humana (sem auto-close).",
+		"Promover candidate para revisão do operador (sem auto-close).",
 	];
 
 	if (idx === -1) {

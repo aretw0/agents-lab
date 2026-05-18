@@ -68,7 +68,7 @@ export function buildLaneBrainstormParameters(options: { includeSource?: boolean
     sample_limit: Type.Optional(Type.Number()),
   };
   if (options.includeSource === true) {
-    props.source = Type.Optional(Type.String({ description: "brainstorm | human | tangent-approved" }));
+    props.source = Type.Optional(Type.String({ description: "brainstorm | operator | tangent-approved" }));
   }
   return Type.Object(props);
 }

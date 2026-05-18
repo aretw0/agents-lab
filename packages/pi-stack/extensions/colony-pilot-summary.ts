@@ -81,7 +81,7 @@ export function buildColonyPilotStatusLines(input: {
 	projectTaskSyncConfig: {
 		enabled: boolean;
 		taskIdPrefix: string;
-		requireHumanClose: boolean;
+		requireOperatorClose: boolean;
 		autoQueueRecoveryOnCandidate: boolean;
 		recoveryTaskSuffix: string;
 	};
@@ -112,7 +112,7 @@ export function buildColonyPilotStatusLines(input: {
 		"project-task-sync:",
 		`  enabled: ${input.projectTaskSyncConfig.enabled ? "yes" : "no"}`,
 		`  taskIdPrefix: ${input.projectTaskSyncConfig.taskIdPrefix}`,
-		`  requireHumanClose: ${input.projectTaskSyncConfig.requireHumanClose ? "yes" : "no"}`,
+		`  requireOperatorClose: ${input.projectTaskSyncConfig.requireOperatorClose ? "yes" : "no"}`,
 		`  autoQueueRecoveryOnCandidate: ${input.projectTaskSyncConfig.autoQueueRecoveryOnCandidate ? "yes" : "no"}`,
 		`  recoveryTaskSuffix: ${input.projectTaskSyncConfig.recoveryTaskSuffix}`,
 		"candidate-retention:",
@@ -134,7 +134,7 @@ export function buildColonyPilotCheckLines(input: {
 		createOnLaunch: boolean;
 		trackProgress: boolean;
 		markTerminalState: boolean;
-		requireHumanClose: boolean;
+		requireOperatorClose: boolean;
 		taskIdPrefix: string;
 		autoQueueRecoveryOnCandidate: boolean;
 		recoveryTaskSuffix: string;
@@ -167,7 +167,7 @@ export function buildColonyPilotCheckLines(input: {
 		`  createOnLaunch: ${input.projectTaskSyncConfig.createOnLaunch ? "yes" : "no"}`,
 		`  trackProgress: ${input.projectTaskSyncConfig.trackProgress ? "yes" : "no"}`,
 		`  markTerminalState: ${input.projectTaskSyncConfig.markTerminalState ? "yes" : "no"}`,
-		`  requireHumanClose: ${input.projectTaskSyncConfig.requireHumanClose ? "yes" : "no"}`,
+		`  requireOperatorClose: ${input.projectTaskSyncConfig.requireOperatorClose ? "yes" : "no"}`,
 		`  taskIdPrefix: ${input.projectTaskSyncConfig.taskIdPrefix}`,
 		`  autoQueueRecoveryOnCandidate: ${input.projectTaskSyncConfig.autoQueueRecoveryOnCandidate ? "yes" : "no"}`,
 		`  recoveryTaskSuffix: ${input.projectTaskSyncConfig.recoveryTaskSuffix}`,

@@ -85,7 +85,7 @@ function buildReport(data) {
     "",
     "## Governance notes",
     "- publish permanece gateado por tag semver + smoke/test/verify/audit",
-    "- draft release é manual (workflow_dispatch) para revisão humana",
+    "- draft release é manual (workflow_dispatch) para revisão do operador",
     "- promotion de release exige evidência canônica no board/handoff",
     "",
   ];

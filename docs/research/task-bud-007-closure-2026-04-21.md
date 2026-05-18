@@ -13,11 +13,11 @@ Consolidar política single-board clock: `.project/tasks` como fonte oficial mac
     - criação no launch opt-in;
     - atualização start/progress/end no mesmo registro canônico;
     - terminal `failed` marcando board como `blocked`;
-    - `completed` mantendo candidate com `requireHumanClose=true`.
+    - `completed` mantendo candidate com `requireOperatorClose=true`.
 
 ## Validação
 - `"/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe" node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts packages/pi-stack/test/smoke/colony-pilot-task-sync-lock.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts`
   - resultado: `3 files passed`, `74 tests passed`.
 
 ## Resultado
-Critérios atendidos: eventos essenciais sincronizam o board, estado efêmero não substitui o board oficial, e fechamento continua human-in-the-loop.
+Critérios atendidos: eventos essenciais sincronizam o board, estado efêmero não substitui o board oficial, e fechamento continua operator-in-the-loop.

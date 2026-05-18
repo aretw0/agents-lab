@@ -19,7 +19,7 @@ function cfg(overrides?: Partial<ColonyTaskSyncConfigShape>): ColonyTaskSyncConf
 		trackProgress: true,
 		markTerminalState: true,
 		taskIdPrefix: "colony",
-		requireHumanClose: true,
+		requireOperatorClose: true,
 		maxNoteLines: 20,
 		recoveryTaskSuffix: "promotion",
 		...overrides,
@@ -95,21 +95,21 @@ describe("colony-pilot task-sync behavior", () => {
 		}
 	});
 
-	it("keeps completed colony as candidate (in-progress) when requireHumanClose is true", () => {
+	it("keeps completed colony as candidate (in-progress) when requireOperatorClose is true", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "pi-task-sync-candidate-"));
 		try {
 			const launch = upsertProjectTaskFromColonySignal(
 				cwd,
-				{ phase: "launched", id: "c-human" },
-				{ config: cfg({ requireHumanClose: true }), source: "ant_colony" },
+				{ phase: "launched", id: "c-operator" },
+				{ config: cfg({ requireOperatorClose: true }), source: "ant_colony" },
 			);
 			expect(launch.changed).toBe(true);
 
 			const done = upsertProjectTaskFromColonySignal(
 				cwd,
-				{ phase: "completed", id: "c-human" },
+				{ phase: "completed", id: "c-operator" },
 				{
-					config: cfg({ requireHumanClose: true }),
+					config: cfg({ requireOperatorClose: true }),
 					taskIdOverride: launch.taskId,
 					source: "ant_colony",
 				},
@@ -130,7 +130,7 @@ describe("colony-pilot task-sync behavior", () => {
 			const launch = upsertProjectTaskFromColonySignal(
 				cwd,
 				{ phase: "launched", id: "c-terminal" },
-				{ config: cfg({ requireHumanClose: false }), source: "ant_colony" },
+				{ config: cfg({ requireOperatorClose: false }), source: "ant_colony" },
 			);
 			expect(launch.changed).toBe(true);
 
@@ -138,7 +138,7 @@ describe("colony-pilot task-sync behavior", () => {
 				cwd,
 				{ phase: "completed", id: "c-terminal" },
 				{
-					config: cfg({ requireHumanClose: false }),
+					config: cfg({ requireOperatorClose: false }),
 					taskIdOverride: launch.taskId,
 					source: "ant_colony",
 				},
@@ -149,7 +149,7 @@ describe("colony-pilot task-sync behavior", () => {
 				cwd,
 				{ phase: "budget_exceeded", id: "c-terminal" },
 				{
-					config: cfg({ requireHumanClose: false }),
+					config: cfg({ requireOperatorClose: false }),
 					taskIdOverride: launch.taskId,
 					source: "ant_colony",
 				},
@@ -216,7 +216,7 @@ describe("colony-pilot task-sync behavior", () => {
 		const event = buildCanonicalTaskEventFromColonySignal({
 			taskId: "TASK-BUD-018",
 			signal: { phase: "running", id: "colony-abc" },
-			requireHumanClose: true,
+			requireOperatorClose: true,
 			timestamp: "2026-04-22T02:30:00.000Z",
 			source: "colony",
 			evidenceRefs: ["docs/research/colony-project-task-bridge.md"],
@@ -256,14 +256,14 @@ describe("colony-pilot task-sync behavior", () => {
 		const first = buildCanonicalTaskEventFromColonySignal({
 			taskId: "TASK-BUD-018",
 			signal: { phase: "running", id: "colony-abc" },
-			requireHumanClose: true,
+			requireOperatorClose: true,
 			timestamp: "",
 			source: "colony",
 		});
 		const second = buildCanonicalTaskEventFromColonySignal({
 			taskId: "TASK-BUD-018",
 			signal: { phase: "running", id: "colony-abc" },
-			requireHumanClose: true,
+			requireOperatorClose: true,
 			timestamp: "",
 			source: "colony",
 		});

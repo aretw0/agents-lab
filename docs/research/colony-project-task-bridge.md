@@ -23,7 +23,7 @@ A integração ocorre via adapter no `colony-pilot` (opt-in), que projeta sinais
 
 - `.project/tasks.json` = fonte oficial macro (governança/versionamento).
 - Estado efêmero da colônia = telemetria operacional (não substitui board).
-- Fechamento de task estratégica permanece human-in-the-loop (`requireHumanClose=true` mantém candidate).
+- Fechamento de task estratégica permanece operator-in-the-loop (`requireOperatorClose=true` mantém candidate).
 
 ## Contrato backend-agnostic (v1)
 
@@ -63,7 +63,7 @@ A integração ocorre via adapter no `colony-pilot` (opt-in), que projeta sinais
 |---|---|---|---|---|
 | `start` | `status=in-progress` + note | issue comment + label/status | comment + board move | insert em `task_events` + update `tasks.status=in-progress` |
 | `progress` | append note | timeline/comment | comment | append `task_events` |
-| `review` | append note + candidato para revisão humana | review requested/check-run pending | review comment/status | append `task_events` + flag review-pending |
+| `review` | append note + candidato para revisão do operador | review requested/check-run pending | review comment/status | append `task_events` + flag review-pending |
 | `done_candidate` | mantém `in-progress` (HITL) + note | issue comment "candidate" (sem close) | comment "candidate" (sem close) | append `task_events`; `tasks.status=in-progress` |
 | `done_verified` | `status=completed` com `verification` | close item + link de evidência | close issue/board item + evidência | append `task_events`; `tasks.status=completed` |
 | `recovery` | `status=blocked` + recovery note/task | reopen/blocked label + follow-up issue | blocked label + follow-up issue | append `task_events`; `tasks.status=blocked` |
