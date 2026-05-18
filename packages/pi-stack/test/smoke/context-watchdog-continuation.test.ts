@@ -62,7 +62,7 @@ describe("context-watchdog continuation recommendation", () => {
 
     expect(packet.decision).toBe("checkpoint");
     expect(packet.reasonCode).toBe("turn-boundary-checkpoint-refresh-focus");
-    expect(packet.humanActionRequired).toBe(false);
+    expect(packet.operatorActionRequired).toBe(false);
     expect(packet.nextAutoStep).toContain("checkpoint");
     expect(packet.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
     expect(packet.directionPreview.recommendedOptionId).toBe("similar-lane");
@@ -75,7 +75,7 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.localSafeMayContinue).toBe(true);
   });
 
-  it("builds pause packet without human action when local-safe next step is missing", () => {
+  it("builds pause packet without operator action when local-safe next step is missing", () => {
     const packet = buildTurnBoundaryDecisionPacket({
       ready: false,
       focusTasks: "TASK-1",
@@ -85,7 +85,7 @@ describe("context-watchdog continuation recommendation", () => {
 
     expect(packet.decision).toBe("pause");
     expect(packet.reasonCode).toBe("turn-boundary-pause-local-stop");
-    expect(packet.humanActionRequired).toBe(false);
+    expect(packet.operatorActionRequired).toBe(false);
     expect(packet.nextAutoStep).toContain("local stop condition");
     expect(packet.directionPreview.recommendedOptionId).toBe("next-high-value");
     expect(packet.directionPreview.options.map((option) => `${option.id}:${option.suitability}`)).toEqual([
@@ -97,7 +97,7 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.localSafeMayContinue).toBe(false);
   });
 
-  it("builds ask-human packet when protected/validation blockers are present", () => {
+  it("builds ask-operator packet when protected/validation blockers are present", () => {
     const packet = buildTurnBoundaryDecisionPacket({
       ready: false,
       focusTasks: "TASK-1",
@@ -105,9 +105,9 @@ describe("context-watchdog continuation recommendation", () => {
       localAuditReasons: ["protected-scopes:invalid", "validation:invalid"],
     });
 
-    expect(packet.decision).toBe("ask-human");
-    expect(packet.reasonCode).toBe("turn-boundary-ask-human-decision-required");
-    expect(packet.humanActionRequired).toBe(true);
+    expect(packet.decision).toBe("ask-operator");
+    expect(packet.reasonCode).toBe("turn-boundary-ask-operator-decision-required");
+    expect(packet.operatorActionRequired).toBe(true);
     expect(packet.nextAutoStep).toContain("operator decision");
     expect(packet.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
     expect(packet.directionPreview.recommendedOptionId).toBe("next-high-value");
