@@ -13,7 +13,6 @@
  * - ~/.pi/agent/sessions (arquivos .jsonl recursivos)
  */
 
-import { promises as fs, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import type {
@@ -22,6 +21,7 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { extractCopilotBillingUsageEvents } from "./quota-visibility-billing";
+import { loadCopilotBillingUsageEvents } from "./quota-visibility-copilot-billing";
 import { estimateHardPathwayMitigation } from "./quota-visibility-hard-pathway";
 import {
 	defaultOpenAIWhamCachePath,
@@ -32,9 +32,11 @@ import {
 import {
 	formatQuotaToolJsonOutput,
 	resolveQuotaToolOutputPolicy,
-	type QuotaVisibilitySettings,
 } from "./quota-visibility-output-policy";
 import { parseSessionFile, walkJsonlFiles } from "./quota-visibility-session-reader";
+import { resolveQuotaSessionRoots } from "./quota-visibility-session-roots";
+import { readQuotaVisibilitySettings } from "./quota-visibility-settings";
+export { resolveQuotaSessionRoots } from "./quota-visibility-session-roots";
 
 export { extractCopilotBillingUsageEvents } from "./quota-visibility-billing";
 export { estimateHardPathwayMitigation } from "./quota-visibility-hard-pathway";
@@ -50,11 +52,9 @@ export { formatQuotaToolJsonOutput, resolveQuotaToolOutputPolicy } from "./quota
 export type { QuotaToolOutputPolicy, QuotaVisibilitySettings } from "./quota-visibility-output-policy";
 
 import {
-	DEFAULT_COPILOT_BILLING_PATH,
 	DEFAULT_DAYS,
 	DEFAULT_PROVIDER_WINDOW_HOURS,
 	MAX_TOP,
-	SETTINGS_PATH,
 	buildProviderAccountKey,
 	buildProviderModelKey,
 	applyOpenAIWhamUsageToBudgets,
@@ -92,7 +92,6 @@ import {
 	type ProviderWindowHours,
 	type ProviderWindowInsight,
 	type QuotaStatus,
-	type QuotaToolOutputPolicy,
 	type QuotaUsageEvent,
 	type RouteAdvisory,
 	type RoutingProfile,
@@ -126,97 +125,12 @@ export {
 	type ProviderBudgetStatus,
 	type ProviderWindowInsight,
 	type QuotaStatus,
-	type QuotaToolOutputPolicy,
 	type QuotaUsageEvent,
 	type RouteAdvisory,
 	type RoutingProfile,
 } from "./quota-visibility-model";
 
-export function resolveQuotaSessionRoots(cwd?: string): string[] {
-	const roots = [path.join(homedir(), ".pi", "agent", "sessions")];
-	if (cwd && cwd.trim().length > 0) {
-		roots.push(path.join(cwd, ".sandbox", "pi-agent", "sessions"));
-	}
-
-	const seen = new Set<string>();
-	const out: string[] = [];
-	for (const root of roots) {
-		const normalized = path.resolve(root);
-		const key = process.platform === "win32" ? normalized.toLowerCase() : normalized;
-		if (seen.has(key)) continue;
-		seen.add(key);
-		out.push(normalized);
-	}
-	return out;
-}
-
-function readSettings(cwd: string): QuotaVisibilitySettings {
-	try {
-		const p = path.join(cwd, ".pi", "settings.json");
-		const raw = JSON.parse(readFileSync(p, "utf8")) as Record<string, unknown>;
-		const nested = SETTINGS_PATH.reduce<unknown>((acc, key) => {
-			if (!acc || typeof acc !== "object") return undefined;
-			return (acc as Record<string, unknown>)[key];
-		}, raw);
-
-		if (!nested || typeof nested !== "object") return {};
-		const cfg = nested as Record<string, unknown>;
-
-		return {
-			defaultDays: safeNum(cfg.defaultDays) || undefined,
-			weeklyQuotaTokens: safeNum(cfg.weeklyQuotaTokens) || undefined,
-			weeklyQuotaCostUsd: safeNum(cfg.weeklyQuotaCostUsd) || undefined,
-			weeklyQuotaRequests: safeNum(cfg.weeklyQuotaRequests) || undefined,
-			monthlyQuotaTokens: safeNum(cfg.monthlyQuotaTokens) || undefined,
-			monthlyQuotaCostUsd: safeNum(cfg.monthlyQuotaCostUsd) || undefined,
-			monthlyQuotaRequests: safeNum(cfg.monthlyQuotaRequests) || undefined,
-			providerWindowHours: parseProviderWindowHours(cfg.providerWindowHours),
-			providerBudgets: parseProviderBudgets(cfg.providerBudgets),
-			routeModelRefs: parseRouteModelRefs(cfg.routeModelRefs),
-			outputPolicy: resolveQuotaToolOutputPolicy({
-				outputPolicy:
-					cfg.outputPolicy && typeof cfg.outputPolicy === "object"
-						? (cfg.outputPolicy as QuotaToolOutputPolicy)
-						: undefined,
-			}),
-		};
-	} catch {
-		return {};
-	}
-}
-
-async function loadCopilotBillingUsageEvents(
-	days: number,
-): Promise<{ events: QuotaUsageEvent[]; sourcePath?: string }> {
-	const sourcePath =
-		typeof process.env.PI_COPILOT_BILLING_PATH === "string" &&
-		process.env.PI_COPILOT_BILLING_PATH.trim().length > 0
-			? process.env.PI_COPILOT_BILLING_PATH.trim()
-			: DEFAULT_COPILOT_BILLING_PATH;
-
-	let rawText = "";
-	try {
-		rawText = await fs.readFile(sourcePath, "utf8");
-	} catch {
-		return { events: [] };
-	}
-
-	let parsed: unknown;
-	try {
-		parsed = JSON.parse(rawText);
-	} catch {
-		return { events: [] };
-	}
-
-	const now = nowLocalMidnight();
-	const start = addDays(now, -(days - 1));
-	const events = extractCopilotBillingUsageEvents(parsed, {
-		sourceFile: sourcePath,
-		windowStartMs: start.getTime(),
-		windowEndMs: Date.now(),
-	});
-	return { events, sourcePath };
-}
+const readSettings = readQuotaVisibilitySettings;
 
 export function buildQuotaStatus(
 	sessions: SessionSample[],
