@@ -109,10 +109,10 @@ describe("agent spawn readiness contract", () => {
       authorization: "none",
       dispatchAllowed: false,
       executorApproved: false,
-      requiresHumanDecision: true,
+      requiresOperatorDecision: true,
       singleRunOnly: true,
-      decision: "ready-for-human-decision",
-      recommendationCode: "agent-run-ready-for-human-decision",
+      decision: "ready-for-operator-decision",
+      recommendationCode: "agent-run-ready-for-operator-decision",
       blockers: [],
     });
   });

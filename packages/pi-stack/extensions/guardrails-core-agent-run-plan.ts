@@ -1,4 +1,4 @@
-export type AgentRunPlanDecision = "ready-for-human-decision" | "blocked";
+export type AgentRunPlanDecision = "ready-for-operator-decision" | "blocked";
 
 export interface AgentRunPlanInput {
   goal?: string;
@@ -20,11 +20,11 @@ export interface AgentRunPlanResult {
   authorization: "none";
   dispatchAllowed: false;
   executorApproved: false;
-  requiresHumanDecision: true;
+  requiresOperatorDecision: true;
   singleRunOnly: true;
   decision: AgentRunPlanDecision;
   recommendationCode:
-    | "agent-run-ready-for-human-decision"
+    | "agent-run-ready-for-operator-decision"
     | "agent-run-blocked-protected-scope"
     | "agent-run-blocked-goal"
     | "agent-run-blocked-provider-model"
@@ -92,7 +92,7 @@ export function buildAgentRunPlan(input: AgentRunPlanInput = {}): AgentRunPlanRe
   const protectedScopeRequested = input.protectedScopeRequested === true;
 
   const blockers: string[] = [];
-  let recommendationCode: AgentRunPlanResult["recommendationCode"] = "agent-run-ready-for-human-decision";
+  let recommendationCode: AgentRunPlanResult["recommendationCode"] = "agent-run-ready-for-operator-decision";
   let recommendation = "agent-run contract is bounded enough to ask for an explicit operator decision.";
 
   const block = (code: AgentRunPlanResult["recommendationCode"], blocker: string, message: string) => {
@@ -137,7 +137,7 @@ export function buildAgentRunPlan(input: AgentRunPlanInput = {}): AgentRunPlanRe
     block("agent-run-blocked-log-tail", "bounded-log-tail-missing", "declare bounded log/status visibility before preparing an agent run.");
   }
 
-  const decision: AgentRunPlanDecision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const decision: AgentRunPlanDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   const runSpec = {
     goal,
     providerModelRef,
@@ -154,7 +154,7 @@ export function buildAgentRunPlan(input: AgentRunPlanInput = {}): AgentRunPlanRe
     protectedScopeRequested,
   };
 
-  const nextActions = decision === "ready-for-human-decision"
+  const nextActions = decision === "ready-for-operator-decision"
     ? [
         "present this packet to the operator for an explicit single-run execute decision",
         "if approved, start exactly one worker and record run id/status/log paths before dispatch",
@@ -171,7 +171,7 @@ export function buildAgentRunPlan(input: AgentRunPlanInput = {}): AgentRunPlanRe
     authorization: "none",
     dispatchAllowed: false,
     executorApproved: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     singleRunOnly: true,
     decision,
     recommendationCode,

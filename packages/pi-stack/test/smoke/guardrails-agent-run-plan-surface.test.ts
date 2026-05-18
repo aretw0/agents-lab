@@ -45,8 +45,8 @@ describe("agent run plan surface", () => {
     expect(result.details?.mode).toBe("agent-run-plan");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.executorApproved).toBe(false);
-    expect(result.details?.decision).toBe("ready-for-human-decision");
-    expect(result.content?.[0]?.text).toContain("agent-run-plan: decision=ready-for-human-decision");
+    expect(result.details?.decision).toBe("ready-for-operator-decision");
+    expect(result.content?.[0]?.text).toContain("agent-run-plan: decision=ready-for-operator-decision");
     expect(result.content?.[0]?.text).not.toContain('"runSpec"');
   });
 });
