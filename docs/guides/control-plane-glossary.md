@@ -24,21 +24,21 @@ Se um nome novo não muda o contrato operacional, ele é só um alias. Registre 
 | **Partial evidence** | Evidência válida, mas insuficiente para fechar a task inteira. Em macro-tasks deve gerar side quests ou manter a task aberta. | Falha; ela pode ser progresso real, só não é fechamento. | slice evidence, policy-only evidence |
 | **Rationale** | Justificativa comunicável para mudanças sensíveis, especialmente risco, refactor ou test-change. | Defesa retroativa para fechar trabalho mal decomposto. | why, decisão, risk note |
 | **Gate** | Função, tool ou regra que decide se uma transição pode prosseguir. Deve ser fail-closed quando faltar evidência. | Autorização automática para executar. | readiness check, guard, canary |
-| **Decision packet** | Pacote read-only para decisão humana: fechar, manter aberto ou deferir. | Mutação automática de status. | no-auto-close packet, close packet |
+| **Decision packet** | Pacote read-only para decisão do operador: fechar, manter aberto ou deferir. | Mutação automática de status. | no-auto-close packet, close packet |
 | **Handoff** | Checkpoint compacto para retomada: foco, contexto, validações, commits, próximos passos e blockers. | Fonte superior ao board ou justificativa para refreshar evidência velha como atual. | checkpoint file, resume state |
 | **Checkpoint** | Ação de salvar progresso suficiente para parar, compactar ou retomar. | Pausa por medo; é parte normal do relógio de trabalho. | handoff refresh, save point |
 | **Compact / Auto-compact** | Redução de contexto quando a janela está alta. Em nível final, não se inicia nova run até checkpoint/compact concluir. | Permissão para continuar “só mais um pouco”. | compaction, context trim |
 | **Reload** | Recarregar runtime/extensões para validar mudanças de tools/surfaces. | Necessário para docs-only; não é. | runtime refresh |
 | **Local-safe** | Escopo pequeno, reversível, sem protected scopes e com validação conhecida. | Seguro para loop forte ou scheduler. | bounded local, safe slice |
 | **Protected scope** | Área que exige intenção explícita: CI/GitHub Actions, remote/offload, publish, `.pi/settings.json`, `.obsidian/`, manutenção destrutiva, etc. | Algo que o agente pode inferir por conveniência. | high-risk scope, guarded scope |
-| **Unattended** | Trabalho com menos intervenção humana, mas ainda governado por gates, checkpoint, cancelamento e escopo local. | Autonomia irrestrita ou execução remota automática. | overnight, deixa rodando |
-| **Nudge-free** | Capacidade futura/advisory de continuar sem empurrão humano quando sinais medidos estiverem verdes. É o termo canônico para batches locais “deixa rodando/overnight” quando não há scheduler/remote/offload. | Permissão manual simulada por boolean ou texto genérico; nova família de loops com outro nome. | no-nudge loop, idle continuation, overnight local, deixa rodando |
+| **Unattended** | Trabalho com menos intervenção do operador, mas ainda governado por gates, checkpoint, cancelamento e escopo local. | Autonomia irrestrita ou execução remota automática. | overnight, deixa rodando |
+| **Nudge-free** | Capacidade futura/advisory de continuar sem empurrão do operador quando sinais medidos estiverem verdes. É o termo canônico para batches locais “deixa rodando/overnight” quando não há scheduler/remote/offload. | Permissão manual simulada por boolean ou texto genérico; nova família de loops com outro nome. | no-nudge loop, idle continuation, overnight local, deixa rodando |
 | **One-slice** | Contrato de executar exatamente uma fatia local e parar. | Loop, scheduler ou executor permanente. | single-slice, one-shot local |
 | **Primitive** | Função reutilizável com contrato determinístico, teste e baixo acoplamento. | Nome bonito para script ad hoc. | helper, kernel, core function |
 | **Surface** | Exposição operacional de uma primitive: tool, command, prompt ou UI. | A lógica em si. | tool surface, runtime surface |
 | **Live validation** | Verificação após reload/runtime real quando uma surface muda. | Smoke test unitário suficiente para garantir runtime carregado. | post-reload validation |
 | **Blocker** | Condição que impede uma transição ou fechamento seguro. Deve ser explícita no board/handoff quando relevante. | Preferência subjetiva para adiar. | impediment, stop reason |
-| **Stop reason code** | Código curto e canônico que explica por que a lane/rodada precisa parar e pedir interação humana (`NO_ELIGIBLE_LOCAL_SAFE`, `PROTECTED_SCOPE_REQUIRED`, etc.). | Texto livre genérico sem ação recomendada. | stop code, reason code |
+| **Stop reason code** | Código curto e canônico que explica por que a lane/rodada precisa parar e pedir interação do operador (`NO_ELIGIBLE_LOCAL_SAFE`, `PROTECTED_SCOPE_REQUIRED`, etc.). | Texto livre genérico sem ação recomendada. | stop code, reason code |
 
 ## Relações importantes
 

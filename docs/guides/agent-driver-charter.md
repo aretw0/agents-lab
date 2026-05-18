@@ -3,13 +3,13 @@
 **Status:** active  
 **Data:** 2026-04-16  
 **Relacionado:** TASK-BUD-016, TASK-BUD-017  
-**Revisão humana obrigatória para alterações de critérios de parada ou limites de autonomia.**
+**Revisão do operador obrigatória para alterações de critérios de parada ou limites de autonomia.**
 
 ---
 
 ## Norte verdadeiro (North Star)
 
-Construir um laboratório de agentes que seja **soberano, auditável e auto-sustentável**: capaz de executar ciclos de melhoria sobre si mesmo usando os próprios agentes que produz, com custo controlado, evidência verificável e supervisão humana nos pontos de decisão estratégica.
+Construir um laboratório de agentes que seja **soberano, auditável e auto-sustentável**: capaz de executar ciclos de melhoria sobre si mesmo usando os próprios agentes que produz, com custo controlado, evidência verificável e supervisão do operador nos pontos de decisão estratégica.
 
 A operação autônoma é meio, não fim. O objetivo final é ter primitivas e padrões reutilizáveis que outros projetos possam adotar.
 
@@ -36,13 +36,13 @@ Mesma regra, `[P1]` com todos os `depends_on` resolvidos.
 
 - Tasks com `status: blocked` sem plano de desbloqueio claro
 - Tasks com `[COLONY:...]` — essas são instâncias de execução, não backlog
-- Tasks com `[RECOVERY:...]` — só avançar após revisão humana
+- Tasks com `[RECOVERY:...]` — só avançar após revisão do operador
 
 ---
 
 ## Limites de autonomia
 
-### O que um agente pode fazer sem aprovação humana
+### O que um agente pode fazer sem aprovação do operador
 
 - Criar tasks novas (status `planned`) com ID sequencial
 - Escrever documentação, guias, research docs
@@ -50,7 +50,7 @@ Mesma regra, `[P1]` com todos os `depends_on` resolvidos.
 - Fechar tasks de `[P1]` ou `[P2]` quando todos os ACs forem verificáveis via testes/verify
 - Registrar evidência em tasks existentes
 
-### O que exige confirmação humana antes de executar
+### O que exige confirmação do operador antes de executar
 
 - Fechar tasks `[P0]` estratégicas
 - Alterar `status` de tasks de `[COLONY:...]` para `completed`
@@ -58,14 +58,14 @@ Mesma regra, `[P1]` com todos os `depends_on` resolvidos.
 - Publicar versões (npm publish, tags de release)
 - Forçar branches ou reescrever histórico
 
-### Stop conditions (parar e chamar humano)
+### Stop conditions (parar e chamar operador)
 
 Um agente deve parar imediatamente quando:
 
 1. **Budget em WARN ou BLOCK** para o provider ativo → chamar `/quota-visibility` e aguardar handoff
 2. **Todas as tasks P0 elegíveis bloqueadas** (dependências circulares ou todas precisam de aprovação) → reportar e aguardar
 3. **Falha de validação repetida** (verify ou test falhando após 2 tentativas de fix) → não persistir; reportar estado e parar
-4. **Conflito de merge não-trivial** em `.project/tasks.json` → não resolver automaticamente; chamar humano
+4. **Conflito de merge não-trivial** em `.project/tasks.json` → não resolver automaticamente; chamar operador
 5. **Escopo de mudança > 5 arquivos** numa task que parecia simples → pausar e confirmar escopo antes de continuar
 6. **Orçamento de contexto em risco** (planejamento crescendo sem fechar decisão) → parar, consolidar mini-handoff e retomar em lote menor
 
@@ -75,7 +75,7 @@ Um agente deve parar imediatamente quando:
 
 | Contrato | Descrição |
 |----------|-----------|
-| **No auto-close** | Tasks estratégicas (P0, colonies) só fecham com revisão humana |
+| **No auto-close** | Tasks estratégicas (P0, colonies) só fecham com revisão do operador |
 | **Evidência obrigatória** | Nenhuma task fecha sem inventário de arquivos + resultado de validação |
 | **Board canônico** | `.project/tasks.json` é o relógio oficial — não criar shadow boards |
 | **Budget envelope** | Toda execução de colônia exige `maxCost` explícito |
@@ -91,7 +91,7 @@ Um agente deve parar imediatamente quando:
 2. Filtrar: status = 'planned', todos os depends_on = 'completed'
 3. Ordenar: P0 primeiro, depois P1, depois P2
 4. Para empate: preferir a que desbloqueie mais outras tasks
-5. Verificar se não é COLONY:, RECOVERY:, ou task com "requires human"
+5. Verificar se não é COLONY:, RECOVERY:, ou task com "requires operator"
 6. Verificar budget: /quota-visibility → se BLOCK, parar
 7. Selecionar e marcar como 'in-progress' no board antes de iniciar
 ```
@@ -149,7 +149,7 @@ Quando houver sinais de repetição com gasto recorrente de LLM:
 - registrar proposta de pathway hard por candidato (gates + equivalência + rollback), sem ativar automaticamente;
 - manter roadmap baseline vs pós-automação no board para priorizar conversão com menor risco.
 
-Contrato: descoberta é **advisory-first**; promoção para hard pathway continua sob governança canônica (`no-auto-close`, `verification`, decisão humana quando estratégico).
+Contrato: descoberta é **advisory-first**; promoção para hard pathway continua sob governança canônica (`no-auto-close`, `verification`, decisão do operador quando estratégico).
 
 ---
 
