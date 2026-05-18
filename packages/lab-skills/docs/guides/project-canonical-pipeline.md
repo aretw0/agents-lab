@@ -12,7 +12,7 @@ Skill distribuída: práticas recorrentes deste guia são resumidas em `packages
 - O board `.project/*` é o **adapter canônico local atual** (fonte oficial de trabalho no workspace).
 - A coordenação deve permanecer **backend-agnostic**: sistema de ticket/projeto é detalhe de implementação.
 - A evolução first-party futura não substitui essa regra; ela entra como mais um adapter.
-- Fluxos baseados em **Markdown/Obsidian** (ex.: inbox/caixa de notas) devem ser suportados via adapter, preservando os mesmos invariantes de governança (`no-auto-close`, evidência, revisão humana).
+- Fluxos baseados em **Markdown/Obsidian** (ex.: inbox/caixa de notas) devem ser suportados via adapter, preservando os mesmos invariantes de governança (`no-auto-close`, evidência, revisão do operador).
 - Skills/processos/extensões com **hard intent** devem consumir o contrato de primitivas (task/event/intent/evidence), não um backend específico.
 - Referência formal do contrato + matriz de adapters: `docs/primitives/continuity-abstraction.md`.
 
@@ -20,12 +20,12 @@ Skill distribuída: práticas recorrentes deste guia são resumidas em `packages
 - `.project` (canônico local atual): fonte oficial de status/verificação/handoff.
 - First-party backend futuro: mesmo contrato canônico, novo adapter.
 - Git trackers (GitHub/Gitea): projeção/sync de task-event-evidence sem alterar governança.
-- Markdown/Obsidian: adapter de captura/espelho humano com frontmatter + journal estruturado.
+- Markdown/Obsidian: adapter de captura/espelho legível para operador com frontmatter + journal estruturado.
 
 ### Camada de hard intent (independente de storage)
 - `intent` resolve execução (ex.: board-first) sem acoplamento ao backend.
 - `event + evidence` registram progresso e validação de forma auditável.
-- `decisionGate` mantém `no-auto-close` e revisão humana para fechamento estratégico.
+- `decisionGate` mantém `no-auto-close` e revisão do operador para fechamento estratégico.
 
 ## Onboarding dual-mode (sem migração forçada)
 Use este framing com usuários novos:
@@ -38,7 +38,7 @@ Use este framing com usuários novos:
    - melhor quando o usuário já opera em outro sistema (Markdown/Obsidian, DB/API, automação/web);
    - o agente trabalha **junto** do sistema existente, sem impor migração total.
 
-3. **Modo C — canônico + espelho humano (opcional)**
+3. **Modo C — canônico + espelho do operador (opcional)**
    - o estado oficial continua em `.project/*`;
    - um adapter projeta esse estado para Markdown renderizável (ex.: Obsidian/vault);
    - referência inicial de template: `https://github.com/aretw0/vault-seed`.
@@ -76,7 +76,7 @@ Trate `.project` como **soft evidence** quando houver outro sistema explicitamen
 | Remote/offload | `.project` é contrato de entrada/saída | report/artifact primeiro; apply só com canal autorizado | delivery gate decide promoção |
 | GitHub Actions/CI | `.project` é snapshot/gate evidence | preferir comments/artifacts; escrita direta só por política | PR/MR revisável antes de canônico |
 | Issue tracker externo | `.project` é adapter/cache | sync por mapeamento task/event/evidence | tracker pode ser fonte hard se escolhido explicitamente |
-| Markdown/Obsidian | inbox/espelho humano | captura/projeção, não fechamento estratégico | promover para task só via decision gate |
+| Markdown/Obsidian | inbox/espelho do operador | captura/projeção, não fechamento estratégico | promover para task só via decision gate |
 
 ### Regras para não virar ruído
 
@@ -280,7 +280,7 @@ Contrato atual:
 - saída inclui `disk: severity=ok|warn|block-long-run|unknown`, espaço livre, uso percentual e recomendação acionável;
 - saída inclui inventário volátil bounded: `bgArtifacts`, `reports`, `sessions` (sandbox) e `globalSessions` (namespace global do workspace), além de resumo de candidatos por classe (`byClass`) para priorização segura;
 - saída também inclui projeção `projectedAfterApply` (severidade/espaço livre estimado após aplicar o plano atual) para decisão dry-first sem execução cega;
-- se `severity=block-long-run`, pausar lotes grandes/benchmarks/e2e/browser e fazer cleanup dry-run + confirmação humana antes de continuar;
+- se `severity=block-long-run`, pausar lotes grandes/benchmarks/e2e/browser e fazer cleanup dry-run + confirmação do operador antes de continuar;
 - para gate determinístico em automações, usar `npm run ops:disk:strict` (exit 1 quando `severity=block-long-run`) ou `npm run ops:disk:strict:warn` para modo conservador (warn+block).
 - logs `/tmp/oh-pi-bg-*` são candidatos seguros de temp artifact, mas sessões JSONL são evidência e permanecem protegidas salvo `--include-sessions` explícito;
 - para dry-run focado apenas em temporários seguros, usar `npm run ops:disk:cleanup:bg:dry` (equivale a `--classes=bg-artifact`);
@@ -297,7 +297,7 @@ Durante long-run:
 - usar `lane-queue` apenas como trilha **opt-in** para deferimento cross-turn em janela idle;
 - quando `lane-queue` for usada, `/lane-queue` (status) deve orientar ações concretas com `queued>0` (`list`/`clear`) e `/lane-queue help` deve manter discoverability imediata;
 - para board-first unattended, usar `/lane-queue board-next`: seleciona deterministicamente a próxima task elegível (`planned + deps satisfeitas + prioridade [P0..Pn] + id`) e injeta intent canônico com contrato `no-auto-close + verification` (quando a lane já está ocupada, enfileira `board.execute-next` para reavaliar o next no momento do dispatch).
-- para fechamento estratégico/no-auto-close, gerar primeiro um pacote compacto via `board_decision_packet`: opções `close | keep-open | defer`, evidências recentes de verification, blockers e riscos; a decisão humana continua explícita e o pacote não altera status sozinho.
+- para fechamento estratégico/no-auto-close, gerar primeiro um pacote compacto via `board_decision_packet`: opções `close | keep-open | defer`, evidências recentes de verification, blockers e riscos; a decisão do operador continua explícita e o pacote não altera status sozinho.
 - opcionalmente, usar escopo por milestone user-defined: `/lane-queue board-next --milestone "<label>"` (ou `-m "<label>"` / `-m=<label>`) para restringir seleção ao recorte atual sem fixar semântica de release no core.
 - para diagnóstico sem dispatch, `/lane-queue status` aceita o mesmo override (`--milestone|--milestone=|-m|-m=|--no-milestone`) e expõe `statusMilestone=<label|n/a>@<source>` (`explicit|default|cleared|none`).
 - `/lane-queue evidence` também aceita override de milestone com o mesmo contrato e inclui `boardReadiness` scoped + `boardHint` quando não há elegível no recorte informado, além de `scopeParity` (expected/boardAuto/loopReady + `reason=match|mismatch|no-expectation`) para diagnóstico rápido de consistência de escopo; notify deve subir para `warning` quando `readyForLoopEvidence=no` (alias legado: `readyForTaskBud125`) ou `scopeParity.matches=no`.
@@ -315,7 +315,7 @@ Durante long-run:
 - compatibilidade retroativa: snapshots/evidências antigas podem conter `PREPARADO/ATIVO_AQUI/EM_LOOP`; tratar `markersLabel` como texto histórico e usar campos estruturados (`runtimeCodeState`, `emLoop`, `boardAutoAdvanceGate`) como contrato canônico de decisão.
 - `/lane-queue status` deve exibir `loopReadyLast` e `loopReadyLabel` para evidenciar a última transição de loop liberado dentro da sessão atual.
 - `/lane-queue evidence` deve mostrar o snapshot persistido mais recente (`boardAuto`/`loopReady`) para comprovação rápida sem varredura de JSONL, incluindo `readyForLoopEvidence=yes|no` (com alias legado temporário `readyForTaskBud125`) e critérios explícitos (`runtime active` + `emLoop=yes`).
-- para gate operacional fora do TUI, usar `npm run ops:loop-evidence:check` (humano) e `npm run ops:loop-evidence:strict` (CI/rollback gate) sobre `.pi/guardrails-loop-evidence.json` com janela de frescor explícita; quando operar por milestone, pode-se exigir paridade de escopo via `node scripts/guardrails-loop-evidence-check.mjs --strict --expect-milestone "<label>"` ou usar `npm run ops:loop-evidence:strict:default-milestone` para validar contra `defaultBoardMilestone` configurada; a saída expõe `milestoneGate=active|inactive`, `milestoneCheck`, `strictFailures` e `strictHint(<code>)` para ação direta (`evidence-stale`, `readiness-not-ready`, `milestone-mismatch`, etc.) sem leitura manual do JSON. Para transformar a ideia de milestone em hard gate explícito, adicionar `--require-milestone-gate` ao strict check (falha com `milestone-gate-inactive` quando nenhum `--expect-milestone`/`@default` está ativo). Atalhos: `npm run ops:loop-evidence:strict:milestone-gate` para exigir qualquer gate ativo; `npm run ops:loop-evidence:strict:default-milestone` para exigir o `defaultBoardMilestone` configurado.
+- para gate operacional fora do TUI, usar `npm run ops:loop-evidence:check` (operador) e `npm run ops:loop-evidence:strict` (CI/rollback gate) sobre `.pi/guardrails-loop-evidence.json` com janela de frescor explícita; quando operar por milestone, pode-se exigir paridade de escopo via `node scripts/guardrails-loop-evidence-check.mjs --strict --expect-milestone "<label>"` ou usar `npm run ops:loop-evidence:strict:default-milestone` para validar contra `defaultBoardMilestone` configurada; a saída expõe `milestoneGate=active|inactive`, `milestoneCheck`, `strictFailures` e `strictHint(<code>)` para ação direta (`evidence-stale`, `readiness-not-ready`, `milestone-mismatch`, etc.) sem leitura manual do JSON. Para transformar a ideia de milestone em hard gate explícito, adicionar `--require-milestone-gate` ao strict check (falha com `milestone-gate-inactive` quando nenhum `--expect-milestone`/`@default` está ativo). Atalhos: `npm run ops:loop-evidence:strict:milestone-gate` para exigir qualquer gate ativo; `npm run ops:loop-evidence:strict:default-milestone` para exigir o `defaultBoardMilestone` configurado.
 - intents canônicos devem usar envelope tipado (`[intent:<type>]` + campos `key=value`, ex.: `board.execute-task` e `board.execute-next`; opcional `milestone=<label>` em `board.execute-next`) para reduzir fragilidade de dispatch textual e manter auditabilidade entre extensões.
 - runtime deve consumir envelope no caminho de execução (input) além do prompt: envelope inválido/unsupported é rejeitado com audit explícita; envelope válido registra decisão (`ready`/`board-not-ready`/`next-mismatch`/`next-ready`) antes da execução.
 
@@ -462,7 +462,7 @@ No loop canônico, steering diário deve priorizar **sinais passivos de stream/s
 Regras operacionais:
 - `context_watch_status` fica como superfície de **diagnóstico explícito** (debug/inspeção), não como passo obrigatório por iteração;
 - no segundo `warn` consecutivo, a cadência deve escalar para checkpoint/handoff automático antes do compact;
-- sinais de intervenção humana (`reload-required`, `handoff-refresh-required`) devem aparecer no stream para evitar surpresa de controle;
+- sinais de intervenção do operador (`reload-required`, `handoff-refresh-required`) devem aparecer no stream para evitar surpresa de controle;
 - delivery de `warn/checkpoint/compact` deve ser tratado como **invariante de steering passivo** (modo-independente), com fallback quando a superfície principal não estiver visível.
 
 Implementação atual (slice 2/4):
@@ -510,7 +510,7 @@ Fluxo canônico:
 Objetivo: manter discoverability útil sem sobrecarregar o operador com sinais concorrentes.
 
 Ownership mínimo por classe:
-- **operator**: sinais de ação humana imediata (ex.: `reload-required`, `handoff-refresh-required`, `compact-checkpoint-required`).
+- **operator**: sinais de ação imediata do operador (ex.: `reload-required`, `handoff-refresh-required`, `compact-checkpoint-required`).
 - **runtime**: sinais técnicos de execução (ex.: bloat, budget, lane status).
 - **governance**: sinais de gate/promoção canônica (verification, readiness, preflight).
 - **discoverability**: dicas de uso (help/list/clear), sempre subordinadas ao contexto operacional ativo.
@@ -733,7 +733,7 @@ Contrato operacional:
 - quando alguma lista estoura limite (tasks/blockers/next), o prompt explicita overflow com `(+N more)` em vez de silêncio implícito.
 - em triagem de qualidade de prompt, consultar audit `context-watchdog.auto-resume-prompt` para diagnosticar dedupe/truncation por seção (`tasks`, `blockers`, `nextActions`) antes de ajustar contrato de handoff.
 
-Objetivo: preservar segurança do contexto sem exigir confirmação humana para continuar quando o estado já está saudável.
+Objetivo: preservar segurança do contexto sem exigir confirmação do operador para continuar quando o estado já está saudável.
 
 ### Milestone mode (control-plane long-run)
 Para rodar um milestone quase unattended no control plane, operar com um contrato explícito:
@@ -744,7 +744,7 @@ Para rodar um milestone quase unattended no control plane, operar com um contrat
 - **stop conditions válidas**: (a) dúvida de requisito não resolvível por default seguro, (b) risco de segurança/perda de dados, (c) reload necessário para ativar código novo, (d) falha de teste sem mitigação segura no lote;
 - **prova obrigatória**: todo incremento técnico do milestone precisa terminar com smoke focal verde (evidence em `verification`) antes de avançar para o próximo bloco;
 - **cadência recomendada**: lotes de 10–50 micro-slices, com checkpoint em board (`notes`) + `VER-*` parcial por lote;
-- **higiene de runtime**: preservar política `board-first`, steering do usuário com precedência, e usar `/lane-queue status` + `/context-watch` como telemetria passiva antes de escalar intervenção humana.
+- **higiene de runtime**: preservar política `board-first`, steering do usuário com precedência, e usar `/lane-queue status` + `/context-watch` como telemetria passiva antes de escalar intervenção do operador.
 
 #### Rehearsal local-first de unattended
 
