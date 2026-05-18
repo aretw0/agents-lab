@@ -15,6 +15,7 @@ import {
   collectSettingsStats,
   computeStrictFailures,
 } from "../pi-dev-pressure.mjs";
+import { PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES } from "../../packages/pi-stack/install.mjs";
 
 function makeWorkspace() {
   return mkdtempSync(join(tmpdir(), "pi-dev-pressure-test-"));
@@ -198,6 +199,22 @@ test("configured guardrails-core stays within hot-path budget", () => {
   assert.ok(core, "configured guardrails-core entrypoint should be measured");
   assert.ok(core.files <= 45, `guardrails-core eager graph has ${core.files} files`);
   assert.ok(core.kb <= 400, `guardrails-core eager graph is ${core.kb}kb`);
+});
+
+test("control-plane profile keeps expensive optional entrypoints cold", () => {
+  const stats = collectEntrypointStats(process.cwd());
+  const excludes = new Set(
+    PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES.map((entry) =>
+      entry.startsWith("!") ? `./${entry.slice(1)}` : entry,
+    ),
+  );
+  const missing = stats
+    .filter((row) => row.entry !== "./extensions/guardrails-core.ts")
+    .filter((row) => row.kb > 400)
+    .filter((row) => !excludes.has(row.entry))
+    .map((row) => `${row.entry} ${row.kb}kb`);
+
+  assert.deepEqual(missing, []);
 });
 
 test("collectEntrypointStats ignores type-only imports in eager graph", () => {
