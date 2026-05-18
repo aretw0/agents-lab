@@ -419,7 +419,8 @@ describe("agent spawn readiness contract", () => {
       authorization: "none",
       dispatchAllowed: false,
       processStartAllowed: false,
-      decision: "ready-for-human-decision",
+      requiresOperatorDecision: true,
+      decision: "ready-for-operator-decision",
       blockers: [],
     });
     expect(contract.contract.availableCapabilities).toContain("filesystem-read");

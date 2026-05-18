@@ -106,7 +106,7 @@ describe("guardrails-core hardening re-exports", () => {
       activation: "none",
       authorization: "none",
       dispatchAllowed: false,
-      decision: "ready-for-human-decision",
+      decision: "ready-for-operator-decision",
     });
     expect(reviewLocalSliceOperatorApprovedContract({
       decisionPacket: localSlicePacket,

@@ -24,8 +24,8 @@ export interface ToolkitContractResult {
   authorization: "none";
   dispatchAllowed: false;
   processStartAllowed: false;
-  requiresHumanDecision: true;
-  decision: "ready-for-human-decision" | "blocked";
+  requiresOperatorDecision: true;
+  decision: "ready-for-operator-decision" | "blocked";
   recommendationCode: "toolkit-contract-ready" | "toolkit-contract-blocked-missing-capabilities";
   blockers: string[];
   contract: {
@@ -156,7 +156,7 @@ export function buildToolkitContract(input: ToolkitContractInput = {}): ToolkitC
     .map((requirement) => requirement.capability);
   const missingTools = Array.from(new Set(missingCapabilities.flatMap(missingToolsFor)));
   const blockers = missingCapabilities.map((capability) => `missing-required-capability:${capability}`);
-  const decision = blockers.length === 0 ? "ready-for-human-decision" : "blocked";
+  const decision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
 
   return {
     mode: "toolkit-contract",
@@ -164,9 +164,9 @@ export function buildToolkitContract(input: ToolkitContractInput = {}): ToolkitC
     authorization: "none",
     dispatchAllowed: false,
     processStartAllowed: false,
-    requiresHumanDecision: true,
+    requiresOperatorDecision: true,
     decision,
-    recommendationCode: decision === "ready-for-human-decision" ? "toolkit-contract-ready" : "toolkit-contract-blocked-missing-capabilities",
+    recommendationCode: decision === "ready-for-operator-decision" ? "toolkit-contract-ready" : "toolkit-contract-blocked-missing-capabilities",
     blockers,
     contract: {
       profile,
@@ -181,7 +181,7 @@ export function buildToolkitContract(input: ToolkitContractInput = {}): ToolkitC
         missingTools,
       },
     },
-    nextActions: decision === "ready-for-human-decision"
+    nextActions: decision === "ready-for-operator-decision"
       ? [
           "include the toolkit contract in the worker packet before dispatch",
           "treat later missing-tool reports as contract feedback, not worker failure",
