@@ -111,17 +111,17 @@ describe("agent run SDK arena packets", () => {
     expect(mutationArenaPacket.fanInPlan.requiredOutcomePackets[0]).toContain("agent_run_outcome_packet");
     expect(mutationArenaPacket.fanInPlan.failClosedOn).toContain("contract-failure");
     expect(mutationArenaPacket.serialSuiteDispatchPlan).toMatchObject({
-      mode: "exact-confirmed-serial-suite-preview",
+      mode: "structured-approval-serial-suite-preview",
       dispatchAllowed: false,
       executeSupported: false,
-      humanConfirmationPhrase: "execute arena serial suite arena-mutation-openai-spark-smoke",
+      operatorApprovalPrompt: "approve arena serial suite arena-mutation-openai-spark-smoke",
       runOrder: [
         "arena-mutation-openai-spark-smoke-mutation-one-file-doc-marker",
         "arena-mutation-openai-spark-smoke-mutation-one-file-test-fixture",
         "arena-mutation-openai-spark-smoke-mutation-one-file-code-constant",
       ],
     });
-    expect(mutationArenaPacket.serialSuiteDispatchPlan.preflightChecks.join("\n")).toContain("operator confirmation exactly matches");
+    expect(mutationArenaPacket.serialSuiteDispatchPlan.preflightChecks.join("\n")).toContain("structured operator approval");
     expect(mutationArenaPacket.serialSuiteDispatchPlan.blockedUntil.join("\n")).toContain("serial-suite executor exists");
     expect(mutationArenaPacket.suiteArtifactPlan).toMatchObject({
       mode: "report-only-artifact-write-preview",
@@ -167,7 +167,7 @@ describe("agent run SDK arena packets", () => {
       writeAllowed: false,
       dispatchAllowed: false,
       applyRequested: false,
-      humanConfirmationPhrase: "persist arena artifacts arena-mutation-openai-spark-smoke",
+      structuredOperatorApproval: false,
     });
     expect(artifactPacket.artifactPreviews.map((artifact) => artifact.kind)).toEqual(["suite-manifest", "scorecard-template", "fanin-plan"]);
     expect(artifactPacket.artifactPreviews[0]?.path).toBe(".pi/reports/arena-mutation-openai-spark-smoke.manifest.json");
@@ -184,11 +184,10 @@ describe("agent run SDK arena packets", () => {
       budgetDecision: "ok",
       budgetEvidence: "manual one-file mutation suite budget evidence",
       apply: true,
-      operatorConfirmation: "wrong confirmation",
     });
     expect(blockedArtifactApply.decision).toBe("blocked");
     expect(blockedArtifactApply.writeAllowed).toBe(false);
-    expect(blockedArtifactApply.blockers).toContain("operator-confirmation-mismatch");
+    expect(blockedArtifactApply.blockers).toContain("structured-operator-approval-missing");
 
     const confirmedArtifactApply = buildAgentRunSdkProviderModelArenaArtifactPacket({
       arenaId: "arena-mutation-openai-spark-smoke",
@@ -200,14 +199,15 @@ describe("agent run SDK arena packets", () => {
       budgetDecision: "ok",
       budgetEvidence: "manual one-file mutation suite budget evidence",
       apply: true,
-      operatorConfirmation: "persist arena artifacts arena-mutation-openai-spark-smoke",
+      operatorApproval: structuredApproval(),
     });
     expect(confirmedArtifactApply).toMatchObject({
       decision: "ready-to-apply",
-      authorization: "explicit-human",
+      authorization: "explicit-operator",
       writeAllowed: true,
       dispatchAllowed: false,
       paidModelCallsAllowed: false,
+      structuredOperatorApproval: true,
     });
     expect(confirmedArtifactApply.summary).toContain("write=yes");
     expect(mutationArenaPacket.nextActions.join("\n")).toContain("serialSuiteDispatchPlan only as a preview");
@@ -229,3 +229,11 @@ describe("agent run SDK arena packets", () => {
     expect(arenaBlocked.blockers).toContain("budget-evidence-missing");
   });
 });
+
+function structuredApproval(): Record<string, unknown> {
+  return {
+    packet_mode: "operator-approval-packet",
+    approved: true,
+    approval_state: "approved",
+  };
+}

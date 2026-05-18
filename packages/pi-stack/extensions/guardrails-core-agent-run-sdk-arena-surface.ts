@@ -84,18 +84,22 @@ export function registerAgentRunSdkProviderModelArenaTool(pi: ExtensionAPI): voi
   pi.registerTool({
     name: "agent_run_sdk_provider_model_arena_artifact_packet",
     label: "Agent Run SDK Provider/Model Arena Artifact Packet",
-    description: "Exact-confirmed local artifact writer for arena suite manifest, scorecard, and fan-in files. Preview by default; never starts workers or dispatches model calls.",
+    description: "Structured-approval local artifact writer for arena suite manifest, scorecard, and fan-in files. Preview by default; never starts workers or dispatches model calls.",
     parameters: Type.Object({
       ...arenaToolParameters.properties,
-      apply: Type.Optional(Type.Boolean({ description: "When true, persist only previewed .pi/reports artifacts after exact confirmation." })),
-      operator_confirmation: Type.Optional(Type.String({ description: "Must exactly equal the packet humanConfirmationPhrase for apply=true." })),
+      apply: Type.Optional(Type.Boolean({ description: "When true, persist only previewed .pi/reports artifacts after structured operator approval." })),
+      operator_approval: Type.Optional(Type.Object({
+        packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
+        approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
+        approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
+      }, { description: "Structured operator approval envelope." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const packet = buildAgentRunSdkProviderModelArenaArtifactPacket({
         ...buildArenaInput(p, ctx.cwd),
         apply: asOptionalBoolean(p.apply),
-        operatorConfirmation: typeof p.operator_confirmation === "string" ? p.operator_confirmation : undefined,
+        operatorApproval: p.operator_approval,
       });
       const persistedArtifacts = persistArenaArtifactPreviews(ctx.cwd, packet);
       const result = {

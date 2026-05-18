@@ -47,13 +47,13 @@ export interface AgentRunSdkProviderModelArenaPacketInput {
 
 export interface AgentRunSdkProviderModelArenaArtifactPacketInput extends AgentRunSdkProviderModelArenaPacketInput {
   apply?: boolean;
-  operatorConfirmation?: string;
+  operatorApproval?: unknown;
 }
 
 export interface AgentRunSdkProviderModelArenaArtifactPacketResult {
   mode: "agent-run-sdk-provider-model-arena-artifact-packet";
   activation: "none";
-  authorization: "none" | "explicit-human";
+  authorization: "none" | "explicit-operator";
   dispatchAllowed: false;
   processStartAllowed: false;
   paidModelCallsAllowed: false;
@@ -61,6 +61,7 @@ export interface AgentRunSdkProviderModelArenaArtifactPacketResult {
   requiresHumanDecision: true;
   decision: "preview" | "ready-to-apply" | "blocked";
   applyRequested: boolean;
+  structuredOperatorApproval: boolean;
   blockers: string[];
   arenaPacket: AgentRunSdkProviderModelArenaPacketResult;
   artifactPreviews: Array<{
@@ -70,7 +71,6 @@ export interface AgentRunSdkProviderModelArenaArtifactPacketResult {
     bytes: number;
     payload: unknown;
   }>;
-  humanConfirmationPhrase: string;
   nextActions: string[];
   summary: string;
 }
@@ -137,10 +137,10 @@ export interface AgentRunSdkProviderModelArenaPacketResult {
     failClosedOn: string[];
   };
   serialSuiteDispatchPlan: {
-    mode: "exact-confirmed-serial-suite-preview";
+    mode: "structured-approval-serial-suite-preview";
     dispatchAllowed: false;
     executeSupported: false;
-    humanConfirmationPhrase: string;
+    operatorApprovalPrompt: string;
     runOrder: string[];
     preflightChecks: string[];
     blockedUntil: string[];
@@ -182,7 +182,7 @@ export interface AgentRunSdkProviderModelArenaPacketResult {
   budgetContract: string[];
   promotionContract: string[];
   priorArtContract: string[];
-  humanConfirmationPhrase: string;
+  operatorApprovalPrompt: string;
   nextActions: string[];
   summary: string;
 }
@@ -357,15 +357,22 @@ function isSafeArtifactArenaId(arenaId: string): boolean {
   return /^[A-Za-z0-9._-]+$/.test(arenaId);
 }
 
+function hasStructuredOperatorApproval(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const row = value as Record<string, unknown>;
+  return row.packet_mode === "operator-approval-packet"
+    && row.approved === true
+    && row.approval_state === "approved";
+}
+
 export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRunSdkProviderModelArenaArtifactPacketInput = {}): AgentRunSdkProviderModelArenaArtifactPacketResult {
   const arenaPacket = buildAgentRunSdkProviderModelArenaPacket(input);
   const applyRequested = input.apply === true;
   const blockers = [...arenaPacket.blockers];
-  const humanConfirmationPhrase = arenaPacket.arenaSpec.arenaId ? `persist arena artifacts ${arenaPacket.arenaSpec.arenaId}` : "";
-  const operatorConfirmation = normalizeText(input.operatorConfirmation);
+  const structuredOperatorApproval = hasStructuredOperatorApproval(input.operatorApproval);
   if (arenaPacket.decision !== "ready-for-human-decision") blockers.push("arena-packet-blocked");
   if (arenaPacket.arenaSpec.arenaId && !isSafeArtifactArenaId(arenaPacket.arenaSpec.arenaId)) blockers.push("arena-artifact-id-unsafe");
-  if (applyRequested && operatorConfirmation !== humanConfirmationPhrase) blockers.push("operator-confirmation-mismatch");
+  if (applyRequested && !structuredOperatorApproval) blockers.push("structured-operator-approval-missing");
   const artifactPreviews = arenaPacket.suiteArtifactPlan.artifacts.map((artifact) => {
     const payload = artifact.sourceField === "suiteManifest"
       ? arenaPacket.suiteManifest
@@ -385,7 +392,7 @@ export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRun
   return {
     mode: "agent-run-sdk-provider-model-arena-artifact-packet",
     activation: "none",
-    authorization: writeAllowed ? "explicit-human" : "none",
+    authorization: writeAllowed ? "explicit-operator" : "none",
     dispatchAllowed: false,
     processStartAllowed: false,
     paidModelCallsAllowed: false,
@@ -393,14 +400,14 @@ export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRun
     requiresHumanDecision: true,
     decision,
     applyRequested,
+    structuredOperatorApproval,
     blockers,
     arenaPacket,
     artifactPreviews,
-    humanConfirmationPhrase,
     nextActions: decision === "preview"
       ? [
         "review artifact previews before any persistence",
-        "set apply=true only with the exact human confirmation phrase when intentionally persisting artifacts",
+        "set apply=true only with structured operator approval when intentionally persisting artifacts",
         "do not start workers or model calls from this artifact packet",
       ]
       : decision === "ready-to-apply"
@@ -535,16 +542,16 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     failClosedOn: suiteStopOn,
   };
   const serialSuiteDispatchPlan = {
-    mode: "exact-confirmed-serial-suite-preview" as const,
+    mode: "structured-approval-serial-suite-preview" as const,
     dispatchAllowed: false as const,
     executeSupported: false as const,
-    humanConfirmationPhrase: arenaId ? `execute arena serial suite ${arenaId}` : "",
+    operatorApprovalPrompt: arenaId ? `approve arena serial suite ${arenaId}` : "",
     runOrder: canaries.map((canary) => canary.runId),
     preflightChecks: [
       "arena packet decision is ready-for-human-decision",
       "workspace dirty state matches the declared suite scope",
       "provider/model budget evidence is fresh and scoped",
-      "operator confirmation exactly matches the suite phrase",
+      "structured operator approval is present for the suite run",
       "parent-side validation and rollback are known for every envelope",
     ],
     blockedUntil: [
@@ -605,14 +612,14 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     ],
     operatorSteps: [
       "review suiteManifest, scorecardTemplate, and fanInPlan before writing artifacts",
-      "persist artifacts only through a separate exact-confirmed artifact writer or manual operator action",
+      "persist artifacts only through a separate structured-approval artifact writer or manual operator action",
       "do not start workers as part of artifact persistence",
       "keep artifact rows scoped to provider/model/envelope so future models prove capabilities independently",
     ],
   };
   const budgetContract = [
     "arena packet is report-only and never starts paid/model calls by itself",
-    "each real run requires exact one-run confirmation plus the arena budget fields",
+    "each real run requires structured one-run approval plus the arena budget fields",
     "stop on auth, quota, rate-limit, timeout, empty-output, unexpected touched file, or contract failure",
     "no automatic retry loops unless a separate budgeted retry policy is explicitly approved",
   ];
@@ -667,7 +674,7 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
     budgetContract,
     promotionContract,
     priorArtContract,
-    humanConfirmationPhrase: arenaId ? `approve arena budget ${arenaId}` : "",
+    operatorApprovalPrompt: arenaId ? `approve arena budget ${arenaId}` : "",
     nextActions: decision === "ready-for-human-decision"
       ? [
         "review this arena packet and budget before any real model call",
@@ -675,7 +682,7 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
         "review the report-only suite manifest before any real model call",
         "use serialSuiteDispatchPlan only as a preview; this packet itself cannot dispatch",
         "review suiteArtifactPlan before persisting suite artifacts; this packet itself cannot write files",
-        "run canaries serially with exact one-run confirmations until a serial-suite executor exists",
+        "run canaries serially with structured one-run approvals until a serial-suite executor exists",
         "record scorecard/fan-in artifacts before promotion",
       ]
       : [

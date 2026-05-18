@@ -743,7 +743,7 @@ describe("agent run SDK packet surfaces", () => {
       properties: {
         arena_id: expect.any(Object),
         apply: expect.any(Object),
-        operator_confirmation: expect.any(Object),
+        operator_approval: expect.any(Object),
       },
     });
     const arenaArtifactTool = arenaArtifactToolCall?.[0] as typeof batchTool;
