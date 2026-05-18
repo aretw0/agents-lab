@@ -1,10 +1,10 @@
-# Human confirmation signal
+# Operator confirmation signal
 
 Status: design boundary for local-first control-plane safety.
 
 ## Problem
 
-Some destructive/protected confirmations happen before or around tool execution, but the local guard/monitor path must not infer authorization from free text. A monitor-visible string such as `human-confirmation-evidence: decision=match` is spoofable unless it is backed by trusted structured details from the runtime.
+Some destructive/protected confirmations happen before or around tool execution, but the local guard/monitor path must not infer authorization from free text. A monitor-visible string such as `operator-confirmation-evidence: decision=match` is spoofable unless it is backed by trusted structured details from the runtime.
 
 Current bounded evidence:
 
@@ -18,7 +18,7 @@ Current bounded evidence:
 A trusted confirmation signal must bind to the pending action:
 
 ```ts
-type HumanConfirmationActionFingerprint = {
+type OperatorConfirmationActionFingerprint = {
   actionKind: "destructive" | "protected";
   toolName: string;
   path?: string;
@@ -30,7 +30,7 @@ type HumanConfirmationActionFingerprint = {
 The runtime evidence envelope must remain non-authorizing by itself:
 
 ```ts
-type TrustedHumanConfirmationEvidence = HumanConfirmationActionFingerprint & {
+type TrustedOperatorConfirmationEvidence = OperatorConfirmationActionFingerprint & {
   id: string;
   origin: "runtime-ui-confirm" | "operator-contract-review";
   trusted: true;
@@ -52,7 +52,7 @@ Consumers must enforce:
 
 ## Implementation channel decision
 
-For the local stack, the first implementation channel should be **guard-owned report-only** unless an explicit later task chooses wrapper or upstream PR work. `resolveHumanConfirmationImplementationChannelPlan` encodes this boundary, and `human_confirmation_implementation_channel_plan` exposes it as a read-only runtime planning tool after reload:
+For the local stack, the first implementation channel should be **guard-owned report-only** unless an explicit later task chooses wrapper or upstream PR work. `resolveOperatorConfirmationImplementationChannelPlan` encodes this boundary, and `operator_confirmation_implementation_channel_plan` exposes it as a read-only runtime planning tool after reload:
 
 - guard-owned channel starts as report-only/dry-run evidence recording;
 - wrapper channel is design-only until it proves structured details survive to the consumer;
@@ -64,11 +64,11 @@ For the local stack, the first implementation channel should be **guard-owned re
 
 ### 1. Guard-owned dialog
 
-When a first-party guard owns the `ctx.ui.confirm` call, it can immediately call `recordTrustedHumanConfirmationUiDecision` and append a structured audit entry. This is the current safe local path used by `guardrails-core` read guards.
+When a first-party guard owns the `ctx.ui.confirm` call, it can immediately call `recordTrustedOperatorConfirmationUiDecision` and append a structured audit entry. This is the current safe local path used by `guardrails-core` read guards.
 
 ### 2. Wrapper signal
 
-If a wrapper owns or observes the confirmation before `tool_call`, it should emit a structured `human-confirmation-evidence` envelope with hidden/display-false metadata and preserve the full `details` object for the consumer. The consumer must call `consumeTrustedHumanConfirmationAuditEnvelope`; it must not parse free-text content.
+If a wrapper owns or observes the confirmation before `tool_call`, it should emit a structured `operator-confirmation-evidence` envelope with hidden/display-false metadata and preserve the full `details` object for the consumer. The consumer must call `consumeTrustedOperatorConfirmationAuditEnvelope`; it must not parse free-text content.
 
 ### 3. Upstream PR/design
 
@@ -89,8 +89,8 @@ Either option must preserve exact binding, TTL/single-use semantics, and no oper
 
 ## Current implementation references
 
-- `resolveHumanConfirmationSignalSourcePlan`
-- `recordTrustedHumanConfirmationUiDecision`
-- `buildTrustedHumanConfirmationAuditEnvelope`
-- `consumeTrustedHumanConfirmationAuditEnvelope`
-- `resolveHumanConfirmationRuntimeConsumptionPlan`
+- `resolveOperatorConfirmationSignalSourcePlan`
+- `recordTrustedOperatorConfirmationUiDecision`
+- `buildTrustedOperatorConfirmationAuditEnvelope`
+- `consumeTrustedOperatorConfirmationAuditEnvelope`
+- `resolveOperatorConfirmationRuntimeConsumptionPlan`

@@ -79,7 +79,7 @@ Contrato canônico para ingestão de conversas/threads de múltiplas plataformas
 - **Telegram/WhatsApp/Signal/Matrix**
   - `source.provider` conforme canal
   - `source.threadId` = chat/conversation id
-  - `event.role` via direção (inbound/outbound + bot/humano)
+  - `event.role` via direção (inbound/outbound + bot/operador)
   - `event.text` = payload textual normalizado
 
 ## Governança
