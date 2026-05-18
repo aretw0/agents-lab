@@ -41,10 +41,10 @@ describe("autonomy lane brainstorm surface", () => {
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
-    expect(result?.details.decision).toBe("ready-for-human-review");
+    expect(result?.details.decision).toBe("ready-for-operator-review");
     expect(result?.details.recommendationCode).toBe("seed-local-safe-lane");
     expect((result?.details.selectedSlices as unknown[] | undefined)?.length).toBeGreaterThan(0);
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm: decision=ready-for-human-review");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm: decision=ready-for-operator-review");
     expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo");
     expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"selectedSlices\"');
   });
@@ -69,7 +69,7 @@ describe("autonomy lane brainstorm surface", () => {
     }, undefined, undefined, { cwd });
 
     const selected = (result?.details.selectedSlices as Array<{ sourceTaskId?: string }> | undefined) ?? [];
-    expect(result?.details.decision).toBe("ready-for-human-review");
+    expect(result?.details.decision).toBe("ready-for-operator-review");
     expect(result?.details.recommendationCode).toBe("seed-local-safe-lane");
     expect(selected).toHaveLength(10);
     expect(selected[0]?.sourceTaskId).toBe("TASK-LOCAL-1");
@@ -88,7 +88,7 @@ describe("autonomy lane brainstorm surface", () => {
     const result = brainstormTool?.execute("call-test", { goal: "lane longa" }, undefined, undefined, { cwd });
 
     expect(result?.details.decision).toBe("blocked");
-    expect(result?.details.recommendationCode).toBe("needs-human-focus-protected");
+    expect(result?.details.recommendationCode).toBe("needs-operator-focus-protected");
     expect(typeof result?.details.nextAction).toBe("string");
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.mutationAllowed).toBe(false);
@@ -112,7 +112,7 @@ describe("autonomy lane brainstorm surface", () => {
       source: "tangent-approved",
     }, undefined, undefined, { cwd });
 
-    expect(result?.details.decision).toBe("needs-human-seeding-decision");
+    expect(result?.details.decision).toBe("needs-operator-seeding-decision");
     expect(result?.details.recommendationCode).toBe("brainstorm-seeding-preview");
     expect(String(result?.details.nextAction)).toContain("review proposals");
     expect(result?.details.confirmationRequired).toBe(true);
@@ -120,7 +120,7 @@ describe("autonomy lane brainstorm surface", () => {
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm-seed-preview: decision=needs-human-seeding-decision");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm-seed-preview: decision=needs-operator-seeding-decision");
     expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo");
     expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"proposals\"');
   });

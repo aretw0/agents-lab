@@ -86,7 +86,7 @@ describe("background process control plan", () => {
       healthcheckKnown: true,
     });
 
-    expect(result.decision).toBe("needs-human-decision");
+    expect(result.decision).toBe("needs-operator-decision");
     expect(result.recommendedMode).toBe("manual-decision");
     expect(result.blockers).toContain("parallel-agent-server-mode-decision-required");
   });
@@ -98,7 +98,7 @@ describe("background process control plan", () => {
     });
 
     expect(result.decision).toBe("blocked");
-    expect(result.blockers).toContain("destructive-restart-requires-human-approval");
+    expect(result.blockers).toContain("destructive-restart-requires-operator-approval");
     expect(result.processStopAllowed).toBe(false);
   });
 

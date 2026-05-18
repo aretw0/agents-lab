@@ -19,7 +19,7 @@ describe("structured interview primitive", () => {
       activation: "none",
       authorization: "none",
       dispatchAllowed: false,
-      decision: "needs-human-answer",
+      decision: "needs-operator-answer",
       nextQuestionId: "validation",
     });
     expect(result.evidence).toContain("dispatch=no");
@@ -83,8 +83,8 @@ describe("structured interview primitive", () => {
       answers: [{ questionId: "task", value: "TASK-BUD-856" }],
     });
 
-    expect(result?.details.decision).toBe("needs-human-answer");
-    expect(result?.content?.[0]?.text).toContain("structured-interview: decision=needs-human-answer");
+    expect(result?.details.decision).toBe("needs-operator-answer");
+    expect(result?.content?.[0]?.text).toContain("structured-interview: decision=needs-operator-answer");
     expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(result?.content?.[0]?.text).not.toContain('\"decision\"');
   });

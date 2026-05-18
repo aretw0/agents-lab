@@ -1,7 +1,7 @@
 export type ProjectIntakeProfile = "light-notes" | "app-medium" | "monorepo-heavy";
 
 export const INTAKE_PLAN_FIRST_SLICE_CODE = "intake-plan-first-slice";
-export const INTAKE_NEEDS_HUMAN_FOCUS_PROTECTED_CODE = "intake-needs-human-focus-protected";
+export const INTAKE_NEEDS_OPERATOR_FOCUS_PROTECTED_CODE = "intake-needs-operator-focus-protected";
 
 export interface ProjectIntakeInput {
   dominantArtifacts?: string[];
@@ -13,9 +13,9 @@ export interface ProjectIntakeInput {
 }
 
 export interface ProjectIntakePlan {
-  decision: "ready-for-human-review" | "blocked";
+  decision: "ready-for-operator-review" | "blocked";
   profile: ProjectIntakeProfile;
-  recommendationCode: typeof INTAKE_PLAN_FIRST_SLICE_CODE | typeof INTAKE_NEEDS_HUMAN_FOCUS_PROTECTED_CODE;
+  recommendationCode: typeof INTAKE_PLAN_FIRST_SLICE_CODE | typeof INTAKE_NEEDS_OPERATOR_FOCUS_PROTECTED_CODE;
   nextAction: string;
   firstSlice: {
     title: string;
@@ -59,8 +59,8 @@ export function evaluateProjectIntakePlan(raw: ProjectIntakeInput): ProjectIntak
     return {
       decision: "blocked",
       profile,
-      recommendationCode: INTAKE_NEEDS_HUMAN_FOCUS_PROTECTED_CODE,
-      nextAction: "protected scope requested; keep intake report-only and ask explicit human focus before escalation.",
+      recommendationCode: INTAKE_NEEDS_OPERATOR_FOCUS_PROTECTED_CODE,
+      nextAction: "protected scope requested; keep intake report-only and ask explicit operator focus before escalation.",
       firstSlice: {
         title: "collect minimal local project facts",
         validation: "read-only intake summary is recorded",
@@ -90,7 +90,7 @@ export function evaluateProjectIntakePlan(raw: ProjectIntakeInput): ProjectIntak
   };
 
   return {
-    decision: "ready-for-human-review",
+    decision: "ready-for-operator-review",
     profile,
     recommendationCode: INTAKE_PLAN_FIRST_SLICE_CODE,
     nextAction: "review profile, confirm first local-safe slice, then execute with focal validation and rollback clarity.",

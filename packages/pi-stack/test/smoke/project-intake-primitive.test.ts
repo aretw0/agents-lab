@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   evaluateProjectIntakePlan,
-  INTAKE_NEEDS_HUMAN_FOCUS_PROTECTED_CODE,
+  INTAKE_NEEDS_OPERATOR_FOCUS_PROTECTED_CODE,
   INTAKE_PLAN_FIRST_SLICE_CODE,
 } from "../../extensions/project-intake-primitive";
 
@@ -14,7 +14,7 @@ describe("project-intake-primitive", () => {
     });
 
     expect(plan.profile).toBe("light-notes");
-    expect(plan.decision).toBe("ready-for-human-review");
+    expect(plan.decision).toBe("ready-for-operator-review");
     expect(plan.recommendationCode).toBe(INTAKE_PLAN_FIRST_SLICE_CODE);
     expect(plan.dispatchAllowed).toBe(false);
     expect(plan.mutationAllowed).toBe(false);
@@ -42,8 +42,8 @@ describe("project-intake-primitive", () => {
     });
 
     expect(plan.decision).toBe("blocked");
-    expect(plan.recommendationCode).toBe(INTAKE_NEEDS_HUMAN_FOCUS_PROTECTED_CODE);
-    expect(plan.nextAction).toContain("human focus");
+    expect(plan.recommendationCode).toBe(INTAKE_NEEDS_OPERATOR_FOCUS_PROTECTED_CODE);
+    expect(plan.nextAction).toContain("operator focus");
   });
 
   it("keeps recommendations short and structured across lightweight and heavy scenarios", () => {

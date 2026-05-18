@@ -72,7 +72,7 @@ describe("lane brainstorm packet module", () => {
       },
     });
 
-    expect(packet.decision).toBe("ready-for-human-review");
+    expect(packet.decision).toBe("ready-for-operator-review");
     expect(packet.recommendationCode).toBe("seed-local-safe-lane");
     expect(packet.dispatchAllowed).toBe(false);
     expect(packet.mutationAllowed).toBe(false);
@@ -97,7 +97,7 @@ describe("lane brainstorm packet module", () => {
     expect(packet.selectedSlices[0]?.sourceTaskId).toBe("TASK-1");
   });
 
-  it("builds visible seeding preview that always requires human confirmation", () => {
+  it("builds visible seeding preview that always requires operator confirmation", () => {
     const packet = buildLaneBrainstormPacket({
       ideas: [{ id: "idea-a", theme: "dedupe outputs", value: "high", risk: "low", effort: "low" }],
       maxSlices: 1,
@@ -109,9 +109,9 @@ describe("lane brainstorm packet module", () => {
       },
     });
 
-    const preview = buildLaneBrainstormSeedPreview({ packet, source: "human" });
+    const preview = buildLaneBrainstormSeedPreview({ packet, source: "operator" });
 
-    expect(preview.decision).toBe("needs-human-seeding-decision");
+    expect(preview.decision).toBe("needs-operator-seeding-decision");
     expect(preview.recommendationCode).toBe("brainstorm-seeding-preview");
     expect(preview.nextAction).toContain("review proposals");
     expect(preview.confirmationRequired).toBe(true);
@@ -120,7 +120,7 @@ describe("lane brainstorm packet module", () => {
     expect(preview.authorization).toBe("none");
     expect(preview.mode).toBe("report-only");
     expect(preview.proposals).toHaveLength(1);
-    expect(preview.source).toBe("human");
+    expect(preview.source).toBe("operator");
   });
 
   it("keeps seeding preview blocked when brainstorm packet is blocked", () => {

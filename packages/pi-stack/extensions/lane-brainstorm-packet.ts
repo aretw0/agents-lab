@@ -1,6 +1,6 @@
 import {
   LOCAL_STOP_PROTECTED_FOCUS_REQUIRED_CODE,
-  NEEDS_HUMAN_FOCUS_PROTECTED_CODE,
+  NEEDS_OPERATOR_FOCUS_PROTECTED_CODE,
   SEED_LOCAL_SAFE_LANE_CODE,
   STOP_NO_LOCAL_SAFE_CODE,
 } from "./guardrails-core-local-stop-guidance";
@@ -39,7 +39,7 @@ export interface LaneBrainstormSelectedSlice {
 }
 
 export interface LaneBrainstormPacket {
-  decision: "ready-for-human-review" | "blocked";
+  decision: "ready-for-operator-review" | "blocked";
   goal: string;
   recommendationCode: string;
   nextAction: string;
@@ -53,10 +53,10 @@ export interface LaneBrainstormPacket {
 }
 
 export interface LaneBrainstormSeedPreview {
-  decision: "needs-human-seeding-decision" | "blocked";
+  decision: "needs-operator-seeding-decision" | "blocked";
   recommendationCode: "brainstorm-seeding-preview" | "brainstorm-seeding-blocked";
   nextAction: string;
-  source: "brainstorm" | "human" | "tangent-approved";
+  source: "brainstorm" | "operator" | "tangent-approved";
   proposals: Array<{
     id: string;
     title: string;
@@ -143,13 +143,13 @@ export function rankBrainstormIdeas(ideas: BrainstormIdeaInput[], maxItems = 12)
 }
 
 export function resolveLaneBrainstormRecommendation(selection: LaneBrainstormSelectionInput): {
-  decision: "ready-for-human-review" | "blocked";
+  decision: "ready-for-operator-review" | "blocked";
   recommendationCode: string;
   nextAction: string;
 } {
   if (selection.ready) {
     return {
-      decision: "ready-for-human-review",
+      decision: "ready-for-operator-review",
       recommendationCode: SEED_LOCAL_SAFE_LANE_CODE,
       nextAction: "review ranked slices and materialize bounded local-safe tasks.",
     };
@@ -157,7 +157,7 @@ export function resolveLaneBrainstormRecommendation(selection: LaneBrainstormSel
   if (selection.recommendationCode === LOCAL_STOP_PROTECTED_FOCUS_REQUIRED_CODE) {
     return {
       decision: "blocked",
-      recommendationCode: NEEDS_HUMAN_FOCUS_PROTECTED_CODE,
+      recommendationCode: NEEDS_OPERATOR_FOCUS_PROTECTED_CODE,
       nextAction: selection.recommendation,
     };
   }
@@ -224,10 +224,10 @@ export function buildLaneBrainstormPacket(input: {
 
 export function buildLaneBrainstormSeedPreview(input: {
   packet: LaneBrainstormPacket;
-  source?: "brainstorm" | "human" | "tangent-approved";
+  source?: "brainstorm" | "operator" | "tangent-approved";
 }): LaneBrainstormSeedPreview {
   const source = input.source ?? "brainstorm";
-  if (input.packet.decision !== "ready-for-human-review" || input.packet.selectedSlices.length === 0) {
+  if (input.packet.decision !== "ready-for-operator-review" || input.packet.selectedSlices.length === 0) {
     return {
       decision: "blocked",
       recommendationCode: "brainstorm-seeding-blocked",
@@ -251,7 +251,7 @@ export function buildLaneBrainstormSeedPreview(input: {
   }));
 
   return {
-    decision: "needs-human-seeding-decision",
+    decision: "needs-operator-seeding-decision",
     recommendationCode: "brainstorm-seeding-preview",
     nextAction: "review proposals and confirm which ones should be materialized as board tasks.",
     source,

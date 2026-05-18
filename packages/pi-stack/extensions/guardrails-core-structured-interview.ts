@@ -1,6 +1,6 @@
 export type StructuredInterviewQuestionKind = "text" | "single-choice" | "boolean" | "number";
 export type StructuredInterviewAnswerState = "answered" | "unknown" | "skipped";
-export type StructuredInterviewDecision = "complete" | "needs-human-answer" | "invalid";
+export type StructuredInterviewDecision = "complete" | "needs-operator-answer" | "invalid";
 
 export interface StructuredInterviewQuestion {
   id: string;
@@ -162,7 +162,7 @@ export function resolveStructuredInterview(input: {
   const decision: StructuredInterviewDecision = invalid.length > 0 || reasons.includes("questions-missing")
     ? "invalid"
     : missing.length > 0
-      ? "needs-human-answer"
+      ? "needs-operator-answer"
       : "complete";
 
   const base: Omit<StructuredInterviewResult, "evidence"> = {
@@ -173,7 +173,7 @@ export function resolveStructuredInterview(input: {
     authorization: "none",
     dispatchAllowed: false,
     decision,
-    nextQuestionId: decision === "needs-human-answer" ? missing[0] : undefined,
+    nextQuestionId: decision === "needs-operator-answer" ? missing[0] : undefined,
     reasons,
     accepted,
     invalid,

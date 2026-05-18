@@ -563,7 +563,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       });
       const preview = buildLaneBrainstormSeedPreview({
         packet,
-        source: p.source === "human" || p.source === "tangent-approved" ? p.source : "brainstorm",
+        source: p.source === "operator" || p.source === "tangent-approved" ? p.source : "brainstorm",
       });
       return buildOperatorVisibleToolResponse({
         label: "lane_brainstorm_seed_preview",

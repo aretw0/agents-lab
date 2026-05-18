@@ -1,6 +1,6 @@
 export type BackgroundProcessKind = "frontend" | "backend" | "test-server" | "worker" | "generic";
 export type BackgroundProcessMode = "auto" | "shared-service" | "isolated-worker";
-export type BackgroundProcessDecision = "ready-for-design" | "needs-port-lease" | "needs-human-decision" | "blocked";
+export type BackgroundProcessDecision = "ready-for-design" | "needs-port-lease" | "needs-operator-decision" | "blocked";
 export type BackgroundProcessLifecycleState = "running" | "stopped" | "finished" | "failed" | "killed" | "late-after-stop" | "unknown-origin";
 export type BackgroundProcessLifecycleEventKind = "registered" | "stop-requested" | "done" | "killed";
 export type BackgroundProcessStopSource = "none" | "human" | "agent" | "timeout" | "unknown";
@@ -256,14 +256,14 @@ export function resolveBackgroundProcessControlPlan(raw: BackgroundProcessPlanIn
 
   if (needsServer && !requestedPort) blockers.push("port-lease-required");
   if (recommendedMode === "manual-decision") blockers.push("parallel-agent-server-mode-decision-required");
-  if (destructiveRestart) blockers.push("destructive-restart-requires-human-approval");
+  if (destructiveRestart) blockers.push("destructive-restart-requires-operator-approval");
   if (needsServer && !healthcheckKnown) warnings.push("healthcheck-not-declared");
   if (parallelAgents > 1 && recommendedMode === "shared-service") warnings.push("shared-service-needs-cross-agent-lock");
 
   const decision: BackgroundProcessDecision = destructiveRestart
     ? "blocked"
     : blockers.includes("parallel-agent-server-mode-decision-required")
-      ? "needs-human-decision"
+      ? "needs-operator-decision"
       : blockers.includes("port-lease-required")
         ? "needs-port-lease"
         : "ready-for-design";

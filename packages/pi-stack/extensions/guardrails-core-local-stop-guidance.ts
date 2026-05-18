@@ -16,7 +16,7 @@ export const LOCAL_AUDIT_BLOCKED_CODE = "local-audit-blocked" as const;
 
 export const SEED_LOCAL_SAFE_LANE_CODE = "seed-local-safe-lane" as const;
 export const CONTINUE_EXISTING_LANE_CODE = "continue-existing-lane" as const;
-export const NEEDS_HUMAN_FOCUS_PROTECTED_CODE = "needs-human-focus-protected" as const;
+export const NEEDS_OPERATOR_FOCUS_PROTECTED_CODE = "needs-operator-focus-protected" as const;
 export const STOP_NO_LOCAL_SAFE_CODE = "stop-no-local-safe" as const;
 
 export const LOCAL_STOP_PROTECTED_FOCUS_NEXT_ACTION =
