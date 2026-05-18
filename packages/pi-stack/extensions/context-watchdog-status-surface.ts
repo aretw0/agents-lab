@@ -1,6 +1,6 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import type { ContextThresholdOverrides } from "./custom-footer";
+import type { ContextThresholdOverrides } from "./custom-footer-context-thresholds";
 import { applyContextWatchBootstrapToSettings, buildContextWatchBootstrapPlan } from "./context-watchdog-bootstrap";
 import { buildAutoCompactDiagnostics } from "./context-watchdog-auto-compact";
 import type { ContextWatchdogConfig } from "./context-watchdog-config";

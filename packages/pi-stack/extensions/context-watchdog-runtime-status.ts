@@ -6,7 +6,7 @@ import {
 	type ContextWatchdogConfig,
 } from "./context-watchdog-config";
 import { readSettingsJson } from "./context-watchdog-storage";
-import type { ContextThresholdOverrides } from "./custom-footer";
+import type { ContextThresholdOverrides } from "./custom-footer-context-thresholds";
 
 export function makeContextWatchdogSourceMtimeReader(sourceUrl: string): () => number | undefined {
 	const sourcePath = fileURLToPath(sourceUrl);

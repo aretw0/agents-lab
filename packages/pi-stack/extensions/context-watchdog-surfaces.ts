@@ -6,8 +6,7 @@
  * runtime hot path.
  */
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import type { ContextThresholdOverrides } from "./custom-footer";
-import { resolveContextThresholds } from "./custom-footer";
+import { resolveContextThresholds, type ContextThresholdOverrides } from "./custom-footer-context-thresholds";
 import { DEFAULT_CONTEXT_WATCHDOG_CONFIG, deriveContextWatchThresholds, normalizeContextWatchdogConfig, type ContextWatchdogConfig } from "./context-watchdog-config";
 import { evaluateContextWatch } from "./context-watchdog-policy";
 import type { ContextWatchAssessment } from "./context-watchdog-operator-signals";
