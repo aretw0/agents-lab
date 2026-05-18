@@ -1,4 +1,7 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { Type } from "@sinclair/typebox";
 
 import { buildBoardReadinessStatusLabel, evaluateBoardLongRunReadiness } from "./guardrails-core-board-readiness";
 import {
@@ -49,7 +52,9 @@ import {
 import {
   computeLoopEvidenceReadiness,
   readLoopActivationEvidence,
+  type LoopActivationEvidenceState,
 } from "./guardrails-core-lane-queue-evidence";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export interface GuardrailsLaneQueueSurfaceRuntimeSnapshot {
   lastLongRunBusyAt: number;
@@ -98,8 +103,156 @@ export interface RegisterGuardrailsLaneQueueSurfaceInput {
   runtime: GuardrailsLaneQueueSurfaceRuntime;
 }
 
+function normalizeMilestoneLabel(value: unknown): string | undefined {
+  const text = String(value ?? "").trim();
+  if (!text) return undefined;
+  const unwrapped = text.length >= 2
+    && ((text.startsWith("\"") && text.endsWith("\"")) || (text.startsWith("'") && text.endsWith("'")))
+    ? text.slice(1, -1)
+    : text;
+  const normalized = unwrapped.replace(/\s+/g, " ").trim();
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+function readLoopEvidenceForReadiness(cwd: string): {
+  exists: boolean;
+  parseError?: string;
+  evidence: LoopActivationEvidenceState;
+} {
+  const filePath = join(cwd, ".pi", "guardrails-loop-evidence.json");
+  if (!existsSync(filePath)) {
+    return {
+      exists: false,
+      evidence: { version: 1, updatedAtIso: new Date(0).toISOString() },
+    };
+  }
+  try {
+    const raw = JSON.parse(readFileSync(filePath, "utf8")) as Partial<LoopActivationEvidenceState>;
+    return {
+      exists: true,
+      evidence: {
+        version: 1,
+        updatedAtIso: typeof raw.updatedAtIso === "string" ? raw.updatedAtIso : new Date(0).toISOString(),
+        lastLoopReady: raw.lastLoopReady,
+        lastBoardAutoAdvance: raw.lastBoardAutoAdvance,
+      },
+    };
+  } catch (error) {
+    return {
+      exists: true,
+      parseError: error instanceof Error ? error.message : String(error),
+      evidence: { version: 1, updatedAtIso: new Date(0).toISOString() },
+    };
+  }
+}
+
+export function buildLoopEvidenceReadinessPacket(input: {
+  cwd: string;
+  nowMs?: number;
+  maxAgeMin?: number;
+  strict?: boolean;
+  expectedMilestone?: string;
+  requireMilestoneGate?: boolean;
+  defaultMilestone?: string;
+}) {
+  const nowMs = input.nowMs ?? Date.now();
+  const maxAgeMin = Math.max(0, Math.floor(input.maxAgeMin ?? 30));
+  const loaded = readLoopEvidenceForReadiness(input.cwd);
+  const evidence = loaded.evidence;
+  const readiness = computeLoopEvidenceReadiness(evidence);
+  const updatedMs = Date.parse(evidence.updatedAtIso);
+  const ageSec = Number.isFinite(updatedMs) ? Math.max(0, Math.floor((nowMs - updatedMs) / 1000)) : undefined;
+  const stale = ageSec === undefined || ageSec > maxAgeMin * 60;
+  const status = !loaded.exists
+    ? "missing"
+    : loaded.parseError
+      ? "invalid-json"
+      : stale
+        ? "stale"
+        : "ok";
+  const expectedMilestone = normalizeMilestoneLabel(input.expectedMilestone) === "@default"
+    ? normalizeMilestoneLabel(input.defaultMilestone)
+    : normalizeMilestoneLabel(input.expectedMilestone);
+  const milestoneParity = evaluateLaneEvidenceMilestoneParity(
+    expectedMilestone,
+    evidence.lastBoardAutoAdvance?.milestone,
+    evidence.lastLoopReady?.milestone,
+  );
+  const strictFailures: string[] = [];
+  if (input.strict === true) {
+    if (status === "missing") strictFailures.push("evidence-missing");
+    else if (status === "invalid-json") strictFailures.push("evidence-invalid-json");
+    else if (status !== "ok") strictFailures.push(`evidence-${status}`);
+    if (stale) strictFailures.push("evidence-stale");
+    if (!readiness.readyForLoopEvidence) strictFailures.push("readiness-not-ready");
+    if (milestoneParity.matches === false) strictFailures.push("milestone-mismatch");
+    if (input.requireMilestoneGate === true && !expectedMilestone) strictFailures.push("milestone-gate-inactive");
+  }
+  const uniqueFailures = [...new Set(strictFailures)];
+  return {
+    mode: "guardrails-loop-evidence-readiness",
+    dispatchAllowed: false,
+    authorization: "none",
+    status,
+    stale,
+    updatedAtIso: evidence.updatedAtIso,
+    ageSec,
+    maxAgeMin,
+    readyForLoopEvidence: readiness.readyForLoopEvidence,
+    readyForTaskBud125: readiness.readyForTaskBud125,
+    criteria: readiness.criteria,
+    boardAuto: evidence.lastBoardAutoAdvance,
+    loopReady: evidence.lastLoopReady,
+    milestoneParity,
+    strict: input.strict === true,
+    strictFailures: uniqueFailures,
+    ok: status === "ok" && readiness.readyForLoopEvidence && milestoneParity.matches !== false && uniqueFailures.length === 0,
+    summary: [
+      "guardrails-loop-evidence-readiness:",
+      `status=${status}`,
+      `ready=${readiness.readyForLoopEvidence ? "yes" : "no"}`,
+      `stale=${stale ? "yes" : "no"}`,
+      `milestone=${milestoneParity.expectedMilestone ?? "n/a"}:${milestoneParity.matches ? "match" : "mismatch"}`,
+      `strictFailures=${uniqueFailures.length}`,
+    ].join(" "),
+  };
+}
+
 export function registerGuardrailsLaneQueueSurface(input: RegisterGuardrailsLaneQueueSurfaceInput): void {
   const { pi, appendAuditEntry, runtime } = input;
+
+  pi.registerTool({
+    name: "guardrails_loop_evidence_readiness",
+    label: "Guardrails Loop Evidence Readiness",
+    description: "Read-only strict/milestone readiness packet for .pi/guardrails-loop-evidence.json. Never dispatches lane work.",
+    parameters: Type.Object({
+      strict: Type.Optional(Type.Boolean()),
+      max_age_min: Type.Optional(Type.Number()),
+      expected_milestone: Type.Optional(Type.String({ description: "Milestone label, or @default for configured defaultBoardMilestone." })),
+      require_milestone_gate: Type.Optional(Type.Boolean()),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as {
+        strict?: boolean;
+        max_age_min?: number;
+        expected_milestone?: string;
+        require_milestone_gate?: boolean;
+      };
+      const packet = buildLoopEvidenceReadinessPacket({
+        cwd: ctx.cwd,
+        strict: p.strict === true,
+        maxAgeMin: p.max_age_min,
+        expectedMilestone: p.expected_milestone,
+        requireMilestoneGate: p.require_milestone_gate === true,
+        defaultMilestone: runtime.getLongRunIntentQueueConfig().defaultBoardMilestone,
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "guardrails_loop_evidence_readiness",
+        summary: packet.summary,
+        details: packet,
+      });
+    },
+  });
 
   pi.registerCommand("lane-queue", {
     description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence [--milestone <label>|-m <label>|-m=<label>|--no-milestone]]",

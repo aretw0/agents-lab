@@ -87,6 +87,11 @@ const DISTRIBUTED_WRAPPERS = [
 		surface: "guardrails-core",
 		reason: "git dirty snapshots are already distributed through git_dirty_snapshot and /git-dirty",
 	},
+	{
+		match: /^ops:loop-evidence/,
+		surface: "guardrails-core",
+		reason: "loop evidence strict/milestone readiness is distributed through guardrails_loop_evidence_readiness",
+	},
 ];
 
 const PROMOTION_CANDIDATES = [
@@ -99,11 +104,6 @@ const PROMOTION_CANDIDATES = [
 		match: /^pi:artifact:audit/,
 		target: "safe-boot",
 		reason: "runtime artifact hygiene is safety behavior useful to installed users",
-	},
-	{
-		match: /^ops:loop-evidence/,
-		target: "guardrails-core",
-		reason: "loop evidence readiness is part of long-run control-plane safety",
 	},
 	{
 		match: /^project:verification/,

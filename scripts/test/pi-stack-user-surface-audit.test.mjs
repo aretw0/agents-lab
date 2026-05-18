@@ -50,6 +50,13 @@ test("classifyRootScript marks git dirty snapshot as guardrails wrapper", () => 
 	assert.equal(row.targetSurface, "guardrails-core");
 });
 
+test("classifyRootScript marks loop evidence scripts as guardrails wrappers", () => {
+	const row = classifyRootScript("ops:loop-evidence:strict:milestone-gate", "node scripts/guardrails-loop-evidence-check.mjs --strict --require-milestone-gate", shipped);
+
+	assert.equal(row.category, "distributed-wrapper");
+	assert.equal(row.targetSurface, "guardrails-core");
+});
+
 test("classifyRootScript keeps ci and release scripts internal", () => {
 	assert.equal(classifyRootScript("ci:smoke:gate", "npm run test:smoke", shipped).category, "repo-internal");
 	assert.equal(classifyRootScript("release", "changeset version", shipped).category, "repo-internal");
@@ -63,4 +70,5 @@ test("buildUserSurfaceAudit exposes grouped promotion targets", () => {
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "machine-maintenance" && group.scripts.includes("ops:disk:check")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "context-watchdog" && group.scripts.includes("context:preload:consume")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "guardrails-core" && group.scripts.includes("git:dirty:snapshot")));
+	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "guardrails-core" && group.scripts.includes("ops:loop-evidence:strict")));
 });

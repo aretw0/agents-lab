@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import guardrailsCore from "../../extensions/guardrails-core";
+import { buildLoopEvidenceReadinessPacket } from "../../extensions/guardrails-core-lane-queue-surface";
 
 function makeMockPi() {
   const handlers = new Map<string, Function[]>();
@@ -100,5 +101,88 @@ describe("guardrails-core shell-route registration", () => {
     const message = String(notify.mock.calls[0]?.[0] ?? "");
     expect(message).toContain("READY=");
     expect(message).toContain("loop=");
+  });
+
+  it("exposes loop evidence readiness as a read-only strict tool", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "lane-queue-evidence-tool-"));
+    mkdirSync(join(cwd, ".pi"), { recursive: true });
+    writeFileSync(
+      join(cwd, ".pi", "guardrails-loop-evidence.json"),
+      JSON.stringify({
+        version: 1,
+        updatedAtIso: "2026-05-01T00:00:00.000Z",
+        lastBoardAutoAdvance: {
+          atIso: "2026-05-01T00:00:00.000Z",
+          taskId: "TASK-1",
+          milestone: "release",
+          runtimeCodeState: "active",
+          markersLabel: "IN_LOOP",
+          emLoop: true,
+        },
+        lastLoopReady: {
+          atIso: "2026-05-01T00:00:00.000Z",
+          markersLabel: "IN_LOOP",
+          runtimeCodeState: "active",
+          boardAutoAdvanceGate: "ready",
+          nextTaskId: "TASK-2",
+          milestone: "release",
+        },
+      }),
+      "utf8",
+    );
+
+    const packet = buildLoopEvidenceReadinessPacket({
+      cwd,
+      nowMs: Date.parse("2026-05-01T00:05:00.000Z"),
+      strict: true,
+      expectedMilestone: "release",
+      maxAgeMin: 30,
+    });
+
+    expect(packet.ok).toBe(true);
+    expect(packet.strictFailures).toEqual([]);
+    expect(packet.summary).toContain("ready=yes");
+
+    const pi = makeMockPi();
+    guardrailsCore(pi);
+    await (pi as unknown as { emit: (event: string, ctx: unknown) => Promise<void> }).emit("session_start", makeCtx(cwd));
+    const tool = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+      ([def]) => def?.name === "guardrails_loop_evidence_readiness",
+    )?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => { content?: Array<{ text?: string }>; details?: Record<string, unknown> };
+    } | undefined;
+
+    expect(tool).toBeDefined();
+    const result = tool?.execute(
+      "tc-loop-evidence",
+      { strict: true, expected_milestone: "release", max_age_min: 30 },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("guardrails-loop-evidence-readiness:");
+    expect((result?.details as any)?.dispatchAllowed).toBe(false);
+    expect((result?.details as any)?.strictFailures).toEqual([]);
+  });
+
+  it("loop evidence readiness fails closed for missing strict evidence", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "lane-queue-evidence-missing-"));
+    const packet = buildLoopEvidenceReadinessPacket({
+      cwd,
+      nowMs: Date.parse("2026-05-01T00:05:00.000Z"),
+      strict: true,
+    });
+
+    expect(packet.status).toBe("missing");
+    expect(packet.ok).toBe(false);
+    expect(packet.strictFailures).toContain("evidence-missing");
+    expect(packet.strictFailures).toContain("readiness-not-ready");
   });
 });
