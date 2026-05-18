@@ -630,7 +630,7 @@ export interface AutonomyProtectedFocusDecisionPreview {
 
 export interface AutonomyProtectedFocusDecisionPacket {
   taskId: string;
-  decision: "ready-for-human-decision" | "blocked";
+  decision: "ready-for-operator-decision" | "blocked";
   recommendedOption: "promote" | "skip" | "defer";
   options: ["promote", "skip", "defer"];
   recommendationCode:
@@ -661,7 +661,7 @@ export interface AutonomyProtectedFocusDecisionPacket {
 }
 
 function buildProtectedFocusDecisionPreview(input: {
-  decision: "ready-for-human-decision" | "blocked";
+  decision: "ready-for-operator-decision" | "blocked";
   recommendedOption: "promote" | "skip" | "defer";
   protectedScope: boolean;
   riskLevel: "high" | "medium" | "low";
@@ -810,10 +810,10 @@ export function buildAutonomyProtectedFocusDecisionPacket(
     protectedClassification.protected && riskLevel === "high" && !rollbackPlanKnown ? "missing-rollback-plan" : undefined,
   ].filter(Boolean) as string[];
 
-  let decision: AutonomyProtectedFocusDecisionPacket["decision"] = "ready-for-human-decision";
+  let decision: AutonomyProtectedFocusDecisionPacket["decision"] = "ready-for-operator-decision";
   let recommendedOption: AutonomyProtectedFocusDecisionPacket["recommendedOption"] = "promote";
   let recommendationCode: AutonomyProtectedFocusDecisionPacket["recommendationCode"] = "protected-focus-promote-canary";
-  let nextAction = "ask human to choose promote/skip/defer; if promote, run one protected canary slice with explicit rollback and focal validation.";
+  let nextAction = "ask operator to choose promote/skip/defer; if promote, run one protected canary slice with explicit rollback and focal validation.";
 
   if (!protectedClassification.protected) {
     recommendedOption = "skip";
@@ -866,7 +866,7 @@ export function buildAutonomyProtectedFocusDecisionPacket(
     mode: "report-only",
     summary: [
       "autonomy-protected-focus-packet:",
-      `ok=${decision === "ready-for-human-decision" ? "yes" : "no"}`,
+      `ok=${decision === "ready-for-operator-decision" ? "yes" : "no"}`,
       `task=${taskId}`,
       `decision=${decision}`,
       `option=${recommendedOption}`,

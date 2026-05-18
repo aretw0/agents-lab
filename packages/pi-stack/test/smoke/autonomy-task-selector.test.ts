@@ -318,7 +318,7 @@ describe("autonomy task selector", () => {
       task({ id: "TASK-LOCAL", status: "planned", description: "[P1] pesquisa local-safe: mapear critérios" }),
     ], "TASK-LOCAL");
 
-    expect(packet.decision).toBe("ready-for-human-decision");
+    expect(packet.decision).toBe("ready-for-operator-decision");
     expect(packet.recommendedOption).toBe("skip");
     expect(packet.recommendationCode).toBe("protected-focus-skip-local-safe");
     expect(packet.protectedScope).toBe(false);
