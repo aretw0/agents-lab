@@ -3,13 +3,15 @@ import {
   evaluateAutonomyLaneTaskSelection,
 } from "./guardrails-core-autonomy-task-selector";
 import {
-  asBool,
-  asNumber,
   normalizeContextLevel,
   resolveAutoAdvanceFailClosedReasons,
   resolveFocusTaskIds,
   workspaceLooksClean,
 } from "./guardrails-core-autonomy-lane-common";
+import {
+  asBooleanWithDefault as asBool,
+  asNumberWithDefault as asNumber,
+} from "./guardrails-core-param-normalizers";
 import {
   findTaskById,
   normalizeTaskDependencyIds,
@@ -20,14 +22,16 @@ import {
   toTaskMnemonic,
 } from "./guardrails-core-task-contracts";
 export {
-  asBool,
-  asNumber,
   buildAutonomyOperatorPauseBrief,
   buildIterationReminder,
   normalizeContextLevel,
   readHandoffFreshnessSignal,
   resolveLocalSafeChainingDecision,
 } from "./guardrails-core-autonomy-lane-common";
+export {
+  asBooleanWithDefault as asBool,
+  asNumberWithDefault as asNumber,
+} from "./guardrails-core-param-normalizers";
 export {
   findTaskById,
   normalizeTaskId,
