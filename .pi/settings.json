@@ -131,6 +131,9 @@
       }
     },
     "guardrailsCore": {
+      "surfaces": {
+        "enabled": false
+      },
       "providerBudgetGovernor": {
         "enabled": true,
         "lookbackDays": 30,

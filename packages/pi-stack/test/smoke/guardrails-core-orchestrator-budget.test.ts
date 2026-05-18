@@ -27,7 +27,7 @@ describe("guardrails-core orchestrator budget", () => {
 		expect(source).toContain("registerGuardrailsCoreEventSurface(pi, eventSurfaceRuntime)");
 		expect(source).toContain("createGuardrailsCoreAutoDrain({");
 		expect(source).toContain("registerGuardrailsCoreToolCallGuard(pi");
-		expect(source).toContain("registerGuardrailsCoreSurfaces({");
+		expect(source).toContain("await import(\"./guardrails-core-surface-registration\")");
 		expect(autoDrainSource).toContain("evaluateBoardLongRunReadiness");
 		expect(surfaceRegistrationSource).toContain("registerGuardrailsDeliverySurface(pi, appendAuditEntry)");
 		expect(surfaceRegistrationSource).toContain("registerGuardrailsSafeMutationSurface(pi, appendAuditEntry)");

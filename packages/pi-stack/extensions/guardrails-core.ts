@@ -16,18 +16,6 @@ import {
   resolveBloatSmellConfig,
   type BloatSmellConfig,
 } from "./guardrails-core-bloat";
-export {
-  buildWideSingleFileSliceStatusLabel,
-  evaluateCodeBloatSmell,
-  evaluateTextBloatSmell,
-  evaluateWideSingleFileSlice,
-  summarizeAssumptionText,
-} from "./guardrails-core-bloat";
-export type {
-  CodeBloatSmellAssessment,
-  TextBloatSmellAssessment,
-  WideSingleFileSliceAssessment,
-} from "./guardrails-core-bloat";
 import {
   DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG,
   resolveLongRunIntentQueueConfig,
@@ -74,46 +62,13 @@ import {
 import { buildShellRoutingStatusLabel, resolveCommandRoutingProfile, type CommandRoutingProfile } from "./guardrails-core-shell-routing";
 import { DEFAULT_I18N_INTENT_CONFIG, resolveI18nIntentConfig, type I18nIntentConfig } from "./guardrails-core-i18n-intents";
 import { shouldAnnounceStrictInteractiveMode } from "./guardrails-core-command-utils";
-export { shouldAnnounceStrictInteractiveMode } from "./guardrails-core-command-utils";
 import { registerGuardrailsCoreEventSurface } from "./guardrails-core-event-surface";
 import { registerGuardrailsCoreToolCallGuard } from "./guardrails-core-tool-call-guard";
-import { registerGuardrailsCoreSurfaces, type GuardrailsLaneQueueSurfaceRuntimeSnapshot } from "./guardrails-core-surface-registration";
-export {
-  extractPathsFromBash,
-  isAllowedOutside,
-  isInsideCwd,
-  isSensitive,
-  isUpstreamPiPackagePath,
-  upstreamPiPackageMutationToolReason,
-} from "./guardrails-core-path-guard";
 import { appendAuditEntry } from "./guardrails-core-confirmation-audit";
 import {
   classifyRouting,
   resolveGuardrailsPortConflictConfig,
   type GuardrailsPortConflictConfig,
-} from "./guardrails-core-web-routing";
-export {
-  computeLoopEvidenceReadiness,
-  shouldRefreshLoopEvidenceFromRuntimeSnapshot,
-  type LoopActivationEvidenceState,
-  type LoopEvidenceReadiness,
-} from "./guardrails-core-lane-queue-evidence";
-
-export {
-  classifyRouting,
-  detectPortConflict,
-  extractDomains,
-  extractExplicitPorts,
-  hasInteractiveIntent,
-  isDisallowedBash,
-  looksLikeServerStartCommand,
-  readReservedSessionWebPort,
-  resolveGuardrailsPortConflictConfig,
-} from "./guardrails-core-web-routing";
-
-export type {
-  GuardrailsPortConflictConfig,
-  RoutingDecision,
 } from "./guardrails-core-web-routing";
 import {
   detectProviderBudgetGovernorMisconfig,
@@ -126,38 +81,29 @@ import {
   type ProviderBudgetGovernorSnapshot,
   type ProviderBudgetGovernorSnapshotCache,
 } from "./guardrails-core-provider-budget-governor";
-export {
-  detectProviderBudgetGovernorMisconfig,
-  providerBudgetGovernorMisconfigReason,
-} from "./guardrails-core-provider-budget-governor";
-export type { ProviderBudgetGovernorMisconfig } from "./guardrails-core-provider-budget-governor";
 
 import {
   DEFAULT_PRAGMATIC_AUTONOMY_CONFIG,
+  resolveGuardrailsCoreSurfacesConfig,
   resolvePragmaticAutonomyConfig,
   type PragmaticAutonomyConfig,
 } from "./guardrails-core-runtime-config";
 
-export {
-  buildGuardrailsConfigHelpLines,
-  buildGuardrailsRuntimeConfigGetLines,
-  buildGuardrailsRuntimeConfigSetResult,
-  buildGuardrailsRuntimeConfigStatus,
-  buildPragmaticAutonomySystemPrompt,
-  coerceGuardrailsRuntimeConfigValue,
-  DEFAULT_PRAGMATIC_AUTONOMY_CONFIG,
-  GUARDRAILS_RUNTIME_CONFIG_SPECS,
-  readGuardrailsRuntimeConfigSnapshot,
-  resolveGuardrailsRuntimeConfigSpec,
-  resolvePragmaticAutonomyConfig,
-  validateGuardrailsRuntimeConfigValue,
-} from "./guardrails-core-runtime-config";
-
-export type {
-  GuardrailsRuntimeConfigSpec,
-  GuardrailsRuntimeConfigValue,
-  PragmaticAutonomyConfig,
-} from "./guardrails-core-runtime-config";
+export interface GuardrailsLaneQueueSurfaceRuntimeSnapshot {
+  lastAutoDrainAt: number;
+  lastLongRunBusyAt: number;
+  lastBoardAutoAdvanceTaskId?: string;
+  lastBoardAutoAdvanceAt: number;
+  lastForceNowAt: number;
+  lastForceNowTextPreview?: string;
+  lastLoopActivationReadyAt: number;
+  lastLoopActivationReadyLabel?: string;
+  lastDispatchFailureFingerprint?: string;
+  lastDispatchFailureClass: DispatchFailureClass;
+  lastDispatchFailurePauseAfterUsed: number;
+  lastDispatchFailureWindowMsUsed: number;
+  identicalDispatchFailureStreak: number;
+}
 
 const GUARDRAILS_CORE_SOURCE_PATH = fileURLToPath(import.meta.url);
 
@@ -187,6 +133,8 @@ export default function (pi: ExtensionAPI) {
   let strictInteractiveMode = false;
   let strictInteractiveAnnounced = false;
   let shellRoutingProfile: CommandRoutingProfile = resolveCommandRoutingProfile();
+  let guardrailsCoreSurfacesEnabled = true;
+  let guardrailsCoreSurfacesRegistered = false;
   let portConflictConfig: GuardrailsPortConflictConfig = { enabled: true, suggestedTestPort: 4173 };
   let providerBudgetGovernorConfig: ProviderBudgetGovernorConfig = {
     enabled: false,
@@ -556,7 +504,58 @@ export default function (pi: ExtensionAPI) {
     currentRuntimeCodeState,
   });
 
-  pi.on("session_start", (_event, ctx) => {
+  async function registerConfiguredGuardrailsCoreSurfaces(ctx: ExtensionContext): Promise<void> {
+    if (guardrailsCoreSurfacesRegistered) return;
+    if (!guardrailsCoreSurfacesEnabled) {
+      ctx.ui?.setStatus?.("guardrails-core-surfaces", undefined);
+      return;
+    }
+    const { registerGuardrailsCoreSurfaces } = await import("./guardrails-core-surface-registration");
+    registerGuardrailsCoreSurfaces({
+      pi,
+      appendAuditEntry,
+      getShellRoutingProfile: () => shellRoutingProfile,
+      onRuntimeConfigChanged: (changedCtx) => {
+        longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(changedCtx.cwd);
+        pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(changedCtx.cwd);
+        i18nIntentConfig = resolveI18nIntentConfig(changedCtx.cwd);
+        updateLongRunLaneStatus(changedCtx, !changedCtx.isIdle() || changedCtx.hasPendingMessages(), longRunLoopRuntimeState);
+      },
+      laneQueueRuntime: {
+        getLongRunIntentQueueConfig: () => longRunIntentQueueConfig,
+        getLongRunProviderRetryConfig: () => longRunProviderRetryConfig,
+        getLongRunLoopRuntimeState: () => longRunLoopRuntimeState,
+        getDiagnosticsSnapshot: (): GuardrailsLaneQueueSurfaceRuntimeSnapshot => ({
+          lastAutoDrainAt,
+          lastLongRunBusyAt,
+          lastBoardAutoAdvanceTaskId,
+          lastBoardAutoAdvanceAt,
+          lastForceNowAt,
+          lastForceNowTextPreview,
+          lastLoopActivationReadyAt,
+          lastLoopActivationReadyLabel,
+          lastDispatchFailureFingerprint,
+          lastDispatchFailureClass,
+          lastDispatchFailurePauseAfterUsed,
+          lastDispatchFailureWindowMsUsed,
+          identicalDispatchFailureStreak,
+        }),
+        updateLongRunLaneStatus,
+        clearAutoDrainTimer,
+        setLoopMode,
+        markLoopHealthy,
+        scheduleAutoDrainDeferredIntent,
+        markLoopDispatch,
+        markLoopDegraded,
+        trackClassifiedDispatchFailure,
+        refreshLoopLeaseOnActivity,
+        currentRuntimeCodeState,
+      },
+    });
+    guardrailsCoreSurfacesRegistered = true;
+  }
+
+  pi.on("session_start", async (_event, ctx) => {
     strictInteractiveMode = false;
     strictInteractiveAnnounced = false;
     sourceMtimeMsAtSessionStart = readGuardrailsCoreSourceMtimeMs();
@@ -569,6 +568,7 @@ export default function (pi: ExtensionAPI) {
     );
     longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);
     longRunProviderRetryConfig = resolveLongRunProviderTransientRetryConfig(ctx.cwd);
+    guardrailsCoreSurfacesEnabled = resolveGuardrailsCoreSurfacesConfig(ctx.cwd).enabled;
     pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(ctx.cwd);
     i18nIntentConfig = resolveI18nIntentConfig(ctx.cwd);
     bloatSmellConfig = resolveBloatSmellConfig(ctx.cwd);
@@ -629,6 +629,7 @@ export default function (pi: ExtensionAPI) {
         preferCmdForNodeFamily: shellRoutingProfile.preferCmdForNodeFamily,
       });
     }
+    await registerConfiguredGuardrailsCoreSurfaces(ctx);
   });
 
   const eventSurfaceRuntime = {
@@ -667,48 +668,6 @@ export default function (pi: ExtensionAPI) {
     getPortConflictConfig: () => portConflictConfig,
     getBloatSmellConfig: () => bloatSmellConfig,
     getEventSurfaceRuntime: () => eventSurfaceRuntime,
-  });
-
-  registerGuardrailsCoreSurfaces({
-    pi,
-    appendAuditEntry,
-    getShellRoutingProfile: () => shellRoutingProfile,
-    onRuntimeConfigChanged: (ctx) => {
-      longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);
-      pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(ctx.cwd);
-      i18nIntentConfig = resolveI18nIntentConfig(ctx.cwd);
-      updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
-    },
-    laneQueueRuntime: {
-      getLongRunIntentQueueConfig: () => longRunIntentQueueConfig,
-      getLongRunProviderRetryConfig: () => longRunProviderRetryConfig,
-      getLongRunLoopRuntimeState: () => longRunLoopRuntimeState,
-      getDiagnosticsSnapshot: (): GuardrailsLaneQueueSurfaceRuntimeSnapshot => ({
-        lastAutoDrainAt,
-        lastLongRunBusyAt,
-        lastBoardAutoAdvanceTaskId,
-        lastBoardAutoAdvanceAt,
-        lastForceNowAt,
-        lastForceNowTextPreview,
-        lastLoopActivationReadyAt,
-        lastLoopActivationReadyLabel,
-        lastDispatchFailureFingerprint,
-        lastDispatchFailureClass,
-        lastDispatchFailurePauseAfterUsed,
-        lastDispatchFailureWindowMsUsed,
-        identicalDispatchFailureStreak,
-      }),
-      updateLongRunLaneStatus,
-      clearAutoDrainTimer,
-      setLoopMode,
-      markLoopHealthy,
-      scheduleAutoDrainDeferredIntent,
-      markLoopDispatch,
-      markLoopDegraded,
-      trackClassifiedDispatchFailure,
-      refreshLoopLeaseOnActivity,
-      currentRuntimeCodeState,
-    },
   });
 
   pi.on("agent_end", (_event, ctx) => {

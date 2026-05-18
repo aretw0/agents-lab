@@ -11,12 +11,34 @@ export interface PragmaticAutonomyConfig {
   maxAuditTextChars: number;
 }
 
+export interface GuardrailsCoreSurfacesConfig {
+  enabled: boolean;
+}
+
 export const DEFAULT_PRAGMATIC_AUTONOMY_CONFIG: PragmaticAutonomyConfig = {
   enabled: true,
   noObviousQuestions: true,
   auditAssumptions: true,
   maxAuditTextChars: 140,
 };
+
+export const DEFAULT_GUARDRAILS_CORE_SURFACES_CONFIG: GuardrailsCoreSurfacesConfig = {
+  enabled: true,
+};
+
+export function resolveGuardrailsCoreSurfacesConfig(cwd: string): GuardrailsCoreSurfacesConfig {
+  try {
+    const p = join(cwd, ".pi", "settings.json");
+    if (!existsSync(p)) return DEFAULT_GUARDRAILS_CORE_SURFACES_CONFIG;
+    const json = JSON.parse(readFileSync(p, "utf8"));
+    const cfg = json?.piStack?.guardrailsCore?.surfaces ?? {};
+    return {
+      enabled: cfg?.enabled !== false,
+    };
+  } catch {
+    return DEFAULT_GUARDRAILS_CORE_SURFACES_CONFIG;
+  }
+}
 
 export function resolvePragmaticAutonomyConfig(cwd: string): PragmaticAutonomyConfig {
   try {
