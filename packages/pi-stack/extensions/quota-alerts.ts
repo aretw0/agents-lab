@@ -67,7 +67,7 @@ export function buildBudgetAlerts(budgets: ProviderBudgetStatus[]): QuotaAlertEn
         severity: "block",
         source: "overage-consent",
         provider: b.provider,
-        message: `OVERAGE CONSENT REQUIRED for '${b.provider}': explicit human approval needed before using paid credits.`,
+        message: `OVERAGE CONSENT REQUIRED for '${b.provider}': explicit operator approval needed before using paid credits.`,
         action: "Do not exceed budget without explicit user consent. Use budget-override token if authorized.",
       });
     } else if (b.state === "warning") {

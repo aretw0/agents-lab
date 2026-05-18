@@ -967,7 +967,7 @@ export function buildAgentRunSdkReadOnlyBatchTaskPacket(input: AgentRunSdkReadOn
       ]
       : [
         "resolve task-derived batch blockers before dispatch",
-        "split protected or broad scopes into explicit human-approved packets when needed",
+        "split protected or broad scopes into explicit operator-approved packets when needed",
       ],
     summary: [
       "agent-run-sdk-readonly-batch-task-packet:",

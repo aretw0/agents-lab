@@ -88,7 +88,7 @@ export function evaluateBackgroundProcessRehearsal(input: BackgroundProcessRehea
     recommendation = "blocked: resolve protected/destructive/unresolved blockers before rehearsal escalation.";
   } else if (missingEvidence.length === 0) {
     decision = "ready";
-    recommendation = "rehearsal evidence is sufficient; ready for bounded local rehearsal under explicit human focus.";
+    recommendation = "rehearsal evidence is sufficient; ready for bounded local rehearsal under explicit operator focus.";
   }
 
   const ready = decision === "ready";

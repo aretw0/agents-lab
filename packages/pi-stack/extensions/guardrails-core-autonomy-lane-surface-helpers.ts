@@ -432,7 +432,7 @@ export function buildInfluenceAssimilationWindowPacket(p: Record<string, unknown
   let window: "open" | "hold" | "closed" = "open";
   let recommendationCode = "influence-assimilation-ready-window-open";
   let recommendation = "open-protected-focus";
-  let nextAction = "window open: prepare protected decision packet and request explicit human focus before external influence assimilation.";
+  let nextAction = "window open: prepare protected decision packet and request explicit operator focus before external influence assimilation.";
 
   if (blockedReasons.includes("reload-required-or-dirty") || blockedReasons.includes("local-safe-readiness-blocked")) {
     decision = "blocked";
@@ -450,7 +450,7 @@ export function buildInfluenceAssimilationWindowPacket(p: Record<string, unknown
 
   const options = decision === "ready-window"
     ? [
-      { option: "open-protected-focus", impact: "Start one protected decision slice with explicit human choice." },
+      { option: "open-protected-focus", impact: "Start one protected decision slice with explicit operator choice." },
       { option: "continue-local-safe", impact: "Keep throughput and revisit the influence window later." },
     ]
     : decision === "defer"

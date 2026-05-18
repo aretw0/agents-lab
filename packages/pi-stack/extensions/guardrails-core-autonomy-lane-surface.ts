@@ -583,7 +583,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       has_tests: Type.Optional(Type.Boolean()),
       has_ci: Type.Optional(Type.Boolean()),
       repository_scale: Type.Optional(Type.String({ description: "small | medium | large" })),
-      protected_scope_requested: Type.Optional(Type.Boolean({ description: "When true, plan blocks and asks explicit human focus." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "When true, plan blocks and asks explicit operator focus." })),
     }),
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;

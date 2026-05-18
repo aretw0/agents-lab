@@ -153,7 +153,7 @@ function buildDelegationRunwayCue(p: Record<string, unknown>, cwd: string): Dele
     return {
       decision: "ready-delegation-rehearsal",
       recommendationCode: "delegation-readiness-ready-delegation-rehearsal",
-      nextAction: "run delegation_rehearsal_start_packet and require explicit human start/defer decision.",
+      nextAction: "run delegation_rehearsal_start_packet and require explicit operator start/defer decision.",
       blockers,
     };
   }
@@ -300,7 +300,7 @@ export function buildRunwayReadinessCue(
       decision: "ready-window",
       recommendationCode: "runway-readiness-ready-window",
       recommendation: "delegation/background runway is ready for bounded promotion planning (still explicit operator decision).",
-      nextAction: "choose one promotion lane (delegate or background rehearsal) and keep explicit human start/defer.",
+      nextAction: "choose one promotion lane (delegate or background rehearsal) and keep explicit operator start/defer.",
       blockers,
       delegation,
       background,

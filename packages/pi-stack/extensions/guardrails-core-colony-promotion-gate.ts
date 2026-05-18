@@ -74,7 +74,7 @@ export function evaluateColonyPromotionGate(input: ColonyPromotionGateInput = {}
   } else if (protectedScopeRequested) {
     blockers.push("protected-scope-requested");
     recommendationCode = "colony-gate-keep-report-only-protected";
-    recommendation = "protected scope requested; keep report-only and require explicit human focus for any promotion step.";
+    recommendation = "protected scope requested; keep report-only and require explicit operator focus for any promotion step.";
   } else if (!backgroundReady) {
     blockers.push("background-readiness-signal-missing");
     recommendationCode = "colony-gate-keep-report-only-background";
