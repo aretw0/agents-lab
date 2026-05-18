@@ -45,7 +45,7 @@ Escolha explicitamente uma trilha:
 
 1. **`.project-first`**: canônico no workspace.
 2. **adapter-first**: operar no sistema do usuário (Markdown/DB/API/web automation).
-3. **canônico + espelho humano**: `.project` oficial + projeção Markdown (ex.: `vault-seed`).
+3. **canônico + espelho do operador**: `.project` oficial + projeção Markdown (ex.: `vault-seed`).
 
 ## Evidência mínima por rodada
 

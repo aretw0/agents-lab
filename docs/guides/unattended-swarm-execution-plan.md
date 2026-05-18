@@ -1,7 +1,7 @@
 # Unattended Swarm Execution Plan (OpenAI-only)
 
 Data: 2026-04-19  
-Escopo: execução por lotes dos P0 `TASK-BUD-010`, `TASK-BUD-020`, `TASK-BUD-024`, `TASK-BUD-026`, `TASK-BUD-029` com baixa interação humana.
+Escopo: execução por lotes dos P0 `TASK-BUD-010`, `TASK-BUD-020`, `TASK-BUD-024`, `TASK-BUD-026`, `TASK-BUD-029` com baixa interação do operador.
 
 ## Princípios operacionais
 - Um lote por vez (sem paralelismo de P0).
@@ -41,7 +41,7 @@ Escopo: execução por lotes dos P0 `TASK-BUD-010`, `TASK-BUD-020`, `TASK-BUD-02
    - consolidar mini-handoff em `docs/research/`
    - atualizar notas no `.project/tasks.json`
 
-## Loop contínuo sem intervenção humana (modo estável)
+## Loop contínuo sem intervenção do operador (modo estável)
 
 Enquanto a política subagent-first estiver ativa:
 1. Executar micro-slice (preferência: 1 arquivo + 1 teste).
@@ -95,4 +95,3 @@ Regras:
 - manter heading explícito `Final file inventory` + `Validation command log`;
 - cada comando em linha própria (`- <comando>`), com caminho real executável;
 - manter coerência com comandos realmente executados no slice.
-

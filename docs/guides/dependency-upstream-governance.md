@@ -4,7 +4,7 @@
 
 Separar evidência de mudanças feitas na stack local (`agents-lab`/`@aretw0/pi-stack`) de mudanças vindas do Pi upstream ou de dependências, antes de decidir `assimilate|hold|reject`.
 
-Esta trilha é **report-only por padrão**: não atualiza dependências, não edita `node_modules` e não autoriza protected scope sem decisão humana explícita.
+Esta trilha é **report-only por padrão**: não atualiza dependências, não edita `node_modules` e não autoriza protected scope sem decisão explícita do operador.
 
 ## Quando usar
 
@@ -73,7 +73,7 @@ Use somente quando todos forem verdadeiros:
 - arquivos nossos alterados estão declarados;
 - risco de runtime é baixo/médio com reload e rollback conhecidos;
 - gate focal passou ou está declarado antes da promoção;
-- há decisão humana explícita quando a ação envolve protected scope, rede, publish, CI, settings ou atualização de dependência.
+- há decisão explícita do operador quando a ação envolve protected scope, rede, publish, CI, settings ou atualização de dependência.
 
 ### `hold`
 

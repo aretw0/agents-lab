@@ -67,7 +67,7 @@ qualquer extensão de terceiro que altere como a sessão se apresenta.
 - [ ] Painéis anexos respeitam largura de render (sem overflow horizontal “solto”).
 - [ ] Painéis anexos são opt-in/progressive disclosure e não inflam o bootstrap quando estão invisíveis.
 - [ ] Status críticos continuam visíveis após compactação.
-- [ ] `/status` mantém drill-down completo para auditoria humana.
+- [ ] `/status` mantém drill-down completo para auditoria do operador.
 
 ## Checklist WEB
 
