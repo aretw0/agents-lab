@@ -32,6 +32,24 @@ Remover/arquivar quando:
 - já existe surface canônica equivalente;
 - manutenção supera valor operacional.
 
+## Política de artefatos de pesquisa
+
+Dados derivados e pequenos (`results.json`, scorecards e sínteses) podem ser
+versionados quando carregam evidência recorrente. Logs brutos, dumps completos e
+datasets grandes em `docs/research/data/**` devem ficar locais, externos ou
+promovidos para artefato de release/CI. O gate `npm run repo:bloat:audit:strict`
+bloqueia logs brutos versionados e datasets grandes antes que o histórico vire
+depósito de runtime.
+
+## Política de discurso canônico
+
+Termos fortes como fábrica, engine, maturidade e soberania precisam refletir
+contrato operacional, gate ou roadmap explícito. Use `npm run
+repo:discourse:audit` como bússola advisory para encontrar linguagem legada
+(`human` em vez de operador) e promessa aspiracional em docs/surfaces canônicas.
+O audit não bloqueia a release por padrão: ele ajuda a escolher a próxima lane
+de poda sem apagar pesquisa histórica nem forçar renomeação ampla.
+
 ## Governança operacional
 
 - Registrar no board (`tasks/verification`) quando uma exceção lab-only for criada ou encerrada.
