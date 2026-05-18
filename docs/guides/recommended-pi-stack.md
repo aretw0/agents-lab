@@ -68,6 +68,13 @@ A baseline da curadoria agora segue densidade adaptativa (wide/medium/narrow):
 - **WEB gateway**: dashboard **summary-first** com detalhes progressivos (raw JSON em seção colapsável);
 - **Semântica compartilhada**: board clock/estado de colônias/health de operação aparecem com o mesmo sentido nas duas superfícies.
 
+A curadoria não cobre só o footer. A capability `pi-session-presentation` em
+`packages/pi-stack/extensions/data/capability-owners.json` é o owner first-party
+da apresentação completa da sessão: headers, prompts visíveis, comandos, skills,
+tema, painéis e integrações que mudam a cadência da TUI. Plugins de terceiro que
+tocam essa superfície só entram no default quando têm fronteira explícita,
+filtro, remoção de perfil ou decisão pendente registrada.
+
 Comandos úteis para validação rápida da experiência:
 
 ```bash

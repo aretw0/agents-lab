@@ -6,6 +6,10 @@ Guia canônico para manter apresentação **first-class** sem clutter no control
 
 Garantir que TUI e WEB compartilhem semântica operacional (board/colony/health), com **densidade adaptativa** e **progressive disclosure**.
 
+O escopo é a apresentação completa do Pi para operador e usuário: footer, status,
+comandos, prompts visíveis, headers, skills expostas, tema, painéis, web gateway e
+qualquer extensão de terceiro que altere como a sessão se apresenta.
+
 ---
 
 ## Princípios
@@ -30,6 +34,11 @@ Garantir que TUI e WEB compartilhem semântica operacional (board/colony/health)
    - A TUI deve parecer uma superfície única para o operador, não uma coleção de modos concorrentes.
    - Painéis e drill-downs continuam disponíveis por intenção explícita (`/qp`, `/cpanel`, `/status`), mas módulos pesados não devem entrar no caminho eager do footer quando estão invisíveis.
    - Se uma superfície anexada depende de singleton/estado compartilhado, o footer pode carregá-la sob demanda e renderizar o resumo base até o módulo estar pronto.
+
+6. **Curadoria first-party antes de acumular plugins**
+   - Plugins de terceiro podem continuar inspirando e fornecendo engine, mas toda superfície visível recorrente precisa ter owner first-party ou decisão explícita em `capability-owners.json`.
+   - Quando um plugin altera chrome, comandos, headers, status, sessão, editor/worktree ou linguagem de resposta, ele entra na capability `pi-session-presentation` antes de entrar na baseline.
+   - Overlap visível deve estar em uma das quatro situações: filtrado, removido do perfil, mantido com fronteira clara, ou marcado como `needs-decision`.
 
 ---
 
@@ -79,6 +88,21 @@ Antes de adicionar novo bloco visual, responder:
 4. Existe teste/smoke cobrindo o comportamento em resize?
 
 Se qualquer resposta for “não”, o widget não entra na baseline curada.
+
+## Contrato de apresentação distribuída
+
+O registro canônico é `packages/pi-stack/extensions/data/capability-owners.json`.
+Para a experiência do Pi, a capability `pi-session-presentation` governa:
+
+- chrome da sessão e footer/status;
+- prompts e mensagens automáticas visíveis;
+- comandos e painéis que aparecem na TUI;
+- skills/prompts/themes expostos como parte do pacote curado;
+- integrações editor/worktree quando mudam a cadência da sessão;
+- gateway web quando replica ou complementa a TUI.
+
+Regra prática: se o operador perceber como “o Pi se apresenta”, isso pertence à
+curadoria de apresentação antes de virar default.
 
 ---
 

@@ -1,6 +1,6 @@
 # Stack Sovereignty Audit (latest)
 
-Generated: 2026-05-06T13:25:47.664Z
+Generated: 2026-05-18T17:51:50.821Z
 Registry: C:\Users\aretw\Documents\GitHub\agents-lab\packages\pi-stack\extensions\data\capability-owners.json
 Settings: C:\Users\aretw\Documents\GitHub\agents-lab\.pi\settings.json
 Mode: strict
@@ -28,7 +28,7 @@ Mode: strict
 | runtime-guardrails | high | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | consolidate | medium |
 | session-web-observability | medium | @aretw0/pi-stack | owned | - | maintain | low |
 | background-process-control | high | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | consolidate | medium |
-| session-ui-footer | low | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | consolidate | low |
+| pi-session-presentation | low | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | consolidate | low |
 
 ## Blockers
 

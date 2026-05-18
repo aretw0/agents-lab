@@ -42,11 +42,37 @@ describe("first-party curation coverage", () => {
       dispatchAllowed: false,
       mutationAllowed: false,
     });
-    expect(result.summary.filtered).toBeGreaterThanOrEqual(6);
+    expect(result.summary.filtered).toBeGreaterThanOrEqual(9);
     expect(result.summary.missingFilter).toBe(0);
     expect(result.records.find((record) => record.id === "oh-pi-watchdog")?.evaluatedStatus).toBe("tracked");
     expect(result.records.find((record) => record.id === "oh-pi-bg-process-future")?.evaluatedStatus).toBe("needs-decision");
     expect(result.evidence).toContain("dispatch=no");
+  });
+
+  it("tracks Pi session presentation as a full curated surface", () => {
+    const registry = readCurationCoverageRegistry();
+    const records = registry.records.filter((record) => record.capabilityId === "pi-session-presentation");
+    const covered = new Set(records.flatMap((record) => record.thirdPartySurfaces));
+
+    expect(records.map((record) => record.id)).toEqual([
+      "oh-pi-custom-footer",
+      "oh-pi-session-chrome",
+      "oh-pi-session-naming-and-lifecycle",
+      "oh-pi-editor-worktree-presentation",
+    ]);
+    expect(covered).toEqual(new Set([
+      "extensions/answer.ts",
+      "extensions/auto-session-name.ts",
+      "extensions/auto-update.ts",
+      "extensions/btw.ts",
+      "extensions/compact-header.ts",
+      "extensions/custom-footer.ts",
+      "extensions/external-editor.ts",
+      "extensions/git-guard.ts",
+      "extensions/tool-metadata.ts",
+      "extensions/worktree.ts",
+    ]));
+    expect(records.every((record) => record.strategy === "suppress-by-filter")).toBe(true);
   });
 
   it("fails high-risk when a suppress-by-filter surface lacks an installer filter", () => {

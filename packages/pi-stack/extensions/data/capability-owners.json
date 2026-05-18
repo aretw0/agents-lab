@@ -233,8 +233,8 @@
       ]
     },
     {
-      "id": "session-ui-footer",
-      "name": "Session footer/status UI",
+      "id": "pi-session-presentation",
+      "name": "Pi session presentation curation",
       "criticality": "low",
       "primaryPackage": "@aretw0/pi-stack",
       "secondaryPackages": [
@@ -243,7 +243,7 @@
       "conflictsWithPackages": [
         "@ifi/oh-pi-extensions"
       ],
-      "coexistencePolicy": "single-curated-footer",
+      "coexistencePolicy": "single-curated-presentation",
       "defaultAction": "consolidate",
       "curationCoverage": [
         {
@@ -256,6 +256,45 @@
           "strategy": "suppress-by-filter",
           "status": "filtered",
           "reason": "first-party custom-footer owns the curated footer surface."
+        },
+        {
+          "id": "oh-pi-session-chrome",
+          "coveredSurface": "session chrome, prompts, headers, and answer affordances",
+          "thirdPartyPackage": "@ifi/oh-pi-extensions",
+          "thirdPartySurfaces": [
+            "extensions/answer.ts",
+            "extensions/btw.ts",
+            "extensions/compact-header.ts",
+            "extensions/tool-metadata.ts"
+          ],
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "first-party stack curates the visible Pi session language and avoids competing header/answer/status affordances."
+        },
+        {
+          "id": "oh-pi-session-naming-and-lifecycle",
+          "coveredSurface": "session naming and update presentation",
+          "thirdPartyPackage": "@ifi/oh-pi-extensions",
+          "thirdPartySurfaces": [
+            "extensions/auto-session-name.ts",
+            "extensions/auto-update.ts"
+          ],
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "session identity and update prompts are part of the curated first-party operator experience."
+        },
+        {
+          "id": "oh-pi-editor-worktree-presentation",
+          "coveredSurface": "editor, worktree, and git session presentation",
+          "thirdPartyPackage": "@ifi/oh-pi-extensions",
+          "thirdPartySurfaces": [
+            "extensions/external-editor.ts",
+            "extensions/git-guard.ts",
+            "extensions/worktree.ts"
+          ],
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "first-party git/worktree/operator guardrails own how these actions appear in the curated session."
         }
       ]
     }

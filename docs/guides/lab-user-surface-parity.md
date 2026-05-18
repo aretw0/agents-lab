@@ -51,6 +51,15 @@ O sinal é avaliado por `stack_sovereignty_status` como `curationCoverage`. Ele 
 
 Regra: se a curadoria cobre uma superfície, ela precisa estar filtrada, removida do perfil, ou explicitamente justificada como decisão pendente.
 
+### Apresentação do Pi como superfície única
+
+A experiência visível do Pi não deve ser tratada como uma coleção solta de plugins.
+A capability `pi-session-presentation` cobre o que o operador percebe como sessão:
+footer/status, headers, prompts automáticos, comandos, skills expostas, tema,
+painéis e integrações editor/worktree. Quando uma extensão third-party altera essa
+apresentação, a decisão deve passar por `curationCoverage` antes de virar baseline
+para usuários.
+
 ## Inventário de slimming da superfície distribuída
 
 Classificação atual da distribuição `@aretw0/pi-stack`:
