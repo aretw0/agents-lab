@@ -77,7 +77,7 @@ describe("background process control plan", () => {
     expect(result.evidence).toContain("dispatch=no");
   });
 
-  it("requires human decision for ambiguous parallel server modes", () => {
+  it("requires operator decision for ambiguous parallel server modes", () => {
     const result = resolveBackgroundProcessControlPlan({
       kind: "test-server",
       requestedMode: "auto",

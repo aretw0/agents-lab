@@ -468,7 +468,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     decision = "ask-human";
     reasonCode = "turn-boundary-ask-human-decision-required";
     humanActionRequired = true;
-    nextAutoStep = "request explicit human decision before continuing this lane.";
+    nextAutoStep = "request explicit operator decision before continuing this lane.";
   } else if (reasons.includes("no-local-safe-next-step")) {
     decision = "pause";
     reasonCode = "turn-boundary-pause-local-stop";
@@ -483,7 +483,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     decision = "ask-human";
     reasonCode = "turn-boundary-ask-human-decision-required";
     humanActionRequired = true;
-    nextAutoStep = "request explicit human decision for blocked local audit reasons.";
+    nextAutoStep = "request explicit operator decision for blocked local audit reasons.";
   }
 
   const growthMaturity = input.growthMaturity

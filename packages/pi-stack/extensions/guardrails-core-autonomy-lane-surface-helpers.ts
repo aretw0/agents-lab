@@ -95,7 +95,7 @@ export function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd:
       nextAction = "clean workspace/reload before AFK continuation.";
     } else if (blockedReasons.includes("no-local-safe-material")) {
       recommendationCode = "afk-material-readiness-blocked-no-material";
-      nextAction = "seed local-safe backlog first (brainstorm packet + seed preview + human decision).";
+      nextAction = "seed local-safe backlog first (brainstorm packet + seed preview + operator decision).";
     } else {
       recommendationCode = "afk-material-readiness-blocked-selection";
       nextAction = "resolve selection blockers before AFK continuation.";

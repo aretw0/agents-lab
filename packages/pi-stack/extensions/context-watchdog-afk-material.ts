@@ -108,7 +108,7 @@ export function buildAfkMaterialReadinessSnapshot(cwd: string, focusTasks: strin
 		return {
 			decision: "seed-backlog",
 			recommendationCode: "afk-material-seed-backlog-low-stock",
-			nextAction: "seed backlog now (brainstorm packet + seed preview + human decision).",
+			nextAction: "seed backlog now (brainstorm packet + seed preview + operator decision).",
 			blockedReasons: [],
 			stock: {
 				minReadySlices: minReady,

@@ -143,7 +143,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "agent_run_sdk_readonly_batch_packet",
     label: "Agent Run SDK Read-Only Batch Packet",
-    description: "Report-only batch packet for future parallel SDK read-only fan-out/fan-in. Never dispatches workers and always requires a separate human decision.",
+    description: "Report-only batch packet for future parallel SDK read-only fan-out/fan-in. Never dispatches workers and always requires a separate operator decision.",
     parameters: sdkReadOnlyBatchParameters(),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;

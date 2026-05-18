@@ -181,7 +181,7 @@ describe("project-board tool surfaces", () => {
     }
   });
 
-  it("board_decision_packet tool emits compact human decision options", async () => {
+  it("board_decision_packet tool emits compact operator decision options", async () => {
     const cwd = seedWorkspace();
     try {
       const pi = makeMockPi();

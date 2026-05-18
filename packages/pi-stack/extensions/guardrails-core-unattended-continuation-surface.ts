@@ -499,7 +499,7 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
   pi.registerTool({
     name: "self_reload_autoresume_canary",
     label: "Self-Reload Auto-Resume Canary",
-    description: "Read-only canary plan for future self-reload/autoresume. Never reloads, never dispatches resume, and requires explicit human decision even when gates are green.",
+    description: "Read-only canary plan for future self-reload/autoresume. Never reloads, never dispatches resume, and requires explicit operator decision even when gates are green.",
     parameters: Type.Object({
       opt_in: Type.Boolean({ description: "Explicit opt-in for evaluating the self-reload/autoresume canary." }),
       reload_required: Type.Boolean({ description: "Whether the live runtime has pending source/tool changes requiring reload." }),

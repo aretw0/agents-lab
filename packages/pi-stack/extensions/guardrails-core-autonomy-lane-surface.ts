@@ -549,7 +549,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "lane_brainstorm_seed_preview",
     label: "Lane Brainstorm Seed Preview",
-    description: "Report-only visible seeding preview from brainstorm slices; always requires explicit human decision before task materialization.",
+    description: "Report-only visible seeding preview from brainstorm slices; always requires explicit operator decision before task materialization.",
     parameters: buildLaneBrainstormParameters({ includeSource: true }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;

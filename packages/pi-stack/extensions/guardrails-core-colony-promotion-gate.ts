@@ -65,7 +65,7 @@ export function evaluateColonyPromotionGate(input: ColonyPromotionGateInput = {}
 
   const blockers: string[] = [];
   let recommendationCode: ColonyPromotionGateResult["recommendationCode"] = "colony-gate-ready";
-  let recommendation = "background and agent-run gates are green; colony discussion can proceed as human decision packet only.";
+  let recommendation = "background and agent-run gates are green; colony discussion can proceed as operator decision packet only.";
 
   if (!liveReloadCompleted) {
     blockers.push("reload-not-confirmed");

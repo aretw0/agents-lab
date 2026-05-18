@@ -19,7 +19,7 @@ export function registerGuardrailsStructuredInterviewSurface(pi: ExtensionAPI): 
     parameters: Type.Object({
       questions: Type.Array(Type.Object({
         id: Type.String({ description: "Stable question id." }),
-        prompt: Type.String({ description: "Question prompt for the human/operator." }),
+        prompt: Type.String({ description: "Question prompt for the operator." }),
         kind: Type.Optional(Type.String({ description: "text | single-choice | boolean | number. Default text." })),
         required: Type.Optional(Type.Boolean({ description: "Whether an answer is required. Default true." })),
         options: Type.Optional(Type.Array(Type.String({ description: "Allowed values for single-choice questions." }))),

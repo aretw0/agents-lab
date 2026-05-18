@@ -30,7 +30,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   pi.registerTool({
     name: "agent_run_start_packet",
     label: "Agent Run Start Packet",
-    description: "Report-only provider-native agent-run start packet with exact pi subprocess argv preview. Never dispatches execution and always requires explicit human confirmation.",
+    description: "Report-only provider-native agent-run start packet with exact pi subprocess argv preview. Never dispatches execution and always requires structured operator approval.",
     parameters: Type.Object({
       run_id: Type.Optional(Type.String({ description: "Agent run id for the future worker." })),
       executor_kind: Type.Optional(Type.String({ description: "Executor kind. Initial supported value: pi-print-subprocess." })),
@@ -265,7 +265,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   pi.registerTool({
     name: "agent_run_task_start_packet",
     label: "Agent Run Task Start Packet",
-    description: "Report-only bridge from board task packet to registry/start/status/log/abort/outcome previews. Never dispatches execution and always requires explicit human confirmation before any future start.",
+    description: "Report-only bridge from board task packet to registry/start/status/log/abort/outcome previews. Never dispatches execution and always requires structured operator approval before any future start.",
     parameters: Type.Object({
       task_id: Type.String({ description: "Board task id to packetize for a future start." }),
       purpose: Type.Optional(Type.String({ description: "Short purpose slug/label for the run id. Defaults to task-packet." })),

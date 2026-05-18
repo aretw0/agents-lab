@@ -354,7 +354,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
   });
 
   const decisionPacketParameters = Type.Object({
-    task_id: Type.String({ minLength: 1, description: "Task id to summarize for a no-auto-close human decision packet." }),
+    task_id: Type.String({ minLength: 1, description: "Task id to summarize for a no-auto-close operator decision packet." }),
   });
 
   const executeDecisionPacket = (

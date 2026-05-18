@@ -228,7 +228,7 @@ export function buildLocalSliceCanaryDispatchDecisionPacket(input: LocalSliceCan
       decision: "blocked",
       reasons,
       summary: `local-slice-dispatch-decision-packet: decision=blocked dispatch=no reasons=${reasons.slice(0, 4).join(",")} authorization=none`,
-      recommendation: "Do not dispatch; complete the missing contracts and ask for an explicit human decision first.",
+      recommendation: "Do not dispatch; complete the missing contracts and ask for an explicit operator decision first.",
     };
   }
 

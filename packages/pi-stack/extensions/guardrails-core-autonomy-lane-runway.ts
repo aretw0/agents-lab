@@ -317,7 +317,7 @@ export function buildRunwayReadinessCue(
     return {
       decision: "ready-window",
       recommendationCode: "runway-readiness-ready-window",
-      recommendation: "delegation/background runway is ready for bounded promotion planning (still explicit human decision).",
+      recommendation: "delegation/background runway is ready for bounded promotion planning (still explicit operator decision).",
       nextAction: "choose one promotion lane (delegate or background rehearsal) and keep explicit human start/defer.",
       blockers,
       delegation,

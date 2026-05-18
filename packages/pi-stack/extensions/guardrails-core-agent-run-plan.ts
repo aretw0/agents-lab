@@ -93,7 +93,7 @@ export function buildAgentRunPlan(input: AgentRunPlanInput = {}): AgentRunPlanRe
 
   const blockers: string[] = [];
   let recommendationCode: AgentRunPlanResult["recommendationCode"] = "agent-run-ready-for-human-decision";
-  let recommendation = "agent-run contract is bounded enough to ask for an explicit human decision.";
+  let recommendation = "agent-run contract is bounded enough to ask for an explicit operator decision.";
 
   const block = (code: AgentRunPlanResult["recommendationCode"], blocker: string, message: string) => {
     if (blockers.length === 0) {
@@ -156,7 +156,7 @@ export function buildAgentRunPlan(input: AgentRunPlanInput = {}): AgentRunPlanRe
 
   const nextActions = decision === "ready-for-human-decision"
     ? [
-        "present this packet to the human/operator for an explicit single-run execute decision",
+        "present this packet to the operator for an explicit single-run execute decision",
         "if approved, start exactly one worker and record run id/status/log paths before dispatch",
         "after worker exit, validate declared files from the parent and stop",
       ]

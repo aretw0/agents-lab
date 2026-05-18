@@ -108,7 +108,7 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.decision).toBe("ask-human");
     expect(packet.reasonCode).toBe("turn-boundary-ask-human-decision-required");
     expect(packet.humanActionRequired).toBe(true);
-    expect(packet.nextAutoStep).toContain("human decision");
+    expect(packet.nextAutoStep).toContain("operator decision");
     expect(packet.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
     expect(packet.directionPreview.recommendedOptionId).toBe("next-high-value");
     expect(packet.directionPreview.options.map((option) => `${option.id}:${option.suitability}`)).toEqual([

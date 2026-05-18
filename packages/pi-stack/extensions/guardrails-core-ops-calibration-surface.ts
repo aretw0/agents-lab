@@ -480,7 +480,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
   pi.registerTool({
     name: "delegation_rehearsal_start_packet",
     label: "Delegation Rehearsal Start Packet",
-    description: "Report-only start/abort packet for one-task delegation rehearsal. Never dispatches execution and always requires explicit human decision.",
+    description: "Report-only start/abort packet for one-task delegation rehearsal. Never dispatches execution and always requires explicit operator decision.",
     parameters: Type.Object({
       lookback_hours: Type.Optional(Type.Number({ description: "How many hours back to scan local session evidence. Default: 24." })),
       preload_decision: Type.Optional(Type.String({ description: "use-pack | fallback-canonical" })),
