@@ -95,7 +95,7 @@ Checklist de resize (first-class):
 
 Critério padrão para tools/comandos first-party que aparecem como blocos na sessão/TUI:
 
-- `content[0].text` e `ctx.ui.notify(...)` devem ser **summary-first**: uma linha curta, humana e estável;
+- `content[0].text` e `ctx.ui.notify(...)` devem ser **summary-first**: uma linha curta, legível e estável;
 - payload JSON completo deve ficar em `details` ou em seção/arquivo explicitamente colapsável, não como dump cru por padrão;
 - dumps JSON inline só são aceitáveis quando bounded, pequenos e deliberadamente diagnósticos;
 - saídas longas devem dizer `payload completo disponível em details` ou equivalente;

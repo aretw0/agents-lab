@@ -74,5 +74,5 @@ Ao fechar uma revisão de presença pública, registrar:
 
 - Não editar `.github/workflows` durante a revisão de presença pública, salvo task explícita de CI.
 - Não fazer publish ou release.
-- Não alterar metadados remotos via `gh repo edit` sem confirmação humana.
+- Não alterar metadados remotos via `gh repo edit` sem confirmação do operador.
 - Não rodar varreduras amplas em `node_modules`, sessões ou diretórios gerados.

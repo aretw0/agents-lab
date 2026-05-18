@@ -168,7 +168,7 @@ Uma long-run autorizada é válida enquanto os quatro sinais permanecem verdadei
 3. budget/provider/machine gates seguem `ok` ou `warn` não bloqueante;
 4. não houve nova ação destrutiva, protected-scope, publish/CI/settings, ou dado sensível fora do contrato autorizado.
 
-Enquanto esse lease estiver válido, monitores L1/L2 não devem reverter para confirmação humana só por falta de contexto local. Eles podem registrar `observe/advisory`, mas interrupção fica reservada a L3/hard gates ou a checkpoint/compact lanes.
+Enquanto esse lease estiver válido, monitores L1/L2 não devem reverter para confirmação do operador só por falta de contexto local. Eles podem registrar `observe/advisory`, mas interrupção fica reservada a L3/hard gates ou a checkpoint/compact lanes.
 
 ### Perfil no-interrupt para loops longos
 

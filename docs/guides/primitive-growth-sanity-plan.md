@@ -30,7 +30,7 @@ Queremos subir throughput sem perder controle:
 
 ### L1 — Protected canary (1 run)
 - Escopo: CI/remote/offload ou outra superfície protegida.
-- Gate: decisão humana explícita + envelope (`owner`, `maxCost`, `expectedValue`, `rollbackPlan`, `focalValidationGate`).
+- Gate: decisão explícita do operador + envelope (`owner`, `maxCost`, `expectedValue`, `rollbackPlan`, `focalValidationGate`).
 - Stop: qualquer blocker de evidência; nunca auto-repetir.
 
 ### L2 — Delegated throughput bounded

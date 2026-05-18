@@ -9,7 +9,7 @@ Quando trabalhamos com agentes, extensões e ferramentas opinativas, o workspace
 - arquivos criados para orientar o agente
 - diretórios gerados por extensões
 - caches, monitores e configurações projetadas no projeto
-- artefatos que ajudam humanos e agentes a permanecerem conectados ao que estão fazendo enquanto fazem
+- artefatos que ajudam pessoas e agentes a permanecerem conectados ao que estão fazendo enquanto fazem
 
 ## Princípio Central
 
@@ -24,7 +24,7 @@ Entender o workspace significa:
 1. observar o que as ferramentas materializam
 2. distinguir intenção de efeito colateral
 3. decidir o que deve virar convenção compartilhada
-4. manter o ambiente legível tanto para agentes quanto para seres humanos
+4. manter o ambiente legível tanto para agentes quanto para pessoas
 
 ## O Workspace como Interface Viva
 
@@ -50,7 +50,7 @@ Um bom workspace ajuda a responder perguntas como:
 - o que está sendo feito agora?
 - por que este arquivo existe?
 - este diretório é parte do projeto ou apenas estado gerado?
-- o que deve ser lido por um humano e o que deve ser consumido por uma ferramenta?
+- o que deve ser lido por uma pessoa e o que deve ser consumido por uma ferramenta?
 
 ### 3. Superfície social
 
@@ -58,7 +58,7 @@ Mesmo quando só uma pessoa está trabalhando, o workspace já está sendo prepa
 
 Isso vale para:
 
-- outros humanos
+- outras pessoas
 - agentes futuros
 - extensões que ainda nem existem
 - primitivas que o próprio laboratório venha a criar
@@ -93,7 +93,7 @@ Exemplos plausíveis:
 - instruções compartilhadas
 - configuração estável do workspace
 - arquivos que definem comportamento esperado de agentes
-- estrutura projetada para colaboração humana + agente
+- estrutura projetada para colaboração entre pessoas e agentes
 
 ### 2. Artefato operacional gerado
 

@@ -131,4 +131,4 @@ Before treating monitors as stable default-on:
 
 - If a monitor increases cost/noise without protecting milestone continuity, it must be downgraded (trigger/context/ceiling) or moved to on-demand.
 - If a monitor guards irreversible risk, it stays on, but with deterministic prefilter to minimize LLM usage.
-- `/monitors` is the canonical namespace for policy visibility and human control.
+- `/monitors` is the canonical namespace for policy visibility and operator control.

@@ -204,7 +204,7 @@ Para bootstrap portável de novos agentes, use:
 - `context_watch_bootstrap` com `apply=true` (persiste patch em `.pi/settings.json` e ativa no runtime do context-watchdog sem `/reload`)
 
 Para reduzir re-leitura repetitiva pós-compactação, gere um warm pack por telemetria real:
-- `npm run context:preload` (inspeção humana)
+- `npm run context:preload` (inspeção do operador)
 - `npm run context:preload:write` (gera JSON em `.sandbox/pi-agent/preload/context-preload-pack.json`)
 
 Consumo fail-closed do pack (com fallback canônico quando stale):

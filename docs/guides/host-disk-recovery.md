@@ -94,7 +94,7 @@ Um resultado `severity=warning action=monitor` significa registrar e continuar s
   2. `git count-objects -vH`;
   3. revisar `.git/gc.log`;
   4. confirmar que não há worktree/rebase/merge crítico em andamento;
-  5. só então considerar `git gc`/`git prune` conforme decisão humana.
+  5. só então considerar `git gc`/`git prune` conforme decisão do operador.
 
 ## Prevenção de recorrência
 
