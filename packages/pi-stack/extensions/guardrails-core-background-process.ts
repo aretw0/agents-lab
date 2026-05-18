@@ -3,7 +3,7 @@ export type BackgroundProcessMode = "auto" | "shared-service" | "isolated-worker
 export type BackgroundProcessDecision = "ready-for-design" | "needs-port-lease" | "needs-operator-decision" | "blocked";
 export type BackgroundProcessLifecycleState = "running" | "stopped" | "finished" | "failed" | "killed" | "late-after-stop" | "unknown-origin";
 export type BackgroundProcessLifecycleEventKind = "registered" | "stop-requested" | "done" | "killed";
-export type BackgroundProcessStopSource = "none" | "human" | "agent" | "timeout" | "unknown";
+export type BackgroundProcessStopSource = "none" | "operator" | "agent" | "timeout" | "unknown";
 
 export interface BackgroundProcessPlanInput {
   kind?: BackgroundProcessKind;
@@ -140,7 +140,7 @@ function normalizeLifecycleEventKind(value: unknown): BackgroundProcessLifecycle
 }
 
 function normalizeStopSource(value: unknown, stopRequested: boolean): BackgroundProcessStopSource {
-  if (value === "human" || value === "agent" || value === "timeout" || value === "unknown") return value;
+  if (value === "operator" || value === "agent" || value === "timeout" || value === "unknown") return value;
   return stopRequested ? "unknown" : "none";
 }
 

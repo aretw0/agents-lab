@@ -155,17 +155,17 @@ describe("background process control plan", () => {
       exitCode: 1,
       knownProcess: true,
       stopRequested: true,
-      stopSource: "human",
+      stopSource: "operator",
       label: "undefined",
     });
     expect(late.state).toBe("late-after-stop");
-    expect(late.stopSource).toBe("human");
+    expect(late.stopSource).toBe("operator");
     expect(late.displayLabel).toBe("background-process");
     expect(late.viewTitle).toBe("background-process");
     expect(late.warnings).toContain("fallback-display-label");
     expect(late.warnings).toContain("fallback-view-title");
     expect(late.warnings).toContain("done-after-stop-request");
-    expect(late.evidence).toContain("stopSource=human");
+    expect(late.evidence).toContain("stopSource=operator");
     expect(late.evidence).not.toContain("label=undefined");
     expect(late.evidence).not.toContain("viewTitle=undefined");
 
@@ -414,7 +414,7 @@ describe("background process control plan", () => {
         exit_code: 1,
         known_process: true,
         stop_requested: true,
-        stop_source: "human",
+        stop_source: "operator",
         label: "undefined",
         view_title: "undefined",
       },
@@ -423,10 +423,10 @@ describe("background process control plan", () => {
       { cwd: process.cwd() },
     );
     expect(result.details?.state).toBe("late-after-stop");
-    expect(result.details?.stopSource).toBe("human");
+    expect(result.details?.stopSource).toBe("operator");
     expect(result.details?.displayLabel).toBe("background-process");
     expect(result.details?.viewTitle).toBe("background-process");
-    expect(String(result.content?.[0]?.text)).toContain("stopSource=human");
+    expect(String(result.content?.[0]?.text)).toContain("stopSource=operator");
     expect(String(result.content?.[0]?.text)).toContain("viewTitle=background-process");
     expect(String(result.content?.[0]?.text)).toContain("dispatch=no");
   });

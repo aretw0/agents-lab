@@ -55,7 +55,7 @@ export function registerContextWatchdogCheckpointBootstrapSurface(
 				Type.Literal("unknown"),
 			])),
 			stop_source: Type.Optional(Type.Union([
-				Type.Literal("human"),
+				Type.Literal("operator"),
 				Type.Literal("agent"),
 				Type.Literal("timeout"),
 				Type.Literal("compact"),
@@ -77,7 +77,7 @@ export function registerContextWatchdogCheckpointBootstrapSurface(
 				growth_score?: number;
 				growth_code?: string;
 				stop_status?: "graceful" | "interrupted" | "unknown";
-				stop_source?: "human" | "agent" | "timeout" | "compact" | "unknown";
+				stop_source?: "operator" | "agent" | "timeout" | "compact" | "unknown";
 			};
 			const result = writeLocalSliceHandoffCheckpoint(ctx.cwd, {
 				timestampIso: new Date().toISOString(),

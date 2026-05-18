@@ -24,7 +24,7 @@ export interface AgentRunRegistryEntry {
   errorCode?: string;
   errorMessage?: string;
   stopRequested?: boolean;
-  stopSource?: "human" | "agent" | "timeout" | "unknown";
+  stopSource?: "operator" | "agent" | "timeout" | "unknown";
 }
 
 export interface AgentRunStatusResult {

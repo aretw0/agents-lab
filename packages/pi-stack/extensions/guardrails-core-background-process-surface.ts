@@ -45,7 +45,7 @@ function normalizeEventKind(value: unknown): BackgroundProcessLifecycleEventKind
 }
 
 function normalizeStopSource(value: unknown): BackgroundProcessStopSource | undefined {
-  return value === "human" || value === "agent" || value === "timeout" || value === "unknown" ? value : undefined;
+  return value === "operator" || value === "agent" || value === "timeout" || value === "unknown" ? value : undefined;
 }
 
 type BackgroundReadinessPacket = {
@@ -395,7 +395,7 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
       exit_code: Type.Optional(Type.Number({ description: "Exit code for done events, if known." })),
       known_process: Type.Optional(Type.Boolean({ description: "Whether the event belongs to a known first-party process registry entry." })),
       stop_requested: Type.Optional(Type.Boolean({ description: "Whether a stop was requested before this event." })),
-      stop_source: Type.Optional(Type.String({ description: "Stop/cancel source: human | agent | timeout | unknown." })),
+      stop_source: Type.Optional(Type.String({ description: "Stop/cancel source: operator | agent | timeout | unknown." })),
       label: Type.Optional(Type.String({ description: "Lifecycle event display label; undefined/null/empty labels fall back to background-process." })),
       view_title: Type.Optional(Type.String({ description: "Background-process view/header title; undefined/null/empty titles fall back to background-process." })),
     }),

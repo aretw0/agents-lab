@@ -1,7 +1,7 @@
 export type HandoffFreshnessLabel = "fresh" | "stale" | "unknown";
 export type HandoffRefreshMode = "none" | "auto-on-compact" | "manual" | "unknown";
 export type HandoffStopStatus = "graceful" | "interrupted" | "unknown";
-export type HandoffStopSource = "human" | "agent" | "timeout" | "compact" | "unknown";
+export type HandoffStopSource = "operator" | "agent" | "timeout" | "compact" | "unknown";
 
 const CONTEXT_WATCH_ACTION_PREFIX = "Context-watch action:";
 const DEFAULT_CONTEXT_WATCH_THRESHOLDS = {
@@ -106,7 +106,7 @@ function normalizeStopStatus(value: unknown): HandoffStopStatus {
 }
 
 function normalizeStopSource(value: unknown): HandoffStopSource {
-	return value === "human" || value === "agent" || value === "timeout" || value === "compact" ? value : "unknown";
+	return value === "operator" || value === "agent" || value === "timeout" || value === "compact" ? value : "unknown";
 }
 
 export function summarizeHandoffStopState(handoffInput: Record<string, unknown> | undefined): string {
