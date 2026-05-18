@@ -23,7 +23,7 @@ export type ContextWatchOperatorSignalReason =
 
 export type ContextWatchOperatorSignal = {
 	reloadRequired: boolean;
-	humanActionRequired: boolean;
+	operatorActionRequired: boolean;
 	reasons: ContextWatchOperatorSignalReason[];
 	noiseExcessive: boolean;
 };
@@ -285,7 +285,7 @@ export function resolveContextWatchOperatorSignal(input: {
 	if (timeoutPressureActive) reasons.push("timeout-pressure");
 	return {
 		reloadRequired,
-		humanActionRequired: reasons.length > 0,
+		operatorActionRequired: reasons.length > 0,
 		reasons,
 		noiseExcessive: signalNoiseExcessive,
 	};
