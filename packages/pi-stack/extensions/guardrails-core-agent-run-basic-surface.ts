@@ -1,6 +1,7 @@
 import { type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
+import { evaluateAgentWorkerLaneReadiness } from "./guardrails-core-agent-worker-lane";
 import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
@@ -80,6 +81,21 @@ export function registerAgentRunBasicTools(pi: ExtensionAPI): void {
 			});
 			return buildOperatorVisibleToolResponse({
 				label: "agent_run_plan",
+				summary: result.summary,
+				details: result,
+			});
+		},
+	});
+
+	pi.registerTool({
+		name: "agent_worker_lane_readiness",
+		label: "Agent Worker Lane Readiness",
+		description: "Report-only worker lane readiness from board, verification, and maturity docs. Never dispatches execution.",
+		parameters: Type.Object({}),
+		execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+			const result = evaluateAgentWorkerLaneReadiness(ctx?.cwd ?? process.cwd());
+			return buildOperatorVisibleToolResponse({
+				label: "agent_worker_lane_readiness",
 				summary: result.summary,
 				details: result,
 			});
