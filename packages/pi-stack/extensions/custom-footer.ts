@@ -23,17 +23,7 @@ import type {
   ReadonlyFooterDataProvider,
 } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth } from "@earendil-works/pi-tui";
-import {
-  shouldShowPanel,
-  getCachedStatus,
-  buildPanelLines as buildQuotaPanelLines,
-} from "./quota-panel";
 import { formatBudgetStatusLegend } from "./quota-visibility";
-import {
-  shouldShowColonyPanel,
-  getColonyPanelSnapshot,
-  buildColonyPanelLines,
-} from "./colony-panel";
 import {
   resolveContextThresholds,
   type ContextThresholdOverrides,
@@ -300,6 +290,8 @@ export function buildFooterLines(
 }
 
 const PR_PROBE_COOLDOWN_MS = 60_000;
+type QuotaPanelRuntime = typeof import("./quota-panel");
+type ColonyPanelRuntime = typeof import("./colony-panel");
 
 export default function customFooterExtension(pi: ExtensionAPI) {
   let sessionStart = Date.now();
@@ -311,6 +303,23 @@ export default function customFooterExtension(pi: ExtensionAPI) {
   let contextThresholdOverrides: ContextThresholdOverrides | undefined;
   let lastPrProbeAt = 0;
   let prProbeInFlight = false;
+  let quotaPanelRuntime: QuotaPanelRuntime | undefined;
+  let colonyPanelRuntime: ColonyPanelRuntime | undefined;
+  let panelRuntimeLoad: Promise<void> | undefined;
+
+  const loadFooterPanelRuntimes = (): Promise<void> => {
+    if (quotaPanelRuntime && colonyPanelRuntime) return Promise.resolve();
+    panelRuntimeLoad ??= Promise.all([
+      import("./quota-panel"),
+      import("./colony-panel"),
+    ]).then(([quotaPanel, colonyPanel]) => {
+      quotaPanelRuntime = quotaPanel;
+      colonyPanelRuntime = colonyPanel;
+    }).finally(() => {
+      panelRuntimeLoad = undefined;
+    });
+    return panelRuntimeLoad;
+  };
 
   const syncUsageTotals = (ctx: Pick<ExtensionContext, "sessionManager">) => {
     usageTotals = collectFooterUsageTotals(ctx);
@@ -353,6 +362,7 @@ export default function customFooterExtension(pi: ExtensionAPI) {
       });
       const timer = setInterval(() => tui.requestRender(), 30_000);
       probePr(footerData.getGitBranch());
+      void loadFooterPanelRuntimes().then(() => tui.requestRender()).catch(() => undefined);
 
       return {
         dispose() { unsub(); clearInterval(timer); },
@@ -382,16 +392,16 @@ export default function customFooterExtension(pi: ExtensionAPI) {
             theme,
             width,
           );
-          const showQuotaPanel = shouldShowPanel();
-          const showColonyPanel = shouldShowColonyPanel();
+          const showQuotaPanel = quotaPanelRuntime?.shouldShowPanel() ?? false;
+          const showColonyPanel = colonyPanelRuntime?.shouldShowColonyPanel() ?? false;
           if (!showQuotaPanel && !showColonyPanel) return baseLines;
 
           const panelLines: string[] = [];
           if (showQuotaPanel) {
-            panelLines.push(...buildQuotaPanelLines(getCachedStatus(), width));
+            panelLines.push(...quotaPanelRuntime.buildPanelLines(quotaPanelRuntime.getCachedStatus(), width));
           }
           if (showColonyPanel) {
-            panelLines.push(...buildColonyPanelLines(getColonyPanelSnapshot(), width));
+            panelLines.push(...colonyPanelRuntime.buildColonyPanelLines(colonyPanelRuntime.getColonyPanelSnapshot(), width));
           }
           return [...baseLines, ...fitFooterPanelLines(panelLines, width)];
         },

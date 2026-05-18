@@ -196,6 +196,8 @@ graph TD
 | `custom-footer.ts` | Orquestra as 2 linhas base + injeta linhas do painel quando ativo |
 | `quota-panel-state.ts` | *(opcional)* Objeto singleton de estado se acoplamento circular surgir |
 
+Contrato de curadoria: `custom-footer.ts` deve permanecer a superfície única do footer, mas não precisa carregar todos os painéis no bootstrap. O footer pode carregar `quota-panel.ts`/painéis equivalentes sob demanda e renderizar apenas as duas linhas base até o módulo opt-in estar disponível. Isso preserva UX única e reduz custo de sessão quando painéis estão off.
+
 ### Por que `buildPanelLines` pode ir para a web
 
 A função `buildPanelLines(status: QuotaStatus, width: number): string[]` recebe tipos puros do domínio e retorna strings. Para a web, basta uma camada de adaptação que converte as strings em componentes React — ou melhor ainda, exportar os dados estruturados via `buildPanelData(status)` e deixar a UI web renderizar do jeito dela. **O núcleo de negócio não muda.**
@@ -306,7 +308,7 @@ A sequência natural é: **TUI consolidada → multi-conta → billing externo �
 ## Sequência de implementação
 
 1. `quota-panel.ts` — extensão separada com `buildPanelLines`, estado do modo, comando `/qp`, `on("turn_start")` para auto-trigger
-2. `custom-footer.ts` — adicionar chamada a `shouldShowPanel()` e injetar linhas extras quando ativo
+2. `custom-footer.ts` — carregar o painel sob demanda, chamar `shouldShowPanel()` quando o módulo estiver disponível e injetar linhas extras quando ativo
 3. `package.json` (`pi.extensions`) — adicionar `quota-panel.ts` **antes** de `custom-footer.ts` (ordem importa: panel registra antes, footer lê estado)
 4. Testes — `buildPanelLines` pure function, estado do modo, auto-trigger lógica
 5. `docs/guides/quota-visibility.md` — documentar `/qp off|on|auto|snapshot`

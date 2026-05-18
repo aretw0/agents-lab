@@ -26,6 +26,11 @@ Garantir que TUI e WEB compartilhem semântica operacional (board/colony/health)
    - Essencial: board clock, budget/health, estado de colônias.
    - Secundário: detalhes diagnósticos e telemetria longa.
 
+5. **Experiência única, capacidades frias**
+   - A TUI deve parecer uma superfície única para o operador, não uma coleção de modos concorrentes.
+   - Painéis e drill-downs continuam disponíveis por intenção explícita (`/qp`, `/cpanel`, `/status`), mas módulos pesados não devem entrar no caminho eager do footer quando estão invisíveis.
+   - Se uma superfície anexada depende de singleton/estado compartilhado, o footer pode carregá-la sob demanda e renderizar o resumo base até o módulo estar pronto.
+
 ---
 
 ## Tiers de densidade
@@ -51,6 +56,7 @@ Garantir que TUI e WEB compartilhem semântica operacional (board/colony/health)
 
 - [ ] Footer com duas linhas legíveis em narrow sem poluição visual.
 - [ ] Painéis anexos respeitam largura de render (sem overflow horizontal “solto”).
+- [ ] Painéis anexos são opt-in/progressive disclosure e não inflam o bootstrap quando estão invisíveis.
 - [ ] Status críticos continuam visíveis após compactação.
 - [ ] `/status` mantém drill-down completo para auditoria humana.
 
