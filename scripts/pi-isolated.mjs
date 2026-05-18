@@ -351,10 +351,10 @@ const LEAN_WATCHDOG_CONFIG = {
 	sampleIntervalMs: 10000,
 	thresholds: {
 		cpuPercent: 90,
-		eventLoopMaxMs: 600,
-		eventLoopP99Ms: 300,
-		heapUsedMb: 1024,
-		rssMb: 1400,
+		eventLoopMaxMs: 300,
+		eventLoopP99Ms: 150,
+		heapUsedMb: 512,
+		rssMb: 768,
 	},
 };
 
@@ -394,6 +394,39 @@ export function leanEnabledModels() {
 
 export function leanWatchdogConfig() {
 	return JSON.parse(JSON.stringify(LEAN_WATCHDOG_CONFIG));
+}
+
+export function reconcileLeanWatchdogConfig(input) {
+	const baseline = leanWatchdogConfig();
+	const current = isRecord(input) ? input : {};
+	const currentThresholds = isRecord(current.thresholds) ? current.thresholds : {};
+	let changed = !isRecord(input);
+
+	const next = {
+		...current,
+		enabled: current.enabled === false ? baseline.enabled : (current.enabled ?? baseline.enabled),
+		sampleIntervalMs:
+			Number.isFinite(Number(current.sampleIntervalMs)) && Number(current.sampleIntervalMs) > 0
+				? Math.min(Number(current.sampleIntervalMs), baseline.sampleIntervalMs)
+				: baseline.sampleIntervalMs,
+		thresholds: {
+			...currentThresholds,
+		},
+	};
+
+	if (next.enabled !== current.enabled) changed = true;
+	if (next.sampleIntervalMs !== current.sampleIntervalMs) changed = true;
+
+	for (const [key, baselineValue] of Object.entries(baseline.thresholds)) {
+		const value = Number(currentThresholds[key]);
+		const nextValue = Number.isFinite(value) && value > 0
+			? Math.min(value, baselineValue)
+			: baselineValue;
+		if (next.thresholds[key] !== nextValue) changed = true;
+		next.thresholds[key] = nextValue;
+	}
+
+	return { config: next, changed };
 }
 
 function setPackageSource(entry, source) {
@@ -509,7 +542,21 @@ function applyLocalRuntimeProfile({ dryRun = false } = {}) {
 
 function ensureLeanWatchdogConfig({ dryRun = false } = {}) {
 	if (existsSync(GLOBAL_WATCHDOG_CONFIG)) {
-		return { status: "present", path: GLOBAL_WATCHDOG_CONFIG, changed: false };
+		let current;
+		try {
+			current = JSON.parse(readFileSync(GLOBAL_WATCHDOG_CONFIG, "utf8"));
+		} catch {
+			current = undefined;
+		}
+		const reconciled = reconcileLeanWatchdogConfig(current);
+		if (!reconciled.changed) {
+			return { status: "present", path: GLOBAL_WATCHDOG_CONFIG, changed: false };
+		}
+		if (dryRun) {
+			return { status: "would-reconcile", path: GLOBAL_WATCHDOG_CONFIG, changed: true };
+		}
+		writeFileSync(GLOBAL_WATCHDOG_CONFIG, JSON.stringify(reconciled.config, null, 2) + "\n", "utf8");
+		return { status: "reconciled", path: GLOBAL_WATCHDOG_CONFIG, changed: true };
 	}
 	if (dryRun) {
 		return { status: "would-create", path: GLOBAL_WATCHDOG_CONFIG, changed: true };

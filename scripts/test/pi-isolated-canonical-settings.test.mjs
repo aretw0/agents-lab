@@ -8,6 +8,7 @@ import {
 	extractPackageNameFromSource,
 	isColdCapabilityPackageSource,
 	leanEnabledModels,
+	reconcileLeanWatchdogConfig,
 	leanWatchdogConfig,
 } from "../pi-isolated.mjs";
 
@@ -85,13 +86,55 @@ test("lean watchdog config preserves guard while tolerating startup transients",
 	assert.equal(config.sampleIntervalMs, 10000);
 	assert.deepEqual(config.thresholds, {
 		cpuPercent: 90,
-		eventLoopMaxMs: 600,
-		eventLoopP99Ms: 300,
-		heapUsedMb: 1024,
-		rssMb: 1400,
+		eventLoopMaxMs: 300,
+		eventLoopP99Ms: 150,
+		heapUsedMb: 512,
+		rssMb: 768,
 	});
 
 	const mutated = leanWatchdogConfig();
 	mutated.thresholds.eventLoopP99Ms = 999;
-	assert.equal(leanWatchdogConfig().thresholds.eventLoopP99Ms, 300);
+	assert.equal(leanWatchdogConfig().thresholds.eventLoopP99Ms, 150);
+});
+
+test("lean watchdog reconciliation tightens only permissive config", () => {
+	const reconciled = reconcileLeanWatchdogConfig({
+		enabled: true,
+		sampleIntervalMs: 20000,
+		thresholds: {
+			cpuPercent: 95,
+			eventLoopMaxMs: 600,
+			eventLoopP99Ms: 300,
+			heapUsedMb: 1024,
+			rssMb: 1400,
+		},
+	});
+
+	assert.equal(reconciled.changed, true);
+	assert.deepEqual(reconciled.config.thresholds, leanWatchdogConfig().thresholds);
+	assert.equal(reconciled.config.sampleIntervalMs, 10000);
+});
+
+test("lean watchdog reconciliation preserves stricter operator thresholds", () => {
+	const reconciled = reconcileLeanWatchdogConfig({
+		enabled: true,
+		sampleIntervalMs: 5000,
+		thresholds: {
+			cpuPercent: 80,
+			eventLoopMaxMs: 250,
+			eventLoopP99Ms: 100,
+			heapUsedMb: 256,
+			rssMb: 512,
+		},
+	});
+
+	assert.equal(reconciled.changed, false);
+	assert.deepEqual(reconciled.config.thresholds, {
+		cpuPercent: 80,
+		eventLoopMaxMs: 250,
+		eventLoopP99Ms: 100,
+		heapUsedMb: 256,
+		rssMb: 512,
+	});
+	assert.equal(reconciled.config.sampleIntervalMs, 5000);
 });
