@@ -54,7 +54,7 @@ Objetivo: usar runners remotos como acelerador, sem substituir governança local
 
 ### Não elegível para offload automático
 - publish/release final;
-- mutações de settings/governança sem decisão humana;
+- mutações de settings/governança sem decisão do operador;
 - ações destrutivas/irreversíveis.
 
 ## Trilha de evidência para offload (board/handoff)
@@ -70,7 +70,7 @@ Template prático local:
 npm run offload:evidence:template -- --task TASK-BUD-134 --decision defer
 ```
 
-## Steer/intervenção humana (cancel/retry/override)
+## Steer/Intervenção do Operador (cancel/retry/override)
 
 - **cancel**: parar run quando custo/qualidade/governança saírem do envelope.
 - **retry**: repetir apenas com motivo curto + gate focal explícito.
@@ -83,7 +83,7 @@ Sem esse trio de controles, a recomendação padrão é `defer`.
 Fluxo end-to-end recomendado:
 1. preparar versão (`changeset version`) e validar alinhamento de versões nos pacotes;
 2. gerar notas/checklist de readiness (local artifact);
-3. criar **draft release** manual para revisão humana;
+3. criar **draft release** manual para revisão do operador;
 4. publicar somente após gates canônicos + decisão explícita.
 
 Automação mínima existente:
@@ -94,7 +94,7 @@ Automação mínima existente:
 Checklist de readiness v0.8.0 (board/handoff):
 - versões de pacotes alinhadas;
 - CI/publish/release-draft prontos e auditáveis;
-- decisão humana explícita de `draft` -> `publish`;
+- decisão explícita do operador de `draft` -> `publish`;
 - rollback documentado para falha pós-corte.
 
 ## Inspirado por `tuts-agentic-ai-examples`
@@ -205,14 +205,14 @@ Gate de entrada — simple-delegate rehearsal bounded:
 1. `simple_delegate_rehearsal_packet.decision == ready`;
 2. foco local-safe já estável (batch 3–5 concluído com checkpoint/commit por fatia);
 3. sem blockers hard-intent (`protected`, `risk`, `reload-required`, `validation-failed-or-unknown`);
-4. escopo protegido continua opt-in humano (nenhum auto-dispatch).
+4. escopo protegido continua opt-in do operador (nenhum auto-dispatch).
 
 Canário protegido de capacidade externa (GitHub Actions/offload) — pré-condições:
 1. declarar valor esperado do canário (throughput/custo/tempo) com métrica observável;
 2. declarar validação focal obrigatória antes/depois (mesmo gate local para comparação);
 3. declarar rollback explícito e não-destrutivo (`git revert <commit>` + retorno imediato ao caminho local);
 4. registrar envelope mínimo no board/handoff: `task`, `maxCost`, `owner`, `evidence`, `decision=promote|defer`;
-5. manter `dispatch=no` até decisão humana explícita de promote.
+5. manter `dispatch=no` até decisão explícita do operador de promote.
 
 Rollout canário:
 1. escolher 1 task curta com critérios claros;
@@ -225,7 +225,7 @@ Rollback:
 - ação: descer para Modo 1 por 1 janela operacional (sem novas delegações) e corrigir causa raiz.
 
 Runbook curto — rehearsal real (1 task):
-1. **start**: usar `simple_delegate_rehearsal_start_packet`; só avançar quando `decision=ready-for-human-decision` e houver go humano explícito;
+1. **start**: usar `simple_delegate_rehearsal_start_packet`; só avançar quando `decision=ready-for-human-decision` e houver go explícito do operador;
 2. **monitor**: manter execução bounded e parar no primeiro `stop: protected|risk|reload-required|validation-failed-or-unknown`;
 3. **abort**: em blocker, encerrar rehearsal no mesmo slice, sem promover próxima task automaticamente;
 4. **rollback**: aplicar rollback não-destrutivo declarado, registrar evidência no board e checkpoint curto;
