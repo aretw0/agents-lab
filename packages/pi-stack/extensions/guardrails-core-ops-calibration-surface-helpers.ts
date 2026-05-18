@@ -256,8 +256,8 @@ export function buildDelegationReadinessStatus(input: {
     return {
       decision: "ready-delegation-rehearsal",
       recommendationCode: "delegation-readiness-ready-delegation-rehearsal",
-      recommendation: "delegation runway looks ready; keep one-task canary with explicit human start/defer decision.",
-      nextAction: "run delegation_rehearsal_start_packet and apply explicit human start/defer decision.",
+      recommendation: "delegation runway looks ready; keep one-task canary with explicit operator start/defer decision.",
+      nextAction: "run delegation_rehearsal_start_packet and apply explicit operator start/defer decision.",
       blockers,
       summary,
     };
@@ -394,7 +394,7 @@ export function buildOperationalRunwayPacket(input: {
     return {
       recommendedOption: "delegate",
       recommendationCode: "operational-runway-delegate",
-      recommendation: "delegation and background runway are mature; run bounded delegation rehearsal under explicit human start/defer decision.",
+      recommendation: "delegation and background runway are mature; run bounded delegation rehearsal under explicit operator start/defer decision.",
       nextAction: "run delegation_rehearsal_start_packet, then choose explicit start/defer; keep background packet as corroborating evidence.",
       blockers: normalizedBlockers,
       normalizedBlockers,
@@ -471,7 +471,7 @@ export type OperatorPauseOption = {
 
 export type DelegationRehearsalOperatorPauseBrief = {
   whyPaused: string;
-  gate: "human-canary-decision" | "blocked-rehearsal-gate";
+  gate: "operator-canary-decision" | "blocked-rehearsal-gate";
   focusTaskId?: string;
   focusMnemonic?: string;
   nextTaskId?: string;
@@ -516,7 +516,7 @@ export function toTaskMnemonic(taskId?: string, description?: string): string | 
 
 export function buildDelegationRehearsalOperatorPauseBrief(input: {
   cwd: string;
-  startDecision: "ready-for-human-decision" | "blocked";
+  startDecision: "ready-for-operator-decision" | "blocked";
   blockers: string[];
   focusTaskId?: string;
   nextTaskId?: string;
@@ -526,10 +526,10 @@ export function buildDelegationRehearsalOperatorPauseBrief(input: {
   const focusTaskMnemonic = toTaskMnemonic(focusTaskId, readTaskDescriptionById(input.cwd, focusTaskId));
   const nextTaskMnemonic = toTaskMnemonic(nextTaskId, readTaskDescriptionById(input.cwd, nextTaskId));
 
-  if (input.startDecision === "ready-for-human-decision") {
+  if (input.startDecision === "ready-for-operator-decision") {
     return {
-      whyPaused: "Canary gate reached: explicit human start/defer decision is required.",
-      gate: "human-canary-decision",
+      whyPaused: "Canary gate reached: explicit operator start/defer decision is required.",
+      gate: "operator-canary-decision",
       focusTaskId,
       focusMnemonic: focusTaskMnemonic,
       nextTaskId,

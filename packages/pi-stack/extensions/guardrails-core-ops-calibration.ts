@@ -61,7 +61,7 @@ export function buildOpsCalibrationDecisionPacket(input: OpsCalibrationDecisionI
   const blockers: string[] = [];
 
   let recommendationCode: OpsCalibrationRecommendationCode = "ops-calibration-ready-bounded-rehearsal";
-  let recommendation = "calibration looks strong; bounded local rehearsal is ready under explicit human focus.";
+  let recommendation = "calibration looks strong; bounded local rehearsal is ready under explicit operator focus.";
 
   const backgroundRehearsal = input.backgroundRehearsal;
 
@@ -440,10 +440,10 @@ export function buildDelegationRehearsalDecisionPacket(
   };
 }
 
-export type DelegationRehearsalStartDecision = "ready-for-human-decision" | "blocked";
+export type DelegationRehearsalStartDecision = "ready-for-operator-decision" | "blocked";
 
 export type DelegationRehearsalStartRecommendationCode =
-  | "delegation-rehearsal-start-ready-for-human-decision"
+  | "delegation-rehearsal-start-ready-for-operator-decision"
   | "delegation-rehearsal-start-blocked-rehearsal-not-ready"
   | "delegation-rehearsal-start-blocked-protected-scope"
   | "delegation-rehearsal-start-blocked-missing-declared-files"
@@ -497,9 +497,9 @@ export function buildDelegationRehearsalStartPacket(
   const rollbackPlanKnown = input.rollbackPlanKnown === true;
 
   const blockers: string[] = [];
-  let decision: DelegationRehearsalStartDecision = "ready-for-human-decision";
-  let recommendationCode: DelegationRehearsalStartRecommendationCode = "delegation-rehearsal-start-ready-for-human-decision";
-  let recommendation = "start can proceed only after explicit human go/no-go confirmation for one bounded rehearsal task.";
+  let decision: DelegationRehearsalStartDecision = "ready-for-operator-decision";
+  let recommendationCode: DelegationRehearsalStartRecommendationCode = "delegation-rehearsal-start-ready-for-operator-decision";
+  let recommendation = "start can proceed only after explicit operator go/no-go confirmation for one bounded rehearsal task.";
 
   if (rehearsalDecision !== "ready") {
     decision = "blocked";
@@ -509,7 +509,7 @@ export function buildDelegationRehearsalStartPacket(
   } else if (protectedScopeRequested) {
     decision = "blocked";
     recommendationCode = "delegation-rehearsal-start-blocked-protected-scope";
-    recommendation = "protected scope requested; require explicit human protected-focus decision before start.";
+    recommendation = "protected scope requested; require explicit operator protected-focus decision before start.";
     blockers.push("protected-scope-requested");
   } else if (!declaredFilesKnown) {
     decision = "blocked";
