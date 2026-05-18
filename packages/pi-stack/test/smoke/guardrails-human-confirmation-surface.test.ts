@@ -55,7 +55,7 @@ describe("human confirmation implementation channel surface", () => {
       max_calls: 3,
       max_cost_usd: 0.25,
       parallelism: 1,
-      structured_confirmation_available: true,
+      structured_approval_available: true,
     });
 
     expect(result.details.interaction).toBe("suite-approval");

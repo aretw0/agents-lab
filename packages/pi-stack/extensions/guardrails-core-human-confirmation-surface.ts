@@ -16,7 +16,7 @@ export function registerGuardrailsHumanConfirmationSurface(pi: ExtensionAPI): vo
   pi.registerTool({
     name: "operator_approval_packet",
     label: "Operator Approval Packet",
-    description: "Report-only UX approval packet. Recommends yes/no, choice, suite approval, or exact-text fallback without authorizing dispatch.",
+    description: "Report-only UX approval packet. Recommends yes/no, choice, or suite approval without authorizing dispatch.",
     parameters: Type.Object({
       intent_kind: Type.String({ description: "local-safe | worker-single-run | worker-suite | protected | destructive" }),
       recommended_action: Type.Optional(Type.String({ description: "Short recommended action shown to the operator." })),
@@ -26,7 +26,7 @@ export function registerGuardrailsHumanConfirmationSurface(pi: ExtensionAPI): vo
       max_calls: Type.Optional(Type.Number({ description: "Maximum model calls for suite approval." })),
       max_cost_usd: Type.Optional(Type.Number({ description: "Maximum suite cost." })),
       parallelism: Type.Optional(Type.Number({ description: "Maximum parallelism." })),
-      structured_confirmation_available: Type.Optional(Type.Boolean({ description: "Whether runtime can record trusted structured confirmation." })),
+      structured_approval_available: Type.Optional(Type.Boolean({ description: "Whether runtime can record trusted structured operator approval." })),
       protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks if intent kind is not protected." })),
       destructive_action_requested: Type.Optional(Type.Boolean({ description: "Blocks if intent kind is not destructive." })),
     }),
@@ -41,7 +41,7 @@ export function registerGuardrailsHumanConfirmationSurface(pi: ExtensionAPI): vo
         maxCalls: typeof p.max_calls === "number" ? p.max_calls : undefined,
         maxCostUsd: typeof p.max_cost_usd === "number" ? p.max_cost_usd : undefined,
         parallelism: typeof p.parallelism === "number" ? p.parallelism : undefined,
-        structuredConfirmationAvailable: typeof p.structured_confirmation_available === "boolean" ? p.structured_confirmation_available : undefined,
+        structuredApprovalAvailable: typeof p.structured_approval_available === "boolean" ? p.structured_approval_available : undefined,
         protectedScopeRequested: typeof p.protected_scope_requested === "boolean" ? p.protected_scope_requested : undefined,
         destructiveActionRequested: typeof p.destructive_action_requested === "boolean" ? p.destructive_action_requested : undefined,
       });
@@ -55,7 +55,7 @@ export function registerGuardrailsHumanConfirmationSurface(pi: ExtensionAPI): vo
   pi.registerTool({
     name: "human_confirmation_implementation_channel_plan",
     label: "Human Confirmation Implementation Channel Plan",
-    description: "Read-only report-only plan for structured human-confirmation signal implementation. Never enables destructive dialogs, dispatch, overrides, or node_modules patches.",
+    description: "Read-only report-only plan for structured operator approval signal implementation. Never enables destructive dialogs, dispatch, overrides, or node_modules patches.",
     parameters: Type.Object({
       preferred_channel: Type.Optional(Type.String({ description: "guard-owned | wrapper | upstream-pr" })),
       guard_can_own_dialog: Type.Optional(Type.Boolean({ description: "Whether a first-party guard can own the confirmation dialog." })),

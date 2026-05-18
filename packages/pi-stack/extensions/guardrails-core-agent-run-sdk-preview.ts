@@ -460,7 +460,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   const operatorApproval = buildOperatorApprovalPacket({
     intentKind: "worker-single-run",
     recommendedAction: runId ? `execute sdk worker ${runId}` : undefined,
-    structuredConfirmationAvailable: false,
+    structuredApprovalAvailable: false,
     protectedScopeRequested,
   });
   const sdkMaturity = buildSdkMaturity({
@@ -798,7 +798,7 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
     providerModelRef: workers[0]?.runSpec.providerModelRef,
     maxCalls: workers.length,
     parallelism: Math.min(workers.length, maxWorkers),
-    structuredConfirmationAvailable: false,
+    structuredApprovalAvailable: false,
     protectedScopeRequested,
   });
   const fanOutContract = [

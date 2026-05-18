@@ -26,7 +26,7 @@ export type OperatorApprovalPacketInput = {
   maxCalls?: number;
   maxCostUsd?: number;
   parallelism?: number;
-  structuredConfirmationAvailable?: boolean;
+  structuredApprovalAvailable?: boolean;
   protectedScopeRequested?: boolean;
   destructiveActionRequested?: boolean;
 };
@@ -93,7 +93,7 @@ const AUDIT_CONTRACT = {
 };
 
 export function buildOperatorApprovalPacket(input: OperatorApprovalPacketInput): OperatorApprovalPacket {
-  const structuredConfirmationAvailable = input.structuredConfirmationAvailable === true;
+  const structuredApprovalAvailable = input.structuredApprovalAvailable === true;
   const recommendedAction = normalizeApprovalText(input.recommendedAction, 180);
   const options = normalizeApprovalOptions(input.options);
   const blockers: string[] = [];
@@ -141,7 +141,7 @@ export function buildOperatorApprovalPacket(input: OperatorApprovalPacketInput):
 
   if (input.intentKind === "worker-suite") {
     const prompt = buildSuiteApprovalPrompt(input);
-    if (structuredConfirmationAvailable) {
+    if (structuredApprovalAvailable) {
       return {
         mode: "operator-approval-packet",
         decision: "ready-for-structured-approval",
@@ -164,7 +164,7 @@ export function buildOperatorApprovalPacket(input: OperatorApprovalPacketInput):
 
   if (input.intentKind === "worker-single-run") {
     const prompt = recommendedAction ? `Execute one worker run? ${recommendedAction}` : "Execute one worker run?";
-    if (structuredConfirmationAvailable) {
+    if (structuredApprovalAvailable) {
       const interaction = options.length > 1 ? "choice" : "yes-no";
       return {
         mode: "operator-approval-packet",
@@ -187,7 +187,7 @@ export function buildOperatorApprovalPacket(input: OperatorApprovalPacketInput):
   }
 
   const prompt = input.intentKind === "destructive" ? "Confirm destructive action?" : "Confirm protected action?";
-  if (structuredConfirmationAvailable) {
+  if (structuredApprovalAvailable) {
     return {
       mode: "operator-approval-packet",
       decision: "ready-for-structured-approval",
@@ -225,8 +225,8 @@ function needsStructuredSignal(
     prompt,
     recommendedAction,
     allowedResponses: [],
-    blockers: ["structured-confirmation-signal-missing"],
+    blockers: ["structured-operator-approval-signal-missing"],
     auditContract: AUDIT_CONTRACT,
-    summary: `operator-approval-packet: decision=needs-structured-approval-signal approvalState=blocked interaction=${interaction} shortAnswer=no structured=yes blockers=structured-confirmation-signal-missing dispatch=no authorizationEffect=none`,
+    summary: `operator-approval-packet: decision=needs-structured-approval-signal approvalState=blocked interaction=${interaction} shortAnswer=no structured=yes blockers=structured-operator-approval-signal-missing dispatch=no authorizationEffect=none`,
   };
 }

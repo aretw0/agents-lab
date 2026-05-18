@@ -5,7 +5,7 @@ import {
 } from "../../extensions/guardrails-core-exports";
 
 describe("agent run operator approval packets", () => {
-  it("attaches exact-text fallback approval to SDK single-worker packets", () => {
+  it("attaches structured operator approval requirements to SDK single-worker packets", () => {
     const packet = buildAgentRunSdkInProcessPacket({
       runId: "sdk-approval-single",
       goal: "Read one file and stop.",
@@ -32,11 +32,11 @@ describe("agent run operator approval packets", () => {
       acceptsShortAnswer: false,
       dispatchAllowed: false,
     });
-    expect(packet.operatorApproval.blockers).toContain("structured-confirmation-signal-missing");
+    expect(packet.operatorApproval.blockers).toContain("structured-operator-approval-signal-missing");
     expect(packet.operatorApproval.allowedResponses).toEqual([]);
   });
 
-  it("attaches suite fallback approval to read-only batch packets", () => {
+  it("attaches structured operator approval requirements to read-only batch packets", () => {
     const packet = buildAgentRunSdkReadOnlyBatchPacket({
       batchId: "sdk-approval-batch",
       sharedEvidence: ["VERIF-SDK-APPROVAL"],

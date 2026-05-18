@@ -8,7 +8,7 @@ export interface AgentRunExecutorStrategyInput {
   sdkRuntimeAvailable?: boolean;
   budgetDecision?: string;
   protectedScopeRequested?: boolean;
-  exactConfirmationAvailable?: boolean;
+  structuredOperatorApprovalAvailable?: boolean;
   runtimeMode?: string;
   devcontainerAvailable?: boolean;
   requiresProcessIsolation?: boolean;
@@ -83,7 +83,7 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
 
   const subprocessDiagnosticsAvailable = input.subprocessDiagnosticsAvailable === true;
   const sdkRuntimeAvailable = input.sdkRuntimeAvailable === true;
-  const exactConfirmationAvailable = input.exactConfirmationAvailable === true;
+  const structuredOperatorApprovalAvailable = input.structuredOperatorApprovalAvailable === true;
   const runtimeMode = normalizeRuntimeMode(input.runtimeMode);
   const devcontainerAvailable = input.devcontainerAvailable === true;
   const requiresProcessIsolation = input.requiresProcessIsolation === true;
@@ -151,9 +151,9 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     },
     {
       oodaStage: "decide",
-      support: "control-plane or human decision after fresh route evidence and board context",
+      support: "control-plane or operator decision after fresh route evidence and board context",
       confidence: "medium",
-      boundary: "exact one-run confirmation is still required for any provider/worker dispatch or provider experiment",
+      boundary: "structured operator approval is still required for any provider/worker dispatch or provider experiment",
     },
     {
       oodaStage: "act",
@@ -183,12 +183,12 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
       "Use SDK/in-process as the next diagnostic candidate, not as a replacement for subprocess.",
       "Keep subprocess as a first-class executor; mature it with startup diagnostics and/or a devcontainer/Linux canary before judging it unsuitable.",
       "Mature the worker rung on the current configured/recommended provider/model before treating alternate provider/model canaries as separate explicit experiments with fresh route/budget evidence.",
-      "Require exact runId confirmation before either executor starts a worker.",
+      "Require structured operator approval before either executor starts a worker.",
     ]
     : decision === "subprocess-first"
       ? [
         "Continue with subprocess diagnostics until a classified blocker justifies SDK fallback.",
-        exactConfirmationAvailable ? "Use exact runId confirmation for the next subprocess canary." : "Prepare packet only; wait for exact runId confirmation before dispatch.",
+        structuredOperatorApprovalAvailable ? "Use structured operator approval for the next subprocess canary." : "Prepare packet only; wait for structured operator approval before dispatch.",
       ]
       : ["Resolve blockers before selecting an executor or preparing a canary."];
 

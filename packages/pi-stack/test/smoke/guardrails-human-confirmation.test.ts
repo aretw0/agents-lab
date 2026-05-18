@@ -57,7 +57,7 @@ describe("human confirmation audit plan", () => {
     const structured = buildOperatorApprovalPacket({
       intentKind: "worker-single-run",
       recommendedAction: "execute sdk worker sdk-one",
-      structuredConfirmationAvailable: true,
+      structuredApprovalAvailable: true,
     });
 
     expect(structured.decision).toBe("ready-for-structured-approval");
@@ -69,14 +69,14 @@ describe("human confirmation audit plan", () => {
     const fallback = buildOperatorApprovalPacket({
       intentKind: "worker-single-run",
       recommendedAction: "execute sdk worker sdk-one",
-      structuredConfirmationAvailable: false,
+      structuredApprovalAvailable: false,
     });
 
     expect(fallback.decision).toBe("needs-structured-approval-signal");
     expect(fallback.interaction).toBe("yes-no");
     expect(fallback.acceptsShortAnswer).toBe(false);
     expect(fallback.allowedResponses).toEqual([]);
-    expect(fallback.blockers).toContain("structured-confirmation-signal-missing");
+    expect(fallback.blockers).toContain("structured-operator-approval-signal-missing");
   });
 
   it("supports suite approval as one bounded operator decision", () => {
@@ -87,7 +87,7 @@ describe("human confirmation audit plan", () => {
       maxCalls: 3,
       maxCostUsd: 0.25,
       parallelism: 1,
-      structuredConfirmationAvailable: true,
+      structuredApprovalAvailable: true,
     });
 
     expect(result.decision).toBe("ready-for-structured-approval");
@@ -103,7 +103,7 @@ describe("human confirmation audit plan", () => {
     const result = buildOperatorApprovalPacket({
       intentKind: "worker-single-run",
       protectedScopeRequested: true,
-      structuredConfirmationAvailable: true,
+      structuredApprovalAvailable: true,
     });
 
     expect(result.decision).toBe("blocked");
