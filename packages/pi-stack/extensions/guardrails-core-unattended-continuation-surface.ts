@@ -19,10 +19,6 @@ import {
 } from "./guardrails-core-unattended-continuation";
 import { asBooleanWithDefault } from "./guardrails-core-param-normalizers";
 
-function asBool(value: unknown, fallback: boolean): boolean {
-  return asBooleanWithDefault(value, fallback);
-}
-
 function normalizeContextLevel(value: unknown): UnattendedContinuationContextLevel {
   return value === "warn" || value === "checkpoint" || value === "compact" || value === "ok" ? value : "ok";
 }
@@ -353,11 +349,11 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
       const result = resolveUnattendedContinuationPlan({
-        nextLocalSafe: asBool(p.next_local_safe, false),
-        protectedScope: asBool(p.protected_scope, false),
-        risk: asBool(p.risk, false),
-        ambiguous: asBool(p.ambiguous, false),
-        progressSaved: asBool(p.progress_saved, false),
+        nextLocalSafe: asBooleanWithDefault(p.next_local_safe, false),
+        protectedScope: asBooleanWithDefault(p.protected_scope, false),
+        risk: asBooleanWithDefault(p.risk, false),
+        ambiguous: asBooleanWithDefault(p.ambiguous, false),
+        progressSaved: asBooleanWithDefault(p.progress_saved, false),
         contextLevel: normalizeContextLevel(p.context_level),
       });
       return {
@@ -400,30 +396,30 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
       const result = resolveLocalSliceBacklogGate({
-        projectStrategyResolved: asBool(p.project_strategy_resolved, false),
-        operatorPacketGreenValidated: asBool(p.operator_packet_green_validated, false),
-        operatorPacketFailClosedValidated: asBool(p.operator_packet_fail_closed_validated, false),
-        operatorPacketMissingFilesValidated: asBool(p.operator_packet_missing_files_validated, false),
-        explicitOperatorContractDefined: asBool(p.explicit_operator_contract_defined, false),
-        declaredFilesKnown: asBool(p.declared_files_known, false),
-        rollbackPlanKnown: asBool(p.rollback_plan_known, false),
-        validationGateKnown: asBool(p.validation_gate_known, false),
-        stagingScopeKnown: asBool(p.staging_scope_known, false),
-        commitScopeKnown: asBool(p.commit_scope_known, false),
-        timeBudgetKnown: asBool(p.time_budget_known, false),
-        costBudgetKnown: asBool(p.cost_budget_known, false),
-        cancellationKnown: asBool(p.cancellation_known, false),
-        checkpointPlanned: asBool(p.checkpoint_planned, false),
-        stopContractKnown: asBool(p.stop_contract_known, false),
-        separateTaskRequired: asBool(p.separate_task_required, false),
-        startsDisabledOrDryRun: asBool(p.starts_disabled_or_dry_run, false),
-        repeatRequested: asBool(p.repeat_requested, false),
-        schedulerRequested: asBool(p.scheduler_requested, false),
-        selfReloadRequested: asBool(p.self_reload_requested, false),
-        remoteOrOffloadRequested: asBool(p.remote_or_offload_requested, false),
-        githubActionsRequested: asBool(p.github_actions_requested, false),
-        protectedScopeRequested: asBool(p.protected_scope_requested, false),
-        destructiveMaintenanceRequested: asBool(p.destructive_maintenance_requested, false),
+        projectStrategyResolved: asBooleanWithDefault(p.project_strategy_resolved, false),
+        operatorPacketGreenValidated: asBooleanWithDefault(p.operator_packet_green_validated, false),
+        operatorPacketFailClosedValidated: asBooleanWithDefault(p.operator_packet_fail_closed_validated, false),
+        operatorPacketMissingFilesValidated: asBooleanWithDefault(p.operator_packet_missing_files_validated, false),
+        explicitOperatorContractDefined: asBooleanWithDefault(p.explicit_operator_contract_defined, false),
+        declaredFilesKnown: asBooleanWithDefault(p.declared_files_known, false),
+        rollbackPlanKnown: asBooleanWithDefault(p.rollback_plan_known, false),
+        validationGateKnown: asBooleanWithDefault(p.validation_gate_known, false),
+        stagingScopeKnown: asBooleanWithDefault(p.staging_scope_known, false),
+        commitScopeKnown: asBooleanWithDefault(p.commit_scope_known, false),
+        timeBudgetKnown: asBooleanWithDefault(p.time_budget_known, false),
+        costBudgetKnown: asBooleanWithDefault(p.cost_budget_known, false),
+        cancellationKnown: asBooleanWithDefault(p.cancellation_known, false),
+        checkpointPlanned: asBooleanWithDefault(p.checkpoint_planned, false),
+        stopContractKnown: asBooleanWithDefault(p.stop_contract_known, false),
+        separateTaskRequired: asBooleanWithDefault(p.separate_task_required, false),
+        startsDisabledOrDryRun: asBooleanWithDefault(p.starts_disabled_or_dry_run, false),
+        repeatRequested: asBooleanWithDefault(p.repeat_requested, false),
+        schedulerRequested: asBooleanWithDefault(p.scheduler_requested, false),
+        selfReloadRequested: asBooleanWithDefault(p.self_reload_requested, false),
+        remoteOrOffloadRequested: asBooleanWithDefault(p.remote_or_offload_requested, false),
+        githubActionsRequested: asBooleanWithDefault(p.github_actions_requested, false),
+        protectedScopeRequested: asBooleanWithDefault(p.protected_scope_requested, false),
+        destructiveMaintenanceRequested: asBooleanWithDefault(p.destructive_maintenance_requested, false),
       });
       return {
         content: [{ type: "text", text: result.summary }],
@@ -466,29 +462,29 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
       const result = reviewLocalSliceOperatorApprovedContract({
         decisionPacket: {
           decision: normalizePacketDecision(p.packet_decision),
-          dispatchAllowed: asBool(p.packet_dispatch_allowed, false) as false,
-          requiresOperatorDecision: asBool(p.packet_requires_operator_decision, false),
-          singleSliceOnly: asBool(p.packet_single_slice_only, false),
+          dispatchAllowed: asBooleanWithDefault(p.packet_dispatch_allowed, false) as false,
+          requiresOperatorDecision: asBooleanWithDefault(p.packet_requires_operator_decision, false),
+          singleSliceOnly: asBooleanWithDefault(p.packet_single_slice_only, false),
           activation: (p.packet_activation === "none" ? "none" : String(p.packet_activation ?? "unknown")) as "none",
           authorization: (p.packet_authorization === "none" ? "none" : String(p.packet_authorization ?? "unknown")) as "none",
         },
         operatorDecision: normalizeOperatorDecision(p.operator_decision),
-        singleFocus: asBool(p.single_focus, false),
-        localSafeScope: asBool(p.local_safe_scope, false),
-        declaredFilesKnown: asBool(p.declared_files_known, false),
-        protectedScopesClear: asBool(p.protected_scopes_clear, false),
-        rollbackPlanKnown: asBool(p.rollback_plan_known, false),
-        validationGateKnown: asBool(p.validation_gate_known, false),
-        stagingScopeKnown: asBool(p.staging_scope_known, false),
-        commitScopeKnown: asBool(p.commit_scope_known, false),
-        checkpointPlanned: asBool(p.checkpoint_planned, false),
-        stopContractKnown: asBool(p.stop_contract_known, false),
-        repeatRequested: asBool(p.repeat_requested, false),
-        schedulerRequested: asBool(p.scheduler_requested, false),
-        selfReloadRequested: asBool(p.self_reload_requested, false),
-        remoteOrOffloadRequested: asBool(p.remote_or_offload_requested, false),
-        githubActionsRequested: asBool(p.github_actions_requested, false),
-        protectedScopeRequested: asBool(p.protected_scope_requested, false),
+        singleFocus: asBooleanWithDefault(p.single_focus, false),
+        localSafeScope: asBooleanWithDefault(p.local_safe_scope, false),
+        declaredFilesKnown: asBooleanWithDefault(p.declared_files_known, false),
+        protectedScopesClear: asBooleanWithDefault(p.protected_scopes_clear, false),
+        rollbackPlanKnown: asBooleanWithDefault(p.rollback_plan_known, false),
+        validationGateKnown: asBooleanWithDefault(p.validation_gate_known, false),
+        stagingScopeKnown: asBooleanWithDefault(p.staging_scope_known, false),
+        commitScopeKnown: asBooleanWithDefault(p.commit_scope_known, false),
+        checkpointPlanned: asBooleanWithDefault(p.checkpoint_planned, false),
+        stopContractKnown: asBooleanWithDefault(p.stop_contract_known, false),
+        repeatRequested: asBooleanWithDefault(p.repeat_requested, false),
+        schedulerRequested: asBooleanWithDefault(p.scheduler_requested, false),
+        selfReloadRequested: asBooleanWithDefault(p.self_reload_requested, false),
+        remoteOrOffloadRequested: asBooleanWithDefault(p.remote_or_offload_requested, false),
+        githubActionsRequested: asBooleanWithDefault(p.github_actions_requested, false),
+        protectedScopeRequested: asBooleanWithDefault(p.protected_scope_requested, false),
       });
       return {
         content: [{ type: "text", text: result.summary }],
@@ -524,24 +520,24 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
       const result = resolveSelfReloadAutoresumeCanaryPlan({
-        optIn: asBool(p.opt_in, false),
-        reloadRequired: asBool(p.reload_required, false),
-        checkpointFresh: asBool(p.checkpoint_fresh, false),
-        handoffBudgetOk: asBool(p.handoff_budget_ok, false),
-        gitStateExpected: asBool(p.git_state_expected, false),
-        protectedScopesClear: asBool(p.protected_scopes_clear, false),
-        cooldownReady: asBool(p.cooldown_ready, false),
-        autoResumePreviewReady: asBool(p.auto_resume_preview_ready, false),
-        pendingMessagesClear: asBool(p.pending_messages_clear, false),
-        recentSteerClear: asBool(p.recent_steer_clear, false),
-        laneQueueClear: asBool(p.lane_queue_clear, false),
-        stopConditionsClear: asBool(p.stop_conditions_clear, false),
+        optIn: asBooleanWithDefault(p.opt_in, false),
+        reloadRequired: asBooleanWithDefault(p.reload_required, false),
+        checkpointFresh: asBooleanWithDefault(p.checkpoint_fresh, false),
+        handoffBudgetOk: asBooleanWithDefault(p.handoff_budget_ok, false),
+        gitStateExpected: asBooleanWithDefault(p.git_state_expected, false),
+        protectedScopesClear: asBooleanWithDefault(p.protected_scopes_clear, false),
+        cooldownReady: asBooleanWithDefault(p.cooldown_ready, false),
+        autoResumePreviewReady: asBooleanWithDefault(p.auto_resume_preview_ready, false),
+        pendingMessagesClear: asBooleanWithDefault(p.pending_messages_clear, false),
+        recentSteerClear: asBooleanWithDefault(p.recent_steer_clear, false),
+        laneQueueClear: asBooleanWithDefault(p.lane_queue_clear, false),
+        stopConditionsClear: asBooleanWithDefault(p.stop_conditions_clear, false),
         contextLevel: normalizeContextLevel(p.context_level),
-        schedulerRequested: asBool(p.scheduler_requested, false),
-        remoteOrOffloadRequested: asBool(p.remote_or_offload_requested, false),
-        githubActionsRequested: asBool(p.github_actions_requested, false),
-        protectedScopeRequested: asBool(p.protected_scope_requested, false),
-        destructiveMaintenanceRequested: asBool(p.destructive_maintenance_requested, false),
+        schedulerRequested: asBooleanWithDefault(p.scheduler_requested, false),
+        remoteOrOffloadRequested: asBooleanWithDefault(p.remote_or_offload_requested, false),
+        githubActionsRequested: asBooleanWithDefault(p.github_actions_requested, false),
+        protectedScopeRequested: asBooleanWithDefault(p.protected_scope_requested, false),
+        destructiveMaintenanceRequested: asBooleanWithDefault(p.destructive_maintenance_requested, false),
       });
       return {
         content: [{ type: "text", text: result.summary }],
@@ -568,15 +564,15 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
       const result = resolveNudgeFreeLoopCanaryGate({
-        optIn: asBool(p.opt_in, false),
-        nextLocalSafe: asBool(p.next_local_safe, false),
-        checkpointFresh: asBool(p.checkpoint_fresh, false),
-        handoffBudgetOk: asBool(p.handoff_budget_ok, false),
-        gitStateExpected: asBool(p.git_state_expected, false),
-        protectedScopesClear: asBool(p.protected_scopes_clear, false),
-        cooldownReady: asBool(p.cooldown_ready, false),
-        validationKnown: asBool(p.validation_known, false),
-        stopConditionsClear: asBool(p.stop_conditions_clear, false),
+        optIn: asBooleanWithDefault(p.opt_in, false),
+        nextLocalSafe: asBooleanWithDefault(p.next_local_safe, false),
+        checkpointFresh: asBooleanWithDefault(p.checkpoint_fresh, false),
+        handoffBudgetOk: asBooleanWithDefault(p.handoff_budget_ok, false),
+        gitStateExpected: asBooleanWithDefault(p.git_state_expected, false),
+        protectedScopesClear: asBooleanWithDefault(p.protected_scopes_clear, false),
+        cooldownReady: asBooleanWithDefault(p.cooldown_ready, false),
+        validationKnown: asBooleanWithDefault(p.validation_known, false),
+        stopConditionsClear: asBooleanWithDefault(p.stop_conditions_clear, false),
       });
       return {
         content: [{ type: "text", text: result.summary }],
