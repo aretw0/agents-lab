@@ -14,7 +14,7 @@ Use before: changing `routeModelRefs`, `providerBudgets`, default provider/model
 | Evaluation date |  |
 | Source task |  |
 
-## 2. Human/operator facts
+## 2. Operator facts
 
 Record dashboard/provider facts separately from local estimates.
 
@@ -126,7 +126,7 @@ Initial monitor allowlist proposal:
 | Field | Value |
 | --- | --- |
 | Canary type | report-only / manual one-shot / small monitor batch |
-| Human approval required | yes |
+| Operator approval required | yes |
 | Max calls |  |
 | Max cost |  |
 | Max duration |  |
@@ -174,7 +174,7 @@ Decision: candidate-only / canary-ready / advisory-ready / activation-ready / bl
 
 Reason:
 
-Required human decision before next step:
+Required operator decision before next step:
 
 - [ ] provider allowed?
 - [ ] model ref allowed?

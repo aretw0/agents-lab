@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Padronizar decisão humana para uma task de escopo protegido via packet **report-only** (`promote | skip | defer`) com sinais de valor/risco/esforço e evidência mínima.
+Padronizar decisão do operador para uma task de escopo protegido via packet **report-only** (`promote | skip | defer`) com sinais de valor/risco/esforço e evidência mínima.
 
 ## Surface
 
@@ -15,7 +15,7 @@ Padronizar decisão humana para uma task de escopo protegido via packet **report
 - `recommendedOption`: `promote | skip | defer`
 - `recommendationCode` canônico
 - `decisionPreview.recommendedOption` + `decisionPreview.options[]` (preview pragmático de `promote|skip|defer` com `suitability`, `blockers`, `nextAction`)
-- `decisionPreview.pragmaticRecommendation` (síntese direta para decisão humana)
+- `decisionPreview.pragmaticRecommendation` (síntese direta para decisão do operador)
 - `valuePotential`, `riskLevel`, `effortLevel`
 - `reasonCodes[]`, `signals[]`, `evidence[]`
 - `declaredFilesKnown`, `validationGateKnown`, `rollbackPlanKnown`
@@ -29,7 +29,7 @@ Padronizar decisão humana para uma task de escopo protegido via packet **report
 - `authorization=none`
 - `mode=report-only`
 
-Packet verde não autoriza execução protected automática; ele só prepara decisão humana auditável.
+Packet verde não autoriza execução protected automática; ele só prepara decisão auditável do operador.
 
 Resumo compacto esperado inclui preview das opções, por exemplo:
 - `preview=promote:blocked,skip:viable,defer:recommended`.
