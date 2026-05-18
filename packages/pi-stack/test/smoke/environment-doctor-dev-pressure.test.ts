@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import environmentDoctorExtension, { buildEnvironmentDevPressureReport } from "../../extensions/environment-doctor";
+import environmentDoctorExtension from "../../extensions/environment-doctor";
+import { buildEnvironmentDevPressureReport } from "../../extensions/environment-doctor-dev-pressure";
 
 function makeWorkspace(): string {
   const dir = mkdtempSync(join(tmpdir(), "pi-env-pressure-"));
