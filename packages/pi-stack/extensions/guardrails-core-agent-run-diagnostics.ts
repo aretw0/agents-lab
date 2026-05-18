@@ -420,7 +420,7 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
         : failureClass === "worker-contract-failed"
           ? ["Treat process as healthy but contract failed; inspect touched files and parent-side validation before retry."]
           : failureClass === "none"
-            ? ["Runner process is not blocked by this evidence; use exact human confirmation for any future canary."]
+            ? ["Runner process is not blocked by this evidence; use exact operator confirmation for any future canary."]
             : ["Collect bounded runner/provider evidence before retry."];
 
   const summary = [
@@ -508,7 +508,7 @@ export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagn
   const nextActions = decision === "worker-canary-ready"
     ? [
       "Prepare one read-only worker canary packet.",
-      "Require exact human confirmation for the specific runId before dispatch.",
+      "Require exact operator confirmation for the specific runId before dispatch.",
     ]
     : decision === "structured-probe-first"
       ? [

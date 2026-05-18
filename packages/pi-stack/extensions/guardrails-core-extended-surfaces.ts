@@ -8,7 +8,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { appendAuditEntry } from "./guardrails-core-confirmation-audit";
 import { registerGuardrailsAutonomyLaneSurface } from "./guardrails-core-autonomy-lane-surface";
 import { registerGuardrailsGrowthMaturitySurface } from "./guardrails-core-growth-maturity-surface";
-import { registerGuardrailsHumanConfirmationSurface } from "./guardrails-core-human-confirmation-surface";
+import { registerGuardrailsOperatorConfirmationSurface } from "./guardrails-core-operator-confirmation-surface";
 import { registerGuardrailsI18nLintSurface } from "./guardrails-core-i18n-lint-surface";
 import { registerGuardrailsMacroRefactorSurface } from "./guardrails-core-macro-refactor-surface";
 import { registerGuardrailsMarkerCheckSurface } from "./guardrails-core-marker-check-surface";
@@ -34,5 +34,5 @@ export default function (pi: ExtensionAPI) {
 	registerGuardrailsGrowthMaturitySurface(pi);
 	registerGuardrailsShellSpoofingScoreSurface(pi);
 	registerGuardrailsI18nLintSurface(pi);
-	registerGuardrailsHumanConfirmationSurface(pi);
+	registerGuardrailsOperatorConfirmationSurface(pi);
 }

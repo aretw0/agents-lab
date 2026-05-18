@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { resolveHumanConfirmationImplementationChannelPlan } from "./guardrails-core-human-confirmation";
+import { resolveOperatorConfirmationImplementationChannelPlan } from "./guardrails-core-operator-confirmation";
 import { buildOperatorApprovalPacket, type OperatorApprovalIntentKind } from "./guardrails-core-operator-approval";
 
 function normalizePreferredChannel(value: unknown): "guard-owned" | "wrapper" | "upstream-pr" | undefined {
@@ -12,7 +12,7 @@ function normalizeApprovalIntentKind(value: unknown): OperatorApprovalIntentKind
   return "local-safe";
 }
 
-export function registerGuardrailsHumanConfirmationSurface(pi: ExtensionAPI): void {
+export function registerGuardrailsOperatorConfirmationSurface(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "operator_approval_packet",
     label: "Operator Approval Packet",
@@ -53,8 +53,8 @@ export function registerGuardrailsHumanConfirmationSurface(pi: ExtensionAPI): vo
   });
 
   pi.registerTool({
-    name: "human_confirmation_implementation_channel_plan",
-    label: "Human Confirmation Implementation Channel Plan",
+    name: "operator_confirmation_implementation_channel_plan",
+    label: "Operator Confirmation Implementation Channel Plan",
     description: "Read-only report-only plan for structured operator approval signal implementation. Never enables destructive dialogs, dispatch, overrides, or node_modules patches.",
     parameters: Type.Object({
       preferred_channel: Type.Optional(Type.String({ description: "guard-owned | wrapper | upstream-pr" })),
@@ -66,7 +66,7 @@ export function registerGuardrailsHumanConfirmationSurface(pi: ExtensionAPI): vo
     }),
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const result = resolveHumanConfirmationImplementationChannelPlan({
+      const result = resolveOperatorConfirmationImplementationChannelPlan({
         preferredChannel: normalizePreferredChannel(p.preferred_channel),
         guardCanOwnDialog: typeof p.guard_can_own_dialog === "boolean" ? p.guard_can_own_dialog : undefined,
         wrapperCanPreserveStructuredDetails: typeof p.wrapper_can_preserve_structured_details === "boolean" ? p.wrapper_can_preserve_structured_details : undefined,

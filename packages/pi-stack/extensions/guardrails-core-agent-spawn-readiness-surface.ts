@@ -745,7 +745,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   pi.registerTool({
     name: "agent_run_sdk_in_process_dispatch",
     label: "Agent Run SDK In-Process Dispatch",
-    description: "First-party SDK/in-process worker gate. Preview by default; execute=true requires exact human confirmation and starts only one SDK AgentSession worker.",
+    description: "First-party SDK/in-process worker gate. Preview by default; execute=true requires exact operator confirmation and starts only one SDK AgentSession worker.",
     parameters: Type.Object({
       run_id: Type.Optional(Type.String({ description: "Future SDK worker run id." })),
       goal: Type.Optional(Type.String({ description: "Run goal/prompt for the SDK worker." })),

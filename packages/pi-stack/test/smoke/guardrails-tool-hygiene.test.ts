@@ -2,7 +2,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore from "../../extensions/guardrails-core";
+import { registerGuardrailsToolHygieneSurface } from "../../extensions/guardrails-core-tool-hygiene-surface";
 import {
   buildAgentsAsToolsCalibrationScore,
   buildLineBudgetSnapshot,
@@ -12,13 +12,13 @@ import {
 } from "../../extensions/guardrails-core-exports";
 
 describe("tool hygiene scorecard", () => {
-  it("classifies protected long-run and scheduler tools as human-approval only", () => {
+  it("classifies protected long-run and scheduler tools as operator-approval only", () => {
     expect(classifyToolHygiene({
       name: "ant_colony",
       description: "Launch an autonomous ant colony in the BACKGROUND",
     })).toMatchObject({
       classification: "protected",
-      maturity: "requires-human-approval",
+      maturity: "requires-operator-approval",
     });
 
     expect(classifyToolHygiene({
@@ -26,7 +26,7 @@ describe("tool hygiene scorecard", () => {
       description: "Create recurring reminders and scheduled prompts",
     })).toMatchObject({
       classification: "protected",
-      maturity: "requires-human-approval",
+      maturity: "requires-operator-approval",
     });
   });
 
@@ -150,7 +150,7 @@ describe("tool hygiene scorecard", () => {
         measured: 1,
       },
       riskSummary: {
-        requiresHumanApproval: 1,
+        requiresOperatorApproval: 1,
       },
     });
     expect(scorecard.evidence).toContain("dispatch=no");
@@ -214,9 +214,9 @@ describe("tool hygiene scorecard", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    const pi = rawPi as unknown as Parameters<typeof registerGuardrailsToolHygieneSurface>[0];
 
-    guardrailsCore(pi);
+    registerGuardrailsToolHygieneSurface(pi);
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agents_as_tools_calibration_score");
     const tool = toolCall?.[0] as {
       execute: (
@@ -252,9 +252,9 @@ describe("tool hygiene scorecard", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    const pi = rawPi as unknown as Parameters<typeof registerGuardrailsToolHygieneSurface>[0];
 
-    guardrailsCore(pi);
+    registerGuardrailsToolHygieneSurface(pi);
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "tool_hygiene_scorecard");
     const tool = toolCall?.[0] as {
       execute: (
@@ -289,11 +289,11 @@ describe("tool hygiene scorecard", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    const pi = rawPi as unknown as Parameters<typeof registerGuardrailsToolHygieneSurface>[0];
     const cwd = mkdtempSync(path.join(tmpdir(), "tool-hygiene-syntax-surface-"));
     try {
       writeFileSync(path.join(cwd, "sample.ts"), "const id = user?.profile?.account?.id;\n", "utf8");
-      guardrailsCore(pi);
+      registerGuardrailsToolHygieneSurface(pi);
       const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "tool_hygiene_scorecard");
       const tool = toolCall?.[0] as {
         execute: (
@@ -352,9 +352,10 @@ describe("tool hygiene scorecard", () => {
       getAllTools: vi.fn(() => [] as unknown[]),
     };
     rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
-    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+    const pi = rawPi as unknown as Parameters<typeof registerGuardrailsToolHygieneSurface>[0];
 
-    guardrailsCore(pi);
+    const cwd = mkdtempSync(path.join(tmpdir(), "line-budget-snapshot-"));
+    registerGuardrailsToolHygieneSurface(pi);
     const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "line_budget_snapshot");
     const tool = toolCall?.[0] as {
       execute: (
@@ -365,8 +366,6 @@ describe("tool hygiene scorecard", () => {
         ctx: { cwd: string },
       ) => Promise<{ details?: Record<string, unknown> }> | { details?: Record<string, unknown> };
     };
-
-    const cwd = mkdtempSync(path.join(tmpdir(), "line-budget-snapshot-"));
     const extDir = path.join(cwd, "packages", "pi-stack", "extensions");
     const smokeDir = path.join(cwd, "packages", "pi-stack", "test", "smoke");
     const helperDir = path.join(cwd, "packages", "pi-stack", "test", "helpers");

@@ -7,7 +7,7 @@ export type SkillAccessBlockReason =
   | "global-skill-not-allowlisted"
   | "path-outside-skill-root"
   | "recursive-scan-blocked"
-  | "operation-requires-human-approval"
+  | "operation-requires-operator-approval"
   | "unsupported-operation";
 
 export interface SkillAccessCandidateRoot {
@@ -31,7 +31,7 @@ export interface SkillAccessDecision {
   requestedPath?: string;
   relativePath?: string;
   boundedRead: boolean;
-  humanApprovalRequired: boolean;
+  operatorApprovalRequired: boolean;
   recommendation: string;
 }
 
@@ -148,7 +148,7 @@ export function resolveSkillReadAccess(input: {
     requestedPath,
     relativePath,
     boundedRead: false,
-    humanApprovalRequired: false,
+    operatorApprovalRequired: false,
   };
 
   if (input.skillRoot.source === "global" && input.skillRoot.globalAllowlisted !== true) {
@@ -156,7 +156,7 @@ export function resolveSkillReadAccess(input: {
       ...base,
       status: "block",
       reason: "global-skill-not-allowlisted",
-      humanApprovalRequired: true,
+      operatorApprovalRequired: true,
       recommendation: "skill-access: global skill is not allowlisted; require explicit operator approval before reading.",
     };
   }
@@ -166,7 +166,7 @@ export function resolveSkillReadAccess(input: {
       ...base,
       status: "block",
       reason: "path-outside-skill-root",
-      humanApprovalRequired: true,
+      operatorApprovalRequired: true,
       recommendation: "skill-access: requested path escapes the skill root; use an exact in-root SKILL.md/doc path.",
     };
   }
@@ -176,7 +176,7 @@ export function resolveSkillReadAccess(input: {
       ...base,
       status: "block",
       reason: "recursive-scan-blocked",
-      humanApprovalRequired: true,
+      operatorApprovalRequired: true,
       recommendation: "skill-access: recursive discovery is blocked; read SKILL.md or a bounded linked doc explicitly.",
     };
   }
@@ -185,8 +185,8 @@ export function resolveSkillReadAccess(input: {
     return {
       ...base,
       status: "block",
-      reason: "operation-requires-human-approval",
-      humanApprovalRequired: true,
+      reason: "operation-requires-operator-approval",
+      operatorApprovalRequired: true,
       recommendation: "skill-access: skill commands/install/enable actions require explicit operator approval.",
     };
   }
@@ -196,7 +196,7 @@ export function resolveSkillReadAccess(input: {
       ...base,
       status: "block",
       reason: "unsupported-operation",
-      humanApprovalRequired: true,
+      operatorApprovalRequired: true,
       recommendation: "skill-access: unsupported operation; use bounded read or request approval.",
     };
   }
@@ -205,7 +205,7 @@ export function resolveSkillReadAccess(input: {
     ...base,
     status: "allow",
     boundedRead: true,
-    humanApprovalRequired: false,
+    operatorApprovalRequired: false,
     recommendation: "skill-access: bounded read allowed for SKILL.md or linked in-root skill documentation; do not execute suggested commands without approval.",
   };
 }

@@ -37,7 +37,7 @@ describe("guardrails skill access policy", () => {
     })).toMatchObject({
       status: "block",
       reason: "global-skill-not-allowlisted",
-      humanApprovalRequired: true,
+      operatorApprovalRequired: true,
     });
   });
 
@@ -51,7 +51,7 @@ describe("guardrails skill access policy", () => {
     expect(decision).toMatchObject({
       status: "allow",
       boundedRead: true,
-      humanApprovalRequired: false,
+      operatorApprovalRequired: false,
       relativePath: "docs/workflow.md",
     });
   });
@@ -87,8 +87,8 @@ describe("guardrails skill access policy", () => {
       operation: "execute",
     })).toMatchObject({
       status: "block",
-      reason: "operation-requires-human-approval",
-      humanApprovalRequired: true,
+      reason: "operation-requires-operator-approval",
+      operatorApprovalRequired: true,
     });
   });
 
@@ -101,7 +101,7 @@ describe("guardrails skill access policy", () => {
       status: "allow",
       source: "global",
       boundedRead: true,
-      humanApprovalRequired: false,
+      operatorApprovalRequired: false,
       relativePath: "SKILL.md",
     });
   });

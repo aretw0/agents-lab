@@ -1,5 +1,5 @@
 export type ToolHygieneClass = "advisory" | "measured" | "operational" | "protected" | "development";
-export type ToolHygieneMaturity = "safe-for-local-loop" | "needs-measured-evidence" | "requires-human-approval" | "hide-before-long-loop";
+export type ToolHygieneMaturity = "safe-for-local-loop" | "needs-measured-evidence" | "requires-operator-approval" | "hide-before-long-loop";
 
 export interface ToolHygieneInputTool {
   name: string;
@@ -24,7 +24,7 @@ export interface ToolHygieneScorecard {
   shown: number;
   summary: Record<ToolHygieneClass, number>;
   riskSummary: {
-    requiresHumanApproval: number;
+    requiresOperatorApproval: number;
     hideBeforeLongLoop: number;
     manualOverrideLike: number;
   };
@@ -313,7 +313,7 @@ export function classifyToolHygiene(tool: ToolHygieneInputTool): ToolHygieneRow 
 
   let maturity: ToolHygieneMaturity = "safe-for-local-loop";
   if (classification === "protected" || flags.includes("remote-or-ci") || flags.includes("scheduler") || flags.includes("long-run-capable")) {
-    maturity = "requires-human-approval";
+    maturity = "requires-operator-approval";
   } else if (classification === "operational" || flags.includes("mutation") || flags.includes("settings-or-profile")) {
     maturity = "needs-measured-evidence";
   } else if (classification === "development" && flags.includes("subprocess-or-command")) {
@@ -324,7 +324,7 @@ export function classifyToolHygiene(tool: ToolHygieneInputTool): ToolHygieneRow 
     ? "keep visible for bounded local loops"
     : maturity === "needs-measured-evidence"
       ? "keep, but require bounded evidence and explicit task linkage before long loops"
-      : maturity === "requires-human-approval"
+      : maturity === "requires-operator-approval"
         ? "protected: require explicit operator approval; no auto-dispatch"
         : "hide or disable before long loops unless explicitly debugging";
 
@@ -342,7 +342,7 @@ export function buildToolHygieneScorecard(input: {
     .map((tool) => classifyToolHygiene({ ...tool, name: tool.name.trim() }))
     .sort((a, b) => {
       const maturityRank: Record<ToolHygieneMaturity, number> = {
-        "requires-human-approval": 0,
+        "requires-operator-approval": 0,
         "hide-before-long-loop": 1,
         "needs-measured-evidence": 2,
         "safe-for-local-loop": 3,
@@ -361,7 +361,7 @@ export function buildToolHygieneScorecard(input: {
   for (const row of rows) summary[row.classification] += 1;
 
   const riskSummary = {
-    requiresHumanApproval: rows.filter((row) => row.maturity === "requires-human-approval").length,
+    requiresOperatorApproval: rows.filter((row) => row.maturity === "requires-operator-approval").length,
     hideBeforeLongLoop: rows.filter((row) => row.maturity === "hide-before-long-loop").length,
     manualOverrideLike: rows.filter((row) => row.flags.includes("manual-override-like")).length,
   };
@@ -373,7 +373,7 @@ export function buildToolHygieneScorecard(input: {
     `shown=${shownRows.length}`,
     `protected=${summary.protected}`,
     `operational=${summary.operational}`,
-    `requiresHuman=${riskSummary.requiresHumanApproval}`,
+    `requiresOperator=${riskSummary.requiresOperatorApproval}`,
     `hideBeforeLongLoop=${riskSummary.hideBeforeLongLoop}`,
     `syntaxFindings=${syntaxHygiene.findings}`,
     `syntaxRequiresRationale=${syntaxHygiene.requiresRationale}`,
@@ -513,12 +513,12 @@ export function buildAgentsAsToolsCalibrationScore(input: { tools: ToolHygieneIn
   const names = new Set(tools.map((tool) => tool.name.toLowerCase()));
 
   const executorRows = rows.filter((row) => row.flags.includes("long-run-capable") || row.flags.includes("subprocess-or-command"));
-  const protectedExecutors = executorRows.filter((row) => row.maturity === "requires-human-approval");
+  const protectedExecutors = executorRows.filter((row) => row.maturity === "requires-operator-approval");
   const longRunCapableTools = rows.filter((row) => row.flags.includes("long-run-capable")).length;
   const manualOverrideLikeTools = rows.filter((row) => row.flags.includes("manual-override-like")).length;
 
   const governanceExecutorRows = rows.filter((row) => row.flags.includes("long-run-capable"));
-  const governanceProtectedExecutors = governanceExecutorRows.filter((row) => row.maturity === "requires-human-approval");
+  const governanceProtectedExecutors = governanceExecutorRows.filter((row) => row.maturity === "requires-operator-approval");
   const longRunGoverned = governanceExecutorRows.length === 0
     ? true
     : governanceProtectedExecutors.length >= Math.max(1, Math.ceil(governanceExecutorRows.length * 0.67));

@@ -1,15 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
-import { registerGuardrailsHumanConfirmationSurface } from "../../extensions/guardrails-core-human-confirmation-surface";
+import { registerGuardrailsOperatorConfirmationSurface } from "../../extensions/guardrails-core-operator-confirmation-surface";
 
-describe("human confirmation implementation channel surface", () => {
+describe("operator confirmation implementation channel surface", () => {
   it("registers a report-only planning tool", () => {
     const pi = { registerTool: vi.fn() } as any;
-    registerGuardrailsHumanConfirmationSurface(pi);
+    registerGuardrailsOperatorConfirmationSurface(pi);
 
     const tool = pi.registerTool.mock.calls
       .map(([registered]) => registered)
-      .find((registered) => registered.name === "human_confirmation_implementation_channel_plan");
-    expect(tool.name).toBe("human_confirmation_implementation_channel_plan");
+      .find((registered) => registered.name === "operator_confirmation_implementation_channel_plan");
+    expect(tool.name).toBe("operator_confirmation_implementation_channel_plan");
     expect(tool.description).toContain("Never enables destructive dialogs");
 
     const result = tool.execute("call-1", { guard_can_own_dialog: true });
@@ -26,10 +26,10 @@ describe("human confirmation implementation channel surface", () => {
 
   it("blocks prohibited runtime enablement and direct node_modules patches", () => {
     const pi = { registerTool: vi.fn() } as any;
-    registerGuardrailsHumanConfirmationSurface(pi);
+    registerGuardrailsOperatorConfirmationSurface(pi);
     const tool = pi.registerTool.mock.calls
       .map(([registered]) => registered)
-      .find((registered) => registered.name === "human_confirmation_implementation_channel_plan");
+      .find((registered) => registered.name === "operator_confirmation_implementation_channel_plan");
 
     const result = tool.execute("call-1", {
       direct_node_modules_patch_requested: true,
@@ -43,7 +43,7 @@ describe("human confirmation implementation channel surface", () => {
 
   it("registers an operator approval packet tool", () => {
     const pi = { registerTool: vi.fn() } as any;
-    registerGuardrailsHumanConfirmationSurface(pi);
+    registerGuardrailsOperatorConfirmationSurface(pi);
     const tool = pi.registerTool.mock.calls
       .map(([registered]) => registered)
       .find((registered) => registered.name === "operator_approval_packet");

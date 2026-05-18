@@ -1,8 +1,8 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import {
-  recordTrustedHumanConfirmationUiDecision,
-  type HumanConfirmationActionFingerprint,
-} from "./guardrails-core-human-confirmation";
+  recordTrustedOperatorConfirmationUiDecision,
+  type OperatorConfirmationActionFingerprint,
+} from "./guardrails-core-operator-confirmation";
 
 export function appendAuditEntry(
   ctx: ExtensionContext,
@@ -17,15 +17,15 @@ export function appendAuditEntry(
 
 export function appendTrustedUiConfirmationEvidence(
   ctx: ExtensionContext,
-  fingerprint: HumanConfirmationActionFingerprint,
+  fingerprint: OperatorConfirmationActionFingerprint,
   confirmed: boolean,
 ): void {
-  const result = recordTrustedHumanConfirmationUiDecision({
+  const result = recordTrustedOperatorConfirmationUiDecision({
     ...fingerprint,
     confirmed,
     nowIso: new Date().toISOString(),
   });
-  appendAuditEntry(ctx, "guardrails-core.human-confirmation-ui-decision", {
+  appendAuditEntry(ctx, "guardrails-core.operator-confirmation-ui-decision", {
     atIso: new Date().toISOString(),
     decision: result.decision,
     reasons: result.reasons,

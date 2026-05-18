@@ -1,11 +1,11 @@
-export type HumanConfirmationActionKind = "local-safe" | "destructive" | "protected";
-export type HumanConfirmationAuditDecision = "not-required" | "auditable" | "audit-gap" | "blocked";
-export type HumanConfirmationEvidenceOrigin = "tool-call" | "custom-message" | "audit-entry";
-export type TrustedHumanConfirmationOrigin = "runtime-ui-confirm" | "operator-contract-review";
-export type HumanConfirmationEvidenceDecision = "match" | "missing" | "expired" | "consumed" | "mismatch" | "untrusted";
+export type OperatorConfirmationActionKind = "local-safe" | "destructive" | "protected";
+export type OperatorConfirmationAuditDecision = "not-required" | "auditable" | "audit-gap" | "blocked";
+export type OperatorConfirmationEvidenceOrigin = "tool-call" | "custom-message" | "audit-entry";
+export type TrustedOperatorConfirmationOrigin = "runtime-ui-confirm" | "operator-contract-review";
+export type OperatorConfirmationEvidenceDecision = "match" | "missing" | "expired" | "consumed" | "mismatch" | "untrusted";
 
-export type HumanConfirmationAuditInput = {
-  actionKind: HumanConfirmationActionKind;
+export type OperatorConfirmationAuditInput = {
+  actionKind: OperatorConfirmationActionKind;
   uiConfirmationObserved?: boolean;
   toolCallEvidence?: boolean;
   customMessageEvidence?: boolean;
@@ -14,41 +14,41 @@ export type HumanConfirmationAuditInput = {
   confirmationMatchesAction?: boolean;
 };
 
-export type HumanConfirmationAuditPlan = {
-  decision: HumanConfirmationAuditDecision;
+export type OperatorConfirmationAuditPlan = {
+  decision: OperatorConfirmationAuditDecision;
   authorization: "none";
   dispatchAllowed: false;
   canOverrideMonitorBlock: false;
   reasons: string[];
-  evidenceOrigins: HumanConfirmationEvidenceOrigin[];
+  evidenceOrigins: OperatorConfirmationEvidenceOrigin[];
   layer: "not-required" | "auditable-path" | "upstream-pi-tui-to-monitor-gap" | "local-monitor-policy";
   recommendation: string;
   summary: string;
 };
 
-export type HumanConfirmationActionFingerprint = {
-  actionKind: Exclude<HumanConfirmationActionKind, "local-safe">;
+export type OperatorConfirmationActionFingerprint = {
+  actionKind: Exclude<OperatorConfirmationActionKind, "local-safe">;
   toolName: string;
   path?: string;
   scope?: string;
   payloadHash?: string;
 };
 
-export type TrustedHumanConfirmationEvidence = HumanConfirmationActionFingerprint & {
+export type TrustedOperatorConfirmationEvidence = OperatorConfirmationActionFingerprint & {
   id: string;
-  origin: TrustedHumanConfirmationOrigin;
+  origin: TrustedOperatorConfirmationOrigin;
   trusted: true;
   createdAtIso: string;
   expiresAtIso: string;
   consumedAtIso?: string;
 };
 
-export type PendingHumanConfirmedAction = HumanConfirmationActionFingerprint & {
+export type PendingOperatorConfirmedAction = OperatorConfirmationActionFingerprint & {
   nowIso: string;
 };
 
-export type HumanConfirmationEvidenceMatch = {
-  decision: HumanConfirmationEvidenceDecision;
+export type OperatorConfirmationEvidenceMatch = {
+  decision: OperatorConfirmationEvidenceDecision;
   authorization: "none";
   dispatchAllowed: false;
   canOverrideMonitorBlock: false;
@@ -59,15 +59,15 @@ export type HumanConfirmationEvidenceMatch = {
   summary: string;
 };
 
-export type TrustedHumanConfirmationAuditEnvelope = {
-  customType: "human-confirmation-evidence";
+export type TrustedOperatorConfirmationAuditEnvelope = {
+  customType: "operator-confirmation-evidence";
   content: string;
   display: false;
   details: {
     evidenceId: string;
-    decision: HumanConfirmationEvidenceDecision;
-    origin: TrustedHumanConfirmationOrigin;
-    actionKind: Exclude<HumanConfirmationActionKind, "local-safe">;
+    decision: OperatorConfirmationEvidenceDecision;
+    origin: TrustedOperatorConfirmationOrigin;
+    actionKind: Exclude<OperatorConfirmationActionKind, "local-safe">;
     toolName: string;
     path?: string;
     scope?: string;
@@ -82,40 +82,40 @@ export type TrustedHumanConfirmationAuditEnvelope = {
   };
 };
 
-export type TrustedHumanConfirmationUiDecisionInput = HumanConfirmationActionFingerprint & {
+export type TrustedOperatorConfirmationUiDecisionInput = OperatorConfirmationActionFingerprint & {
   confirmed: boolean;
   nowIso: string;
   ttlMs?: number;
-  origin?: TrustedHumanConfirmationOrigin;
+  origin?: TrustedOperatorConfirmationOrigin;
   evidenceId?: string;
 };
 
-export type TrustedHumanConfirmationUiDecisionResult = {
+export type TrustedOperatorConfirmationUiDecisionResult = {
   decision: "declined" | "recorded" | "invalid";
   authorization: "none";
   dispatchAllowed: false;
   canOverrideMonitorBlock: false;
   reasons: string[];
-  evidence?: TrustedHumanConfirmationEvidence;
-  envelope?: TrustedHumanConfirmationAuditEnvelope;
+  evidence?: TrustedOperatorConfirmationEvidence;
+  envelope?: TrustedOperatorConfirmationAuditEnvelope;
   summary: string;
 };
 
-export type TrustedHumanConfirmationEnvelopeConsumption = {
+export type TrustedOperatorConfirmationEnvelopeConsumption = {
   decision: "consumed" | "rejected";
   authorization: "none";
   dispatchAllowed: false;
   canOverrideMonitorBlock: false;
   reasons: string[];
-  match: HumanConfirmationEvidenceMatch;
-  evidence?: TrustedHumanConfirmationEvidence;
-  envelope?: TrustedHumanConfirmationAuditEnvelope;
+  match: OperatorConfirmationEvidenceMatch;
+  evidence?: TrustedOperatorConfirmationEvidence;
+  envelope?: TrustedOperatorConfirmationAuditEnvelope;
   summary: string;
 };
 
-export type HumanConfirmationRuntimeConsumptionDecision = "ready-for-guard-consumption" | "needs-runtime-bridge" | "needs-upstream-signal" | "blocked";
+export type OperatorConfirmationRuntimeConsumptionDecision = "ready-for-guard-consumption" | "needs-runtime-bridge" | "needs-upstream-signal" | "blocked";
 
-export type HumanConfirmationRuntimeConsumptionPlanInput = {
+export type OperatorConfirmationRuntimeConsumptionPlanInput = {
   guardOwnsConfirmationDialog?: boolean;
   structuredEnvelopeDetailsAvailable?: boolean;
   auditEntryReadableByConsumer?: boolean;
@@ -124,8 +124,8 @@ export type HumanConfirmationRuntimeConsumptionPlanInput = {
   destructiveOrProtectedAction?: boolean;
 };
 
-export type HumanConfirmationRuntimeConsumptionPlan = {
-  decision: HumanConfirmationRuntimeConsumptionDecision;
+export type OperatorConfirmationRuntimeConsumptionPlan = {
+  decision: OperatorConfirmationRuntimeConsumptionDecision;
   authorization: "none";
   dispatchAllowed: false;
   canOverrideMonitorBlock: false;
@@ -135,9 +135,9 @@ export type HumanConfirmationRuntimeConsumptionPlan = {
   summary: string;
 };
 
-export type HumanConfirmationSignalSourceDecision = "use-guard-owned-audit-entry" | "propose-upstream-tool-call-signal" | "build-wrapper-signal" | "blocked";
+export type OperatorConfirmationSignalSourceDecision = "use-guard-owned-audit-entry" | "propose-upstream-tool-call-signal" | "build-wrapper-signal" | "blocked";
 
-export type HumanConfirmationSignalSourcePlanInput = {
+export type OperatorConfirmationSignalSourcePlanInput = {
   guardOwnsConfirmationDialog?: boolean;
   toolCallEventHasConfirmationSignal?: boolean;
   extensionContextCanSendStructuredMessage?: boolean;
@@ -146,8 +146,8 @@ export type HumanConfirmationSignalSourcePlanInput = {
   upstreamMutationAllowed?: boolean;
 };
 
-export type HumanConfirmationSignalSourcePlan = {
-  decision: HumanConfirmationSignalSourceDecision;
+export type OperatorConfirmationSignalSourcePlan = {
+  decision: OperatorConfirmationSignalSourceDecision;
   authorization: "none";
   dispatchAllowed: false;
   implementationAllowed: false;
@@ -158,9 +158,9 @@ export type HumanConfirmationSignalSourcePlan = {
   summary: string;
 };
 
-export type HumanConfirmationImplementationChannel = "guard-owned-report-only" | "wrapper-design" | "upstream-pr-design" | "blocked";
+export type OperatorConfirmationImplementationChannel = "guard-owned-report-only" | "wrapper-design" | "upstream-pr-design" | "blocked";
 
-export type HumanConfirmationImplementationChannelInput = {
+export type OperatorConfirmationImplementationChannelInput = {
   preferredChannel?: "guard-owned" | "wrapper" | "upstream-pr";
   guardCanOwnDialog?: boolean;
   wrapperCanPreserveStructuredDetails?: boolean;
@@ -169,8 +169,8 @@ export type HumanConfirmationImplementationChannelInput = {
   destructiveRuntimeEnableRequested?: boolean;
 };
 
-export type HumanConfirmationImplementationChannelPlan = {
-  channel: HumanConfirmationImplementationChannel;
+export type OperatorConfirmationImplementationChannelPlan = {
+  channel: OperatorConfirmationImplementationChannel;
   authorization: "none";
   dispatchAllowed: false;
   implementationAllowed: false;
@@ -183,9 +183,9 @@ export type HumanConfirmationImplementationChannelPlan = {
 
 const DEFAULT_CONFIRMATION_TTL_MS = 30_000;
 
-export function resolveHumanConfirmationImplementationChannelPlan(
-  input: HumanConfirmationImplementationChannelInput,
-): HumanConfirmationImplementationChannelPlan {
+export function resolveOperatorConfirmationImplementationChannelPlan(
+  input: OperatorConfirmationImplementationChannelInput,
+): OperatorConfirmationImplementationChannelPlan {
   const reasons: string[] = [];
 
   if (input.directNodeModulesPatchRequested) reasons.push("direct-node-modules-patch-prohibited");
@@ -200,7 +200,7 @@ export function resolveHumanConfirmationImplementationChannelPlan(
       directNodeModulesPatchAllowed: false,
       reasons,
       nextActions: ["remove-prohibited-request", "continue-with-design-or-report-only-channel"],
-      summary: `human-confirmation-implementation-channel: channel=blocked dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-implementation-channel: channel=blocked dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -216,7 +216,7 @@ export function resolveHumanConfirmationImplementationChannelPlan(
       directNodeModulesPatchAllowed: false,
       reasons,
       nextActions: ["record-evidence-from-guard-owned-confirm-only", "keep-operational-destructive-dialog-disabled", "validate-envelope-consumption-before-enable"],
-      summary: `human-confirmation-implementation-channel: channel=guard-owned-report-only dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-implementation-channel: channel=guard-owned-report-only dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -232,7 +232,7 @@ export function resolveHumanConfirmationImplementationChannelPlan(
       directNodeModulesPatchAllowed: false,
       reasons,
       nextActions: ["design-wrapper-structured-envelope", "prove-consumer-receives-details", "keep-fail-closed"],
-      summary: `human-confirmation-implementation-channel: channel=wrapper-design dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-implementation-channel: channel=wrapper-design dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -248,7 +248,7 @@ export function resolveHumanConfirmationImplementationChannelPlan(
       directNodeModulesPatchAllowed: false,
       reasons,
       nextActions: ["draft-upstream-interface", "preserve-local-fail-closed-until-release"],
-      summary: `human-confirmation-implementation-channel: channel=upstream-pr-design dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-implementation-channel: channel=upstream-pr-design dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -262,13 +262,13 @@ export function resolveHumanConfirmationImplementationChannelPlan(
     directNodeModulesPatchAllowed: false,
     reasons,
     nextActions: ["choose-guard-owned-wrapper-or-upstream-pr-channel"],
-    summary: "human-confirmation-implementation-channel: channel=blocked dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=no-safe-channel-selected authorization=none",
+    summary: "operator-confirmation-implementation-channel: channel=blocked dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=no-safe-channel-selected authorization=none",
   };
 }
 
-export function resolveHumanConfirmationSignalSourcePlan(
-  input: HumanConfirmationSignalSourcePlanInput,
-): HumanConfirmationSignalSourcePlan {
+export function resolveOperatorConfirmationSignalSourcePlan(
+  input: OperatorConfirmationSignalSourcePlanInput,
+): OperatorConfirmationSignalSourcePlan {
   const reasons: string[] = [];
 
   if (input.guardOwnsConfirmationDialog && input.auditEntryAppendAvailable) {
@@ -282,8 +282,8 @@ export function resolveHumanConfirmationSignalSourcePlan(
       canOverrideMonitorBlock: false,
       reasons,
       recommendedPath: "record trusted evidence from the guard-owned dialog via audit entry; consume only structured envelope details",
-      nextActions: ["wire-guard-owned-dialog-to-recordTrustedHumanConfirmationUiDecision", "consume-structured-envelope-details-only"],
-      summary: `human-confirmation-signal-source: decision=use-guard-owned-audit-entry dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+      nextActions: ["wire-guard-owned-dialog-to-recordTrustedOperatorConfirmationUiDecision", "consume-structured-envelope-details-only"],
+      summary: `operator-confirmation-signal-source: decision=use-guard-owned-audit-entry dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -296,9 +296,9 @@ export function resolveHumanConfirmationSignalSourcePlan(
       implementationAllowed: false,
       canOverrideMonitorBlock: false,
       reasons,
-      recommendedPath: "wrap the exposed confirmation signal into human-confirmation-evidence details before monitor/guard consumption",
+      recommendedPath: "wrap the exposed confirmation signal into operator-confirmation-evidence details before monitor/guard consumption",
       nextActions: ["map-upstream-signal-to-exact-action-fingerprint", "consume-envelope-with-ttl-single-use"],
-      summary: `human-confirmation-signal-source: decision=build-wrapper-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-signal-source: decision=build-wrapper-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -311,9 +311,9 @@ export function resolveHumanConfirmationSignalSourcePlan(
       implementationAllowed: false,
       canOverrideMonitorBlock: false,
       reasons,
-      recommendedPath: "emit hidden structured human-confirmation-evidence custom messages and consume details, not content text",
+      recommendedPath: "emit hidden structured operator-confirmation-evidence custom messages and consume details, not content text",
       nextActions: ["emit-display-false-structured-envelope", "verify-consumer-receives-details"],
-      summary: `human-confirmation-signal-source: decision=build-wrapper-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-signal-source: decision=build-wrapper-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -328,7 +328,7 @@ export function resolveHumanConfirmationSignalSourcePlan(
       reasons,
       recommendedPath: "propose an upstream ToolCallEvent confirmation field or structured pre-tool confirmation event; do not patch node_modules directly",
       nextActions: ["draft-upstream-pr-or-wrapper-design", "keep-local-fail-closed-until-signal-exists"],
-      summary: `human-confirmation-signal-source: decision=propose-upstream-tool-call-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-signal-source: decision=propose-upstream-tool-call-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -344,13 +344,13 @@ export function resolveHumanConfirmationSignalSourcePlan(
     reasons,
     recommendedPath: "keep fail-closed; do not consume text-only confirmation evidence",
     nextActions: ["use-guard-owned-dialog-or-upstream-wrapper-before-consuming-confirmation"],
-    summary: `human-confirmation-signal-source: decision=blocked dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+    summary: `operator-confirmation-signal-source: decision=blocked dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
   };
 }
 
-export function resolveHumanConfirmationRuntimeConsumptionPlan(
-  input: HumanConfirmationRuntimeConsumptionPlanInput,
-): HumanConfirmationRuntimeConsumptionPlan {
+export function resolveOperatorConfirmationRuntimeConsumptionPlan(
+  input: OperatorConfirmationRuntimeConsumptionPlanInput,
+): OperatorConfirmationRuntimeConsumptionPlan {
   const reasons: string[] = [];
   const nextActions: string[] = [];
   const protectedAction = input.destructiveOrProtectedAction !== false;
@@ -365,7 +365,7 @@ export function resolveHumanConfirmationRuntimeConsumptionPlan(
       textOnlyEvidenceAccepted: false,
       reasons,
       nextActions: ["do-not-use-confirmation-evidence-for-local-safe-action"],
-      summary: "human-confirmation-runtime-consumption: decision=blocked dispatch=no override=no textOnly=no reasons=confirmation-not-required-for-local-safe-action authorization=none",
+      summary: "operator-confirmation-runtime-consumption: decision=blocked dispatch=no override=no textOnly=no reasons=confirmation-not-required-for-local-safe-action authorization=none",
     };
   }
 
@@ -384,7 +384,7 @@ export function resolveHumanConfirmationRuntimeConsumptionPlan(
       textOnlyEvidenceAccepted: false,
       reasons,
       nextActions: ["consume-envelope-with-exact-match-ttl-single-use"],
-      summary: `human-confirmation-runtime-consumption: decision=ready-for-guard-consumption dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-runtime-consumption: decision=ready-for-guard-consumption dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -398,7 +398,7 @@ export function resolveHumanConfirmationRuntimeConsumptionPlan(
       textOnlyEvidenceAccepted: false,
       reasons,
       nextActions: ["consume-envelope-with-exact-match-ttl-single-use"],
-      summary: `human-confirmation-runtime-consumption: decision=ready-for-guard-consumption dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-runtime-consumption: decision=ready-for-guard-consumption dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -413,7 +413,7 @@ export function resolveHumanConfirmationRuntimeConsumptionPlan(
       textOnlyEvidenceAccepted: false,
       reasons,
       nextActions,
-      summary: `human-confirmation-runtime-consumption: decision=needs-upstream-signal dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-runtime-consumption: decision=needs-upstream-signal dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -427,7 +427,7 @@ export function resolveHumanConfirmationRuntimeConsumptionPlan(
     textOnlyEvidenceAccepted: false,
     reasons,
     nextActions,
-    summary: `human-confirmation-runtime-consumption: decision=needs-runtime-bridge dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
+    summary: `operator-confirmation-runtime-consumption: decision=needs-runtime-bridge dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
   };
 }
 
@@ -439,11 +439,11 @@ function asString(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
-function isKnownTrustedOrigin(value: unknown): value is TrustedHumanConfirmationOrigin {
+function isKnownTrustedOrigin(value: unknown): value is TrustedOperatorConfirmationOrigin {
   return value === "runtime-ui-confirm" || value === "operator-contract-review";
 }
 
-function isProtectedActionKind(value: unknown): value is Exclude<HumanConfirmationActionKind, "local-safe"> {
+function isProtectedActionKind(value: unknown): value is Exclude<OperatorConfirmationActionKind, "local-safe"> {
   return value === "destructive" || value === "protected";
 }
 
@@ -466,7 +466,7 @@ function addMsIso(nowIso: string, ttlMs: number): string | undefined {
   return new Date(now + ttlMs).toISOString();
 }
 
-function stableEvidenceId(input: TrustedHumanConfirmationUiDecisionInput): string {
+function stableEvidenceId(input: TrustedOperatorConfirmationUiDecisionInput): string {
   const raw = [
     input.origin ?? "runtime-ui-confirm",
     input.actionKind,
@@ -490,18 +490,18 @@ function isExpired(expiresAtIso: string, nowIso: string): boolean {
   return now > expires;
 }
 
-function collectOrigins(input: HumanConfirmationAuditInput): HumanConfirmationEvidenceOrigin[] {
-  const origins: HumanConfirmationEvidenceOrigin[] = [];
+function collectOrigins(input: OperatorConfirmationAuditInput): OperatorConfirmationEvidenceOrigin[] {
+  const origins: OperatorConfirmationEvidenceOrigin[] = [];
   if (input.toolCallEvidence) origins.push("tool-call");
   if (input.customMessageEvidence) origins.push("custom-message");
   if (input.auditEntryEvidence) origins.push("audit-entry");
   return origins;
 }
 
-export function resolveHumanConfirmationEvidenceMatch(
-  evidence: TrustedHumanConfirmationEvidence | undefined,
-  pending: PendingHumanConfirmedAction,
-): HumanConfirmationEvidenceMatch {
+export function resolveOperatorConfirmationEvidenceMatch(
+  evidence: TrustedOperatorConfirmationEvidence | undefined,
+  pending: PendingOperatorConfirmedAction,
+): OperatorConfirmationEvidenceMatch {
   const reasons: string[] = [];
 
   if (!evidence) {
@@ -514,7 +514,7 @@ export function resolveHumanConfirmationEvidenceMatch(
       usableAsAuditEvidence: false,
       consumeAllowed: false,
       reasons,
-      summary: "human-confirmation-evidence: decision=missing dispatch=no override=no reasons=confirmation-evidence-missing authorization=none",
+      summary: "operator-confirmation-evidence: decision=missing dispatch=no override=no reasons=confirmation-evidence-missing authorization=none",
     };
   }
 
@@ -529,7 +529,7 @@ export function resolveHumanConfirmationEvidenceMatch(
       consumeAllowed: false,
       reasons,
       evidenceId: evidence.id,
-      summary: `human-confirmation-evidence: decision=untrusted dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-evidence: decision=untrusted dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -544,7 +544,7 @@ export function resolveHumanConfirmationEvidenceMatch(
       consumeAllowed: false,
       reasons,
       evidenceId: evidence.id,
-      summary: `human-confirmation-evidence: decision=consumed dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-evidence: decision=consumed dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -559,7 +559,7 @@ export function resolveHumanConfirmationEvidenceMatch(
       consumeAllowed: false,
       reasons,
       evidenceId: evidence.id,
-      summary: `human-confirmation-evidence: decision=expired dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-evidence: decision=expired dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -580,7 +580,7 @@ export function resolveHumanConfirmationEvidenceMatch(
       consumeAllowed: false,
       reasons: mismatchReasons,
       evidenceId: evidence.id,
-      summary: `human-confirmation-evidence: decision=mismatch dispatch=no override=no reasons=${mismatchReasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-evidence: decision=mismatch dispatch=no override=no reasons=${mismatchReasons.join("|")} authorization=none`,
     };
   }
 
@@ -596,19 +596,19 @@ export function resolveHumanConfirmationEvidenceMatch(
     consumeAllowed: true,
     reasons,
     evidenceId: evidence.id,
-    summary: `human-confirmation-evidence: decision=match dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+    summary: `operator-confirmation-evidence: decision=match dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
   };
 }
 
-export function buildTrustedHumanConfirmationAuditEnvelope(
-  evidence: TrustedHumanConfirmationEvidence,
-  match: HumanConfirmationEvidenceMatch,
-): TrustedHumanConfirmationAuditEnvelope {
+export function buildTrustedOperatorConfirmationAuditEnvelope(
+  evidence: TrustedOperatorConfirmationEvidence,
+  match: OperatorConfirmationEvidenceMatch,
+): TrustedOperatorConfirmationAuditEnvelope {
   const path = truncateValue(evidence.path);
   const scope = truncateValue(evidence.scope);
   const payloadHash = truncateValue(evidence.payloadHash, 96);
   const contentParts = [
-    "human-confirmation-evidence:",
+    "operator-confirmation-evidence:",
     `decision=${match.decision}`,
     `id=${evidence.id}`,
     `tool=${evidence.toolName}`,
@@ -620,7 +620,7 @@ export function buildTrustedHumanConfirmationAuditEnvelope(
   ].filter((part): part is string => Boolean(part));
 
   return {
-    customType: "human-confirmation-evidence",
+    customType: "operator-confirmation-evidence",
     content: contentParts.join(" "),
     display: false,
     details: {
@@ -643,9 +643,9 @@ export function buildTrustedHumanConfirmationAuditEnvelope(
   };
 }
 
-export function recordTrustedHumanConfirmationUiDecision(
-  input: TrustedHumanConfirmationUiDecisionInput,
-): TrustedHumanConfirmationUiDecisionResult {
+export function recordTrustedOperatorConfirmationUiDecision(
+  input: TrustedOperatorConfirmationUiDecisionInput,
+): TrustedOperatorConfirmationUiDecisionResult {
   if (!input.confirmed) {
     return {
       decision: "declined",
@@ -653,7 +653,7 @@ export function recordTrustedHumanConfirmationUiDecision(
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       reasons: ["ui-confirmation-declined"],
-      summary: "human-confirmation-ui: decision=declined dispatch=no override=no reasons=ui-confirmation-declined authorization=none",
+      summary: "operator-confirmation-ui: decision=declined dispatch=no override=no reasons=ui-confirmation-declined authorization=none",
     };
   }
 
@@ -666,11 +666,11 @@ export function recordTrustedHumanConfirmationUiDecision(
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       reasons: ["invalid-confirmation-ttl-or-timestamp"],
-      summary: "human-confirmation-ui: decision=invalid dispatch=no override=no reasons=invalid-confirmation-ttl-or-timestamp authorization=none",
+      summary: "operator-confirmation-ui: decision=invalid dispatch=no override=no reasons=invalid-confirmation-ttl-or-timestamp authorization=none",
     };
   }
 
-  const evidence: TrustedHumanConfirmationEvidence = {
+  const evidence: TrustedOperatorConfirmationEvidence = {
     id: input.evidenceId ?? stableEvidenceId(input),
     origin: input.origin ?? "runtime-ui-confirm",
     trusted: true,
@@ -682,9 +682,9 @@ export function recordTrustedHumanConfirmationUiDecision(
     createdAtIso: input.nowIso,
     expiresAtIso,
   };
-  const pending: PendingHumanConfirmedAction = { ...input, nowIso: input.nowIso };
-  const match = resolveHumanConfirmationEvidenceMatch(evidence, pending);
-  const envelope = buildTrustedHumanConfirmationAuditEnvelope(evidence, match);
+  const pending: PendingOperatorConfirmedAction = { ...input, nowIso: input.nowIso };
+  const match = resolveOperatorConfirmationEvidenceMatch(evidence, pending);
+  const envelope = buildTrustedOperatorConfirmationAuditEnvelope(evidence, match);
   return {
     decision: "recorded",
     authorization: "none",
@@ -693,16 +693,16 @@ export function recordTrustedHumanConfirmationUiDecision(
     reasons: ["trusted-ui-confirmation-recorded", "single-use-evidence-created"],
     evidence,
     envelope,
-    summary: `human-confirmation-ui: decision=recorded dispatch=no override=no reasons=trusted-ui-confirmation-recorded|single-use-evidence-created authorization=none`,
+    summary: `operator-confirmation-ui: decision=recorded dispatch=no override=no reasons=trusted-ui-confirmation-recorded|single-use-evidence-created authorization=none`,
   };
 }
 
-export function extractTrustedHumanConfirmationEvidenceFromEnvelope(
+export function extractTrustedOperatorConfirmationEvidenceFromEnvelope(
   envelope: unknown,
-): TrustedHumanConfirmationEvidence | undefined {
+): TrustedOperatorConfirmationEvidence | undefined {
   const root = asRecord(envelope);
   if (!root) return undefined;
-  if (root.customType !== "human-confirmation-evidence") return undefined;
+  if (root.customType !== "operator-confirmation-evidence") return undefined;
   if (root.display !== false) return undefined;
   const details = asRecord(root.details);
   if (!details) return undefined;
@@ -729,13 +729,13 @@ export function extractTrustedHumanConfirmationEvidenceFromEnvelope(
   };
 }
 
-export function consumeTrustedHumanConfirmationAuditEnvelope(
+export function consumeTrustedOperatorConfirmationAuditEnvelope(
   envelope: unknown,
-  pending: PendingHumanConfirmedAction,
-): TrustedHumanConfirmationEnvelopeConsumption {
-  const evidence = extractTrustedHumanConfirmationEvidenceFromEnvelope(envelope);
+  pending: PendingOperatorConfirmedAction,
+): TrustedOperatorConfirmationEnvelopeConsumption {
+  const evidence = extractTrustedOperatorConfirmationEvidenceFromEnvelope(envelope);
   if (!evidence) {
-    const match = resolveHumanConfirmationEvidenceMatch(undefined, pending);
+    const match = resolveOperatorConfirmationEvidenceMatch(undefined, pending);
     return {
       decision: "rejected",
       authorization: "none",
@@ -743,11 +743,11 @@ export function consumeTrustedHumanConfirmationAuditEnvelope(
       canOverrideMonitorBlock: false,
       reasons: ["confirmation-envelope-invalid-or-untrusted"],
       match,
-      summary: "human-confirmation-envelope-consume: decision=rejected dispatch=no override=no reasons=confirmation-envelope-invalid-or-untrusted authorization=none",
+      summary: "operator-confirmation-envelope-consume: decision=rejected dispatch=no override=no reasons=confirmation-envelope-invalid-or-untrusted authorization=none",
     };
   }
 
-  const consumed = consumeTrustedHumanConfirmationEvidence(evidence, pending);
+  const consumed = consumeTrustedOperatorConfirmationEvidence(evidence, pending);
   if (!consumed.ok) {
     return {
       decision: "rejected",
@@ -757,11 +757,11 @@ export function consumeTrustedHumanConfirmationAuditEnvelope(
       reasons: consumed.match.reasons,
       match: consumed.match,
       evidence,
-      summary: `human-confirmation-envelope-consume: decision=rejected dispatch=no override=no reasons=${consumed.match.reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-envelope-consume: decision=rejected dispatch=no override=no reasons=${consumed.match.reasons.join("|")} authorization=none`,
     };
   }
 
-  const consumedEnvelope = buildTrustedHumanConfirmationAuditEnvelope(consumed.evidence, consumed.match);
+  const consumedEnvelope = buildTrustedOperatorConfirmationAuditEnvelope(consumed.evidence, consumed.match);
   return {
     decision: "consumed",
     authorization: "none",
@@ -771,15 +771,15 @@ export function consumeTrustedHumanConfirmationAuditEnvelope(
     match: consumed.match,
     evidence: consumed.evidence,
     envelope: consumedEnvelope,
-    summary: "human-confirmation-envelope-consume: decision=consumed dispatch=no override=no reasons=trusted-envelope-consumed|confirmation-single-use authorization=none",
+    summary: "operator-confirmation-envelope-consume: decision=consumed dispatch=no override=no reasons=trusted-envelope-consumed|confirmation-single-use authorization=none",
   };
 }
 
-export function consumeTrustedHumanConfirmationEvidence(
-  evidence: TrustedHumanConfirmationEvidence,
-  pending: PendingHumanConfirmedAction,
-): { ok: true; evidence: TrustedHumanConfirmationEvidence; match: HumanConfirmationEvidenceMatch } | { ok: false; evidence: TrustedHumanConfirmationEvidence; match: HumanConfirmationEvidenceMatch } {
-  const match = resolveHumanConfirmationEvidenceMatch(evidence, pending);
+export function consumeTrustedOperatorConfirmationEvidence(
+  evidence: TrustedOperatorConfirmationEvidence,
+  pending: PendingOperatorConfirmedAction,
+): { ok: true; evidence: TrustedOperatorConfirmationEvidence; match: OperatorConfirmationEvidenceMatch } | { ok: false; evidence: TrustedOperatorConfirmationEvidence; match: OperatorConfirmationEvidenceMatch } {
+  const match = resolveOperatorConfirmationEvidenceMatch(evidence, pending);
   if (!match.consumeAllowed) return { ok: false, evidence, match };
   return {
     ok: true,
@@ -791,7 +791,7 @@ export function consumeTrustedHumanConfirmationEvidence(
   };
 }
 
-export function resolveHumanConfirmationAuditPlan(input: HumanConfirmationAuditInput): HumanConfirmationAuditPlan {
+export function resolveOperatorConfirmationAuditPlan(input: OperatorConfirmationAuditInput): OperatorConfirmationAuditPlan {
   const evidenceOrigins = collectOrigins(input);
   const reasons: string[] = [];
   const protectedOrDestructive = input.actionKind === "destructive" || input.actionKind === "protected";
@@ -807,7 +807,7 @@ export function resolveHumanConfirmationAuditPlan(input: HumanConfirmationAuditI
       evidenceOrigins,
       layer: "not-required",
       recommendation: "Continue normal local-safe flow; do not treat this as authorization for protected/destructive actions.",
-      summary: "human-confirmation-audit: decision=not-required dispatch=no override=no reasons=confirmation-not-required-for-local-safe-action authorization=none",
+      summary: "operator-confirmation-audit: decision=not-required dispatch=no override=no reasons=confirmation-not-required-for-local-safe-action authorization=none",
     };
   }
 
@@ -825,7 +825,7 @@ export function resolveHumanConfirmationAuditPlan(input: HumanConfirmationAuditI
       recommendation: input.uiConfirmationObserved
         ? "Treat as a propagation/audit gap: preserve the block, record the TUI-confirmation mismatch, and add a trusted confirmation evidence path before relaxing monitors."
         : "Keep fail-closed behavior and request explicit auditable confirmation before protected/destructive execution.",
-      summary: `human-confirmation-audit: decision=audit-gap dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-audit: decision=audit-gap dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -841,7 +841,7 @@ export function resolveHumanConfirmationAuditPlan(input: HumanConfirmationAuditI
       evidenceOrigins,
       layer: "local-monitor-policy",
       recommendation: "Do not execute or override monitor blocks from spoofable confirmation evidence; require trusted runtime-originated audit evidence.",
-      summary: `human-confirmation-audit: decision=blocked dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-audit: decision=blocked dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -857,7 +857,7 @@ export function resolveHumanConfirmationAuditPlan(input: HumanConfirmationAuditI
       evidenceOrigins,
       layer: "local-monitor-policy",
       recommendation: "Do not execute; confirmation evidence must name the same action/path/scope as the pending protected or destructive call.",
-      summary: `human-confirmation-audit: decision=blocked dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-audit: decision=blocked dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
     };
   }
 
@@ -872,6 +872,6 @@ export function resolveHumanConfirmationAuditPlan(input: HumanConfirmationAuditI
     evidenceOrigins,
     layer: "auditable-path",
     recommendation: "Confirmation is auditable evidence for a future guard/monitor decision, but this read-only plan does not authorize dispatch by itself.",
-    summary: `human-confirmation-audit: decision=auditable dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+    summary: `operator-confirmation-audit: decision=auditable dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
   };
 }

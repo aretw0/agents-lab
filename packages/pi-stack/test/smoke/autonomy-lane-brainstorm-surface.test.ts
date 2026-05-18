@@ -97,7 +97,7 @@ describe("autonomy lane brainstorm surface", () => {
     expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo");
   });
 
-  it("emits visible brainstorm seed preview that requires human confirmation", () => {
+  it("emits visible brainstorm seed preview that requires operator confirmation", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-seed-preview-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });
     writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
