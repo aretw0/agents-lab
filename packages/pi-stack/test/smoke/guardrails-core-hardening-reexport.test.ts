@@ -26,7 +26,7 @@ import {
   resolveRecurringFailureHardening,
   resolveValidationKnownCollectorResult,
   resolveValidationMethodPlan,
-  reviewLocalSliceHumanConfirmedContract,
+  reviewLocalSliceOperatorApprovedContract,
 } from "../../extensions/guardrails-core-exports";
 
 describe("guardrails-core hardening re-exports", () => {
@@ -108,9 +108,9 @@ describe("guardrails-core hardening re-exports", () => {
       dispatchAllowed: false,
       decision: "ready-for-human-decision",
     });
-    expect(reviewLocalSliceHumanConfirmedContract({
+    expect(reviewLocalSliceOperatorApprovedContract({
       decisionPacket: localSlicePacket,
-      humanConfirmation: "explicit-task-action",
+      operatorDecision: "explicit-task-action",
       singleFocus: true,
       localSafeScope: true,
       declaredFilesKnown: true,
@@ -134,7 +134,7 @@ describe("guardrails-core hardening re-exports", () => {
       operatorPacketGreenValidated: true,
       operatorPacketFailClosedValidated: true,
       operatorPacketMissingFilesValidated: true,
-      explicitHumanContractDefined: true,
+      explicitOperatorContractDefined: true,
       declaredFilesKnown: true,
       rollbackPlanKnown: true,
       validationGateKnown: true,

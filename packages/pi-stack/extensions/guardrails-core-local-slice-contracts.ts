@@ -31,8 +31,8 @@ export interface LocalSliceCanaryPlan {
 
 export type LocalSliceCanaryDispatchPacketDecision = "ready-for-human-decision" | "blocked";
 export type LocalSliceCanaryOperatorIntent = "none" | "review" | "execute-local-slice";
-export type LocalSliceHumanConfirmationKind = "missing" | "generic" | "explicit-task-action";
-export type LocalSliceHumanConfirmedContractDecision = "contract-ready-no-executor" | "blocked";
+export type LocalSliceOperatorDecisionKind = "missing" | "generic" | "explicit-task-action";
+export type LocalSliceOperatorApprovedContractDecision = "contract-ready-no-executor" | "blocked";
 export type LocalSliceBacklogGateDecision = "ready-for-separate-task" | "blocked";
 
 export interface LocalSliceCanaryDispatchPacketInput {
@@ -61,9 +61,9 @@ export interface LocalSliceCanaryDispatchDecisionPacket {
   recommendation: string;
 }
 
-export interface LocalSliceHumanConfirmedContractInput {
+export interface LocalSliceOperatorApprovedContractInput {
   decisionPacket: Pick<LocalSliceCanaryDispatchDecisionPacket, "decision" | "dispatchAllowed" | "requiresHumanDecision" | "singleSliceOnly" | "activation" | "authorization">;
-  humanConfirmation: LocalSliceHumanConfirmationKind;
+  operatorDecision: LocalSliceOperatorDecisionKind;
   singleFocus: boolean;
   localSafeScope: boolean;
   declaredFilesKnown: boolean;
@@ -82,7 +82,7 @@ export interface LocalSliceHumanConfirmedContractInput {
   protectedScopeRequested?: boolean;
 }
 
-export interface LocalSliceHumanConfirmedContractReview {
+export interface LocalSliceOperatorApprovedContractReview {
   effect: "none";
   mode: "contract-review";
   activation: "none";
@@ -90,7 +90,7 @@ export interface LocalSliceHumanConfirmedContractReview {
   dispatchAllowed: false;
   executorApproved: false;
   singleSliceOnly: true;
-  decision: LocalSliceHumanConfirmedContractDecision;
+  decision: LocalSliceOperatorApprovedContractDecision;
   reasons: string[];
   summary: string;
   recommendation: string;
@@ -101,7 +101,7 @@ export interface LocalSliceBacklogGateInput {
   operatorPacketGreenValidated: boolean;
   operatorPacketFailClosedValidated: boolean;
   operatorPacketMissingFilesValidated: boolean;
-  explicitHumanContractDefined: boolean;
+  explicitOperatorContractDefined: boolean;
   declaredFilesKnown: boolean;
   rollbackPlanKnown: boolean;
   validationGateKnown: boolean;
@@ -255,7 +255,7 @@ export function resolveLocalSliceBacklogGate(input: LocalSliceBacklogGateInput):
   if (!input.operatorPacketGreenValidated) reasons.push("operator-packet-green-missing");
   if (!input.operatorPacketFailClosedValidated) reasons.push("operator-packet-fail-closed-missing");
   if (!input.operatorPacketMissingFilesValidated) reasons.push("operator-packet-missing-files-missing");
-  if (!input.explicitHumanContractDefined) reasons.push("explicit-human-contract-missing");
+  if (!input.explicitOperatorContractDefined) reasons.push("explicit-operator-contract-missing");
   if (!input.declaredFilesKnown) reasons.push("declared-files-missing");
   if (!input.rollbackPlanKnown) reasons.push("rollback-plan-missing");
   if (!input.validationGateKnown) reasons.push("validation-gate-missing");
@@ -331,7 +331,7 @@ export function resolveLocalSliceBacklogGate(input: LocalSliceBacklogGateInput):
   };
 }
 
-export function reviewLocalSliceHumanConfirmedContract(input: LocalSliceHumanConfirmedContractInput): LocalSliceHumanConfirmedContractReview {
+export function reviewLocalSliceOperatorApprovedContract(input: LocalSliceOperatorApprovedContractInput): LocalSliceOperatorApprovedContractReview {
   const reasons: string[] = [];
   const blockedRequests: string[] = [];
 
@@ -341,8 +341,8 @@ export function reviewLocalSliceHumanConfirmedContract(input: LocalSliceHumanCon
   if (!input.decisionPacket.singleSliceOnly) reasons.push("single-slice-contract-missing");
   if (input.decisionPacket.activation !== "none") reasons.push(`packet-activation-${input.decisionPacket.activation}`);
   if (input.decisionPacket.authorization !== "none") reasons.push(`packet-authorization-${input.decisionPacket.authorization}`);
-  if (input.humanConfirmation === "missing") reasons.push("human-confirmation-missing");
-  if (input.humanConfirmation === "generic") reasons.push("human-confirmation-generic");
+  if (input.operatorDecision === "missing") reasons.push("operator-decision-missing");
+  if (input.operatorDecision === "generic") reasons.push("operator-decision-generic");
   if (!input.singleFocus) reasons.push("single-focus-missing");
   if (!input.localSafeScope) reasons.push("local-safe-scope-missing");
   if (!input.declaredFilesKnown) reasons.push("declared-files-missing");
@@ -390,7 +390,7 @@ export function reviewLocalSliceHumanConfirmedContract(input: LocalSliceHumanCon
       singleSliceOnly: true,
       decision: "blocked",
       reasons,
-      summary: `local-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")}${blockedRequestsSummary} authorization=none`,
+      summary: `local-slice-operator-approved-contract: decision=blocked dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")}${blockedRequestsSummary} authorization=none`,
       recommendation: "Do not execute; resolve the contract blockers and keep using preview/readiness evidence until an approved executor exists.",
     };
   }
@@ -404,8 +404,8 @@ export function reviewLocalSliceHumanConfirmedContract(input: LocalSliceHumanCon
     executorApproved: false,
     singleSliceOnly: true,
     decision: "contract-ready-no-executor",
-    reasons: ["contract-valid", "human-confirmation-explicit", "executor-not-approved"],
-    summary: "local-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none",
+    reasons: ["contract-valid", "operator-decision-explicit", "executor-not-approved"],
+    summary: "local-slice-operator-approved-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,operator-decision-explicit,executor-not-approved authorization=none",
     recommendation: "The proposed local-slice local contract is review-ready, but no executor is approved; keep dispatch disabled until a separate execution primitive is authorized.",
   };
 }

@@ -33,7 +33,7 @@ import { readHandoffJson } from "./context-watchdog-storage";
 import {
 	buildLocalSliceCanaryDispatchDecisionPacket,
 	resolveLocalSliceCanaryPlan,
-	reviewLocalSliceHumanConfirmedContract,
+	reviewLocalSliceOperatorApprovedContract,
 } from "./guardrails-core-unattended-continuation";
 import {
 	buildLocalContinuityAudit,
@@ -468,9 +468,9 @@ export function registerContextWatchdogContinuationSurface(
 				stopContractKnown: plan.mustStopAfterSlice && plan.singleSliceOnly,
 			});
 			const declaredFilesKnown = Number(localAudit.packetInput?.candidate?.estimatedFiles ?? 0) > 0;
-			const contractReview = reviewLocalSliceHumanConfirmedContract({
+			const contractReview = reviewLocalSliceOperatorApprovedContract({
 				decisionPacket,
-				humanConfirmation: "missing",
+				operatorDecision: "missing",
 				singleFocus,
 				localSafeScope: protectedScopesClear,
 				declaredFilesKnown,

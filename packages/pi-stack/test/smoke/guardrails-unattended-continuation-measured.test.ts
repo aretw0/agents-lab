@@ -31,7 +31,7 @@ import {
   resolveUnattendedContinuationPlan,
   resolveValidationKnownCollectorResult,
   resolveValidationKnownMeasuredSignal,
-  reviewLocalSliceHumanConfirmedContract,
+  reviewLocalSliceOperatorApprovedContract,
 } from "../../extensions/guardrails-core-unattended-continuation";
 
 const completeMeasuredEvidence = [

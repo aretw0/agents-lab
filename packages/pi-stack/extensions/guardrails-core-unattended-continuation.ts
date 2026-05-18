@@ -5,7 +5,7 @@ export {
   buildLocalSliceCanaryDispatchDecisionPacket,
   resolveLocalSliceBacklogGate,
   resolveLocalSliceCanaryPlan,
-  reviewLocalSliceHumanConfirmedContract,
+  reviewLocalSliceOperatorApprovedContract,
 } from "./guardrails-core-local-slice-contracts";
 
 export type {
@@ -19,10 +19,10 @@ export type {
   LocalSliceCanaryInput,
   LocalSliceCanaryOperatorIntent,
   LocalSliceCanaryPlan,
-  LocalSliceHumanConfirmationKind,
-  LocalSliceHumanConfirmedContractDecision,
-  LocalSliceHumanConfirmedContractInput,
-  LocalSliceHumanConfirmedContractReview,
+  LocalSliceOperatorDecisionKind,
+  LocalSliceOperatorApprovedContractDecision,
+  LocalSliceOperatorApprovedContractInput,
+  LocalSliceOperatorApprovedContractReview,
 } from "./guardrails-core-local-slice-contracts";
 
 function normalizeContextLevel(value: unknown): UnattendedContinuationContextLevel {

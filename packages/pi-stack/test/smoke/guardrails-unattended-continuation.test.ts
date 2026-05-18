@@ -30,7 +30,7 @@ import {
   resolveStopConditionsClearMeasuredSignal,
   resolveValidationKnownCollectorResult,
   resolveValidationKnownMeasuredSignal,
-  reviewLocalSliceHumanConfirmedContract,
+  reviewLocalSliceOperatorApprovedContract,
 } from "../../extensions/guardrails-core-unattended-continuation";
 
 const completeMeasuredEvidence = [
@@ -181,7 +181,7 @@ describe("guardrails unattended continuation", () => {
       operatorPacketGreenValidated: true,
       operatorPacketFailClosedValidated: true,
       operatorPacketMissingFilesValidated: true,
-      explicitHumanContractDefined: true,
+      explicitOperatorContractDefined: true,
       declaredFilesKnown: true,
       rollbackPlanKnown: true,
       validationGateKnown: true,
@@ -200,7 +200,7 @@ describe("guardrails unattended continuation", () => {
       ...readyInput,
       projectStrategyResolved: false,
       operatorPacketMissingFilesValidated: false,
-      explicitHumanContractDefined: false,
+      explicitOperatorContractDefined: false,
       timeBudgetKnown: false,
       repeatRequested: true,
       schedulerRequested: true,
@@ -234,7 +234,7 @@ describe("guardrails unattended continuation", () => {
     expect(blocked.reasons).toEqual(expect.arrayContaining([
       "project-strategy-missing",
       "operator-packet-missing-files-missing",
-      "explicit-human-contract-missing",
+      "explicit-operator-contract-missing",
       "time-budget-missing",
       "repeat-requested",
       "scheduler-requested",
@@ -243,7 +243,7 @@ describe("guardrails unattended continuation", () => {
     ]));
   });
 
-  it("reviews a human-confirmed local-slice contract without approving an executor", () => {
+  it("reviews a operator-approved local-slice contract without approving an executor", () => {
     const readyPlan = resolveLocalSliceCanaryPlan(greenInput());
     const readyPacket = buildLocalSliceCanaryDispatchDecisionPacket({
       plan: readyPlan,
@@ -254,9 +254,9 @@ describe("guardrails unattended continuation", () => {
       checkpointPlanned: true,
       stopContractKnown: true,
     });
-    const readyReview = reviewLocalSliceHumanConfirmedContract({
+    const readyReview = reviewLocalSliceOperatorApprovedContract({
       decisionPacket: readyPacket,
-      humanConfirmation: "explicit-task-action",
+      operatorDecision: "explicit-task-action",
       singleFocus: true,
       localSafeScope: true,
       declaredFilesKnown: true,
@@ -268,9 +268,9 @@ describe("guardrails unattended continuation", () => {
       checkpointPlanned: true,
       stopContractKnown: true,
     });
-    const genericConfirmation = reviewLocalSliceHumanConfirmedContract({
+    const genericConfirmation = reviewLocalSliceOperatorApprovedContract({
       decisionPacket: readyPacket,
-      humanConfirmation: "generic",
+      operatorDecision: "generic",
       singleFocus: true,
       localSafeScope: true,
       declaredFilesKnown: true,
@@ -282,9 +282,9 @@ describe("guardrails unattended continuation", () => {
       checkpointPlanned: true,
       stopContractKnown: true,
     });
-    const protectedRepeat = reviewLocalSliceHumanConfirmedContract({
+    const protectedRepeat = reviewLocalSliceOperatorApprovedContract({
       decisionPacket: readyPacket,
-      humanConfirmation: "explicit-task-action",
+      operatorDecision: "explicit-task-action",
       singleFocus: true,
       localSafeScope: true,
       declaredFilesKnown: true,
@@ -312,15 +312,15 @@ describe("guardrails unattended continuation", () => {
       executorApproved: false,
       singleSliceOnly: true,
       decision: "contract-ready-no-executor",
-      reasons: ["contract-valid", "human-confirmation-explicit", "executor-not-approved"],
-      summary: "local-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none",
+      reasons: ["contract-valid", "operator-decision-explicit", "executor-not-approved"],
+      summary: "local-slice-operator-approved-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,operator-decision-explicit,executor-not-approved authorization=none",
     });
     expect(readyReview.summary).not.toContain("blockedRequests=");
     expect(genericConfirmation).toMatchObject({
       decision: "blocked",
       dispatchAllowed: false,
       executorApproved: false,
-      reasons: ["human-confirmation-generic"],
+      reasons: ["operator-decision-generic"],
     });
     expect(protectedRepeat.dispatchAllowed).toBe(false);
     expect(protectedRepeat.executorApproved).toBe(false);

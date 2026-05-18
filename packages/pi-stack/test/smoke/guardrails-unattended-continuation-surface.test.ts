@@ -395,7 +395,7 @@ describe("guardrails unattended continuation surface", () => {
       operator_packet_green_validated: true,
       operator_packet_fail_closed_validated: true,
       operator_packet_missing_files_validated: true,
-      explicit_human_contract_defined: true,
+      explicit_operator_contract_defined: true,
       declared_files_known: true,
       rollback_plan_known: true,
       validation_gate_known: true,
@@ -414,7 +414,7 @@ describe("guardrails unattended continuation surface", () => {
       operator_packet_green_validated: true,
       operator_packet_fail_closed_validated: true,
       operator_packet_missing_files_validated: false,
-      explicit_human_contract_defined: false,
+      explicit_operator_contract_defined: false,
       declared_files_known: true,
       rollback_plan_known: true,
       validation_gate_known: true,
@@ -457,13 +457,13 @@ describe("guardrails unattended continuation surface", () => {
     });
   });
 
-  it("registers read-only human-confirmed local-slice contract review tool", () => {
+  it("registers read-only operator-approved local-slice contract review tool", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsUnattendedContinuationSurface({
       registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
     } as never);
 
-    const reviewTool = tools.find((tool) => tool.name === "local_slice_human_contract_review");
+    const reviewTool = tools.find((tool) => tool.name === "local_slice_operator_contract_review");
     const ready = reviewTool?.execute("call-ready", {
       packet_decision: "ready-for-human-decision",
       packet_dispatch_allowed: false,
@@ -471,7 +471,7 @@ describe("guardrails unattended continuation surface", () => {
       packet_single_slice_only: true,
       packet_activation: "none",
       packet_authorization: "none",
-      human_confirmation: "explicit-task-action",
+      operator_decision: "explicit-task-action",
       single_focus: true,
       local_safe_scope: true,
       declared_files_known: true,
@@ -490,7 +490,7 @@ describe("guardrails unattended continuation surface", () => {
       packet_single_slice_only: true,
       packet_activation: "none",
       packet_authorization: "none",
-      human_confirmation: "generic",
+      operator_decision: "generic",
       single_focus: true,
       local_safe_scope: true,
       declared_files_known: true,
@@ -506,7 +506,7 @@ describe("guardrails unattended continuation surface", () => {
       github_actions_requested: true,
     });
 
-    expect(ready?.content?.[0]?.text).toBe("local-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none");
+    expect(ready?.content?.[0]?.text).toBe("local-slice-operator-approved-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,operator-decision-explicit,executor-not-approved authorization=none");
     expect(ready?.details).toMatchObject({
       effect: "none",
       mode: "contract-review",
@@ -516,13 +516,13 @@ describe("guardrails unattended continuation surface", () => {
       executorApproved: false,
       decision: "contract-ready-no-executor",
     });
-    expect(blocked?.content?.[0]?.text).toContain("local-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no");
+    expect(blocked?.content?.[0]?.text).toContain("local-slice-operator-approved-contract: decision=blocked dispatch=no executor=no");
     expect(blocked?.content?.[0]?.text).toContain("blockedRequests=scheduler|remote-or-offload|github-actions");
     expect(blocked?.details.dispatchAllowed).toBe(false);
     expect(blocked?.details.executorApproved).toBe(false);
     expect(blocked?.details.reasons).toEqual(expect.arrayContaining([
       "packet-dispatch-not-false",
-      "human-confirmation-generic",
+      "operator-decision-generic",
       "protected-scope",
       "scheduler-requested",
       "remote-or-offload-requested",

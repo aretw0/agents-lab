@@ -9,12 +9,12 @@ import {
   resolveSelfReloadAutoresumeCanaryPlan,
   resolveLocalSliceBacklogGate,
   resolveUnattendedContinuationPlan,
-  reviewLocalSliceHumanConfirmedContract,
+  reviewLocalSliceOperatorApprovedContract,
   type NudgeFreeLoopLocalCandidate,
   type NudgeFreeLoopLocalReadStatus,
   type NudgeFreeLoopValidationKind,
   type LocalSliceCanaryDispatchPacketDecision,
-  type LocalSliceHumanConfirmationKind,
+  type LocalSliceOperatorDecisionKind,
   type UnattendedContinuationContextLevel,
 } from "./guardrails-core-unattended-continuation";
 
@@ -30,7 +30,7 @@ function normalizePacketDecision(value: unknown): LocalSliceCanaryDispatchPacket
   return value === "ready-for-human-decision" ? "ready-for-human-decision" : "blocked";
 }
 
-function normalizeHumanConfirmation(value: unknown): LocalSliceHumanConfirmationKind {
+function normalizeOperatorDecision(value: unknown): LocalSliceOperatorDecisionKind {
   return value === "explicit-task-action" || value === "generic" || value === "missing" ? value : "missing";
 }
 
@@ -375,7 +375,7 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
       operator_packet_green_validated: Type.Boolean({ description: "Whether operator packet green path was live-validated." }),
       operator_packet_fail_closed_validated: Type.Boolean({ description: "Whether operator packet fail-closed path was live-validated." }),
       operator_packet_missing_files_validated: Type.Boolean({ description: "Whether missing-files operator packet path was live-validated." }),
-      explicit_human_contract_defined: Type.Boolean({ description: "Whether explicit task/action human contract is defined." }),
+      explicit_operator_contract_defined: Type.Boolean({ description: "Whether explicit task/action operator contract is defined." }),
       declared_files_known: Type.Boolean({ description: "Whether file scope is declared." }),
       rollback_plan_known: Type.Boolean({ description: "Whether non-destructive rollback is known." }),
       validation_gate_known: Type.Boolean({ description: "Whether validation gate is known before editing." }),
@@ -403,7 +403,7 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
         operatorPacketGreenValidated: asBool(p.operator_packet_green_validated, false),
         operatorPacketFailClosedValidated: asBool(p.operator_packet_fail_closed_validated, false),
         operatorPacketMissingFilesValidated: asBool(p.operator_packet_missing_files_validated, false),
-        explicitHumanContractDefined: asBool(p.explicit_human_contract_defined, false),
+        explicitOperatorContractDefined: asBool(p.explicit_operator_contract_defined, false),
         declaredFilesKnown: asBool(p.declared_files_known, false),
         rollbackPlanKnown: asBool(p.rollback_plan_known, false),
         validationGateKnown: asBool(p.validation_gate_known, false),
@@ -432,9 +432,9 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
   });
 
   pi.registerTool({
-    name: "local_slice_human_contract_review",
-    label: "One-Slice Human Contract Review",
-    description: "Read-only review for a proposed human-confirmed local-slice local execution contract. Never dispatches execution; always keeps dispatchAllowed=false and executorApproved=false.",
+    name: "local_slice_operator_contract_review",
+    label: "One-Slice Operator Contract Review",
+    description: "Read-only review for a proposed operator-approved local-slice local execution contract. Never dispatches execution; always keeps dispatchAllowed=false and executorApproved=false.",
     parameters: Type.Object({
       packet_decision: Type.String({ description: "Decision from local-slice decision packet: ready-for-human-decision | blocked." }),
       packet_dispatch_allowed: Type.Boolean({ description: "Must be false; packet evidence never authorizes dispatch." }),
@@ -442,7 +442,7 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
       packet_single_slice_only: Type.Boolean({ description: "Must be true." }),
       packet_activation: Type.Optional(Type.String({ description: "Expected none." })),
       packet_authorization: Type.Optional(Type.String({ description: "Expected none." })),
-      human_confirmation: Type.String({ description: "missing | generic | explicit-task-action." }),
+      operator_decision: Type.String({ description: "missing | generic | explicit-task-action." }),
       single_focus: Type.Boolean({ description: "Whether exactly one focus task is named." }),
       local_safe_scope: Type.Boolean({ description: "Whether scope is local-safe." }),
       declared_files_known: Type.Boolean({ description: "Whether all touched files are declared." }),
@@ -462,7 +462,7 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
     }),
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const result = reviewLocalSliceHumanConfirmedContract({
+      const result = reviewLocalSliceOperatorApprovedContract({
         decisionPacket: {
           decision: normalizePacketDecision(p.packet_decision),
           dispatchAllowed: asBool(p.packet_dispatch_allowed, false) as false,
@@ -471,7 +471,7 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
           activation: (p.packet_activation === "none" ? "none" : String(p.packet_activation ?? "unknown")) as "none",
           authorization: (p.packet_authorization === "none" ? "none" : String(p.packet_authorization ?? "unknown")) as "none",
         },
-        humanConfirmation: normalizeHumanConfirmation(p.human_confirmation),
+        operatorDecision: normalizeOperatorDecision(p.operator_decision),
         singleFocus: asBool(p.single_focus, false),
         localSafeScope: asBool(p.local_safe_scope, false),
         declaredFilesKnown: asBool(p.declared_files_known, false),
