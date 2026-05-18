@@ -10,7 +10,9 @@
  * Profiles:
  * - stack-full: all managed packages from @aretw0/pi-stack installer (first + third-party)
  * - first-party: only @aretw0/* workspace packages
- * - curated-default: strict curated baseline for distribution defaults
+ * - strict-curated: official minimal distribution baseline
+ * - curated-default: backward-compatible alias for strict-curated
+ * - curated-runtime: strict baseline plus explicit runtime/capability extras
  *
  * Usage:
  *   node scripts/pi-parity.mjs
@@ -23,7 +25,14 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import process from "node:process";
-import { CURATED_DEFAULT, FIRST_PARTY, PACKAGES, THIRD_PARTY } from "../packages/pi-stack/package-list.mjs";
+import {
+  CURATED_DEFAULT,
+  CURATED_RUNTIME,
+  FIRST_PARTY,
+  PACKAGES,
+  STRICT_CURATED,
+  THIRD_PARTY,
+} from "../packages/pi-stack/package-list.mjs";
 
 const IS_WINDOWS = process.platform === "win32";
 const DEFAULT_SCOPE = "user";
@@ -32,7 +41,9 @@ const DEFAULT_PROFILE = "stack-full";
 const PROFILES = {
   "stack-full": PACKAGES,
   "first-party": FIRST_PARTY,
+  "strict-curated": STRICT_CURATED,
   "curated-default": CURATED_DEFAULT,
+  "curated-runtime": CURATED_RUNTIME,
 };
 
 function parseArgs(argv) {
@@ -74,12 +85,13 @@ Usage:
   npm run pi:parity
   node scripts/pi-parity.mjs --scope user --profile stack-full --strict
   node scripts/pi-parity.mjs --scope project --profile first-party
-  node scripts/pi-parity.mjs --scope project --profile curated-default
+  node scripts/pi-parity.mjs --scope project --profile strict-curated
+  node scripts/pi-parity.mjs --scope project --profile curated-runtime
   node scripts/pi-parity.mjs --scope both --json
 
 Options:
   --scope <user|project|both>
-  --profile <stack-full|first-party|curated-default>
+  --profile <stack-full|first-party|strict-curated|curated-default|curated-runtime>
   --strict              Exit 1 on parity drift (missing official or non-permitted items)
   --json                Emit machine-readable JSON
   -h, --help
@@ -158,14 +170,18 @@ function detectSurfaces(configuredNames) {
   };
 }
 
-function buildCurationRemediation({ missing, optIn, nonPermittedPackages, nonPermittedSources }) {
+function profileHint(profile) {
+  return profile === "curated-default" ? "strict-curated" : profile;
+}
+
+function buildCurationRemediation({ profile, missing, optIn, nonPermittedPackages, nonPermittedSources }) {
   const actions = [];
   if (missing.length > 0) {
     actions.push({
       decision: "curar",
       reason: "Pacotes oficiais ausentes na baseline selecionada.",
       items: missing,
-      commandHint: "npx @aretw0/pi-stack --profile curated-default --local",
+      commandHint: `npx @aretw0/pi-stack --profile ${profileHint(profile)} --local`,
     });
   }
   if (optIn.length > 0) {
@@ -229,6 +245,7 @@ function analyzeScope(scope, profile) {
   };
 
   const remediation = buildCurationRemediation({
+    profile,
     missing,
     optIn: extraManaged,
     nonPermittedPackages: classification.nonPermitted.packages,

@@ -53,6 +53,42 @@ test("pi-parity classifies official/opt-in/non-permitted for curated-default", (
   });
 });
 
+test("pi-parity treats runtime extras as official in curated-runtime", () => {
+  withTempProject((cwd) => {
+    writeFileSync(
+      join(cwd, ".pi", "settings.json"),
+      JSON.stringify(
+        {
+          packages: [
+            "npm:@aretw0/pi-stack",
+            "npm:@ifi/oh-pi-extensions",
+            "npm:@ifi/oh-pi-ant-colony",
+            "npm:@ifi/pi-web-remote",
+          ],
+        },
+        null,
+        2,
+      ),
+    );
+
+    const run = spawnSync(
+      process.execPath,
+      [SCRIPT, "--scope", "project", "--profile", "curated-runtime", "--json"],
+      { cwd, encoding: "utf8" },
+    );
+
+    assert.equal(run.status, 0, run.stderr || run.stdout);
+    const payload = JSON.parse(run.stdout);
+    const result = payload.results[0];
+
+    assert.equal(result.profile, "curated-runtime");
+    assert.ok(result.classification.official.present.includes("@ifi/oh-pi-extensions"));
+    assert.ok(result.classification.official.present.includes("@ifi/oh-pi-ant-colony"));
+    assert.ok(result.classification.official.present.includes("@ifi/pi-web-remote"));
+    assert.ok(!result.classification.optIn.managed.includes("@ifi/oh-pi-extensions"));
+  });
+});
+
 test("pi-parity --strict blocks curated-default on non-permitted items", () => {
   withTempProject((cwd) => {
     writeFileSync(
