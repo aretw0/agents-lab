@@ -37,6 +37,8 @@ Ou diretamente via pi:
 pi install npm:@aretw0/pi-stack
 # para auditoria de baseline curada:
 npm run pi:parity:curated
+# para auditoria do perfil opt-in de runtime:
+npm run pi:parity:runtime
 ```
 
 **Via git** (sempre atualizado, sem esperar publish):
