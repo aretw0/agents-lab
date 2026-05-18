@@ -4,16 +4,8 @@ import { type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaPacket, type AgentRunSdkProviderModelArenaArtifactPacketResult } from "./guardrails-core-agent-run-sdk-arena";
 import { resolveExecutionCwdParam } from "./guardrails-core-execution-context";
+import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-param-normalizers";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
-
-function asOptionalBoolean(value: unknown): boolean | undefined {
-  return typeof value === "boolean" ? value : undefined;
-}
-
-function asOptionalStringArray(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value.filter((entry): entry is string => typeof entry === "string");
-}
 
 function buildArenaInput(p: Record<string, unknown>, cwd: string) {
   return {

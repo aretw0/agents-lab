@@ -10,10 +10,9 @@ import { buildAgentsAsToolsCalibrationScore, type ToolHygieneInputTool } from ".
 import { evaluateAutonomyLaneTaskSelection, readAutonomyHandoffFocusTaskIds } from "./guardrails-core-autonomy-task-selector";
 import { consumeContextPreloadPack } from "./context-watchdog-continuation";
 import { buildUnavailableGitDirtySnapshot, readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
+import { asOptionalBoolean } from "./guardrails-core-param-normalizers";
 
-export function asOptionalBoolean(value: unknown): boolean | undefined {
-  return typeof value === "boolean" ? value : undefined;
-}
+export { asOptionalBoolean } from "./guardrails-core-param-normalizers";
 
 export function inferDelegationCapabilityDefaults(cwd: string): {
   preloadDecision: "use-pack" | "fallback-canonical";

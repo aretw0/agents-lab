@@ -5,6 +5,7 @@ import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPl
 import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
 import { consumeContextPreloadPack } from "./context-watchdog-continuation";
 import { buildUnavailableGitDirtySnapshot, readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
+import { asOptionalBoolean } from "./guardrails-core-param-normalizers";
 
 function asBool(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
@@ -18,10 +19,6 @@ function asNumber(value: unknown, fallback: number): number {
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
-}
-
-function asOptionalBoolean(value: unknown): boolean | undefined {
-  return typeof value === "boolean" ? value : undefined;
 }
 
 function asOptionalNumber(value: unknown): number | undefined {

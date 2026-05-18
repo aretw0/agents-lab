@@ -3,16 +3,10 @@ import { Type } from "@sinclair/typebox";
 import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
 import { evaluateAgentWorkerLaneReadiness } from "./guardrails-core-agent-worker-lane";
 import { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
+import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-param-normalizers";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
-export function asOptionalBoolean(value: unknown): boolean | undefined {
-	return typeof value === "boolean" ? value : undefined;
-}
-
-export function asOptionalStringArray(value: unknown): string[] | undefined {
-	if (!Array.isArray(value)) return undefined;
-	return value.filter((entry): entry is string => typeof entry === "string");
-}
+export { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-param-normalizers";
 
 export function registerAgentRunBasicTools(pi: ExtensionAPI): void {
 	pi.registerTool({

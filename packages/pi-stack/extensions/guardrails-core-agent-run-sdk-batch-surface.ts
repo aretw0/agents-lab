@@ -6,16 +6,8 @@ import { readLogByteCount, readLogTail, readRegistryEntry, startSdkInProcessWork
 import { evaluateAgentWorkerLaneReadiness } from "./guardrails-core-agent-worker-lane";
 import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-context";
 import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
+import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-param-normalizers";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
-
-function asOptionalBoolean(value: unknown): boolean | undefined {
-  return typeof value === "boolean" ? value : undefined;
-}
-
-function asOptionalStringArray(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value.filter((entry): entry is string => typeof entry === "string");
-}
 
 function sdkReadOnlyBatchWorkerSchema() {
   return Type.Object({

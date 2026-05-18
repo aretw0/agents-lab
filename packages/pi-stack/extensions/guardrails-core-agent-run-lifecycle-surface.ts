@@ -6,16 +6,8 @@ import { buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from ".
 import { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus, type AgentRunMarkerResult, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import { isTerminalAgentRunState, readLogByteCount, readLogTail, readRegistryEntry, sleepMs, writeRegistryEntry } from "./guardrails-core-agent-run-surface-runtime";
 import { resolveExecutionCwdParam } from "./guardrails-core-execution-context";
+import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-param-normalizers";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
-
-function asOptionalBoolean(value: unknown): boolean | undefined {
-  return typeof value === "boolean" ? value : undefined;
-}
-
-function asOptionalStringArray(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value.filter((entry): entry is string => typeof entry === "string");
-}
 
 function asMarkerResults(value: unknown): AgentRunMarkerResult[] | undefined {
   if (!Array.isArray(value)) return undefined;
