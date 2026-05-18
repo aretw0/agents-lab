@@ -29,6 +29,13 @@ test("classifyRootScript marks promoted dev pressure as distributed wrapper", ()
 	assert.equal(row.recommendedAction, "fold-wrapper-into-extension-or-doc-as-lab-shortcut");
 });
 
+test("classifyRootScript marks disk ops as machine-maintenance wrappers", () => {
+	const row = classifyRootScript("ops:disk:cleanup:dry", "node scripts/host-disk-guard.mjs", shipped);
+
+	assert.equal(row.category, "distributed-wrapper");
+	assert.equal(row.targetSurface, "machine-maintenance");
+});
+
 test("classifyRootScript keeps ci and release scripts internal", () => {
 	assert.equal(classifyRootScript("ci:smoke:gate", "npm run test:smoke", shipped).category, "repo-internal");
 	assert.equal(classifyRootScript("release", "changeset version", shipped).category, "repo-internal");
@@ -39,4 +46,5 @@ test("buildUserSurfaceAudit exposes grouped promotion targets", () => {
 	assert.equal(audit.generatedAtIso, "2026-05-18T00:00:00.000Z");
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "subagent-readiness"));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "environment-doctor" && group.scripts.includes("pi:dev:pressure")));
+	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "machine-maintenance" && group.scripts.includes("ops:disk:check")));
 });

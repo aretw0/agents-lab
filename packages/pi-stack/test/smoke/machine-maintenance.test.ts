@@ -8,8 +8,10 @@ import machineMaintenanceExtension, {
   classifyGpuPressure,
   classifyMemoryPressure,
   classifySwapPressure,
+  buildWorkspaceDiskCleanupPlan,
   buildWorkspaceStoragePressureReport,
   evaluateMachineMaintenanceGate,
+  formatWorkspaceDiskCleanupPlan,
   formatMachineMaintenanceGate,
   formatWorkspaceStoragePressureReport,
   resolveMachineMaintenanceThresholds,
@@ -21,6 +23,7 @@ function makeMockPi() {
   return {
     on: vi.fn(),
     registerTool: vi.fn(),
+    registerCommand: vi.fn(),
   } as unknown as Parameters<typeof machineMaintenanceExtension>[0];
 }
 
@@ -202,6 +205,52 @@ describe("machine-maintenance gate", () => {
     }
   });
 
+  it("builds report-only cleanup plan for generated caches and opt-in old sessions", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-disk-cleanup-plan-"));
+    try {
+      const reportRoot = join(cwd, ".pi", "reports");
+      const cacheRoot = join(cwd, ".vitest");
+      const sessionRoot = join(cwd, ".sandbox", "pi-agent", "sessions", "w1");
+      mkdirSync(reportRoot, { recursive: true });
+      mkdirSync(cacheRoot, { recursive: true });
+      mkdirSync(sessionRoot, { recursive: true });
+
+      const reportFile = join(reportRoot, "old-report.json");
+      const cacheFile = join(cacheRoot, "cache.bin");
+      const oldSession = join(sessionRoot, "old-session.jsonl");
+      const recentSession = join(sessionRoot, "recent-session.jsonl");
+      writeFileSync(reportFile, Buffer.alloc(1024 * 1024, "r"));
+      writeFileSync(cacheFile, Buffer.alloc(1024 * 1024, "c"));
+      writeFileSync(oldSession, Buffer.alloc(1024 * 1024, "s"));
+      writeFileSync(recentSession, Buffer.alloc(1024 * 1024, "n"));
+      const oldDate = new Date("2026-04-01T00:00:00.000Z");
+      const recentDate = new Date("2026-05-01T00:00:00.000Z");
+      utimesSync(reportFile, oldDate, oldDate);
+      utimesSync(oldSession, oldDate, oldDate);
+      utimesSync(recentSession, recentDate, recentDate);
+
+      const plan = buildWorkspaceDiskCleanupPlan({
+        cwd,
+        nowMs: Date.parse("2026-05-01T00:00:00.000Z"),
+        includeSessions: true,
+        keepRecentSessions: 1,
+        sessionAgeDays: 7,
+        reportsAgeDays: 14,
+      });
+
+      expect(plan.dispatchAllowed).toBe(false);
+      expect(plan.cleanupExecuted).toBe(false);
+      expect(plan.candidateSummary.selectedCount).toBeGreaterThanOrEqual(3);
+      expect(plan.candidates.some((row) => row.class === "generated-cache" && row.selected)).toBe(true);
+      expect(plan.candidates.some((row) => row.class === "pi-report" && row.selected)).toBe(true);
+      expect(plan.candidates.some((row) => row.path.endsWith("old-session.jsonl") && row.selected)).toBe(true);
+      expect(plan.candidateSummary.protectedCount).toBeGreaterThan(0);
+      expect(formatWorkspaceDiskCleanupPlan(plan)).toContain("report-only");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("registers pi tools with the canonical execute signature", async () => {
     const pi = makeMockPi();
     machineMaintenanceExtension(pi);
@@ -234,5 +283,21 @@ describe("machine-maintenance gate", () => {
     expect(storageResult.content?.[0]?.text).toContain("workspace-storage-pressure-report");
     expect(storageResult.details?.dispatchAllowed).toBe(false);
     expect(storageResult.details?.cleanupExecuted).toBe(false);
+
+    const cleanupTool = getTool(pi, "workspace_disk_cleanup_plan");
+    const cleanupResult = await cleanupTool.execute(
+      "tc-cleanup-1",
+      { maxCandidates: 3 },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd(), ui: { setStatus: vi.fn() } },
+    );
+
+    expect(cleanupResult.content?.[0]?.text).toContain("workspace-disk-cleanup-plan");
+    expect(cleanupResult.details?.dispatchAllowed).toBe(false);
+    expect(cleanupResult.details?.cleanupExecuted).toBe(false);
+
+    const commands = (pi.registerCommand as ReturnType<typeof vi.fn>).mock.calls.map(([name]) => name);
+    expect(commands).toContain("machine-maintenance");
   });
 });

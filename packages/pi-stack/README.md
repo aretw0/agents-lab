@@ -46,6 +46,7 @@ pi install https://github.com/aretw0/agents-lab
 | `colony-pilot` | Primitiva de orquestração/visibilidade: prepara runbooks manuais para pilot (monitors/remote/colony) e mantém snapshot de colonies em background |
 | `web-session-gateway` | Gateway web first-party para observabilidade local da sessão (URL determinística, `/api/health` e painel web local) |
 | `quota-visibility` | Observabilidade de consumo/cota a partir de `~/.pi/agent/sessions` (burn rate, janelas de 5h/peak hours por provider, budgets provider/model, OpenAI Codex WHAM probe read-only, export de evidências) |
+| `machine-maintenance` | Gate determinístico de pressão de máquina + `workspace_storage_pressure_report` e `workspace_disk_cleanup_plan` report-only |
 
 #### Defaults do `monitor-provider-patch`
 

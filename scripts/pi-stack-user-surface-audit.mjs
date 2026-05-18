@@ -72,6 +72,11 @@ const DISTRIBUTED_WRAPPERS = [
 		surface: "environment-doctor",
 		reason: "dev pressure diagnostics are distributed through environment-doctor; root script remains a local startup wrapper",
 	},
+	{
+		match: /^ops:disk/,
+		surface: "machine-maintenance",
+		reason: "disk pressure and cleanup planning are distributed through machine-maintenance; root scripts keep explicit apply wrappers",
+	},
 ];
 
 const PROMOTION_CANDIDATES = [
@@ -84,11 +89,6 @@ const PROMOTION_CANDIDATES = [
 		match: /^pi:artifact:audit/,
 		target: "safe-boot",
 		reason: "runtime artifact hygiene is safety behavior useful to installed users",
-	},
-	{
-		match: /^ops:disk/,
-		target: "machine-maintenance",
-		reason: "host disk pressure is operational safety behavior, but destructive apply paths must stay strongly gated",
 	},
 	{
 		match: /^ops:loop-evidence/,
