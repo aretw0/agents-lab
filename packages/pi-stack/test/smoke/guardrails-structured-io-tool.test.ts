@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import guardrailsCore from "../../extensions/guardrails-core";
+import guardrailsCoreExtendedSurfaces from "../../extensions/guardrails-core-extended-surfaces";
 
 function makeMockPi() {
   return {
@@ -10,7 +10,7 @@ function makeMockPi() {
     registerCommand: vi.fn(),
     registerTool: vi.fn(),
     sendUserMessage: vi.fn(),
-  } as unknown as Parameters<typeof guardrailsCore>[0];
+  } as unknown as Parameters<typeof guardrailsCoreExtendedSurfaces>[0];
 }
 
 function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
@@ -32,7 +32,7 @@ function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
 describe("guardrails-core structured_io_json tool", () => {
   it("registers unified structured_io and legacy structured_io_json tools", () => {
     const pi = makeMockPi();
-    guardrailsCore(pi);
+    guardrailsCoreExtendedSurfaces(pi);
     const unifiedCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([t]) => t?.name === "structured_io");
     const jsonCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([t]) => t?.name === "structured_io_json");
     expect(unifiedCall).toBeTruthy();
@@ -51,7 +51,7 @@ describe("guardrails-core structured_io_json tool", () => {
     writeFileSync(path, JSON.stringify({ a: { b: 1 } }, null, 2), "utf8");
 
     const pi = makeMockPi();
-    guardrailsCore(pi);
+    guardrailsCoreExtendedSurfaces(pi);
     const tool = getTool(pi, "structured_io_json");
 
     const dry = await tool.execute(
@@ -72,7 +72,7 @@ describe("guardrails-core structured_io_json tool", () => {
 
     const apply = await tool.execute(
       "tc-2",
-      { path: "data.json", selector: "a.b", operation: "set", payload: 2, dryRun: false },
+      { path: "data.json", selector: "a.b", operation: "set", payload: 2, dryRun: false, operator_approval: structuredApproval() },
       undefined as unknown as AbortSignal,
       () => {},
       { cwd },
@@ -83,6 +83,16 @@ describe("guardrails-core structured_io_json tool", () => {
     const changed = JSON.parse(readFileSync(path, "utf8"));
     expect(changed.a.b).toBe(2);
 
+    const blocked = await tool.execute(
+      "tc-2-blocked",
+      { path: "data.json", selector: "a.b", operation: "set", payload: 3, dryRun: false },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+    expect((blocked.details as any)?.applied).toBe(false);
+    expect((blocked.details as any)?.blockers).toContain("structured-operator-approval-missing");
+
     rmSync(cwd, { recursive: true, force: true });
   });
 
@@ -92,12 +102,12 @@ describe("guardrails-core structured_io_json tool", () => {
     writeFileSync(path, JSON.stringify({ a: 1 }, null, 2), "utf8");
 
     const pi = makeMockPi();
-    guardrailsCore(pi);
+    guardrailsCoreExtendedSurfaces(pi);
     const tool = getTool(pi, "structured_io_json");
 
     const apply = await tool.execute(
       "tc-root",
-      { path: "data.json", selector: "$", operation: "set", payload: { b: 2 }, dryRun: false },
+      { path: "data.json", selector: "$", operation: "set", payload: { b: 2 }, dryRun: false, operator_approval: structuredApproval() },
       undefined as unknown as AbortSignal,
       () => {},
       { cwd },
@@ -109,7 +119,7 @@ describe("guardrails-core structured_io_json tool", () => {
 
     const blocked = await tool.execute(
       "tc-root-remove",
-      { path: "data.json", selector: "$", operation: "remove", dryRun: false },
+      { path: "data.json", selector: "$", operation: "remove", dryRun: false, operator_approval: structuredApproval() },
       undefined as unknown as AbortSignal,
       () => {},
       { cwd },
@@ -126,12 +136,12 @@ describe("guardrails-core structured_io_json tool", () => {
     writeFileSync(path, JSON.stringify({ a: { "b.c": 1 } }, null, 2), "utf8");
 
     const pi = makeMockPi();
-    guardrailsCore(pi);
+    guardrailsCoreExtendedSurfaces(pi);
     const tool = getTool(pi, "structured_io_json");
 
     const apply = await tool.execute(
       "tc-quoted-selector",
-      { path: "data.json", selector: "$.a[\"b.c\"]", operation: "set", payload: 9, dryRun: false },
+      { path: "data.json", selector: "$.a[\"b.c\"]", operation: "set", payload: 9, dryRun: false, operator_approval: structuredApproval() },
       undefined as unknown as AbortSignal,
       () => {},
       { cwd },
@@ -150,7 +160,7 @@ describe("guardrails-core structured_io_json tool", () => {
     writeFileSync(join(cwd, "paper.tex"), ["\\section{Target}", "old", "\\section{Next}", "tail"].join("\n"), "utf8");
 
     const pi = makeMockPi();
-    guardrailsCore(pi);
+    guardrailsCoreExtendedSurfaces(pi);
     const tool = getTool(pi, "structured_io");
 
     const read = await tool.execute(
@@ -167,7 +177,7 @@ describe("guardrails-core structured_io_json tool", () => {
 
     const apply = await tool.execute(
       "tc-md-write",
-      { path: "doc.md", selector: "heading:Target", operation: "set", payload: "new", dryRun: false },
+      { path: "doc.md", selector: "heading:Target", operation: "set", payload: "new", dryRun: false, operator_approval: structuredApproval() },
       undefined as unknown as AbortSignal,
       () => {},
       { cwd },
@@ -188,3 +198,11 @@ describe("guardrails-core structured_io_json tool", () => {
     rmSync(cwd, { recursive: true, force: true });
   });
 });
+
+function structuredApproval(): Record<string, unknown> {
+  return {
+    packet_mode: "operator-approval-packet",
+    approved: true,
+    approval_state: "approved",
+  };
+}

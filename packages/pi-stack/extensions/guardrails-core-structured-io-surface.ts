@@ -33,6 +33,14 @@ function buildStructuredIoToolResponse(label: string, details: Record<string, un
 	});
 }
 
+function hasStructuredOperatorApproval(value: unknown): boolean {
+	if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+	const row = value as Record<string, unknown>;
+	return row.packet_mode === "operator-approval-packet"
+		&& row.approved === true
+		&& row.approval_state === "approved";
+}
+
 export function registerGuardrailsStructuredIoSurface(
 	pi: ExtensionAPI,
 	appendAuditEntry: GuardrailsAuditAppender,
@@ -58,6 +66,11 @@ export function registerGuardrailsStructuredIoSurface(
 			], { description: "read | set | remove" }),
 			payload: Type.Optional(Type.Any()),
 			dryRun: Type.Optional(Type.Boolean()),
+			operator_approval: Type.Optional(Type.Object({
+				packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
+				approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
+				approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
+			}, { description: "Structured operator approval envelope for dryRun=false." })),
 			maxTouchedLines: Type.Optional(Type.Integer({ minimum: 1 })),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -68,6 +81,7 @@ export function registerGuardrailsStructuredIoSurface(
 				operation?: string;
 				payload?: unknown;
 				dryRun?: boolean;
+				operator_approval?: unknown;
 				maxTouchedLines?: number;
 			};
 			const targetPath = String(p.path ?? "").trim();
@@ -119,6 +133,23 @@ export function registerGuardrailsStructuredIoSurface(
 				return buildStructuredIoToolResponse("structured_io", details);
 			}
 
+			const dryRun = p.dryRun !== false;
+			const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
+			if (!dryRun && !structuredOperatorApproval) {
+				const details = {
+					ok: false,
+					path: targetPath,
+					selector,
+					operation,
+					dryRun,
+					applied: false,
+					structuredOperatorApproval,
+					blockers: ["structured-operator-approval-missing"],
+					reason: "structured-operator-approval-missing",
+				};
+				return buildStructuredIoToolResponse("structured_io", details);
+			}
+
 			const result = structuredWrite({
 				content,
 				selector,
@@ -126,7 +157,7 @@ export function registerGuardrailsStructuredIoSurface(
 				path: targetPath,
 				operation: operation as "set" | "remove",
 				payload: p.payload,
-				dryRun: p.dryRun !== false,
+				dryRun,
 				maxTouchedLines: p.maxTouchedLines,
 			});
 
@@ -141,7 +172,8 @@ export function registerGuardrailsStructuredIoSurface(
 				selector,
 				operation,
 				via: result.via,
-				dryRun: p.dryRun !== false,
+				dryRun,
+				structuredOperatorApproval,
 				maxTouchedLines: p.maxTouchedLines,
 				applied: result.applied,
 				changed: result.changed,
@@ -172,6 +204,11 @@ export function registerGuardrailsStructuredIoSurface(
 			], { description: "read | set | remove" }),
 			payload: Type.Optional(Type.Any()),
 			dryRun: Type.Optional(Type.Boolean()),
+			operator_approval: Type.Optional(Type.Object({
+				packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
+				approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
+				approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
+			}, { description: "Structured operator approval envelope for dryRun=false." })),
 			maxTouchedLines: Type.Optional(Type.Integer({ minimum: 1 })),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -181,6 +218,7 @@ export function registerGuardrailsStructuredIoSurface(
 				operation?: string;
 				payload?: unknown;
 				dryRun?: boolean;
+				operator_approval?: unknown;
 				maxTouchedLines?: number;
 			};
 			const targetPath = String(p.path ?? "").trim();
@@ -255,12 +293,29 @@ export function registerGuardrailsStructuredIoSurface(
 				return buildStructuredIoToolResponse("structured_io_json", details);
 			}
 
+			const dryRun = p.dryRun !== false;
+			const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
+			if (!dryRun && !structuredOperatorApproval) {
+				const details = {
+					ok: false,
+					path: targetPath,
+					selector,
+					operation,
+					dryRun,
+					applied: false,
+					structuredOperatorApproval,
+					blockers: ["structured-operator-approval-missing"],
+					reason: "structured-operator-approval-missing",
+				};
+				return buildStructuredIoToolResponse("structured_io_json", details);
+			}
+
 			const result = structuredJsonWrite({
 				content,
 				selector,
 				operation: operation as "set" | "remove",
 				payload: p.payload,
-				dryRun: p.dryRun !== false,
+				dryRun,
 				maxTouchedLines: p.maxTouchedLines,
 			});
 
@@ -274,7 +329,8 @@ export function registerGuardrailsStructuredIoSurface(
 				selector,
 				operation,
 				via: "tool",
-				dryRun: p.dryRun !== false,
+				dryRun,
+				structuredOperatorApproval,
 				maxTouchedLines: p.maxTouchedLines,
 				applied: result.applied,
 				changed: result.changed,
@@ -381,6 +437,10 @@ export function registerGuardrailsStructuredIoSurface(
 				}
 
 				const applyRequested = tokens.includes("--apply");
+				if (applyRequested) {
+					ctx.ui.notify("structured-io: --apply requires structured operator approval through the structured_io tool.", "warning");
+					return;
+				}
 				const maxLinesFlagIndex = tokens.findIndex((t) => t === "--max-lines");
 				let maxTouchedLines = 120;
 				if (maxLinesFlagIndex >= 0) {
