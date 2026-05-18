@@ -10,8 +10,6 @@ import { resolveHandoffFreshness, type HandoffFreshnessLabel } from "./context-w
 import { readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
 import { asBooleanWithDefault, asNonEmptyStringArray, asNumberWithDefault } from "./guardrails-core-param-normalizers";
 import {
-  normalizeTaskDependencyIds,
-  normalizeTaskId as normalizeOptionalTaskId,
   taskHasLocalProtectedSignal,
   taskHasLocalRiskSignal,
   taskValidationGateKnown as taskContractValidationGateKnown,
@@ -252,30 +250,6 @@ export function resolveFocusTaskIds(p: Record<string, unknown>, cwd: string): { 
   return handoff.length > 0 ? { ids: handoff, source: "handoff" } : { ids: [] };
 }
 
-export function normalizeTaskId(value: unknown): string {
-  return normalizeOptionalTaskId(value) ?? "";
-}
-
-export function findTaskById(tasks: ProjectTaskItem[], taskId: string): ProjectTaskItem | undefined {
-  const normalized = normalizeTaskId(taskId);
-  if (!normalized) return undefined;
-  return tasks.find((task) => normalizeTaskId(task.id) === normalized);
-}
-
-export function toTaskMnemonic(task: ProjectTaskItem | undefined): string | undefined {
-  if (!task) return undefined;
-  const taskId = normalizeTaskId(task.id);
-  if (!taskId) return undefined;
-  const cleanedDescription = String(task.description ?? "")
-    .replace(/\[[^\]]+\]\s*/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  const shortDescription = cleanedDescription.length > 0
-    ? cleanedDescription.split(/[.;]/)[0].trim().slice(0, 72)
-    : "";
-  return shortDescription.length > 0 ? `${taskId}:${shortDescription}` : taskId;
-}
-
 export function buildAutonomyOperatorPauseBrief(input: {
   selectionReady: boolean;
   selectionReason: string;
@@ -348,18 +322,6 @@ export function buildAutonomyOperatorPauseBrief(input: {
   };
 }
 
-export function taskHasProtectedSignal(task: ProjectTaskItem): boolean {
-  return taskHasLocalProtectedSignal(task);
-}
-
-export function taskHasRiskSignal(task: ProjectTaskItem): boolean {
-  return taskHasLocalRiskSignal(task);
-}
-
-export function taskValidationGateKnown(task: ProjectTaskItem): boolean {
-  return taskContractValidationGateKnown(task);
-}
-
 export function workspaceLooksClean(cwd: string): boolean {
   try {
     return readGitDirtySnapshot(cwd).clean;
@@ -380,12 +342,8 @@ export function resolveAutoAdvanceFailClosedReasons(input: {
     reasons.push("next-task-not-found");
     return reasons;
   }
-  if (taskHasProtectedSignal(input.nextTask)) reasons.push("protected-task");
-  if (taskHasRiskSignal(input.nextTask)) reasons.push("risk-signal");
-  if (!taskValidationGateKnown(input.nextTask)) reasons.push("validation-gate-unknown");
+  if (taskHasLocalProtectedSignal(input.nextTask)) reasons.push("protected-task");
+  if (taskHasLocalRiskSignal(input.nextTask)) reasons.push("risk-signal");
+  if (!taskContractValidationGateKnown(input.nextTask)) reasons.push("validation-gate-unknown");
   return reasons;
-}
-
-export function normalizeDependsOn(value: unknown): string[] {
-  return normalizeTaskDependencyIds(value);
 }

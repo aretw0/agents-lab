@@ -23,6 +23,26 @@ export function normalizeTaskDependencyIds(value: unknown): string[] {
     .filter((item): item is string => Boolean(item));
 }
 
+export function findTaskById<T extends TaskContractLike>(tasks: T[], taskId: string): T | undefined {
+  const normalized = normalizeTaskId(taskId);
+  if (!normalized) return undefined;
+  return tasks.find((task) => normalizeTaskId(task.id) === normalized);
+}
+
+export function toTaskMnemonic(task: TaskContractLike | undefined): string | undefined {
+  if (!task) return undefined;
+  const taskId = normalizeTaskId(task.id);
+  if (!taskId) return undefined;
+  const cleanedDescription = String(task.description ?? "")
+    .replace(/\[[^\]]+\]\s*/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const shortDescription = cleanedDescription.length > 0
+    ? cleanedDescription.split(/[.;]/)[0].trim().slice(0, 72)
+    : "";
+  return shortDescription.length > 0 ? `${taskId}:${shortDescription}` : taskId;
+}
+
 export function taskContractText(task: TaskContractLike, fields: Array<keyof TaskContractLike>): string {
   const parts: string[] = [];
   for (const field of fields) {

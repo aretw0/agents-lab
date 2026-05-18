@@ -5,31 +5,35 @@ import {
 import {
   asBool,
   asNumber,
-  findTaskById,
   normalizeContextLevel,
-  normalizeDependsOn,
-  normalizeTaskId,
   resolveAutoAdvanceFailClosedReasons,
   resolveFocusTaskIds,
-  taskHasProtectedSignal,
-  taskHasRiskSignal,
-  taskValidationGateKnown,
-  toTaskMnemonic,
   workspaceLooksClean,
 } from "./guardrails-core-autonomy-lane-common";
+import {
+  findTaskById,
+  normalizeTaskDependencyIds,
+  normalizeTaskId,
+  taskHasLocalProtectedSignal as taskHasProtectedSignal,
+  taskHasLocalRiskSignal as taskHasRiskSignal,
+  taskValidationGateKnown,
+  toTaskMnemonic,
+} from "./guardrails-core-task-contracts";
 export {
   asBool,
   asNumber,
   buildAutonomyOperatorPauseBrief,
   buildIterationReminder,
-  findTaskById,
   normalizeContextLevel,
-  normalizeTaskId,
   readHandoffFreshnessSignal,
   resolveLocalSafeChainingDecision,
-  taskHasProtectedSignal,
-  toTaskMnemonic,
 } from "./guardrails-core-autonomy-lane-common";
+export {
+  findTaskById,
+  normalizeTaskId,
+  taskHasLocalProtectedSignal as taskHasProtectedSignal,
+  toTaskMnemonic,
+} from "./guardrails-core-task-contracts";
 
 export function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd: string) {
   const focus = resolveFocusTaskIds(p, cwd);
@@ -58,7 +62,7 @@ export function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd:
   const localSafe = inScope.filter((task) => {
     if (!includeProtectedScopes && taskHasProtectedSignal(task)) return false;
     if (taskHasRiskSignal(task)) return false;
-    const deps = normalizeDependsOn(task.depends_on);
+    const deps = normalizeTaskDependencyIds(task.depends_on);
     return deps.every((dep) => completedTaskIds.has(dep));
   });
 
@@ -558,7 +562,7 @@ export function buildAutonomyLaneBatchPreviewPacket(p: Record<string, unknown>, 
       if (!includeProtectedScopes && taskHasProtectedSignal(task)) return false;
       if (taskHasRiskSignal(task)) return false;
       if (!taskValidationGateKnown(task)) return false;
-      const deps = normalizeDependsOn(task.depends_on);
+      const deps = normalizeTaskDependencyIds(task.depends_on);
       return deps.every((dep) => completedTaskIds.has(dep));
     })
     .map((task) => normalizeTaskId(task.id))
