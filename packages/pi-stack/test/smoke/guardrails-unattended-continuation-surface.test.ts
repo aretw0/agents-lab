@@ -216,13 +216,13 @@ describe("guardrails unattended continuation surface", () => {
       const result = auditTool?.execute("call-audit", {}, undefined, undefined, { cwd });
 
       expect(result?.content?.[0]?.text).toContain("local-continuity-audit: eligible=yes collectors=8/8");
-      expect(result?.content?.[0]?.text).toContain("stagnation=pause-human-replan events=2");
+      expect(result?.content?.[0]?.text).toContain("stagnation=pause-operator-replan events=2");
       expect(result?.details.stagnationSignal).toMatchObject({
-        decision: "pause-human-replan",
+        decision: "pause-operator-replan",
         reasonCode: "context-pressure-repeat",
         consecutiveContextPressureEvents: 2,
         focusTask: "TASK-SURFACE",
-        humanActionRequired: true,
+        operatorActionRequired: true,
         advisoryOnly: true,
       });
     } finally {

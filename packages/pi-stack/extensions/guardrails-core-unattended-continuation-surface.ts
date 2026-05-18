@@ -74,11 +74,11 @@ function localContinuityStopBlockerEvidence(input: { advisoryCount: number; stop
 }
 
 type LocalContinuityStagnationSignal = {
-  decision: "none" | "watch" | "pause-human-replan";
+  decision: "none" | "watch" | "pause-operator-replan";
   reasonCode: "no-stagnation" | "context-pressure-repeat";
   consecutiveContextPressureEvents: number;
   focusTask: string;
-  humanActionRequired: boolean;
+  operatorActionRequired: boolean;
   advisoryOnly: true;
 };
 
@@ -100,7 +100,7 @@ function buildLocalContinuityStagnationSignal(handoffJson: any): LocalContinuity
   }
   const hasFreshCompletion = Array.isArray(handoffJson?.completed_tasks) && handoffJson.completed_tasks.length > 0;
   const decision = consecutiveContextPressureEvents >= 2 && focusTask !== "none" && !hasFreshCompletion
-    ? "pause-human-replan"
+    ? "pause-operator-replan"
     : consecutiveContextPressureEvents === 1 && focusTask !== "none" && !hasFreshCompletion
       ? "watch"
       : "none";
@@ -109,7 +109,7 @@ function buildLocalContinuityStagnationSignal(handoffJson: any): LocalContinuity
     reasonCode: decision === "none" ? "no-stagnation" : "context-pressure-repeat",
     consecutiveContextPressureEvents,
     focusTask,
-    humanActionRequired: decision === "pause-human-replan",
+    operatorActionRequired: decision === "pause-operator-replan",
     advisoryOnly: true,
   };
 }
