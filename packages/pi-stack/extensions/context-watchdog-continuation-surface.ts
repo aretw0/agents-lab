@@ -238,7 +238,7 @@ export function registerContextWatchdogContinuationSurface(
 		name: "turn_boundary_decision_packet",
 		label: "Turn Boundary Decision Packet",
 		description:
-			"Report-only packet for turn boundary continuation decisions (continue|checkpoint|pause|ask-human) with explicit humanActionRequired, nextAutoStep, directionPrompt, directionPreview, and optional growth maturity go/hold snapshot.",
+			"Report-only packet for turn boundary continuation decisions (continue|checkpoint|pause|ask-operator) with explicit operatorActionRequired, nextAutoStep, directionPrompt, directionPreview, and optional growth maturity go/hold snapshot.",
 		parameters: Type.Object({
 			safety_score: Type.Optional(Type.Number({ description: "Optional safety maturity score (0..100)." })),
 			calibration_score: Type.Optional(Type.Number({ description: "Optional calibration maturity score (0..100)." })),

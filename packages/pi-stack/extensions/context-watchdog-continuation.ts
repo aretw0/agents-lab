@@ -20,13 +20,13 @@ export type ContextWatchContinuationRecommendationCode =
   | typeof REFRESH_FOCUS_CHECKPOINT_CODE
   | typeof LOCAL_AUDIT_BLOCKED_CODE;
 
-export type TurnBoundaryDecision = "continue" | "checkpoint" | "pause" | "ask-human";
+export type TurnBoundaryDecision = "continue" | "checkpoint" | "pause" | "ask-operator";
 
 export type TurnBoundaryReasonCode =
   | "turn-boundary-continue-local"
   | "turn-boundary-checkpoint-refresh-focus"
   | "turn-boundary-pause-local-stop"
-  | "turn-boundary-ask-human-decision-required";
+  | "turn-boundary-ask-operator-decision-required";
 
 export const TURN_BOUNDARY_DIRECTION_PROMPT = "continue in a similar lane to consolidate, or switch to the next lane with higher long-term value?";
 
@@ -180,7 +180,7 @@ export interface TurnBoundaryDecisionPacket {
   mode: "report-only";
   decision: TurnBoundaryDecision;
   reasonCode: TurnBoundaryReasonCode;
-  humanActionRequired: boolean;
+  operatorActionRequired: boolean;
   nextAutoStep: string;
   directionPrompt: string;
   directionPreview: TurnBoundaryDirectionPreview;
@@ -314,7 +314,7 @@ export function formatContextWatchLocalSliceOperatorPacketPreviewSummary(input: 
 
 function buildTurnBoundaryDirectionPreview(input: {
   decision: TurnBoundaryDecision;
-  humanActionRequired: boolean;
+  operatorActionRequired: boolean;
   nextAutoStep: string;
   localAuditReasons: string[];
   growthDecision?: GrowthMaturityDecision;
@@ -343,11 +343,11 @@ function buildTurnBoundaryDirectionPreview(input: {
           : "viable";
 
   const nextLaneBlockers: string[] = [];
-  nextLaneBlockers.push("requires-explicit-human-focus");
+  nextLaneBlockers.push("requires-explicit-operator-focus");
   if (criticalReasons.length > 0) nextLaneBlockers.push(...criticalReasons);
 
   const nextLaneSuitability: "recommended" | "viable" | "blocked" =
-    (input.decision === "pause" || input.decision === "ask-human" || input.humanActionRequired || growthEncouragesExpansion)
+    (input.decision === "pause" || input.decision === "ask-operator" || input.operatorActionRequired || growthEncouragesExpansion)
       ? "recommended"
       : criticalReasons.length > 0
         ? "blocked"
@@ -457,32 +457,32 @@ export function buildTurnBoundaryDecisionPacket(input: {
 
   let decision: TurnBoundaryDecision = "pause";
   let reasonCode: TurnBoundaryReasonCode = "turn-boundary-pause-local-stop";
-  let humanActionRequired = false;
+  let operatorActionRequired = false;
   let nextAutoStep = recommendation.nextAction;
 
   if (input.ready) {
     decision = "continue";
     reasonCode = "turn-boundary-continue-local";
-    humanActionRequired = false;
+    operatorActionRequired = false;
   } else if (reasons.includes("protected-scopes:invalid") || reasons.includes("stop-conditions:invalid") || reasons.includes("validation:invalid")) {
-    decision = "ask-human";
-    reasonCode = "turn-boundary-ask-human-decision-required";
-    humanActionRequired = true;
+    decision = "ask-operator";
+    reasonCode = "turn-boundary-ask-operator-decision-required";
+    operatorActionRequired = true;
     nextAutoStep = "request explicit operator decision before continuing this lane.";
   } else if (reasons.includes("no-local-safe-next-step")) {
     decision = "pause";
     reasonCode = "turn-boundary-pause-local-stop";
-    humanActionRequired = false;
+    operatorActionRequired = false;
     nextAutoStep = localStopProtectedFocusNextAction();
   } else if (input.focusTasks === "none-listed" || input.staleFocusCount > 0 || reasons.includes("candidate:invalid")) {
     decision = "checkpoint";
     reasonCode = "turn-boundary-checkpoint-refresh-focus";
-    humanActionRequired = false;
+    operatorActionRequired = false;
     nextAutoStep = "write checkpoint with explicit focus and resume bounded local-safe slice.";
   } else {
-    decision = "ask-human";
-    reasonCode = "turn-boundary-ask-human-decision-required";
-    humanActionRequired = true;
+    decision = "ask-operator";
+    reasonCode = "turn-boundary-ask-operator-decision-required";
+    operatorActionRequired = true;
     nextAutoStep = "request explicit operator decision for blocked local audit reasons.";
   }
 
@@ -513,7 +513,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
 
   const directionPreview = buildTurnBoundaryDirectionPreview({
     decision,
-    humanActionRequired,
+    operatorActionRequired,
     nextAutoStep,
     localAuditReasons: reasons,
     growthDecision: growthMaturity?.decision,
@@ -526,7 +526,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     directionPreview,
     recentChange: input.recentChange,
   });
-  const localSafeMayContinue = !humanActionRequired
+  const localSafeMayContinue = !operatorActionRequired
     && decision !== "pause"
     && !reasons.includes("protected-scopes:invalid")
     && !reasons.includes("validation:invalid")
@@ -537,7 +537,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     mode: "report-only",
     decision,
     reasonCode,
-    humanActionRequired,
+    operatorActionRequired,
     nextAutoStep,
     recommendationCode: recommendation.recommendationCode,
     directionPrompt: TURN_BOUNDARY_DIRECTION_PROMPT,
@@ -554,7 +554,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
       "turn-boundary-decision:",
       `decision=${decision}`,
       `reasonCode=${reasonCode}`,
-      `humanActionRequired=${humanActionRequired ? "yes" : "no"}`,
+      `operatorActionRequired=${operatorActionRequired ? "yes" : "no"}`,
       `recommendationCode=${recommendation.recommendationCode}`,
       "directionPrompt=similar-lane-or-next-value",
       `directionRecommended=${directionPreview.recommendedOptionId}`,

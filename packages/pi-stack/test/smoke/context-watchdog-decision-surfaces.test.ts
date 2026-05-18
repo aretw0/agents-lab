@@ -35,7 +35,7 @@ describe("context-watchdog decision surfaces", () => {
     };
   }
 
-	it("turn_boundary_decision_packet returns continue for local-safe focus and ask-human for protected scope", async () => {
+	it("turn_boundary_decision_packet returns continue for local-safe focus and ask-operator for protected scope", async () => {
 		const cwdCheckpoint = mkdtempSync(join(tmpdir(), "ctx-turn-boundary-checkpoint-"));
 		try {
 			execFileSync("git", ["init"], { cwd: cwdCheckpoint, stdio: "ignore" });
@@ -60,7 +60,7 @@ describe("context-watchdog decision surfaces", () => {
 			expect(checkpointResult.content?.[0]?.text).toContain("turn-boundary-decision:");
 			expect(checkpointResult.details?.decision).toBe("continue");
 			expect(checkpointResult.details?.reasonCode).toBe("turn-boundary-continue-local");
-			expect(checkpointResult.details?.humanActionRequired).toBe(false);
+			expect(checkpointResult.details?.operatorActionRequired).toBe(false);
 			expect(checkpointResult.details?.localSafeMayContinue).toBe(true);
 			expect(checkpointResult.directionPrompt).toBeUndefined();
 			expect(checkpointResult.details?.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
@@ -199,18 +199,18 @@ describe("context-watchdog decision surfaces", () => {
 			rmSync(cwdCheckpoint, { recursive: true, force: true });
 		}
 
-		const cwdAskHuman = mkdtempSync(join(tmpdir(), "ctx-turn-boundary-ask-human-"));
+		const cwdAskOperator = mkdtempSync(join(tmpdir(), "ctx-turn-boundary-ask-operator-"));
 		try {
-			execFileSync("git", ["init"], { cwd: cwdAskHuman, stdio: "ignore" });
-			execFileSync("git", ["config", "user.email", "test@example.com"], { cwd: cwdAskHuman, stdio: "ignore" });
-			execFileSync("git", ["config", "user.name", "Test User"], { cwd: cwdAskHuman, stdio: "ignore" });
-			mkdirSync(join(cwdAskHuman, ".project"), { recursive: true });
-			writeFileSync(join(cwdAskHuman, ".project", "handoff.json"), JSON.stringify({
+			execFileSync("git", ["init"], { cwd: cwdAskOperator, stdio: "ignore" });
+			execFileSync("git", ["config", "user.email", "test@example.com"], { cwd: cwdAskOperator, stdio: "ignore" });
+			execFileSync("git", ["config", "user.name", "Test User"], { cwd: cwdAskOperator, stdio: "ignore" });
+			mkdirSync(join(cwdAskOperator, ".project"), { recursive: true });
+			writeFileSync(join(cwdAskOperator, ".project", "handoff.json"), JSON.stringify({
 				timestamp: new Date().toISOString(),
 				current_tasks: ["TASK-BUD-PROTECTED"],
 				blockers: [],
 			}));
-			writeFileSync(join(cwdAskHuman, ".project", "tasks.json"), JSON.stringify({ tasks: [
+			writeFileSync(join(cwdAskOperator, ".project", "tasks.json"), JSON.stringify({ tasks: [
 				{
 					id: "TASK-BUD-PROTECTED",
 					status: "in-progress",
@@ -219,15 +219,15 @@ describe("context-watchdog decision surfaces", () => {
 					acceptance_criteria: ["run smoke test"],
 				},
 			] }));
-			execFileSync("git", ["add", "."], { cwd: cwdAskHuman, stdio: "ignore" });
-			execFileSync("git", ["commit", "-m", "init"], { cwd: cwdAskHuman, stdio: "ignore" });
-			const piAskHuman = makeMockPi();
-			contextWatchdogSurfacesExtension(piAskHuman);
-			const tool = getTool(piAskHuman, "turn_boundary_decision_packet");
-			const askResult = await tool.execute("tc-turn-boundary-ask", {}, undefined as unknown as AbortSignal, () => {}, { cwd: cwdAskHuman });
-			expect(askResult.details?.decision).toBe("ask-human");
-			expect(askResult.details?.reasonCode).toBe("turn-boundary-ask-human-decision-required");
-			expect(askResult.details?.humanActionRequired).toBe(true);
+			execFileSync("git", ["add", "."], { cwd: cwdAskOperator, stdio: "ignore" });
+			execFileSync("git", ["commit", "-m", "init"], { cwd: cwdAskOperator, stdio: "ignore" });
+			const piAskOperator = makeMockPi();
+			contextWatchdogSurfacesExtension(piAskOperator);
+			const tool = getTool(piAskOperator, "turn_boundary_decision_packet");
+			const askResult = await tool.execute("tc-turn-boundary-ask", {}, undefined as unknown as AbortSignal, () => {}, { cwd: cwdAskOperator });
+			expect(askResult.details?.decision).toBe("ask-operator");
+			expect(askResult.details?.reasonCode).toBe("turn-boundary-ask-operator-decision-required");
+			expect(askResult.details?.operatorActionRequired).toBe(true);
 			expect(askResult.details?.localSafeMayContinue).toBe(false);
 			expect(askResult.details?.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
 			expect(askResult.details?.directionPreview?.recommendedOptionId).toBe("next-high-value");
@@ -238,7 +238,7 @@ describe("context-watchdog decision surfaces", () => {
 			expect(askResult.content?.[0]?.text).toContain("directionOptions=similar-lane:blocked,next-high-value:recommended");
 			expect(askResult.content?.[0]?.text).toContain("localSafeMayContinue=no");
 		} finally {
-			rmSync(cwdAskHuman, { recursive: true, force: true });
+			rmSync(cwdAskOperator, { recursive: true, force: true });
 		}
 	});
 
