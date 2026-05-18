@@ -568,7 +568,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const result = {
         mode: "agent-run-task-dispatch" as const,
         activation: "none" as const,
-        authorization: dispatchAllowed ? "explicit-human" as const : "none" as const,
+        authorization: dispatchAllowed ? "explicit-operator" as const : "none" as const,
         dispatchAllowed,
         processStartAllowed: dispatchAllowed,
         processStopAllowed: false,
@@ -830,7 +830,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const result = {
         mode: "agent-run-sdk-in-process-dispatch" as const,
         activation: "none" as const,
-        authorization: dispatchAllowed ? "explicit-human" as const : "none" as const,
+        authorization: dispatchAllowed ? "explicit-operator" as const : "none" as const,
         dispatchAllowed,
         processStartAllowed: dispatchAllowed,
         processStopAllowed: false,

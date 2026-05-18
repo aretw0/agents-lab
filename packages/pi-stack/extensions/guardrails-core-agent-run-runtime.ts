@@ -194,7 +194,7 @@ export interface AgentRunAbortPlanInput {
   runId?: string;
   entry?: AgentRunRegistryEntry;
   execute?: boolean;
-  operatorConfirmed?: boolean;
+  operatorApproval?: unknown;
   cwdExpected?: string;
   nowMs?: number;
 }
@@ -202,7 +202,7 @@ export interface AgentRunAbortPlanInput {
 export interface AgentRunAbortPlanResult {
   mode: "agent-run-abort-plan";
   activation: "none";
-  authorization: "none" | "explicit-human";
+  authorization: "none" | "explicit-operator";
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: boolean;
@@ -214,16 +214,24 @@ export interface AgentRunAbortPlanResult {
     | "agent-run-abort-blocked-not-running"
     | "agent-run-abort-blocked-missing-pid"
     | "agent-run-abort-blocked-cwd-mismatch"
-    | "agent-run-abort-blocked-human-confirmation";
+    | "agent-run-abort-blocked-operator-approval";
   blockers: string[];
   runId: string;
   pid?: number;
-  stopSource: "human";
+  stopSource: "operator";
   summary: string;
 }
 
 function normalizeText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function hasStructuredOperatorApproval(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const row = value as Record<string, unknown>;
+  return row.packet_mode === "operator-approval-packet"
+    && row.approved === true
+    && row.approval_state === "approved";
 }
 
 function normalizePid(value: unknown): number | undefined {
@@ -598,7 +606,7 @@ export function buildAgentRunAbortPlan(input: AgentRunAbortPlanInput = {}): Agen
   const entry = input.entry;
   const pid = normalizePid(entry?.pid);
   const execute = input.execute === true;
-  const operatorConfirmed = input.operatorConfirmed === true;
+  const structuredOperatorApproval = hasStructuredOperatorApproval(input.operatorApproval);
   const cwdExpected = normalizeText(input.cwdExpected);
   const blockers: string[] = [];
   let recommendationCode: AgentRunAbortPlanResult["recommendationCode"] = execute ? "agent-run-abort-ready" : "agent-run-abort-dry-run";
@@ -612,7 +620,7 @@ export function buildAgentRunAbortPlan(input: AgentRunAbortPlanInput = {}): Agen
   if (entry && normalizeState(entry.state) !== "running") block("agent-run-abort-blocked-not-running", "run-not-running");
   if (entry && !pid) block("agent-run-abort-blocked-missing-pid", "pid-missing");
   if (entry && cwdExpected && !sameCwd(normalizeText(entry.cwd), cwdExpected)) block("agent-run-abort-blocked-cwd-mismatch", "cwd-mismatch");
-  if (execute && !operatorConfirmed) block("agent-run-abort-blocked-human-confirmation", "human-confirmation-missing");
+  if (execute && !structuredOperatorApproval) block("agent-run-abort-blocked-operator-approval", "structured-operator-approval-missing");
 
   const decision: AgentRunAbortDecision = blockers.length > 0 ? "blocked" : execute ? "abort-ready" : "dry-run";
   const processStopAllowed = decision === "abort-ready";
@@ -624,13 +632,13 @@ export function buildAgentRunAbortPlan(input: AgentRunAbortPlanInput = {}): Agen
     pid ? `pid=${pid}` : undefined,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     `processStopAllowed=${processStopAllowed ? "yes" : "no"}`,
-    `authorization=${processStopAllowed ? "explicit-human" : "none"}`,
+    `authorization=${processStopAllowed ? "explicit-operator" : "none"}`,
   ].filter(Boolean).join(" ");
 
   return {
     mode: "agent-run-abort-plan",
     activation: "none",
-    authorization: processStopAllowed ? "explicit-human" : "none",
+    authorization: processStopAllowed ? "explicit-operator" : "none",
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed,
@@ -639,7 +647,7 @@ export function buildAgentRunAbortPlan(input: AgentRunAbortPlanInput = {}): Agen
     blockers,
     runId,
     ...(pid ? { pid } : {}),
-    stopSource: "human",
+    stopSource: "operator",
     summary,
   };
 }

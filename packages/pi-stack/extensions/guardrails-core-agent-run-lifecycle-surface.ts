@@ -344,11 +344,15 @@ export function registerAgentRunLifecycleTools(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "agent_run_abort",
     label: "Agent Run Abort",
-    description: "Dry-first abort plan for a registered agent run. execute=true requires operator_confirmed=true and only targets the registered worker pid.",
+    description: "Dry-first abort plan for a registered agent run. execute=true requires structured operator approval and only targets the registered worker pid.",
     parameters: Type.Object({
       run_id: Type.String({ description: "Agent run id." }),
       execute: Type.Optional(Type.Boolean({ description: "When true, send SIGTERM to the registered worker pid after gates pass." })),
-      operator_confirmed: Type.Optional(Type.Boolean({ description: "Explicit human confirmation for execute=true." })),
+      operator_approval: Type.Optional(Type.Object({
+        packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
+        approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
+        approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
+      }, { description: "Structured operator approval envelope." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -358,7 +362,7 @@ export function registerAgentRunLifecycleTools(pi: ExtensionAPI): void {
         runId,
         entry,
         execute: asOptionalBoolean(p.execute),
-        operatorConfirmed: asOptionalBoolean(p.operator_confirmed),
+        operatorApproval: p.operator_approval,
         cwdExpected: ctx.cwd,
       });
       if (plan.processStopAllowed && plan.pid) {

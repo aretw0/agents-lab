@@ -697,7 +697,7 @@ describe("agent run SDK packet surfaces", () => {
       batch_id: "task-bud-1071-sdk-readonly-batch-dispatch-preview",
       run_ids: ["batch-dispatch-surface-worker-a", "batch-dispatch-surface-worker-b"],
       execute: true,
-      operator_confirmed: true,
+      operator_approval: structuredApproval(),
     }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() });
     expect(batchAbortMissing.details?.mode).toBe("agent-run-sdk-readonly-batch-abort");
     expect(batchAbortMissing.details?.processStopAllowed).toBe(false);
@@ -838,3 +838,11 @@ describe("agent run SDK packet surfaces", () => {
     expect(dispatchMissingApproval.content?.[0]?.text).toContain("structured-operator-approval-missing");
   });
 });
+
+function structuredApproval(): Record<string, unknown> {
+  return {
+    packet_mode: "operator-approval-packet",
+    approved: true,
+    approval_state: "approved",
+  };
+}

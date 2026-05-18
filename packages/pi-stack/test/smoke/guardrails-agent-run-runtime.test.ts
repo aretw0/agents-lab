@@ -101,12 +101,13 @@ describe("agent run runtime packets", () => {
       authorization: "none",
     });
 
-    const confirmed = buildAgentRunAbortPlan({ runId: "run-1", entry, execute: true, operatorConfirmed: true, cwdExpected: process.cwd() });
+    const confirmed = buildAgentRunAbortPlan({ runId: "run-1", entry, execute: true, operatorApproval: structuredApproval(), cwdExpected: process.cwd() });
     expect(confirmed).toMatchObject({
       decision: "abort-ready",
       processStopAllowed: true,
-      authorization: "explicit-human",
+      authorization: "explicit-operator",
       pid: 12345,
+      stopSource: "operator",
     });
   });
 
@@ -299,3 +300,11 @@ describe("agent run runtime packets", () => {
     expect(blocked.blockers).toContain("expected-run-missing:worker-c");
   });
 });
+
+function structuredApproval(): Record<string, unknown> {
+  return {
+    packet_mode: "operator-approval-packet",
+    approved: true,
+    approval_state: "approved",
+  };
+}

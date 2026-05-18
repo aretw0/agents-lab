@@ -191,7 +191,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
       const result = {
         mode: "agent-run-sdk-readonly-batch-dispatch" as const,
         activation: "none" as const,
-        authorization: parallelDispatchAllowed ? "explicit-human" as const : "none" as const,
+        authorization: parallelDispatchAllowed ? "explicit-operator" as const : "none" as const,
         dispatchAllowed: parallelDispatchAllowed,
         parallelDispatchAllowed,
         processStartAllowed: parallelDispatchAllowed,
@@ -303,19 +303,23 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "agent_run_sdk_readonly_batch_abort",
     label: "Agent Run SDK Read-Only Batch Abort",
-    description: "Dry-first abort plan for read-only SDK batch workers. execute=true requires operator_confirmed=true and only targets registered worker pids through the shared abort plan.",
+    description: "Dry-first abort plan for read-only SDK batch workers. execute=true requires structured operator approval and only targets registered worker pids through the shared abort plan.",
     parameters: Type.Object({
       batch_id: Type.Optional(Type.String({ description: "Batch id for display only." })),
       run_ids: Type.Optional(Type.Array(Type.String(), { description: "Worker run ids to abort." })),
       execute: Type.Optional(Type.Boolean({ description: "When true, send SIGTERM only to registered worker pids after all gates pass." })),
-      operator_confirmed: Type.Optional(Type.Boolean({ description: "Explicit human confirmation for execute=true." })),
+      operator_approval: Type.Optional(Type.Object({
+        packet_mode: Type.Optional(Type.String({ description: "Must be operator-approval-packet." })),
+        approved: Type.Optional(Type.Boolean({ description: "Structured operator approval decision." })),
+        approval_state: Type.Optional(Type.String({ description: "Must be approved." })),
+      }, { description: "Structured operator approval envelope." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const batchId = typeof p.batch_id === "string" ? p.batch_id : "";
       const runIds = Array.isArray(p.run_ids) ? p.run_ids.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0) : [];
       const executeRequested = p.execute === true;
-      const operatorConfirmed = p.operator_confirmed === true;
+      const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
       const blockers = runIds.length === 0 ? ["run-ids-missing"] : [];
       const plans = runIds.map((runId) => {
         const entry = readRegistryEntry(ctx.cwd, runId);
@@ -323,7 +327,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
           runId,
           entry,
           execute: executeRequested,
-          operatorConfirmed,
+          operatorApproval: p.operator_approval,
           cwdExpected: ctx.cwd,
         });
       });
@@ -344,7 +348,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
       const result = {
         mode: "agent-run-sdk-readonly-batch-abort" as const,
         activation: "none" as const,
-        authorization: stopAllowed ? "explicit-human" as const : "none" as const,
+        authorization: stopAllowed ? "explicit-operator" as const : "none" as const,
         dispatchAllowed: false,
         processStartAllowed: false,
         processStopAllowed: stopAllowed,
@@ -353,7 +357,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
         batchId,
         runIds,
         executeRequested,
-        operatorConfirmed,
+        structuredOperatorApproval,
         plans,
         stoppedPids,
         summary: [
@@ -366,7 +370,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
           stoppedPids.length > 0 ? `stopped=${stoppedPids.length}` : undefined,
           blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
           "dispatch=no",
-          `authorization=${stopAllowed ? "explicit-human" : "none"}`,
+          `authorization=${stopAllowed ? "explicit-operator" : "none"}`,
         ].filter(Boolean).join(" "),
       };
       return buildOperatorVisibleToolResponse({
