@@ -17,7 +17,7 @@ Definir um contrato mínimo para executar **uma única fatia local protected** c
 - falha de validação focal;
 - ausência de rollback explícito;
 - escopo declarado violado;
-- necessidade de segunda fatia protected sem nova decisão humana.
+- necessidade de segunda fatia protected sem nova decisão do operador.
 
 ## Evidência mínima pós-slice
 
@@ -29,4 +29,4 @@ Definir um contrato mínimo para executar **uma única fatia local protected** c
 
 - canário não autoriza repetição automática;
 - canário não autoriza scheduler/remote/offload por default;
-- cada nova fatia protected exige nova confirmação humana.
+- cada nova fatia protected exige nova confirmação do operador.

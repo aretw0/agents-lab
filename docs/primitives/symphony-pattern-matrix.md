@@ -19,7 +19,7 @@ Transformar a pesquisa sobre OpenAI Symphony em uma matriz de assimilação gove
 | Reload fail-closed com last-known-good | `context_watch_status`, reload intent, handoff checkpoint | Expor `reload-required`, `last-known-good` e blockers em frase curta operator-visible | Auto-reload/autoresume sem canary explícito |
 | Preflight por tick antes de dispatch | `autonomy_lane_status`, machine/context/provider gates | Revalidar gates imediatamente antes da próxima fatia, não só no planejamento | Dispatch quando gates estão stale |
 | Workpad persistente com critérios e validação | task notes, verification entries, handoff | Manter aceite + validação no board, não apenas no resumo final | Comentários soltos sem vínculo a verification |
-| Defaults de sandbox/approval documentados | guardrails de protected scope, human confirmation, path guard | Registrar defaults seguros e diferenças de trust posture por lane | Copiar `approval_policy: never` como default |
+| Defaults de sandbox/approval documentados | guardrails de protected scope, operator confirmation, path guard | Registrar defaults seguros e diferenças de trust posture por lane | Copiar `approval_policy: never` como default |
 
 ## Critérios de uso
 
@@ -28,7 +28,7 @@ Uma influência externa só pode virar implementação quando cumprir todos os i
 1. A fatia proposta é local-first e reversível.
 2. O arquivo ou superfície de destino está declarado no task board.
 3. Há validação focal antes de completar a task.
-4. Protected scope está ausente ou explicitamente autorizado por foco humano.
+4. Protected scope está ausente ou explicitamente autorizado por foco do operador.
 5. A mudança melhora uma primitiva existente ou cria documentação/teste antes de runtime novo.
 
 ## Próximas fatias candidatas

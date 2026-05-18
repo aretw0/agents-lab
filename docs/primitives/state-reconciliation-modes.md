@@ -47,7 +47,7 @@ O board é a fonte operacional de tarefas, status e verificação. Para fatias l
 `.pi/settings.json` é baseline canônico protegido.
 
 - não reescrever automaticamente em loops, containers ou canários;
-- mudanças exigem intenção explícita, snapshot/rollback e review humano;
+- mudanças exigem intenção explícita, snapshot/rollback e review do operador;
 - variações temporárias pertencem a overlays derivados, por exemplo `.pi/derived-settings/<agent-id>.settings.json`;
 - promoção de overlay para settings canônico precisa de tarefa separada.
 
@@ -99,4 +99,4 @@ Esta política não autoriza:
 - resolução automática de conflitos de múltiplos escritores;
 - limpeza git destrutiva.
 
-Esses caminhos precisam de tarefa explícita, evidência local e decisão humana.
+Esses caminhos precisam de tarefa explícita, evidência local e decisão do operador.
