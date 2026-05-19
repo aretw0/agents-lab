@@ -23,5 +23,5 @@ RUN mkdir -p /workspaces/agents-lab/.sandbox/pi-agent \
   && chown -R 1000:1000 /workspaces/agents-lab
 
 # Enter the operator shell from Docker Desktop root terminals.
-COPY .devcontainer/lab /usr/local/bin/lab
+COPY lab /usr/local/bin/lab
 RUN chmod +x /usr/local/bin/lab

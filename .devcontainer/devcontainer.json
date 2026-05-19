@@ -2,7 +2,7 @@
   "name": "agents-lab-dev",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": ".."
+    "context": "."
   },
   "runArgs": [
     "--memory=4g",
