@@ -149,7 +149,7 @@ test("session-triage extracts idea inbox proposals from markdown and canonical e
       source: { provider: "pi" },
       event: {
         timestampIso: new Date().toISOString(),
-        role: "user",
+        role: "operator",
         text: "idea: Converter brainstorming de sessão em task draft revisável",
       },
     };
@@ -158,10 +158,11 @@ test("session-triage extracts idea inbox proposals from markdown and canonical e
     const report = runTriage({ workspace, eventsPath, extraArgs: ["--ideas", ideasPath] });
     assert.equal(report.ideaInbox.proposalCount, 3);
     assert.equal(report.ideaInbox.reviewRequired, true);
+    assert.equal(report.sessions[0].userMessages, 1);
     assert.match(report.ideaInbox.promotionPolicy, /operator-review-required/);
     for (const proposal of report.ideaInbox.proposals) {
       assert.equal(proposal.taskDraft.status, "planned");
-      assert.equal(proposal.decisionGate.requiresHumanApproval, true);
+      assert.equal(proposal.decisionGate.requiresOperatorApproval, true);
       assert.equal(proposal.decisionGate.noAutoClose, true);
       assert.ok(proposal.taskDraft.acceptance_criteria.length >= 1);
     }

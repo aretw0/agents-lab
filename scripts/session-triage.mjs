@@ -22,6 +22,8 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { homedir } from "node:os";
 import path from "node:path";
 
+const OPERATOR_EVENT_ROLES = new Set(["user", "operator"]);
+
 function parseArgs(argv) {
   const out = {
     days: 1,
@@ -302,7 +304,7 @@ function extractIdeaCandidatesFromText(text, source) {
         references: [source.ref],
       },
       decisionGate: {
-        requiresHumanApproval: true,
+        requiresOperatorApproval: true,
         requiresVerification: true,
         noAutoClose: true,
       },
@@ -652,7 +654,7 @@ function parseCanonicalEventsFile(eventsPath, cutoffMs) {
     const text = normalizeCanonicalText(ev);
 
     out.messageCount += 1;
-    if (role === "user" || role === "human") out.userMessages += 1;
+    if (OPERATOR_EVENT_ROLES.has(role)) out.userMessages += 1;
     if (role === "assistant" || role === "agent" || role === "bot") out.assistantMessages += 1;
 
     const matches = [...text.matchAll(/\[COLONY_SIGNAL:([A-Z_]+)\]/g)];

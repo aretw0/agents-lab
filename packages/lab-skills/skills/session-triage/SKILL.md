@@ -73,7 +73,7 @@ project-validate
 
 - Manter `no-auto-close`
 - Exigir evidência (arquivos, comandos, resultados)
-- Preservar `human-in-the-loop`
+- Preservar `operator-in-the-loop`
 - Evitar retrabalho de decisões já `decided` sem evidência nova
 
 ## Tidy up seguro de runtime/worktrees
