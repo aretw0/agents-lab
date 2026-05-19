@@ -288,6 +288,9 @@ export function registerContextWatchdogContinuationSurface(
 			hold_threshold: Type.Optional(Type.Number({ description: "Optional hold threshold for growth maturity snapshot." })),
 			debt_budget_ok: Type.Optional(Type.Boolean({ description: "Optional debt-budget signal for growth maturity snapshot." })),
 			critical_blockers: Type.Optional(Type.Number({ description: "Optional critical blocker count." })),
+			runtime_changed: Type.Optional(Type.Boolean({ description: "Whether the just-closed slice changed runtime/extension code." })),
+			docs_only: Type.Optional(Type.Boolean({ description: "Whether the just-closed slice changed only docs/board narrative." })),
+			git_clean: Type.Optional(Type.Boolean({ description: "Whether the slice was committed and the relevant working tree is clean." })),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
 			const config = runtime.getConfig();
@@ -343,9 +346,14 @@ export function registerContextWatchdogContinuationSurface(
 						holdThreshold: typeof p.hold_threshold === "number" ? p.hold_threshold : undefined,
 						debtBudgetOk: typeof p.debt_budget_ok === "boolean" ? p.debt_budget_ok : undefined,
 						criticalBlockers: typeof p.critical_blockers === "number" ? p.critical_blockers : undefined,
-					}
+				}
 					: undefined,
 				growthMaturitySnapshot: fallbackGrowthSnapshot,
+				recentChange: {
+					runtimeChanged: p.runtime_changed === true,
+					docsOnly: p.docs_only === true,
+					gitClean: p.git_clean === true,
+				},
 			});
 			return {
 				content: [{ type: "text", text: packet.summary }],

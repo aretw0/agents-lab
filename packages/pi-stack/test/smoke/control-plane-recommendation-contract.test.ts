@@ -116,6 +116,47 @@ describe("control-plane recommendation contract", () => {
     expect(result.content?.[0]?.text).toContain("reload-before-compact:");
   });
 
+  it("turn_boundary_decision_packet carries concise reload ritual for clean runtime closes", async () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "ctrl-plane-turn-close-"));
+    try {
+      mkdirSync(path.join(cwd, ".project"), { recursive: true });
+      writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({
+        timestamp: new Date().toISOString(),
+        current_tasks: ["TASK-RUNTIME"],
+        blockers: [],
+      }), "utf8");
+      writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
+        { id: "TASK-RUNTIME", status: "in-progress", description: "Runtime slice", files: ["packages/pi-stack/extensions/context-watchdog.ts"] },
+      ] }), "utf8");
+
+      const pi = makeMockPi();
+      registerContextWatchdogContinuationSurface(pi as never, {
+        getConfig: () => DEFAULT_CONTEXT_WATCHDOG_CONFIG,
+        isReloadRequiredForSourceUpdate: () => true,
+      });
+      const tool = getRegisteredTool(pi, "turn_boundary_decision_packet");
+      const runtimeResult = await tool.execute("tc-turn-close-runtime", {
+        runtime_changed: true,
+        git_clean: true,
+      }, undefined as unknown as AbortSignal, () => {}, { cwd }) as { details?: Record<string, unknown> };
+      const runtimeBrief = runtimeResult.details?.finalTurnBrief as { reloadRitual?: { required?: boolean; action?: string }; recommendedNextSteps?: string[] };
+
+      expect(runtimeBrief.reloadRitual?.required).toBe(true);
+      expect(runtimeBrief.reloadRitual?.action).toContain("/reload");
+      expect(runtimeBrief.recommendedNextSteps?.length).toBeLessThanOrEqual(3);
+
+      const docsResult = await tool.execute("tc-turn-close-docs", {
+        docs_only: true,
+        git_clean: true,
+      }, undefined as unknown as AbortSignal, () => {}, { cwd }) as { details?: Record<string, unknown> };
+      const docsBrief = docsResult.details?.finalTurnBrief as { reloadRitual?: { required?: boolean; reason?: string } };
+      expect(docsBrief.reloadRitual?.required).toBe(false);
+      expect(docsBrief.reloadRitual?.reason).toContain("Only documentation changed");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("project_intake_plan keeps concise decision payload with explicit guardrails", () => {
     const pi = makeMockPi();
     registerGuardrailsAutonomyLaneSurface(pi as never);
