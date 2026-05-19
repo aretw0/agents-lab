@@ -4,6 +4,10 @@ import {
   SEED_LOCAL_SAFE_LANE_CODE,
   STOP_NO_LOCAL_SAFE_CODE,
 } from "./guardrails-core-local-stop-guidance";
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
 
 export type BrainstormLevel = "high" | "medium" | "low";
 
@@ -48,7 +52,7 @@ export interface LaneBrainstormPacket {
   selection: LaneBrainstormSelectionInput;
   dispatchAllowed: false;
   mutationAllowed: false;
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   mode: "report-only";
 }
 
@@ -67,7 +71,7 @@ export interface LaneBrainstormSeedPreview {
   confirmationRequired: true;
   dispatchAllowed: false;
   mutationAllowed: false;
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   mode: "report-only";
 }
 
@@ -217,7 +221,7 @@ export function buildLaneBrainstormPacket(input: {
     selection: input.selection,
     dispatchAllowed: false,
     mutationAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     mode: "report-only",
   };
 }
@@ -237,7 +241,7 @@ export function buildLaneBrainstormSeedPreview(input: {
       confirmationRequired: true,
       dispatchAllowed: false,
       mutationAllowed: false,
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       mode: "report-only",
     };
   }
@@ -259,7 +263,7 @@ export function buildLaneBrainstormSeedPreview(input: {
     confirmationRequired: true,
     dispatchAllowed: false,
     mutationAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     mode: "report-only",
   };
 }

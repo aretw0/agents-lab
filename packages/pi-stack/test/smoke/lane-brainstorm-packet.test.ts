@@ -5,6 +5,7 @@ import {
   rankBrainstormIdeas,
   scoreBrainstormIdea,
 } from "../../extensions/lane-brainstorm-packet";
+import { GUARDRAILS_AUTHORIZATION_NONE } from "../../extensions/guardrails-core-authorization";
 
 describe("lane brainstorm packet module", () => {
   it("scores and ranks ideas by value/risk/effort", () => {
@@ -76,7 +77,7 @@ describe("lane brainstorm packet module", () => {
     expect(packet.recommendationCode).toBe("seed-local-safe-lane");
     expect(packet.dispatchAllowed).toBe(false);
     expect(packet.mutationAllowed).toBe(false);
-    expect(packet.authorization).toBe("none");
+    expect(packet.authorization).toBe(GUARDRAILS_AUTHORIZATION_NONE);
     expect(packet.mode).toBe("report-only");
     expect(packet.selectedSlices).toHaveLength(1);
   });
@@ -117,7 +118,7 @@ describe("lane brainstorm packet module", () => {
     expect(preview.confirmationRequired).toBe(true);
     expect(preview.dispatchAllowed).toBe(false);
     expect(preview.mutationAllowed).toBe(false);
-    expect(preview.authorization).toBe("none");
+    expect(preview.authorization).toBe(GUARDRAILS_AUTHORIZATION_NONE);
     expect(preview.mode).toBe("report-only");
     expect(preview.proposals).toHaveLength(1);
     expect(preview.source).toBe("operator");

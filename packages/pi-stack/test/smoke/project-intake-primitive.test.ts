@@ -4,6 +4,7 @@ import {
   INTAKE_NEEDS_OPERATOR_FOCUS_PROTECTED_CODE,
   INTAKE_PLAN_FIRST_SLICE_CODE,
 } from "../../extensions/project-intake-primitive";
+import { GUARDRAILS_AUTHORIZATION_NONE } from "../../extensions/guardrails-core-authorization";
 
 describe("project-intake-primitive", () => {
   it("classifies light notes projects and keeps report-only guardrails", () => {
@@ -18,7 +19,7 @@ describe("project-intake-primitive", () => {
     expect(plan.recommendationCode).toBe(INTAKE_PLAN_FIRST_SLICE_CODE);
     expect(plan.dispatchAllowed).toBe(false);
     expect(plan.mutationAllowed).toBe(false);
-    expect(plan.authorization).toBe("none");
+    expect(plan.authorization).toBe(GUARDRAILS_AUTHORIZATION_NONE);
     expect(plan.mode).toBe("report-only");
   });
 
@@ -66,7 +67,7 @@ describe("project-intake-primitive", () => {
       expect(plan.firstSlice.rollback).toBe("git revert commit");
       expect(plan.dispatchAllowed).toBe(false);
       expect(plan.mutationAllowed).toBe(false);
-      expect(plan.authorization).toBe("none");
+      expect(plan.authorization).toBe(GUARDRAILS_AUTHORIZATION_NONE);
     }
   });
 

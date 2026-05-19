@@ -1,3 +1,8 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+
 export type ProjectIntakeProfile = "light-notes" | "app-medium" | "monorepo-heavy";
 
 export const INTAKE_PLAN_FIRST_SLICE_CODE = "intake-plan-first-slice";
@@ -25,7 +30,7 @@ export interface ProjectIntakePlan {
   rationale: string;
   dispatchAllowed: false;
   mutationAllowed: false;
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   mode: "report-only";
 }
 
@@ -69,7 +74,7 @@ export function evaluateProjectIntakePlan(raw: ProjectIntakeInput): ProjectIntak
       rationale: "protected scope cannot be auto-selected during intake.",
       dispatchAllowed: false,
       mutationAllowed: false,
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       mode: "report-only",
     };
   }
@@ -102,7 +107,7 @@ export function evaluateProjectIntakePlan(raw: ProjectIntakeInput): ProjectIntak
     rationale: "intake stays deterministic and report-only to preserve control and low token cost.",
     dispatchAllowed: false,
     mutationAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     mode: "report-only",
   };
 }
