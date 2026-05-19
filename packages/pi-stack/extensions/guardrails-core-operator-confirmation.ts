@@ -514,13 +514,13 @@ export function resolveOperatorConfirmationEvidenceMatch(
     reasons.push("confirmation-evidence-missing");
     return {
       decision: "missing",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       usableAsAuditEvidence: false,
       consumeAllowed: false,
       reasons,
-      summary: "operator-confirmation-evidence: decision=missing dispatch=no override=no reasons=confirmation-evidence-missing authorization=none",
+      summary: `operator-confirmation-evidence: decision=missing dispatch=no override=no reasons=confirmation-evidence-missing ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -528,14 +528,14 @@ export function resolveOperatorConfirmationEvidenceMatch(
     reasons.push("confirmation-origin-untrusted");
     return {
       decision: "untrusted",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       usableAsAuditEvidence: false,
       consumeAllowed: false,
       reasons,
       evidenceId: evidence.id,
-      summary: `operator-confirmation-evidence: decision=untrusted dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-evidence: decision=untrusted dispatch=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -543,14 +543,14 @@ export function resolveOperatorConfirmationEvidenceMatch(
     reasons.push("confirmation-already-consumed");
     return {
       decision: "consumed",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       usableAsAuditEvidence: false,
       consumeAllowed: false,
       reasons,
       evidenceId: evidence.id,
-      summary: `operator-confirmation-evidence: decision=consumed dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-evidence: decision=consumed dispatch=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -558,14 +558,14 @@ export function resolveOperatorConfirmationEvidenceMatch(
     reasons.push("confirmation-expired");
     return {
       decision: "expired",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       usableAsAuditEvidence: false,
       consumeAllowed: false,
       reasons,
       evidenceId: evidence.id,
-      summary: `operator-confirmation-evidence: decision=expired dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-evidence: decision=expired dispatch=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -579,14 +579,14 @@ export function resolveOperatorConfirmationEvidenceMatch(
   if (mismatchReasons.length > 0) {
     return {
       decision: "mismatch",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       usableAsAuditEvidence: false,
       consumeAllowed: false,
       reasons: mismatchReasons,
       evidenceId: evidence.id,
-      summary: `operator-confirmation-evidence: decision=mismatch dispatch=no override=no reasons=${mismatchReasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-evidence: decision=mismatch dispatch=no override=no reasons=${mismatchReasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -595,14 +595,14 @@ export function resolveOperatorConfirmationEvidenceMatch(
   reasons.push("confirmation-single-use-ready");
   return {
     decision: "match",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     canOverrideMonitorBlock: false,
     usableAsAuditEvidence: true,
     consumeAllowed: true,
     reasons,
     evidenceId: evidence.id,
-    summary: `operator-confirmation-evidence: decision=match dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+    summary: `operator-confirmation-evidence: decision=match dispatch=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
   };
 }
 
@@ -622,7 +622,7 @@ export function buildTrustedOperatorConfirmationAuditEnvelope(
     scope ? `scope=${scope}` : undefined,
     `dispatch=no`,
     `override=no`,
-    `authorization=none`,
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter((part): part is string => Boolean(part));
 
   return {
@@ -644,7 +644,7 @@ export function buildTrustedOperatorConfirmationAuditEnvelope(
       reasons: match.reasons.slice(0, 8),
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
     },
   };
 }
