@@ -43,6 +43,27 @@ npm run ops:disk:cleanup:with-sessions
 
 - `*.jsonl` em `.sandbox/pi-agent/sessions`
 - para isso, é obrigatório `--include-sessions`
+- artefatos de volume do host, como Docker/WSL `*.vhdx`
+
+### Quando `hostVolumes` domina
+
+Se a saída mostrar `hostVolumes` muito maior que os candidatos de limpeza, o problema não está nos artefatos seguros do repositório. Exemplo:
+
+```text
+volatile: ... globalSessions=622.75MB hostVolumes=214306MB
+top host volume artifacts (read-only inventory):
+- docker-wsl-data-vhdx: C:/Users/.../Docker/wsl/disk/docker_data.vhdx
+- wsl-ubuntu-vhdx: C:/Users/.../Packages/CanonicalGroupLimited.Ubuntu.../LocalState/ext4.vhdx
+```
+
+Nessa situação:
+
+1. Tratar `ops:disk:cleanup` como insuficiente para desbloquear long-run.
+2. Manter o Pi em modo curto/checkpoint até liberar disco fora do repo.
+3. Resolver Docker/WSL pelo mecanismo próprio do host, com intenção explícita do operador.
+4. Reexecutar `npm run ops:disk:cleanup:dry` e `npm run pi:dev:pressure` antes de voltar à runtime do Pi.
+
+O inventário de `hostVolumes` é somente leitura. Ele não autoriza apagar, compactar ou resetar Docker/WSL automaticamente.
 
 ## Checklist de retomada
 
@@ -103,3 +124,4 @@ Um resultado `severity=warning action=monitor` significa registrar e continuar s
 - Registrar checkpoint antes de validações potencialmente longas.
 - Rodar `ops:disk:check` periodicamente em fases de long-run.
 - Tratar avisos de Git GC como manutenção controlada: observar, classificar e agir dry-first.
+- Se `hostVolumes` aparecer como o maior consumo, pausar long-run e corrigir o host antes de tentar otimizar o repositório.
