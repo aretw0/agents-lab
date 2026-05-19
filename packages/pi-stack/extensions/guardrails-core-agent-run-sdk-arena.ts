@@ -1,6 +1,12 @@
 import { resolveProviderExecutionBudgetEvidence, type ProviderExecutionBudgetDecision } from "./guardrails-core-provider-budget-evidence";
 import { buildAgentRunSdkInProcessPacket, type AgentRunSdkFileContract, type AgentRunSdkInProcessPacketResult, type AgentRunSdkPacketDecision } from "./guardrails-core-agent-run-sdk-preview";
 import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
+import {
+  GUARDRAILS_AUTHORIZATION_EXPLICIT_OPERATOR,
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationExplicitOperator,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
 
 const ARENA_ENVELOPE_IDS = [
   "readonly-one-file",
@@ -54,7 +60,7 @@ export interface AgentRunSdkProviderModelArenaArtifactPacketInput extends AgentR
 export interface AgentRunSdkProviderModelArenaArtifactPacketResult {
   mode: "agent-run-sdk-provider-model-arena-artifact-packet";
   activation: "none";
-  authorization: "none" | "explicit-operator";
+  authorization: GuardrailsAuthorizationNone | GuardrailsAuthorizationExplicitOperator;
   dispatchAllowed: false;
   processStartAllowed: false;
   paidModelCallsAllowed: false;
@@ -79,7 +85,7 @@ export interface AgentRunSdkProviderModelArenaArtifactPacketResult {
 export interface AgentRunSdkProviderModelArenaPacketResult {
   mode: "agent-run-sdk-provider-model-arena-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -385,7 +391,7 @@ export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRun
   return {
     mode: "agent-run-sdk-provider-model-arena-artifact-packet",
     activation: "none",
-    authorization: writeAllowed ? "explicit-operator" : "none",
+    authorization: writeAllowed ? GUARDRAILS_AUTHORIZATION_EXPLICIT_OPERATOR : GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     paidModelCallsAllowed: false,
@@ -634,7 +640,7 @@ export function buildAgentRunSdkProviderModelArenaPacket(input: AgentRunSdkProvi
   return {
     mode: "agent-run-sdk-provider-model-arena-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
