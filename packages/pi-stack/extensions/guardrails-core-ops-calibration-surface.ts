@@ -23,6 +23,7 @@ import {
   parseAutoAdvanceHardIntentTelemetry,
   parseDelegationMixScore,
 } from "./session-analytics";
+import { GUARDRAILS_AUTHORIZATION_NONE } from "./guardrails-core-authorization";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 import {
@@ -447,7 +448,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         details: {
           mode: "delegation-readiness-status-packet",
           activation: "none",
-          authorization: "none",
+          authorization: GUARDRAILS_AUTHORIZATION_NONE,
           dispatchAllowed: false,
           mutationAllowed: false,
           decision: status.decision,

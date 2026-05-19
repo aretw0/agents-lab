@@ -1,6 +1,11 @@
 import type { AgentsAsToolsCalibrationScore } from "./guardrails-core-tool-hygiene";
 import type { BackgroundProcessReadinessScore } from "./guardrails-core-background-process";
 import type { BackgroundProcessRehearsalResult } from "./guardrails-core-background-process-rehearsal";
+import {
+  formatAuthorizationEvidence,
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
 
 export type OpsCalibrationDecision = "keep-report-only" | "ready-for-bounded-rehearsal";
 export type OpsCalibrationRecommendationCode =
@@ -22,7 +27,7 @@ export interface OpsCalibrationDecisionInput {
 export interface OpsCalibrationDecisionPacket {
   mode: "ops-calibration-decision-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   decision: OpsCalibrationDecision;
   recommendationCode: OpsCalibrationRecommendationCode;
@@ -92,7 +97,7 @@ export function buildOpsCalibrationDecisionPacket(input: OpsCalibrationDecisionI
   return {
     mode: "ops-calibration-decision-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     decision,
     recommendationCode,
@@ -152,7 +157,7 @@ export interface DelegateOrExecuteDecisionInput {
 export interface DelegateOrExecuteDecisionPacket {
   mode: "delegate-or-execute-decision-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   mutationAllowed: false;
   recommendedOption: DelegateOrExecuteOption;
@@ -238,13 +243,13 @@ export function buildDelegateOrExecuteDecisionPacket(
     `mix=${mixDecision}`,
     `mixScore=${mixScore}`,
     blockers.length > 0 ? `blockers=${[...new Set(blockers)].join("|")}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
     mode: "delegate-or-execute-decision-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     mutationAllowed: false,
     recommendedOption,
@@ -297,7 +302,7 @@ export interface DelegationRehearsalDecisionInput {
 export interface DelegationRehearsalDecisionPacket {
   mode: "delegation-rehearsal-readiness-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   mutationAllowed: false;
   decision: DelegationRehearsalDecision;
@@ -406,13 +411,13 @@ export function buildDelegationRehearsalDecisionPacket(
     `autoAdvance=${autoAdvanceDecision}`,
     `telemetry=${telemetryDecision}`,
     uniqueBlockers.length > 0 ? `blockers=${uniqueBlockers.join("|")}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
     mode: "delegation-rehearsal-readiness-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     mutationAllowed: false,
     decision,
@@ -463,7 +468,7 @@ export interface DelegationRehearsalStartPacketInput {
 export interface DelegationRehearsalStartPacket {
   mode: "delegation-rehearsal-start-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   mutationAllowed: false;
   decision: DelegationRehearsalStartDecision;
@@ -541,13 +546,13 @@ export function buildDelegationRehearsalStartPacket(
     `rehearsal=${rehearsalDecision}`,
     `contract=${contractState}`,
     uniqueBlockers.length > 0 ? `blockers=${uniqueBlockers.join("|")}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
     mode: "delegation-rehearsal-start-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     mutationAllowed: false,
     decision,

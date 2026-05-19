@@ -6,6 +6,10 @@ import {
   buildDelegateOrExecuteDecisionPacket,
   buildDelegationRehearsalDecisionPacket,
 } from "./guardrails-core-ops-calibration";
+import {
+  formatAuthorizationEvidence,
+  GUARDRAILS_AUTHORIZATION_NONE,
+} from "./guardrails-core-authorization";
 import { buildAgentsAsToolsCalibrationScore, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
 import { evaluateAutonomyLaneTaskSelection, readAutonomyHandoffFocusTaskIds } from "./guardrails-core-autonomy-task-selector";
 import { consumeContextPreloadPack } from "./context-watchdog-continuation";
@@ -251,7 +255,7 @@ export function buildDelegationReadinessStatus(input: {
       `execute=${input.delegatePacket.recommendedOption}`,
       `rehearsal=${input.rehearsalPacket.decision}`,
       "next=delegation_rehearsal_start_packet",
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].join(" ");
     return {
       decision: "ready-delegation-rehearsal",
@@ -272,7 +276,7 @@ export function buildDelegationReadinessStatus(input: {
       `rehearsal=${input.rehearsalPacket.decision}`,
       "next=collect-bounded-evidence",
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].filter(Boolean).join(" ");
     return {
       decision: "local-execute-first",
@@ -292,7 +296,7 @@ export function buildDelegationReadinessStatus(input: {
     `rehearsal=${input.rehearsalPacket.decision}`,
     "next=resolve-blockers",
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
@@ -365,7 +369,7 @@ export function buildOperationalRunwayPacket(input: {
       `delegation=${input.delegation.decision}`,
       `background=${backgroundDecision}`,
       normalizedBlockers.length > 0 ? `blockers=${normalizedBlockers.join("|")}` : undefined,
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].filter(Boolean).join(" ");
     return {
       recommendedOption: "defer",
@@ -389,7 +393,7 @@ export function buildOperationalRunwayPacket(input: {
       "code=operational-runway-delegate",
       `delegation=${input.delegation.decision}`,
       `background=${backgroundDecision}`,
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].join(" ");
     return {
       recommendedOption: "delegate",
@@ -413,7 +417,7 @@ export function buildOperationalRunwayPacket(input: {
     `delegation=${input.delegation.decision}`,
     `background=${backgroundDecision}`,
     normalizedBlockers.length > 0 ? `blockers=${normalizedBlockers.join("|")}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
   return {
     recommendedOption: "local-execute",
