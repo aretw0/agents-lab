@@ -12,11 +12,18 @@
     "cpus": 4,
     "memory": "8gb"
   },
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": false,
+      "username": "vscode"
+    }
+  },
   "remoteUser": "vscode",
   "workspaceFolder": "/workspaces/agents-lab",
   "containerEnv": {
     "PI_CODING_AGENT_DIR": "/workspaces/agents-lab/.sandbox/pi-agent",
     "NPM_CONFIG_CACHE": "/home/vscode/.npm-cache",
+    "PNPM_HOME": "/home/vscode/.local/share/pnpm",
     "LANG": "pt_BR.UTF-8",
     "LC_ALL": "pt_BR.UTF-8",
     "LANGUAGE": "pt_BR:pt:en",
@@ -25,7 +32,8 @@
   },
   "mounts": [
     "source=agents-lab-node-modules,target=/workspaces/agents-lab/node_modules,type=volume",
-    "source=agents-lab-npm-cache,target=/home/vscode/.npm-cache,type=volume"
+    "source=agents-lab-npm-cache,target=/home/vscode/.npm-cache,type=volume",
+    "source=agents-lab-pnpm-store,target=/home/vscode/.local/share/pnpm/store,type=volume"
   ],
   "postCreateCommand": "bash .devcontainer/postCreate.sh",
   "postStartCommand": "bash .devcontainer/postStart.sh",

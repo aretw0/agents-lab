@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm
+FROM mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm
 
 ARG USERNAME=vscode
 
@@ -20,7 +20,7 @@ RUN apt-get update \
 
 # Workspace-local runtime directory (mounted project will persist it).
 RUN mkdir -p /workspaces/agents-lab/.sandbox/pi-agent \
-  && chown -R ${USERNAME}:${USERNAME} /workspaces/agents-lab
+  && chown -R 1000:1000 /workspaces/agents-lab
 
 # Enter the operator shell from Docker Desktop root terminals.
 COPY .devcontainer/lab /usr/local/bin/lab
