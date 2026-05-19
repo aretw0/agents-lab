@@ -31,6 +31,12 @@ export function buildDevelopmentVelocityPressure(report) {
   if (signals.some((signal) => signal.code === "stale-handoff" || signal.code === "stale-useful-commit")) {
     if (!stopConditions.includes("checkpoint-before-more-work")) stopConditions.push("checkpoint-before-more-work");
   }
+  if (signals.some((signal) => signal.code === "dangling-agent-run-process")) {
+    if (!stopConditions.includes("checkpoint-before-more-work")) stopConditions.push("checkpoint-before-more-work");
+  }
+  if (signals.some((signal) => signal.code === "excessive-control-plane-ceremony")) {
+    stopConditions.push("reduce-ceremony");
+  }
 
   let severity = "ok";
   if (hasBlock) severity = "block";

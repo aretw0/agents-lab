@@ -21,6 +21,9 @@ const DEFAULT_THRESHOLDS = {
   diskWarnFreeMb: 10 * 1024,
   diskBlockFreeMb: 5 * 1024,
   processAgeWarnMinutes: 6 * 60,
+  danglingProcessWarn: 1,
+  ceremonyToolCallWarn: 40,
+  ceremonyBoardReadWarn: 8,
 };
 
 function isRecord(value) {
@@ -419,10 +422,12 @@ export function collectVelocityStats(cwd = process.cwd(), options = {}) {
   const board = options.board ?? collectBoardStateStats(cwd);
   const handoff = options.handoff ?? collectHandoffStats(cwd, nowMs);
   const commit = options.commit ?? collectLastCommitStats(cwd, nowMs);
+  const agentRuns = options.agentRuns ?? collectAgentRunPressureStats(cwd, nowMs);
+  const ceremony = options.ceremony ?? collectCeremonyPressureStats(cwd);
   const runtime = options.runtime ?? {
     processUptimeMinutes: Number((Number(options.processUptimeSeconds ?? process.uptime()) / 60).toFixed(1)),
   };
-  return { machine, board, handoff, commit, runtime };
+  return { machine, board, handoff, commit, agentRuns, ceremony, runtime };
 }
 
 export function collectMachineStats(cwd = process.cwd()) {
@@ -500,6 +505,42 @@ export function collectLastCommitStats(cwd = process.cwd(), nowMs = Date.now()) 
   };
 }
 
+export function collectAgentRunPressureStats(cwd = process.cwd(), nowMs = Date.now()) {
+  const registryPath = path.join(cwd, ".pi", "reports", "agent-runs.json");
+  const registry = readJsonIfExists(registryPath);
+  if (!registry || registry.__parseError) {
+    return { available: existsSync(registryPath), parseError: registry?.__parseError };
+  }
+  const runs = Array.isArray(registry.runs) ? registry.runs : [];
+  const activeStates = new Set(["running", "started", "starting", "pending"]);
+  const active = runs.filter((run) => activeStates.has(String(run?.state ?? "").toLowerCase()));
+  const dangling = active.filter((run) => {
+    const lastEventMs = typeof run?.lastEventAtIso === "string" ? Date.parse(run.lastEventAtIso) : NaN;
+    const timeoutMs = Number.isFinite(Number(run?.timeoutMs)) ? Number(run.timeoutMs) : 90_000;
+    return Number.isFinite(lastEventMs) && nowMs - lastEventMs > Math.max(timeoutMs * 2, 5 * 60_000);
+  });
+  return {
+    available: true,
+    activeCount: active.length,
+    danglingProcessCount: dangling.length,
+    danglingRunIds: dangling.map((run) => String(run.runId ?? "unknown")).slice(0, 10),
+  };
+}
+
+export function collectCeremonyPressureStats(cwd = process.cwd()) {
+  const markerPath = path.join(cwd, ".pi", "reports", "dev-ceremony-pressure.json");
+  const marker = readJsonIfExists(markerPath);
+  if (!marker || marker.__parseError) {
+    return { available: existsSync(markerPath), parseError: marker?.__parseError };
+  }
+  return {
+    available: true,
+    toolCallsSinceUsefulCommit: Number(marker.toolCallsSinceUsefulCommit ?? 0),
+    boardReadCount: Number(marker.boardReadCount ?? 0),
+    slowToolCount: Number(marker.slowToolCount ?? 0),
+  };
+}
+
 export function buildVelocityPressureSignals(velocity, thresholds = DEFAULT_THRESHOLDS) {
   const signals = [];
   const memory = velocity?.machine?.memory;
@@ -534,6 +575,23 @@ export function buildVelocityPressureSignals(velocity, thresholds = DEFAULT_THRE
   const runtime = velocity?.runtime;
   if (runtime?.processUptimeMinutes >= thresholds.processAgeWarnMinutes) {
     signals.push({ level: "warn", code: "long-dev-process", detail: `processUptime=${runtime.processUptimeMinutes} minutes` });
+  }
+
+  const agentRuns = velocity?.agentRuns;
+  if (agentRuns?.danglingProcessCount >= thresholds.danglingProcessWarn) {
+    signals.push({ level: "warn", code: "dangling-agent-run-process", detail: `dangling=${agentRuns.danglingProcessCount} active=${agentRuns.activeCount ?? "n/a"}` });
+  }
+
+  const ceremony = velocity?.ceremony;
+  if (
+    ceremony?.toolCallsSinceUsefulCommit >= thresholds.ceremonyToolCallWarn ||
+    ceremony?.boardReadCount >= thresholds.ceremonyBoardReadWarn
+  ) {
+    signals.push({
+      level: "warn",
+      code: "excessive-control-plane-ceremony",
+      detail: `toolCalls=${ceremony.toolCallsSinceUsefulCommit ?? "n/a"} boardReads=${ceremony.boardReadCount ?? "n/a"} slowTools=${ceremony.slowToolCount ?? "n/a"}`,
+    });
   }
 
   return signals;
@@ -595,6 +653,8 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   else if (signals.some((signal) => signal.code === "large-board-state")) recommendation = "reduce-governance-surface";
   else if (signals.some((signal) => signal.code === "wide-dirty-scope")) recommendation = "checkpoint-and-commit";
   else if (signals.some((signal) => signal.code === "stale-handoff" || signal.code === "stale-useful-commit")) recommendation = "checkpoint-and-commit";
+  else if (signals.some((signal) => signal.code === "dangling-agent-run-process")) recommendation = "checkpoint-and-commit";
+  else if (signals.some((signal) => signal.code === "excessive-control-plane-ceremony")) recommendation = "reduce-governance-surface";
   else if (signals.some((signal) => signal.code === "long-dev-process")) recommendation = "new-session";
 
   const velocityPressure = buildDevelopmentVelocityPressure({ signals });
@@ -725,6 +785,9 @@ function printHuman(report) {
       `minutesSinceCommit=${report.velocity.commit?.minutesSinceUsefulCommit ?? "n/a"}`,
       `memoryUsed=${report.velocity.machine?.memory?.usedPct ?? "n/a"}%`,
       `diskFreeMb=${report.velocity.machine?.disk?.freeMb ?? "n/a"}`,
+      `danglingRuns=${report.velocity.agentRuns?.danglingProcessCount ?? "n/a"}`,
+      `toolCalls=${report.velocity.ceremony?.toolCallsSinceUsefulCommit ?? "n/a"}`,
+      `boardReads=${report.velocity.ceremony?.boardReadCount ?? "n/a"}`,
       `processUptimeMin=${report.velocity.runtime?.processUptimeMinutes ?? "n/a"}`,
     ];
     lines.push(`- velocity: ${velocityParts.join(" ")}`);

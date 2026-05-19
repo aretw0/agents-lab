@@ -16,6 +16,7 @@ import {
   computeStrictFailures,
   buildDevelopmentVelocityPressure,
   buildVelocityPressureSignals,
+  collectAgentRunPressureStats,
 } from "../pi-dev-pressure.mjs";
 import { PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES } from "../../packages/pi-stack/install.mjs";
 
@@ -297,6 +298,8 @@ test("buildPiDevPressureReport recommends new-session for large resume logs", ()
         board: { exists: false },
         handoff: { exists: false },
         commit: { available: false },
+        agentRuns: { available: true, activeCount: 0, danglingProcessCount: 0 },
+        ceremony: { available: false },
         runtime: { processUptimeMinutes: 0 },
       },
     });
@@ -377,6 +380,8 @@ test("buildVelocityPressureSignals classifies local-first velocity pressure inpu
     handoff: { exists: true, ageMinutes: 1500 },
     commit: { available: true, minutesSinceUsefulCommit: 300 },
     runtime: { processUptimeMinutes: 400 },
+    agentRuns: { available: true, activeCount: 2, danglingProcessCount: 1 },
+    ceremony: { available: true, toolCallsSinceUsefulCommit: 45, boardReadCount: 9, slowToolCount: 3 },
   }, {
     memoryWarnUsedPct: 85,
     memoryBlockUsedPct: 96,
@@ -386,6 +391,9 @@ test("buildVelocityPressureSignals classifies local-first velocity pressure inpu
     handoffWarnMinutes: 1440,
     usefulCommitWarnMinutes: 240,
     processAgeWarnMinutes: 360,
+    danglingProcessWarn: 1,
+    ceremonyToolCallWarn: 40,
+    ceremonyBoardReadWarn: 8,
   });
 
   assert.deepEqual(signals.map((signal) => signal.code), [
@@ -395,5 +403,45 @@ test("buildVelocityPressureSignals classifies local-first velocity pressure inpu
     "stale-handoff",
     "stale-useful-commit",
     "long-dev-process",
+    "dangling-agent-run-process",
+    "excessive-control-plane-ceremony",
   ]);
+});
+
+test("collectAgentRunPressureStats reports stale active runs as dangling", () => {
+  const cwd = makeWorkspace();
+  try {
+    const reports = join(cwd, ".pi", "reports");
+    mkdirSync(reports, { recursive: true });
+    writeJson(join(reports, "agent-runs.json"), {
+      runs: [
+        {
+          runId: "active-fresh",
+          state: "running",
+          timeoutMs: 90_000,
+          lastEventAtIso: "2026-05-19T05:00:00.000Z",
+        },
+        {
+          runId: "active-stale",
+          state: "running",
+          timeoutMs: 90_000,
+          lastEventAtIso: "2026-05-19T04:00:00.000Z",
+        },
+        {
+          runId: "completed-stale",
+          state: "completed",
+          timeoutMs: 90_000,
+          lastEventAtIso: "2026-05-19T04:00:00.000Z",
+        },
+      ],
+    });
+
+    const stats = collectAgentRunPressureStats(cwd, Date.parse("2026-05-19T05:01:00.000Z"));
+
+    assert.equal(stats.activeCount, 2);
+    assert.equal(stats.danglingProcessCount, 1);
+    assert.deepEqual(stats.danglingRunIds, ["active-stale"]);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
 });
