@@ -44,6 +44,12 @@ function taskOneLine(task) {
   return `${id} [${priority}/${status}] ${description}`.slice(0, 180);
 }
 
+function taskDependencies(task) {
+  return Array.isArray(task?.depends_on)
+    ? task.depends_on.map((dep) => String(dep ?? "").trim()).filter(Boolean)
+    : [];
+}
+
 export function summarizeBoard(cwd = process.cwd()) {
   const tasksPath = path.join(cwd, ".project", "tasks.json");
   if (!existsSync(tasksPath)) {
@@ -53,6 +59,8 @@ export function summarizeBoard(cwd = process.cwd()) {
       byStatus: {},
       byPriority: {},
       openP0: [],
+      p0Ready: [],
+      p0BlockedByDependency: [],
       inProgress: [],
       blocked: [],
       releaseReady: false,
@@ -65,8 +73,15 @@ export function summarizeBoard(cwd = process.cwd()) {
   const byStatus = {};
   const byPriority = {};
   const openP0 = [];
+  const p0Ready = [];
+  const p0BlockedByDependency = [];
   const inProgress = [];
   const blocked = [];
+  const statusById = new Map();
+
+  for (const task of tasks) {
+    statusById.set(String(task?.id ?? ""), normalizeStatus(task?.status));
+  }
 
   for (const task of tasks) {
     const status = normalizeStatus(task?.status);
@@ -74,7 +89,15 @@ export function summarizeBoard(cwd = process.cwd()) {
     byStatus[status] = (byStatus[status] ?? 0) + 1;
     byPriority[priority] = (byPriority[priority] ?? 0) + 1;
     const open = status !== "completed" && status !== "cancelled";
-    if (priority === "p0" && open) openP0.push(task);
+    if (priority === "p0" && open) {
+      const unmetDeps = taskDependencies(task).filter((dep) => statusById.get(dep) !== "completed");
+      openP0.push(task);
+      if (unmetDeps.length > 0) {
+        p0BlockedByDependency.push(`${taskOneLine(task)} blockedBy=${unmetDeps.slice(0, 5).join(",")}`);
+      } else {
+        p0Ready.push(task);
+      }
+    }
     if (status === "in-progress") inProgress.push(task);
     if (status === "blocked") blocked.push(task);
   }
@@ -90,6 +113,8 @@ export function summarizeBoard(cwd = process.cwd()) {
     byStatus,
     byPriority,
     openP0: openP0.map(taskOneLine).slice(0, 12),
+    p0Ready: p0Ready.map(taskOneLine).slice(0, 12),
+    p0BlockedByDependency: p0BlockedByDependency.slice(0, 12),
     inProgress: inProgress.map(taskOneLine).slice(0, 12),
     blocked: blocked.map(taskOneLine).slice(0, 12),
     releaseReady: blockers.length === 0,
@@ -174,6 +199,12 @@ export function buildReport(data) {
     "",
     "### Open P0",
     ...(data.board.openP0.length ? data.board.openP0.map((line) => `- ${line}`) : ["- none"]),
+    "",
+    "### P0 Ready To Start",
+    ...(data.board.p0Ready.length ? data.board.p0Ready.map((line) => `- ${line}`) : ["- none"]),
+    "",
+    "### P0 Blocked By Dependency",
+    ...(data.board.p0BlockedByDependency.length ? data.board.p0BlockedByDependency.map((line) => `- ${line}`) : ["- none"]),
     "",
     "### In Progress",
     ...(data.board.inProgress.length ? data.board.inProgress.map((line) => `- ${line}`) : ["- none"]),

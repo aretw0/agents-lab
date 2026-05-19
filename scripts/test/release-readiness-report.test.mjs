@@ -37,6 +37,7 @@ test("summarizeBoard normalizes active release blockers", () => {
     tasks: [
       { id: "TASK-A", status: "completed", priority: "p0", description: "done" },
       { id: "TASK-B", status: "in_progress", priority: "p0", description: "active p0" },
+      { id: "TASK-D", status: "planned", priority: "p0", description: "blocked by dep", depends_on: ["TASK-C"] },
       { id: "TASK-C", status: "blocked", priority: "p1", description: "blocked p1" },
     ],
   });
@@ -44,8 +45,11 @@ test("summarizeBoard normalizes active release blockers", () => {
   try {
     const summary = summarizeBoard(workspace);
     assert.equal(summary.releaseReady, false);
-    assert.deepEqual(summary.blockers, ["open-p0=1", "in-progress=1", "blocked=1"]);
+    assert.deepEqual(summary.blockers, ["open-p0=2", "in-progress=1", "blocked=1"]);
     assert.equal(summary.byStatus["in-progress"], 1);
+    assert.equal(summary.p0Ready.length, 1);
+    assert.equal(summary.p0BlockedByDependency.length, 1);
+    assert.match(summary.p0BlockedByDependency[0], /blockedBy=TASK-C/);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }
@@ -64,6 +68,7 @@ test("buildReport marks target release not ready until version and board gates a
     assert.match(report.markdown, /\[ \] target-version-ready/);
     assert.match(report.markdown, /\[ \] board-release-clear/);
     assert.match(report.markdown, /TASK-P0 \[p0\/planned\]/);
+    assert.match(report.markdown, /### P0 Ready To Start/);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }
