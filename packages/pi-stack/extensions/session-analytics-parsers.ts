@@ -1,4 +1,9 @@
 import { extractUsage, estimateHardPathwayMitigation } from "./quota-visibility";
+import {
+  formatAuthorizationEvidence,
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
 
 function extractTextContent(content: unknown): string {
   if (typeof content === "string") return content;
@@ -86,7 +91,7 @@ export interface DelegationMixScore {
   };
   buckets: DelegationMixBucket[];
   dispatchAllowed: false;
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   mutationAllowed: false;
   summary: string;
 }
@@ -120,7 +125,7 @@ export interface AutoAdvanceHardIntentTelemetry {
     blocked: string[];
   };
   dispatchAllowed: false;
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   mutationAllowed: false;
   summary: string;
 }
@@ -317,7 +322,7 @@ export function parseDelegationMixScore(
     `delegate=${counters["delegate"]}`,
     `swarm=${counters.swarm}`,
     `code=${recommendationCode}`,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].join(" ");
 
   return {
@@ -342,7 +347,7 @@ export function parseDelegationMixScore(
     },
     buckets,
     dispatchAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     mutationAllowed: false,
     summary,
   };
@@ -473,7 +478,7 @@ export function parseAutoAdvanceHardIntentTelemetry(
     `blocked=${blockedEvents}`,
     `blockedRatePct=${blockedRatePct}`,
     `code=${recommendationCode}`,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].join(" ");
 
   return {
@@ -496,7 +501,7 @@ export function parseAutoAdvanceHardIntentTelemetry(
     blockedReasons: blockedReasonRows,
     examples,
     dispatchAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     mutationAllowed: false,
     summary,
   };
