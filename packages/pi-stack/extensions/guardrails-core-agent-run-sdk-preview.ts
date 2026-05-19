@@ -15,6 +15,11 @@ import {
 } from "./guardrails-core-agent-run-sdk-preview-helpers";
 import { buildOperatorApprovalPacket, type OperatorApprovalPacket } from "./guardrails-core-operator-approval";
 import { findUnsupportedDeclaredFileScopedSdkWorkerTools } from "./guardrails-core-tool-policy";
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
 
 export type AgentRunSdkSessionMode = "in-memory" | "run-session-dir" | "unknown";
 export type AgentRunSdkPacketDecision = "ready-for-operator-decision" | "blocked";
@@ -56,7 +61,7 @@ export interface AgentRunSdkInProcessPacketInput {
 export interface AgentRunSdkInProcessPacketResult {
   mode: "agent-run-sdk-in-process-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -159,7 +164,7 @@ export interface AgentRunSdkCachePackPacketInput {
 export interface AgentRunSdkCachePackPacketResult {
   mode: "agent-run-sdk-cache-pack-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -208,7 +213,7 @@ export interface AgentRunSdkReadOnlyBatchPacketInput {
 export interface AgentRunSdkReadOnlyBatchPacketResult {
   mode: "agent-run-sdk-readonly-batch-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   parallelDispatchAllowed: false;
   processStartAllowed: false;
@@ -263,7 +268,7 @@ export interface AgentRunSdkReadOnlyBatchTaskInput {
 export interface AgentRunSdkReadOnlyBatchTaskResult {
   mode: "agent-run-sdk-readonly-batch-task-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   parallelDispatchAllowed: false;
   processStartAllowed: false;
@@ -426,7 +431,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
   return {
     mode: "agent-run-sdk-in-process-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -485,7 +490,7 @@ export function buildAgentRunSdkInProcessPacket(input: AgentRunSdkInProcessPacke
       unexpectedDirty ? "unexpectedDirty=yes" : undefined,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
       "dispatch=no",
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].filter(Boolean).join(" "),
   };
 }
@@ -561,7 +566,7 @@ export function buildAgentRunSdkCachePackPacket(input: AgentRunSdkCachePackPacke
   return {
     mode: "agent-run-sdk-cache-pack-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -606,7 +611,7 @@ export function buildAgentRunSdkCachePackPacket(input: AgentRunSdkCachePackPacke
       unknownCount > 0 ? `unknown=${unknownCount}` : undefined,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
       "dispatch=no",
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].filter(Boolean).join(" "),
   };
 }
@@ -714,7 +719,7 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
   return {
     mode: "agent-run-sdk-readonly-batch-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     parallelDispatchAllowed: false,
     processStartAllowed: false,
@@ -760,7 +765,7 @@ export function buildAgentRunSdkReadOnlyBatchPacket(input: AgentRunSdkReadOnlyBa
       `maxWorkers=${maxWorkers}`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
       "parallelDispatch=no",
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].filter(Boolean).join(" "),
   };
 }
@@ -832,7 +837,7 @@ export function buildAgentRunSdkReadOnlyBatchTaskPacket(input: AgentRunSdkReadOn
   return {
     mode: "agent-run-sdk-readonly-batch-task-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     parallelDispatchAllowed: false,
     processStartAllowed: false,
@@ -872,7 +877,7 @@ export function buildAgentRunSdkReadOnlyBatchTaskPacket(input: AgentRunSdkReadOn
       omittedFiles.length > 0 ? `omitted=${omittedFiles.length}` : undefined,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
       "dispatch=no",
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].filter(Boolean).join(" "),
   };
 }
