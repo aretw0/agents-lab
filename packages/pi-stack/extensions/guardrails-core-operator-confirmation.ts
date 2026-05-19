@@ -282,14 +282,14 @@ export function resolveOperatorConfirmationSignalSourcePlan(
     reasons.push("audit-entry-append-available");
     return {
       decision: "use-guard-owned-audit-entry",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       implementationAllowed: false,
       canOverrideMonitorBlock: false,
       reasons,
       recommendedPath: "record trusted evidence from the guard-owned dialog via audit entry; consume only structured envelope details",
       nextActions: ["wire-guard-owned-dialog-to-recordTrustedOperatorConfirmationUiDecision", "consume-structured-envelope-details-only"],
-      summary: `operator-confirmation-signal-source: decision=use-guard-owned-audit-entry dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-signal-source: decision=use-guard-owned-audit-entry dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -297,14 +297,14 @@ export function resolveOperatorConfirmationSignalSourcePlan(
     reasons.push("tool-call-confirmation-signal-available");
     return {
       decision: "build-wrapper-signal",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       implementationAllowed: false,
       canOverrideMonitorBlock: false,
       reasons,
       recommendedPath: "wrap the exposed confirmation signal into operator-confirmation-evidence details before monitor/guard consumption",
       nextActions: ["map-upstream-signal-to-exact-action-fingerprint", "consume-envelope-with-ttl-single-use"],
-      summary: `operator-confirmation-signal-source: decision=build-wrapper-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-signal-source: decision=build-wrapper-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -312,14 +312,14 @@ export function resolveOperatorConfirmationSignalSourcePlan(
     reasons.push("structured-custom-message-available");
     return {
       decision: "build-wrapper-signal",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       implementationAllowed: false,
       canOverrideMonitorBlock: false,
       reasons,
       recommendedPath: "emit hidden structured operator-confirmation-evidence custom messages and consume details, not content text",
       nextActions: ["emit-display-false-structured-envelope", "verify-consumer-receives-details"],
-      summary: `operator-confirmation-signal-source: decision=build-wrapper-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-signal-source: decision=build-wrapper-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -327,14 +327,14 @@ export function resolveOperatorConfirmationSignalSourcePlan(
     reasons.push("upstream-change-required");
     return {
       decision: "propose-upstream-tool-call-signal",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       implementationAllowed: false,
       canOverrideMonitorBlock: false,
       reasons,
       recommendedPath: "propose an upstream ToolCallEvent confirmation field or structured pre-tool confirmation event; do not patch node_modules directly",
       nextActions: ["draft-upstream-pr-or-wrapper-design", "keep-local-fail-closed-until-signal-exists"],
-      summary: `operator-confirmation-signal-source: decision=propose-upstream-tool-call-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-signal-source: decision=propose-upstream-tool-call-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -343,14 +343,14 @@ export function resolveOperatorConfirmationSignalSourcePlan(
   if (input.toolCallEventHasConfirmationSignal === false) reasons.push("tool-call-confirmation-signal-missing");
   return {
     decision: "blocked",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     implementationAllowed: false,
     canOverrideMonitorBlock: false,
     reasons,
     recommendedPath: "keep fail-closed; do not consume text-only confirmation evidence",
     nextActions: ["use-guard-owned-dialog-or-upstream-wrapper-before-consuming-confirmation"],
-    summary: `operator-confirmation-signal-source: decision=blocked dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+    summary: `operator-confirmation-signal-source: decision=blocked dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
   };
 }
 
@@ -365,13 +365,13 @@ export function resolveOperatorConfirmationRuntimeConsumptionPlan(
     reasons.push("confirmation-not-required-for-local-safe-action");
     return {
       decision: "blocked",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       textOnlyEvidenceAccepted: false,
       reasons,
       nextActions: ["do-not-use-confirmation-evidence-for-local-safe-action"],
-      summary: "operator-confirmation-runtime-consumption: decision=blocked dispatch=no override=no textOnly=no reasons=confirmation-not-required-for-local-safe-action authorization=none",
+      summary: `operator-confirmation-runtime-consumption: decision=blocked dispatch=no override=no textOnly=no reasons=confirmation-not-required-for-local-safe-action ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -384,13 +384,13 @@ export function resolveOperatorConfirmationRuntimeConsumptionPlan(
     reasons.push("guard-owned-confirmation-structured-evidence");
     return {
       decision: "ready-for-guard-consumption",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       textOnlyEvidenceAccepted: false,
       reasons,
       nextActions: ["consume-envelope-with-exact-match-ttl-single-use"],
-      summary: `operator-confirmation-runtime-consumption: decision=ready-for-guard-consumption dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-runtime-consumption: decision=ready-for-guard-consumption dispatch=no override=no textOnly=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -398,13 +398,13 @@ export function resolveOperatorConfirmationRuntimeConsumptionPlan(
     reasons.push("structured-audit-entry-readable-by-consumer");
     return {
       decision: "ready-for-guard-consumption",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       textOnlyEvidenceAccepted: false,
       reasons,
       nextActions: ["consume-envelope-with-exact-match-ttl-single-use"],
-      summary: `operator-confirmation-runtime-consumption: decision=ready-for-guard-consumption dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-runtime-consumption: decision=ready-for-guard-consumption dispatch=no override=no textOnly=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -413,13 +413,13 @@ export function resolveOperatorConfirmationRuntimeConsumptionPlan(
     nextActions.push("add-upstream-or-wrapper-confirmation-signal");
     return {
       decision: "needs-upstream-signal",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       textOnlyEvidenceAccepted: false,
       reasons,
       nextActions,
-      summary: `operator-confirmation-runtime-consumption: decision=needs-upstream-signal dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-runtime-consumption: decision=needs-upstream-signal dispatch=no override=no textOnly=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -427,13 +427,13 @@ export function resolveOperatorConfirmationRuntimeConsumptionPlan(
   nextActions.push("wire-runtime-bridge-for-structured-envelope-details");
   return {
     decision: "needs-runtime-bridge",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     canOverrideMonitorBlock: false,
     textOnlyEvidenceAccepted: false,
     reasons,
     nextActions,
-    summary: `operator-confirmation-runtime-consumption: decision=needs-runtime-bridge dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
+    summary: `operator-confirmation-runtime-consumption: decision=needs-runtime-bridge dispatch=no override=no textOnly=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
   };
 }
 
