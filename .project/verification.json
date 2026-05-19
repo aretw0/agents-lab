@@ -16631,6 +16631,15 @@
       "method": "implementation-smoke-and-ci-gate",
       "timestamp": "2026-05-19T05:25:54.753Z",
       "evidence": "Completed report-only development velocity pressure primitive. It now composes session size, configured runtime surface, settings suppression, stale loop lease, git dirty scope, machine memory/disk, board size, handoff age, useful commit age, process uptime, stale active agent-run registry entries, and ceremony/tool-call counters. It never kills processes, reloads, compacts, dispatches workers, mutates settings, or cleans disk; launcher blocks strict machine pressure unless explicitly forced. Host VHDX pressure is inventoried read-only in ops disk guard. Validation: npm run test:pi:dev:pressure passed; npm run test:pi:isolated passed; npm run test:ops:disk-guard passed; npx vitest run packages/pi-stack/test/smoke/environment-doctor-dev-pressure.test.ts passed; npm run pi:dev:pressure reports the real machine-disk-pressure blocker without dangling run false positives."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1067-CLOSURE-RECONCILIATION-20260519",
+      "target": "TASK-BUD-1067",
+      "target_type": "task",
+      "status": "passed",
+      "method": "board-reconciliation-smoke",
+      "timestamp": "2026-05-19T13:10:00.000Z",
+      "evidence": "Reconciled TASK-BUD-1067 after the later quota route and agent-run budget slices completed the original acceptance. Existing evidence covers provider/model Spark budget separation, model-specific route preference before fallback, aggregate openai-codex blocked not masking an available Spark scope, and blockedProviders semantics. Fresh validation: npx vitest run packages/pi-stack/test/smoke/quota-visibility-route-advisory.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 2 files passed, 26 tests passed."
     }
   ]
 }

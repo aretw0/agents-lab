@@ -23808,7 +23808,7 @@
     {
       "id": "TASK-BUD-1067",
       "description": "[hard-intent/quota-visibility] Separar explicitamente budget/capacidade por modelo para `openai-codex/gpt-5.3-codex-spark` e não deixar o agregado `openai-codex=blocked` mascarar cota Spark disponível; reconciliar também DashScope/Qwen com evidência externa do ModelStudio.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p0",
       "depends_on": [
         "TASK-BUD-1008",
@@ -23828,7 +23828,7 @@
         "Teste cobre conflito aggregate-blocked vs model-specific-ok."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Criada após auditoria dos attempts: últimos workers de TASK-BUD-1063 usaram openai-codex/gpt-5.3-codex-spark; só um retry antigo de TASK-BUD-1059 usou dashscope/qwen3-coder-plus. Ferramenta atual ainda reporta openai-codex agregado blocked e dashscope local ok, o que conflita com intenção operacional de tratar Spark como cota separada e Qwen como possivelmente exaurido no ModelStudio.\n[provenance:human] source_task=TASK-BUD-1066 reason=Estabilização de workers depende de roteamento/budget model-specific confiável.",
+      "notes": "Criada após auditoria dos attempts: últimos workers de TASK-BUD-1063 usaram openai-codex/gpt-5.3-codex-spark; só um retry antigo de TASK-BUD-1059 usou dashscope/qwen3-coder-plus. Ferramenta atual ainda reporta openai-codex agregado blocked e dashscope local ok, o que conflita com intenção operacional de tratar Spark como cota separada e Qwen como possivelmente exaurido no ModelStudio.\n[provenance:human] source_task=TASK-BUD-1066 reason=Estabilização de workers depende de roteamento/budget model-specific confiável.\n[closure] Reconciled after follow-up quota route and agent-run budget evidence landed. Spark model-specific budget evidence is surfaced separately from aggregate openai-codex, routeModelRefs prefer the configured provider/model scope before fallback, blockedProviders no longer marks a provider blocked when an available model-specific scope exists, and agent-run packets carry scoped providerModelRef evidence. DashScope/Qwen exhaustion remains conservative through explicit provider/model budget evidence and provider-unavailable canary evidence rather than local telemetry optimism. Validation: npx vitest run packages/pi-stack/test/smoke/quota-visibility-route-advisory.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 2 files passed, 26 tests passed.",
       "verification": "VERIF-TASK-BUD-1067-SPARK-MODEL-SCOPE-2026-05-08"
     },
     {
