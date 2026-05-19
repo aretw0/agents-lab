@@ -49,7 +49,7 @@ A saída deve ser lida como contrato de arranque:
 ## Comando principal
 
 ```bash
-npm run session:triage
+pnpm run session:triage
 ```
 
 Padrão atual de coleta (context-economy):
@@ -60,7 +60,7 @@ Padrão atual de coleta (context-economy):
 JSON (para automação):
 
 ```bash
-npm run session:triage:json
+pnpm run session:triage:json
 ```
 
 Fonte canônica adicional (provider-agnostic):
@@ -102,11 +102,11 @@ Exemplo no repositório:
 node scripts/session-triage.mjs --events docs/research/data/session-triage/canonical-events.example.json
 ```
 
-Atalhos npm para smoke do adapter canônico:
+Atalhos pnpm para smoke do adapter canônico:
 
 ```bash
-npm run session:triage:events:json
-npm run session:triage:events:jsonl
+pnpm run session:triage:events:json
+pnpm run session:triage:events:jsonl
 ```
 
 Por padrão, o script lê **último 1 dia** e até **8 sessões** mais recentes, usando tail-batch.
@@ -162,7 +162,7 @@ Contrato canônico de eventos (v1):
 
 Use quando quiser avançar mais de um micro-lote sem perder governança:
 
-1. Rodar triagem (`npm run session:triage`) e escolher **1 frente ativa**.
+1. Rodar triagem (`pnpm run session:triage`) e escolher **1 frente ativa**.
 2. Rodar gate rápido de control plane:
    - `scheduler_governance_status`
    - `colony_pilot_preflight`

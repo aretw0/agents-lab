@@ -35,7 +35,7 @@
      - `@capability-id <id>`
      - `@capability-criticality high|medium|low`
    - para criticalidade `high`, `id` deve existir em `packages/pi-stack/extensions/data/capability-owners.json`
-   - validado automaticamente por `npm run audit:sovereignty:diff`
+   - validado automaticamente por `pnpm run audit:sovereignty:diff`
 
 > Este checklist é **preventivo** (design/aceitação antes de merge).
 > Para falhas já detectadas no pipeline, use o troubleshooting reativo em [`ci-governance.md`](./ci-governance.md).

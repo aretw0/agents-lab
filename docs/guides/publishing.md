@@ -45,7 +45,7 @@ git commit -m "feat(git-skills): adiciona suporte a glab mr rebase"
 ### 2. Na hora de lançar — bumpar versões
 
 ```bash
-npm run release
+pnpm run release
 ```
 
 Isso executa `changeset version`, que:

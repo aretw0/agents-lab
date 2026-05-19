@@ -171,8 +171,8 @@ pnpm run pi:parity:project
 Ao contribuir no agents-lab, a stack usa dois checks complementares:
 
 - **Fail/pass obrigatório**
-  - `npm run audit:sovereignty`
-  - `npm run audit:sovereignty:diff`
+  - `pnpm run audit:sovereignty`
+  - `pnpm run audit:sovereignty:diff`
 - **Relatório operacional**
   - job `Sovereignty Report`
   - artifact `stack-sovereignty-audit`

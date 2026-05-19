@@ -225,12 +225,12 @@ monitor_sovereign_delta {}
 Evidência offline/repetível (sem sessão interativa):
 
 ```text
-npm run monitor:stability:evidence
-npm run monitor:stability:evidence:write
-npm run monitor:stability:gate
-npm run monitor:stability:gate:strict
-npm run subagent:readiness
-npm run subagent:readiness:strict
+pnpm run monitor:stability:evidence
+pnpm run monitor:stability:evidence:write
+pnpm run monitor:stability:gate
+pnpm run monitor:stability:gate:strict
+pnpm run subagent:readiness
+pnpm run subagent:readiness:strict
 ```
 
 > Em sessão isolada sem `@davidorex/pi-project-workflows`, o comando `/monitors` não existe.
@@ -258,7 +258,7 @@ Antes de qualquer publish RC/final:
 
 Critério de saída: runtime de monitor estável no provider alvo, sem novos classify failures durante o smoke.
 
-> Nota prática: `npm run verify` agora tenta auto-repair do contrato crítico de classify (`systemPrompt: compiled.systemPrompt`) em cópias divergentes de `@davidorex/pi-behavior-monitors/dist/index.js` antes de falhar. Além disso, no `session_start`, `monitor-provider-patch` aplica o mesmo reparo de runtime (best-effort) para reduzir drift após reinstalações.
+> Nota prática: `pnpm run verify` agora tenta auto-repair do contrato crítico de classify (`systemPrompt: compiled.systemPrompt`) em cópias divergentes de `@davidorex/pi-behavior-monitors/dist/index.js` antes de falhar. Além disso, no `session_start`, `monitor-provider-patch` aplica o mesmo reparo de runtime (best-effort) para reduzir drift após reinstalações.
 
 ## Diagnóstico rápido de drift
 

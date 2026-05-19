@@ -3,7 +3,7 @@
 Use ao fechar cada micro-lote (3-5 decisões).
 
 ## Ritual de fechamento (5-10 min)
-1. `npm run project:verification:check`
+1. `pnpm run project:verification:check`
 2. `project-validate` (tool/comando da stack)
 3. `project-status` para triagem rápida (status/contagens/WIP)
 4. Atualizar `.project/handoff.json` (delta curto)

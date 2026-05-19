@@ -796,7 +796,7 @@ Para manutenção git, a regra é conservadora: diagnosticar, registrar e recome
 
 Para limpeza operacional simples (ex.: arquivos temporários de status/listagem), prefira uma remoção agrupada em um único comando bounded em vez de várias remoções unitárias. Isso reduz ruído de confirmação sem promover limpeza destrutiva ampla.
 
-Para inspeção de dirty state, prefira snapshot sem arquivo temporário (`npm run git:dirty:snapshot`, command `/git-dirty`, ou tool read-only `git_dirty_snapshot`) em vez de `git diff --name-only > arquivo` seguido de `rm`. Fora de repositório git, a tool deve falhar fechado com envelope `unavailable` (sem erro cru).
+Para inspeção de dirty state, prefira snapshot sem arquivo temporário (`pnpm run git:dirty:snapshot`, command `/git-dirty`, ou tool read-only `git_dirty_snapshot`) em vez de `git diff --name-only > arquivo` seguido de `rm`. Fora de repositório git, a tool deve falhar fechado com envelope `unavailable` (sem erro cru).
 
 Essa escada é parte da autonomia cultivada: reduzir hesitação e ruído, não aumentar gordura operacional. A resposta certa para um sinal pequeno deve ser curta e auditável; a resposta certa para um sinal estrutural deve virar tarefa estreita, não frente difusa.
 
@@ -814,7 +814,7 @@ Regras de custo:
 - quando possível, deixar o bash guard bloquear padrões amplos e refazer com escopo + depth/timeout explícitos.
 
 Paridade local↔CI (anti-drift):
-- manter um comando canônico único para o gate principal (`npm run ci:smoke:gate`);
+- manter um comando canônico único para o gate principal (`pnpm run ci:smoke:gate`);
 - CI deve chamar o mesmo comando (single source of truth), evitando drift entre pipeline e rotina local.
 
 ### Encerramento de turno: mini-packet condicional (quando houver material novo)
@@ -960,8 +960,8 @@ Contrato dessa lane:
 Relatório operacional da lane (report-only):
 
 ```bash
-npm run decoupling:maturity
-npm run decoupling:maturity:json
+pnpm run decoupling:maturity
+pnpm run decoupling:maturity:json
 ```
 
 Batch local-safe de 3–5 fatias:

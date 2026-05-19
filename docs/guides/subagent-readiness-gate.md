@@ -12,9 +12,9 @@ Objetivo: decidir **quando delegar para sub-agentes/swarms** com base em sinais 
 ## Comandos (scripts de laboratório)
 
 ```bash
-npm run subagent:readiness
-npm run subagent:readiness:strict
-npm run subagent:readiness:write
+pnpm run subagent:readiness
+pnpm run subagent:readiness:strict
+pnpm run subagent:readiness:write
 ```
 
 ## O que o gate valida
@@ -23,7 +23,7 @@ npm run subagent:readiness:write
    - `monitor-stability-evidence` (turnos mínimos + classify failures)
 2. **Saúde recente de sinais de colônia**
    - `session-triage --json` (FAILED/BUDGET_EXCEEDED/COMPLETE)
-3. **Capacidades de pilot/swarm carregadas** (strict)
+3. **Capacidades de delegação/swarm carregadas** (strict)
    - `@ifi/oh-pi-ant-colony`
    - `@ifi/pi-web-remote`
 
@@ -86,15 +86,13 @@ Ao rollback:
 
 ## Quando strict falhar por pacote ausente
 
-Ative pilot profile e recarregue a sessão:
+Use a experiência única do control plane e recarregue a sessão se a configuração mudou:
 
 ```bash
-npm run pi:pilot:on
-# ou escopo de projeto:
-npm run pi:pilot:on:project
+pnpm run pi:dev
 ```
 
-Depois rode `/reload` na sessão pi e repita `npm run subagent:readiness:strict`.
+Depois rode `/reload` na sessão pi se houver mudança de configuração e repita `pnpm run subagent:readiness:strict`.
 
 ## Evidência
 

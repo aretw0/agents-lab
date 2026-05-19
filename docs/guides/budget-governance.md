@@ -38,7 +38,7 @@ Sem esses campos, a decisão padrão é `defer`.
 Template operacional (report-only) para registrar pacote de evidência:
 
 ```bash
-npm run offload:evidence:template -- --task TASK-BUD-134 --decision defer
+pnpm run offload:evidence:template -- --task TASK-BUD-134 --decision defer
 ```
 
 Controles mínimos do operador na lane protegida (sempre explícitos):

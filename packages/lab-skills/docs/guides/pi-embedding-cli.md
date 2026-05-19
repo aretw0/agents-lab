@@ -116,7 +116,7 @@ packages/
   "files": ["dist", "skills"],
   "scripts": {
     "build": "tsc",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "pnpm run build"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": ">=0.1.0"
@@ -250,7 +250,7 @@ Independente do modelo escolhido, os contratos de governança do pi-stack devem 
 
 ### Observabilidade
 
-- Verificar `quota-visibility` antes de rodar colônias pesadas: `npm run pi:quota-visibility`.
+- Verificar quota antes de rodar colônias pesadas: `/quota-visibility status`.
 - Em contextos embedded, exportar evidência de uso via `quota-visibility` para auditoria externa.
 
 ---

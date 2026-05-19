@@ -67,7 +67,7 @@ Cada run remota deve registrar, no mínimo:
 Template prático local:
 
 ```bash
-npm run offload:evidence:template -- --task TASK-BUD-134 --decision defer
+pnpm run offload:evidence:template -- --task TASK-BUD-134 --decision defer
 ```
 
 ## Steer/Intervenção do Operador (cancel/retry/override)
@@ -89,7 +89,7 @@ Fluxo end-to-end recomendado:
 Automação mínima existente:
 - `publish.yml` mantém publish gateado por tag semver + smoke/test/verify/audits;
 - `release-draft.yml` prepara draft release manual com artefato de notas;
-- `npm run release:readiness:v0.8.0` gera checklist local canônico em `.artifacts/release-readiness/`.
+- `pnpm run release:readiness:v0.8.0` gera checklist local canônico em `.artifacts/release-readiness/`.
 
 Checklist de readiness v0.8.0 (board/handoff):
 - versões de pacotes alinhadas;

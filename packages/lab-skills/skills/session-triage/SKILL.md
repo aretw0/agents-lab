@@ -27,13 +27,13 @@ Use este skill quando o usuário disser que “já falou tudo no histórico” e
 ### 1) Snapshot rápido do histórico recente
 
 ```bash
-npm run session:triage
+pnpm run session:triage
 ```
 
 Opcional JSON para automação:
 
 ```bash
-npm run session:triage:json
+pnpm run session:triage:json
 ```
 
 Por padrão, a leitura é **tail-batch** (cauda da sessão) para economizar contexto.

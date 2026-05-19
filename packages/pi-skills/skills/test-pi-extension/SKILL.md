@@ -78,8 +78,8 @@ Só 3 pontos são substituídos — todo o resto é pi real.
 
 ```typescript
 when("Faça o deploy", [
-  calls("bash", { command: "npm run build" }),
-  calls("bash", { command: "npm run deploy" }),
+  calls("bash", { command: "pnpm run build" }),
+  calls("bash", { command: "pnpm run deploy" }),
   says("Deploy concluído."),
 ])
 ```

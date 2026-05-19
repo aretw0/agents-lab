@@ -35,7 +35,7 @@ No Windows (Git Bash), o espelho costuma ficar em:
 Script utilitário deste repo:
 
 ```bash
-npm run colony:inspect
+pnpm run colony:inspect
 # ou filtrar por ID
 node scripts/colony-runtime-inspect.mjs --id colony-abc123
 ```
@@ -49,7 +49,7 @@ Ele mostra:
 
 1. Capture o último sinal/report no chat:
    - exemplo: `[c1|colony-mnxq8g8z-vii7z]`
-2. Rode `npm run colony:inspect` e localize `state.json` correspondente.
+2. Rode `pnpm run colony:inspect` e localize `state.json` correspondente.
 3. Se houve worktree isolado, entre nele e confira diff:
 
 ```bash

@@ -137,7 +137,7 @@ Antes de promover hardening interno como capability da pi-stack:
 1. Capturar mudanças no board canônico:
    - `decisions`, `requirements`, `tasks`, `verification`, `handoff`.
 2. Rodar higiene:
-   - `npm run project:verification:check`
+   - `pnpm run project:verification:check`
    - `/safe-boot artifacts` (ou `pnpm run pi:artifact:audit:strict` no gate)
    - `project-validate`
    - `project-status`
@@ -317,7 +317,7 @@ Durante long-run:
 - compatibilidade retroativa: snapshots/evidências antigas podem conter `PREPARADO/ATIVO_AQUI/EM_LOOP`; tratar `markersLabel` como texto histórico e usar campos estruturados (`runtimeCodeState`, `emLoop`, `boardAutoAdvanceGate`) como contrato canônico de decisão.
 - `/lane-queue status` deve exibir `loopReadyLast` e `loopReadyLabel` para evidenciar a última transição de loop liberado dentro da sessão atual.
 - `/lane-queue evidence` deve mostrar o snapshot persistido mais recente (`boardAuto`/`loopReady`) para comprovação rápida sem varredura de JSONL, incluindo `readyForLoopEvidence=yes|no` (com alias legado temporário `readyForTaskBud125`) e critérios explícitos (`runtime active` + `emLoop=yes`).
-- para gate operacional fora do TUI, usar `npm run ops:loop-evidence:check` (operador) e `npm run ops:loop-evidence:strict` (CI/rollback gate) sobre `.pi/guardrails-loop-evidence.json` com janela de frescor explícita; quando operar por milestone, pode-se exigir paridade de escopo via `node scripts/guardrails-loop-evidence-check.mjs --strict --expect-milestone "<label>"` ou usar `npm run ops:loop-evidence:strict:default-milestone` para validar contra `defaultBoardMilestone` configurada; a saída expõe `milestoneGate=active|inactive`, `milestoneCheck`, `strictFailures` e `strictHint(<code>)` para ação direta (`evidence-stale`, `readiness-not-ready`, `milestone-mismatch`, etc.) sem leitura manual do JSON. Para transformar a ideia de milestone em hard gate explícito, adicionar `--require-milestone-gate` ao strict check (falha com `milestone-gate-inactive` quando nenhum `--expect-milestone`/`@default` está ativo). Atalhos: `npm run ops:loop-evidence:strict:milestone-gate` para exigir qualquer gate ativo; `npm run ops:loop-evidence:strict:default-milestone` para exigir o `defaultBoardMilestone` configurado.
+- para gate operacional fora do TUI, usar `pnpm run ops:loop-evidence:check` (operador) e `pnpm run ops:loop-evidence:strict` (CI/rollback gate) sobre `.pi/guardrails-loop-evidence.json` com janela de frescor explícita; quando operar por milestone, pode-se exigir paridade de escopo via `node scripts/guardrails-loop-evidence-check.mjs --strict --expect-milestone "<label>"` ou usar `pnpm run ops:loop-evidence:strict:default-milestone` para validar contra `defaultBoardMilestone` configurada; a saída expõe `milestoneGate=active|inactive`, `milestoneCheck`, `strictFailures` e `strictHint(<code>)` para ação direta (`evidence-stale`, `readiness-not-ready`, `milestone-mismatch`, etc.) sem leitura manual do JSON. Para transformar a ideia de milestone em hard gate explícito, adicionar `--require-milestone-gate` ao strict check (falha com `milestone-gate-inactive` quando nenhum `--expect-milestone`/`@default` está ativo). Atalhos: `pnpm run ops:loop-evidence:strict:milestone-gate` para exigir qualquer gate ativo; `pnpm run ops:loop-evidence:strict:default-milestone` para exigir o `defaultBoardMilestone` configurado.
 - intents canônicos devem usar envelope tipado (`[intent:<type>]` + campos `key=value`, ex.: `board.execute-task` e `board.execute-next`; opcional `milestone=<label>` em `board.execute-next`) para reduzir fragilidade de dispatch textual e manter auditabilidade entre extensões.
 - runtime deve consumir envelope no caminho de execução (input) além do prompt: envelope inválido/unsupported é rejeitado com audit explícita; envelope válido registra decisão (`ready`/`board-not-ready`/`next-mismatch`/`next-ready`) antes da execução.
 
@@ -398,7 +398,7 @@ Para reduzir falhas de execução por mismatch de shell/PATH, o guardrails-core 
 
 Contrato inicial (hard-pathway):
 - em `Windows + Git Bash`, comandos node-family no tool `bash` (`node/npm/npx/pnpm/yarn/vitest`) devem usar `cmd.exe /c <comando>`;
-- comando bare (ex.: `npm run test`) nessa combinação é bloqueado com instrução determinística de fallback;
+- comando bare (ex.: `pnpm run test`) nessa combinação é bloqueado com instrução determinística de fallback;
 - sessão registra perfil/ações em audit trail (`guardrails-core.shell-routing-profile`, `guardrails-core.shell-routing-block`) e status curto (`guardrails-core-shell`);
 - operador pode inspecionar/normalizar via `/shell-route status` e `/shell-route wrap <command>`.
 
