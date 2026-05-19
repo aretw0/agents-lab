@@ -629,7 +629,7 @@ export interface AutonomyProtectedFocusOptionPreview {
 export interface AutonomyProtectedFocusDecisionPreview {
   recommendedOption: "promote" | "skip" | "defer";
   options: AutonomyProtectedFocusOptionPreview[];
-  pragmaticRecommendation: string;
+  operatorRecommendation: string;
 }
 
 export interface AutonomyProtectedFocusDecisionPacket {
@@ -707,7 +707,7 @@ function buildProtectedFocusDecisionPreview(input: {
         promoteSuitability === "blocked"
           ? "promote blocked until protected evidence is explicit."
           : promoteSuitability === "recommended"
-            ? "promote is pragmatic for one protected canary with rollback."
+            ? "promote fits one protected canary with rollback."
             : "promote is possible but requires extra caution/risk acceptance.",
       nextAction:
         promoteSuitability === "blocked"
@@ -732,23 +732,23 @@ function buildProtectedFocusDecisionPreview(input: {
       recommendationCode: `protected-focus-option-defer-${deferSuitability}`,
       rationale:
         deferSuitability === "recommended"
-          ? "defer is pragmatic while risk/evidence conditions remain constrained."
+          ? "defer while risk/evidence conditions remain constrained."
           : "defer is viable, but may postpone high-value protected learning.",
       nextAction: "defer protected execution and revisit once evidence/value is clearer.",
       blockers: input.blockers,
     },
   ];
 
-  const pragmaticRecommendation = input.recommendedOption === "promote"
-    ? "pragmatic recommendation: promote only one protected canary slice with explicit rollback and focal validation."
+  const operatorRecommendation = input.recommendedOption === "promote"
+    ? "operator recommendation: promote only one protected canary slice with explicit rollback and focal validation."
     : input.recommendedOption === "skip"
-      ? "pragmatic recommendation: skip protected promotion and keep local-safe throughput."
-      : "pragmatic recommendation: defer now; harden evidence/rollback and reassess on next boundary.";
+      ? "operator recommendation: skip protected promotion and keep local-safe throughput."
+      : "operator recommendation: defer now; harden evidence/rollback and reassess on next boundary.";
 
   return {
     recommendedOption: input.recommendedOption,
     options,
-    pragmaticRecommendation,
+    operatorRecommendation,
   };
 }
 

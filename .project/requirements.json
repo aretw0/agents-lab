@@ -643,7 +643,7 @@
     },
     {
       "id": "REQ-BUD-047",
-      "description": "O controle de drift entre ambiente isolado (curadoria) e superfície user-like deve ser auditado continuamente e bloquear promoção quando houver funcionalidades não maturadas no default.",
+      "description": "O controle de drift entre ambiente isolado (curadoria) e superfície user-like deve ser auditado continuamente e bloquear promoção quando houver funcionalidades sem evidência de maturidade no default.",
       "type": "non-functional",
       "status": "accepted",
       "priority": "must",

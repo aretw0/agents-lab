@@ -14,8 +14,8 @@ Padronizar decisão do operador para uma task de escopo protegido via packet **r
 - `decision`: `ready-for-operator-decision | blocked`
 - `recommendedOption`: `promote | skip | defer`
 - `recommendationCode` canônico
-- `decisionPreview.recommendedOption` + `decisionPreview.options[]` (preview pragmático de `promote|skip|defer` com `suitability`, `blockers`, `nextAction`)
-- `decisionPreview.pragmaticRecommendation` (síntese direta para decisão do operador)
+- `decisionPreview.recommendedOption` + `decisionPreview.options[]` (preview de decisão `promote|skip|defer` com `suitability`, `blockers`, `nextAction`)
+- `decisionPreview.operatorRecommendation` (síntese direta para decisão do operador)
 - `valuePotential`, `riskLevel`, `effortLevel`
 - `reasonCodes[]`, `signals[]`, `evidence[]`
 - `declaredFilesKnown`, `validationGateKnown`, `rollbackPlanKnown`

@@ -310,6 +310,7 @@ describe("autonomy task selector", () => {
       "skip:viable",
       "defer:recommended",
     ]);
+    expect(packet.decisionPreview.operatorRecommendation).toContain("operator recommendation: defer");
     expect(packet.summary).toContain("preview=promote:blocked,skip:viable,defer:recommended");
   });
 
@@ -328,6 +329,7 @@ describe("autonomy task selector", () => {
       "skip:recommended",
       "defer:viable",
     ]);
+    expect(packet.decisionPreview.operatorRecommendation).toContain("operator recommendation: skip");
     expect(packet.summary).toContain("preview=promote:blocked,skip:recommended,defer:viable");
   });
 
