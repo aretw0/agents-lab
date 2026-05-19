@@ -655,11 +655,11 @@ export function recordTrustedOperatorConfirmationUiDecision(
   if (!input.confirmed) {
     return {
       decision: "declined",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       reasons: ["ui-confirmation-declined"],
-      summary: "operator-confirmation-ui: decision=declined dispatch=no override=no reasons=ui-confirmation-declined authorization=none",
+      summary: `operator-confirmation-ui: decision=declined dispatch=no override=no reasons=ui-confirmation-declined ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -668,11 +668,11 @@ export function recordTrustedOperatorConfirmationUiDecision(
   if (!expiresAtIso) {
     return {
       decision: "invalid",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       reasons: ["invalid-confirmation-ttl-or-timestamp"],
-      summary: "operator-confirmation-ui: decision=invalid dispatch=no override=no reasons=invalid-confirmation-ttl-or-timestamp authorization=none",
+      summary: `operator-confirmation-ui: decision=invalid dispatch=no override=no reasons=invalid-confirmation-ttl-or-timestamp ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -693,13 +693,13 @@ export function recordTrustedOperatorConfirmationUiDecision(
   const envelope = buildTrustedOperatorConfirmationAuditEnvelope(evidence, match);
   return {
     decision: "recorded",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     canOverrideMonitorBlock: false,
     reasons: ["trusted-ui-confirmation-recorded", "single-use-evidence-created"],
     evidence,
     envelope,
-    summary: `operator-confirmation-ui: decision=recorded dispatch=no override=no reasons=trusted-ui-confirmation-recorded|single-use-evidence-created authorization=none`,
+    summary: `operator-confirmation-ui: decision=recorded dispatch=no override=no reasons=trusted-ui-confirmation-recorded|single-use-evidence-created ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
   };
 }
 
@@ -712,7 +712,7 @@ export function extractTrustedOperatorConfirmationEvidenceFromEnvelope(
   if (root.display !== false) return undefined;
   const details = asRecord(root.details);
   if (!details) return undefined;
-  if (details.dispatchAllowed !== false || details.canOverrideMonitorBlock !== false || details.authorization !== "none") return undefined;
+  if (details.dispatchAllowed !== false || details.canOverrideMonitorBlock !== false || details.authorization !== GUARDRAILS_AUTHORIZATION_NONE) return undefined;
   if (!isKnownTrustedOrigin(details.origin)) return undefined;
   if (!isProtectedActionKind(details.actionKind)) return undefined;
   const id = asString(details.evidenceId);
@@ -744,12 +744,12 @@ export function consumeTrustedOperatorConfirmationAuditEnvelope(
     const match = resolveOperatorConfirmationEvidenceMatch(undefined, pending);
     return {
       decision: "rejected",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       reasons: ["confirmation-envelope-invalid-or-untrusted"],
       match,
-      summary: "operator-confirmation-envelope-consume: decision=rejected dispatch=no override=no reasons=confirmation-envelope-invalid-or-untrusted authorization=none",
+      summary: `operator-confirmation-envelope-consume: decision=rejected dispatch=no override=no reasons=confirmation-envelope-invalid-or-untrusted ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -757,27 +757,27 @@ export function consumeTrustedOperatorConfirmationAuditEnvelope(
   if (!consumed.ok) {
     return {
       decision: "rejected",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       reasons: consumed.match.reasons,
       match: consumed.match,
       evidence,
-      summary: `operator-confirmation-envelope-consume: decision=rejected dispatch=no override=no reasons=${consumed.match.reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-envelope-consume: decision=rejected dispatch=no override=no reasons=${consumed.match.reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
   const consumedEnvelope = buildTrustedOperatorConfirmationAuditEnvelope(consumed.evidence, consumed.match);
   return {
     decision: "consumed",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     canOverrideMonitorBlock: false,
     reasons: ["trusted-envelope-consumed", "confirmation-single-use"],
     match: consumed.match,
     evidence: consumed.evidence,
     envelope: consumedEnvelope,
-    summary: "operator-confirmation-envelope-consume: decision=consumed dispatch=no override=no reasons=trusted-envelope-consumed|confirmation-single-use authorization=none",
+    summary: `operator-confirmation-envelope-consume: decision=consumed dispatch=no override=no reasons=trusted-envelope-consumed|confirmation-single-use ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
   };
 }
 
