@@ -358,6 +358,26 @@ const LEAN_WATCHDOG_CONFIG = {
 	},
 };
 
+const DEFAULT_WINDOWS_GIT_BASH = "C:\\Program Files\\Git\\bin\\bash.exe";
+
+export function reconcileLocalShellPath(
+	settings,
+	{
+		platform = process.platform,
+		gitBashPath = DEFAULT_WINDOWS_GIT_BASH,
+		pathExists = existsSync,
+	} = {},
+) {
+	if (!isRecord(settings)) return { settings, changed: false };
+	if (typeof settings.shellPath === "string" && settings.shellPath.trim()) {
+		return { settings, changed: false };
+	}
+	if (platform !== "win32" || !pathExists(gitBashPath)) {
+		return { settings, changed: false };
+	}
+	return { settings: { ...settings, shellPath: gitBashPath }, changed: true };
+}
+
 function getPackageSource(entry) {
 	if (typeof entry === "string") return entry;
 	if (isRecord(entry) && typeof entry.source === "string") return entry.source;
@@ -523,6 +543,8 @@ function applyLocalRuntimeProfile({ dryRun = false } = {}) {
 		defaultModel: "gpt-5.3-codex",
 		enabledModels: LEAN_ENABLED_MODELS,
 	};
+	const shellPath = reconcileLocalShellPath(next);
+	const nextWithShellPath = shellPath.settings;
 	const currentEnabledModels = Array.isArray(settings.enabledModels) ? settings.enabledModels : [];
 	const modelsChanged =
 		currentEnabledModels.length !== LEAN_ENABLED_MODELS.length ||
@@ -532,10 +554,11 @@ function applyLocalRuntimeProfile({ dryRun = false } = {}) {
 		settings.runtimeProfile !== "control-plane" ||
 		settings.defaultProvider !== "openai-codex" ||
 		settings.defaultModel !== "gpt-5.3-codex" ||
-		modelsChanged;
+		modelsChanged ||
+		shellPath.changed;
 	if (!changed) return { status: "control-plane", changed: false, removed };
 	if (!dryRun) {
-		writeFileSync(LOCAL_SETTINGS, JSON.stringify(next, null, 2) + "\n", "utf8");
+		writeFileSync(LOCAL_SETTINGS, JSON.stringify(nextWithShellPath, null, 2) + "\n", "utf8");
 	}
 	return { status: dryRun ? "dry-run" : "control-plane", changed: true, removed };
 }

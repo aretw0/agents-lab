@@ -8,6 +8,7 @@ import {
 	extractPackageNameFromSource,
 	isColdCapabilityPackageSource,
 	leanEnabledModels,
+	reconcileLocalShellPath,
 	reconcileLeanWatchdogConfig,
 	leanWatchdogConfig,
 } from "../pi-isolated.mjs";
@@ -77,6 +78,34 @@ test("lean model scope stays intentionally small", () => {
 		"openai-codex/gpt-5.4-mini",
 		"dashscope/qwen3.6-flash",
 	]);
+});
+
+test("local shell reconciliation pins Git Bash for Windows sandbox settings", () => {
+	const result = reconcileLocalShellPath(
+		{ packages: [] },
+		{
+			platform: "win32",
+			gitBashPath: "C:\\Program Files\\Git\\bin\\bash.exe",
+			pathExists: () => true,
+		},
+	);
+
+	assert.equal(result.changed, true);
+	assert.equal(result.settings.shellPath, "C:\\Program Files\\Git\\bin\\bash.exe");
+});
+
+test("local shell reconciliation preserves explicit operator shellPath", () => {
+	const result = reconcileLocalShellPath(
+		{ shellPath: "D:\\Tools\\Git\\bin\\bash.exe" },
+		{
+			platform: "win32",
+			gitBashPath: "C:\\Program Files\\Git\\bin\\bash.exe",
+			pathExists: () => true,
+		},
+	);
+
+	assert.equal(result.changed, false);
+	assert.equal(result.settings.shellPath, "D:\\Tools\\Git\\bin\\bash.exe");
 });
 
 test("lean watchdog config preserves guard while tolerating startup transients", () => {
