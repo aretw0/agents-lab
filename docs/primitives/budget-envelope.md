@@ -45,7 +45,7 @@ Para sincronizar `.project`, GitHub/Gitea e SQLite sem lock-in, o envelope refer
 - `eventId`
 - `taskId`
 - `type` (`start | progress | review | done_candidate | done_verified | recovery`)
-- `source` (`colony | scheduler | human | ci`)
+- `source` (`colony | scheduler | operator | ci`)
 - `timestamp`
 - `evidenceRefs` (lista opcional)
 

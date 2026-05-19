@@ -242,7 +242,7 @@ Status local da auditoria de cancelamento:
 - ferramentas que apenas abrem URL, consultam status curto ou fazem diagnóstico passivo continuam aceitáveis com timeout curto, mas não são prova de cancelamento para long-run;
 - comandos interativos/slash commands que disparam execução longa sem contrato explícito de cancelamento não devem ser usados como base para unattended forte;
 - qualquer nova ferramenta que invoque subprocesso longo precisa declarar como propaga cancelamento e qual fallback operacional existe;
-- drills de processo em background devem registrar a origem do stop/cancelamento como evidência separada: `stopSource=human`, `stopSource=agent`, `stopSource=timeout` ou `stopSource=unknown`. Um `stopRequested=true` sem origem conhecida não basta para liberar unattended forte.
+- drills de processo em background devem registrar a origem do stop/cancelamento como evidência separada: `stopSource=operator`, `stopSource=agent`, `stopSource=timeout` ou `stopSource=unknown`. Um `stopRequested=true` sem origem conhecida não basta para liberar unattended forte.
 
 Drill local registrado em 2026-05-01: um subprocesso Node descartável foi iniciado só para teste (`DRILL_REGISTERED pid=33608`), recebeu stop controlado pelo agente (`DRILL_STOP_REQUESTED source=agent`) e concluiu com `DRILL_DONE code=null signal=SIGTERM`. A sequência canônica classificou `registered → running`, `stop-requested → stopped` com `stopSource=agent`, e o `done` posterior como `late-after-stop`, sem dispatch/autorização. Isso prova o caminho local de cancelamento controlado para processo filho descartável; não autoriza servers longos, scheduler, remote/offload nem kill de processo externo.
 
@@ -376,7 +376,7 @@ Retorno ao perfil Codex também é manual: usar `/model` ou `quota_visibility_ro
 
 ## Entrevistas Estruturadas e Gaps do Operador
 
-Gaps do operador devem ser preenchidos por contrato backend-first antes de qualquer UI. A primitiva `structured_interview_plan` recebe uma lista de perguntas com ids estáveis, tipo, obrigatoriedade, opções, defaults e flags `allowUnknown`/`allowSkip`; recebe respostas parciais; valida sequencialmente; e devolve `complete`, `needs-human-answer` ou `invalid` com `nextQuestionId` e evidência compacta.
+Gaps do operador devem ser preenchidos por contrato backend-first antes de qualquer UI. A primitiva `structured_interview_plan` recebe uma lista de perguntas com ids estáveis, tipo, obrigatoriedade, opções, defaults e flags `allowUnknown`/`allowSkip`; recebe respostas parciais; valida sequencialmente; e devolve `complete`, `needs-operator-answer` ou `invalid` com `nextQuestionId` e evidência compacta.
 
 Essa primitiva é deliberadamente UI-independent: não abre formulário, não agenda repetição, não despacha executor e mantém `authorization=none` e `dispatchAllowed=false`. TUI, web, Telegram ou forms podem ser adaptadores futuros sobre o mesmo contrato, mas não são a fonte de verdade. Defaults, `unknown` e `skip` só contam quando declarados no schema da pergunta; escolhas inválidas e skips não autorizados falham fechado.
 
@@ -519,7 +519,7 @@ simple_delegate_rehearsal_start_packet {
 
 Interpretação operacional:
 - `decision=blocked`: manter lane local-safe e fechar gaps de rehearsal/capability;
-- `decision=ready-for-human-decision`: canário apto para decisão explícita do operador (`start|abort|defer`), sem auto-dispatch.
+- `decision=ready-for-operator-decision`: canário apto para decisão explícita do operador (`start|abort|defer`), sem auto-dispatch.
 
 ### Material-first para long run AFK
 
@@ -620,7 +620,7 @@ Self-reload executado pelo agente ainda é backlog/canary opt-in, não comportam
 
 Enquanto esse contrato não existir, reload continua sendo intervenção do operador. O objetivo futuro é permitir que o agente solicite/execute reload somente quando esses gates estiverem verdes e falhe fechado quando faltar evidência de progresso preservado.
 
-A superfície `self_reload_autoresume_canary` é apenas plano read-only: mesmo com todos os gates verdes retorna `reloadAllowed=false`, `autoResumeDispatchAllowed=false`, `dispatchAllowed=false`, `authorization=none` e `decision=ready-for-human-decision`. Ela existe para auditar maturidade do contrato antes de qualquer implementação protegida de reload real; não executa `/reload`, não agenda resume e bloqueia em pending messages, recent steer, lane queue, escopos protegidos, remote/offload, GitHub Actions ou manutenção destrutiva.
+A superfície `self_reload_autoresume_canary` é apenas plano read-only: mesmo com todos os gates verdes retorna `reloadAllowed=false`, `autoResumeDispatchAllowed=false`, `dispatchAllowed=false`, `authorization=none` e `decision=ready-for-operator-decision`. Ela existe para auditar maturidade do contrato antes de qualquer implementação protegida de reload real; não executa `/reload`, não agenda resume e bloqueia em pending messages, recent steer, lane queue, escopos protegidos, remote/offload, GitHub Actions ou manutenção destrutiva.
 
 ## Loop local sem empurrões manuais
 
@@ -661,11 +661,11 @@ A cadeia compacta validada para o canário local é:
 
 ```text
 context_watch_continuation_readiness: ready=yes ... authorization=none
-context_watch_one_slice_canary_preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no ... authorization=none
+context_watch_one_slice_canary_preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-operator-decision dispatch=no ... authorization=none
 turn_boundary_decision_packet: ... growthDecision=go|hold|needs-evidence growthCode=... authorization=none
 ```
 
-Leia essa saída como evidência graduada, não como permissão. `ready=yes` diz que os fatos locais observados estão verdes. `prepare=yes` diz que a próxima fatia poderia ser preparada. `packet=ready-for-human-decision` diz que há material suficiente para uma decisão futura do operador. `growthDecision=...` explicita se o boundary está em faixa de expansão (`go`) ou estabilização (`hold|needs-evidence`). `dispatch=no` é a fronteira dura: nenhuma execução pode começar por essa preview.
+Leia essa saída como evidência graduada, não como permissão. `ready=yes` diz que os fatos locais observados estão verdes. `prepare=yes` diz que a próxima fatia poderia ser preparada. `packet=ready-for-operator-decision` diz que há material suficiente para uma decisão futura do operador. `growthDecision=...` explicita se o boundary está em faixa de expansão (`go`) ou estabilização (`hold|needs-evidence`). `dispatch=no` é a fronteira dura: nenhuma execução pode começar por essa preview.
 
 `stop=yes` e `oneSliceOnly=yes` são parte do contrato de segurança. Mesmo um futuro caminho explicitamente autorizado deve parar depois de uma fatia, registrar validação, commit e checkpoint, e só considerar outra iteração com contrato separado de repetição/cooldown/cancelamento.
 
@@ -703,7 +703,7 @@ A próxima fronteira antes de qualquer executor é um contrato explícito para u
 
 Pré-condições mínimas:
 
-1. summary live recente com `packet=ready-for-human-decision dispatch=no authorization=none`;
+1. summary live recente com `packet=ready-for-operator-decision dispatch=no authorization=none`;
 2. foco único `in-progress`, local-safe, com arquivos declarados e reversíveis por git;
 3. rollback explícito: `git restore <arquivos>` ou equivalente não destrutivo para cada arquivo tocado;
 4. validação conhecida antes da edição: smoke focal, `safe_marker_check` ou structured-read;
@@ -725,7 +725,7 @@ Se qualquer pré-condição cair entre o packet e a execução — diff inespera
 Caminho verde atual, ainda sem executor:
 
 ```text
-context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none
+context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-operator-decision contract=blocked dispatch=no executor=no reasons=operator-decision-missing authorization=none
 ```
 
 Leia isso como: os fatos locais estão verdes, a fatia pode ser preparada, há decision packet suficiente para decisão do operador, mas o contrato segue bloqueado porque a confirmação explícita do operador não está presente. `dispatch=no` e `executor=no` continuam sendo fronteiras duras.
@@ -733,7 +733,7 @@ Leia isso como: os fatos locais estão verdes, a fatia pode ser preparada, há d
 Caminho fail-closed por validação desconhecida:
 
 ```text
-context-watch-one-slice-operator-packet: readiness=no preview=blocked packet=blocked contract=blocked dispatch=no executor=no reasons=packet-not-ready|human-confirmation-missing|validation-gate-missing authorization=none
+context-watch-one-slice-operator-packet: readiness=no preview=blocked packet=blocked contract=blocked dispatch=no executor=no reasons=packet-not-ready|operator-decision-missing|validation-gate-missing authorization=none
 ```
 
 Esse caso prova que o pacote não inventa validação; foco sem gate conhecido volta para diagnóstico.
@@ -741,7 +741,7 @@ Esse caso prova que o pacote não inventa validação; foco sem gate conhecido v
 Caminho com validação conhecida mas sem arquivos declarados:
 
 ```text
-context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing|declared-files-missing authorization=none
+context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-operator-decision contract=blocked dispatch=no executor=no reasons=operator-decision-missing|declared-files-missing authorization=none
 ```
 
 Esse caso prova que foco único não equivale a escopo reversível. `task.files` ou evidência equivalente precisa existir antes de qualquer execução futura.

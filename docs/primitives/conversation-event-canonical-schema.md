@@ -26,7 +26,7 @@ Contrato canônico para ingestão de conversas/threads de múltiplas plataformas
     "id": "evt-uuid-or-stable-id",
     "type": "message|summary|status|tool_call|tool_result|signal",
     "timestampIso": "2026-04-15T12:34:56.000Z",
-    "role": "user|assistant|tool|system|agent|human|bot",
+    "role": "user|assistant|tool|system|agent|operator|bot",
     "text": "conteúdo textual normalizado",
     "labels": ["optional", "tags"],
     "refs": {

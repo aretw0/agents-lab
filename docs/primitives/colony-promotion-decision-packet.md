@@ -65,7 +65,7 @@ Formato conceitual:
 ```json
 {
   "candidateId": "colony-c-ret-1-promotion",
-  "decision": "ready-for-human-decision",
+  "decision": "ready-for-operator-decision",
   "recommendedOption": "defer",
   "options": ["promote", "skip", "defer"],
   "reviewMode": "read-only",
@@ -126,7 +126,7 @@ Regras:
 
 - nudge-free pode preparar packets;
 - nudge-free não pode promover candidates;
-- `autonomy_lane_next_task` não deve transformar `ready-for-human-decision` em execução;
+- `autonomy_lane_next_task` não deve transformar `ready-for-operator-decision` em execução;
 - `board_decision_packet` e verification podem registrar a revisão, mas não substituem o operador.
 
 ## Validação mínima da primitiva

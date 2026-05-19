@@ -23,7 +23,7 @@ Saída (determinística):
 ## Invariantes
 
 1. Intake não autoriza execução automática.
-2. Escopo protegido pedido explicitamente retorna bloqueio (`intake-needs-human-focus-protected`).
+2. Escopo protegido pedido explicitamente retorna bloqueio (`intake-needs-operator-focus-protected`).
 3. Sempre retorna primeira fatia com validação e rollback explícitos.
 4. Sem acoplamento de domínio à stack do laboratório.
 

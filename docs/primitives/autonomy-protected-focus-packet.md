@@ -11,7 +11,7 @@ Padronizar decisão do operador para uma task de escopo protegido via packet **r
 
 ## Saída esperada
 
-- `decision`: `ready-for-human-decision | blocked`
+- `decision`: `ready-for-operator-decision | blocked`
 - `recommendedOption`: `promote | skip | defer`
 - `recommendationCode` canônico
 - `decisionPreview.recommendedOption` + `decisionPreview.options[]` (preview pragmático de `promote|skip|defer` com `suitability`, `blockers`, `nextAction`)

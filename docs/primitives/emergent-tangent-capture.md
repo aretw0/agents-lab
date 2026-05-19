@@ -8,7 +8,7 @@ Registrar trabalho emergente **aprovado** durante execução (tangente necessár
 
 Na criação da task, aceitar campos opcionais de proveniência:
 
-- `provenance_origin`: `brainstorm | human | tangent-approved`
+- `provenance_origin`: `brainstorm | operator | tangent-approved`
 - `source_task_id`: task foco/origem
 - `source_reason`: motivo curto do desvio
 

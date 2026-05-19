@@ -49,7 +49,7 @@ Campos mínimos:
 
 ```json
 {
-  "decision": "ready-for-human-review",
+  "decision": "ready-for-operator-review",
   "recommendationCode": "seed-local-safe-lane",
   "nextAction": "materialize top 3 slices as board tasks",
   "ideas": [
@@ -81,7 +81,7 @@ Campos mínimos:
 - `seed-local-safe-lane`
 - `continue-existing-lane`
 - `refresh-focus-checkpoint`
-- `needs-human-focus-protected`
+- `needs-operator-focus-protected`
 - `stop-no-local-safe`
 
 ## Semeadura visível (preview-only)
@@ -90,13 +90,13 @@ Quando houver slices candidatos, a semeadura deve passar por preview explícito 
 
 Saída esperada do preview:
 
-- `decision=needs-human-seeding-decision` ou `blocked`;
+- `decision=needs-operator-seeding-decision` ou `blocked`;
 - `recommendationCode=brainstorm-seeding-preview|brainstorm-seeding-blocked`;
 - `confirmationRequired=true` sempre;
 - lista `proposals[]` derivada de `selectedSlices`;
 - invariantes de segurança: `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`, `mode=report-only`.
 
-Origem da proposta deve ser visível no preview (`source=brainstorm|human|tangent-approved`). Materialização de task só ocorre após decisão explícita do operador.
+Origem da proposta deve ser visível no preview (`source=brainstorm|operator|tangent-approved`). Materialização de task só ocorre após decisão explícita do operador.
 
 ## Exemplo blocked/fail-closed
 
@@ -123,7 +123,7 @@ Regra prática para continuidade:
 
 Contrato do packet de semeadura:
 - `decision`: `seed-now|wait|blocked`
-- `humanActionRequired`: `true` quando `seed-now|blocked`
+- `operatorActionRequired`: `true` quando `seed-now|blocked`
 - `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`
 
 Stop condition explícita:

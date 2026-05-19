@@ -68,7 +68,7 @@ A primitive `buildAgentRunPlan` (exposta no runtime como `agent_run_plan`) é o 
 - abort seguro;
 - log/status bounded.
 
-Mesmo no caminho verde, ela apenas retorna `ready-for-human-decision`; não autoriza dispatch.
+Mesmo no caminho verde, ela apenas retorna `ready-for-operator-decision`; não autoriza dispatch.
 
 ## Registry upsert dry-first
 

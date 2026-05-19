@@ -118,18 +118,18 @@ Quando a continuidade repete pressão de contexto sem avanço material, o contra
 
 Campos mínimos do sinal:
 
-- `decision`: `none | watch | pause-human-replan`;
+- `decision`: `none | watch | pause-operator-replan`;
 - `reasonCode`: `no-stagnation | context-pressure-repeat`;
 - `eventCount`: número de eventos recentes compatíveis com estagnação;
 - `evidence`: blockers/snapshots recentes, incluindo checkpoint/compact/reload quando presentes;
-- `humanActionRequired`: `true` quando o limiar exigir pausa e replanejamento pelo operador.
+- `operatorActionRequired`: `true` quando o limiar exigir pausa e replanejamento pelo operador.
 
-Regra local-safe atual: repetição de blockers transitórios de contexto (`context-watch-*`, checkpoint/compact/reload) por múltiplas janelas gera `pause-human-replan` advisory no `local_continuity_audit`. O sinal não autoriza dispatch, não conclui task e não cria auto-advance; ele congela a progressão automática até checkpoint/replanejamento explícito.
+Regra local-safe atual: repetição de blockers transitórios de contexto (`context-watch-*`, checkpoint/compact/reload) por múltiplas janelas gera `pause-operator-replan` advisory no `local_continuity_audit`. O sinal não autoriza dispatch, não conclui task e não cria auto-advance; ele congela a progressão automática até checkpoint/replanejamento explícito.
 
 Evidência de implementação atual:
 
 - superfície: `local_continuity_audit` inclui `stagnationSignal` report-only;
-- regressão: `guardrails-unattended-continuation-surface.test.ts` cobre `stagnation=pause-human-replan events=2`;
+- regressão: `guardrails-unattended-continuation-surface.test.ts` cobre `stagnation=pause-operator-replan events=2`;
 - board: tasks podem registrar o sinal por note/verification antes de fechamento.
 
 ## Próximos incrementos
