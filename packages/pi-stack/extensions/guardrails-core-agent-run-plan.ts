@@ -1,3 +1,8 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+
 export type AgentRunPlanDecision = "ready-for-operator-decision" | "blocked";
 
 export interface AgentRunPlanInput {
@@ -17,7 +22,7 @@ export interface AgentRunPlanInput {
 export interface AgentRunPlanResult {
   mode: "agent-run-plan";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   executorApproved: false;
   requiresOperatorDecision: true;
@@ -168,7 +173,7 @@ export function buildAgentRunPlan(input: AgentRunPlanInput = {}): AgentRunPlanRe
   return {
     mode: "agent-run-plan",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     executorApproved: false,
     requiresOperatorDecision: true,

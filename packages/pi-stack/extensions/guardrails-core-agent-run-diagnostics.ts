@@ -1,4 +1,9 @@
 import type { AgentRunRegistryEntry, AgentRunState } from "./guardrails-core-agent-run-runtime";
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
 
 export type AgentRunnerFailureClass =
   | "none"
@@ -53,7 +58,7 @@ export interface AgentRunStartupDiagnosticInput extends AgentRunFailureClassific
 export interface AgentRunFailureClassificationResult {
   mode: "agent-run-failure-classification";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -96,7 +101,7 @@ export interface AgentRunStartupProbePlanStep {
 export interface AgentRunStartupDiagnosticPacketResult {
   mode: "agent-run-startup-diagnostic-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -431,13 +436,13 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
     `retryAllowed=${retryAllowed ? "yes" : "no"}`,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     "dispatch=no",
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
     mode: "agent-run-failure-classification",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -526,13 +531,13 @@ export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagn
     `canaryAllowed=no`,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     "dispatch=no",
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
     mode: "agent-run-startup-diagnostic-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,

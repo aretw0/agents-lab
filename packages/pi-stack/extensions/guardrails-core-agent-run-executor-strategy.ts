@@ -1,3 +1,9 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
+
 export type AgentRunExecutorStrategyDecision = "subprocess-first" | "sdk-in-process-candidate" | "blocked";
 export type AgentRunExecutorStrategyKind = "pi-print-subprocess" | "pi-sdk-in-process";
 export type AgentRunExecutorRuntimeMode = "windows" | "linux" | "devcontainer" | "unknown";
@@ -20,7 +26,7 @@ export interface AgentRunExecutorStrategyInput {
 export interface AgentRunExecutorStrategyPacketResult {
   mode: "agent-run-executor-strategy-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   decision: AgentRunExecutorStrategyDecision;
@@ -147,7 +153,7 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
       oodaStage: "orient",
       support: "report-only packets: executor strategy, SDK packet, startup diagnostic, cache pack, batch/fan-in preview",
       confidence: "high",
-      boundary: "packets explain options and blockers; they remain authorization=none",
+      boundary: `packets explain options and blockers; they remain ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     },
     {
       oodaStage: "decide",
@@ -212,13 +218,13 @@ export function buildAgentRunExecutorStrategyPacket(input: AgentRunExecutorStrat
     unexpectedDirty ? "unexpectedDirty=yes" : undefined,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     "dispatch=no",
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
     mode: "agent-run-executor-strategy-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     decision,
