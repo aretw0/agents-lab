@@ -62,7 +62,7 @@
 					"source": {
 						"type": "string",
 						"enum": [
-							"human",
+							"operator",
 							"agent",
 							"analysis"
 						],
