@@ -1,3 +1,9 @@
+import {
+  formatAuthorizationEvidence,
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+
 export type LocalSliceCanaryDecision = "prepare-local-slice" | "stop-after-slice" | "blocked";
 
 export interface LocalSliceCanaryInput {
@@ -19,7 +25,7 @@ export interface LocalSliceCanaryPlan {
   effect: "none";
   mode: "advisory";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   singleSliceOnly: true;
   decision: LocalSliceCanaryDecision;
   canPrepareSlice: boolean;
@@ -51,7 +57,7 @@ export interface LocalSliceCanaryDispatchDecisionPacket {
   effect: "none";
   mode: "decision-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   requiresOperatorDecision: true;
   singleSliceOnly: true;
@@ -86,7 +92,7 @@ export interface LocalSliceOperatorApprovedContractReview {
   effect: "none";
   mode: "contract-review";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   executorApproved: false;
   singleSliceOnly: true;
@@ -127,7 +133,7 @@ export interface LocalSliceBacklogGate {
   effect: "none";
   mode: "backlog-gate";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   executorApproved: false;
   implementationAllowed: false;
@@ -146,13 +152,13 @@ export function resolveLocalSliceCanaryPlan(input: LocalSliceCanaryInput): Local
       effect: "none",
       mode: "advisory",
       activation: "none",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       singleSliceOnly: true,
       decision: "stop-after-slice",
       canPrepareSlice: false,
       mustStopAfterSlice: true,
       reasons: ["slice-complete", "single-slice-limit"],
-      summary: "local-slice-canary: decision=stop-after-slice prepare=no stop=yes reasons=slice-complete,single-slice-limit authorization=none",
+      summary: `local-slice-canary: decision=stop-after-slice prepare=no stop=yes reasons=slice-complete,single-slice-limit ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
       recommendation: "Stop after this slice; any repetition needs a separate cooldown/iteration contract and operator authorization.",
     };
   }
@@ -174,13 +180,13 @@ export function resolveLocalSliceCanaryPlan(input: LocalSliceCanaryInput): Local
       effect: "none",
       mode: "advisory",
       activation: "none",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       singleSliceOnly: true,
       decision: "blocked",
       canPrepareSlice: false,
       mustStopAfterSlice: true,
       reasons,
-      summary: `local-slice-canary: decision=blocked prepare=no stop=yes reasons=${reasons.slice(0, 4).join(",")} authorization=none`,
+      summary: `local-slice-canary: decision=blocked prepare=no stop=yes reasons=${reasons.slice(0, 4).join(",")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
       recommendation: "Do not prepare the canary slice; resolve blockers or ask the operator before any local unattended dispatch.",
     };
   }
@@ -189,13 +195,13 @@ export function resolveLocalSliceCanaryPlan(input: LocalSliceCanaryInput): Local
     effect: "none",
     mode: "advisory",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     singleSliceOnly: true,
     decision: "prepare-local-slice",
     canPrepareSlice: true,
     mustStopAfterSlice: true,
     reasons: ["readiness-green", "single-slice-only"],
-    summary: "local-slice-canary: decision=prepare-local-slice prepare=yes stop=yes reasons=readiness-green,single-slice-only authorization=none",
+    summary: `local-slice-canary: decision=prepare-local-slice prepare=yes stop=yes reasons=readiness-green,single-slice-only ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     recommendation: "Prepare at most one local-safe slice, then validate, commit, checkpoint, and stop.",
   };
 }
@@ -221,13 +227,13 @@ export function buildLocalSliceCanaryDispatchDecisionPacket(input: LocalSliceCan
       effect: "none",
       mode: "decision-packet",
       activation: "none",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       requiresOperatorDecision: true,
       singleSliceOnly: true,
       decision: "blocked",
       reasons,
-      summary: `local-slice-dispatch-decision-packet: decision=blocked dispatch=no reasons=${reasons.slice(0, 4).join(",")} authorization=none`,
+      summary: `local-slice-dispatch-decision-packet: decision=blocked dispatch=no reasons=${reasons.slice(0, 4).join(",")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
       recommendation: "Do not dispatch; complete the missing contracts and ask for an explicit operator decision first.",
     };
   }
@@ -236,13 +242,13 @@ export function buildLocalSliceCanaryDispatchDecisionPacket(input: LocalSliceCan
     effect: "none",
     mode: "decision-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     requiresOperatorDecision: true,
     singleSliceOnly: true,
     decision: "ready-for-operator-decision",
     reasons: ["preview-ready", "contracts-present", "operator-decision-required"],
-    summary: "local-slice-dispatch-decision-packet: decision=ready-for-operator-decision dispatch=no reasons=preview-ready,contracts-present,operator-decision-required authorization=none",
+    summary: `local-slice-dispatch-decision-packet: decision=ready-for-operator-decision dispatch=no reasons=preview-ready,contracts-present,operator-decision-required ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     recommendation: "Present this packet to the operator; do not dispatch until a separate execution path is explicitly authorized.",
   };
 }
@@ -303,14 +309,14 @@ export function resolveLocalSliceBacklogGate(input: LocalSliceBacklogGateInput):
       effect: "none",
       mode: "backlog-gate",
       activation: "none",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       executorApproved: false,
       implementationAllowed: false,
       singleSliceOnly: true,
       decision: "blocked",
       reasons,
-      summary: `local-slice-backlog-gate: decision=blocked implementation=no dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")}${blockedRequestsSummary} authorization=none`,
+      summary: `local-slice-backlog-gate: decision=blocked implementation=no dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")}${blockedRequestsSummary} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
       recommendation: "Do not implement or use an executor; resolve the backlog-gate blockers in a separate design task first.",
     };
   }
@@ -319,14 +325,14 @@ export function resolveLocalSliceBacklogGate(input: LocalSliceBacklogGateInput):
     effect: "none",
     mode: "backlog-gate",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     executorApproved: false,
     implementationAllowed: false,
     singleSliceOnly: true,
     decision: "ready-for-separate-task",
     reasons: ["criteria-present", "separate-task-required", "implementation-still-not-authorized"],
-    summary: "local-slice-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none",
+    summary: `local-slice-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     recommendation: "The executor idea is eligible for a separate design/backlog task only; implementation and dispatch remain unauthorized.",
   };
 }
@@ -384,13 +390,13 @@ export function reviewLocalSliceOperatorApprovedContract(input: LocalSliceOperat
       effect: "none",
       mode: "contract-review",
       activation: "none",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       executorApproved: false,
       singleSliceOnly: true,
       decision: "blocked",
       reasons,
-      summary: `local-slice-operator-approved-contract: decision=blocked dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")}${blockedRequestsSummary} authorization=none`,
+      summary: `local-slice-operator-approved-contract: decision=blocked dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")}${blockedRequestsSummary} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
       recommendation: "Do not execute; resolve the contract blockers and keep using preview/readiness evidence until an approved executor exists.",
     };
   }
@@ -399,13 +405,13 @@ export function reviewLocalSliceOperatorApprovedContract(input: LocalSliceOperat
     effect: "none",
     mode: "contract-review",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     executorApproved: false,
     singleSliceOnly: true,
     decision: "contract-ready-no-executor",
     reasons: ["contract-valid", "operator-decision-explicit", "executor-not-approved"],
-    summary: "local-slice-operator-approved-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,operator-decision-explicit,executor-not-approved authorization=none",
+    summary: `local-slice-operator-approved-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,operator-decision-explicit,executor-not-approved ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     recommendation: "The proposed local-slice local contract is review-ready, but no executor is approved; keep dispatch disabled until a separate execution primitive is authorized.",
   };
 }

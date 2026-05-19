@@ -65,6 +65,18 @@ export {
   shouldPauseOnIdenticalFailure,
 } from "./guardrails-core-lane-queue";
 export {
+  formatAuthorizationEvidence,
+  GUARDRAILS_AUTHORIZATION_EXPLICIT_APPLY,
+  GUARDRAILS_AUTHORIZATION_EXPLICIT_OPERATOR,
+  GUARDRAILS_AUTHORIZATION_NONE,
+} from "./guardrails-core-authorization";
+export type {
+  GuardrailsAuthorization,
+  GuardrailsAuthorizationExplicitApply,
+  GuardrailsAuthorizationExplicitOperator,
+  GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+export {
   buildGuardrailsRuntimeConfigSetResult,
   buildOperatorCadenceSystemPrompt,
   coerceGuardrailsRuntimeConfigValue,

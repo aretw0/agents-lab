@@ -8,6 +8,8 @@ import {
   detectShellInlineCommandSensitiveMarkerCheck,
   evaluateGitMaintenanceSignal,
   evaluateTextMarkerCheck,
+  formatAuthorizationEvidence,
+  GUARDRAILS_AUTHORIZATION_NONE,
   resolveCheckpointFreshCollectorResult,
   resolveCooldownReadyCollectorResult,
   resolveGitStateExpectedCollectorResult,
@@ -75,7 +77,7 @@ describe("guardrails-core hardening re-exports", () => {
 
     const localSlicePlan = resolveLocalSliceCanaryPlan({
       readinessReady: true,
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       checkpointFresh: true,
       handoffBudgetOk: true,
       gitStateExpected: true,
@@ -92,6 +94,7 @@ describe("guardrails-core hardening re-exports", () => {
       singleSliceOnly: true,
       decision: "prepare-local-slice",
     });
+    expect(formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)).toBe("authorization=none");
     const localSlicePacket = buildLocalSliceCanaryDispatchDecisionPacket({
       plan: localSlicePlan,
       rollbackPlanKnown: true,
