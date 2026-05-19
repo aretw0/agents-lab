@@ -55,6 +55,7 @@ import {
   type LoopActivationEvidenceState,
 } from "./guardrails-core-lane-queue-evidence";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
+import { GUARDRAILS_AUTHORIZATION_NONE } from "./guardrails-core-authorization";
 
 export interface GuardrailsLaneQueueSurfaceRuntimeSnapshot {
   lastLongRunBusyAt: number;
@@ -192,7 +193,7 @@ export function buildLoopEvidenceReadinessPacket(input: {
   return {
     mode: "guardrails-loop-evidence-readiness",
     dispatchAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     status,
     stale,
     updatedAtIso: evidence.updatedAtIso,
