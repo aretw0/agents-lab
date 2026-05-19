@@ -1,3 +1,8 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+
 export type ToolkitContractProfile = "read-only-review" | "research" | "small-mutation" | "test-fix";
 export type ToolkitCapability = "filesystem-read" | "filesystem-write" | "web-research" | "provider-ready" | "focal-validation" | "custom-tools";
 
@@ -21,7 +26,7 @@ export interface ToolkitContractInput {
 export interface ToolkitContractResult {
   mode: "toolkit-contract";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   requiresOperatorDecision: true;
@@ -161,7 +166,7 @@ export function buildToolkitContract(input: ToolkitContractInput = {}): ToolkitC
   return {
     mode: "toolkit-contract",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     requiresOperatorDecision: true,
