@@ -64,6 +64,13 @@ test("classifyRootScript marks project verification scripts as board wrappers", 
 	assert.equal(row.targetSurface, "project-board-surface");
 });
 
+test("classifyRootScript marks scheduler next scripts as autonomy-lane wrappers", () => {
+	const row = classifyRootScript("scheduler:next", "node scripts/autonomous-scheduler.mjs", shipped);
+
+	assert.equal(row.category, "distributed-wrapper");
+	assert.equal(row.targetSurface, "guardrails-core");
+});
+
 test("classifyRootScript keeps ci and release scripts internal", () => {
 	assert.equal(classifyRootScript("ci:smoke:gate", "npm run test:smoke", shipped).category, "repo-internal");
 	assert.equal(classifyRootScript("release", "changeset version", shipped).category, "repo-internal");
@@ -87,6 +94,7 @@ test("buildUserSurfaceAudit exposes grouped promotion targets", () => {
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "context-watchdog" && group.scripts.includes("context:preload:consume")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "guardrails-core" && group.scripts.includes("git:dirty:snapshot")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "guardrails-core" && group.scripts.includes("ops:loop-evidence:strict")));
+	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "guardrails-core" && group.scripts.includes("scheduler:next")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "project-board-surface" && group.scripts.includes("project:verification:check")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:bloat:audit:strict")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:discourse:audit")));

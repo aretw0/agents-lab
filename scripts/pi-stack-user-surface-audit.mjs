@@ -98,6 +98,11 @@ const DISTRIBUTED_WRAPPERS = [
 		reason: "project verification integrity backfill is distributed through board_verification_backfill_plan",
 	},
 	{
+		match: /^scheduler:next/,
+		surface: "guardrails-core",
+		reason: "next-task selection is distributed through autonomy_lane_next_task/autonomy_lane_status; root scheduler script remains a lab wrapper",
+	},
+	{
 		match: /^repo:complexity/,
 		surface: "stack-sovereignty",
 		reason: "repo complexity budget is distributed through stack_quality_audit; root script remains a CI/lab wrapper",
@@ -124,11 +129,6 @@ const PROMOTION_CANDIDATES = [
 		match: /^pi:artifact:audit/,
 		target: "safe-boot",
 		reason: "runtime artifact hygiene is safety behavior useful to installed users",
-	},
-	{
-		match: /^scheduler:next/,
-		target: "scheduler-governance",
-		reason: "scheduler next-task selection is already a governance concern",
 	},
 	{
 		match: /^repo:discourse:curation/,
