@@ -18,7 +18,6 @@
  * @capability-criticality medium
  */
 import { existsSync, readdirSync, statSync } from "node:fs";
-import { homedir } from "node:os";
 import path from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
@@ -31,6 +30,10 @@ import {
   type SessionJsonlScanLimits,
 } from "./session-analytics-jsonl";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
+import {
+  resolveWorkspaceSessionDir,
+  toSessionWorkspaceKey,
+} from "./quota-visibility-session-roots";
 export {
   DEFAULT_SESSION_JSONL_SCAN_LIMITS,
   clampScanLimits,
@@ -42,40 +45,10 @@ export type {
   SessionJsonlScanLimits,
 } from "./session-analytics-jsonl";
 
-// ---------------------------------------------------------------------------
-// Workspace key derivation (mirrors session-triage.mjs logic)
-// ---------------------------------------------------------------------------
-
-export function toSessionWorkspaceKey(absPath: string): string {
-  // Normalize backslashes before drive-letter check so Windows paths work on
-  // any platform. path.resolve() mis-resolves "C:\..." on Linux by treating
-  // it as a relative path and prepending the Linux CWD.
-  const normalized = absPath.replace(/\\/g, "/");
-  const driveMatch = normalized.match(/^([A-Za-z]):\/(.*)$/);
-  if (driveMatch) {
-    const letter = driveMatch[1].toUpperCase();
-    const rest = driveMatch[2]
-      .split("/")
-      .filter(Boolean)
-      .map((s) => s.replace(/[^A-Za-z0-9._-]/g, "-"))
-      .join("-");
-    return `--${letter}--${rest}--`;
-  }
-  const resolved = path.resolve(normalized);
-  const rest = resolved
-    .replace(/^\//, "")
-    .split("/")
-    .filter(Boolean)
-    .map((s) => s.replace(/[^A-Za-z0-9._-]/g, "-"))
-    .join("-");
-  return `--${rest}--`;
-}
+export { toSessionWorkspaceKey };
 
 export function sessionDir(cwd: string): string {
-  const key = toSessionWorkspaceKey(cwd);
-  const local = path.join(cwd, ".sandbox", "pi-agent", "sessions", key);
-  if (existsSync(local)) return local;
-  return path.join(homedir(), ".pi", "agent", "sessions", key);
+  return resolveWorkspaceSessionDir(cwd);
 }
 
 import {

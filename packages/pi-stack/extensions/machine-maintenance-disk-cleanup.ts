@@ -1,7 +1,8 @@
 import { existsSync, readdirSync, statSync, type Dirent } from "node:fs";
-import { homedir, tmpdir } from "node:os";
-import { join, relative, resolve } from "node:path";
+import { tmpdir } from "node:os";
+import { join, relative } from "node:path";
 import type { MachineMaintenanceSeverity, ResourcePressureReading } from "./machine-maintenance";
+import { resolveGlobalWorkspaceSessionDir } from "./quota-visibility-session-roots";
 
 const MB = 1024 * 1024;
 
@@ -141,15 +142,6 @@ function gatherClassRows(cwd: string, className: WorkspaceDiskCleanupClass, root
 		.filter((row): row is CleanupRow => Boolean(row));
 }
 
-function encodeGlobalWorkspaceSessionNamespace(cwd: string): string {
-	const normalized = resolve(cwd).replace(/\\/g, "/");
-	const win = /^([A-Za-z]):\/(.*)$/.exec(normalized);
-	if (win) return `--${win[1].toUpperCase()}--${win[2].split("/").filter(Boolean).join("-")}--`;
-	const mntWin = /^\/mnt\/([a-zA-Z])\/(.*)$/.exec(normalized);
-	if (mntWin) return `--${mntWin[1].toUpperCase()}--${mntWin[2].split("/").filter(Boolean).join("-")}--`;
-	return `--${normalized.split("/").filter(Boolean).join("-")}--`;
-}
-
 function inventoryByClass(rows: Array<{ class: WorkspaceDiskCleanupClass; bytes: number }>) {
 	const empty: Record<WorkspaceDiskCleanupClass, { count: number; totalMb: number }> = {
 		"bg-artifact": { count: 0, totalMb: 0 },
@@ -196,7 +188,7 @@ export function buildWorkspaceDiskCleanupPlan(input: {
 		...gatherClassRows(cwd, "generated-cache", join(cwd, ".cache", "vitest"), nowMs),
 		...gatherClassRows(cwd, "pi-report", join(cwd, ".pi", "reports"), nowMs),
 		...gatherClassRows(cwd, "session-jsonl", join(cwd, ".sandbox", "pi-agent", "sessions"), nowMs, (p) => p.toLowerCase().endsWith(".jsonl")),
-		...gatherClassRows(cwd, "global-session-jsonl", join(homedir(), ".pi", "agent", "sessions", encodeGlobalWorkspaceSessionNamespace(cwd)), nowMs, (p) => p.toLowerCase().endsWith(".jsonl")),
+		...gatherClassRows(cwd, "global-session-jsonl", resolveGlobalWorkspaceSessionDir(cwd), nowMs, (p) => p.toLowerCase().endsWith(".jsonl")),
 	];
 
 	const sessionIndexes = new Map<WorkspaceDiskCleanupClass, Map<string, number>>();

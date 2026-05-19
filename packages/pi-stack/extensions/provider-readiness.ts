@@ -16,9 +16,9 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { homedir } from "node:os";
 import path from "node:path";
 import { readProjectSettings } from "./context-watchdog-storage";
+import { resolveGlobalWorkspaceSessionDir } from "./quota-visibility-session-roots";
 import {
   analyzeQuota,
   parseProviderBudgets,
@@ -66,24 +66,7 @@ const AUTH_RE = /(\b401\b|\b403\b|unauthori[sz]ed|forbidden|auth\s*failed|invali
 const SERVER_RE = /(\b5\d\d\b|overloaded|temporar(y|ily)\s*unavailable|internal\s*server\s*error)/i;
 
 function sessionDir(cwd: string): string {
-  const resolved = path.resolve(cwd).replace(/\\/g, "/");
-  const driveMatch = resolved.match(/^([A-Za-z]):\/(.*)$/);
-  if (driveMatch) {
-    const letter = driveMatch[1].toUpperCase();
-    const rest = driveMatch[2]
-      .split("/")
-      .filter(Boolean)
-      .map((s) => s.replace(/[^A-Za-z0-9._-]/g, "-"))
-      .join("-");
-    return path.join(homedir(), ".pi", "agent", "sessions", `--${letter}--${rest}--`);
-  }
-  const rest = resolved
-    .replace(/^\//, "")
-    .split("/")
-    .filter(Boolean)
-    .map((s) => s.replace(/[^A-Za-z0-9._-]/g, "-"))
-    .join("-");
-  return path.join(homedir(), ".pi", "agent", "sessions", `--${rest}--`);
+  return resolveGlobalWorkspaceSessionDir(cwd);
 }
 
 function collectRuntimeSignals(cwd: string, lookbackMinutes = 45): Record<string, RuntimeSignal> {

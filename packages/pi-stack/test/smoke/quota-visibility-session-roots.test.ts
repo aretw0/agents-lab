@@ -2,9 +2,19 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { resolveQuotaSessionRoots } from "../../extensions/quota-visibility-session-roots";
+import {
+	resolveGlobalWorkspaceSessionDir,
+	resolveQuotaSessionRoots,
+	toSessionWorkspaceKey,
+} from "../../extensions/quota-visibility-session-roots";
 
 describe("quota-visibility session roots", () => {
+	it("centraliza o namespace de sessão do workspace", () => {
+		expect(toSessionWorkspaceKey("C:\\Users\\pi\\my project")).toBe("--C--Users-pi-my-project--");
+		expect(toSessionWorkspaceKey("/mnt/c/Users/pi/my project")).toBe("--C--Users-pi-my-project--");
+		expect(resolveGlobalWorkspaceSessionDir("C:\\Users\\pi\\my project")).toContain("--C--Users-pi-my-project--");
+	});
+
 	it("prefere PI_CODING_AGENT_DIR e não varre sessões globais na runtime isolada", () => {
 		const tmp = mkdtempSync(join(tmpdir(), "quota-isolated-root-"));
 		const prev = process.env.PI_CODING_AGENT_DIR;

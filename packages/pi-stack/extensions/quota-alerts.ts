@@ -13,7 +13,6 @@
  * @capability-criticality high
  */
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { homedir } from "node:os";
 import path from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
@@ -24,6 +23,7 @@ import {
   safeNum,
   type ProviderBudgetStatus,
 } from "./quota-visibility";
+import { resolveGlobalWorkspaceSessionDir } from "./quota-visibility-session-roots";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 // ---------------------------------------------------------------------------
@@ -221,17 +221,7 @@ export function buildWindowPressureAlerts(budgets: ProviderBudgetStatus[]): Quot
 // ---------------------------------------------------------------------------
 
 function sessionDir(cwd: string): string {
-  const resolved = path.resolve(cwd).replace(/\\/g, "/");
-  const driveMatch = resolved.match(/^([A-Za-z]):\/(.*)$/);
-  if (driveMatch) {
-    const letter = driveMatch[1].toUpperCase();
-    const rest = driveMatch[2].split("/").filter(Boolean)
-      .map((s) => s.replace(/[^A-Za-z0-9._-]/g, "-")).join("-");
-    return path.join(homedir(), ".pi", "agent", "sessions", `--${letter}--${rest}--`);
-  }
-  const rest = resolved.replace(/^\//, "").split("/").filter(Boolean)
-    .map((s) => s.replace(/[^A-Za-z0-9._-]/g, "-")).join("-");
-  return path.join(homedir(), ".pi", "agent", "sessions", `--${rest}--`);
+  return resolveGlobalWorkspaceSessionDir(cwd);
 }
 
 function recentSessionRecords(cwd: string, lookbackHours: number): unknown[] {
