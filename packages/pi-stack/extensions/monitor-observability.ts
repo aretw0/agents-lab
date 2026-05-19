@@ -12,6 +12,11 @@ import {
 	readSync,
 	statSync,
 } from "node:fs";
+import {
+	formatAuthorizationEvidence,
+	GUARDRAILS_AUTHORIZATION_NONE,
+	type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
 
 export interface ClassifyFailureSummary {
 	total: number;
@@ -41,7 +46,7 @@ export interface MonitorClassifyFailureReadiness {
 	mode: "monitor-classify-failure-readiness";
 	decision: MonitorClassifyFailureDecision;
 	activation: "none";
-	authorization: "none";
+	authorization: GuardrailsAuthorizationNone;
 	dispatchAllowed: false;
 	readyForStrongUnattended: boolean;
 	readinessImpact: "none" | "advisory" | "degrade-unattended" | "block-unattended";
@@ -57,7 +62,7 @@ export interface MonitorClassifyFailureReadiness {
 export interface MonitorEmptyResponseEvidence {
 	mode: "monitor-empty-response-evidence";
 	activation: "none";
-	authorization: "none";
+	authorization: GuardrailsAuthorizationNone;
 	dispatchAllowed: false;
 	decision: MonitorEmptyResponseDecision;
 	recommendationCode:
@@ -181,7 +186,7 @@ export function resolveMonitorClassifyFailureReadiness(
 		mode: "monitor-classify-failure-readiness",
 		decision,
 		activation: "none",
-		authorization: "none",
+		authorization: GUARDRAILS_AUTHORIZATION_NONE,
 		dispatchAllowed: false,
 		readyForStrongUnattended: decision === "ok",
 		readinessImpact,
@@ -198,7 +203,7 @@ export function resolveMonitorClassifyFailureReadiness(
 			`last=${summary.lastMonitor ?? "none"}`,
 			`impact=${readinessImpact}`,
 			"dispatch=no",
-			"authorization=none",
+			formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
 		].join(" "),
 	};
 }
@@ -467,13 +472,13 @@ function buildMonitorEmptyResponseEvidenceResult(input: {
 		`assistantFinalChars=${Math.max(0, Math.floor(input.assistantFinalChars))}`,
 		input.workerOutputChars !== undefined ? `workerOutputChars=${Math.max(0, Math.floor(input.workerOutputChars))}` : undefined,
 		input.turnTimestamp ? `turnTimestamp=${input.turnTimestamp}` : undefined,
-		"authorization=none",
+		formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
 	].filter(Boolean).join(" ");
 
 	return {
 		mode: "monitor-empty-response-evidence",
 		activation: "none",
-		authorization: "none",
+		authorization: GUARDRAILS_AUTHORIZATION_NONE,
 		dispatchAllowed: false,
 		decision: input.decision,
 		recommendationCode,
