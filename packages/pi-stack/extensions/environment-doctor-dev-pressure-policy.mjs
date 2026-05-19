@@ -19,6 +19,18 @@ export function buildDevelopmentVelocityPressure(report) {
   if (signals.some((signal) => signal.code === "heavy-configured-extension-entrypoint")) {
     stopConditions.push("reduce-runtime-surface");
   }
+  if (signals.some((signal) => signal.code === "large-board-state")) {
+    stopConditions.push("reduce-board-surface");
+  }
+  if (signals.some((signal) => signal.code === "machine-memory-pressure" || signal.code === "machine-disk-pressure")) {
+    stopConditions.push("machine-pressure");
+  }
+  if (signals.some((signal) => signal.code === "long-dev-process")) {
+    stopConditions.push("prefer-new-session");
+  }
+  if (signals.some((signal) => signal.code === "stale-handoff" || signal.code === "stale-useful-commit")) {
+    if (!stopConditions.includes("checkpoint-before-more-work")) stopConditions.push("checkpoint-before-more-work");
+  }
 
   let severity = "ok";
   if (hasBlock) severity = "block";

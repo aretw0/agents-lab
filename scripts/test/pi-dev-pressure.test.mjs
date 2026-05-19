@@ -15,6 +15,7 @@ import {
   collectSettingsStats,
   computeStrictFailures,
   buildDevelopmentVelocityPressure,
+  buildVelocityPressureSignals,
 } from "../pi-dev-pressure.mjs";
 import { PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES } from "../../packages/pi-stack/install.mjs";
 
@@ -285,6 +286,18 @@ test("buildPiDevPressureReport recommends new-session for large resume logs", ()
         blockingSessionMb: 99,
         heavyEntrypointKb: 999,
         heavyEntrypointFiles: 999,
+        boardWarnMb: 999,
+        memoryWarnUsedPct: 101,
+        diskWarnFreeMb: 0,
+        handoffWarnMinutes: 999_999,
+        usefulCommitWarnMinutes: 999_999,
+      },
+      velocityStats: {
+        machine: { memory: { usedPct: 0, freeMb: 999 }, disk: { available: true, freeMb: 999_999, usedPct: 0 } },
+        board: { exists: false },
+        handoff: { exists: false },
+        commit: { available: false },
+        runtime: { processUptimeMinutes: 0 },
       },
     });
 
@@ -351,5 +364,36 @@ test("buildDevelopmentVelocityPressure blocks huge resume sessions", () => {
     "block-signal-present",
     "checkpoint-before-more-work",
     "avoid-resume-heavy-session",
+  ]);
+});
+
+test("buildVelocityPressureSignals classifies local-first velocity pressure inputs", () => {
+  const signals = buildVelocityPressureSignals({
+    machine: {
+      memory: { usedPct: 90, freeMb: 512 },
+      disk: { available: true, freeMb: 2048, usedPct: 95 },
+    },
+    board: { exists: true, path: ".project/tasks.json", mb: 2 },
+    handoff: { exists: true, ageMinutes: 1500 },
+    commit: { available: true, minutesSinceUsefulCommit: 300 },
+    runtime: { processUptimeMinutes: 400 },
+  }, {
+    memoryWarnUsedPct: 85,
+    memoryBlockUsedPct: 96,
+    diskWarnFreeMb: 10_240,
+    diskBlockFreeMb: 1024,
+    boardWarnMb: 1,
+    handoffWarnMinutes: 1440,
+    usefulCommitWarnMinutes: 240,
+    processAgeWarnMinutes: 360,
+  });
+
+  assert.deepEqual(signals.map((signal) => signal.code), [
+    "machine-memory-pressure",
+    "machine-disk-pressure",
+    "large-board-state",
+    "stale-handoff",
+    "stale-useful-commit",
+    "long-dev-process",
   ]);
 });

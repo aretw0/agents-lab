@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, rmSync, statfsSync, statSync } from "node:fs";
+import { freemem, totalmem } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildDevelopmentVelocityPressure } from "../packages/pi-stack/extensions/environment-doctor-dev-pressure-policy.mjs";
@@ -12,10 +13,27 @@ const DEFAULT_THRESHOLDS = {
   heavyEntrypointKb: 750,
   heavyEntrypointFiles: 70,
   dirtyFileWarn: 8,
+  boardWarnMb: 1,
+  handoffWarnMinutes: 24 * 60,
+  usefulCommitWarnMinutes: 4 * 60,
+  memoryWarnUsedPct: 85,
+  memoryBlockUsedPct: 96,
+  diskWarnFreeMb: 10 * 1024,
+  diskBlockFreeMb: 5 * 1024,
+  processAgeWarnMinutes: 6 * 60,
 };
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function toMb(bytes) {
+  return Number((Math.max(0, Number(bytes) || 0) / 1024 / 1024).toFixed(2));
+}
+
+function minutesBetween(nowMs, thenMs) {
+  if (!Number.isFinite(nowMs) || !Number.isFinite(thenMs)) return undefined;
+  return Math.max(0, Number(((nowMs - thenMs) / 60_000).toFixed(1)));
 }
 
 function readJsonIfExists(filePath) {
@@ -394,6 +412,133 @@ export function collectGitDirtyStats(cwd = process.cwd()) {
   };
 }
 
+export function collectVelocityStats(cwd = process.cwd(), options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
+  const nowMs = now.getTime();
+  const machine = options.machine ?? collectMachineStats(cwd);
+  const board = options.board ?? collectBoardStateStats(cwd);
+  const handoff = options.handoff ?? collectHandoffStats(cwd, nowMs);
+  const commit = options.commit ?? collectLastCommitStats(cwd, nowMs);
+  const runtime = options.runtime ?? {
+    processUptimeMinutes: Number((Number(options.processUptimeSeconds ?? process.uptime()) / 60).toFixed(1)),
+  };
+  return { machine, board, handoff, commit, runtime };
+}
+
+export function collectMachineStats(cwd = process.cwd()) {
+  const totalMb = toMb(totalmem());
+  const freeMb = toMb(freemem());
+  const usedPct = totalMb > 0 ? Number((((totalMb - freeMb) / totalMb) * 100).toFixed(1)) : 0;
+  let disk = { available: false };
+  try {
+    const stat = statfsSync(cwd);
+    const totalBytes = Number(stat.blocks) * Number(stat.bsize);
+    const freeBytes = Number(stat.bavail) * Number(stat.bsize);
+    disk = {
+      available: true,
+      totalMb: toMb(totalBytes),
+      freeMb: toMb(freeBytes),
+      usedPct: totalBytes > 0 ? Number(((1 - freeBytes / totalBytes) * 100).toFixed(1)) : 0,
+    };
+  } catch (error) {
+    disk = { available: false, error: String(error?.message ?? error) };
+  }
+  return {
+    memory: { totalMb, freeMb, usedPct },
+    disk,
+  };
+}
+
+export function collectBoardStateStats(cwd = process.cwd()) {
+  const boardPath = path.join(cwd, ".project", "tasks.json");
+  try {
+    const stat = statSync(boardPath);
+    return {
+      exists: true,
+      path: ".project/tasks.json",
+      mb: toMb(stat.size),
+      mtimeIso: stat.mtime.toISOString(),
+    };
+  } catch {
+    return { exists: false, path: ".project/tasks.json" };
+  }
+}
+
+export function collectHandoffStats(cwd = process.cwd(), nowMs = Date.now()) {
+  const handoffPath = path.join(cwd, ".project", "handoff.json");
+  const handoff = readJsonIfExists(handoffPath);
+  if (!handoff || handoff.__parseError) {
+    return { exists: existsSync(handoffPath), parseError: handoff?.__parseError };
+  }
+  const timestampMs = typeof handoff.timestamp === "string" ? Date.parse(handoff.timestamp) : NaN;
+  return {
+    exists: true,
+    timestamp: handoff.timestamp,
+    ageMinutes: minutesBetween(nowMs, timestampMs),
+    currentTasks: Array.isArray(handoff.current_tasks) ? handoff.current_tasks.slice(0, 5) : [],
+  };
+}
+
+export function collectLastCommitStats(cwd = process.cwd(), nowMs = Date.now()) {
+  const run = spawnSync("git", ["log", "-1", "--format=%ct"], {
+    cwd,
+    encoding: "utf8",
+    stdio: "pipe",
+  });
+  if (run.status !== 0) {
+    return {
+      available: false,
+      error: (run.stderr || run.stdout || "git log failed").trim(),
+    };
+  }
+  const epochSeconds = Number(String(run.stdout ?? "").trim());
+  const commitMs = Number.isFinite(epochSeconds) ? epochSeconds * 1000 : NaN;
+  return {
+    available: true,
+    committedAtIso: Number.isFinite(commitMs) ? new Date(commitMs).toISOString() : undefined,
+    minutesSinceUsefulCommit: minutesBetween(nowMs, commitMs),
+  };
+}
+
+export function buildVelocityPressureSignals(velocity, thresholds = DEFAULT_THRESHOLDS) {
+  const signals = [];
+  const memory = velocity?.machine?.memory;
+  if (memory && memory.usedPct >= thresholds.memoryBlockUsedPct) {
+    signals.push({ level: "block", code: "machine-memory-pressure", detail: `memory used=${memory.usedPct}% free=${memory.freeMb} MB` });
+  } else if (memory && memory.usedPct >= thresholds.memoryWarnUsedPct) {
+    signals.push({ level: "warn", code: "machine-memory-pressure", detail: `memory used=${memory.usedPct}% free=${memory.freeMb} MB` });
+  }
+
+  const disk = velocity?.machine?.disk;
+  if (disk?.available && disk.freeMb <= thresholds.diskBlockFreeMb) {
+    signals.push({ level: "block", code: "machine-disk-pressure", detail: `disk free=${disk.freeMb} MB used=${disk.usedPct}%` });
+  } else if (disk?.available && disk.freeMb <= thresholds.diskWarnFreeMb) {
+    signals.push({ level: "warn", code: "machine-disk-pressure", detail: `disk free=${disk.freeMb} MB used=${disk.usedPct}%` });
+  }
+
+  const board = velocity?.board;
+  if (board?.exists && board.mb >= thresholds.boardWarnMb) {
+    signals.push({ level: "warn", code: "large-board-state", detail: `${board.path} ${board.mb} MB` });
+  }
+
+  const handoff = velocity?.handoff;
+  if (handoff?.ageMinutes >= thresholds.handoffWarnMinutes) {
+    signals.push({ level: "warn", code: "stale-handoff", detail: `handoffAge=${handoff.ageMinutes} minutes` });
+  }
+
+  const commit = velocity?.commit;
+  if (commit?.available && commit.minutesSinceUsefulCommit >= thresholds.usefulCommitWarnMinutes) {
+    signals.push({ level: "warn", code: "stale-useful-commit", detail: `minutesSinceUsefulCommit=${commit.minutesSinceUsefulCommit}` });
+  }
+
+  const runtime = velocity?.runtime;
+  if (runtime?.processUptimeMinutes >= thresholds.processAgeWarnMinutes) {
+    signals.push({ level: "warn", code: "long-dev-process", detail: `processUptime=${runtime.processUptimeMinutes} minutes` });
+  }
+
+  return signals;
+}
+
 export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   const thresholds = { ...DEFAULT_THRESHOLDS, ...(options.thresholds ?? {}) };
   const sessions = collectSessionStats(cwd);
@@ -405,6 +550,7 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   const settings = collectSettingsStats(cwd);
   const loop = collectLoopState(cwd, options.now ?? new Date());
   const git = options.git === false ? { available: false, skipped: true } : collectGitDirtyStats(cwd);
+  const velocity = options.velocityStats ?? collectVelocityStats(cwd, { ...(options.velocity ?? {}), now: options.now });
 
   const signals = [];
   const largestSessionMb = sessions.largest?.mb ?? 0;
@@ -440,12 +586,16 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   if (git.available && git.count >= thresholds.dirtyFileWarn) {
     signals.push({ level: "warn", code: "wide-dirty-scope", detail: `${git.count} dirty files` });
   }
+  signals.push(...buildVelocityPressureSignals(velocity, thresholds));
 
   let recommendation = "continue";
   if (signals.some((signal) => signal.level === "block")) recommendation = "block-and-clean";
   else if (signals.some((signal) => signal.code === "large-resume-session")) recommendation = "new-session";
   else if (signals.some((signal) => signal.code === "heavy-configured-extension-entrypoint")) recommendation = "reduce-governance-surface";
+  else if (signals.some((signal) => signal.code === "large-board-state")) recommendation = "reduce-governance-surface";
   else if (signals.some((signal) => signal.code === "wide-dirty-scope")) recommendation = "checkpoint-and-commit";
+  else if (signals.some((signal) => signal.code === "stale-handoff" || signal.code === "stale-useful-commit")) recommendation = "checkpoint-and-commit";
+  else if (signals.some((signal) => signal.code === "long-dev-process")) recommendation = "new-session";
 
   const velocityPressure = buildDevelopmentVelocityPressure({ signals });
 
@@ -465,6 +615,7 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
     settings,
     loop,
     git,
+    velocity,
     summary: `pi-dev-pressure: recommendation=${recommendation} signals=${signals.length} largestSessionMb=${largestSessionMb} heaviestConfiguredEntrypoint=${heaviestConfiguredEntrypoint ? `${heaviestConfiguredEntrypoint.package}:${heaviestConfiguredEntrypoint.entry}` : "n/a"}`,
   };
 }
@@ -566,6 +717,17 @@ function printHuman(report) {
   lines.push(`- settings: ${report.settings.map((row) => `${row.path} packages=${row.packageCount} suppressed=${row.suppressedSurfaceCount} extExcludes=${row.extensionExcludeCount ?? 0}`).join("; ")}`);
   if (report.loop.exists) {
     lines.push(`- loop: mode=${report.loop.mode ?? "unknown"} health=${report.loop.health ?? "unknown"} stop=${report.loop.stopCondition ?? "unknown"} leaseExpired=${report.loop.leaseExpired ?? "unknown"}`);
+  }
+  if (report.velocity) {
+    const velocityParts = [
+      `boardMb=${report.velocity.board?.mb ?? "n/a"}`,
+      `handoffAgeMin=${report.velocity.handoff?.ageMinutes ?? "n/a"}`,
+      `minutesSinceCommit=${report.velocity.commit?.minutesSinceUsefulCommit ?? "n/a"}`,
+      `memoryUsed=${report.velocity.machine?.memory?.usedPct ?? "n/a"}%`,
+      `diskFreeMb=${report.velocity.machine?.disk?.freeMb ?? "n/a"}`,
+      `processUptimeMin=${report.velocity.runtime?.processUptimeMinutes ?? "n/a"}`,
+    ];
+    lines.push(`- velocity: ${velocityParts.join(" ")}`);
   }
   lines.push("- heaviest entrypoints:");
   for (const row of report.entrypoints.slice(0, 5)) {
