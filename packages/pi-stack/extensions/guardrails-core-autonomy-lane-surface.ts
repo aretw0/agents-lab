@@ -26,6 +26,7 @@ import {
   buildAutonomyLaneStatusSummary,
   buildDelegationLaneCapabilitySummary,
 } from "./guardrails-core-autonomy-lane-formatting";
+import { GUARDRAILS_AUTHORIZATION_NONE } from "./guardrails-core-authorization";
 import {
   buildAutonomyMaterialParameters,
   buildAutonomyTaskSelectionParameters,
@@ -340,7 +341,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         ...snapshot,
         effect: "none",
         mode: "report-only",
-        authorization: "none",
+        authorization: GUARDRAILS_AUTHORIZATION_NONE,
         dispatchAllowed: false,
         mutationAllowed: false,
       };

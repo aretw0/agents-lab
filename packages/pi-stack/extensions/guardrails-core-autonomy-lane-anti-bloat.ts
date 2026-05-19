@@ -1,4 +1,9 @@
 import { buildExtensionLineBudgetEntries } from "./guardrails-core-line-budget-files";
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
 import { buildLineBudgetSnapshot, type LineBudgetRecommendation, type LineBudgetSnapshotRow } from "./guardrails-core-tool-hygiene";
 
 export type AutonomyAntiBloatCue = {
@@ -16,7 +21,7 @@ export type AutonomyAntiBloatCue = {
   topFiles: LineBudgetSnapshotRow[];
   blockers: string[];
   risks: string[];
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   mutationAllowed: false;
   summary: string;
@@ -50,7 +55,7 @@ export function buildAutonomyAntiBloatCue(cwd: string): AutonomyAntiBloatCue {
     `aboveExtract=${snapshot.totals.aboveExtract}`,
     `aboveCritical=${snapshot.totals.aboveCritical}`,
     snapshot.blockers.length > 0 ? `blockers=${snapshot.blockers.join("|")}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
@@ -63,7 +68,7 @@ export function buildAutonomyAntiBloatCue(cwd: string): AutonomyAntiBloatCue {
     topFiles: snapshot.rows.slice(0, 5),
     blockers: snapshot.blockers,
     risks: snapshot.risks,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     mutationAllowed: false,
     summary,

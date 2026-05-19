@@ -13,6 +13,10 @@ import {
   asNumberWithDefault as asNumber,
 } from "./guardrails-core-param-normalizers";
 import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
+import {
   findTaskById,
   normalizeTaskDependencyIds,
   normalizeTaskId,
@@ -134,7 +138,7 @@ export function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd:
     `stockGap=${stockGap}`,
     `recommendedSeedCount=${recommendedSeedCount}`,
     decision === "blocked" ? `blockers=${blockedReasons.join("|")}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
@@ -161,7 +165,7 @@ export function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd:
     blockedReasons,
     dispatchAllowed: false,
     mutationAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     summary,
   };
 }
@@ -387,7 +391,7 @@ export function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: stri
     `seedWhy=${reseedJustification.reasonCode}`,
     `seedPriority=${reseedPriority.code}`,
     `operatorActionRequired=${operatorActionRequired ? "yes" : "no"}`,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].join(" ");
 
   return {
@@ -405,7 +409,7 @@ export function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: stri
     reseedPriority,
     dispatchAllowed: false,
     mutationAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     summary,
   };
 }
@@ -472,7 +476,7 @@ export function buildInfluenceAssimilationWindowPacket(p: Record<string, unknown
     `coverage=${readiness.material.validationCoveragePct}/${minValidationCoveragePct}`,
     blockedReasons.length > 0 ? `blockers=${blockedReasons.join("|")}` : undefined,
     `recommend=${recommendation}`,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
@@ -492,7 +496,7 @@ export function buildInfluenceAssimilationWindowPacket(p: Record<string, unknown
     },
     dispatchAllowed: false,
     mutationAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     summary,
   };
 }
@@ -629,7 +633,7 @@ export function buildAutonomyLaneBatchPreviewPacket(p: Record<string, unknown>, 
     `preview=${slices.length}`,
     selection.nextTaskId ? `next=${selection.nextTaskId}` : undefined,
     blockedReasons.length > 0 ? `blockers=${blockedReasons.join("|")}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
@@ -647,7 +651,7 @@ export function buildAutonomyLaneBatchPreviewPacket(p: Record<string, unknown>, 
     nextTaskId: selection.nextTaskId,
     dispatchAllowed: false,
     mutationAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     summary,
   };
 }
@@ -740,7 +744,7 @@ export function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, c
       nextTaskId: fallback.nextTaskId,
       dispatchAllowed: false,
       mutationAllowed: false,
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       summary: "autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-no-focus-complete",
     };
   }
@@ -758,7 +762,7 @@ export function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, c
       nextTaskId: undefined,
       dispatchAllowed: false,
       mutationAllowed: false,
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       summary: "autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-no-successor",
     };
   }
@@ -780,7 +784,7 @@ export function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, c
       nextTaskId: fallback.nextTaskId,
       dispatchAllowed: false,
       mutationAllowed: false,
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       summary: `autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-fail-closed reasons=${blockedReasons.join(",")}`,
     };
   }
@@ -797,7 +801,7 @@ export function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, c
     nextTaskId: fallback.nextTaskId,
     dispatchAllowed: false,
     mutationAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     summary: `autonomy-lane-auto-advance-snapshot: decision=eligible code=auto-advance-snapshot-eligible next=${fallback.nextTaskId}`,
   };
 }

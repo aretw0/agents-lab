@@ -1,3 +1,8 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
+
 export function buildAutonomyLaneStatusSummary(input: {
   ready: boolean;
   recommendationCode: string;
@@ -36,7 +41,7 @@ export function buildAutonomyLaneStatusSummary(input: {
     `backgroundReady=${input.backgroundDecision}`,
     `antiBloat=${input.antiBloatDecision}`,
     `lineBudgetAboveExtract=${input.lineBudgetAboveExtract}`,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 }
 
@@ -72,6 +77,6 @@ export function buildDelegationLaneCapabilitySummary(input: {
     `monitorClassifyFailures=${input.monitorClassifyFailures}`,
     `subagentsReady=${input.subagentsReady ? "yes" : "no"}`,
     `code=${input.recommendationCode}`,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].join(" ");
 }

@@ -6,6 +6,10 @@ import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background
 import { consumeContextPreloadPack } from "./context-watchdog-continuation";
 import { buildUnavailableGitDirtySnapshot, readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
 import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
+import {
   asBooleanWithDefault,
   asNonEmptyStringArray,
   asNumberWithDefault,
@@ -273,7 +277,7 @@ export function buildRunwayReadinessCue(
       `delegation=${delegation.decision}`,
       `background=${background.decision}`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].filter(Boolean).join(" ");
     return {
       decision: "blocked",
@@ -294,7 +298,7 @@ export function buildRunwayReadinessCue(
       "code=runway-readiness-ready-window",
       `delegation=${delegation.decision}`,
       `background=${background.decision}`,
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].join(" ");
     return {
       decision: "ready-window",
@@ -315,7 +319,7 @@ export function buildRunwayReadinessCue(
     `delegation=${delegation.decision}`,
     `background=${background.decision}`,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
   return {
     decision: "needs-evidence",
