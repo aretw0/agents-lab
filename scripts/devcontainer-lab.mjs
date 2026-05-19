@@ -10,14 +10,14 @@ const LOCAL_AGENT_DIR = `${WORKDIR}/.sandbox/pi-agent`;
 
 function printHelp() {
 	console.log([
-		"devcontainer-farm — entrada simplificada para anexar no container",
+		"devcontainer-lab — entrada simplificada para anexar no container",
 		"",
 		"Uso:",
-		"  node scripts/devcontainer-farm.mjs <container> [-- <comando>]",
+		"  node scripts/devcontainer-lab.mjs <container> [-- <comando>]",
 		"",
 		"Exemplos:",
-		"  node scripts/devcontainer-farm.mjs agents-lab-dev -- pwd",
-		"  node scripts/devcontainer-farm.mjs agents-lab-dev -- npm run pi:isolated",
+		"  node scripts/devcontainer-lab.mjs agents-lab-dev -- pwd",
+		"  node scripts/devcontainer-lab.mjs agents-lab-dev -- npm run pi:isolated",
 		"",
 		"Comportamento:",
 		"  - força user=vscode",
@@ -54,7 +54,7 @@ function run() {
 	}
 
 	if (!parsed.container) {
-		console.error("devcontainer-farm: informe o container.");
+		console.error("devcontainer-lab: informe o container.");
 		printHelp();
 		process.exit(1);
 	}
@@ -80,13 +80,13 @@ function run() {
 			stdio: "inherit",
 			env: {
 				...process.env,
-				PI_DEVCONTAINER_FARM_REPO_ROOT: REPO_ROOT,
+				PI_DEVCONTAINER_LAB_REPO_ROOT: REPO_ROOT,
 			},
 		});
 	} catch (err) {
 		const code = typeof err?.status === "number" ? err.status : 1;
 		const message = err instanceof Error ? err.message : String(err);
-		console.error(`devcontainer-farm: falha ao anexar no container: ${message}`);
+		console.error(`devcontainer-lab: falha ao anexar no container: ${message}`);
 		process.exit(code);
 	}
 }

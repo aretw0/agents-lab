@@ -4,16 +4,41 @@
     "dockerfile": "Dockerfile",
     "context": ".."
   },
+  "runArgs": [
+    "--memory=4g",
+    "--cpus=4"
+  ],
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb"
+  },
   "remoteUser": "vscode",
   "workspaceFolder": "/workspaces/agents-lab",
   "containerEnv": {
-    "PI_CODING_AGENT_DIR": "/workspaces/agents-lab/.sandbox/pi-agent"
+    "PI_CODING_AGENT_DIR": "/workspaces/agents-lab/.sandbox/pi-agent",
+    "NPM_CONFIG_CACHE": "/home/vscode/.npm-cache",
+    "LANG": "pt_BR.UTF-8",
+    "LC_ALL": "pt_BR.UTF-8",
+    "LANGUAGE": "pt_BR:pt:en",
+    "TERM": "xterm-256color",
+    "COLORTERM": "truecolor"
   },
+  "mounts": [
+    "source=agents-lab-node-modules,target=/workspaces/agents-lab/node_modules,type=volume",
+    "source=agents-lab-npm-cache,target=/home/vscode/.npm-cache,type=volume"
+  ],
   "postCreateCommand": "bash .devcontainer/postCreate.sh",
+  "postStartCommand": "bash .devcontainer/postStart.sh",
   "customizations": {
     "vscode": {
       "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash"
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.env.linux": {
+          "LANG": "pt_BR.UTF-8",
+          "LC_ALL": "pt_BR.UTF-8",
+          "LANGUAGE": "pt_BR:pt:en",
+          "COLORTERM": "truecolor"
+        }
       }
     }
   }

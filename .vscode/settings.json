@@ -1,0 +1,91 @@
+{
+  "terminal.integrated.sendKeybindingsToShell": true,
+  "terminal.integrated.allowChords": false,
+  "terminal.integrated.allowMnemonics": false,
+  "terminal.integrated.env.linux": {
+    "LANG": "pt_BR.UTF-8",
+    "LC_ALL": "pt_BR.UTF-8",
+    "LANGUAGE": "pt_BR:pt:en",
+    "COLORTERM": "truecolor"
+  },
+  "keyboard.dispatch": "code",
+  "terminal.integrated.localEchoEnabled": "off",
+
+  "files.autoSave": "off",
+  "files.trimTrailingWhitespace": false,
+  "files.trimFinalNewlines": false,
+  "files.insertFinalNewline": false,
+
+  "editor.formatOnSave": false,
+  "editor.formatOnType": false,
+  "editor.formatOnPaste": false,
+  "editor.codeActionsOnSave": {},
+  "editor.suggestOnTriggerCharacters": false,
+
+  "eslint.enable": false,
+  "eslint.lintTask.enable": false,
+  "prettier.requireConfig": true,
+  "markdownlint.enabled": false,
+  "markdownlint.run": "onSave",
+  "jest.autoRun": "off",
+  "vitest.enable": false,
+
+  "npm.autoDetect": "off",
+  "task.autoDetect": "off",
+  "grunt.autoDetect": "off",
+  "gulp.autoDetect": "off",
+  "jake.autoDetect": "off",
+  "typescript.tsc.autoDetect": "off",
+
+  "git.autoFetch": false,
+  "git.autofetch": false,
+  "git.autorefresh": false,
+  "git.decorations.enabled": false,
+  "git.enableSmartCommit": false,
+  "git.confirmSync": true,
+  "scm.diffDecorations": "none",
+
+  "remote.autoForwardPorts": false,
+  "remote.autoForwardPortsSource": "process",
+
+  "debug.javascript.autoAttachFilter": "disabled",
+
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false,
+
+  "typescript.tsserver.maxTsServerMemory": 1024,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "typescript.validate.enable": true,
+  "javascript.validate.enable": true,
+  "typescript.suggest.enabled": true,
+  "javascript.suggest.enabled": true,
+  "typescript.suggest.autoImports": false,
+  "javascript.suggest.autoImports": false,
+  "typescript.referencesCodeLens.enabled": false,
+  "javascript.referencesCodeLens.enabled": false,
+  "typescript.implementationsCodeLens.enabled": false,
+  "javascript.implementationsCodeLens.enabled": false,
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "typescript.updateImportsOnFileMove.enabled": "never",
+  "javascript.updateImportsOnFileMove.enabled": "never",
+
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.sandbox/**": true,
+    "**/.turbo/**": true,
+    "**/.artifacts/**": true,
+    "**/dist/**": true,
+    "**/coverage/**": true
+  },
+
+  "search.exclude": {
+    "**/node_modules/**": true,
+    "**/.sandbox/**": true,
+    "**/.turbo/**": true,
+    "**/.artifacts/**": true,
+    "**/dist/**": true,
+    "**/coverage/**": true
+  }
+}

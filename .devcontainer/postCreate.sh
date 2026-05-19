@@ -6,6 +6,7 @@ LOCAL_AGENT_DIR="$REPO_ROOT/.sandbox/pi-agent"
 SETTINGS_FILE="$LOCAL_AGENT_DIR/settings.json"
 
 mkdir -p "$LOCAL_AGENT_DIR"
+mkdir -p "${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
 
 if [[ ! -f "$SETTINGS_FILE" ]]; then
   cat > "$SETTINGS_FILE" <<'JSON'
@@ -16,4 +17,8 @@ if [[ ! -f "$SETTINGS_FILE" ]]; then
 JSON
 fi
 
-npm install
+if [[ -f package-lock.json ]]; then
+  npm ci --prefer-offline --no-audit --no-fund
+else
+  npm install --prefer-offline --no-audit --no-fund
+fi

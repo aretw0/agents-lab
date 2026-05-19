@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TARGET_USER="${1:-vscode}"
+PROJECT_DIR="${2:-/workspaces/agents-lab}"
+INIT_FILE="/home/${TARGET_USER}/.lab-init.sh"
+
+cat > "$INIT_FILE" <<INIT
+[ -f /home/${TARGET_USER}/.bashrc ] && . /home/${TARGET_USER}/.bashrc
+export HOME=/home/${TARGET_USER}
+export USER=${TARGET_USER}
+export LANG=pt_BR.UTF-8
+export LC_ALL=pt_BR.UTF-8
+export LANGUAGE=pt_BR:pt:en
+export TERM=\${TERM:-xterm-256color}
+export COLORTERM=\${COLORTERM:-truecolor}
+export NPM_CONFIG_CACHE=/home/${TARGET_USER}/.npm-cache
+export PI_CODING_AGENT_DIR=/workspaces/agents-lab/.sandbox/pi-agent
+cd "${PROJECT_DIR}"
+INIT
+
+chmod 644 "$INIT_FILE"
+exec su -s /bin/bash "$TARGET_USER" -- --init-file "$INIT_FILE"

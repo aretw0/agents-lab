@@ -65,18 +65,18 @@ Invariantes aplicados:
 - workdir fixo (`/workspaces/agents-lab`);
 - runtime local no workspace (`PI_CODING_AGENT_DIR=/workspaces/agents-lab/.sandbox/pi-agent`).
 
-### Entrada simplificada estilo farm
+### Entrada simplificada lab
 
 Script dedicado no host:
 
 ```bash
-npm run devcontainer:farm -- <container-name> -- npm run pi:isolated
+npm run devcontainer:lab -- <container-name> -- npm run pi:isolated
 ```
 
 Atalho padrão (container `agents-lab-dev`):
 
 ```bash
-npm run devcontainer:farm:pi
+npm run devcontainer:lab:pi
 ```
 
 O comando força usuário/workdir/env corretos ao anexar no container.
@@ -89,9 +89,9 @@ O comando força usuário/workdir/env corretos ao anexar no container.
    ```bash
    docker ps --format '{{.Names}}' | grep agents-lab-dev
    ```
-3. Entrar com farm:
+3. Entrar com lab:
    ```bash
-   npm run devcontainer:farm -- <container-name> -- npm run pi:isolated
+   npm run devcontainer:lab -- <container-name> -- npm run pi:isolated
    ```
 
 **Windows (Windows Terminal PowerShell):**
@@ -100,9 +100,9 @@ O comando força usuário/workdir/env corretos ao anexar no container.
    ```powershell
    $c = docker ps --format "{{.Names}}" | Where-Object { $_ -like "*agents-lab-dev*" } | Select-Object -First 1
    ```
-3. Entrar com farm:
+3. Entrar com lab:
    ```powershell
-   npm run devcontainer:farm -- $c -- npm run pi:isolated
+   npm run devcontainer:lab -- $c -- npm run pi:isolated
    ```
 
 ### Checklist TUI + WEB no container
