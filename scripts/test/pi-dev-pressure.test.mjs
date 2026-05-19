@@ -14,6 +14,7 @@ import {
   collectSessionStats,
   collectSettingsStats,
   computeStrictFailures,
+  buildDevelopmentVelocityPressure,
 } from "../pi-dev-pressure.mjs";
 import { PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES } from "../../packages/pi-stack/install.mjs";
 
@@ -289,6 +290,8 @@ test("buildPiDevPressureReport recommends new-session for large resume logs", ()
 
     assert.equal(report.recommendation, "new-session");
     assert.ok(report.signals.some((signal) => signal.code === "large-resume-session"));
+    assert.equal(report.velocityPressure.severity, "warn");
+    assert.equal(report.velocityPressure.recommendation, "continue-with-bounded-slices");
     assert.equal(report.sessionBudget.oversized.length, 1);
     assert.equal(report.sessionBudget.recommendation, "prefer-new-session-and-checkpoint-before-resume");
     assert.equal(report.entrypointBudget.recommendation, "within-budget");
@@ -307,4 +310,46 @@ test("computeStrictFailures fails only blocking pressure signals", () => {
   });
 
   assert.deepEqual(failures, ["huge-resume-session"]);
+});
+
+test("buildDevelopmentVelocityPressure keeps clean sessions in continue mode", () => {
+  const pressure = buildDevelopmentVelocityPressure({ signals: [] });
+
+  assert.equal(pressure.severity, "ok");
+  assert.equal(pressure.score, 0);
+  assert.equal(pressure.recommendation, "continue");
+  assert.deepEqual(pressure.stopConditions, []);
+});
+
+test("buildDevelopmentVelocityPressure pauses when pressure accumulates across warnings", () => {
+  const pressure = buildDevelopmentVelocityPressure({
+    signals: [
+      { level: "warn", code: "heavy-configured-extension-entrypoint" },
+      { level: "warn", code: "wide-dirty-scope" },
+    ],
+  });
+
+  assert.equal(pressure.severity, "pause");
+  assert.equal(pressure.score, 70);
+  assert.equal(pressure.recommendation, "checkpoint-and-reduce-pressure");
+  assert.deepEqual(pressure.stopConditions, [
+    "checkpoint-before-more-work",
+    "reduce-runtime-surface",
+  ]);
+});
+
+test("buildDevelopmentVelocityPressure blocks huge resume sessions", () => {
+  const pressure = buildDevelopmentVelocityPressure({
+    signals: [
+      { level: "block", code: "huge-resume-session" },
+    ],
+  });
+
+  assert.equal(pressure.severity, "block");
+  assert.equal(pressure.recommendation, "stop-and-clean-before-continuing");
+  assert.deepEqual(pressure.stopConditions, [
+    "block-signal-present",
+    "checkpoint-before-more-work",
+    "avoid-resume-heavy-session",
+  ]);
 });
