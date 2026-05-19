@@ -806,14 +806,14 @@ export function resolveOperatorConfirmationAuditPlan(input: OperatorConfirmation
     reasons.push("confirmation-not-required-for-local-safe-action");
     return {
       decision: "not-required",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       reasons,
       evidenceOrigins,
       layer: "not-required",
       recommendation: "Continue normal local-safe flow; do not treat this as authorization for protected/destructive actions.",
-      summary: "operator-confirmation-audit: decision=not-required dispatch=no override=no reasons=confirmation-not-required-for-local-safe-action authorization=none",
+      summary: `operator-confirmation-audit: decision=not-required dispatch=no override=no reasons=confirmation-not-required-for-local-safe-action ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -822,7 +822,7 @@ export function resolveOperatorConfirmationAuditPlan(input: OperatorConfirmation
     reasons.push("fail-closed-without-auditable-evidence");
     return {
       decision: "audit-gap",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       reasons,
@@ -831,7 +831,7 @@ export function resolveOperatorConfirmationAuditPlan(input: OperatorConfirmation
       recommendation: input.uiConfirmationObserved
         ? "Treat as a propagation/audit gap: preserve the block, record the TUI-confirmation mismatch, and add a trusted confirmation evidence path before relaxing monitors."
         : "Keep fail-closed behavior and request explicit auditable confirmation before protected/destructive execution.",
-      summary: `operator-confirmation-audit: decision=audit-gap dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-audit: decision=audit-gap dispatch=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -840,14 +840,14 @@ export function resolveOperatorConfirmationAuditPlan(input: OperatorConfirmation
     reasons.push("manual-or-spoofable-evidence-cannot-authorize");
     return {
       decision: "blocked",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       reasons,
       evidenceOrigins,
       layer: "local-monitor-policy",
       recommendation: "Do not execute or override monitor blocks from spoofable confirmation evidence; require trusted runtime-originated audit evidence.",
-      summary: `operator-confirmation-audit: decision=blocked dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-audit: decision=blocked dispatch=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -856,14 +856,14 @@ export function resolveOperatorConfirmationAuditPlan(input: OperatorConfirmation
     reasons.push("fail-closed-without-exact-action-match");
     return {
       decision: "blocked",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       canOverrideMonitorBlock: false,
       reasons,
       evidenceOrigins,
       layer: "local-monitor-policy",
       recommendation: "Do not execute; confirmation evidence must name the same action/path/scope as the pending protected or destructive call.",
-      summary: `operator-confirmation-audit: decision=blocked dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+      summary: `operator-confirmation-audit: decision=blocked dispatch=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -871,13 +871,13 @@ export function resolveOperatorConfirmationAuditPlan(input: OperatorConfirmation
   reasons.push("confirmation-matches-action");
   return {
     decision: "auditable",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     canOverrideMonitorBlock: false,
     reasons,
     evidenceOrigins,
     layer: "auditable-path",
     recommendation: "Confirmation is auditable evidence for a future guard/monitor decision, but this read-only plan does not authorize dispatch by itself.",
-    summary: `operator-confirmation-audit: decision=auditable dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+    summary: `operator-confirmation-audit: decision=auditable dispatch=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
   };
 }
