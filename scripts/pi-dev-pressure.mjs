@@ -6,6 +6,10 @@ import { freemem, totalmem } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildDevelopmentVelocityPressure } from "../packages/pi-stack/extensions/environment-doctor-dev-pressure-policy.mjs";
+import {
+  buildSessionBudget,
+  computeStrictFailures,
+} from "../packages/pi-stack/extensions/session-pressure-policy.mjs";
 
 const DEFAULT_THRESHOLDS = {
   largeSessionMb: 50,
@@ -94,35 +98,6 @@ export function collectSessionStats(cwd = process.cwd()) {
     files,
     largest: files[0],
     recent: [...files].sort((a, b) => String(b.mtimeIso).localeCompare(String(a.mtimeIso))).slice(0, 5),
-  };
-}
-
-export function buildSessionBudget(sessions, thresholds = DEFAULT_THRESHOLDS) {
-  const files = Array.isArray(sessions?.files) ? sessions.files : [];
-  const oversized = files
-    .filter((row) => row.mb >= thresholds.largeSessionMb)
-    .map((row) => ({
-      ...row,
-      level: row.mb >= thresholds.blockingSessionMb ? "block" : "warn",
-      overLargeByMb: Number((row.mb - thresholds.largeSessionMb).toFixed(2)),
-      overBlockByMb: row.mb >= thresholds.blockingSessionMb
-        ? Number((row.mb - thresholds.blockingSessionMb).toFixed(2))
-        : 0,
-    }));
-
-  const blockers = oversized.filter((row) => row.level === "block");
-  const recommendation = blockers.length > 0
-    ? "do-not-resume-archive-or-delete-after-checkpoint"
-    : oversized.length > 0
-      ? "prefer-new-session-and-checkpoint-before-resume"
-      : "within-budget";
-
-  return {
-    largeSessionMb: thresholds.largeSessionMb,
-    blockingSessionMb: thresholds.blockingSessionMb,
-    oversized,
-    blockers,
-    recommendation,
   };
 }
 
@@ -680,15 +655,7 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   };
 }
 
-export function computeStrictFailures(report) {
-  const failures = [];
-  for (const signal of report.signals ?? []) {
-    if (signal.level === "block") failures.push(signal.code);
-  }
-  return failures;
-}
-
-export { buildDevelopmentVelocityPressure };
+export { buildDevelopmentVelocityPressure, buildSessionBudget, computeStrictFailures };
 
 function resolveSessionBudgetCleanupTargets(report) {
   const cwd = path.resolve(report.cwd ?? process.cwd());

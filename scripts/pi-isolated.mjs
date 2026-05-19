@@ -30,7 +30,13 @@ import { homedir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
-import { buildPiDevPressureReport, computeStrictFailures } from "./pi-dev-pressure.mjs";
+import {
+	detectSessionResumeIntent,
+	resolveSessionPressureGate,
+} from "../packages/pi-stack/extensions/session-pressure-policy.mjs";
+import { buildPiDevPressureReport } from "./pi-dev-pressure.mjs";
+
+export { detectSessionResumeIntent };
 
 const REPO_ROOT = path.resolve(process.cwd());
 const LOCAL_AGENT_DIR = path.join(REPO_ROOT, ".sandbox", "pi-agent");
@@ -633,28 +639,8 @@ function printStatus() {
 	}
 }
 
-export function detectSessionResumeIntent(piArgs) {
-	if (!Array.isArray(piArgs)) return false;
-	return piArgs.some((arg) => typeof arg === "string" && arg.trim() === "--resume");
-}
-
 export function resolvePiDevPressureGate(report, { force = false, resume = false } = {}) {
-	const failures = computeStrictFailures(report);
-	const newSessionRecoverableFailures = new Set(["huge-resume-session"]);
-	const blockingFailures = failures.filter((code) => !newSessionRecoverableFailures.has(code));
-	if (failures.length === 0) {
-		return { allowed: true, failures, reason: "clean" };
-	}
-	if (force) {
-		return { allowed: true, failures, reason: "forced" };
-	}
-	if (blockingFailures.length > 0) {
-		return { allowed: false, failures, reason: "machine-pressure-strict" };
-	}
-	if (!resume) {
-		return { allowed: true, failures, reason: "new-session-advisory" };
-	}
-	return { allowed: false, failures, reason: "strict-failures" };
+	return resolveSessionPressureGate(report, { force, resume });
 }
 
 function run() {
