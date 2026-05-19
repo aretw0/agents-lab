@@ -45,6 +45,7 @@ import {
 	localContinuityAuditReasons,
 	localContinuityProtectedPaths,
 } from "./guardrails-core-unattended-continuation-surface";
+import { GUARDRAILS_AUTHORIZATION_NONE } from "./guardrails-core-authorization";
 
 export interface ContextWatchdogContinuationSurfaceRuntime {
 	getConfig(): ContextWatchdogConfig;
@@ -232,7 +233,7 @@ export function registerContextWatchdogContinuationSurface(
 					autoResumePrompt: resumeEnvelope.prompt,
 					effect: "none",
 					mode: "read-only-readiness",
-					authorization: "none",
+					authorization: GUARDRAILS_AUTHORIZATION_NONE,
 				},
 			};
 		},
@@ -321,7 +322,7 @@ export function registerContextWatchdogContinuationSurface(
 					directionPromptCanonical: TURN_BOUNDARY_DIRECTION_PROMPT,
 					mode: "report-only",
 					effect: "none",
-					authorization: "none",
+					authorization: GUARDRAILS_AUTHORIZATION_NONE,
 					dispatchAllowed: false,
 					mutationAllowed: false,
 				},
@@ -363,7 +364,7 @@ export function registerContextWatchdogContinuationSurface(
 			const singleFocus = focusTasks !== "none-listed" && !focusTasks.includes(",");
 			const plan = resolveLocalSliceCanaryPlan({
 				readinessReady,
-				authorization: "none",
+				authorization: GUARDRAILS_AUTHORIZATION_NONE,
 				checkpointFresh,
 				handoffBudgetOk,
 				gitStateExpected,
@@ -412,7 +413,7 @@ export function registerContextWatchdogContinuationSurface(
 					effect: "none",
 					mode: "read-only-preview",
 					activation: "none",
-					authorization: "none",
+					authorization: GUARDRAILS_AUTHORIZATION_NONE,
 				},
 			};
 		},
@@ -450,7 +451,7 @@ export function registerContextWatchdogContinuationSurface(
 			const singleFocus = focusTasks !== "none-listed" && !focusTasks.includes(",");
 			const plan = resolveLocalSliceCanaryPlan({
 				readinessReady,
-				authorization: "none",
+				authorization: GUARDRAILS_AUTHORIZATION_NONE,
 				checkpointFresh,
 				handoffBudgetOk,
 				gitStateExpected,
@@ -514,7 +515,7 @@ export function registerContextWatchdogContinuationSurface(
 					effect: "none",
 					mode: "read-only-operator-packet",
 					activation: "none",
-					authorization: "none",
+					authorization: GUARDRAILS_AUTHORIZATION_NONE,
 					dispatchAllowed: false,
 					executorApproved: false,
 				},
