@@ -10,9 +10,8 @@
  * - autonomous steering/mutation actions
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
+import { readSettingsValue } from "./context-watchdog-storage";
 import type {
 	ExtensionAPI,
 	ExtensionContext,
@@ -86,42 +85,8 @@ const MODE_PATH = [...SETTINGS_ROOT, "mode"];
 const REPORT_MAX_ENTRIES_PATH = [...SETTINGS_ROOT, "reportMaxEntries"];
 const STARTUP_NOTIFY_PATH = [...SETTINGS_ROOT, "startupNotify"];
 
-function settingsCandidates(cwd: string): string[] {
-	return [
-		join(cwd, ".pi", "settings.json"),
-		join(homedir(), ".pi", "agent", "settings.json"),
-	];
-}
-
-function readSettings(path: string): Record<string, unknown> | undefined {
-	if (!existsSync(path)) return undefined;
-	try {
-		const parsed = JSON.parse(readFileSync(path, "utf8"));
-		return parsed && typeof parsed === "object"
-			? (parsed as Record<string, unknown>)
-			: undefined;
-	} catch {
-		return undefined;
-	}
-}
-
 function detectSetting(cwd: string, path: string[]): unknown {
-	for (const candidate of settingsCandidates(cwd)) {
-		const settings = readSettings(candidate);
-		if (!settings) continue;
-
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		let cursor: any = settings;
-		for (const key of path) {
-			if (cursor == null || typeof cursor !== "object") {
-				cursor = undefined;
-				break;
-			}
-			cursor = cursor[key];
-		}
-		if (cursor !== undefined) return cursor;
-	}
-	return undefined;
+	return readSettingsValue(cwd, path);
 }
 
 function loadConfig(cwd: string): SovereignConfig {

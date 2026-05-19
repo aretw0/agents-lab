@@ -1,6 +1,11 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
+import {
+	readBooleanSetting,
+	readSettingsValue,
+	readStringMapSetting,
+	readStringSetting,
+} from "./context-watchdog-storage";
 import {
 	CLASSIFIERS,
 	CLASSIFIER_MODEL_BY_PROVIDER_SETTING_PATH,
@@ -27,45 +32,9 @@ export function parseCommandInput(input: string): { cmd: string; body: string } 
 	return { cmd: (cmd ?? "").toLowerCase(), body: rest.join(" ").trim() };
 }
 
-function settingsCandidates(cwd: string): string[] {
-	return [
-		join(cwd, ".pi", "settings.json"),
-		join(homedir(), ".pi", "agent", "settings.json"),
-	];
-}
-
-function readSettings(path: string): Record<string, unknown> | undefined {
-	if (!existsSync(path)) return undefined;
-	try {
-		const parsed = JSON.parse(readFileSync(path, "utf8"));
-		return parsed && typeof parsed === "object"
-			? (parsed as Record<string, unknown>)
-			: undefined;
-	} catch {
-		return undefined;
-	}
-}
-
 /** Reads a setting from pi settings (project → global cascade). */
 export function detectSetting(cwd: string, path: string[]): unknown {
-	for (const candidate of settingsCandidates(cwd)) {
-		const settings = readSettings(candidate);
-		if (!settings) continue;
-
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		let cursor: any = settings;
-		for (const key of path) {
-			if (cursor == null || typeof cursor !== "object") {
-				cursor = undefined;
-				break;
-			}
-			cursor = cursor[key];
-		}
-
-		if (cursor !== undefined) return cursor;
-	}
-
-	return undefined;
+	return readSettingsValue(cwd, path);
 }
 
 /** Returns nested boolean setting, or undefined when missing/invalid. */
@@ -73,8 +42,7 @@ export function detectBooleanSetting(
 	cwd: string,
 	path: string[],
 ): boolean | undefined {
-	const value = detectSetting(cwd, path);
-	return typeof value === "boolean" ? value : undefined;
+	return readBooleanSetting(cwd, path);
 }
 
 /** Returns nested string setting, or undefined when missing/invalid. */
@@ -82,10 +50,7 @@ export function detectStringSetting(
 	cwd: string,
 	path: string[],
 ): string | undefined {
-	const value = detectSetting(cwd, path);
-	if (typeof value !== "string") return undefined;
-	const trimmed = value.trim();
-	return trimmed.length > 0 ? trimmed : undefined;
+	return readStringSetting(cwd, path);
 }
 
 /** Returns nested object<string,string> setting, or undefined when invalid. */
@@ -93,19 +58,7 @@ export function detectStringMapSetting(
 	cwd: string,
 	path: string[],
 ): Record<string, string> | undefined {
-	const value = detectSetting(cwd, path);
-	if (!value || typeof value !== "object" || Array.isArray(value))
-		return undefined;
-
-	const out: Record<string, string> = {};
-	for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-		if (typeof v !== "string") continue;
-		const trimmed = v.trim();
-		if (!trimmed) continue;
-		out[k] = trimmed;
-	}
-
-	return Object.keys(out).length > 0 ? out : undefined;
+	return readStringMapSetting(cwd, path);
 }
 
 /**

@@ -219,22 +219,75 @@ export function writeDerivedAgentSettings(
 }
 
 export function readSettingsJson(cwd: string): Record<string, unknown> {
-	const candidates = [
+	for (const filePath of resolveSettingsJsonCandidates(cwd)) {
+		if (!existsSync(filePath)) continue;
+		const parsed = readJsonObjectFile(filePath);
+		if (parsed) return parsed;
+	}
+	return {};
+}
+
+export function resolveSettingsJsonCandidates(cwd: string): string[] {
+	return [
 		path.join(cwd, ".pi", "settings.json"),
 		path.join(homedir(), ".pi", "agent", "settings.json"),
 	];
-	for (const filePath of candidates) {
-		if (!existsSync(filePath)) continue;
-		try {
-			const parsed = JSON.parse(readFileSync(filePath, "utf8"));
-			if (parsed && typeof parsed === "object") {
-				return parsed as Record<string, unknown>;
-			}
-		} catch {
-			// ignore malformed settings
-		}
+}
+
+export function readJsonObjectFile(filePath: string): Record<string, unknown> | undefined {
+	if (!existsSync(filePath)) return undefined;
+	try {
+		const parsed = JSON.parse(readFileSync(filePath, "utf8"));
+		return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+			? (parsed as Record<string, unknown>)
+			: undefined;
+	} catch {
+		return undefined;
 	}
-	return {};
+}
+
+export function readSettingsValue(cwd: string, settingPath: string[]): unknown {
+	for (const candidate of resolveSettingsJsonCandidates(cwd)) {
+		const settings = readJsonObjectFile(candidate);
+		if (!settings) continue;
+
+		let cursor: unknown = settings;
+		for (const key of settingPath) {
+			if (cursor == null || typeof cursor !== "object" || Array.isArray(cursor)) {
+				cursor = undefined;
+				break;
+			}
+			cursor = (cursor as Record<string, unknown>)[key];
+		}
+		if (cursor !== undefined) return cursor;
+	}
+	return undefined;
+}
+
+export function readStringSetting(cwd: string, settingPath: string[]): string | undefined {
+	const value = readSettingsValue(cwd, settingPath);
+	if (typeof value !== "string") return undefined;
+	const trimmed = value.trim();
+	return trimmed.length > 0 ? trimmed : undefined;
+}
+
+export function readBooleanSetting(cwd: string, settingPath: string[]): boolean | undefined {
+	const value = readSettingsValue(cwd, settingPath);
+	return typeof value === "boolean" ? value : undefined;
+}
+
+export function readStringMapSetting(cwd: string, settingPath: string[]): Record<string, string> | undefined {
+	const value = readSettingsValue(cwd, settingPath);
+	if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+
+	const out: Record<string, string> = {};
+	for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+		if (typeof raw !== "string") continue;
+		const trimmed = raw.trim();
+		if (!trimmed) continue;
+		out[key] = trimmed;
+	}
+	return Object.keys(out).length > 0 ? out : undefined;
 }
 
 export function readHandoffJson(cwd: string): Record<string, unknown> {

@@ -1,6 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
-import { homedir } from "node:os";
-import path from "node:path";
+import { readStringSetting } from "./context-watchdog-storage";
 
 export type ModelAuthStatus =
 	| "ok"
@@ -20,32 +18,11 @@ export interface ColonyModelReadiness {
 	antColonyDefaultModelRef?: string;
 }
 
-function settingsCandidates(cwd: string): string[] {
-	return [
-		path.join(cwd, ".pi", "settings.json"),
-		path.join(homedir(), ".pi", "agent", "settings.json"),
-	];
-}
-
 function readTopLevelStringSetting(
 	cwd: string,
 	key: string,
 ): string | undefined {
-	for (const candidate of settingsCandidates(cwd)) {
-		if (!existsSync(candidate)) continue;
-
-		try {
-			const json = JSON.parse(readFileSync(candidate, "utf8"));
-			const value = json?.[key];
-			if (typeof value === "string" && value.trim().length > 0) {
-				return value.trim();
-			}
-		} catch {
-			// ignore malformed settings
-		}
-	}
-
-	return undefined;
+	return readStringSetting(cwd, [key]);
 }
 
 export function parseProviderModelRef(
