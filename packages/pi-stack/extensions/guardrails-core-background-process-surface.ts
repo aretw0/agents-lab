@@ -6,6 +6,10 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent, type BackgroundProcessKind, type BackgroundProcessLifecycleEventKind, type BackgroundProcessMode, type BackgroundProcessStopSource } from "./guardrails-core-background-process";
 import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
 import { asOptionalBoolean } from "./guardrails-core-param-normalizers";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
@@ -83,7 +87,7 @@ function buildBackgroundProcessReadinessPacket(input: {
       `readiness=${input.readiness.recommendationCode}`,
       `rehearsal=${input.rehearsal.decision}`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].filter(Boolean).join(" ");
     return {
       decision: "blocked",
@@ -103,7 +107,7 @@ function buildBackgroundProcessReadinessPacket(input: {
       `plan=${input.plan.decision}`,
       `readiness=${input.readiness.recommendationCode}`,
       `rehearsal=${input.rehearsal.decision}`,
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].join(" ");
     return {
       decision: "needs-evidence",
@@ -122,7 +126,7 @@ function buildBackgroundProcessReadinessPacket(input: {
     `plan=${input.plan.decision}`,
     `readiness=${input.readiness.recommendationCode}`,
     `rehearsal=${input.rehearsal.decision}`,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].join(" ");
   return {
     decision: "ready-window",
@@ -372,7 +376,7 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
         details: {
           mode: "background-process-readiness-packet",
           activation: "none",
-          authorization: "none",
+          authorization: GUARDRAILS_AUTHORIZATION_NONE,
           dispatchAllowed: false,
           processStartAllowed: false,
           processStopAllowed: false,

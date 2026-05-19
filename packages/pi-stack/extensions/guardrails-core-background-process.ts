@@ -1,3 +1,9 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
+
 export type BackgroundProcessKind = "frontend" | "backend" | "test-server" | "worker" | "generic";
 export type BackgroundProcessMode = "auto" | "shared-service" | "isolated-worker";
 export type BackgroundProcessDecision = "ready-for-design" | "needs-port-lease" | "needs-operator-decision" | "blocked";
@@ -44,7 +50,7 @@ export interface BackgroundProcessLifecycleEventResult {
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   warnings: string[];
   evidence: string;
 }
@@ -54,7 +60,7 @@ export interface BackgroundProcessPlanResult {
   decision: BackgroundProcessDecision;
   recommendedMode: "no-server" | "shared-service" | "isolated-worker" | "manual-decision";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -102,7 +108,7 @@ export interface BackgroundProcessReadinessInput {
 export interface BackgroundProcessReadinessScore {
   mode: "background-process-readiness-score";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   score: number;
   recommendationCode: BackgroundProcessReadinessRecommendationCode;
@@ -202,7 +208,7 @@ export function resolveBackgroundProcessLifecycleEvent(raw: BackgroundProcessLif
     `label=${displayLabel}`,
     `viewTitle=${viewTitle}`,
     "dispatch=no",
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
@@ -220,7 +226,7 @@ export function resolveBackgroundProcessLifecycleEvent(raw: BackgroundProcessLif
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     warnings,
     evidence,
   };
@@ -288,7 +294,7 @@ export function resolveBackgroundProcessControlPlan(raw: BackgroundProcessPlanIn
     `parallelAgents=${parallelAgents}`,
     "dispatch=no",
     "processStart=no",
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].join(" ");
 
   return {
@@ -296,7 +302,7 @@ export function resolveBackgroundProcessControlPlan(raw: BackgroundProcessPlanIn
     decision,
     recommendedMode,
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -386,7 +392,7 @@ export function buildBackgroundProcessReadinessScore(raw: BackgroundProcessReadi
   return {
     mode: "background-process-readiness-score",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     score,
     recommendationCode,

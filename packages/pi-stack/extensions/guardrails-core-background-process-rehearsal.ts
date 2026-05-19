@@ -1,3 +1,8 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+
 export type BackgroundProcessRehearsalDecision = "ready" | "needs-evidence" | "blocked";
 
 export interface BackgroundProcessRehearsalInput {
@@ -15,7 +20,7 @@ export interface BackgroundProcessRehearsalInput {
 export interface BackgroundProcessRehearsalResult {
   mode: "background-process-rehearsal";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   decision: BackgroundProcessRehearsalDecision;
   ready: boolean;
@@ -96,7 +101,7 @@ export function evaluateBackgroundProcessRehearsal(input: BackgroundProcessRehea
   return {
     mode: "background-process-rehearsal",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     decision,
     ready,
