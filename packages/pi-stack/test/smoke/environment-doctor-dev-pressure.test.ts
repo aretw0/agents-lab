@@ -3,7 +3,10 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import environmentDoctorExtension from "../../extensions/environment-doctor";
-import { buildEnvironmentDevPressureReport } from "../../extensions/environment-doctor-dev-pressure";
+import {
+  buildDevelopmentVelocityPressure,
+  buildEnvironmentDevPressureReport,
+} from "../../extensions/environment-doctor-dev-pressure";
 
 function makeWorkspace(): string {
   const dir = mkdtempSync(join(tmpdir(), "pi-env-pressure-"));
@@ -76,9 +79,27 @@ describe("environment doctor dev pressure", () => {
       expect(report.settings[0]?.extensionExcludeCount).toBe(1);
       expect(report.configuredEntrypoints.map((row) => row.entry)).toEqual(["./extensions/light.ts"]);
       expect(report.recommendation).toBe("continue");
+      expect(report.velocityPressure.severity).toBe("ok");
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  it("classifies accumulated development velocity pressure for operator decisions", () => {
+    const pressure = buildDevelopmentVelocityPressure({
+      signals: [
+        { level: "warn", code: "heavy-configured-extension-entrypoint", detail: "heavy" },
+        { level: "warn", code: "large-resume-session", detail: "large" },
+      ],
+    });
+
+    expect(pressure.severity).toBe("pause");
+    expect(pressure.recommendation).toBe("checkpoint-and-reduce-pressure");
+    expect(pressure.stopConditions).toEqual([
+      "checkpoint-before-more-work",
+      "avoid-resume-heavy-session",
+      "reduce-runtime-surface",
+    ]);
   });
 
   it("registers environment_dev_pressure_status as an operator-visible Pi tool", async () => {
@@ -100,6 +121,7 @@ describe("environment doctor dev pressure", () => {
       expect(String(result.content?.[0]?.text ?? "")).toContain("environment-dev-pressure: recommendation=continue");
       expect(String(result.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
       expect((result.details as any)?.mode).toBe("environment-dev-pressure");
+      expect((result.details as any)?.velocityPressure?.severity).toBe("ok");
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

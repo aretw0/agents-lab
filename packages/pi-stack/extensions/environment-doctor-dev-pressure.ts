@@ -1,5 +1,8 @@
 import { existsSync, readFileSync, readdirSync, statSync, type Dirent } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { buildDevelopmentVelocityPressure } from "./environment-doctor-dev-pressure-policy.mjs";
+
+export { buildDevelopmentVelocityPressure };
 
 const DEV_PRESSURE_THRESHOLDS = {
   largeSessionMb: 50,
@@ -255,11 +258,14 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
   else if (signals.some((signal) => signal.code === "large-resume-session")) recommendation = "new-session";
   else if (signals.some((signal) => signal.code === "heavy-configured-extension-entrypoint")) recommendation = "reduce-governance-surface";
 
+  const velocityPressure = buildDevelopmentVelocityPressure({ signals });
+
   return {
     mode: "environment-dev-pressure",
     cwd: resolve(cwd),
     thresholds: DEV_PRESSURE_THRESHOLDS,
     recommendation,
+    velocityPressure,
     signals,
     sessions,
     configuredEntrypoints: configuredEntrypoints.slice(0, 15),
