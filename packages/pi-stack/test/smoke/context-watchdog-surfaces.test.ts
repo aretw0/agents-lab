@@ -88,6 +88,7 @@ import {
 	shouldRefreshHandoffBeforeAutoCompact,
 	shouldScheduleAutoCompactRetry,
 	shouldTriggerAutoCompact,
+	toSessionWorkspaceKey,
 	writeLocalSliceHandoffCheckpoint,
 } from "../../extensions/context-watchdog-exports";
 
@@ -738,6 +739,54 @@ describe("context-watchdog tool surfaces", () => {
 				decision: "use-pack",
 				profileResolved: "control-plane-core",
 			});
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_preload_pack tool writes operator-requested cache from read telemetry", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-preload-pack-tool-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-BUD-3"] }));
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{ id: "TASK-BUD-3", status: "planned" }] }));
+			writeFileSync(join(cwd, ".project", "verification.json"), JSON.stringify({ verification: [] }));
+			const sessionDir = join(cwd, ".sandbox", "pi-agent", "sessions", toSessionWorkspaceKey(cwd));
+			mkdirSync(sessionDir, { recursive: true });
+			writeFileSync(join(sessionDir, "session.jsonl"), `${JSON.stringify({
+				type: "message",
+				message: {
+					role: "assistant",
+					content: [
+						{ type: "toolCall", name: "read", arguments: { path: join(cwd, ".project", "handoff.json") } },
+						{ type: "toolCall", name: "read", arguments: { path: join(cwd, "packages", "pi-stack", "README.md") } },
+					],
+				},
+			})}\n`);
+
+			const pi = makeMockPi();
+			contextWatchdogSurfacesExtension(pi);
+			const tool = getTool(pi, "context_preload_pack");
+			const result = await tool.execute(
+				"tc-context-preload-pack",
+				{ write: true, days: 1, limit: 4, top: 8 },
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd } as any,
+			);
+			const packPath = join(cwd, ".sandbox", "pi-agent", "preload", "context-preload-pack.json");
+
+			expect(result.content?.[0]?.text).toContain("context-preload-pack:");
+			expect(result.details).toMatchObject({
+				written: true,
+				effect: "write-cache",
+				mode: "operator-requested-cache-write",
+				authorization: "explicit-operator",
+			});
+			expect(result.details?.topReads).toEqual(expect.arrayContaining([
+				expect.objectContaining({ file: ".project/handoff.json", class: "project" }),
+			]));
+			expect(existsSync(packPath)).toBe(true);
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

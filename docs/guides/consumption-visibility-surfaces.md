@@ -71,10 +71,10 @@ Antes de concluir “não temos ferramenta X”, valide instalação real do usu
 
 ```bash
 pi list
-npm run pi:parity
-npm run pi:parity:project
-npm run pi:parity:curated
-npm run pi:parity:curated:strict
+pnpm run pi:parity
+pnpm run pi:parity:project
+pnpm run pi:parity:curated
+pnpm run pi:parity:curated:strict
 ```
 
 No profile `curated-default`, o relatório classifica drift em três classes:

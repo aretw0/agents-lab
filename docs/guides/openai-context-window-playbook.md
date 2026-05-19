@@ -204,13 +204,13 @@ Para bootstrap portável de novos agentes, use:
 - `context_watch_bootstrap` com `apply=true` (persiste patch em `.pi/settings.json` e ativa no runtime do context-watchdog sem `/reload`)
 
 Para reduzir re-leitura repetitiva pós-compactação, gere um warm pack por telemetria real:
-- `npm run context:preload` (inspeção do operador)
-- `npm run context:preload:write` (gera JSON em `.sandbox/pi-agent/preload/context-preload-pack.json`)
+- runtime tool: `context_preload_pack` (preview por padrão; `write=true` gera JSON em `.sandbox/pi-agent/preload/context-preload-pack.json`)
+- wrappers de gate/lab: `pnpm run context:preload` e `pnpm run context:preload:write`
 
 Consumo fail-closed do pack (com fallback canônico quando stale):
-- `npm run context:preload:consume` (`control-plane-core`)
-- `npm run context:preload:consume:worker` (`agent-worker-lean`)
-- `npm run context:preload:consume:scout` (`swarm-scout-min`)
+- `pnpm run context:preload:consume` (`control-plane-core`)
+- `pnpm run context:preload:consume:worker` (`agent-worker-lean`)
+- `pnpm run context:preload:consume:scout` (`swarm-scout-min`)
 - runtime tool read-only: `context_preload_consume`
 - composição em readiness packet: `context_watch_continuation_readiness` inclui `preload.decision=use-pack|fallback-canonical` e `dirty=clean|dirty|unknown`.
 - `context_watch_status` também expõe `details.gitDirty` (clean/dirty/unknown) e `details.preload` (`use-pack|fallback-canonical`) sem alterar o summary principal.

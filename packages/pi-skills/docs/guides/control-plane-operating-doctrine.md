@@ -225,11 +225,11 @@ A investigação deve separar três camadas antes de atribuir culpa:
 
 A evidência mínima para classificar o incidente é curta: keybinding efetivo, presença/ausência de override pessoal, foco/estado do TUI no momento, caminho de abort chamado, e se a operação em curso respeita `AbortSignal` ou mata subprocesso/árvore de processo. Um resultado `ready` de qualquer gate continua sendo evidência, não permissão para executar mais tempo.
 
-Em sessões deste repositório, considere ainda o launcher. O fluxo comum de desenvolvimento é `npm run pi:dev`, que chama `scripts/pi-isolated.mjs --dev`, define `PI_CODING_AGENT_DIR=.sandbox/pi-agent`, usa o CLI local oficial em `node_modules/@earendil-works/pi-coding-agent/dist/cli.js`, com fallback temporário para `node_modules/@mariozechner/pi-coding-agent/dist/cli.js` durante a transição, e pausa o loop autônomo antes de iniciar. Portanto, uma investigação não deve assumir que `~/.pi/agent` ou um pacote publicado representam a sessão live; confira launcher, `PI_CODING_AGENT_DIR`, sourceInfo de recursos e caminhos carregados antes de atribuir comportamento a upstream ou às extensões locais.
+Em sessões deste repositório, considere ainda o launcher. O fluxo comum de desenvolvimento é `pnpm run pi:dev`, que chama `scripts/pi-isolated.mjs --dev`, define `PI_CODING_AGENT_DIR=.sandbox/pi-agent`, usa o CLI local oficial em `node_modules/@earendil-works/pi-coding-agent/dist/cli.js`, com fallback temporário para `node_modules/@mariozechner/pi-coding-agent/dist/cli.js` durante a transição, e pausa o loop autônomo antes de iniciar. Portanto, uma investigação não deve assumir que `~/.pi/agent` ou um pacote publicado representam a sessão live; confira launcher, `PI_CODING_AGENT_DIR`, sourceInfo de recursos e caminhos carregados antes de atribuir comportamento a upstream ou às extensões locais.
 
 Checklist source-aware para `pi:dev`:
 
-- confirmar `npm run pi:isolated:status` e registrar se o modo ativo é `isolated`;
+- confirmar `pnpm run pi:isolated:status` e registrar se o modo ativo é `isolated`;
 - checar overrides de keybinding no sandbox (`.sandbox/pi-agent/keybindings.json`) além de `~/.pi/agent/keybindings.json`;
 - listar somente os pacotes carregados que podem tocar input (`registerShortcut`, `setEditorComponent`, `onTerminalInput`, overlays) com busca curta e sem source maps;
 - separar “tecla não chegou ao TUI” de “abort foi chamado, mas a operação não respeitou o sinal”.

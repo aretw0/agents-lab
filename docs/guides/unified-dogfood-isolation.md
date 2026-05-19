@@ -11,20 +11,20 @@ Objetivo: recriar um ambiente próximo do usuário final, com runtime isolado no
 ## Pré-voo (2-3 min)
 
 ```bash
-npm run pi:isolated:status
-npm run context:preload
+pnpm run pi:isolated:status
+pnpm run context:preload
 ```
 
 Opcional (puxar sessão mais recente do global para sandbox local):
 
 ```bash
-npm run pi:isolated:adopt-latest
+pnpm run pi:isolated:adopt-latest
 ```
 
 ## Subir sessão isolada
 
 ```bash
-npm run pi:isolated
+pnpm run pi:isolated
 ```
 
 Dentro do Pi (na sessão isolada):
@@ -70,13 +70,13 @@ Invariantes aplicados:
 Script dedicado no host:
 
 ```bash
-npm run devcontainer:lab -- <container-name> -- npm run pi:isolated
+pnpm run devcontainer:lab -- <container-name> -- pnpm run pi:isolated
 ```
 
 Atalho padrão (container `agents-lab-dev`):
 
 ```bash
-npm run devcontainer:lab:pi
+pnpm run devcontainer:lab:pi
 ```
 
 O comando força usuário/workdir/env corretos ao anexar no container.
@@ -91,7 +91,7 @@ O comando força usuário/workdir/env corretos ao anexar no container.
    ```
 3. Entrar com lab:
    ```bash
-   npm run devcontainer:lab -- <container-name> -- npm run pi:isolated
+   pnpm run devcontainer:lab -- <container-name> -- pnpm run pi:isolated
    ```
 
 **Windows (Windows Terminal PowerShell):**
@@ -102,7 +102,7 @@ O comando força usuário/workdir/env corretos ao anexar no container.
    ```
 3. Entrar com lab:
    ```powershell
-   npm run devcontainer:lab -- $c -- npm run pi:isolated
+   pnpm run devcontainer:lab -- $c -- pnpm run pi:isolated
    ```
 
 ### Checklist TUI + WEB no container

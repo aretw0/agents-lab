@@ -25,7 +25,7 @@ Antes de rodar triagem, escolha o modo de operação:
    - projeção para vault Markdown renderizável (referência: https://github.com/aretw0/vault-seed).
 
 Checklist de spawn rápido por modo:
-- `npm run context:preload` para sugerir carga mínima recente;
+- `context_preload_pack` no Pi, ou `pnpm run context:preload` como wrapper de laboratório, para sugerir carga mínima recente;
 - coordenador carrega `control-plane-core`;
 - workers carregam `agent-worker-lean`.
 

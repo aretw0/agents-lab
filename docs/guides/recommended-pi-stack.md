@@ -36,9 +36,9 @@ Ou diretamente via pi:
 ```bash
 pi install npm:@aretw0/pi-stack
 # para auditoria de baseline curada:
-npm run pi:parity:curated
+pnpm run pi:parity:curated
 # para auditoria do perfil opt-in de runtime:
-npm run pi:parity:runtime
+pnpm run pi:parity:runtime
 ```
 
 **Via git** (sempre atualizado, sem esperar publish):
@@ -162,8 +162,8 @@ Use o mapa consolidado em [`consumption-visibility-surfaces.md`](./consumption-v
 Para validar paridade sem confundir ambiente local com user-like:
 
 ```bash
-npm run pi:parity
-npm run pi:parity:project
+pnpm run pi:parity
+pnpm run pi:parity:project
 ```
 
 ## Governança de soberania no CI (para contribuidores)

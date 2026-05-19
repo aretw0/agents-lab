@@ -10,6 +10,7 @@ const shipped = [
 	"machine-maintenance",
 	"monitor-summary",
 	"project-board-surface",
+	"safe-boot",
 	"session-analytics",
 	"subagent-readiness",
 ];
@@ -45,6 +46,13 @@ test("classifyRootScript marks disk ops as machine-maintenance wrappers", () => 
 
 test("classifyRootScript marks context preload consume as existing watchdog wrapper", () => {
 	const row = classifyRootScript("context:preload:consume:worker", "node scripts/context-preload-consume.mjs --profile agent-worker-lean --json", shipped);
+
+	assert.equal(row.category, "distributed-wrapper");
+	assert.equal(row.targetSurface, "context-watchdog");
+});
+
+test("classifyRootScript marks context preload pack as watchdog wrapper", () => {
+	const row = classifyRootScript("context:preload:write", "node scripts/context-preload-pack.mjs --write --json", shipped);
 
 	assert.equal(row.category, "distributed-wrapper");
 	assert.equal(row.targetSurface, "context-watchdog");
@@ -100,10 +108,12 @@ test("buildUserSurfaceAudit exposes grouped promotion targets", () => {
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "safe-boot" && group.scripts.includes("pi:artifact:audit:strict")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "machine-maintenance" && group.scripts.includes("ops:disk:check")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "context-watchdog" && group.scripts.includes("context:preload:consume")));
+	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "context-watchdog" && group.scripts.includes("context:preload:write")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "guardrails-core" && group.scripts.includes("git:dirty:snapshot")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "guardrails-core" && group.scripts.includes("ops:loop-evidence:strict")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "guardrails-core" && group.scripts.includes("scheduler:next")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "project-board-surface" && group.scripts.includes("project:verification:check")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:bloat:audit:strict")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:discourse:audit")));
+	assert.deepEqual(audit.promotionGroups, []);
 });

@@ -128,6 +128,16 @@
       "defaultAction": "maintain"
     },
     {
+      "id": "safe-boot",
+      "name": "Safe boot profile and runtime artifact hygiene",
+      "criticality": "high",
+      "primaryPackage": "@aretw0/pi-stack",
+      "secondaryPackages": [],
+      "conflictsWithPackages": [],
+      "coexistencePolicy": "single-owner",
+      "defaultAction": "maintain"
+    },
+    {
       "id": "web-research-policy",
       "name": "Web research/browser policy",
       "criticality": "medium",

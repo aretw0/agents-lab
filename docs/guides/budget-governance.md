@@ -164,8 +164,8 @@ Exemplo:
 Antes de concluir que "falta funcionalidade", rode:
 
 ```bash
-npm run pi:parity
-npm run pi:parity:project
+pnpm run pi:parity
+pnpm run pi:parity:project
 ```
 
 - `pi:parity` valida se seu **user scope** está próximo da stack completa.
@@ -174,8 +174,8 @@ npm run pi:parity:project
 Para isolamento forte em estudos (sem sujar `~/.pi/agent`):
 
 ```bash
-npm run pi:isolated
-npm run pi:isolated:status
+pnpm run pi:isolated
+pnpm run pi:isolated:status
 ```
 
 (Equivalente manual: exportar `PI_CODING_AGENT_DIR=$PWD/.sandbox/pi-agent`.)

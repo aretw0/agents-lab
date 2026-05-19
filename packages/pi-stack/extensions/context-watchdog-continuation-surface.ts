@@ -14,6 +14,10 @@ import {
 	resolveContextWatchContinuationRecommendation,
 	TURN_BOUNDARY_DIRECTION_PROMPT,
 } from "./context-watchdog-continuation";
+import {
+	runContextPreloadPack,
+	summarizeContextPreloadPack,
+} from "./context-watchdog-preload-pack.mjs";
 import { buildAfkMaterialReadinessSnapshot } from "./context-watchdog-afk-material";
 import {
 	extractAutoResumePromptValue,
@@ -46,7 +50,10 @@ import {
 	localContinuityAuditReasons,
 	localContinuityProtectedPaths,
 } from "./guardrails-core-unattended-continuation-surface";
-import { GUARDRAILS_AUTHORIZATION_NONE } from "./guardrails-core-authorization";
+import {
+	GUARDRAILS_AUTHORIZATION_EXPLICIT_OPERATOR,
+	GUARDRAILS_AUTHORIZATION_NONE,
+} from "./guardrails-core-authorization";
 
 export interface ContextWatchdogContinuationSurfaceRuntime {
 	getConfig(): ContextWatchdogConfig;
@@ -106,6 +113,43 @@ export function registerContextWatchdogContinuationSurface(
 			return {
 				content: [{ type: "text", text: packet.summary }],
 				details: packet,
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "context_preload_pack",
+		label: "Context Preload Pack",
+		description:
+			"Generate a context warm pack from recent read telemetry. Read-only by default; write=true stores the generated cache under .sandbox/pi-agent/preload or a provided output path.",
+		parameters: Type.Object({
+			days: Type.Optional(Type.Number()),
+			limit: Type.Optional(Type.Number()),
+			top: Type.Optional(Type.Number()),
+			write: Type.Optional(Type.Boolean()),
+			out: Type.Optional(Type.String()),
+		}),
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			const p = (params ?? {}) as Record<string, unknown>;
+			const write = p.write === true;
+			const report = runContextPreloadPack({
+				workspace: ctx.cwd,
+				days: p.days,
+				limit: p.limit,
+				top: p.top,
+				write,
+				out: typeof p.out === "string" ? p.out : undefined,
+			});
+			const summary = summarizeContextPreloadPack(report);
+			return {
+				content: [{ type: "text", text: summary }],
+				details: {
+					...report,
+					summary,
+					effect: write ? "write-cache" : "none",
+					mode: write ? "operator-requested-cache-write" : "read-only-preview",
+					authorization: write ? GUARDRAILS_AUTHORIZATION_EXPLICIT_OPERATOR : GUARDRAILS_AUTHORIZATION_NONE,
+				},
 			};
 		},
 	});

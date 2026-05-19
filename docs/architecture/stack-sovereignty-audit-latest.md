@@ -7,7 +7,7 @@ Mode: strict
 
 ## Summary
 
-- capabilities: 16
+- capabilities: 17
 - ownerMissing: 0
 - coexisting: 5
 - highRisk: 0
@@ -26,6 +26,7 @@ Mode: strict
 | quota-visibility-ops | high | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | maintain | medium |
 | quota-alerts | high | @aretw0/pi-stack | owned | - | maintain | low |
 | handoff-advisor | high | @aretw0/pi-stack | owned | - | maintain | low |
+| safe-boot | high | @aretw0/pi-stack | owned | - | maintain | low |
 | web-research-policy | medium | @aretw0/web-skills | owned | - | filter-migrate | low |
 | stack-sovereignty-governance | high | @aretw0/pi-stack | owned | - | maintain | low |
 | project-board-surface | medium | @aretw0/pi-stack | owned | - | maintain | low |

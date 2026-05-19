@@ -18,7 +18,7 @@ Sem isso, é difícil:
 Antes de analisar números, confirme paridade do ambiente:
 
 ```bash
-npm run pi:parity
+pnpm run pi:parity
 ```
 
 ---

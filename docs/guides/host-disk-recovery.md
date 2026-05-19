@@ -20,14 +20,14 @@ Guia curto para recuperar espaço sem perder continuidade do trabalho.
 
 ```bash
 # 1) Diagnóstico (sem apagar nada)
-npm run ops:disk:check
+pnpm run ops:disk:check
 
 # 2) Limpeza segura (artefatos temporários / relatórios antigos)
-npm run ops:disk:cleanup
+pnpm run ops:disk:cleanup
 
 # 3) Modo agressivo (somente se ainda faltar espaço)
 # remove sessões antigas mantendo as 20 mais recentes
-npm run ops:disk:cleanup:with-sessions
+pnpm run ops:disk:cleanup:with-sessions
 ```
 
 ## Script usado
@@ -61,7 +61,7 @@ Nessa situação:
 1. Tratar `ops:disk:cleanup` como insuficiente para desbloquear long-run.
 2. Manter o Pi em modo curto/checkpoint até liberar disco fora do repo.
 3. Resolver Docker/WSL pelo mecanismo próprio do host, com intenção explícita do operador.
-4. Reexecutar `npm run ops:disk:cleanup:dry` e `npm run pi:dev:pressure` antes de voltar à runtime do Pi.
+4. Reexecutar `pnpm run ops:disk:cleanup:dry` e `pnpm run pi:dev:pressure` antes de voltar à runtime do Pi.
 
 O inventário de `hostVolumes` é somente leitura. Ele não autoriza apagar, compactar ou resetar Docker/WSL automaticamente.
 

@@ -83,9 +83,14 @@ const DISTRIBUTED_WRAPPERS = [
 		reason: "disk pressure and cleanup planning are distributed through machine-maintenance; root scripts keep explicit apply wrappers",
 	},
 	{
+		match: /^context:preload(?::write)?$/,
+		surface: "context-watchdog",
+		reason: "context preload pack generation is distributed through context_preload_pack; root script remains a CI/lab wrapper",
+	},
+	{
 		match: /^context:preload:consume/,
 		surface: "context-watchdog",
-		reason: "context preload consumption is already distributed through context_preload_consume; pack generation remains a promotion candidate",
+		reason: "context preload consumption is distributed through context_preload_consume; root script remains a CI/lab wrapper",
 	},
 	{
 		match: /^git:dirty:snapshot/,
@@ -125,11 +130,6 @@ const DISTRIBUTED_WRAPPERS = [
 ];
 
 const PROMOTION_CANDIDATES = [
-	{
-		match: /^context:preload/,
-		target: "context-watchdog",
-		reason: "context preload/consume is operator-facing continuity behavior and should not require root scripts long-term",
-	},
 	{
 		match: /^repo:discourse:curation/,
 		target: "stack-sovereignty",

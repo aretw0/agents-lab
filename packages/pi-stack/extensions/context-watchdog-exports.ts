@@ -65,6 +65,21 @@ export {
 	TURN_BOUNDARY_DIRECTION_PROMPT,
 } from "./context-watchdog-continuation";
 export {
+	buildContextPreloadPack,
+	buildContextPreloadTopEntries,
+	classifyContextPreloadPath,
+	collectContextPreloadReadTelemetry,
+	detectContextPreloadSessionDirs,
+	formatContextPreloadPackReport,
+	listRecentContextPreloadSessionFiles,
+	normalizeContextPreloadPackOptions,
+	normalizeContextPreloadReadPath,
+	readContextPreloadCanonicalState,
+	runContextPreloadPack,
+	summarizeContextPreloadPack,
+	toSessionWorkspaceKey,
+} from "./context-watchdog-preload-pack.mjs";
+export {
 	applyContextWatchToHandoff,
 	contextWatchEventAgeMs,
 	latestContextWatchEvent,
