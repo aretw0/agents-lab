@@ -23524,7 +23524,7 @@
     {
       "id": "TASK-BUD-1056",
       "description": "[hard-intent/context] Implementar packet/gate de reload-before-compact: se reload é necessário e compactação se aproxima, checkpointar e pedir reload antes de auto-resume ficar suprimido.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p0",
       "depends_on": [
         "TASK-BUD-1046"
@@ -23544,7 +23544,8 @@
         "Teste cobre reload-not-required, reload-needed-but-deferrable e reload-before-compact recomendado."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Criado a partir do steer do operador: loop é assistido, e reload deve ser coordenado graciosamente antes de compactação inevitável quando isso evita travar auto-resume.\n[provenance:human] source_task=none reason=Consolidar exemplo reload/compact como hard intent do loop assistido e gracioso."
+      "notes": "Criado a partir do steer do operador: loop é assistido, e reload deve ser coordenado graciosamente antes de compactação inevitável quando isso evita travar auto-resume.\n[provenance:human] source_task=none reason=Consolidar exemplo reload/compact como hard intent do loop assistido e gracioso.\n[completed] Added report-only reload-before-compact packet and surface. It composes reloadGate, context level/percent, handoff freshness, checkpoint freshness, and pending source/tool changes; defers reload during ok/warn local-safe work; recommends checkpoint + operator /reload at checkpoint/compact pressure; and never dispatches reload, compact, resume, or mutation. Validation: npx vitest run packages/pi-stack/test/smoke/context-watchdog-runtime-reload.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts -> 2 files passed, 8 tests passed.",
+      "verification": "VERIF-TASK-BUD-1056-RELOAD-BEFORE-COMPACT-20260519"
     },
     {
       "id": "TASK-BUD-1057",

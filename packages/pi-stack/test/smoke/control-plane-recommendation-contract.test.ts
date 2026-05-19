@@ -2,7 +2,8 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import contextWatchdogExtension from "../../extensions/context-watchdog";
+import { DEFAULT_CONTEXT_WATCHDOG_CONFIG } from "../../extensions/context-watchdog-config";
+import { registerContextWatchdogContinuationSurface } from "../../extensions/context-watchdog-continuation-surface";
 import { registerGuardrailsAutonomyLaneSurface } from "../../extensions/guardrails-core-autonomy-lane-surface";
 
 function makeMockPi() {
@@ -66,7 +67,10 @@ describe("control-plane recommendation contract", () => {
       ] }), "utf8");
 
       const pi = makeMockPi();
-      contextWatchdogExtension(pi as never);
+      registerContextWatchdogContinuationSurface(pi as never, {
+        getConfig: () => DEFAULT_CONTEXT_WATCHDOG_CONFIG,
+        isReloadRequiredForSourceUpdate: () => false,
+      });
       const tool = getRegisteredTool(pi, "context_watch_continuation_readiness");
       const result = await tool.execute("tc-context-readiness", {}, undefined as unknown as AbortSignal, () => {}, { cwd }) as { details?: Record<string, unknown> };
 
@@ -83,6 +87,33 @@ describe("control-plane recommendation contract", () => {
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
+  });
+
+  it("context_watch_reload_before_compact_packet exposes report-only reload coordination", async () => {
+    const pi = makeMockPi();
+    registerContextWatchdogContinuationSurface(pi as never, {
+      getConfig: () => DEFAULT_CONTEXT_WATCHDOG_CONFIG,
+      isReloadRequiredForSourceUpdate: () => true,
+    });
+    const tool = getRegisteredTool(pi, "context_watch_reload_before_compact_packet");
+    const result = await tool.execute("tc-reload-before-compact", {
+      context_level: "compact",
+      context_percent: 68,
+      handoff_freshness: "stale",
+      checkpoint_fresh: false,
+      pending_source_or_tool_changes: true,
+    }, undefined as unknown as AbortSignal, () => {}, { cwd: process.cwd() }) as { details?: Record<string, unknown>; content?: Array<{ text?: string }> };
+
+    expect(result.details).toMatchObject({
+      mode: "report-only",
+      effect: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      mutationAllowed: false,
+    });
+    expect(["not-needed", "continue-local-safe-short", "checkpoint-and-request-reload"])
+      .toContain(result.details?.decision);
+    expect(result.content?.[0]?.text).toContain("reload-before-compact:");
   });
 
   it("project_intake_plan keeps concise decision payload with explicit guardrails", () => {

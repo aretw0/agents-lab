@@ -26,6 +26,7 @@ import {
 } from "./context-watchdog-handoff";
 import { resolveHandoffGrowthMaturitySnapshot } from "./context-watchdog-growth-checkpoint";
 import {
+	buildReloadBeforeCompactPacket,
 	readAutoResumeAfterReloadIntent,
 } from "./context-watchdog-reload-intent";
 import {
@@ -75,6 +76,40 @@ export function registerContextWatchdogContinuationSurface(
 	pi: ExtensionAPI,
 	runtime: ContextWatchdogContinuationSurfaceRuntime,
 ): void {
+	pi.registerTool({
+		name: "context_watch_reload_before_compact_packet",
+		label: "Context Watch Reload Before Compact Packet",
+		description:
+			"Report-only reload-before-compact decision packet. Composes runtime reload need, context pressure, handoff freshness, checkpoint freshness, and source/tool changes without dispatching reload, compact, resume, or mutation.",
+		parameters: Type.Object({
+			context_level: Type.Optional(Type.Union([
+				Type.Literal("ok"),
+				Type.Literal("warn"),
+				Type.Literal("checkpoint"),
+				Type.Literal("compact"),
+			])),
+			context_percent: Type.Optional(Type.Number()),
+			handoff_freshness: Type.Optional(Type.String()),
+			checkpoint_fresh: Type.Optional(Type.Boolean()),
+			pending_source_or_tool_changes: Type.Optional(Type.Boolean()),
+		}),
+		async execute(_toolCallId, params, _signal, _onUpdate, _ctx) {
+			const p = (params ?? {}) as Record<string, unknown>;
+			const packet = buildReloadBeforeCompactPacket({
+				contextLevel: typeof p.context_level === "string" ? p.context_level : undefined,
+				contextPercent: typeof p.context_percent === "number" ? p.context_percent : undefined,
+				reloadRequired: currentReloadRequired(runtime) === true,
+				handoffFreshness: typeof p.handoff_freshness === "string" ? p.handoff_freshness : undefined,
+				checkpointFresh: p.checkpoint_fresh === true,
+				pendingSourceOrToolChanges: p.pending_source_or_tool_changes === true,
+			});
+			return {
+				content: [{ type: "text", text: packet.summary }],
+				details: packet,
+			};
+		},
+	});
+
 	pi.registerTool({
 		name: "context_preload_consume",
 		label: "Context Preload Consume",

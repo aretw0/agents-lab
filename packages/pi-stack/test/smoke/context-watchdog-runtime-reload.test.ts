@@ -8,6 +8,7 @@ import {
 	CONTEXT_WATCHDOG_RUNTIME_RELOAD_SOURCE_DIRS,
 	readContextWatchdogRuntimeReloadMtimeMs,
 } from "../../extensions/context-watchdog-runtime-status";
+import { buildReloadBeforeCompactPacket } from "../../extensions/context-watchdog-exports";
 
 describe("context-watchdog runtime reload surfaces", () => {
 	it("tracks model catalog, sandbox settings, project settings, and agent overrides", () => {
@@ -72,5 +73,55 @@ describe("context-watchdog runtime reload surfaces", () => {
 		expect(CONTEXT_WATCHDOG_RUNTIME_RELOAD_SOURCE_DIRS).toEqual([
 			"packages/pi-stack/extensions",
 		]);
+	});
+
+	it("builds reload-before-compact packet decisions without dispatch", () => {
+		const clear = buildReloadBeforeCompactPacket({
+			contextLevel: "ok",
+			contextPercent: 20,
+			reloadRequired: false,
+			handoffFreshness: "fresh",
+			checkpointFresh: true,
+		});
+		expect(clear).toMatchObject({
+			decision: "not-needed",
+			reloadGate: "reload-not-required",
+			dispatchAllowed: false,
+			mutationAllowed: false,
+			authorization: "none",
+		});
+
+		const deferrable = buildReloadBeforeCompactPacket({
+			contextLevel: "warn",
+			contextPercent: 48,
+			reloadRequired: true,
+			handoffFreshness: "fresh",
+			checkpointFresh: true,
+		});
+		expect(deferrable).toMatchObject({
+			decision: "continue-local-safe-short",
+			reloadGate: "level-not-precompact",
+			operatorActionRequired: true,
+			checkpointRequired: false,
+			reloadRequestRequired: true,
+		});
+
+		const nearCompact = buildReloadBeforeCompactPacket({
+			contextLevel: "compact",
+			contextPercent: 68,
+			reloadRequired: true,
+			handoffFreshness: "stale",
+			checkpointFresh: false,
+			pendingSourceOrToolChanges: true,
+		});
+		expect(nearCompact).toMatchObject({
+			decision: "checkpoint-and-request-reload",
+			reloadGate: "reload-required-compact",
+			operatorActionRequired: true,
+			checkpointRequired: true,
+			reloadRequestRequired: true,
+			pendingSourceOrToolChanges: true,
+		});
+		expect(nearCompact.summary).toContain("dispatch=no");
 	});
 });

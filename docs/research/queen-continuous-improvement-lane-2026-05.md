@@ -47,6 +47,8 @@ Code/runtime/tooling work that should eventually be implemented with tests:
 9. `TASK-BUD-1060` — missing/weak tool feedback loop: classify capability gaps and prepare retry with the right toolkit.
 10. `TASK-BUD-1061` — first-hatch toolkit inventory for workspace/sandbox capabilities and missing tools.
 
+Implemented status: `TASK-BUD-1056` now has the report-only `context_watch_reload_before_compact_packet`, which reuses the existing reload gate and never dispatches reload, compact, resume or mutation.
+
 ## Soft intent backlog
 
 Skills, prompts, docs and research that make the behavior discoverable and reusable:

@@ -30,6 +30,7 @@ export {
 	writeLocalSliceHandoffCheckpoint,
 } from "./context-watchdog-runtime-helpers";
 export {
+	buildReloadBeforeCompactPacket,
 	clearAutoResumeAfterReloadIntent,
 	readAutoResumeAfterReloadIntent,
 	withAutoResumeAfterReloadIntent,

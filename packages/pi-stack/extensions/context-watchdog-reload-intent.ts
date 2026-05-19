@@ -1,3 +1,6 @@
+import { resolvePreCompactReloadSignal, type ContextWatchdogLevel, type PreCompactReloadSignalReason } from "./context-watchdog-resume";
+import { GUARDRAILS_AUTHORIZATION_NONE } from "./guardrails-core-authorization";
+
 export type AutoResumeAfterReloadIntentReason = "reload-required-after-compact";
 
 export type AutoResumeAfterReloadIntent = {
@@ -6,6 +9,119 @@ export type AutoResumeAfterReloadIntent = {
 	reason: AutoResumeAfterReloadIntentReason;
 	focusTasks: string[];
 };
+
+export type ReloadBeforeCompactDecision =
+	| "not-needed"
+	| "continue-local-safe-short"
+	| "checkpoint-and-request-reload";
+
+export type ReloadBeforeCompactPacket = {
+	mode: "report-only";
+	effect: "none";
+	authorization: typeof GUARDRAILS_AUTHORIZATION_NONE;
+	dispatchAllowed: false;
+	mutationAllowed: false;
+	reloadRequired: boolean;
+	reloadGate: PreCompactReloadSignalReason;
+	contextLevel: ContextWatchdogLevel;
+	contextPercent: number;
+	handoffFreshness: string;
+	checkpointFresh: boolean;
+	pendingSourceOrToolChanges: boolean;
+	operatorActionRequired: boolean;
+	checkpointRequired: boolean;
+	reloadRequestRequired: boolean;
+	decision: ReloadBeforeCompactDecision;
+	nextAction: string;
+	summary: string;
+};
+
+function normalizeLevel(value: unknown): ContextWatchdogLevel {
+	return value === "warn" || value === "checkpoint" || value === "compact" ? value : "ok";
+}
+
+function normalizePercent(value: unknown): number {
+	const parsed = Number(value);
+	if (!Number.isFinite(parsed)) return 0;
+	return Math.max(0, Math.min(100, Number(parsed.toFixed(1))));
+}
+
+function normalizeHandoffFreshness(value: unknown): string {
+	const text = typeof value === "string" ? value.trim() : "";
+	return text.length > 0 ? text : "unknown";
+}
+
+export function buildReloadBeforeCompactPacket(input: {
+	contextLevel?: ContextWatchdogLevel | string;
+	contextPercent?: number;
+	reloadRequired?: boolean;
+	handoffFreshness?: string;
+	checkpointFresh?: boolean;
+	pendingSourceOrToolChanges?: boolean;
+}): ReloadBeforeCompactPacket {
+	const contextLevel = normalizeLevel(input.contextLevel);
+	const contextPercent = normalizePercent(input.contextPercent);
+	const reloadRequired = input.reloadRequired === true;
+	const checkpointFresh = input.checkpointFresh === true;
+	const handoffFreshness = normalizeHandoffFreshness(input.handoffFreshness);
+	const pendingSourceOrToolChanges = input.pendingSourceOrToolChanges === true || reloadRequired;
+	const reloadSignal = resolvePreCompactReloadSignal({
+		assessmentLevel: contextLevel,
+		reloadRequired,
+	});
+	let decision: ReloadBeforeCompactDecision = "not-needed";
+	let nextAction = "continue; runtime reload is not required.";
+	let checkpointRequired = false;
+	let reloadRequestRequired = false;
+
+	if (reloadRequired && !reloadSignal.active) {
+		decision = "continue-local-safe-short";
+		nextAction = "continue one short local-safe slice; request /reload before starting long-run or compact-bound work.";
+		reloadRequestRequired = true;
+	} else if (reloadSignal.active) {
+		decision = "checkpoint-and-request-reload";
+		checkpointRequired = !checkpointFresh || handoffFreshness !== "fresh";
+		reloadRequestRequired = true;
+		nextAction = checkpointRequired
+			? "write a compact checkpoint, ask the operator for /reload, then resume from handoff."
+			: "ask the operator for /reload before compact/auto-resume; checkpoint evidence is already fresh.";
+	}
+
+	const operatorActionRequired = checkpointRequired || reloadRequestRequired;
+	const summary = [
+		"reload-before-compact:",
+		`decision=${decision}`,
+		`reloadGate=${reloadSignal.reason}`,
+		`level=${contextLevel}`,
+		`percent=${contextPercent}`,
+		`handoff=${handoffFreshness}`,
+		`checkpointFresh=${checkpointFresh ? "yes" : "no"}`,
+		`sourceChanges=${pendingSourceOrToolChanges ? "yes" : "no"}`,
+		"dispatch=no",
+		`authorization=${GUARDRAILS_AUTHORIZATION_NONE}`,
+	].join(" ");
+
+	return {
+		mode: "report-only",
+		effect: "none",
+		authorization: GUARDRAILS_AUTHORIZATION_NONE,
+		dispatchAllowed: false,
+		mutationAllowed: false,
+		reloadRequired,
+		reloadGate: reloadSignal.reason,
+		contextLevel,
+		contextPercent,
+		handoffFreshness,
+		checkpointFresh,
+		pendingSourceOrToolChanges,
+		operatorActionRequired,
+		checkpointRequired,
+		reloadRequestRequired,
+		decision,
+		nextAction,
+		summary,
+	};
+}
 
 export function readAutoResumeAfterReloadIntent(
 	handoffInput: Record<string, unknown> | undefined,
