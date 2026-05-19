@@ -1,3 +1,8 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+
 export type AgentSpawnReadinessDecision = "keep-report-only" | "ready-for-agent-run";
 
 export interface AgentSpawnReadinessInput {
@@ -13,7 +18,7 @@ export interface AgentSpawnReadinessInput {
 export interface AgentSpawnReadinessResult {
   mode: "agent-spawn-readiness";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   decision: AgentSpawnReadinessDecision;
   recommendationCode:
@@ -97,7 +102,7 @@ export function evaluateAgentSpawnReadiness(input: AgentSpawnReadinessInput = {}
   return {
     mode: "agent-spawn-readiness",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     decision,
     recommendationCode,

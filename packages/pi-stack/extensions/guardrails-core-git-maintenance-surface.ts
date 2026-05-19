@@ -4,6 +4,10 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { evaluateGitMaintenanceSignal } from "./guardrails-core-git-maintenance";
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export interface GitMaintenanceDiagnostics {
@@ -41,7 +45,7 @@ export interface GitDirtySnapshot {
     deleted: number;
   };
   dispatchAllowed: false;
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   summary: string;
 }
 
@@ -58,7 +62,7 @@ export interface GitDirtySnapshotUnavailable {
     deleted: 0;
   };
   dispatchAllowed: false;
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   summary: "git-dirty-snapshot: unavailable";
   error: "not-a-git-repo" | "git-dirty-snapshot-error";
 }
@@ -152,7 +156,7 @@ export function parseGitStatusPorcelainOutput(output: string): GitDirtySnapshot 
     rows,
     counts,
     dispatchAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     summary: `git-dirty-snapshot: clean=${clean ? "yes" : "no"} rows=${rows.length} tracked=${counts.tracked} untracked=${counts.untracked}`,
   };
 }
@@ -182,7 +186,7 @@ export function buildUnavailableGitDirtySnapshot(error: unknown): GitDirtySnapsh
       deleted: 0,
     },
     dispatchAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     summary: "git-dirty-snapshot: unavailable",
     error: normalizeGitDirtySnapshotError(error),
   };

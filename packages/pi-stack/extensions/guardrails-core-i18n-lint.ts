@@ -1,3 +1,8 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+
 export type I18nLintExpectedLanguage = "preserve-existing" | "pt-BR" | "en" | "unknown" | string;
 export type I18nLintDecision = "pass" | "warn" | "invalid";
 
@@ -22,7 +27,7 @@ export interface I18nLintResult {
   decision: I18nLintDecision;
   severity: "ok" | "warn" | "block";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   mutationAllowed: false;
   path?: string;
@@ -159,7 +164,7 @@ export function lintI18nUserFacingText(options: I18nLintOptions): I18nLintResult
     decision,
     severity,
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     mutationAllowed: false,
     ...(options.path ? { path: options.path } : {}),

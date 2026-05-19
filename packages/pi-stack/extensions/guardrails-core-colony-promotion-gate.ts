@@ -1,3 +1,8 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+
 export type ColonyPromotionGateDecision = "keep-report-only" | "ready-for-colony-gate";
 
 export interface ColonyPromotionGateInput {
@@ -13,7 +18,7 @@ export interface ColonyPromotionGateInput {
 export interface ColonyPromotionGateResult {
   mode: "colony-promotion-readiness-gate";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   colonyDispatchAllowed: false;
   decision: ColonyPromotionGateDecision;
@@ -94,7 +99,7 @@ export function evaluateColonyPromotionGate(input: ColonyPromotionGateInput = {}
   return {
     mode: "colony-promotion-readiness-gate",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     colonyDispatchAllowed: false,
     decision,
