@@ -41,7 +41,11 @@
   "mounts": [
     "source=agents-lab-node-modules,target=/workspaces/agents-lab/node_modules,type=volume",
     "source=agents-lab-npm-cache,target=/home/vscode/.npm-cache,type=volume",
-    "source=agents-lab-pnpm-store,target=/home/vscode/.local/share/pnpm/store,type=volume"
+    "source=agents-lab-npm-global,target=/home/vscode/.npm-global,type=volume",
+    "source=agents-lab-pnpm-store,target=/home/vscode/.local/share/pnpm/store,type=volume",
+    "source=agents-lab-pi-home,target=/home/vscode/.pi,type=volume",
+    "source=agents-lab-claude-home,target=/home/vscode/.claude,type=volume",
+    "source=agents-lab-codex-home,target=/home/vscode/.codex,type=volume"
   ],
   "postCreateCommand": "bash .devcontainer/postCreate.sh",
   "postStartCommand": "bash .devcontainer/postStart.sh",
