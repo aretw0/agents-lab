@@ -73,6 +73,11 @@ const DISTRIBUTED_WRAPPERS = [
 		reason: "dev pressure diagnostics are distributed through environment-doctor; root script remains a local startup wrapper",
 	},
 	{
+		match: /^pi:artifact:audit/,
+		surface: "safe-boot",
+		reason: "runtime artifact hygiene is distributed through safe_boot_runtime_artifact_audit; root script remains a CI/lab wrapper",
+	},
+	{
 		match: /^ops:disk/,
 		surface: "machine-maintenance",
 		reason: "disk pressure and cleanup planning are distributed through machine-maintenance; root scripts keep explicit apply wrappers",
@@ -124,11 +129,6 @@ const PROMOTION_CANDIDATES = [
 		match: /^context:preload/,
 		target: "context-watchdog",
 		reason: "context preload/consume is operator-facing continuity behavior and should not require root scripts long-term",
-	},
-	{
-		match: /^pi:artifact:audit/,
-		target: "safe-boot",
-		reason: "runtime artifact hygiene is safety behavior useful to installed users",
 	},
 	{
 		match: /^repo:discourse:curation/,

@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { execFileSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -13,6 +14,34 @@ import {
   snapshotDir,
   settingsPath,
 } from "../../extensions/safe-boot";
+import safeBootExtension from "../../extensions/safe-boot";
+
+type RegisteredTool = {
+  name: string;
+  execute: (
+    toolCallId: string,
+    params: Record<string, unknown>,
+    signal: AbortSignal,
+    onUpdate: (update: unknown) => void,
+    ctx: { cwd: string },
+  ) => Promise<{ content?: Array<{ text?: string }>; details?: Record<string, unknown> }>;
+};
+
+function makeMockPi() {
+  return {
+    registerTool: vi.fn(),
+    registerCommand: vi.fn(),
+    appendEntry: vi.fn(),
+  } as unknown as Parameters<typeof safeBootExtension>[0];
+}
+
+function getTool(pi: ReturnType<typeof makeMockPi>, name: string): RegisteredTool {
+  const call = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+    ([tool]) => tool?.name === name,
+  );
+  if (!call) throw new Error(`tool not found: ${name}`);
+  return call[0] as RegisteredTool;
+}
 
 // ---------------------------------------------------------------------------
 // buildSnapshotFilename
@@ -187,6 +216,36 @@ describe("safe-boot — snapshot I/O", () => {
       const result = restoreSnapshot(dir, "nonexistent.json");
       expect(result.restored).toBe(false);
       expect(result.error).toBeDefined();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("safe-boot — runtime artifact audit surface", () => {
+  it("registers read-only artifact audit tool with summary-first output", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "safe-boot-artifact-audit-"));
+    try {
+      mkdirSync(join(dir, ".pi", "agent"), { recursive: true });
+      writeFileSync(join(dir, ".pi", "deferred-intents.json"), "[]", "utf8");
+      writeFileSync(join(dir, ".pi", "settings.json"), "{}", "utf8");
+      execFileSync("git", ["init"], { cwd: dir, stdio: "ignore" });
+      execFileSync("git", ["add", "."], { cwd: dir, stdio: "ignore" });
+
+      const pi = makeMockPi();
+      safeBootExtension(pi);
+      const tool = getTool(pi, "safe_boot_runtime_artifact_audit");
+      const result = await tool.execute(
+        "tc-safe-boot-artifacts",
+        {},
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd: dir },
+      );
+
+      expect((result.details as any)?.violations?.[0]?.path).toBe(".pi/deferred-intents.json");
+      expect(String(result.content?.[0]?.text ?? "")).toContain("runtime-artifact-audit:");
+      expect(String(result.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

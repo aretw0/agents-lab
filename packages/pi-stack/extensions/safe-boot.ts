@@ -14,6 +14,11 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import path from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
+import {
+  buildRuntimeArtifactAuditSummary,
+  runRuntimeArtifactAudit,
+} from "./runtime-artifact-audit.mjs";
 
 // ---------------------------------------------------------------------------
 // Snapshot types
@@ -262,12 +267,27 @@ export default function safeBootExtension(pi: ExtensionAPI) {
     },
   });
 
+  pi.registerTool({
+    name: "safe_boot_runtime_artifact_audit",
+    label: "Safe Boot Runtime Artifact Audit",
+    description: "Read-only audit for tracked Pi runtime artifacts such as .pi session state, .sandbox data, and .pi-lens files.",
+    parameters: Type.Object({}),
+    async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+      const report = runRuntimeArtifactAudit(ctx.cwd);
+      return buildOperatorVisibleToolResponse({
+        label: "safe_boot_runtime_artifact_audit",
+        summary: buildRuntimeArtifactAuditSummary(report),
+        details: report,
+      });
+    },
+  });
+
   // ---- command: /safe-boot -----------------------------------------------
 
   pi.registerCommand("safe-boot", {
     description: [
       "Safe-core boot profile + settings snapshot management.",
-      "Usage: /safe-boot [apply|snapshot|restore [<filename>]|list|recover]",
+      "Usage: /safe-boot [apply|snapshot|restore [<filename>]|list|artifacts|recover]",
     ].join(" "),
     handler: async (args, ctx) => {
       const tokens = (args ?? "").trim().split(/\s+/).filter(Boolean);
@@ -284,6 +304,7 @@ export default function safeBootExtension(pi: ExtensionAPI) {
             "  /quota-visibility       — provider budget status",
             "  /quota-alerts           — active budget/429 alerts",
             "  /handoff                — next recommended provider",
+            "  /safe-boot artifacts    — audit tracked runtime artifacts",
             "  /safe-boot list         — list saved snapshots",
             "  /safe-boot restore      — restore last pre-safe-boot snapshot",
             "  /safe-boot apply        — re-apply safe-core profile",
@@ -293,6 +314,22 @@ export default function safeBootExtension(pi: ExtensionAPI) {
           ].join("\n"),
           "info"
         );
+        return;
+      }
+
+      if (cmd === "artifacts") {
+        const report = runRuntimeArtifactAudit(ctx.cwd);
+        const lines = [
+          "safe-boot runtime artifact audit",
+          `tracked files: ${report.trackedCount}`,
+          `violations: ${report.violations.length}`,
+          report.violations.length === 0 ? "status: clean" : "status: violation",
+          ...report.violations.slice(0, 20).map((row) => `  - ${row.path} (${row.reason})`),
+          report.violations.length > 20 ? `  ... (+${report.violations.length - 20} more)` : undefined,
+          report.remediation.length > 0 ? "remediation preview:" : undefined,
+          ...report.remediation.slice(0, 8).map((cmd) => `  ${cmd}`),
+        ].filter((line): line is string => typeof line === "string");
+        ctx.ui.notify(lines.join("\n"), report.violations.length > 0 ? "warning" : "info");
         return;
       }
 

@@ -138,7 +138,7 @@ Antes de promover hardening interno como capability da pi-stack:
    - `decisions`, `requirements`, `tasks`, `verification`, `handoff`.
 2. Rodar higiene:
    - `npm run project:verification:check`
-   - `npm run pi:artifact:audit` (ou `:strict` no gate)
+   - `/safe-boot artifacts` (ou `pnpm run pi:artifact:audit:strict` no gate)
    - `project-validate`
    - `project-status`
 3. Atualizar derivados:
@@ -656,12 +656,12 @@ Use quando não há dado sensível e o objetivo é apenas parar de versionar.
 1. confirmar trabalho local antes de qualquer ação:
    - `git status --short`
 2. conferir violações da policy:
-   - `npm run pi:artifact:audit`
+   - `/safe-boot artifacts`
 3. remover do índice sem apagar cópia local:
    - `git rm --cached -- <path>`
 4. garantir ignore para recorrência (`.gitignore`/baseline)
 5. validar novamente:
-   - `npm run pi:artifact:audit:strict`
+   - `pnpm run pi:artifact:audit:strict`
 
 ### Cenário B — remediação pesada (histórico)
 

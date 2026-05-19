@@ -53,8 +53,8 @@ Para a baseline oficial, artefatos efêmeros de runtime devem ficar fora do git 
 
 Checklist rápido:
 
-1. `npm run pi:artifact:audit` para inspecionar drift;
-2. `npm run pi:artifact:audit:strict` no gate;
+1. `/safe-boot artifacts` para inspecionar drift dentro do Pi;
+2. `pnpm run pi:artifact:audit:strict` no gate;
 3. se houver arquivo indevido rastreado, usar `git rm --cached -- <path>` (sem apagar cópia local);
 4. só versionar extras de monitor/runtime por decisão explícita de opt-in do projeto.
 

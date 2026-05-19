@@ -129,6 +129,7 @@ Ativar: `/settings` → selecionar `agents-lab`
 | `/scheduler-governance` | Governança de scheduler lease/ownership (`status/policy/apply`) com confirmações fortes para ações destrutivas |
 | `/stack-status` | Diagnóstico de soberania da stack: owners por capability, risco de overlap e postura de governança em runtime |
 | `/stack-quality` | Audit read-only de qualidade da stack: complexidade, bloat versionado/local e drift de discurso canônico |
+| `/safe-boot` | Perfil safe-core, snapshot/restore de settings e audit de artefatos runtime (`/safe-boot artifacts`) |
 | `/claude-code` | Bridge experimental para Claude Code CLI (status/login/auth-status) |
 
 > Convenção: `/doctor` permanece o diagnóstico global de ambiente/runtime. Comandos verticais como `/monitor-provider`, `/colony-pilot` e `/scheduler-governance` fazem diagnóstico/controle de domínio.
