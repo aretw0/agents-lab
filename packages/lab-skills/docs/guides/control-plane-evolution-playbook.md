@@ -225,7 +225,7 @@ Rollback:
 - ação: descer para Modo 1 por 1 janela operacional (sem novas delegações) e corrigir causa raiz.
 
 Runbook curto — rehearsal real (1 task):
-1. **start**: usar `simple_delegate_rehearsal_start_packet`; só avançar quando `decision=ready-for-human-decision` e houver go explícito do operador;
+1. **start**: usar `simple_delegate_rehearsal_start_packet`; só avançar quando `decision=ready-for-operator-decision` e houver go explícito do operador;
 2. **monitor**: manter execução bounded e parar no primeiro `stop: protected|risk|reload-required|validation-failed-or-unknown`;
 3. **abort**: em blocker, encerrar rehearsal no mesmo slice, sem promover próxima task automaticamente;
 4. **rollback**: aplicar rollback não-destrutivo declarado, registrar evidência no board e checkpoint curto;
