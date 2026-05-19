@@ -1,58 +1,57 @@
 {
-  "timestamp": "2026-05-19T05:22:04.141Z",
-  "context": "External stabilization session for Pi runtime pressure. The velocity pressure primitive now detects session/runtime pressure, dirty scope, board size, stale handoff, useful commit age, process age, memory, disk, and host VHDX pressure. Current machine pressure blocks long Pi runs: C: has about 3GB free, with Docker/WSL VHDX artifacts accounting for about 214GB.",
-  "current_tasks": [
-    "TASK-BUD-1089"
-  ],
+  "timestamp": "2026-05-19T05:25:54.753Z",
+  "context": "External stabilization session for Pi runtime pressure. TASK-BUD-1089 is now completed as a report-only development velocity pressure primitive. The primitive detects session/runtime pressure, dirty scope, board size, handoff age, useful commit age, process age, memory/disk, host VHDX pressure, stale active agent-run registry entries, and ceremony/tool-call pressure. Current machine pressure still blocks long Pi runs: C: has about 3GB free, with Docker/WSL VHDX artifacts accounting for about 214GB.",
+  "current_tasks": [],
   "next_actions": [
     "Free host disk before returning to npm run pi:dev or any long Pi runtime.",
     "Re-run npm run ops:disk:cleanup:dry and npm run pi:dev:pressure after cleanup.",
-    "Continue TASK-BUD-1089 with the missing deterministic coverage for dangling-process and ceremony/tool-call pressure once disk pressure is no longer blocking.",
-    "Keep release readiness anchored on npm run release:readiness:v0.8.0 before choosing the next P0 lane."
+    "Run npm run release:readiness:v0.8.0 after disk pressure clears and choose the next P0 from the ready-to-start list.",
+    "Prefer small validated slices until machine-disk-pressure is no longer blocking."
   ],
   "blockers": [
     "machine-disk-pressure: pi:dev:pressure reports block-and-clean with about 3GB free",
-    "host volume pressure: Docker docker_data.vhdx about 132GB and Ubuntu ext4.vhdx about 81GB",
-    "TASK-BUD-1089 is not complete yet: dangling-process and ceremony/tool-call pressure tests remain"
+    "host volume pressure: Docker docker_data.vhdx about 132GB and Ubuntu ext4.vhdx about 81GB"
   ],
   "recent_validation": [
     "npm run test:pi:dev:pressure passed",
     "npm run test:pi:isolated passed",
     "npm run test:ops:disk-guard passed",
-    "npm run pi:dev:dry reports pressure block-and-clean (machine-pressure-strict)",
+    "npx vitest run packages/pi-stack/test/smoke/environment-doctor-dev-pressure.test.ts passed",
+    "npm run pi:dev:pressure reports machine-disk-pressure and danglingRuns=0",
     "npm run repo:complexity:changed:strict passed",
     "npm run repo:discourse:audit passed",
     "npm run docs:package:check passed"
   ],
   "recent_commits": [
+    "693c2169 feat(pressure): cover dangling run pressure",
+    "2249fded chore(project): checkpoint pressure lane",
     "12e05819 ci(ops): run pressure guards in smoke gate",
     "4a2f5e47 fix(pi): block dev under machine pressure",
     "2780be8a feat(ops): inventory host volume pressure",
-    "73f669da feat(pressure): add local velocity signals",
-    "4590b237 refactor(pressure): share velocity policy",
-    "a6f0b1a4 feat(pressure): add velocity pressure contract"
+    "73f669da feat(pressure): add local velocity signals"
   ],
   "slice_memory": {
     "focus": "stabilize-pi-dev-runtime-pressure",
     "canonical_links": [
       "task:TASK-BUD-1089",
+      "verification:VERIF-TASK-BUD-1089-DEV-VELOCITY-PRESSURE-20260519",
+      "commit:693c2169",
+      "commit:2249fded",
       "commit:12e05819",
-      "commit:4a2f5e47",
-      "commit:2780be8a",
-      "commit:73f669da"
+      "commit:4a2f5e47"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-19T05:22:04.141Z",
+    "generatedAtIso": "2026-05-19T05:25:54.753Z",
     "level": "checkpoint",
     "percent": 0,
     "action": "checkpoint-and-stop-long-runs",
-    "recommendation": "Do not start long Pi runtime while machine-disk-pressure is blocking; free disk, then resume with small validated slices."
+    "recommendation": "TASK-BUD-1089 is complete; do not start long Pi runtime while machine-disk-pressure is blocking."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-19T05:22:04.141Z",
-      "reason": "machine-disk-pressure-block",
+      "atIso": "2026-05-19T05:25:54.753Z",
+      "reason": "task-bud-1089-complete-machine-disk-pressure-block",
       "level": "checkpoint",
       "percent": 0,
       "thresholds": {
@@ -61,7 +60,7 @@
         "compactPct": 65
       },
       "action": "checkpoint-and-stop-long-runs",
-      "recommendation": "Free host disk before returning to Pi long runs."
+      "recommendation": "Free host disk before selecting the next P0 lane."
     }
   ]
 }
