@@ -1,3 +1,5 @@
+import type { GuardrailsAuthorizationNone } from "./guardrails-core-authorization";
+
 export type UnattendedContinuationContextLevel = "ok" | "warn" | "checkpoint" | "compact";
 export type UnattendedContinuationDecision = "continue-local" | "checkpoint" | "pause-for-compact" | "ask-decision" | "blocked";
 
@@ -146,7 +148,7 @@ export interface NudgeFreeLoopFactSourceAssessment {
   effect: "none";
   mode: "advisory";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   factSource: NudgeFreeLoopPacketFactSource;
   localObservedCount: number;
   missingLocalFacts: NudgeFreeLoopLocalFactKey[];
@@ -167,7 +169,7 @@ export interface NudgeFreeLoopLocalMeasuredAuditEnvelope {
   effect: "none";
   mode: "advisory";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   eligibleForAuditedRuntimeSurface: boolean;
   collectorAssessment: NudgeFreeLoopFactCollectorAssessment;
   packet: NudgeFreeLoopLocalMeasuredCanaryPacket;
@@ -222,7 +224,7 @@ export interface NudgeFreeLoopPreparedLocalMeasuredAuditEnvelope {
   effect: "none";
   mode: "advisory";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   collectorResults: NudgeFreeLoopLocalFactCollectorResult[];
   packetInput: NudgeFreeLoopLocalMeasuredCanaryInput;
   envelope: NudgeFreeLoopLocalMeasuredAuditEnvelope;
@@ -233,7 +235,7 @@ export interface NudgeFreeLoopMeasuredPacketTrust {
   effect: "none";
   mode: "advisory";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   factSource: NudgeFreeLoopPacketFactSource;
   eligibleForAuditedRuntimeSurface: boolean;
   reasons: string[];
@@ -268,7 +270,7 @@ export interface SelfReloadAutoresumeCanaryPlan {
   effect: "none";
   mode: "advisory";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   reloadAllowed: false;
   autoResumeDispatchAllowed: false;
