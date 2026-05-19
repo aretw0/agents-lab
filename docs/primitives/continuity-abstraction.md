@@ -27,7 +27,7 @@ Entidades obrigatórias:
 4. **evidence**
    - `id`, `target`, `status`, `method`, `timestamp`, `artifacts?`, `summary`
 5. **decisionGate**
-   - `noAutoClose`, `requiresVerification`, `requiresHumanApproval`
+   - `noAutoClose`, `requiresVerification`, `requiresOperatorApproval`
 6. **deliveryState**
    - `reported | artifact-produced | applied | recovery-required`
 
@@ -81,7 +81,7 @@ Regras mínimas do adapter:
 - mapear `task` para nota com frontmatter estável (`id`, `status`, `priority`, `dependsOn`);
 - mapear `event` para journal append-only na nota (ou arquivo de eventos);
 - mapear `evidence` para bloco estruturado com `id/status/method/timestamp`;
-- manter `decisionGate` explícito (`no-auto-close`, `requiresHumanApproval`).
+- manter `decisionGate` explícito (`no-auto-close`, `requiresOperatorApproval`).
 
 O adapter pode ser **inbox-first** (captura) ou **mirror-first** (projeção), sem substituir o contrato canônico.
 
@@ -92,7 +92,7 @@ A captura de ideias livres deve produzir proposal antes de task final:
 1. aceitar fontes Markdown/Obsidian e eventos de sessão;
 2. normalizar para `proposal` com origem auditável;
 3. gerar `taskDraft.status=planned` com descrição objetiva e AC mínimo;
-4. exigir `decisionGate.requiresHumanApproval=true` antes de promover prioridade/scope;
+4. exigir `decisionGate.requiresOperatorApproval=true` antes de promover prioridade/scope;
 5. nunca aplicar auto-close nem auto-priorização agressiva a partir do inbox.
 
 ---

@@ -22,7 +22,7 @@
 					"package": { "type": "string", "description": "Which monorepo package this issue touches (e.g. pi-workflows, pi-project, pi-behavior-monitors)" },
 					"source": {
 						"type": "string",
-						"enum": ["human", "agent", "monitor", "workflow"],
+						"enum": ["operator", "agent", "monitor", "workflow"],
 						"description": "How this issue was created"
 					},
 					"resolved_by": { "type": "string", "description": "Commit message or reference if resolved" }

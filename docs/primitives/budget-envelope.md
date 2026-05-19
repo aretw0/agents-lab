@@ -37,7 +37,7 @@ Para sincronizar `.project`, GitHub/Gitea e SQLite sem lock-in, o envelope refer
 - `description`
 - `status` (`planned | in-progress | blocked | completed | cancelled`)
 - `priority` (`P0 | P1 | P2`)
-- `requiresHumanClose` (bool)
+- `requiresOperatorClose` (bool)
 - `verificationRef` (opcional; obrigatório para fechamento estratégico)
 - `updatedAt`
 
@@ -53,12 +53,12 @@ Para sincronizar `.project`, GitHub/Gitea e SQLite sem lock-in, o envelope refer
 - `planned -> in-progress`
 - `in-progress -> blocked | completed`
 - `blocked -> in-progress | cancelled`
-- `completed -> in-progress` (somente quando `requiresHumanClose=true`, como reabertura/candidate)
+- `completed -> in-progress` (somente quando `requiresOperatorClose=true`, como reabertura/candidate)
 
 ### Regras de governança
 - `done_candidate` nunca fecha task estratégica sozinho.
 - `done_verified` exige verificação canônica vinculada.
-- adapter pode enriquecer payload, mas não pode relaxar invariantes de budget/evidência/HITL.
+- adapter pode enriquecer payload, mas não pode relaxar invariantes de budget, evidência e decisão do operador.
 
 ## Implementação no ecossistema atual
 

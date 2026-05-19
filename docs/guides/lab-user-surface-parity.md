@@ -46,7 +46,7 @@ depósito de runtime.
 Termos fortes como fábrica, engine, maturidade e soberania precisam refletir
 contrato operacional, gate ou roadmap explícito. Use `npm run
 repo:discourse:audit` como bússola advisory para encontrar linguagem legada
-(`human` em vez de operador) e promessa aspiracional em docs/surfaces canônicas.
+(termos antigos para operador) e promessa aspiracional em docs/surfaces canônicas.
 O audit não bloqueia a release por padrão: ele ajuda a escolher a próxima lane
 de poda sem apagar pesquisa histórica nem forçar renomeação ampla.
 
