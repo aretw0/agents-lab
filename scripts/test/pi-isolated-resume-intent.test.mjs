@@ -48,3 +48,22 @@ test("resolvePiDevPressureGate blocks resume strict failures unless explicitly f
     reason: "forced",
   });
 });
+
+test("resolvePiDevPressureGate blocks machine pressure for new sessions", () => {
+  const report = {
+    signals: [
+      { level: "block", code: "machine-disk-pressure" },
+    ],
+  };
+
+  assert.deepEqual(resolvePiDevPressureGate(report), {
+    allowed: false,
+    failures: ["machine-disk-pressure"],
+    reason: "machine-pressure-strict",
+  });
+  assert.deepEqual(resolvePiDevPressureGate(report, { force: true }), {
+    allowed: true,
+    failures: ["machine-disk-pressure"],
+    reason: "forced",
+  });
+});

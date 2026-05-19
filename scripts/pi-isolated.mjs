@@ -617,11 +617,16 @@ export function detectSessionResumeIntent(piArgs) {
 
 export function resolvePiDevPressureGate(report, { force = false, resume = false } = {}) {
 	const failures = computeStrictFailures(report);
+	const newSessionRecoverableFailures = new Set(["huge-resume-session"]);
+	const blockingFailures = failures.filter((code) => !newSessionRecoverableFailures.has(code));
 	if (failures.length === 0) {
 		return { allowed: true, failures, reason: "clean" };
 	}
 	if (force) {
 		return { allowed: true, failures, reason: "forced" };
+	}
+	if (blockingFailures.length > 0) {
+		return { allowed: false, failures, reason: "machine-pressure-strict" };
 	}
 	if (!resume) {
 		return { allowed: true, failures, reason: "new-session-advisory" };
