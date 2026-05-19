@@ -16,12 +16,12 @@ function makeWorkspace(): string {
 }
 
 describe("monitor provider authorization calibration", () => {
-	it("adds bounded history to unauthorized-action before L3 blocking", () => {
+	it("keeps unauthorized-action context lean by default", () => {
 		const cwd = makeWorkspace();
 		const monitorPath = join(cwd, ".pi", "monitors", "unauthorized-action.monitor.json");
 		writeFileSync(
 			monitorPath,
-			JSON.stringify({ name: "unauthorized-action", classify: { context: ["user_text", "tool_calls"] } }, null, 2),
+			JSON.stringify({ name: "unauthorized-action", classify: { context: ["user_text", "tool_calls", "conversation_history"] } }, null, 2),
 			"utf8",
 		);
 
@@ -29,7 +29,8 @@ describe("monitor provider authorization calibration", () => {
 		const written = JSON.parse(readFileSync(monitorPath, "utf8"));
 
 		expect(result.changed).toBe(true);
-		expect(written.classify.context).toContain("conversation_history");
+		expect(result.details).toContain("unauthorized-action=context-lean");
+		expect(written.classify.context).not.toContain("conversation_history");
 		expect(written.classify.context.slice(0, 4)).toEqual([
 			"user_text",
 			"tool_calls",

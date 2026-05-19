@@ -50,14 +50,13 @@ function normalizeUnauthorizedActionContext(input: unknown): string[] {
 		: [];
 	const normalized = new Set(raw);
 	for (const key of UNAUTHORIZED_ACTION_BASE_CONTEXT) normalized.add(key);
-	normalized.add("conversation_history");
 
 	const ordered: string[] = [];
 	for (const key of UNAUTHORIZED_ACTION_BASE_CONTEXT) {
 		if (normalized.has(key)) ordered.push(key);
 	}
-	if (normalized.has("conversation_history")) ordered.push("conversation_history");
 	for (const key of normalized) {
+		if (key === "conversation_history") continue;
 		if (!ordered.includes(key)) ordered.push(key);
 	}
 	return ordered;
@@ -91,7 +90,7 @@ export function ensureUnauthorizedActionMonitorPolicy(cwd: string): {
 
 	(classify as Record<string, unknown>)["context"] = nextContext;
 	writeFileSync(monitorPath, JSON.stringify(monitor, null, 2) + "\n", "utf8");
-	return { changed: true, details: ["unauthorized-action=context-history"] };
+	return { changed: true, details: ["unauthorized-action=context-lean"] };
 }
 
 const UNAUTHORIZED_ACTION_CONTEXT_PROMPT_BLOCK = `{% if conversation_history %}
