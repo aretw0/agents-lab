@@ -1,3 +1,7 @@
+/**
+ * @capability-id runtime-guardrails
+ * @capability-criticality high
+ */
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { parseBudgetOverrideReason } from "./budget-override-token";
 import { appendAuditEntry } from "./guardrails-core-confirmation-audit";

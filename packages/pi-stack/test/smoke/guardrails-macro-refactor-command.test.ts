@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore from "../../extensions/guardrails-core";
+import guardrailsCore from "../../extensions/guardrails-core-extended-surfaces";
 
 function makeMockPi() {
   return {

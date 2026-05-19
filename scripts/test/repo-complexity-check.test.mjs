@@ -29,7 +29,7 @@ test("scanFiles marks known structured state and lockfiles as allowed large file
   const cwd = mkdtempSync(path.join(tmpdir(), "repo-complexity-allowed-"));
   const projectDir = path.join(cwd, ".project");
   const tasks = path.join(projectDir, "tasks.json");
-  const lockfile = path.join(cwd, "package-lock.json");
+  const lockfile = path.join(cwd, "pnpm-lock.yaml");
   const source = path.join(cwd, "large.ts");
 
   try {
@@ -44,7 +44,7 @@ test("scanFiles marks known structured state and lockfiles as allowed large file
     assert.deepEqual(findings.map((finding) => path.relative(cwd, finding.file).replace(/\\/g, "/")), [
       ".project/tasks.json",
       "large.ts",
-      "package-lock.json",
+      "pnpm-lock.yaml",
     ]);
     assert.deepEqual(findings.map((finding) => finding.note), [
       "allowed:canonical-state",

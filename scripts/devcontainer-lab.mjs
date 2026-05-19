@@ -17,7 +17,7 @@ function printHelp() {
 		"",
 		"Exemplos:",
 		"  node scripts/devcontainer-lab.mjs agents-lab-dev -- pwd",
-		"  node scripts/devcontainer-lab.mjs agents-lab-dev -- npm run pi:isolated",
+		"  node scripts/devcontainer-lab.mjs agents-lab-dev -- pnpm run pi:isolated",
 		"",
 		"Comportamento:",
 		"  - entra pelo comando lab versionado no container",

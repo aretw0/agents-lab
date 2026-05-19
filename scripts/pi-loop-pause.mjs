@@ -10,9 +10,9 @@
  * - Um comando em-sessão (/loop pause) seria domínio de extensão — problema separado
  *
  * Uso:
- *   npm run pi:loop:pause    ← define stopCondition = "manual-pause"
- *   npm run pi:loop:resume   ← define stopCondition = "none"
- *   npm run pi:loop:status   ← mostra o estado atual sem modificar
+ *   pnpm run pi:loop:pause    ← define stopCondition = "manual-pause"
+ *   pnpm run pi:loop:resume   ← define stopCondition = "none"
+ *   pnpm run pi:loop:status   ← mostra o estado atual sem modificar
  */
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -116,7 +116,7 @@ function run() {
 	writeLoopState(next);
 	console.log(`pi:loop:pause   mode=${next.mode} stopCondition=${next.stopCondition}  ⏸ loop pausado`);
 	console.log("  pi pode ser iniciado — auto-dispatch de board desativado");
-	console.log(`  para retomar: npm run pi:loop:resume`);
+	console.log(`  para retomar: pnpm run pi:loop:resume`);
 	console.log(`  path: ${LOOP_STATE_PATH}`);
 }
 

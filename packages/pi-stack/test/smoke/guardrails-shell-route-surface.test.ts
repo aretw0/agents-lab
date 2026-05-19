@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore from "../../extensions/guardrails-core";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { registerGuardrailsShellRouteSurface } from "../../extensions/guardrails-core-shell-route-surface";
+import { resolveCommandRoutingProfile } from "../../extensions/guardrails-core-shell-routing";
+
+const appendAuditEntry = vi.fn();
 
 function makeMockPi() {
 	return {
@@ -7,7 +11,7 @@ function makeMockPi() {
 		registerCommand: vi.fn(),
 		registerTool: vi.fn(),
 		sendUserMessage: vi.fn(),
-	} as unknown as Parameters<typeof guardrailsCore>[0];
+	} as unknown as ExtensionAPI;
 }
 
 function getCommand(pi: ReturnType<typeof makeMockPi>, name: string) {
@@ -21,7 +25,7 @@ function getCommand(pi: ReturnType<typeof makeMockPi>, name: string) {
 describe("guardrails-core shell-route surface", () => {
 	it("registers shell-route command and provides status/help/wrap", async () => {
 		const pi = makeMockPi();
-		guardrailsCore(pi);
+		registerGuardrailsShellRouteSurface(pi, appendAuditEntry, resolveCommandRoutingProfile);
 		const command = getCommand(pi, "shell-route");
 		const notify = vi.fn();
 

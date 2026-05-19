@@ -35,6 +35,7 @@ JSON
 fi
 
 corepack enable || true
+corepack prepare --activate || true
 
 install_global_tool claude @anthropic-ai/claude-code || true
 install_global_tool codex @openai/codex || true
@@ -44,8 +45,8 @@ git config core.quotepath false
 git config i18n.commitEncoding UTF-8
 git config i18n.logOutputEncoding UTF-8
 
-if [[ -f package-lock.json ]]; then
-  npm ci --prefer-offline --no-audit --no-fund
+if [[ -f pnpm-lock.yaml ]]; then
+  pnpm install --frozen-lockfile --prefer-offline
 else
-  npm install --prefer-offline --no-audit --no-fund
+  pnpm install --prefer-offline
 fi

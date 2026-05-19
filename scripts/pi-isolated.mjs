@@ -9,9 +9,9 @@
  * - preserve reproducibility when debugging monitor/runtime behavior
  *
  * Usage:
- *   npm run pi:isolated
- *   npm run pi:isolated -- --help
- *   npm run pi:isolated:status
+ *   pnpm run pi:isolated
+ *   pnpm run pi:isolated -- --help
+ *   pnpm run pi:isolated:status
  *   node scripts/pi-isolated.mjs --reset
  */
 
@@ -159,22 +159,22 @@ function printHelp() {
 		"pi-isolated — launcher com PI_CODING_AGENT_DIR local do workspace",
 		"",
 		"Uso:",
-		"  npm run pi:isolated",
-		"  npm run pi:dev                  ← modo dev: pausa loop antes de iniciar",
-		"  npm run pi:dev:resume           ← retoma sessão do pi, mantendo loop pausado",
-		"  npm run pi:isolated:resume",
-		"  npm run pi:isolated:status",
-		"  npm run pi:isolated:adopt-latest",
+		"  pnpm run pi:isolated",
+		"  pnpm run pi:dev                  ← modo dev: pausa loop antes de iniciar",
+		"  pnpm run pi:dev:resume           ← retoma sessão do pi, mantendo loop pausado",
+		"  pnpm run pi:isolated:resume",
+		"  pnpm run pi:isolated:status",
+		"  pnpm run pi:isolated:adopt-latest",
 		"  node scripts/pi-isolated.mjs canonicalize-settings --dry-run",
-		"  npm run pi:isolated:reset",
-		"  npm run pi:isolated:help",
+		"  pnpm run pi:isolated:reset",
+		"  pnpm run pi:isolated:help",
 		"",
 		"Execução direta:",
 		"  node scripts/pi-isolated.mjs [status|help|adopt-latest|canonicalize-settings] [--reset] [--dev] [--dry-run] [--no-auth-import] [-- <args do pi>]",
 		"",
 		"--dev: pausa o loop autônomo (stopCondition=manual-pause) antes de iniciar pi.",
 		"--force-pressure: permite iniciar --dev mesmo quando pi:dev:pressure:strict bloquear.",
-		"       Use 'npm run pi:loop:resume' para retomar a fábrica depois.",
+		"       Use 'pnpm run pi:loop:resume' para retomar a fábrica depois.",
 	].join("\n"));
 }
 
@@ -553,7 +553,7 @@ function run() {
 	if (!localPiCli) {
 		console.error("pi-isolated: local cli ausente");
 		for (const candidate of LOCAL_PI_CLI_CANDIDATES) console.error(`  tried: ${candidate}`);
-		console.error("Dica: npm install (workspace root) para garantir resolução local determinística.");
+		console.error("Dica: pnpm install (workspace root) para garantir resolução local determinística.");
 		process.exit(1);
 	}
 
@@ -603,7 +603,7 @@ function run() {
 			console.error(`  [${signal.level}] ${signal.code}: ${signal.detail}`);
 		}
 		console.error("pi-isolated: ação recomendada: iniciar sessão nova/limpa em vez de retomar runtime pesado.");
-		console.error("pi-isolated: override explícito para diagnóstico: npm run pi:dev -- --force-pressure");
+		console.error("pi-isolated: override explícito para diagnóstico: pnpm run pi:dev -- --force-pressure");
 		process.exit(2);
 	}
 
@@ -628,13 +628,13 @@ function run() {
 			? "paused"
 			: "unknown";
 		const sessionState = sessionResumeRequested ? "resume" : "new";
-		const nextAction = factoryState === "paused" ? "npm run pi:loop:resume" : "npm run pi:loop:status";
+		const nextAction = factoryState === "paused" ? "pnpm run pi:loop:resume" : "pnpm run pi:loop:status";
 		console.log(`pi-isolated: startup-hint session=${sessionState} factory=${factoryState} next=${nextAction}`);
 		if (devPauseResult === "paused" || devPauseResult === "already-paused") {
-			console.log("pi-isolated: para retomar a fábrica depois: npm run pi:loop:resume");
+			console.log("pi-isolated: para retomar a fábrica depois: pnpm run pi:loop:resume");
 		}
 		if (sessionResumeRequested) {
-			console.log("pi-isolated: --resume retoma a sessão do pi; loop de fábrica continua pausado até npm run pi:loop:resume");
+			console.log("pi-isolated: --resume retoma a sessão do pi; loop de fábrica continua pausado até pnpm run pi:loop:resume");
 		}
 		if (runtimeProfile.status === "control-plane" || runtimeProfile.status === "dry-run") {
 			console.log("pi-isolated: runtime-profile=control-plane (capabilities cold; activate expensive work by explicit intent)");

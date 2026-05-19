@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import guardrailsCore from "../../extensions/guardrails-core";
+import guardrailsCore from "../../extensions/guardrails-core-extended-surfaces";
 
 function makeMockPi() {
   return {
@@ -45,7 +45,7 @@ describe("guardrails-core structured-io command", () => {
     rmSync(cwd, { recursive: true, force: true });
   });
 
-  it("applies json-write when --apply is requested", async () => {
+  it("blocks json-write apply without structured tool approval", async () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-structured-io-cmd-"));
     const target = join(cwd, "data.json");
     writeFileSync(target, JSON.stringify({ a: { b: 1 } }, null, 2), "utf8");
@@ -62,13 +62,13 @@ describe("guardrails-core structured-io command", () => {
     });
 
     const content = JSON.parse(readFileSync(target, "utf8"));
-    expect(content.a.b).toBe(2);
-    expect(String(notify.mock.calls.at(-1)?.[0] ?? "")).toContain("applied=yes");
+    expect(content.a.b).toBe(1);
+    expect(String(notify.mock.calls.at(-1)?.[0] ?? "")).toContain("requires structured operator approval");
 
     rmSync(cwd, { recursive: true, force: true });
   });
 
-  it("accepts bracket selector syntax in command mode", async () => {
+  it("keeps bracket selector writes dry without structured tool approval", async () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-structured-io-cmd-"));
     const target = join(cwd, "data.json");
     writeFileSync(target, JSON.stringify({ a: { b: [{ c: 1 }] } }, null, 2), "utf8");
@@ -85,13 +85,13 @@ describe("guardrails-core structured-io command", () => {
     });
 
     const content = JSON.parse(readFileSync(target, "utf8"));
-    expect(content.a.b[0].c).toBe(9);
-    expect(String(notify.mock.calls.at(-1)?.[0] ?? "")).toContain("applied=yes");
+    expect(content.a.b[0].c).toBe(1);
+    expect(String(notify.mock.calls.at(-1)?.[0] ?? "")).toContain("requires structured operator approval");
 
     rmSync(cwd, { recursive: true, force: true });
   });
 
-  it("accepts quoted-key selector syntax in command mode", async () => {
+  it("keeps quoted-key selector writes dry without structured tool approval", async () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-structured-io-cmd-"));
     const target = join(cwd, "data.json");
     writeFileSync(target, JSON.stringify({ a: { "b.c": 1 } }, null, 2), "utf8");
@@ -108,8 +108,8 @@ describe("guardrails-core structured-io command", () => {
     });
 
     const content = JSON.parse(readFileSync(target, "utf8"));
-    expect(content.a["b.c"]).toBe(11);
-    expect(String(notify.mock.calls.at(-1)?.[0] ?? "")).toContain("applied=yes");
+    expect(content.a["b.c"]).toBe(1);
+    expect(String(notify.mock.calls.at(-1)?.[0] ?? "")).toContain("requires structured operator approval");
 
     rmSync(cwd, { recursive: true, force: true });
   });

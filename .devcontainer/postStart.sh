@@ -7,11 +7,11 @@ cd "$REPO_ROOT"
 echo "[agents-lab-devcontainer] Post-start sanity check..."
 
 if [[ -f package.json ]]; then
-  npm run ops:disk:check --silent || true
+  pnpm run ops:disk:check --silent || true
 fi
 
 if [[ ! -d node_modules ]]; then
-  echo "[agents-lab-devcontainer][warn] node_modules missing. Run: npm ci"
+  echo "[agents-lab-devcontainer][warn] node_modules missing. Run: pnpm install"
 fi
 
 for tool in claude codex; do
@@ -21,7 +21,7 @@ for tool in claude codex; do
 done
 
 if [[ ! -x "$REPO_ROOT/node_modules/.bin/pi" ]]; then
-  echo "[agents-lab-devcontainer][warn] pi missing from node_modules. Run: npm ci"
+  echo "[agents-lab-devcontainer][warn] pi missing from node_modules. Run: pnpm install"
 fi
 
 if [[ ! -f /home/vscode/.codex/auth.json ]]; then

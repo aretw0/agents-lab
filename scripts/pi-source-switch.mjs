@@ -11,9 +11,9 @@
  *   node scripts/pi-source-switch.mjs status     # show current sources
  *
  * Shortcuts (from package.json):
- *   npm run pi:local
- *   npm run pi:published
- *   npm run pi:status
+ *   pnpm run pi:local
+ *   pnpm run pi:published
+ *   pnpm run pi:status
  */
 
 import { execFileSync } from "node:child_process";
@@ -79,9 +79,9 @@ function printHelp() {
 pi source switcher — toggle between local workspace and npm packages
 
 Usage:
-  npm run pi:local             Point pi to local workspace paths
-  npm run pi:published         Point pi to npm packages
-  npm run pi:status            Show current source configuration
+  pnpm run pi:local            Point pi to local workspace paths
+  pnpm run pi:published        Point pi to npm packages
+  pnpm run pi:status           Show current source configuration
 
 Options:
   -l, --pi-local    Write to project .pi/settings.json instead of user settings

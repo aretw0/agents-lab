@@ -25,7 +25,7 @@ const LARGE_TRACKED_STATE_FILES = new Set([
   ".project/issues.json",
   ".project/tasks.json",
   ".project/verification.json",
-  "package-lock.json",
+  "pnpm-lock.yaml",
 ]);
 
 function parseArgs(argv) {
@@ -115,7 +115,7 @@ function largeFileExceptionNote(filePath) {
   const normalized = filePath.replace(/\\/g, "/");
   const matched = [...LARGE_TRACKED_STATE_FILES].find((allowed) => normalized === allowed || normalized.endsWith(`/${allowed}`));
   if (!matched) return undefined;
-  if (matched === "package-lock.json") return "allowed:lockfile";
+  if (matched === "pnpm-lock.yaml") return "allowed:lockfile";
   return "allowed:canonical-state";
 }
 

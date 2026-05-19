@@ -36,6 +36,7 @@ jobs:
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
 
       - name: Detect release tag on commit
         id: tag
@@ -71,20 +72,24 @@ jobs:
 
       - name: Instalar dependências
         if: steps.tag.outputs.should_publish == 'true'
-        run: npm install --no-fund --no-audit
+        run: |
+          corepack enable
+          corepack prepare --activate
+          pnpm install --frozen-lockfile
 
       - name: Revalidar gates antes de publicar
         if: steps.tag.outputs.should_publish == 'true'
         run: |
-          npm run test:smoke
-          npm test
-          npm run verify
-          npm run audit:sovereignty
-          npm run audit:sovereignty:diff
+          pnpm run test:smoke
+          pnpm test
+          pnpm run verify
+          pnpm run audit:sovereignty
+          pnpm run audit:sovereignty:diff
 
       - name: Publicar pacotes
         if: steps.tag.outputs.should_publish == 'true'
         run: |
+          # npm publish keeps npm provenance semantics explicit; installs and gates use pnpm.
           npm publish --workspace packages/pi-stack --provenance --access public
           npm publish --workspace packages/git-skills --provenance --access public
           npm publish --workspace packages/web-skills --provenance --access public

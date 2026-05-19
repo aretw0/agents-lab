@@ -427,10 +427,6 @@ export function registerGuardrailsStructuredIoSurface(
 				}
 
 				const applyRequested = tokens.includes("--apply");
-				if (applyRequested) {
-					ctx.ui.notify("structured-io: --apply requires structured operator approval through the structured_io tool.", "warning");
-					return;
-				}
 				const maxLinesFlagIndex = tokens.findIndex((t) => t === "--max-lines");
 				let maxTouchedLines = 120;
 				if (maxLinesFlagIndex >= 0) {
@@ -441,6 +437,10 @@ export function registerGuardrailsStructuredIoSurface(
 						return;
 					}
 					maxTouchedLines = Math.floor(parsedMaxLines);
+				}
+				if (applyRequested) {
+					ctx.ui.notify("structured-io: --apply requires structured operator approval through the structured_io tool.", "warning");
+					return;
 				}
 
 				const writeMatch = rawArgs.match(/^json-write\s+\S+\s+\S+\s+(set|remove)\s*(.*)$/i);

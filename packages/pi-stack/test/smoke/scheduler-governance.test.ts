@@ -120,6 +120,8 @@ describe("scheduler-governance", () => {
 
   it("status snapshot mostra owner e foreign ativo quando lease fresco é de outro pid", () => {
     const cwd = makeTempWorkspace();
+    const previousPiAgentDir = process.env.PI_CODING_AGENT_DIR;
+    process.env.PI_CODING_AGENT_DIR = join(cwd, ".pi", "agent");
     try {
       const leasePath = getSchedulerLeasePath(cwd);
       const storagePath = getSchedulerStoragePath(cwd);
@@ -161,6 +163,8 @@ describe("scheduler-governance", () => {
       expect(snapshot.activeForeignOwner).toBe(true);
       expect(snapshot.foreignTaskCount).toBe(1);
     } finally {
+      if (previousPiAgentDir === undefined) delete process.env.PI_CODING_AGENT_DIR;
+      else process.env.PI_CODING_AGENT_DIR = previousPiAgentDir;
       rmSync(cwd, { recursive: true, force: true });
     }
   });

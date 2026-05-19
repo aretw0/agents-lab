@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore from "../../extensions/guardrails-core";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { registerGuardrailsSafeMutationSurface } from "../../extensions/guardrails-core-safe-mutation-surface";
+
+const appendAuditEntry = vi.fn();
 
 function makeMockPi() {
   return {
@@ -7,7 +10,7 @@ function makeMockPi() {
     registerCommand: vi.fn(),
     registerTool: vi.fn(),
     sendUserMessage: vi.fn(),
-  } as unknown as Parameters<typeof guardrailsCore>[0];
+  } as unknown as ExtensionAPI;
 }
 
 function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
@@ -29,7 +32,7 @@ function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
 describe("guardrails-core safe mutation tools", () => {
   it("registers safe mutation tool surfaces", () => {
     const pi = makeMockPi();
-    guardrailsCore(pi);
+    registerGuardrailsSafeMutationSurface(pi, appendAuditEntry);
 
     const calls = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls;
     const names = calls.map(([tool]) => tool?.name);
@@ -46,7 +49,7 @@ describe("guardrails-core safe mutation tools", () => {
 
   it("returns deterministic large-file and query plans", async () => {
     const pi = makeMockPi();
-    guardrailsCore(pi);
+    registerGuardrailsSafeMutationSurface(pi, appendAuditEntry);
 
     const largeFileTool = getTool(pi, "safe_mutate_large_file");
     const largeFile = await largeFileTool.execute(

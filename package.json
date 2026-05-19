@@ -6,23 +6,23 @@
     "packages/*"
   ],
   "scripts": {
-    "list": "npm ls --workspaces --depth=0",
+    "list": "pnpm list -r --depth=0",
     "test": "node --test packages/*/test/*.test.mjs",
-    "test:smoke": "npx vitest run",
-    "ci:smoke:gate": "npm run test:smoke && npm run test:verify-pi-stack && npm run test:audit:sovereignty && npm run test:pi-stack:user-surface && npm run test:pi:dev:pressure && npm run test:pi:isolated && npm run test:ops:disk-guard && npm run audit:sovereignty && npm run audit:sovereignty:diff && npm run repo:complexity:strict && npm run repo:bloat:audit:strict",
-    "ci:local:parity": "npm run ci:smoke:gate",
+    "test:smoke": "pnpm exec vitest run",
+    "ci:smoke:gate": "pnpm run test:smoke && pnpm run test:verify-pi-stack && pnpm run test:audit:sovereignty && pnpm run test:pi-stack:user-surface && pnpm run test:pi:dev:pressure && pnpm run test:pi:isolated && pnpm run test:ops:disk-guard && pnpm run audit:sovereignty && pnpm run audit:sovereignty:diff && pnpm run repo:complexity:strict && pnpm run repo:bloat:audit:strict",
+    "ci:local:parity": "pnpm run ci:smoke:gate",
     "test:monitor:regression": "node --test packages/pi-stack/test/monitor-context-budget.test.mjs packages/pi-stack/test/monitor-gates-regression.test.mjs packages/pi-stack/test/monitor-chaos-policy.test.mjs packages/pi-stack/test/monitor-interference-matrix.test.mjs packages/pi-stack/test/monitor-profile-policy.test.mjs packages/pi-stack/test/monitor-provider-patch.test.mjs packages/pi-stack/test/monitor-replay-regression.test.mjs packages/pi-stack/test/tool-execute-signature.test.mjs",
-    "gate:monitor:regression": "npm run test:monitor:regression --silent",
-    "test:monitor:smoke": "npx vitest run packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/curation-coverage.test.ts packages/pi-stack/test/smoke/guardrails-skill-access-policy.test.ts packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/guardrails-tool-cadence.test.ts packages/pi-stack/test/smoke/guardrails-git-maintenance.test.ts packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts packages/pi-stack/test/smoke/guardrails-marker-check.test.ts packages/pi-stack/test/smoke/guardrails-marker-check-surface.test.ts packages/pi-stack/test/smoke/guardrails-recurring-failure.test.ts packages/pi-stack/test/smoke/guardrails-recurring-failure-surface.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts packages/pi-stack/test/smoke/guardrails-unattended-rehearsal.test.ts packages/pi-stack/test/smoke/guardrails-unattended-rehearsal-surface.test.ts packages/pi-stack/test/smoke/guardrails-validation-method.test.ts packages/pi-stack/test/smoke/guardrails-validation-method-surface.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/guardrails-i18n-intents.test.ts packages/pi-stack/test/smoke/guardrails-i18n-lint.test.ts packages/pi-stack/test/smoke/guardrails-structured-first.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts packages/pi-stack/test/smoke/machine-maintenance.test.ts packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts packages/pi-stack/test/smoke/monitor-classify-failure-readiness.test.ts packages/pi-stack/test/smoke/monitor-sovereign-startup-output.test.ts packages/pi-stack/test/smoke/monitor-summary.test.ts packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/subagent-readiness.test.ts",
-    "gate:monitor:local": "npm run gate:monitor:regression && npm run test:monitor:smoke",
+    "gate:monitor:regression": "pnpm run test:monitor:regression --silent",
+    "test:monitor:smoke": "pnpm exec vitest run packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/curation-coverage.test.ts packages/pi-stack/test/smoke/guardrails-skill-access-policy.test.ts packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/guardrails-tool-cadence.test.ts packages/pi-stack/test/smoke/guardrails-git-maintenance.test.ts packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts packages/pi-stack/test/smoke/guardrails-marker-check.test.ts packages/pi-stack/test/smoke/guardrails-marker-check-surface.test.ts packages/pi-stack/test/smoke/guardrails-recurring-failure.test.ts packages/pi-stack/test/smoke/guardrails-recurring-failure-surface.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts packages/pi-stack/test/smoke/guardrails-unattended-rehearsal.test.ts packages/pi-stack/test/smoke/guardrails-unattended-rehearsal-surface.test.ts packages/pi-stack/test/smoke/guardrails-validation-method.test.ts packages/pi-stack/test/smoke/guardrails-validation-method-surface.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/guardrails-i18n-intents.test.ts packages/pi-stack/test/smoke/guardrails-i18n-lint.test.ts packages/pi-stack/test/smoke/guardrails-structured-first.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts packages/pi-stack/test/smoke/machine-maintenance.test.ts packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts packages/pi-stack/test/smoke/monitor-classify-failure-readiness.test.ts packages/pi-stack/test/smoke/monitor-sovereign-startup-output.test.ts packages/pi-stack/test/smoke/monitor-summary.test.ts packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/subagent-readiness.test.ts",
+    "gate:monitor:local": "pnpm run gate:monitor:regression && pnpm run test:monitor:smoke",
     "verify": "node scripts/verify-pi-stack.mjs",
     "test:verify-pi-stack": "node --test scripts/test/verify-pi-stack.test.mjs",
     "docs:package:sync": "node scripts/sync-package-docs.mjs",
     "docs:package:check": "node scripts/sync-package-docs.mjs --check",
     "audit:sovereignty": "node scripts/stack-sovereignty-audit.mjs --strict",
     "audit:sovereignty:diff": "node scripts/sovereignty-diff-gate.mjs --strict",
-    "release": "changeset version",
-    "publish:all": "npm run build --workspaces --if-present && changeset publish",
+    "release": "pnpm exec changeset version",
+    "publish:all": "pnpm -r --if-present run build && pnpm exec changeset publish",
     "offload:evidence:template": "node scripts/offload-evidence-template.mjs",
     "release:readiness:v0.8.0": "node scripts/release-readiness-report.mjs --target 0.8.0",
     "pi:local": "node scripts/pi-source-switch.mjs local",
@@ -43,7 +43,7 @@
     "pi:loop:resume": "node scripts/pi-loop-pause.mjs --resume",
     "pi:loop:status": "node scripts/pi-loop-pause.mjs --status",
     "devcontainer:lab": "node scripts/devcontainer-lab.mjs",
-    "devcontainer:lab:pi": "node scripts/devcontainer-lab.mjs agents-lab-dev -- npm run pi:isolated",
+    "devcontainer:lab:pi": "node scripts/devcontainer-lab.mjs agents-lab-dev -- pnpm run pi:isolated",
     "pi:parity": "node scripts/pi-parity.mjs --scope user --profile stack-full",
     "pi:parity:project": "node scripts/pi-parity.mjs --scope project --profile first-party",
     "pi:parity:curated": "node scripts/pi-parity.mjs --scope both --profile strict-curated",
@@ -154,5 +154,14 @@
   },
   "engines": {
     "node": ">=22"
-  }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@google/genai",
+      "koffi",
+      "pi-lens",
+      "protobufjs"
+    ]
+  },
+  "packageManager": "pnpm@11.1.2+sha512.415a1cc25974731e75455c1468371be74c5aa5fb7621b50d4056d222451609f11412f23fd602e6169f1e060466641f798597e1be961a10688836a67b16569499"
 }

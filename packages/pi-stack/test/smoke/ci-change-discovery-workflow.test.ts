@@ -24,7 +24,7 @@ describe("ci workflow change-discovery report-only loop", () => {
 
     expect(ciWorkflow).toContain("name: Smoke Tests");
     expect(ciWorkflow).toContain("needs: [changes]");
-    expect(ciWorkflow).toContain("run: npm run ci:smoke:gate");
+    expect(ciWorkflow).toContain("run: pnpm run ci:smoke:gate");
   });
 
   it("keeps actions runtime baseline on Node24 with pinned action SHAs", () => {

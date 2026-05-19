@@ -187,9 +187,9 @@ for (const check of contractChecks) {
 
 if (failed > 0) {
   console.error(`\n${failed} verificação(ões) falharam.`);
-  console.error("Tente: npm run verify (auto-repair tenta corrigir o contrato quando possível)");
-  console.error("Ou:    npm install --no-fund --no-audit (workspace root)");
-  console.error("Ou:    npm install --prefix packages/pi-stack --no-workspaces");
+  console.error("Tente: pnpm run verify (auto-repair tenta corrigir o contrato quando possível)");
+  console.error("Ou:    pnpm install (workspace root)");
+  console.error("Ou:    pnpm --filter @aretw0/pi-stack install");
   process.exit(1);
 } else {
   console.log(`\n✅ pi-stack ok — ${checks.length + contractChecks.length} verificações passaram.`);

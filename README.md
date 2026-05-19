@@ -122,48 +122,38 @@ Para desenvolver pacotes do monorepo usando o pi:
 ```bash
 git clone https://github.com/aretw0/agents-lab.git
 cd agents-lab
-npm install
+pnpm install
 
 # Apontar pi para os pacotes locais do workspace
-npm run pi:local
+pnpm run pi:local
 
 # Verificar configuração atual
-npm run pi:status
+pnpm run pi:status
 
 # Checar paridade user-like vs laboratório (consumo/quota/superfícies)
-npm run pi:parity
-npm run pi:parity:project
+pnpm run pi:parity
+pnpm run pi:parity:project
 
 # Voltar para pacotes publicados no npm
-npm run pi:published
+pnpm run pi:published
 
 # Isolamento forte (recomendado para curadoria):
 # roda o pi com PI_CODING_AGENT_DIR local do workspace (.sandbox/pi-agent)
-npm run pi:isolated
+pnpm run pi:isolated
 # para retomar sessão isolada existente
-npm run pi:isolated:resume
-npm run pi:isolated:status
-npm run pi:isolated:help
+pnpm run pi:isolated:resume
+pnpm run pi:isolated:status
+pnpm run pi:isolated:help
 # copiar a sessão global mais recente para o sandbox local (quando necessário)
-npm run pi:isolated:adopt-latest
+pnpm run pi:isolated:adopt-latest
 # preview sem alterar arquivos (sem depender de flags do npm)
-npm run pi:isolated:adopt-latest:dry
+pnpm run pi:isolated:adopt-latest:dry
 # reset do sandbox local quando quiser começar "do zero"
-npm run pi:isolated:reset
-
-# Overlay opcional para pilot de colony (/monitors, /remote, /colony)
-# (escopo user por padrão, sem sujar .pi/settings.json do repositório)
-npm run pi:pilot:on
-npm run pi:pilot:status
-npm run pi:pilot:off
-
-# Se quiser alterar o settings do projeto explicitamente
-npm run pi:pilot:on:project
-npm run pi:pilot:off:project
+pnpm run pi:isolated:reset
 ```
 
 O `.pi/settings.json` do projeto já aponta para os pacotes locais automaticamente.
-Para cenários de pilot, use o overlay opcional acima (explícito e reversível).
+O perfil diário do laboratório mantém capacidades caras frias até intenção explícita do operador.
 
 ### Testando Extensões
 
@@ -171,10 +161,10 @@ Este monorepo usa `@marcfargas/pi-test-harness` para testes automatizados:
 
 ```bash
 # Rodar todos os testes
-npm run test:smoke
+pnpm run test:smoke
 
 # Testes unitários de extensões
-npm test
+pnpm test
 ```
 
 A skill `test-pi-extension` (em `@aretw0/pi-skills`) documenta como criar testes para suas próprias extensões.
@@ -182,7 +172,7 @@ A skill `test-pi-extension` (em `@aretw0/pi-skills`) documenta como criar testes
 ### Benchmark canônico — economia de contexto
 
 ```bash
-npm run benchmark:context
+pnpm run benchmark:context
 ```
 
 O benchmark roda A/B reproduzível (`pi puro` vs `pi-stack default`) com prompt curto e gera artefato auditável em:

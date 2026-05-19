@@ -9,7 +9,7 @@ function parseArgs(argv) {
     decision: "defer",
     owner: "operator",
     expectedValue: "throughput/latency gain to justify remote offload",
-    focalGate: "npm run ci:smoke:gate",
+    focalGate: "pnpm run ci:smoke:gate",
     rollbackPlan: "git revert <commit> && pausar rota remota",
     runId: "",
     workflow: "",

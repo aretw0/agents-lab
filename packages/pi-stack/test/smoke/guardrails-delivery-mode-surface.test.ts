@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore from "../../extensions/guardrails-core";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { registerGuardrailsDeliverySurface } from "../../extensions/guardrails-core-delivery-surface";
+
+const appendAuditEntry = vi.fn();
 
 function makeMockPi() {
 	return {
@@ -7,7 +10,7 @@ function makeMockPi() {
 		registerCommand: vi.fn(),
 		registerTool: vi.fn(),
 		sendUserMessage: vi.fn(),
-	} as unknown as Parameters<typeof guardrailsCore>[0];
+	} as unknown as ExtensionAPI;
 }
 
 function getCommand(pi: ReturnType<typeof makeMockPi>, name: string) {
@@ -37,7 +40,7 @@ function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
 describe("guardrails-core delivery mode command/tool", () => {
 	it("registers delivery mode surfaces", () => {
 		const pi = makeMockPi();
-		guardrailsCore(pi);
+		registerGuardrailsDeliverySurface(pi, appendAuditEntry);
 
 		const commandNames = (pi.registerCommand as ReturnType<typeof vi.fn>).mock.calls.map(([name]) => name);
 		expect(commandNames).toContain("delivery-mode");
@@ -48,7 +51,7 @@ describe("guardrails-core delivery mode command/tool", () => {
 
 	it("reports status via delivery-mode command", async () => {
 		const pi = makeMockPi();
-		guardrailsCore(pi);
+		registerGuardrailsDeliverySurface(pi, appendAuditEntry);
 		const command = getCommand(pi, "delivery-mode");
 		const notify = vi.fn();
 
@@ -65,7 +68,7 @@ describe("guardrails-core delivery mode command/tool", () => {
 
 	it("returns deterministic tool payload", async () => {
 		const pi = makeMockPi();
-		guardrailsCore(pi);
+		registerGuardrailsDeliverySurface(pi, appendAuditEntry);
 		const tool = getTool(pi, "delivery_mode_plan");
 
 		const result = await tool.execute(
@@ -86,7 +89,7 @@ describe("guardrails-core delivery mode command/tool", () => {
 
 	it("accepts aliases and returns concise invalid tool feedback", async () => {
 		const pi = makeMockPi();
-		guardrailsCore(pi);
+		registerGuardrailsDeliverySurface(pi, appendAuditEntry);
 		const tool = getTool(pi, "delivery_mode_plan");
 
 		const aliasResult = await tool.execute(

@@ -82,7 +82,7 @@ function printHelp() {
 pi parity checker
 
 Usage:
-  npm run pi:parity
+  pnpm run pi:parity
   node scripts/pi-parity.mjs --scope user --profile stack-full --strict
   node scripts/pi-parity.mjs --scope project --profile first-party
   node scripts/pi-parity.mjs --scope project --profile strict-curated

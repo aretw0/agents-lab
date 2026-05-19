@@ -1,5 +1,7 @@
 /**
  * monitor-sovereign — first-party monitor primitive (audit/shadow mode).
+ * @capability-id monitor-provider-governance
+ * @capability-criticality high
  *
  * Goal:
  * - establish stable, auditable monitor behavior under agents-lab control

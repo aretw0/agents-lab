@@ -167,6 +167,8 @@ import {
 	summarizeProgressPreservationSignal,
 } from "./context-watchdog-progress-signals";
 
+export * from "./context-watchdog-exports";
+
 const readContextWatchdogSourceMtimeMs = makeContextWatchdogSourceMtimeReader(import.meta.url);
 
 const DEFAULT_CONFIG: ContextWatchdogConfig = DEFAULT_CONTEXT_WATCHDOG_CONFIG;
