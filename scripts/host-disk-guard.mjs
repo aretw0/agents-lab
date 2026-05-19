@@ -462,6 +462,29 @@ function summarizeCandidatesByClass(rows) {
   return Object.values(out).sort((a, b) => b.totalMb - a.totalMb);
 }
 
+function buildDiskPressureDiagnosis({ disk, projectedSeverity, hostVolumeBytes, deletableBytes }) {
+  const hostVolumeDominates = hostVolumeBytes > 0 && hostVolumeBytes > Math.max(deletableBytes * 10, 10 * MB);
+  if (disk?.severity === "block-long-run" && projectedSeverity === "block-long-run" && hostVolumeDominates) {
+    return {
+      pressureSource: "host-volume",
+      hostVolumeDominates: true,
+      recommendation: "pause long-runs; resolve Docker/WSL host volumes outside repo cleanup, then rerun ops:disk:check",
+    };
+  }
+  if (disk?.severity === "block-long-run") {
+    return {
+      pressureSource: "workspace-cleanup-or-host",
+      hostVolumeDominates,
+      recommendation: "run dry cleanup and inspect protected candidates before long-runs",
+    };
+  }
+  return {
+    pressureSource: "none",
+    hostVolumeDominates,
+    recommendation: "continue bounded work",
+  };
+}
+
 export function planDiskGuard(cwd, opts) {
   const all = {
     bg: gatherBgArtifacts(),
@@ -492,8 +515,16 @@ export function planDiskGuard(cwd, opts) {
   }));
 
   const disk = readWorkspaceDiskPressure(cwd, opts);
-  const projectedFreeMb = toMb(((Number(disk.freeMb) || 0) * MB) + selection.deletable.reduce((sum, x) => sum + x.bytes, 0));
+  const deletableBytes = selection.deletable.reduce((sum, x) => sum + x.bytes, 0);
+  const hostVolumeBytes = all.hostVolumeArtifacts.reduce((sum, x) => sum + x.bytes, 0);
+  const projectedFreeMb = toMb(((Number(disk.freeMb) || 0) * MB) + deletableBytes);
   const projectedSeverity = resolveDiskSeverity(projectedFreeMb, disk.warnFreeMb, disk.blockFreeMb);
+  const diagnosis = buildDiskPressureDiagnosis({
+    disk,
+    projectedSeverity,
+    hostVolumeBytes,
+    deletableBytes,
+  });
 
   return {
     generatedAtIso: new Date().toISOString(),
@@ -505,6 +536,7 @@ export function planDiskGuard(cwd, opts) {
       severityAfterApply: projectedSeverity,
       recommendationAfterApply: resolveDiskRecommendation(projectedSeverity),
     },
+    diagnosis,
     inventory: {
       bgArtifactCount: all.bg.length,
       bgArtifactTotalMb: toMb(all.bg.reduce((sum, x) => sum + x.bytes, 0)),
@@ -574,6 +606,7 @@ function printHuman(report, applyResult, strictFailures = []) {
   console.log(`generated: ${report.generatedAtIso}`);
   console.log(`disk: severity=${report.disk.severity} free=${report.disk.freeMb}MB used=${report.disk.usedPct}% recommendation=${report.disk.recommendation}`);
   console.log(`projectedAfterApply: severity=${report.projected.severityAfterApply} free=${report.projected.freeMbAfterApply}MB recommendation=${report.projected.recommendationAfterApply}`);
+  console.log(`diagnosis: pressureSource=${report.diagnosis.pressureSource} hostVolumeDominates=${report.diagnosis.hostVolumeDominates ? "yes" : "no"} recommendation=${report.diagnosis.recommendation}`);
   console.log(`volatile: bgArtifacts=${report.inventory.bgArtifactTotalMb}MB generatedCaches=${report.inventory.generatedCacheTotalMb}MB reports=${report.inventory.reportTotalMb}MB sessions=${report.inventory.sessionTotalMb}MB globalSessions=${report.inventory.globalSessionTotalMb}MB hostVolumes=${report.inventory.hostVolumeArtifactTotalMb}MB`);
   console.log(`candidates: ${report.candidateSummary.deletableCount} files / ${report.candidateSummary.deletableMb} MB`);
   for (const row of report.candidateSummary.byClass.deletable) {

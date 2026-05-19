@@ -204,6 +204,8 @@ test("planDiskGuard reports bounded workspace disk pressure", () => {
     assert.equal(typeof report.inventory.hostVolumeArtifactTotalMb, "number");
     assert.ok(Array.isArray(report.inventory.topGlobalSessions));
     assert.ok(Array.isArray(report.inventory.topHostVolumeArtifacts));
+    assert.ok(["none", "workspace-cleanup-or-host", "host-volume"].includes(report.diagnosis.pressureSource));
+    assert.equal(typeof report.diagnosis.hostVolumeDominates, "boolean");
     assert.equal(report.disk.warnFreeMb, 1024);
     assert.equal(report.disk.blockFreeMb, 512);
     assert.ok(report.disk.recommendation.length > 0);
@@ -239,6 +241,29 @@ test("planDiskGuard inventories host VHDX artifacts as read-only pressure eviden
       "wsl-ubuntu-vhdx",
     ]);
     assert.equal(report.deletable.some((row) => row.class === "host-volume-artifact"), false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+    rmSync(fakeHome, { recursive: true, force: true });
+  }
+});
+
+test("planDiskGuard diagnoses host volume dominated pressure when cleanup cannot unblock", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "disk-guard-test-"));
+  const fakeHome = mkdtempSync(join(tmpdir(), "disk-guard-home-"));
+  try {
+    const dockerDisk = join(fakeHome, "AppData", "Local", "Docker", "wsl", "disk");
+    mkdirSync(dockerDisk, { recursive: true });
+    writeFileSync(join(dockerDisk, "docker_data.vhdx"), "x".repeat(11 * 1024 * 1024), "utf8");
+
+    const report = planDiskGuard(cwd, defaultOpts({
+      hostArtifactHome: fakeHome,
+      warnFreeMb: 999_999_999,
+      blockFreeMb: 999_999_999,
+    }));
+
+    assert.equal(report.diagnosis.pressureSource, "host-volume");
+    assert.equal(report.diagnosis.hostVolumeDominates, true);
+    assert.match(report.diagnosis.recommendation, /Docker\/WSL/);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
     rmSync(fakeHome, { recursive: true, force: true });
