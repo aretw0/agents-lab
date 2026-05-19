@@ -24299,7 +24299,7 @@
     {
       "id": "TASK-BUD-1089",
       "description": "Implement a P0 development velocity pressure primitive that detects when session/runtime/control-plane overhead is slowing development enough to require checkpoint, reduced governance surface, compact, new session, or cleanup.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p0",
       "files": [
         "docs/primitives/development-velocity-pressure.md",
@@ -24320,7 +24320,7 @@
         "Keep the implementation local-first and avoid reading the full board unless explicitly requested."
       ],
       "milestone": "ops-performance-governance",
-      "notes": "P0 from operator feedback on 2026-05-17: development became slower than a simpler devcontainer + Claude Code loop despite many guardrails. Treat velocity blindness as safety-critical, comparable to security: if the control plane slows work enough, it erodes trust and decision quality.\n2026-05-17 external Codex slice: added launcher-side pi-dev-pressure report, session budget cleanup dry-run/apply, resume pressure gate, pi:dev dry-run, and stale lease visibility. Committed as 9e529b55. Still in progress because full first-party runtime primitive/surface integration and broader signal coverage remain future slices.\n[provenance:human] source_task=none reason=unspecified"
+      "notes": "P0 from operator feedback on 2026-05-17: development became slower than a simpler devcontainer + Claude Code loop despite many guardrails. Treat velocity blindness as safety-critical, comparable to security: if the control plane slows work enough, it erodes trust and decision quality.\n2026-05-17 external Codex slice: added launcher-side pi-dev-pressure report, session budget cleanup dry-run/apply, resume pressure gate, pi:dev dry-run, and stale lease visibility. Committed as 9e529b55. Still in progress because full first-party runtime primitive/surface integration and broader signal coverage remain future slices.\n2026-05-19 external Codex slice: added shared development velocity pressure contract, local machine/board/handoff/commit/process-age signals, runtime pressure payload alignment, host VHDX pressure inventory, CI smoke coverage, and launcher block for strict machine pressure. Current machine-disk-pressure is intentionally blocking Pi long runs until disk is freed. Remaining acceptance gaps: deterministic dangling-process pressure and ceremony/tool-call pressure coverage.\n[provenance:human] source_task=none reason=unspecified"
     },
     {
       "id": "TASK-BUD-1090",

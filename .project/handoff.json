@@ -1,51 +1,58 @@
 {
-  "timestamp": "2026-05-17T18:05:00.000Z",
-  "context": "External stabilization session after Pi runtime pressure made day-to-day work heavy. Session-budget blocker was removed, resume pressure is guarded, and SDK task batch packetizer was committed. Continue from Codex/local tests instead of relying on old Pi session resume.",
+  "timestamp": "2026-05-19T05:22:04.141Z",
+  "context": "External stabilization session for Pi runtime pressure. The velocity pressure primitive now detects session/runtime pressure, dirty scope, board size, stale handoff, useful commit age, process age, memory, disk, and host VHDX pressure. Current machine pressure blocks long Pi runs: C: has about 3GB free, with Docker/WSL VHDX artifacts accounting for about 214GB.",
   "current_tasks": [
-    "TASK-BUD-1089",
-    "TASK-BUD-1090"
+    "TASK-BUD-1089"
   ],
   "next_actions": [
-    "Keep using npm run pi:dev:pressure and npm run pi:dev:dry before returning to Pi runtime.",
-    "Reduce governance hot path next: guardrails-core.ts is still over budget at files=150 kb=1806.",
-    "Treat context-watchdog as second diet target: files=72 kb=788.6.",
-    "Do not resume old Pi sessions; session budget blockers should be archived or deleted after checkpoint."
+    "Free host disk before returning to npm run pi:dev or any long Pi runtime.",
+    "Re-run npm run ops:disk:cleanup:dry and npm run pi:dev:pressure after cleanup.",
+    "Continue TASK-BUD-1089 with the missing deterministic coverage for dangling-process and ceremony/tool-call pressure once disk pressure is no longer blocking.",
+    "Keep release readiness anchored on npm run release:readiness:v0.8.0 before choosing the next P0 lane."
   ],
   "blockers": [
-    "guardrails-core hot path exceeds entrypoint budget",
-    "context-watchdog slightly exceeds entrypoint budget",
-    "loop lease is stale until a fresh Pi runtime owns it",
-    "settings contain 5 suppressed package entries to clean in a separate slice"
+    "machine-disk-pressure: pi:dev:pressure reports block-and-clean with about 3GB free",
+    "host volume pressure: Docker docker_data.vhdx about 132GB and Ubuntu ext4.vhdx about 81GB",
+    "TASK-BUD-1089 is not complete yet: dangling-process and ceremony/tool-call pressure tests remain"
   ],
   "recent_validation": [
-    "node --test scripts/test/pi-dev-pressure.test.mjs scripts/test/pi-isolated-resume-intent.test.mjs scripts/test/pi-loop-pause-state-contract.test.mjs scripts/test/pi-runtime-artifact-audit.test.mjs scripts/test/pi-parity-curated-profile.test.mjs scripts/test/pi-parity-curation-gate.test.mjs passed",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed",
-    "node scripts/pi-dev-pressure.mjs reports sessions count=0 and recommendation=reduce-governance-surface"
+    "npm run test:pi:dev:pressure passed",
+    "npm run test:pi:isolated passed",
+    "npm run test:ops:disk-guard passed",
+    "npm run pi:dev:dry reports pressure block-and-clean (machine-pressure-strict)",
+    "npm run repo:complexity:changed:strict passed",
+    "npm run repo:discourse:audit passed",
+    "npm run docs:package:check passed"
   ],
   "recent_commits": [
-    "9e529b55 Add Pi dev pressure guard",
-    "6c5fff36 Add SDK task batch packetizer"
+    "12e05819 ci(ops): run pressure guards in smoke gate",
+    "4a2f5e47 fix(pi): block dev under machine pressure",
+    "2780be8a feat(ops): inventory host volume pressure",
+    "73f669da feat(pressure): add local velocity signals",
+    "4590b237 refactor(pressure): share velocity policy",
+    "a6f0b1a4 feat(pressure): add velocity pressure contract"
   ],
   "slice_memory": {
     "focus": "stabilize-pi-dev-runtime-pressure",
     "canonical_links": [
       "task:TASK-BUD-1089",
-      "task:TASK-BUD-1090",
-      "commit:9e529b55",
-      "commit:6c5fff36"
+      "commit:12e05819",
+      "commit:4a2f5e47",
+      "commit:2780be8a",
+      "commit:73f669da"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-17T18:05:00.000Z",
+    "generatedAtIso": "2026-05-19T05:22:04.141Z",
     "level": "checkpoint",
     "percent": 0,
-    "action": "checkpoint-refresh",
-    "recommendation": "Continue with small external stabilization slices; commit each slice before returning to Pi runtime."
+    "action": "checkpoint-and-stop-long-runs",
+    "recommendation": "Do not start long Pi runtime while machine-disk-pressure is blocking; free disk, then resume with small validated slices."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-17T18:05:00.000Z",
-      "reason": "external-codex-checkpoint",
+      "atIso": "2026-05-19T05:22:04.141Z",
+      "reason": "machine-disk-pressure-block",
       "level": "checkpoint",
       "percent": 0,
       "thresholds": {
@@ -53,8 +60,8 @@
         "checkpointPct": 55,
         "compactPct": 65
       },
-      "action": "checkpoint-refresh",
-      "recommendation": "Continue with small external stabilization slices; commit each slice before returning to Pi runtime."
+      "action": "checkpoint-and-stop-long-runs",
+      "recommendation": "Free host disk before returning to Pi long runs."
     }
   ]
 }
