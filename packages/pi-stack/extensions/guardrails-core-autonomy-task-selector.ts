@@ -13,6 +13,10 @@ import {
   REALIGN_FOCUS_CODE,
   localStopProtectedFocusNextAction,
 } from "./guardrails-core-local-stop-guidance";
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
 import { normalizeTaskDependencyIds } from "./guardrails-core-task-contracts";
 
 export type AutonomyTaskSelectionReason =
@@ -655,7 +659,7 @@ export interface AutonomyProtectedFocusDecisionPacket {
   reviewMode: "read-only";
   mutationAllowed: false;
   dispatchAllowed: false;
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   mode: "report-only";
   summary: string;
 }
@@ -786,7 +790,7 @@ export function buildAutonomyProtectedFocusDecisionPacket(
       reviewMode: "read-only",
       mutationAllowed: false,
       dispatchAllowed: false,
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       mode: "report-only",
       summary: `autonomy-protected-focus-packet: ok=no task=${taskId || "?"} decision=blocked option=defer code=protected-focus-blocked-task-not-found preview=${previewCompact}`,
     };
@@ -862,7 +866,7 @@ export function buildAutonomyProtectedFocusDecisionPacket(
     reviewMode: "read-only",
     mutationAllowed: false,
     dispatchAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     mode: "report-only",
     summary: [
       "autonomy-protected-focus-packet:",
