@@ -9,6 +9,7 @@
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const roots = [
   "packages/pi-stack/node_modules",
@@ -17,18 +18,23 @@ const roots = [
 
 const checks = [
   // Monitors — essencial, causa falha silenciosa se ausente
-  ["@davidorex/pi-project-workflows/monitors-extension.ts", "monitors (hedge, fragility, etc.)"],
-  ["@davidorex/pi-project-workflows/project-extension.ts", "project blocks (.project/)"],
-  ["@davidorex/pi-project-workflows/workflows-extension.ts", "workflows YAML"],
+  { paths: ["@davidorex/pi-project-workflows/monitors-extension.ts"], label: "monitors (hedge, fragility, etc.)", required: true },
+  { paths: ["@davidorex/pi-project-workflows/project-extension.ts"], label: "project blocks (.project/)", required: true },
+  { paths: ["@davidorex/pi-project-workflows/workflows-extension.ts"], label: "workflows YAML", required: true },
   // Core extensions
-  ["pi-lens/index.ts", "pi-lens (LSP, ast-grep)"],
-  ["pi-web-access/index.ts", "pi-web-access (fetch, PDF)"],
-  ["@ifi/oh-pi-extensions/extensions/safe-guard.ts", "safe-guard"],
-  ["@ifi/oh-pi-extensions/extensions/bg-process.ts", "bg-process"],
-  ["mitsupi/pi-extensions/multi-edit.ts", "multi-edit"],
+  { paths: ["pi-lens/index.ts"], label: "pi-lens (LSP, ast-grep)", required: true },
+  { paths: ["pi-web-access/index.ts"], label: "pi-web-access (fetch, PDF)", required: true },
+  {
+    paths: ["@ifi/oh-pi-extensions/extensions/safe-guard.ts"],
+    label: "safe-guard (filtered/optional)",
+    required: false,
+    missingOk: "curated installs suppress safe-guard and current oh-pi may not ship it",
+  },
+  { paths: ["@ifi/oh-pi-extensions/extensions/bg-process.ts"], label: "bg-process", required: true },
+  { paths: ["mitsupi/extensions/multi-edit.ts", "mitsupi/pi-extensions/multi-edit.ts"], label: "multi-edit", required: true },
   // Skills
-  ["@ifi/oh-pi-skills/skills/debug-helper/SKILL.md", "debug-helper skill"],
-  ["mitsupi/skills/web-browser/SKILL.md", "web-browser skill"],
+  { paths: ["@ifi/oh-pi-skills/skills/debug-helper/SKILL.md"], label: "debug-helper skill", required: true },
+  { paths: ["mitsupi/skills/web-browser/SKILL.md"], label: "web-browser skill", required: true },
 ];
 
 const ROBUST_SYSTEM_PROMPT_RE = /systemPrompt:\s*\(typeof compiled\.systemPrompt === "string"/;
@@ -46,12 +52,28 @@ const contractChecks = [
   },
 ];
 
-function findExistingPath(relPath) {
-  for (const root of roots) {
+function findExistingPath(relPath, searchRoots = roots) {
+  for (const root of searchRoots) {
     const full = join(root, relPath);
     if (existsSync(full)) return full;
   }
   return undefined;
+}
+
+export function resolveCheck(check, searchRoots = roots) {
+  const paths = Array.isArray(check.paths) ? check.paths : [check.relPath].filter(Boolean);
+  for (const relPath of paths) {
+    const found = findExistingPath(relPath, searchRoots);
+    if (found) return { ok: true, found, label: check.label, required: check.required !== false };
+  }
+  return {
+    ok: check.required === false,
+    optionalMissing: check.required === false,
+    label: check.label,
+    required: check.required !== false,
+    missingOk: check.missingOk,
+    expected: paths.flatMap((relPath) => searchRoots.map((r) => join(r, relPath))),
+  };
 }
 
 function repairClassifyContract(content) {
@@ -94,15 +116,18 @@ function findAllExistingPaths(relPath) {
   return found;
 }
 
+function main() {
 let failed = 0;
 
-for (const [relPath, label] of checks) {
-  const found = findExistingPath(relPath);
-  if (found) {
-    console.log(`  ✅ ${label}`);
+for (const check of checks) {
+  const result = resolveCheck(check);
+  if (result.found) {
+    console.log(`  ✅ ${result.label}`);
+  } else if (result.optionalMissing) {
+    console.log(`  ⚪ ${result.label} — opcional ausente (${result.missingOk})`);
   } else {
     console.error(
-      `  ❌ ${label} — ausente: ${roots.map((r) => join(r, relPath)).join(" | ")}`
+      `  ❌ ${result.label} — ausente: ${result.expected.join(" | ")}`
     );
     failed++;
   }
@@ -168,4 +193,9 @@ if (failed > 0) {
   process.exit(1);
 } else {
   console.log(`\n✅ pi-stack ok — ${checks.length + contractChecks.length} verificações passaram.`);
+}
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
 }
