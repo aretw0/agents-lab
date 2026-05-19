@@ -1,3 +1,12 @@
+import {
+  formatAuthorizationEvidence,
+  GUARDRAILS_AUTHORIZATION_EXPLICIT_APPLY,
+  GUARDRAILS_AUTHORIZATION_EXPLICIT_OPERATOR,
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationExplicitApply,
+  type GuardrailsAuthorizationExplicitOperator,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
 import { sameCwd } from "./guardrails-core-execution-context";
 import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 
@@ -30,7 +39,7 @@ export interface AgentRunRegistryEntry {
 export interface AgentRunStatusResult {
   mode: "agent-run-status";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -71,7 +80,7 @@ export interface AgentRunRegistryUpsertInput {
 export interface AgentRunRegistryUpsertResult {
   mode: "agent-run-registry-upsert";
   activation: "none";
-  authorization: "none" | "explicit-apply";
+  authorization: GuardrailsAuthorizationNone | GuardrailsAuthorizationExplicitApply;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -110,7 +119,7 @@ export interface AgentRunOutcomeInput {
 export interface AgentRunOutcomeResult {
   mode: "agent-run-outcome-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -163,7 +172,7 @@ export interface AgentRunBatchOutcomeInput {
 export interface AgentRunBatchOutcomeResult {
   mode: "agent-run-batch-outcome-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -203,7 +212,7 @@ export interface AgentRunAbortPlanInput {
 export interface AgentRunAbortPlanResult {
   mode: "agent-run-abort-plan";
   activation: "none";
-  authorization: "none" | "explicit-operator";
+  authorization: GuardrailsAuthorizationNone | GuardrailsAuthorizationExplicitOperator;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: boolean;
@@ -299,6 +308,7 @@ export function buildAgentRunRegistryUpsertPacket(input: AgentRunRegistryUpsertI
   };
 
   const writeAllowed = blockers.length === 0 && input.dryRun === false;
+  const authorization = writeAllowed ? GUARDRAILS_AUTHORIZATION_EXPLICIT_APPLY : GUARDRAILS_AUTHORIZATION_NONE;
   const decision: AgentRunRegistryUpsertDecision = blockers.length > 0 ? "blocked" : writeAllowed ? "write-ready" : "dry-run";
   const summary = [
     "agent-run-registry-upsert:",
@@ -308,14 +318,14 @@ export function buildAgentRunRegistryUpsertPacket(input: AgentRunRegistryUpsertI
     `files=${declaredFiles.length}`,
     `writeAllowed=${writeAllowed ? "yes" : "no"}`,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
-    `authorization=${writeAllowed ? "explicit-apply" : "none"}`,
+    formatAuthorizationEvidence(authorization),
     "dispatch=no",
   ].filter(Boolean).join(" ");
 
   return {
     mode: "agent-run-registry-upsert",
     activation: "none",
-    authorization: writeAllowed ? "explicit-apply" : "none",
+    authorization,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -353,13 +363,13 @@ export function buildAgentRunStatus(runId: string, entry?: AgentRunRegistryEntry
     stale ? "stale=yes" : "stale=no",
     warnings.length > 0 ? `warnings=${warnings.join("|")}` : undefined,
     "dispatch=no",
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
     mode: "agent-run-status",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -466,13 +476,13 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
     markerFailures.length > 0 ? `markerFailures=${markerFailures.length}` : undefined,
     outputBytes !== undefined ? `outputBytes=${outputBytes}` : undefined,
     "dispatch=no",
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
     mode: "agent-run-outcome-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -567,13 +577,13 @@ export function buildAgentRunBatchOutcomePacket(input: AgentRunBatchOutcomeInput
     cacheUnknown > 0 ? `cacheUnknown=${cacheUnknown}` : undefined,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     "dispatch=no",
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
     mode: "agent-run-batch-outcome-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -617,6 +627,7 @@ export function buildAgentRunAbortPlan(input: AgentRunAbortPlanInput = {}): Agen
 
   const decision: AgentRunAbortDecision = blockers.length > 0 ? "blocked" : execute ? "abort-ready" : "dry-run";
   const processStopAllowed = decision === "abort-ready";
+  const authorization = processStopAllowed ? GUARDRAILS_AUTHORIZATION_EXPLICIT_OPERATOR : GUARDRAILS_AUTHORIZATION_NONE;
   const summary = [
     "agent-run-abort-plan:",
     `decision=${decision}`,
@@ -625,13 +636,13 @@ export function buildAgentRunAbortPlan(input: AgentRunAbortPlanInput = {}): Agen
     pid ? `pid=${pid}` : undefined,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     `processStopAllowed=${processStopAllowed ? "yes" : "no"}`,
-    `authorization=${processStopAllowed ? "explicit-operator" : "none"}`,
+    formatAuthorizationEvidence(authorization),
   ].filter(Boolean).join(" ");
 
   return {
     mode: "agent-run-abort-plan",
     activation: "none",
-    authorization: processStopAllowed ? "explicit-operator" : "none",
+    authorization,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed,
