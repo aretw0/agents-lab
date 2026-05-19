@@ -201,12 +201,46 @@ test("planDiskGuard reports bounded workspace disk pressure", () => {
     assert.equal(typeof report.inventory.generatedCacheTotalMb, "number");
     assert.equal(typeof report.inventory.sessionTotalMb, "number");
     assert.equal(typeof report.inventory.globalSessionTotalMb, "number");
+    assert.equal(typeof report.inventory.hostVolumeArtifactTotalMb, "number");
     assert.ok(Array.isArray(report.inventory.topGlobalSessions));
+    assert.ok(Array.isArray(report.inventory.topHostVolumeArtifacts));
     assert.equal(report.disk.warnFreeMb, 1024);
     assert.equal(report.disk.blockFreeMb, 512);
     assert.ok(report.disk.recommendation.length > 0);
     assert.ok(Array.isArray(report.candidateSummary.byClass.deletable));
   } finally {
     rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("planDiskGuard inventories host VHDX artifacts as read-only pressure evidence", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "disk-guard-test-"));
+  const fakeHome = mkdtempSync(join(tmpdir(), "disk-guard-home-"));
+  try {
+    const dockerDisk = join(fakeHome, "AppData", "Local", "Docker", "wsl", "disk");
+    const ubuntuState = join(
+      fakeHome,
+      "AppData",
+      "Local",
+      "Packages",
+      "CanonicalGroupLimited.Ubuntu_79rhkp1fndgsc",
+      "LocalState",
+    );
+    mkdirSync(dockerDisk, { recursive: true });
+    mkdirSync(ubuntuState, { recursive: true });
+    writeFileSync(join(dockerDisk, "docker_data.vhdx"), "docker\n", "utf8");
+    writeFileSync(join(ubuntuState, "ext4.vhdx"), "ubuntu\n", "utf8");
+
+    const report = planDiskGuard(cwd, defaultOpts({ hostArtifactHome: fakeHome }));
+
+    assert.equal(report.inventory.hostVolumeArtifactCount, 2);
+    assert.deepEqual(report.inventory.topHostVolumeArtifacts.map((row) => row.label).sort(), [
+      "docker-wsl-data-vhdx",
+      "wsl-ubuntu-vhdx",
+    ]);
+    assert.equal(report.deletable.some((row) => row.class === "host-volume-artifact"), false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+    rmSync(fakeHome, { recursive: true, force: true });
   }
 });

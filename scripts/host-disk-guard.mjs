@@ -311,6 +311,47 @@ function gatherGlobalWorkspaceSessions(cwd) {
   return gatherSessionFiles(root, "global-session-jsonl");
 }
 
+function gatherHostVolumeArtifacts(homeDir = homedir()) {
+  const out = [];
+  const pushFile = (filePath, label, className = "host-volume-artifact") => {
+    const st = safeStat(filePath);
+    if (!st) return;
+    out.push({
+      path: filePath,
+      label,
+      bytes: st.size,
+      ageDays: (Date.now() - st.mtimeMs) / (24 * 60 * 60 * 1000),
+      class: className,
+    });
+  };
+
+  pushFile(
+    join(homeDir, "AppData", "Local", "Docker", "wsl", "disk", "docker_data.vhdx"),
+    "docker-wsl-data-vhdx",
+  );
+  pushFile(
+    join(homeDir, "AppData", "Local", "Docker", "wsl", "main", "ext4.vhdx"),
+    "docker-wsl-main-vhdx",
+  );
+
+  const packagesRoot = join(homeDir, "AppData", "Local", "Packages");
+  if (existsSync(packagesRoot)) {
+    try {
+      for (const entry of readdirSync(packagesRoot, { withFileTypes: true })) {
+        if (!entry.isDirectory() || !/^CanonicalGroupLimited\.Ubuntu_/i.test(entry.name)) continue;
+        pushFile(
+          join(packagesRoot, entry.name, "LocalState", "ext4.vhdx"),
+          "wsl-ubuntu-vhdx",
+        );
+      }
+    } catch {
+      // ignore unreadable Windows package roots
+    }
+  }
+
+  return out.sort((a, b) => b.bytes - a.bytes);
+}
+
 function selectCandidates(all, opts) {
   const reportCutoffDays = Math.max(1, opts.reportsAgeDays);
   const sessionCutoffDays = Math.max(1, opts.sessionAgeDays);
@@ -428,6 +469,7 @@ export function planDiskGuard(cwd, opts) {
     generatedCaches: gatherGeneratedCaches(cwd),
     sessions: gatherSessions(cwd),
     globalSessions: gatherGlobalWorkspaceSessions(cwd),
+    hostVolumeArtifacts: gatherHostVolumeArtifacts(opts.hostArtifactHome),
   };
   const selection = selectCandidates(all, opts);
 
@@ -442,6 +484,12 @@ export function planDiskGuard(cwd, opts) {
 
   const topSessions = formatTopSessions(all.sessions);
   const topGlobalSessions = formatTopSessions(all.globalSessions);
+  const topHostVolumeArtifacts = all.hostVolumeArtifacts.slice(0, 10).map((x) => ({
+    label: x.label,
+    path: x.path.replace(/\\/g, "/"),
+    sizeMb: toMb(x.bytes),
+    ageDays: Math.round(x.ageDays * 10) / 10,
+  }));
 
   const disk = readWorkspaceDiskPressure(cwd, opts);
   const projectedFreeMb = toMb(((Number(disk.freeMb) || 0) * MB) + selection.deletable.reduce((sum, x) => sum + x.bytes, 0));
@@ -468,8 +516,11 @@ export function planDiskGuard(cwd, opts) {
       sessionTotalMb: toMb(all.sessions.reduce((sum, x) => sum + x.bytes, 0)),
       globalSessionCount: all.globalSessions.length,
       globalSessionTotalMb: toMb(all.globalSessions.reduce((sum, x) => sum + x.bytes, 0)),
+      hostVolumeArtifactCount: all.hostVolumeArtifacts.length,
+      hostVolumeArtifactTotalMb: toMb(all.hostVolumeArtifacts.reduce((sum, x) => sum + x.bytes, 0)),
       topSessions,
       topGlobalSessions,
+      topHostVolumeArtifacts,
     },
     candidateSummary: {
       deletableCount: selection.deletable.length,
@@ -523,7 +574,7 @@ function printHuman(report, applyResult, strictFailures = []) {
   console.log(`generated: ${report.generatedAtIso}`);
   console.log(`disk: severity=${report.disk.severity} free=${report.disk.freeMb}MB used=${report.disk.usedPct}% recommendation=${report.disk.recommendation}`);
   console.log(`projectedAfterApply: severity=${report.projected.severityAfterApply} free=${report.projected.freeMbAfterApply}MB recommendation=${report.projected.recommendationAfterApply}`);
-  console.log(`volatile: bgArtifacts=${report.inventory.bgArtifactTotalMb}MB generatedCaches=${report.inventory.generatedCacheTotalMb}MB reports=${report.inventory.reportTotalMb}MB sessions=${report.inventory.sessionTotalMb}MB globalSessions=${report.inventory.globalSessionTotalMb}MB`);
+  console.log(`volatile: bgArtifacts=${report.inventory.bgArtifactTotalMb}MB generatedCaches=${report.inventory.generatedCacheTotalMb}MB reports=${report.inventory.reportTotalMb}MB sessions=${report.inventory.sessionTotalMb}MB globalSessions=${report.inventory.globalSessionTotalMb}MB hostVolumes=${report.inventory.hostVolumeArtifactTotalMb}MB`);
   console.log(`candidates: ${report.candidateSummary.deletableCount} files / ${report.candidateSummary.deletableMb} MB`);
   for (const row of report.candidateSummary.byClass.deletable) {
     console.log(`  - class ${row.class}: ${row.count} files / ${row.totalMb} MB`);
@@ -542,6 +593,12 @@ function printHuman(report, applyResult, strictFailures = []) {
     console.log("top global session files:");
     for (const row of report.inventory.topGlobalSessions) {
       console.log(`- ${row.path} (${row.sizeMb} MB, age=${row.ageDays}d)`);
+    }
+  }
+  if (report.inventory.topHostVolumeArtifacts.length > 0) {
+    console.log("top host volume artifacts (read-only inventory):");
+    for (const row of report.inventory.topHostVolumeArtifacts) {
+      console.log(`- ${row.label}: ${row.path} (${row.sizeMb} MB, age=${row.ageDays}d)`);
     }
   }
 
