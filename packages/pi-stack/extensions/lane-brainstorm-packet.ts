@@ -43,7 +43,7 @@ export interface LaneBrainstormSelectedSlice {
 }
 
 export interface LaneBrainstormPacket {
-  decision: "ready-for-operator-review" | "blocked";
+  decision: "ready-for-operator-decision" | "blocked";
   goal: string;
   recommendationCode: string;
   nextAction: string;
@@ -147,15 +147,15 @@ export function rankBrainstormIdeas(ideas: BrainstormIdeaInput[], maxItems = 12)
 }
 
 export function resolveLaneBrainstormRecommendation(selection: LaneBrainstormSelectionInput): {
-  decision: "ready-for-operator-review" | "blocked";
+  decision: "ready-for-operator-decision" | "blocked";
   recommendationCode: string;
   nextAction: string;
 } {
   if (selection.ready) {
     return {
-      decision: "ready-for-operator-review",
+      decision: "ready-for-operator-decision",
       recommendationCode: SEED_LOCAL_SAFE_LANE_CODE,
-      nextAction: "review ranked slices and materialize bounded local-safe tasks.",
+      nextAction: "choose ranked slices and materialize bounded local-safe tasks.",
     };
   }
   if (selection.recommendationCode === LOCAL_STOP_PROTECTED_FOCUS_REQUIRED_CODE) {
@@ -231,7 +231,7 @@ export function buildLaneBrainstormSeedPreview(input: {
   source?: "brainstorm" | "operator" | "tangent-approved";
 }): LaneBrainstormSeedPreview {
   const source = input.source ?? "brainstorm";
-  if (input.packet.decision !== "ready-for-operator-review" || input.packet.selectedSlices.length === 0) {
+  if (input.packet.decision !== "ready-for-operator-decision" || input.packet.selectedSlices.length === 0) {
     return {
       decision: "blocked",
       recommendationCode: "brainstorm-seeding-blocked",
@@ -257,7 +257,7 @@ export function buildLaneBrainstormSeedPreview(input: {
   return {
     decision: "needs-operator-seeding-decision",
     recommendationCode: "brainstorm-seeding-preview",
-    nextAction: "review proposals and confirm which ones should be materialized as board tasks.",
+    nextAction: "choose proposals and confirm which ones should be materialized as board tasks.",
     source,
     proposals,
     confirmationRequired: true,

@@ -903,13 +903,13 @@ describe("autonomy lane surface", () => {
     });
 
     expect(result?.details.profile).toBe("light-notes");
-    expect(result?.details.decision).toBe("ready-for-operator-review");
+    expect(result?.details.decision).toBe("ready-for-operator-decision");
     expect(result?.details.recommendationCode).toBe("intake-plan-first-slice");
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
     expect(result?.details.mode).toBe("report-only");
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("project-intake: decision=ready-for-operator-review");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("project-intake: decision=ready-for-operator-decision");
     expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
     expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"profile\"');
   });

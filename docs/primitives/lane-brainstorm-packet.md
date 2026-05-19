@@ -49,7 +49,7 @@ Campos mínimos:
 
 ```json
 {
-  "decision": "ready-for-operator-review",
+  "decision": "ready-for-operator-decision",
   "recommendationCode": "seed-local-safe-lane",
   "nextAction": "materialize top 3 slices as board tasks",
   "ideas": [

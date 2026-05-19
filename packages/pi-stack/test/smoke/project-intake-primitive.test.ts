@@ -15,7 +15,7 @@ describe("project-intake-primitive", () => {
     });
 
     expect(plan.profile).toBe("light-notes");
-    expect(plan.decision).toBe("ready-for-operator-review");
+    expect(plan.decision).toBe("ready-for-operator-decision");
     expect(plan.recommendationCode).toBe(INTAKE_PLAN_FIRST_SLICE_CODE);
     expect(plan.dispatchAllowed).toBe(false);
     expect(plan.mutationAllowed).toBe(false);

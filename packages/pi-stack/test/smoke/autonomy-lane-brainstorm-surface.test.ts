@@ -41,10 +41,10 @@ describe("autonomy lane brainstorm surface", () => {
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
-    expect(result?.details.decision).toBe("ready-for-operator-review");
+    expect(result?.details.decision).toBe("ready-for-operator-decision");
     expect(result?.details.recommendationCode).toBe("seed-local-safe-lane");
     expect((result?.details.selectedSlices as unknown[] | undefined)?.length).toBeGreaterThan(0);
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm: decision=ready-for-operator-review");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm: decision=ready-for-operator-decision");
     expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo");
     expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"selectedSlices\"');
   });
@@ -69,7 +69,7 @@ describe("autonomy lane brainstorm surface", () => {
     }, undefined, undefined, { cwd });
 
     const selected = (result?.details.selectedSlices as Array<{ sourceTaskId?: string }> | undefined) ?? [];
-    expect(result?.details.decision).toBe("ready-for-operator-review");
+    expect(result?.details.decision).toBe("ready-for-operator-decision");
     expect(result?.details.recommendationCode).toBe("seed-local-safe-lane");
     expect(selected).toHaveLength(10);
     expect(selected[0]?.sourceTaskId).toBe("TASK-LOCAL-1");
@@ -114,7 +114,7 @@ describe("autonomy lane brainstorm surface", () => {
 
     expect(result?.details.decision).toBe("needs-operator-seeding-decision");
     expect(result?.details.recommendationCode).toBe("brainstorm-seeding-preview");
-    expect(String(result?.details.nextAction)).toContain("review proposals");
+    expect(String(result?.details.nextAction)).toContain("choose proposals");
     expect(result?.details.confirmationRequired).toBe(true);
     expect(result?.details.source).toBe("tangent-approved");
     expect(result?.details.dispatchAllowed).toBe(false);

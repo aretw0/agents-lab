@@ -18,7 +18,7 @@ export interface ProjectIntakeInput {
 }
 
 export interface ProjectIntakePlan {
-  decision: "ready-for-operator-review" | "blocked";
+  decision: "ready-for-operator-decision" | "blocked";
   profile: ProjectIntakeProfile;
   recommendationCode: typeof INTAKE_PLAN_FIRST_SLICE_CODE | typeof INTAKE_NEEDS_OPERATOR_FOCUS_PROTECTED_CODE;
   nextAction: string;
@@ -95,10 +95,10 @@ export function evaluateProjectIntakePlan(raw: ProjectIntakeInput): ProjectIntak
   };
 
   return {
-    decision: "ready-for-operator-review",
+    decision: "ready-for-operator-decision",
     profile,
     recommendationCode: INTAKE_PLAN_FIRST_SLICE_CODE,
-    nextAction: "review profile, confirm first local-safe slice, then execute with focal validation and rollback clarity.",
+    nextAction: "choose first local-safe slice from this profile, then execute with focal validation and rollback clarity.",
     firstSlice: {
       title: firstSliceByProfile[profile].title,
       validation: firstSliceByProfile[profile].validation,

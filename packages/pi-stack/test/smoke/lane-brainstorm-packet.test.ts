@@ -73,7 +73,7 @@ describe("lane brainstorm packet module", () => {
       },
     });
 
-    expect(packet.decision).toBe("ready-for-operator-review");
+    expect(packet.decision).toBe("ready-for-operator-decision");
     expect(packet.recommendationCode).toBe("seed-local-safe-lane");
     expect(packet.dispatchAllowed).toBe(false);
     expect(packet.mutationAllowed).toBe(false);
@@ -114,7 +114,7 @@ describe("lane brainstorm packet module", () => {
 
     expect(preview.decision).toBe("needs-operator-seeding-decision");
     expect(preview.recommendationCode).toBe("brainstorm-seeding-preview");
-    expect(preview.nextAction).toContain("review proposals");
+    expect(preview.nextAction).toContain("choose proposals");
     expect(preview.confirmationRequired).toBe(true);
     expect(preview.dispatchAllowed).toBe(false);
     expect(preview.mutationAllowed).toBe(false);
