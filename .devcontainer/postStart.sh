@@ -20,6 +20,10 @@ for tool in claude codex; do
   fi
 done
 
+if ! command -v pi >/dev/null 2>&1; then
+  echo "[agents-lab-devcontainer][warn] pi missing. Rebuild, or run: npm install -g @earendil-works/pi-coding-agent"
+fi
+
 if [[ ! -f /home/vscode/.codex/auth.json ]]; then
   echo "[agents-lab-devcontainer][info] Codex login not found yet. Run: codex login"
 fi

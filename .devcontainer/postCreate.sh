@@ -38,6 +38,18 @@ corepack enable || true
 
 install_global_tool claude @anthropic-ai/claude-code || true
 install_global_tool codex @openai/codex || true
+install_global_tool pi @earendil-works/pi-coding-agent || true
+npm install -g @aretw0/pi-stack 2>/dev/null \
+  || echo "[agents-lab-devcontainer][warn] pi-stack install failed. Run: npm install -g @aretw0/pi-stack"
+if command -v pi >/dev/null 2>&1; then
+  node "$(npm root -g)/@aretw0/pi-stack/install.mjs" 2>/dev/null \
+    || echo "[agents-lab-devcontainer][warn] pi-stack setup failed. Run: node \$(npm root -g)/@aretw0/pi-stack/install.mjs"
+fi
+
+# Git — encoding PT-BR e nomes de arquivo legíveis em logs
+git config core.quotepath false
+git config i18n.commitEncoding UTF-8
+git config i18n.logOutputEncoding UTF-8
 
 if [[ -f package-lock.json ]]; then
   npm ci --prefer-offline --no-audit --no-fund

@@ -16,12 +16,15 @@
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": false,
       "username": "vscode"
-    }
+    },
+    "ghcr.io/jsburckhardt/devcontainer-features/uv:1": {}
   },
   "remoteUser": "vscode",
   "workspaceFolder": "/workspaces/agents-lab",
   "containerEnv": {
     "PI_CODING_AGENT_DIR": "/workspaces/agents-lab/.sandbox/pi-agent",
+    "UV_SYSTEM_PYTHON": "true",
+    "UV_LINK_MODE": "copy",
     "NPM_CONFIG_CACHE": "/home/vscode/.npm-cache",
     "NPM_CONFIG_PREFIX": "/home/vscode/.npm-global",
     "PNPM_HOME": "/home/vscode/.local/share/pnpm",
