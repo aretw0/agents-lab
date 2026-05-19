@@ -97,6 +97,21 @@ const DISTRIBUTED_WRAPPERS = [
 		surface: "project-board-surface",
 		reason: "project verification integrity backfill is distributed through board_verification_backfill_plan",
 	},
+	{
+		match: /^repo:complexity/,
+		surface: "stack-sovereignty",
+		reason: "repo complexity budget is distributed through stack_quality_audit; root script remains a CI/lab wrapper",
+	},
+	{
+		match: /^repo:bloat:audit/,
+		surface: "stack-sovereignty",
+		reason: "repo bloat audit is distributed through stack_quality_audit; root script remains a CI/lab wrapper",
+	},
+	{
+		match: /^repo:discourse:audit/,
+		surface: "stack-sovereignty",
+		reason: "repo discourse audit is distributed through stack_quality_audit; root script remains a CI/lab wrapper",
+	},
 ];
 
 const PROMOTION_CANDIDATES = [
@@ -116,19 +131,9 @@ const PROMOTION_CANDIDATES = [
 		reason: "scheduler next-task selection is already a governance concern",
 	},
 	{
-		match: /^repo:complexity/,
+		match: /^repo:discourse:curation/,
 		target: "stack-sovereignty",
-		reason: "repo complexity budget is stack quality governance, not only lab convenience",
-	},
-	{
-		match: /^repo:bloat:audit/,
-		target: "stack-sovereignty",
-		reason: "repo bloat audit is stack quality governance for artifact hygiene",
-	},
-	{
-		match: /^repo:discourse:audit/,
-		target: "stack-sovereignty",
-		reason: "repo discourse audit is stack quality governance for operator-facing semantics",
+		reason: "future discourse curation workflows should stay near stack quality governance",
 	},
 ];
 

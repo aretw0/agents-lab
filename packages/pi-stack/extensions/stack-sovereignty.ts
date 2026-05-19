@@ -10,6 +10,7 @@ import path from "node:path";
 import { buildSchedulerOwnershipSnapshot, resolveSchedulerGovernanceConfig } from "./scheduler-governance";
 import { evaluateCurationCoverage, readCurationCoverageRegistry } from "./curation-coverage";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
+import { buildRepoQualityAudit } from "./stack-quality-audit.mjs";
 
 export type CapabilityCriticality = "high" | "medium" | "low";
 export type CapabilityStatus = "owned" | "coexisting" | "owner-missing" | "inactive";
@@ -180,6 +181,22 @@ function icon(status: CapabilityStatus): string {
   return "[--]";
 }
 
+function boolParam(value: unknown, fallback: boolean): boolean {
+  if (typeof value === "boolean") return value;
+  return fallback;
+}
+
+function numberParam(value: unknown, fallback: number): number {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return fallback;
+  return Math.floor(n);
+}
+
+function stringParam(value: unknown, fallback: string): string {
+  const text = typeof value === "string" ? value.trim() : "";
+  return text.length > 0 ? text : fallback;
+}
+
 export default function stackSovereigntyExtension(pi: ExtensionAPI) {
   pi.registerTool({
     name: "stack_sovereignty_status",
@@ -225,6 +242,45 @@ export default function stackSovereigntyExtension(pi: ExtensionAPI) {
     },
   });
 
+  pi.registerTool({
+    name: "stack_quality_audit",
+    label: "Stack Quality Audit",
+    description: "Run repo quality gates for complexity, bloat, and discourse from the first-party stack surface.",
+    parameters: Type.Object({
+      complexity: Type.Optional(Type.Boolean()),
+      bloat: Type.Optional(Type.Boolean()),
+      discourse: Type.Optional(Type.Boolean()),
+      changed: Type.Optional(Type.Boolean()),
+      base: Type.Optional(Type.String()),
+      maxLines: Type.Optional(Type.Number()),
+    }),
+    async execute(_id, params, _signal, _onUpdate, ctx) {
+      const audit = buildRepoQualityAudit(ctx.cwd, {
+        complexity: boolParam((params as Record<string, unknown>)?.complexity, true),
+        bloat: boolParam((params as Record<string, unknown>)?.bloat, true),
+        discourse: boolParam((params as Record<string, unknown>)?.discourse, true),
+        changed: boolParam((params as Record<string, unknown>)?.changed, false),
+        base: stringParam((params as Record<string, unknown>)?.base, "HEAD"),
+        maxLines: numberParam((params as Record<string, unknown>)?.maxLines, 1000),
+      });
+
+      return buildOperatorVisibleToolResponse({
+        label: "stack_quality_audit",
+        summary: [
+          "stack-quality:",
+          `errors=${audit.summary.errors}`,
+          `complexityBlocking=${audit.summary.complexityBlocking}`,
+          `complexityAllowed=${audit.summary.complexityAllowed}`,
+          `bloatViolations=${audit.summary.bloatViolations}`,
+          `bloatWarnings=${audit.summary.bloatWarnings}`,
+          `localBloatAdvisories=${audit.summary.localBloatAdvisories}`,
+          `discourseFindings=${audit.summary.discourseFindings}`,
+        ].join(" "),
+        details: audit,
+      });
+    },
+  });
+
   pi.registerCommand("stack-status", {
     description: "Show stack sovereignty health: capability owners, overlap risks, and scheduler conflict posture.",
     handler: async (_args, ctx) => {
@@ -255,6 +311,22 @@ export default function stackSovereigntyExtension(pi: ExtensionAPI) {
       ];
 
       const severity = summary.highRisk > 0 || schedSnapshot.activeForeignOwner ? "warning" : "info";
+      ctx.ui.notify(lines.join("\n"), severity);
+    },
+  });
+
+  pi.registerCommand("stack-quality", {
+    description: "Run stack quality audit: complexity budget, bloat hygiene, and discourse drift.",
+    handler: async (_args, ctx) => {
+      const audit = buildRepoQualityAudit(ctx.cwd);
+      const lines = [
+        "stack quality audit",
+        `errors: ${audit.summary.errors}`,
+        `complexity: blocking=${audit.summary.complexityBlocking} allowed=${audit.summary.complexityAllowed}`,
+        `bloat: violations=${audit.summary.bloatViolations} warnings=${audit.summary.bloatWarnings} localAdvisories=${audit.summary.localBloatAdvisories}`,
+        `discourse: findings=${audit.summary.discourseFindings}`,
+      ];
+      const severity = audit.summary.errors > 0 || audit.summary.complexityBlocking > 0 || audit.summary.bloatViolations > 0 ? "warning" : "info";
       ctx.ui.notify(lines.join("\n"), severity);
     },
   });

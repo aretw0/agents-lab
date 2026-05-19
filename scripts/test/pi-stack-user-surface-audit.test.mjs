@@ -69,12 +69,12 @@ test("classifyRootScript keeps ci and release scripts internal", () => {
 	assert.equal(classifyRootScript("release", "changeset version", shipped).category, "repo-internal");
 });
 
-test("classifyRootScript marks repo quality audits as stack-sovereignty candidates", () => {
+test("classifyRootScript marks repo quality audits as stack-sovereignty wrappers", () => {
 	for (const name of ["repo:complexity:strict", "repo:bloat:audit:strict", "repo:discourse:audit"]) {
 		const row = classifyRootScript(name, "node scripts/example.mjs", [...shipped, "stack-sovereignty"]);
-		assert.equal(row.category, "promotion-candidate");
+		assert.equal(row.category, "distributed-wrapper");
 		assert.equal(row.targetSurface, "stack-sovereignty");
-		assert.equal(row.recommendedAction, "add-or-consolidate-distributed-command-tool");
+		assert.equal(row.recommendedAction, "fold-wrapper-into-extension-or-doc-as-lab-shortcut");
 	}
 });
 
@@ -88,6 +88,6 @@ test("buildUserSurfaceAudit exposes grouped promotion targets", () => {
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "guardrails-core" && group.scripts.includes("git:dirty:snapshot")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "guardrails-core" && group.scripts.includes("ops:loop-evidence:strict")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "project-board-surface" && group.scripts.includes("project:verification:check")));
-	assert.ok(audit.promotionGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:bloat:audit:strict")));
-	assert.ok(audit.promotionGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:discourse:audit")));
+	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:bloat:audit:strict")));
+	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:discourse:audit")));
 });

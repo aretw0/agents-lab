@@ -9,57 +9,16 @@
  * - canonical board files may be large, but are audited by board-specific tools.
  */
 
-import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync, statSync } from "node:fs";
-import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
+import {
+  buildRepoBloatReport,
+  classifyTrackedBloat,
+  formatBytes,
+  normalizeRepoPath,
+} from "../packages/pi-stack/extensions/stack-quality-audit.mjs";
 
-const DEFAULT_THRESHOLDS = {
-  largeResearchDataBytes: 1024 * 1024,
-  localRawLogBytes: 1024 * 1024,
-};
-
-export function normalizeRepoPath(input) {
-  return String(input ?? "").trim().replace(/\\/g, "/").replace(/^\.\//, "");
-}
-
-function isResearchDataPath(filePath) {
-  return normalizeRepoPath(filePath).startsWith("docs/research/data/");
-}
-
-function isRawLogPath(filePath) {
-  const p = normalizeRepoPath(filePath);
-  return isResearchDataPath(p) && (p.includes("/raw/") || p.endsWith(".log"));
-}
-
-export function classifyTrackedBloat(files, thresholds = DEFAULT_THRESHOLDS) {
-  const rows = Array.isArray(files) ? files : [];
-  const violations = [];
-  const warnings = [];
-
-  for (const row of rows) {
-    const filePath = normalizeRepoPath(typeof row === "string" ? row : row?.path);
-    const bytes = Number(typeof row === "string" ? 0 : row?.bytes ?? 0);
-    if (!filePath) continue;
-
-    if (isRawLogPath(filePath)) {
-      violations.push({ path: filePath, reason: "tracked-raw-research-log", bytes });
-      continue;
-    }
-
-    if (isResearchDataPath(filePath) && bytes >= thresholds.largeResearchDataBytes) {
-      violations.push({ path: filePath, reason: "tracked-large-research-data", bytes });
-      continue;
-    }
-
-    if (filePath.startsWith(".project/") && bytes >= 1024 * 1024) {
-      warnings.push({ path: filePath, reason: "large-canonical-board-file", bytes });
-    }
-  }
-
-  return { scannedCount: rows.length, violations, warnings };
-}
+export { buildRepoBloatReport, classifyTrackedBloat, normalizeRepoPath };
 
 function parseArgs(argv) {
   const out = { strict: false, json: false, help: false };
@@ -77,8 +36,8 @@ function printHelp() {
     "repo bloat audit",
     "",
     "Usage:",
-    "  npm run repo:bloat:audit",
-    "  npm run repo:bloat:audit:strict",
+    "  pnpm run repo:bloat:audit",
+    "  pnpm run repo:bloat:audit:strict",
     "  node scripts/repo-bloat-audit.mjs --json",
     "",
     "Options:",
@@ -86,80 +45,6 @@ function printHelp() {
     "  --json     machine-readable output",
     "  -h, --help",
   ].join("\n"));
-}
-
-function listTrackedFiles(cwd) {
-  const out = execFileSync("git", ["ls-files"], {
-    cwd,
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-  return out.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-}
-
-function trackedRows(cwd) {
-  return listTrackedFiles(cwd).map((filePath) => {
-    const fullPath = path.join(cwd, filePath);
-    let bytes = 0;
-    try {
-      bytes = statSync(fullPath).size;
-    } catch {
-      bytes = 0;
-    }
-    return { path: filePath, bytes };
-  });
-}
-
-function walkFiles(rootDir) {
-  if (!existsSync(rootDir)) return [];
-  const out = [];
-  const stack = [rootDir];
-  while (stack.length > 0) {
-    const dir = stack.pop();
-    if (!dir) continue;
-    let entries = [];
-    try {
-      entries = readdirSync(dir, { withFileTypes: true });
-    } catch {
-      continue;
-    }
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory()) stack.push(fullPath);
-      else if (entry.isFile()) out.push(fullPath);
-    }
-  }
-  return out;
-}
-
-function localRawLogAdvisories(cwd, trackedSet, thresholds = DEFAULT_THRESHOLDS) {
-  const root = path.join(cwd, "docs", "research", "data");
-  return walkFiles(root)
-    .map((fullPath) => {
-      const rel = normalizeRepoPath(path.relative(cwd, fullPath));
-      if (!isRawLogPath(rel) || trackedSet.has(rel)) return undefined;
-      const bytes = statSync(fullPath).size;
-      if (bytes < thresholds.localRawLogBytes) return undefined;
-      return { path: rel, reason: "local-ignored-raw-log", bytes };
-    })
-    .filter(Boolean)
-    .sort((a, b) => b.bytes - a.bytes);
-}
-
-export function buildRepoBloatReport(cwd = process.cwd(), thresholds = DEFAULT_THRESHOLDS) {
-  const rows = trackedRows(cwd);
-  const trackedSet = new Set(rows.map((row) => normalizeRepoPath(row.path)));
-  const classified = classifyTrackedBloat(rows, thresholds);
-  return {
-    cwd,
-    trackedCount: rows.length,
-    ...classified,
-    localAdvisories: localRawLogAdvisories(cwd, trackedSet, thresholds),
-  };
-}
-
-function formatBytes(bytes) {
-  return `${(Number(bytes || 0) / 1024 / 1024).toFixed(2)}MB`;
 }
 
 function main() {
