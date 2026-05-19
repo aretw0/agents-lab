@@ -22,6 +22,10 @@ import {
   type UnattendedContinuationContextLevel,
 } from "./guardrails-core-unattended-continuation";
 import { asBooleanWithDefault } from "./guardrails-core-param-normalizers";
+import {
+  formatAuthorizationEvidence,
+  GUARDRAILS_AUTHORIZATION_NONE,
+} from "./guardrails-core-authorization";
 
 function normalizeContextLevel(value: unknown): UnattendedContinuationContextLevel {
   return value === "warn" || value === "checkpoint" || value === "compact" || value === "ok" ? value : "ok";
@@ -249,7 +253,7 @@ export function formatLocalContinuityAuditSummary(
     reasons.length > 0 ? `reasons=${reasons.join("|")}` : undefined,
     protectedPaths.length > 0 ? `protected=${protectedPaths.join("|")}` : undefined,
     stagnation ? `stagnation=${stagnation}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 }
 
