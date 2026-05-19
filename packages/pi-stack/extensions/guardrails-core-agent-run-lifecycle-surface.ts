@@ -12,6 +12,10 @@ import { isTerminalAgentRunState, readLogByteCount, readLogTail, readRegistryEnt
 import { resolveExecutionCwdParam } from "./guardrails-core-execution-context";
 import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-param-normalizers";
 import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asMarkerResults(value: unknown): AgentRunMarkerResult[] | undefined {
@@ -170,7 +174,7 @@ export function registerAgentRunLifecycleTools(pi: ExtensionAPI): void {
       const result = {
         mode: "agent-run-log-tail" as const,
         activation: "none" as const,
-        authorization: "none" as const,
+        authorization: GUARDRAILS_AUTHORIZATION_NONE,
         dispatchAllowed: false,
         processStartAllowed: false,
         processStopAllowed: false,
@@ -179,7 +183,7 @@ export function registerAgentRunLifecycleTools(pi: ExtensionAPI): void {
         logPath: entry?.logPath,
         maxLines: Math.max(1, Math.min(500, Math.floor(maxLines))),
         lines,
-        summary: `agent-run-log-tail: runId=${runId || "unknown"} found=${entry ? "yes" : "no"} lines=${lines.length} dispatch=no authorization=none`,
+        summary: `agent-run-log-tail: runId=${runId || "unknown"} found=${entry ? "yes" : "no"} lines=${lines.length} dispatch=no ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
       };
       return buildOperatorVisibleToolResponse({
         label: "agent_run_log_tail",
@@ -221,7 +225,7 @@ export function registerAgentRunLifecycleTools(pi: ExtensionAPI): void {
       const result = {
         mode: "agent-run-follow" as const,
         activation: "none" as const,
-        authorization: "none" as const,
+        authorization: GUARDRAILS_AUTHORIZATION_NONE,
         dispatchAllowed: false,
         processStartAllowed: false,
         processStopAllowed: false,
@@ -245,7 +249,7 @@ export function registerAgentRunLifecycleTools(pi: ExtensionAPI): void {
           `outputBytes=${outputBytes}`,
           `lines=${lines.length}`,
           "dispatch=no",
-          "authorization=none",
+          formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
         ].join(" "),
       };
       return buildOperatorVisibleToolResponse({
