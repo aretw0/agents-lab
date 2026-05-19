@@ -1,3 +1,8 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+
 export type StructuredInterviewQuestionKind = "text" | "single-choice" | "boolean" | "number";
 export type StructuredInterviewAnswerState = "answered" | "unknown" | "skipped";
 export type StructuredInterviewDecision = "complete" | "needs-operator-answer" | "invalid";
@@ -24,7 +29,7 @@ export interface StructuredInterviewResult {
   backendFirst: true;
   uiCoupling: "none";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   decision: StructuredInterviewDecision;
   nextQuestionId?: string;
@@ -170,7 +175,7 @@ export function resolveStructuredInterview(input: {
     backendFirst: true,
     uiCoupling: "none",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     decision,
     nextQuestionId: decision === "needs-operator-answer" ? missing[0] : undefined,

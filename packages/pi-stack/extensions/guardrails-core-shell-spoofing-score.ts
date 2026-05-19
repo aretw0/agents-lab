@@ -1,3 +1,8 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+
 export interface ShellSpoofingCoverageInput {
   hasCommandSensitivePolicyRule: boolean;
   hasDoctrineSpoofingRule: boolean;
@@ -22,7 +27,7 @@ export type ShellSpoofingCoverageRecommendationCode =
 export interface ShellSpoofingCoverageScore {
   mode: "shell-spoofing-coverage-score";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   score: number;
   recommendationCode: ShellSpoofingCoverageRecommendationCode;
@@ -107,7 +112,7 @@ export function buildShellSpoofingCoverageScore(input: ShellSpoofingCoverageInpu
   return {
     mode: "shell-spoofing-coverage-score",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     score,
     recommendationCode,
