@@ -1,3 +1,9 @@
+import {
+  formatAuthorizationEvidence,
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+
 export type ToolHygieneClass = "advisory" | "measured" | "operational" | "protected" | "development";
 export type ToolHygieneMaturity = "safe-for-local-loop" | "needs-measured-evidence" | "requires-operator-approval" | "hide-before-long-loop";
 
@@ -18,7 +24,7 @@ export interface ToolHygieneRow {
 export interface ToolHygieneScorecard {
   mode: "tool-hygiene-scorecard";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   total: number;
   shown: number;
@@ -99,7 +105,7 @@ export interface LineBudgetSnapshotRow {
 export interface LineBudgetSnapshot {
   mode: "line-budget-snapshot";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   mutationAllowed: false;
   recommendation: LineBudgetRecommendation;
@@ -127,7 +133,7 @@ export interface LineBudgetSnapshot {
 export interface AgentsAsToolsCalibrationScore {
   mode: "agents-as-tools-calibration-score";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   score: number;
   recommendationCode: AgentsAsToolsCalibrationRecommendationCode;
@@ -378,13 +384,13 @@ export function buildToolHygieneScorecard(input: {
     `syntaxFindings=${syntaxHygiene.findings}`,
     `syntaxRequiresRationale=${syntaxHygiene.requiresRationale}`,
     "dispatch=no",
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].join(" ");
 
   return {
     mode: "tool-hygiene-scorecard",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     total: rows.length,
     shown: shownRows.length,
@@ -476,13 +482,13 @@ export function buildLineBudgetSnapshot(input: {
     `aboveExtract=${totals.aboveExtract}`,
     `aboveCritical=${totals.aboveCritical}`,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
   return {
     mode: "line-budget-snapshot",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     mutationAllowed: false,
     recommendation,
@@ -565,7 +571,7 @@ export function buildAgentsAsToolsCalibrationScore(input: { tools: ToolHygieneIn
   return {
     mode: "agents-as-tools-calibration-score",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     score,
     recommendationCode,
