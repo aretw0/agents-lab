@@ -8,7 +8,7 @@ export type LocalSliceCanaryDecision = "prepare-local-slice" | "stop-after-slice
 
 export interface LocalSliceCanaryInput {
   readinessReady: boolean;
-  authorization: "none" | "operator" | "unknown";
+  authorization: GuardrailsAuthorizationNone | "operator" | "unknown";
   checkpointFresh: boolean;
   handoffBudgetOk: boolean;
   gitStateExpected: boolean;
