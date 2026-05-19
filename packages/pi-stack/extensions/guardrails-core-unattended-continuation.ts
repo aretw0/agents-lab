@@ -1,4 +1,8 @@
 import type { UnattendedContinuationContextLevel, UnattendedContinuationDecision, UnattendedContinuationInput, UnattendedContinuationPlan, NudgeFreeLoopCanarySignalSource, NudgeFreeLoopValidationKind, NudgeFreeLoopStopConditionKind, NudgeFreeLoopMeasuredGate, NudgeFreeLoopMeasuredEvidenceEntry, NudgeFreeLoopCanaryInput, NudgeFreeLoopMeasuredSignal, NudgeFreeLoopStopConditionSignal, NudgeFreeLoopLocalCandidate, NudgeFreeLoopMeasuredSignals, NudgeFreeLoopMeasuredCanaryInput, NudgeFreeLoopLocalMeasuredCanaryInput, NudgeFreeLoopLocalMeasuredCanaryPacket, NudgeFreeLoopPacketFactSource, NudgeFreeLoopLocalFactKey, NudgeFreeLoopLocalFactOrigin, NudgeFreeLoopLocalFactCollectorStatus, NudgeFreeLoopLocalReadStatus, NudgeFreeLoopLocalFactCollectorResult, NudgeFreeLoopFactSourceAssessment, NudgeFreeLoopFactCollectorAssessment, NudgeFreeLoopLocalMeasuredAuditEnvelope, NudgeFreeLoopLocalCollectedFactsInput, NudgeFreeLoopPreparedLocalMeasuredAuditEnvelope, NudgeFreeLoopMeasuredPacketTrust, NudgeFreeLoopCanaryDecision, SelfReloadAutoresumeCanaryDecision, SelfReloadAutoresumeCanaryInput, SelfReloadAutoresumeCanaryPlan, NudgeFreeLoopCanaryGate } from "./guardrails-core-unattended-continuation-types";
+import {
+  formatAuthorizationEvidence,
+  GUARDRAILS_AUTHORIZATION_NONE,
+} from "./guardrails-core-authorization";
 export type * from "./guardrails-core-unattended-continuation-types";
 
 export {
@@ -531,7 +535,7 @@ export function resolveMeasuredFactSourceAssessment(input: {
     effect: "none",
     mode: "advisory",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     factSource,
     localObservedCount,
     missingLocalFacts,
@@ -596,13 +600,13 @@ export function buildLocalMeasuredNudgeFreeLoopAuditEnvelope(input: {
     effect: "none",
     mode: "advisory",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     eligibleForAuditedRuntimeSurface: eligible,
     collectorAssessment,
     packet,
     trust,
     reasons: eligible ? ["audit-envelope-eligible"] : [...reasons],
-    summary: `nudge-free-audit-envelope: eligible=${eligible ? "yes" : "no"} packet=${packet.gate.decision} collectors=${collectorAssessment.eligibleForMeasuredPacket ? "yes" : "no"} trust=${trust.eligibleForAuditedRuntimeSurface ? "yes" : "no"} authorization=none`,
+    summary: `nudge-free-audit-envelope: eligible=${eligible ? "yes" : "no"} packet=${packet.gate.decision} collectors=${collectorAssessment.eligibleForMeasuredPacket ? "yes" : "no"} trust=${trust.eligibleForAuditedRuntimeSurface ? "yes" : "no"} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
   };
 }
 
@@ -674,11 +678,11 @@ export function buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts(
     effect: "none",
     mode: "advisory",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     collectorResults,
     packetInput,
     envelope,
-    summary: `nudge-free-local-audit-prep: eligible=${envelope.eligibleForAuditedRuntimeSurface ? "yes" : "no"} collectors=${collectorResults.length}/${REQUIRED_NUDGE_FREE_LOCAL_FACTS.length} packet=${envelope.packet.gate.decision} authorization=none`,
+    summary: `nudge-free-local-audit-prep: eligible=${envelope.eligibleForAuditedRuntimeSurface ? "yes" : "no"} collectors=${collectorResults.length}/${REQUIRED_NUDGE_FREE_LOCAL_FACTS.length} packet=${envelope.packet.gate.decision} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
   };
 }
 
@@ -699,7 +703,7 @@ export function resolveMeasuredPacketTrust(input: {
     effect: "none",
     mode: "advisory",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     factSource: input.factSource,
     eligibleForAuditedRuntimeSurface: eligible,
     reasons: eligible ? ["local-observed-ready-packet"] : reasons,
@@ -839,14 +843,14 @@ export function resolveSelfReloadAutoresumeCanaryPlan(input: SelfReloadAutoresum
       effect: "none",
       mode: "advisory",
       activation: "none",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       reloadAllowed: false,
       autoResumeDispatchAllowed: false,
       requiresOperatorDecision: false,
       decision: "not-needed",
       reasons,
-      summary: "self-reload-autoresume-canary: decision=not-needed reload=no autoResume=no dispatch=no reasons=reload-not-required authorization=none",
+      summary: `self-reload-autoresume-canary: decision=not-needed reload=no autoResume=no dispatch=no reasons=reload-not-required ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
       recommendation: "Do not reload; continue from the current live runtime.",
     };
   }
@@ -857,14 +861,14 @@ export function resolveSelfReloadAutoresumeCanaryPlan(input: SelfReloadAutoresum
       effect: "none",
       mode: "advisory",
       activation: "none",
-      authorization: "none",
+      authorization: GUARDRAILS_AUTHORIZATION_NONE,
       dispatchAllowed: false,
       reloadAllowed: false,
       autoResumeDispatchAllowed: false,
       requiresOperatorDecision: true,
       decision: "blocked",
       reasons,
-      summary: `self-reload-autoresume-canary: decision=blocked reload=no autoResume=no dispatch=no reasons=${reasons.slice(0, 5).join(",")}${blockedRequestsSummary} authorization=none`,
+      summary: `self-reload-autoresume-canary: decision=blocked reload=no autoResume=no dispatch=no reasons=${reasons.slice(0, 5).join(",")}${blockedRequestsSummary} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
       recommendation: "Do not self-reload; preserve progress and ask the operator after the missing gates are resolved.",
     };
   }
@@ -873,14 +877,14 @@ export function resolveSelfReloadAutoresumeCanaryPlan(input: SelfReloadAutoresum
     effect: "none",
     mode: "advisory",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     reloadAllowed: false,
     autoResumeDispatchAllowed: false,
     requiresOperatorDecision: true,
     decision: "ready-for-operator-decision",
     reasons: ["all-gates-green", "operator-decision-required", "execution-not-implemented"],
-    summary: "self-reload-autoresume-canary: decision=ready-for-operator-decision reload=no autoResume=no dispatch=no reasons=all-gates-green,operator-decision-required,execution-not-implemented authorization=none",
+    summary: `self-reload-autoresume-canary: decision=ready-for-operator-decision reload=no autoResume=no dispatch=no reasons=all-gates-green,operator-decision-required,execution-not-implemented ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     recommendation: "Present this evidence to the operator; runtime self-reload execution remains a separate protected implementation task.",
   };
 }
