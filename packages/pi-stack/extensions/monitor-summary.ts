@@ -28,6 +28,7 @@ import {
 import { resolveMonitorStaleFeedbackPrefilter } from "./monitor-runtime-contract";
 import { shouldEmitMonitorSummaryStatus } from "./monitor-summary-status-dedupe";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
+import { GUARDRAILS_AUTHORIZATION_NONE } from "./guardrails-core-authorization";
 
 interface MonitorMeta {
 	name: string;
@@ -295,7 +296,7 @@ export default function monitorSummaryExtension(pi: ExtensionAPI) {
 			return buildOperatorVisibleToolResponse({
 				label: "monitor_stale_feedback_prefilter",
 				summary: result.summary,
-				details: { ...result, effect: "none", mode: "report-only", authorization: "none" },
+				details: { ...result, effect: "none", mode: "report-only", authorization: GUARDRAILS_AUTHORIZATION_NONE },
 			});
 		},
 	});
