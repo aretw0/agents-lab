@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore from "../../extensions/guardrails-core";
 import { evaluateGrowthMaturityScorePacket } from "../../extensions/guardrails-core-exports";
+import { registerGuardrailsGrowthMaturitySurface } from "../../extensions/guardrails-core-growth-maturity-surface";
 
 function makeMockPi() {
   const rawPi = {
@@ -87,7 +87,7 @@ describe("growth maturity score packet", () => {
 
   it("exposes growth_maturity_score_packet as read-only no-dispatch surface", async () => {
     const pi = makeMockPi();
-    guardrailsCore(pi);
+    registerGuardrailsGrowthMaturitySurface(pi);
     const tool = getTool(pi, "growth_maturity_score_packet");
 
     const ready = await tool.execute(

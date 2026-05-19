@@ -1,3 +1,8 @@
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+
 export type GrowthMaturityDecision = "go" | "hold" | "needs-evidence";
 
 export type GrowthMaturityRecommendationCode =
@@ -21,7 +26,7 @@ export interface GrowthMaturityScorePacket {
   mode: "growth-maturity-score-packet";
   reviewMode: "read-only";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   mutationAllowed: false;
   dispatchAllowed: false;
   decision: GrowthMaturityDecision;
@@ -132,7 +137,7 @@ export function evaluateGrowthMaturityScorePacket(input: GrowthMaturityScoreInpu
     mode: "growth-maturity-score-packet",
     reviewMode: "read-only",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     mutationAllowed: false,
     dispatchAllowed: false,
     decision,
