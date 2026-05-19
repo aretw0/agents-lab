@@ -12,6 +12,11 @@ import { resolveExecutionCwdParam, sameCwd } from "./guardrails-core-execution-c
 import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-param-normalizers";
 import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
+import {
+  GUARDRAILS_AUTHORIZATION_EXPLICIT_OPERATOR,
+  GUARDRAILS_AUTHORIZATION_NONE,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function sdkReadOnlyBatchWorkerSchema() {
@@ -177,7 +182,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
       const result = {
         mode: "agent-run-sdk-readonly-batch-dispatch" as const,
         activation: "none" as const,
-        authorization: parallelDispatchAllowed ? "explicit-operator" as const : "none" as const,
+        authorization: parallelDispatchAllowed ? GUARDRAILS_AUTHORIZATION_EXPLICIT_OPERATOR : GUARDRAILS_AUTHORIZATION_NONE,
         dispatchAllowed: parallelDispatchAllowed,
         parallelDispatchAllowed,
         processStartAllowed: parallelDispatchAllowed,
@@ -249,7 +254,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
       const result = {
         mode: "agent-run-sdk-readonly-batch-status" as const,
         activation: "none" as const,
-        authorization: "none" as const,
+        authorization: GUARDRAILS_AUTHORIZATION_NONE,
         dispatchAllowed: false,
         processStartAllowed: false,
         processStopAllowed: false,
@@ -274,7 +279,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
           staleCount > 0 ? `stale=${staleCount}` : undefined,
           `fanInReady=${runIds.length > 0 && missingCount === 0 && terminalCount === runIds.length ? "yes" : "no"}`,
           "dispatch=no",
-          "authorization=none",
+          formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
           blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
         ].filter(Boolean).join(" "),
       };
@@ -330,7 +335,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
       const result = {
         mode: "agent-run-sdk-readonly-batch-abort" as const,
         activation: "none" as const,
-        authorization: stopAllowed ? "explicit-operator" as const : "none" as const,
+        authorization: stopAllowed ? GUARDRAILS_AUTHORIZATION_EXPLICIT_OPERATOR : GUARDRAILS_AUTHORIZATION_NONE,
         dispatchAllowed: false,
         processStartAllowed: false,
         processStopAllowed: stopAllowed,
@@ -352,7 +357,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
           stoppedPids.length > 0 ? `stopped=${stoppedPids.length}` : undefined,
           blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
           "dispatch=no",
-          `authorization=${stopAllowed ? "explicit-operator" : "none"}`,
+          formatAuthorizationEvidence(stopAllowed ? GUARDRAILS_AUTHORIZATION_EXPLICIT_OPERATOR : GUARDRAILS_AUTHORIZATION_NONE),
         ].filter(Boolean).join(" "),
       };
       return buildOperatorVisibleToolResponse({
@@ -428,7 +433,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
       const result = {
         mode: "agent-run-sdk-readonly-batch-fan-in-packet" as const,
         activation: "none" as const,
-        authorization: "none" as const,
+        authorization: GUARDRAILS_AUTHORIZATION_NONE,
         dispatchAllowed: false,
         processStartAllowed: false,
         processStopAllowed: false,
@@ -447,7 +452,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
           `workers=${workerOutcomes.length}`,
           aggregate.blockers.length > 0 ? `blockers=${aggregate.blockers.join("|")}` : undefined,
           "dispatch=no",
-          "authorization=none",
+          formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
         ].filter(Boolean).join(" "),
       };
       return buildOperatorVisibleToolResponse({
