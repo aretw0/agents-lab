@@ -30,9 +30,10 @@ export LANGUAGE=pt_BR:pt:en
 export TERM=\${TERM:-xterm-256color}
 export COLORTERM=\${COLORTERM:-truecolor}
 export NPM_CONFIG_CACHE=/home/${TARGET_USER}/.npm-cache
+export NPM_CONFIG_PREFIX=/home/${TARGET_USER}/.npm-global
 export PNPM_HOME=/home/${TARGET_USER}/.local/share/pnpm
 export PI_CODING_AGENT_DIR=/workspaces/agents-lab/.sandbox/pi-agent
-export PATH=/home/${TARGET_USER}/.local/share/pnpm:\$PATH
+export PATH=/home/${TARGET_USER}/.local/share/pnpm:/home/${TARGET_USER}/.npm-global/bin:/home/${TARGET_USER}/.local/bin:\$PATH
 cd "${PROJECT_DIR}"
 INIT
 

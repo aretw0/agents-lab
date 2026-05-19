@@ -3,10 +3,10 @@
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
 
 const REPO_ROOT = path.resolve(process.cwd());
 const WORKDIR = "/workspaces/agents-lab";
-const LOCAL_AGENT_DIR = `${WORKDIR}/.sandbox/pi-agent`;
 
 function printHelp() {
 	console.log([
@@ -20,9 +20,9 @@ function printHelp() {
 		"  node scripts/devcontainer-lab.mjs agents-lab-dev -- npm run pi:isolated",
 		"",
 		"Comportamento:",
-		"  - força user=vscode",
+		"  - entra pelo comando lab versionado no container",
+		"  - força operador=vscode",
 		"  - força workdir=/workspaces/agents-lab",
-		"  - injeta PI_CODING_AGENT_DIR local no workspace",
 	].join("\n"));
 }
 
@@ -46,8 +46,22 @@ function parseArgs(argv) {
 	};
 }
 
-function run() {
-	const parsed = parseArgs(process.argv);
+export function buildDockerExecArgs(parsed) {
+	return [
+		"exec",
+		"-it",
+		"--user",
+		"root",
+		parsed.container,
+		"lab",
+		"vscode",
+		WORKDIR,
+		...parsed.command,
+	];
+}
+
+export function run(argv = process.argv) {
+	const parsed = parseArgs(argv);
 	if (parsed.help) {
 		printHelp();
 		return;
@@ -59,21 +73,7 @@ function run() {
 		process.exit(1);
 	}
 
-	const shellCommand = parsed.command.join(" ");
-	const dockerArgs = [
-		"exec",
-		"-it",
-		"--user",
-		"vscode",
-		"--workdir",
-		WORKDIR,
-		"--env",
-		`PI_CODING_AGENT_DIR=${LOCAL_AGENT_DIR}`,
-		parsed.container,
-		"bash",
-		"-lc",
-		shellCommand,
-	];
+	const dockerArgs = buildDockerExecArgs(parsed);
 
 	try {
 		execFileSync("docker", dockerArgs, {
@@ -91,4 +91,6 @@ function run() {
 	}
 }
 
-run();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+	run();
+}

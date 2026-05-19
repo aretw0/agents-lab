@@ -106,6 +106,7 @@
     "test:repo:complexity": "node --test scripts/test/repo-complexity-check.test.mjs",
     "test:repo:bloat:audit": "node --test scripts/test/repo-bloat-audit.test.mjs",
     "test:repo:discourse:audit": "node --test scripts/test/repo-discourse-audit.test.mjs",
+    "test:devcontainer:lab": "node --test scripts/test/devcontainer-lab.test.mjs",
     "test:ops:disk-guard": "node --test scripts/test/host-disk-guard.test.mjs",
     "test:ops:loop-evidence": "node --test scripts/test/guardrails-loop-evidence-check.test.mjs",
     "monitor:stability:evidence": "node scripts/monitor-stability-evidence.mjs --source auto",

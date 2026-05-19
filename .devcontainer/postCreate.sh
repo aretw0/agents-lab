@@ -7,7 +7,9 @@ SETTINGS_FILE="$LOCAL_AGENT_DIR/settings.json"
 
 mkdir -p "$LOCAL_AGENT_DIR"
 mkdir -p "${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
+mkdir -p "${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}/bin"
 mkdir -p "${PNPM_HOME:-/home/vscode/.local/share/pnpm}/store"
+mkdir -p /home/vscode/.local/bin
 
 if [[ ! -f "$SETTINGS_FILE" ]]; then
   cat > "$SETTINGS_FILE" <<'JSON'

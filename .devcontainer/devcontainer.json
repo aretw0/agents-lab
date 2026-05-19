@@ -23,11 +23,19 @@
   "containerEnv": {
     "PI_CODING_AGENT_DIR": "/workspaces/agents-lab/.sandbox/pi-agent",
     "NPM_CONFIG_CACHE": "/home/vscode/.npm-cache",
+    "NPM_CONFIG_PREFIX": "/home/vscode/.npm-global",
     "PNPM_HOME": "/home/vscode/.local/share/pnpm",
     "LANG": "pt_BR.UTF-8",
     "LC_ALL": "pt_BR.UTF-8",
     "LANGUAGE": "pt_BR:pt:en",
     "TERM": "xterm-256color",
+    "COLORTERM": "truecolor"
+  },
+  "remoteEnv": {
+    "PATH": "/home/vscode/.local/share/pnpm:/home/vscode/.npm-global/bin:/home/vscode/.local/bin:${containerEnv:PATH}",
+    "LANG": "pt_BR.UTF-8",
+    "LC_ALL": "pt_BR.UTF-8",
+    "LANGUAGE": "pt_BR:pt:en",
     "COLORTERM": "truecolor"
   },
   "mounts": [
