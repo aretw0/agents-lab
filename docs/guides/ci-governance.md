@@ -7,8 +7,8 @@ Guia rápido para diagnosticar e corrigir falhas de governança no CI.
 No workflow `CI`:
 
 - **Gate de bloqueio (job `smoke`)**
-  - `npm run audit:sovereignty`
-  - `npm run audit:sovereignty:diff`
+  - `pnpm run audit:sovereignty`
+  - `pnpm run audit:sovereignty:diff`
 - **Visibilidade (job `sovereignty-report`)**
   - artifact `stack-sovereignty-audit`
   - comentário de PR com `<!-- stack-sovereignty-report -->`
@@ -37,7 +37,7 @@ packages/pi-stack/extensions/<arquivo>.ts: missing capability annotations (requi
 Depois rode localmente:
 
 ```bash
-npm run audit:sovereignty:diff
+pnpm run audit:sovereignty:diff
 ```
 
 ---
@@ -67,8 +67,8 @@ Campos mínimos:
 Validação:
 
 ```bash
-npm run audit:sovereignty
-npm run audit:sovereignty:diff
+pnpm run audit:sovereignty
+pnpm run audit:sovereignty:diff
 ```
 
 ---
@@ -108,10 +108,10 @@ critical capability owner missing at runtime: <id>
 ## Checklist local antes de abrir PR
 
 ```bash
-npm run audit:sovereignty
-npm run audit:sovereignty:diff
-npm run test:smoke
-npm test
+pnpm run audit:sovereignty
+pnpm run audit:sovereignty:diff
+pnpm run test:smoke
+pnpm test
 ```
 
 ## Referências

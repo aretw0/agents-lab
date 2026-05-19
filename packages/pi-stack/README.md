@@ -128,6 +128,7 @@ Ativar: `/settings` → selecionar `agents-lab`
 | `/session-analytics` | Analytics de sessões (`signals|timeline|model-usage|summary|outliers`) para triagem sem grep recursivo em `~/.pi` |
 | `/scheduler-governance` | Governança de scheduler lease/ownership (`status/policy/apply`) com confirmações fortes para ações destrutivas |
 | `/stack-status` | Diagnóstico de soberania da stack: owners por capability, risco de overlap e postura de governança em runtime |
+| `/stack-quality` | Audit read-only de qualidade da stack: complexidade, bloat versionado/local e drift de discurso canônico |
 | `/claude-code` | Bridge experimental para Claude Code CLI (status/login/auth-status) |
 
 > Convenção: `/doctor` permanece o diagnóstico global de ambiente/runtime. Comandos verticais como `/monitor-provider`, `/colony-pilot` e `/scheduler-governance` fazem diagnóstico/controle de domínio.
@@ -207,8 +208,8 @@ Baseline aplicada (default):
 No repositório, a soberania é validada por dois níveis:
 
 - **Gate de bloqueio** (job `smoke`):
-  - `npm run audit:sovereignty`
-  - `npm run audit:sovereignty:diff`
+  - `pnpm run audit:sovereignty`
+  - `pnpm run audit:sovereignty:diff`
 - **Visibilidade operacional** (job `sovereignty-report`):
   - gera `docs/architecture/stack-sovereignty-audit-latest.md`
   - publica artifact `stack-sovereignty-audit`
@@ -229,7 +230,7 @@ Para evitar regressão de UX, operamos em duas trilhas:
 Auditoria rápida da fronteira publicada vs lab:
 
 ```bash
-npm run pi-stack:user-surface
+pnpm run pi-stack:user-surface
 ```
 
 ## Filosofia

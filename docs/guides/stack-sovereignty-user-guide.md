@@ -8,6 +8,7 @@
 ## Comandos essenciais
 - `/doctor` — saúde global (inclui sinal de scheduler governance)
 - `/stack-status` — soberania da stack (owners + overlaps + risco)
+- `/stack-quality` — qualidade da stack (complexidade + bloat + discurso)
 - `/scheduler-governance status` — lease owner + foreign tasks
 - `/scheduler-governance policy <mode>` — define policy no workspace
 - `/scheduler-governance apply <action>` — ação destrutiva guardada
@@ -30,6 +31,19 @@
 - usar tasks `workspace` somente para checks realmente compartilhados
 - follow-up comum deve ficar em `instance`
 
+## Qualidade da stack
+
+Use `/stack-quality` quando precisar de um snapshot read-only do que pode travar
+fluidez do repo antes de virar tarefa maior:
+
+- `complexityBlocking`: arquivos rastreados acima do orçamento sem exceção;
+- `bloatViolations`: logs brutos ou datasets grandes versionados;
+- `localBloatAdvisories`: logs brutos locais grandes que ainda não estão no git;
+- `discourseFindings`: termos ou promessas fortes em superfície canônica.
+
+Os scripts `repo:*` continuam úteis como wrappers de CI/lab, mas a superfície
+distribuída para usuários é `stack_quality_audit` e o comando `/stack-quality`.
+
 ## CI: relatório de soberania (artifact + PR)
 - O CI publica um artifact `stack-sovereignty-audit` com o arquivo:
   - `docs/architecture/stack-sovereignty-audit-latest.md`
@@ -46,8 +60,8 @@
 
 ### Relação com os gates de bloqueio
 - `smoke` continua sendo o gate de fail/pass:
-  - `npm run audit:sovereignty` (strict)
-  - `npm run audit:sovereignty:diff` (strict)
+  - `pnpm run audit:sovereignty` (strict)
+  - `pnpm run audit:sovereignty:diff` (strict)
 - `sovereignty-report` é de visibilidade operacional (artifact + comentário no PR).
 
 Troubleshooting rápido de falhas no CI: [`ci-governance.md`](./ci-governance.md)

@@ -37,14 +37,15 @@ Remover/arquivar quando:
 Dados derivados e pequenos (`results.json`, scorecards e sínteses) podem ser
 versionados quando carregam evidência recorrente. Logs brutos, dumps completos e
 datasets grandes em `docs/research/data/**` devem ficar locais, externos ou
-promovidos para artefato de release/CI. O gate `npm run repo:bloat:audit:strict`
+promovidos para artefato de release/CI. O gate `pnpm run repo:bloat:audit:strict`
 bloqueia logs brutos versionados e datasets grandes antes que o histórico vire
-depósito de runtime.
+depósito de runtime. Para usuários da stack, o mesmo sinal aparece no comando
+`/stack-quality` e na tool `stack_quality_audit`.
 
 ## Política de discurso canônico
 
 Termos fortes como fábrica, engine, maturidade e soberania precisam refletir
-contrato operacional, gate ou roadmap explícito. Use `npm run
+contrato operacional, gate ou roadmap explícito. Use `pnpm run
 repo:discourse:audit` como bússola advisory para encontrar linguagem legada
 (termos antigos para operador) e promessa aspiracional em docs/surfaces canônicas.
 O audit não bloqueia a release por padrão: ele ajuda a escolher a próxima lane
