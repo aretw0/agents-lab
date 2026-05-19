@@ -19,6 +19,10 @@ import { readAutoResumeAfterReloadIntent } from "./context-watchdog-reload-inten
 import { describeAutoResumeDispatchHint, describeAutoResumeDispatchReason, resolveHandoffPrepDecision, resolvePreCompactReloadSignal, shouldEmitAutoResumeAfterCompact, type AutoResumeDecisionSnapshot } from "./context-watchdog-resume";
 import { readHandoffJson, readProjectSettings, writeProjectSettings } from "./context-watchdog-storage";
 import { formatContextWatchCommandStatusSummary, formatContextWatchCompactStageStatusSummary, formatContextWatchStatusToolSummary, formatTimeoutPressureSummary, resolveContextWatchAdaptiveStatusSummary, resolveContextWatchCompactStageNextAction } from "./context-watchdog-status-formatting";
+import {
+	GUARDRAILS_AUTHORIZATION_NONE,
+	formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
 
 export interface ContextWatchdogStatusSurfaceRuntime {
 	getConfig(): ContextWatchdogConfig;
@@ -422,7 +426,7 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 					nextAction,
 					effect: "none",
 					mode: "read-only-compact-stage",
-					authorization: "none",
+					authorization: GUARDRAILS_AUTHORIZATION_NONE,
 					dispatchAllowed: false,
 				},
 			};
@@ -441,7 +445,7 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 				"context-watch-freshness-status:",
 				`preload=${freshness.preloadDecision}`,
 				`dirty=${freshness.dirtySignal}`,
-				"authorization=none",
+				formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
 			].join(" ");
 			return {
 				content: [{ type: "text", text: summary }],
@@ -453,7 +457,7 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 					gitDirty: freshness.gitDirty,
 					effect: "none",
 					mode: "read-only-freshness",
-					authorization: "none",
+					authorization: GUARDRAILS_AUTHORIZATION_NONE,
 					dispatchAllowed: false,
 				},
 			};
@@ -517,7 +521,7 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 					},
 					effect: "none",
 					mode: "read-only-preview",
-					authorization: "none",
+					authorization: GUARDRAILS_AUTHORIZATION_NONE,
 				},
 			};
 		},
@@ -555,7 +559,7 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 						`preload=${freshness.preloadDecision}`,
 						`dirty=${freshness.dirtySignal}`,
 						`rows=${freshness.gitDirty.rowCount}`,
-						`authorization=none`,
+						formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
 					].join("\n"),
 					"info",
 				);

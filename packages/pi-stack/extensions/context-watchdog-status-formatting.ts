@@ -4,6 +4,10 @@ import type {
 	ContextWatchDeterministicStopReason,
 	ContextWatchdogLevel,
 } from "./context-watchdog-operator-signals";
+import {
+	GUARDRAILS_AUTHORIZATION_NONE,
+	formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
 
 export function formatTimeoutPressureSummary(input: {
 	active?: boolean;
@@ -86,7 +90,7 @@ export function formatContextWatchCompactStageStatusSummary(input: {
 		`compact=${Math.floor(Number(input.compactPct))}`,
 		`reloadGate=${input.reloadGate}`,
 		`next=${input.nextAction.replace(/\s+/g, "_")}`,
-		"authorization=none",
+		formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
 	].join(" ");
 }
 

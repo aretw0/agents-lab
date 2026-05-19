@@ -9,6 +9,11 @@ import {
   localStopProtectedFocusNextAction,
 } from "./guardrails-core-local-stop-guidance";
 import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
+import {
   evaluateGrowthMaturityScorePacket,
   type GrowthMaturityDecision,
   type GrowthMaturityScorePacket,
@@ -138,7 +143,7 @@ function toSnapshotGrowthMaturityPacket(
     mode: "growth-maturity-score-packet",
     reviewMode: "read-only",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     mutationAllowed: false,
     dispatchAllowed: false,
     decision,
@@ -192,7 +197,7 @@ export interface TurnBoundaryDecisionPacket {
   recommendationCode: ContextWatchContinuationRecommendationCode;
   dispatchAllowed: false;
   mutationAllowed: false;
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   summary: string;
 }
 
@@ -262,7 +267,7 @@ export function formatContextWatchContinuationReadinessSummary(input: {
     input.localAuditReasons && input.localAuditReasons.length > 0 ? `reasons=${input.localAuditReasons.slice(0, 3).join("|")}` : undefined,
     input.protectedPaths && input.protectedPaths.length > 0 ? `protected=${input.protectedPaths.slice(0, 3).join("|")}` : undefined,
     `staleFocus=${input.staleFocusCount}`,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 }
 
@@ -286,7 +291,7 @@ export function formatContextWatchLocalSlicePreviewSummary(input: {
     input.dispatchAllowed !== undefined ? `dispatch=${input.dispatchAllowed ? "yes" : "no"}` : undefined,
     input.reasons.length > 0 ? `reasons=${input.reasons.slice(0, 3).join("|")}` : undefined,
     input.decisionPacketDecision === "blocked" && input.decisionPacketReasons && input.decisionPacketReasons.length > 0 ? `packetReasons=${input.decisionPacketReasons.slice(0, 3).join("|")}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 }
 
@@ -308,7 +313,7 @@ export function formatContextWatchLocalSliceOperatorPacketPreviewSummary(input: 
     `dispatch=${input.dispatchAllowed ? "yes" : "no"}`,
     `executor=${input.executorApproved ? "yes" : "no"}`,
     input.contractReasons.length > 0 ? `reasons=${input.contractReasons.slice(0, 4).join("|")}` : undefined,
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 }
 
@@ -549,7 +554,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     localSafeMayContinue,
     dispatchAllowed: false,
     mutationAllowed: false,
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     summary: [
       "turn-boundary-decision:",
       `decision=${decision}`,
@@ -565,7 +570,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
       growthMaturity ? `growthScore=${growthMaturity.score ?? "na"}` : undefined,
       growthSource ? `growthSource=${growthSource}` : undefined,
       growthFresh ? `growthFresh=${growthFresh}` : undefined,
-      "authorization=none",
+      formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     ].filter(Boolean).join(" "),
   };
 }
@@ -575,7 +580,7 @@ export type ContextPreloadProfile = "control-plane-core" | "agent-worker-lean" |
 export interface ContextPreloadConsumeReport {
   mode: "context-preload-consume";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   workspace: string;
   packPath: string;
@@ -710,7 +715,7 @@ export function consumeContextPreloadPack(cwd: string, input?: {
   return {
     mode: "context-preload-consume",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     workspace,
     packPath,
