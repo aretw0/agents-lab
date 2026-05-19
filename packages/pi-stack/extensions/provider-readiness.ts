@@ -65,12 +65,8 @@ const RATE_LIMIT_RE = /(\b429\b|rate.?limit|too many requests|quota\s*exceeded|c
 const AUTH_RE = /(\b401\b|\b403\b|unauthori[sz]ed|forbidden|auth\s*failed|invalid\s*token)/i;
 const SERVER_RE = /(\b5\d\d\b|overloaded|temporar(y|ily)\s*unavailable|internal\s*server\s*error)/i;
 
-function sessionDir(cwd: string): string {
-  return resolveGlobalWorkspaceSessionDir(cwd);
-}
-
 function collectRuntimeSignals(cwd: string, lookbackMinutes = 45): Record<string, RuntimeSignal> {
-  const dir = sessionDir(cwd);
+  const dir = resolveGlobalWorkspaceSessionDir(cwd);
   if (!existsSync(dir)) return {};
 
   const cutoffMs = Date.now() - lookbackMinutes * 60 * 1000;

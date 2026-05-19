@@ -220,12 +220,8 @@ export function buildWindowPressureAlerts(budgets: ProviderBudgetStatus[]): Quot
 // Main query function
 // ---------------------------------------------------------------------------
 
-function sessionDir(cwd: string): string {
-  return resolveGlobalWorkspaceSessionDir(cwd);
-}
-
 function recentSessionRecords(cwd: string, lookbackHours: number): unknown[] {
-  const dir = sessionDir(cwd);
+  const dir = resolveGlobalWorkspaceSessionDir(cwd);
   if (!existsSync(dir)) return [];
   const cutoffMs = Date.now() - lookbackHours * 3600 * 1000;
   const files = readdirSync(dir)
