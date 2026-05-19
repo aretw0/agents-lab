@@ -36,6 +36,8 @@ import {
 } from "../packages/pi-stack/extensions/session-pressure-policy.mjs";
 import {
 	buildControlPlaneRuntimeSettings,
+	canonicalizePackageSourceForAgentDir,
+	canonicalizeSettingsPackageSourcesForAgentDir,
 	controlPlaneEnabledModels,
 	controlPlaneWatchdogConfig,
 	extractPackageNameFromSource,
@@ -44,6 +46,7 @@ import {
 	reconcileLocalShellPath,
 } from "../packages/pi-stack/extensions/runtime-profile-policy.mjs";
 import { buildPiDevPressureReport } from "./pi-dev-pressure.mjs";
+import { applyLoopControlToState } from "./pi-loop-pause.mjs";
 
 export { detectSessionResumeIntent };
 export {
@@ -146,7 +149,7 @@ function pauseLoopForDevSession(dryRun = false) {
 	}
 	if (state.stopCondition === "manual-pause") return "already-paused";
 	if (dryRun) return "dry-run";
-	const next = { ...state, stopCondition: "manual-pause", updatedAtIso: new Date().toISOString() };
+	const next = applyLoopControlToState(state, "pause");
 	writeFileSync(LOOP_STATE_PATH, JSON.stringify(next, null, 2) + "\n", "utf8");
 	return "paused";
 }
@@ -354,12 +357,6 @@ function isRecord(value) {
 	return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function getPackageSource(entry) {
-	if (typeof entry === "string") return entry;
-	if (isRecord(entry) && typeof entry.source === "string") return entry.source;
-	return undefined;
-}
-
 export function leanEnabledModels() {
 	return controlPlaneEnabledModels();
 }
@@ -372,54 +369,18 @@ export function reconcileLeanWatchdogConfig(input) {
 	return reconcileControlPlaneWatchdogConfig(input);
 }
 
-function setPackageSource(entry, source) {
-	if (typeof entry === "string") return source;
-	if (isRecord(entry) && typeof entry.source === "string") return { ...entry, source };
-	return entry;
-}
-
-function toPortableRelativePath(fromDir, targetPath) {
-	const rel = path.relative(fromDir, targetPath) || ".";
-	return rel.split(path.sep).join("/");
-}
-
 export function canonicalizePackageSourceForLocalAgent(
 	source,
 	{ repoRoot = REPO_ROOT, localAgentDir = LOCAL_AGENT_DIR } = {},
 ) {
-	if (typeof source !== "string") return source;
-	if (source.startsWith("npm:") || source.startsWith("git+") || /^[a-z]+:\/\//i.test(source)) return source;
-	if (!path.isAbsolute(source)) return source;
-
-	const resolvedSource = path.resolve(source);
-	const resolvedRepo = path.resolve(repoRoot);
-	const relToRepo = path.relative(resolvedRepo, resolvedSource);
-	if (relToRepo.startsWith("..") || path.isAbsolute(relToRepo)) return source;
-	return toPortableRelativePath(path.resolve(localAgentDir), resolvedSource);
+	return canonicalizePackageSourceForAgentDir(source, { repoRoot, agentDir: localAgentDir });
 }
 
 export function canonicalizeSettingsObjectForLocalAgent(
 	settings,
 	{ repoRoot = REPO_ROOT, localAgentDir = LOCAL_AGENT_DIR } = {},
 ) {
-	if (!isRecord(settings) || !Array.isArray(settings.packages)) {
-		return { settings, changed: false, changes: [] };
-	}
-
-	let changed = false;
-	const changes = [];
-	const packages = settings.packages.map((entry) => {
-		const source = getPackageSource(entry);
-		if (!source) return entry;
-		const nextSource = canonicalizePackageSourceForLocalAgent(source, { repoRoot, localAgentDir });
-		if (nextSource === source) return entry;
-		changed = true;
-		changes.push({ from: source, to: nextSource });
-		return setPackageSource(entry, nextSource);
-	});
-
-	if (!changed) return { settings, changed: false, changes: [] };
-	return { settings: { ...settings, packages }, changed: true, changes };
+	return canonicalizeSettingsPackageSourcesForAgentDir(settings, { repoRoot, agentDir: localAgentDir });
 }
 
 function canonicalizeLocalSettings({ dryRun = false } = {}) {

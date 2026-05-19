@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import path from "node:path";
 
 export const COLD_CAPABILITY_PACKAGES = [
   "@davidorex/pi-project-workflows",
@@ -11,6 +12,13 @@ export const CONTROL_PLANE_ENABLED_MODELS = [
   "openai-codex/gpt-5.4-mini",
   "dashscope/qwen3.6-flash",
 ];
+
+export const CONTROL_PLANE_RUNTIME_PROFILE = {
+  runtimeProfile: "control-plane",
+  defaultProvider: "openai-codex",
+  defaultModel: "gpt-5.3-codex",
+  enabledModels: CONTROL_PLANE_ENABLED_MODELS,
+};
 
 export const CONTROL_PLANE_WATCHDOG_CONFIG = {
   enabled: true,
@@ -28,6 +36,23 @@ export const DEFAULT_WINDOWS_GIT_BASH = "C:\\Program Files\\Git\\bin\\bash.exe";
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function getPackageSource(entry) {
+  if (typeof entry === "string") return entry;
+  if (isRecord(entry) && typeof entry.source === "string") return entry.source;
+  return undefined;
+}
+
+function setPackageSource(entry, source) {
+  if (typeof entry === "string") return source;
+  if (isRecord(entry) && typeof entry.source === "string") return { ...entry, source };
+  return entry;
+}
+
+function toPortableRelativePath(fromDir, targetPath) {
+  const rel = path.relative(fromDir, targetPath) || ".";
+  return rel.split(path.sep).join("/");
 }
 
 export function reconcileLocalShellPath(
@@ -67,9 +92,48 @@ export function extractPackageNameFromSource(source) {
   return versionAt === -1 ? npm : npm.slice(0, versionAt);
 }
 
-export function isColdCapabilityPackageSource(source) {
+export function isColdCapabilityPackageSource(source, coldCapabilityPackages = COLD_CAPABILITY_PACKAGES) {
   const pkg = extractPackageNameFromSource(source);
-  return Boolean(pkg && COLD_CAPABILITY_PACKAGES.includes(pkg));
+  return Boolean(pkg && coldCapabilityPackages.includes(pkg));
+}
+
+export function canonicalizePackageSourceForAgentDir(
+  source,
+  { repoRoot = process.cwd(), agentDir } = {},
+) {
+  if (typeof source !== "string") return source;
+  if (source.startsWith("npm:") || source.startsWith("git+") || /^[a-z]+:\/\//i.test(source)) return source;
+  if (!agentDir || !path.isAbsolute(source)) return source;
+
+  const resolvedSource = path.resolve(source);
+  const resolvedRepo = path.resolve(repoRoot);
+  const relToRepo = path.relative(resolvedRepo, resolvedSource);
+  if (relToRepo.startsWith("..") || path.isAbsolute(relToRepo)) return source;
+  return toPortableRelativePath(path.resolve(agentDir), resolvedSource);
+}
+
+export function canonicalizeSettingsPackageSourcesForAgentDir(
+  settings,
+  { repoRoot = process.cwd(), agentDir } = {},
+) {
+  if (!isRecord(settings) || !Array.isArray(settings.packages)) {
+    return { settings, changed: false, changes: [] };
+  }
+
+  let changed = false;
+  const changes = [];
+  const packages = settings.packages.map((entry) => {
+    const source = getPackageSource(entry);
+    if (!source) return entry;
+    const nextSource = canonicalizePackageSourceForAgentDir(source, { repoRoot, agentDir });
+    if (nextSource === source) return entry;
+    changed = true;
+    changes.push({ from: source, to: nextSource });
+    return setPackageSource(entry, nextSource);
+  });
+
+  if (!changed) return { settings, changed: false, changes: [] };
+  return { settings: { ...settings, packages }, changed: true, changes };
 }
 
 export function controlPlaneEnabledModels() {
@@ -118,35 +182,48 @@ export function buildControlPlaneRuntimeSettings(settings, options = {}) {
     return { settings, changed: false, removed: [] };
   }
 
+  const profile = isRecord(options.profile) ? options.profile : CONTROL_PLANE_RUNTIME_PROFILE;
+  const runtimeProfile = typeof profile.runtimeProfile === "string"
+    ? profile.runtimeProfile
+    : CONTROL_PLANE_RUNTIME_PROFILE.runtimeProfile;
+  const defaultProvider = typeof profile.defaultProvider === "string"
+    ? profile.defaultProvider
+    : CONTROL_PLANE_RUNTIME_PROFILE.defaultProvider;
+  const defaultModel = typeof profile.defaultModel === "string"
+    ? profile.defaultModel
+    : CONTROL_PLANE_RUNTIME_PROFILE.defaultModel;
+  const enabledModels = Array.isArray(profile.enabledModels) && profile.enabledModels.length > 0
+    ? [...profile.enabledModels]
+    : [...CONTROL_PLANE_RUNTIME_PROFILE.enabledModels];
+  const coldCapabilityPackages = Array.isArray(options.coldCapabilityPackages)
+    ? options.coldCapabilityPackages
+    : COLD_CAPABILITY_PACKAGES;
+
   const removed = [];
   const packages = settings.packages.filter((entry) => {
-    const source = typeof entry === "string"
-      ? entry
-      : isRecord(entry) && typeof entry.source === "string"
-        ? entry.source
-        : undefined;
-    if (!isColdCapabilityPackageSource(source)) return true;
+    const source = getPackageSource(entry);
+    if (!isColdCapabilityPackageSource(source, coldCapabilityPackages)) return true;
     removed.push(source);
     return false;
   });
   const next = {
     ...settings,
     packages,
-    runtimeProfile: "control-plane",
-    defaultProvider: "openai-codex",
-    defaultModel: "gpt-5.3-codex",
-    enabledModels: CONTROL_PLANE_ENABLED_MODELS,
+    runtimeProfile,
+    defaultProvider,
+    defaultModel,
+    enabledModels,
   };
   const shellPath = reconcileLocalShellPath(next, options);
   const currentEnabledModels = Array.isArray(settings.enabledModels) ? settings.enabledModels : [];
   const modelsChanged =
-    currentEnabledModels.length !== CONTROL_PLANE_ENABLED_MODELS.length ||
-    currentEnabledModels.some((value, index) => value !== CONTROL_PLANE_ENABLED_MODELS[index]);
+    currentEnabledModels.length !== enabledModels.length ||
+    currentEnabledModels.some((value, index) => value !== enabledModels[index]);
   const changed =
     removed.length > 0 ||
-    settings.runtimeProfile !== "control-plane" ||
-    settings.defaultProvider !== "openai-codex" ||
-    settings.defaultModel !== "gpt-5.3-codex" ||
+    settings.runtimeProfile !== runtimeProfile ||
+    settings.defaultProvider !== defaultProvider ||
+    settings.defaultModel !== defaultModel ||
     modelsChanged ||
     shellPath.changed;
 
