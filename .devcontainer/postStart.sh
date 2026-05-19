@@ -16,7 +16,8 @@ fi
 
 for tool in claude codex; do
   if ! command -v "$tool" >/dev/null 2>&1; then
-    echo "[agents-lab-devcontainer][warn] $tool missing. Rebuild, or run: npm install -g $([[ "$tool" == "claude" ]] && echo "@anthropic-ai/claude-code" || echo "@openai/codex")"
+    package_name=$([[ "$tool" == "claude" ]] && echo "@anthropic-ai/claude-code" || echo "@openai/codex")
+    echo "[agents-lab-devcontainer][warn] $tool missing. Rebuild, or run: pnpm add -g $package_name"
   fi
 done
 

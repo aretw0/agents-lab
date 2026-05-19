@@ -22,7 +22,7 @@ install_global_tool() {
   fi
 
   echo "[agents-lab-devcontainer] Installing $package_name..."
-  npm install -g "$package_name"
+  pnpm add -g "$package_name"
 }
 
 if [[ ! -f "$SETTINGS_FILE" ]]; then
