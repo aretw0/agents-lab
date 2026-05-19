@@ -7,7 +7,7 @@ import { buildBehaviorRouteSystemPrompt, classifyBehaviorRoute } from "./guardra
 import { buildShellRoutingSystemPrompt, type CommandRoutingProfile } from "./guardrails-core-shell-routing";
 import { classifyRouting } from "./guardrails-core-web-routing";
 import { buildI18nIntentSystemPrompt, summarizeI18nIntentConfig, type I18nIntentConfig } from "./guardrails-core-i18n-intents";
-import { buildPragmaticAutonomySystemPrompt, type PragmaticAutonomyConfig } from "./guardrails-core-runtime-config";
+import { buildOperatorCadenceSystemPrompt, type OperatorCadenceConfig } from "./guardrails-core-runtime-config";
 import { buildBoardReadinessStatusLabel, evaluateBoardLongRunReadiness } from "./guardrails-core-board-readiness";
 import {
 	buildCodeBloatStatusLabel,
@@ -40,7 +40,7 @@ export interface GuardrailsCoreEventSurfaceRuntime {
 	setStrictInteractiveAnnounced(value: boolean): void;
 	getShellRoutingProfile(): CommandRoutingProfile;
 	getLongRunIntentQueueConfig(): LongRunIntentQueueConfig;
-	getPragmaticAutonomyConfig(): PragmaticAutonomyConfig;
+	getOperatorCadenceConfig(): OperatorCadenceConfig;
 	getI18nIntentConfig(): I18nIntentConfig;
 	getBloatSmellConfig(): BloatSmellConfig;
 	getProviderBudgetGovernorConfig(): ProviderBudgetGovernorConfig;
@@ -72,14 +72,14 @@ export function registerGuardrailsCoreEventSurface(pi: ExtensionAPI, runtime: Gu
 		const strictInteractiveMode = runtime.getStrictInteractiveMode();
 
 		const systemPromptParts: string[] = [event.systemPrompt ?? ""];
-		const pragmaticAutonomyConfig = runtime.getPragmaticAutonomyConfig();
-		const autonomyPrompt = buildPragmaticAutonomySystemPrompt(pragmaticAutonomyConfig);
-		if (autonomyPrompt) {
-			systemPromptParts.push("", autonomyPrompt);
-			if (pragmaticAutonomyConfig.auditAssumptions) {
-				appendAuditEntry(ctx, "guardrails-core.pragmatic-autonomy-policy", {
+		const operatorCadenceConfig = runtime.getOperatorCadenceConfig();
+		const cadencePrompt = buildOperatorCadenceSystemPrompt(operatorCadenceConfig);
+		if (cadencePrompt) {
+			systemPromptParts.push("", cadencePrompt);
+			if (operatorCadenceConfig.auditAssumptions) {
+				appendAuditEntry(ctx, "guardrails-core.operator-cadence-policy", {
 					atIso: new Date().toISOString(),
-					noObviousQuestions: pragmaticAutonomyConfig.noObviousQuestions,
+					noObviousQuestions: operatorCadenceConfig.noObviousQuestions,
 					strictInteractiveMode,
 				});
 			}
@@ -124,7 +124,7 @@ export function registerGuardrailsCoreEventSurface(pi: ExtensionAPI, runtime: Gu
 		if (shellRoutingPrompt.length > 0) systemPromptParts.push("", ...shellRoutingPrompt);
 		if (!strictInteractiveMode) {
 			ctx.ui?.setStatus?.("guardrails-core", undefined);
-			if (!autonomyPrompt && i18nPrompt.length === 0 && !parsedIntent.ok && shellRoutingPrompt.length === 0) return undefined;
+			if (!cadencePrompt && i18nPrompt.length === 0 && !parsedIntent.ok && shellRoutingPrompt.length === 0) return undefined;
 			return { systemPrompt: systemPromptParts.join("\n") };
 		}
 
@@ -205,7 +205,7 @@ export function registerGuardrailsCoreEventSurface(pi: ExtensionAPI, runtime: Gu
 			}
 		}
 		const longRunIntentQueueConfig = runtime.getLongRunIntentQueueConfig();
-		const pragmaticAutonomyConfig = runtime.getPragmaticAutonomyConfig();
+		const operatorCadenceConfig = runtime.getOperatorCadenceConfig();
 		if (event.source === "interactive") {
 			const forceNowText = extractForceNowText(inputText, longRunIntentQueueConfig);
 			if (forceNowText !== undefined) {
@@ -215,8 +215,8 @@ export function registerGuardrailsCoreEventSurface(pi: ExtensionAPI, runtime: Gu
 				}
 				const nowIso = new Date().toISOString();
 				runtime.setLastForceNowAt(Date.parse(nowIso));
-				runtime.setLastForceNowTextPreview(summarizeAssumptionText(forceNowText, pragmaticAutonomyConfig.maxAuditTextChars));
-				appendAuditEntry(ctx, "guardrails-core.long-run-intent-force-now", { atIso: nowIso, activeLongRun, textPreview: summarizeAssumptionText(forceNowText, pragmaticAutonomyConfig.maxAuditTextChars) });
+				runtime.setLastForceNowTextPreview(summarizeAssumptionText(forceNowText, operatorCadenceConfig.maxAuditTextChars));
+				appendAuditEntry(ctx, "guardrails-core.long-run-intent-force-now", { atIso: nowIso, activeLongRun, textPreview: summarizeAssumptionText(forceNowText, operatorCadenceConfig.maxAuditTextChars) });
 				pi.sendUserMessage(forceNowText, { deliverAs: "followUp" });
 				ctx.ui.notify(activeLongRun ? "lane-now: override aplicado; mensagem enviada como follow-up imediato." : "lane-now: override aplicado; mensagem enviada para processamento imediato.", "info");
 				return { action: "handled" as const };
@@ -235,8 +235,8 @@ export function registerGuardrailsCoreEventSurface(pi: ExtensionAPI, runtime: Gu
 				intentType: parsedInputIntent.ok ? parsedInputIntent.intent?.type : undefined,
 				intentSummary: parsedInputIntent.ok && parsedInputIntent.intent ? summarizeGuardrailsIntent(parsedInputIntent.intent) : undefined,
 			});
-			if (pragmaticAutonomyConfig.enabled && pragmaticAutonomyConfig.auditAssumptions) {
-				appendAuditEntry(ctx, "guardrails-core.pragmatic-assumption-applied", { atIso: new Date().toISOString(), assumption: "defer-noncritical-interrupt", itemId: queued.itemId, queuedCount: queued.queuedCount, activeLongRun, textPreview: summarizeAssumptionText(inputText, pragmaticAutonomyConfig.maxAuditTextChars) });
+			if (operatorCadenceConfig.enabled && operatorCadenceConfig.auditAssumptions) {
+				appendAuditEntry(ctx, "guardrails-core.operator-cadence-assumption-applied", { atIso: new Date().toISOString(), assumption: "defer-noncritical-interrupt", itemId: queued.itemId, queuedCount: queued.queuedCount, activeLongRun, textPreview: summarizeAssumptionText(inputText, operatorCadenceConfig.maxAuditTextChars) });
 			}
 			runtime.updateLongRunLaneStatus(ctx, activeLongRun, runtime.getLongRunLoopRuntimeState());
 			ctx.ui.notify(["Long-run ativo: solicitação registrada na fila sem trocar de foco.", "Assunção automática: ambiguidades de baixo risco foram deferidas sem interromper o lane atual.", `queued=${queued.queuedCount}`, `use '${longRunIntentQueueConfig.forceNowPrefix}<mensagem>' para forçar processamento imediato.`].join("\n"), "info");

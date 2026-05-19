@@ -225,7 +225,7 @@ Todo adapter remoto deve preservar budget/delivery gates, registrar evidência e
 Para manter velocidade de cruzeiro em long-run:
 - ambiguidades de baixo risco devem ser resolvidas por default seguro/determinístico;
 - interrupção do usuário apenas em risco irreversível/perda de dados/conflito de objetivo;
-- assunções automáticas devem ficar auditáveis no runtime (`guardrails-core.pragmatic-assumption-applied`) e refletidas no board quando impactarem decisão de tarefa.
+- assunções automáticas devem ficar auditáveis no runtime (`guardrails-core.operator-cadence-assumption-applied`) e refletidas no board quando impactarem decisão de tarefa.
 
 ### Perfil opt-in de economia de contexto
 

@@ -83,10 +83,10 @@ import {
 } from "./guardrails-core-provider-budget-governor";
 
 import {
-  DEFAULT_PRAGMATIC_AUTONOMY_CONFIG,
+  DEFAULT_OPERATOR_CADENCE_CONFIG,
   resolveGuardrailsCoreSurfacesConfig,
-  resolvePragmaticAutonomyConfig,
-  type PragmaticAutonomyConfig,
+  resolveOperatorCadenceConfig,
+  type OperatorCadenceConfig,
 } from "./guardrails-core-runtime-config";
 
 export interface GuardrailsLaneQueueSurfaceRuntimeSnapshot {
@@ -148,7 +148,7 @@ export default function (pi: ExtensionAPI) {
   let longRunIntentQueueConfig: LongRunIntentQueueConfig = DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
   let longRunProviderRetryConfig: LongRunProviderTransientRetryConfig =
     DEFAULT_LONG_RUN_PROVIDER_TRANSIENT_RETRY_CONFIG;
-  let pragmaticAutonomyConfig: PragmaticAutonomyConfig = DEFAULT_PRAGMATIC_AUTONOMY_CONFIG;
+  let operatorCadenceConfig: OperatorCadenceConfig = DEFAULT_OPERATOR_CADENCE_CONFIG;
   let i18nIntentConfig: I18nIntentConfig = DEFAULT_I18N_INTENT_CONFIG;
   let bloatSmellConfig: BloatSmellConfig = DEFAULT_BLOAT_SMELL_CONFIG;
   let lastTextBloatSignalAt = 0;
@@ -517,7 +517,7 @@ export default function (pi: ExtensionAPI) {
       getShellRoutingProfile: () => shellRoutingProfile,
       onRuntimeConfigChanged: (changedCtx) => {
         longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(changedCtx.cwd);
-        pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(changedCtx.cwd);
+        operatorCadenceConfig = resolveOperatorCadenceConfig(changedCtx.cwd);
         i18nIntentConfig = resolveI18nIntentConfig(changedCtx.cwd);
         updateLongRunLaneStatus(changedCtx, !changedCtx.isIdle() || changedCtx.hasPendingMessages(), longRunLoopRuntimeState);
       },
@@ -569,7 +569,7 @@ export default function (pi: ExtensionAPI) {
     longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);
     longRunProviderRetryConfig = resolveLongRunProviderTransientRetryConfig(ctx.cwd);
     guardrailsCoreSurfacesEnabled = resolveGuardrailsCoreSurfacesConfig(ctx.cwd).enabled;
-    pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(ctx.cwd);
+    operatorCadenceConfig = resolveOperatorCadenceConfig(ctx.cwd);
     i18nIntentConfig = resolveI18nIntentConfig(ctx.cwd);
     bloatSmellConfig = resolveBloatSmellConfig(ctx.cwd);
     shellRoutingProfile = resolveCommandRoutingProfile();
@@ -639,7 +639,7 @@ export default function (pi: ExtensionAPI) {
     setStrictInteractiveAnnounced: (value: boolean) => { strictInteractiveAnnounced = value; },
     getShellRoutingProfile: () => shellRoutingProfile,
     getLongRunIntentQueueConfig: () => longRunIntentQueueConfig,
-    getPragmaticAutonomyConfig: () => pragmaticAutonomyConfig,
+    getOperatorCadenceConfig: () => operatorCadenceConfig,
     getI18nIntentConfig: () => i18nIntentConfig,
     getBloatSmellConfig: () => bloatSmellConfig,
     getProviderBudgetGovernorConfig: () => providerBudgetGovernorConfig,

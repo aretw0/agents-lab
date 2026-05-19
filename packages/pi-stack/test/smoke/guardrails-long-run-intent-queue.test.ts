@@ -27,7 +27,7 @@ import {
   resolveAutoDrainRetryDelayMs,
   resolveLongRunIntentQueueConfig,
   extractForceNowText,
-  resolvePragmaticAutonomyConfig,
+  resolveOperatorCadenceConfig,
   resolveGuardrailsRuntimeConfigSpec,
   coerceGuardrailsRuntimeConfigValue,
   readGuardrailsRuntimeConfigSnapshot,
@@ -35,7 +35,7 @@ import {
   resolveBloatSmellConfig,
   shouldAutoDrainDeferredIntent,
   shouldQueueInputForLongRun,
-  buildPragmaticAutonomySystemPrompt,
+  buildOperatorCadenceSystemPrompt,
   summarizeAssumptionText,
   evaluateTextBloatSmell,
   evaluateCodeBloatSmell,
@@ -103,10 +103,10 @@ describe("guardrails-core long-run intent queue", () => {
     }
   });
 
-  it("uses pragmatic autonomy defaults when settings are missing", () => {
-    const cwd = mkdtempSync(join(tmpdir(), "pi-pragmatic-autonomy-default-"));
+  it("uses operator cadence defaults when settings are missing", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-operator-cadence-default-"));
     try {
-      const cfg = resolvePragmaticAutonomyConfig(cwd);
+      const cfg = resolveOperatorCadenceConfig(cwd);
       expect(cfg.enabled).toBe(true);
       expect(cfg.noObviousQuestions).toBe(true);
       expect(cfg.auditAssumptions).toBe(true);
@@ -140,7 +140,7 @@ describe("guardrails-core long-run intent queue", () => {
       const snapshot = readGuardrailsRuntimeConfigSnapshot(cwd);
       expect(snapshot["longRunIntentQueue.maxItems"]).toBe(80);
 
-      const boolSpec = resolveGuardrailsRuntimeConfigSpec("pragmaticAutonomy.enabled");
+      const boolSpec = resolveGuardrailsRuntimeConfigSpec("operatorCadence.enabled");
       expect(boolSpec).toBeDefined();
       if (!boolSpec) return;
       const boolOk = coerceGuardrailsRuntimeConfigValue("off", boolSpec);
@@ -398,11 +398,11 @@ describe("guardrails-core long-run intent queue", () => {
   });
 
   it("builds no-obvious-questions prompt only when policy is enabled", () => {
-    const enabled = buildPragmaticAutonomySystemPrompt({ enabled: true, noObviousQuestions: true });
-    expect(enabled).toContain("Pragmatic autonomy policy is active");
+    const enabled = buildOperatorCadenceSystemPrompt({ enabled: true, noObviousQuestions: true });
+    expect(enabled).toContain("Operator cadence policy is active");
     expect(enabled).toContain("irreversible actions");
 
-    const disabled = buildPragmaticAutonomySystemPrompt({ enabled: false, noObviousQuestions: true });
+    const disabled = buildOperatorCadenceSystemPrompt({ enabled: false, noObviousQuestions: true });
     expect(disabled).toBeUndefined();
   });
 

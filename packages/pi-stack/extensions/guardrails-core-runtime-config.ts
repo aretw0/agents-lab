@@ -4,7 +4,7 @@ import { normalizeContextWatchdogConfig } from "./context-watchdog-config";
 import { readProjectSettings as readProjectSettingsImpl, writeProjectSettings as writeProjectSettingsImpl } from "./context-watchdog-storage";
 import { resolveLongRunIntentQueueConfig } from "./guardrails-core-lane-queue";
 
-export interface PragmaticAutonomyConfig {
+export interface OperatorCadenceConfig {
   enabled: boolean;
   noObviousQuestions: boolean;
   auditAssumptions: boolean;
@@ -15,7 +15,7 @@ export interface GuardrailsCoreSurfacesConfig {
   enabled: boolean;
 }
 
-export const DEFAULT_PRAGMATIC_AUTONOMY_CONFIG: PragmaticAutonomyConfig = {
+export const DEFAULT_OPERATOR_CADENCE_CONFIG: OperatorCadenceConfig = {
   enabled: true,
   noObviousQuestions: true,
   auditAssumptions: true,
@@ -40,12 +40,12 @@ export function resolveGuardrailsCoreSurfacesConfig(cwd: string): GuardrailsCore
   }
 }
 
-export function resolvePragmaticAutonomyConfig(cwd: string): PragmaticAutonomyConfig {
+export function resolveOperatorCadenceConfig(cwd: string): OperatorCadenceConfig {
   try {
     const p = join(cwd, ".pi", "settings.json");
-    if (!existsSync(p)) return DEFAULT_PRAGMATIC_AUTONOMY_CONFIG;
+    if (!existsSync(p)) return DEFAULT_OPERATOR_CADENCE_CONFIG;
     const json = JSON.parse(readFileSync(p, "utf8"));
-    const cfg = json?.piStack?.guardrailsCore?.pragmaticAutonomy ?? {};
+    const cfg = json?.piStack?.guardrailsCore?.operatorCadence ?? {};
     const maxAuditTextCharsRaw = Number(cfg?.maxAuditTextChars);
     return {
       enabled: cfg?.enabled !== false,
@@ -53,10 +53,10 @@ export function resolvePragmaticAutonomyConfig(cwd: string): PragmaticAutonomyCo
       auditAssumptions: cfg?.auditAssumptions !== false,
       maxAuditTextChars: Number.isFinite(maxAuditTextCharsRaw) && maxAuditTextCharsRaw > 0
         ? Math.max(40, Math.min(400, Math.floor(maxAuditTextCharsRaw)))
-        : DEFAULT_PRAGMATIC_AUTONOMY_CONFIG.maxAuditTextChars,
+        : DEFAULT_OPERATOR_CADENCE_CONFIG.maxAuditTextChars,
     };
   } catch {
-    return DEFAULT_PRAGMATIC_AUTONOMY_CONFIG;
+    return DEFAULT_OPERATOR_CADENCE_CONFIG;
   }
 }
 
@@ -201,22 +201,22 @@ export const GUARDRAILS_RUNTIME_CONFIG_SPECS: GuardrailsRuntimeConfigSpec[] = [
   { key: "longRunIntentQueue.forceNowPrefix", path: ["piStack", "guardrailsCore", "longRunIntentQueue", "forceNowPrefix"], type: "string", minLength: 2, maxLength: 40, pattern: /^\S+$/, reloadRequired: false, description: "Immediate dispatch prefix (example: lane-now:)." },
   { key: "longRunIntentQueue.defaultBoardMilestone", path: ["piStack", "guardrailsCore", "longRunIntentQueue", "defaultBoardMilestone"], type: "string", maxLength: 120, reloadRequired: false, description: "Default milestone scope for board readiness/board-next when none is passed." },
   {
-    key: "pragmaticAutonomy.enabled",
-    path: ["piStack", "guardrailsCore", "pragmaticAutonomy", "enabled"],
+    key: "operatorCadence.enabled",
+    path: ["piStack", "guardrailsCore", "operatorCadence", "enabled"],
     type: "boolean",
     reloadRequired: false,
-    description: "Enable pragmatic-autonomy policy.",
+    description: "Enable operator cadence policy.",
   },
   {
-    key: "pragmaticAutonomy.noObviousQuestions",
-    path: ["piStack", "guardrailsCore", "pragmaticAutonomy", "noObviousQuestions"],
+    key: "operatorCadence.noObviousQuestions",
+    path: ["piStack", "guardrailsCore", "operatorCadence", "noObviousQuestions"],
     type: "boolean",
     reloadRequired: false,
     description: "Prefer deterministic defaults for low-risk ambiguity.",
   },
   {
-    key: "pragmaticAutonomy.maxAuditTextChars",
-    path: ["piStack", "guardrailsCore", "pragmaticAutonomy", "maxAuditTextChars"],
+    key: "operatorCadence.maxAuditTextChars",
+    path: ["piStack", "guardrailsCore", "operatorCadence", "maxAuditTextChars"],
     type: "number",
     min: 40,
     max: 400,
@@ -491,7 +491,7 @@ export function coerceGuardrailsRuntimeConfigValue(
 
 export function readGuardrailsRuntimeConfigSnapshot(cwd: string): Record<string, GuardrailsRuntimeConfigValue> {
   const queueCfg = resolveLongRunIntentQueueConfig(cwd);
-  const autonomyCfg = resolvePragmaticAutonomyConfig(cwd);
+  const operatorCadenceCfg = resolveOperatorCadenceConfig(cwd);
   const settings = readProjectPiSettings(cwd);
   const piStack = (settings.piStack as Record<string, unknown> | undefined) ?? {};
   const contextWatchCfg = normalizeContextWatchdogConfig(piStack.contextWatchdog);
@@ -513,9 +513,9 @@ export function readGuardrailsRuntimeConfigSnapshot(cwd: string): Record<string,
     "longRunIntentQueue.orphanFailureWindowMs": queueCfg.orphanFailureWindowMs,
     "longRunIntentQueue.forceNowPrefix": queueCfg.forceNowPrefix,
     "longRunIntentQueue.defaultBoardMilestone": queueCfg.defaultBoardMilestone ?? "(unset)",
-    "pragmaticAutonomy.enabled": autonomyCfg.enabled,
-    "pragmaticAutonomy.noObviousQuestions": autonomyCfg.noObviousQuestions,
-    "pragmaticAutonomy.maxAuditTextChars": autonomyCfg.maxAuditTextChars,
+    "operatorCadence.enabled": operatorCadenceCfg.enabled,
+    "operatorCadence.noObviousQuestions": operatorCadenceCfg.noObviousQuestions,
+    "operatorCadence.maxAuditTextChars": operatorCadenceCfg.maxAuditTextChars,
     "contextWatchdog.enabled": contextWatchCfg.enabled,
     "contextWatchdog.status": contextWatchCfg.status,
     "contextWatchdog.notify": contextWatchCfg.notify,
@@ -653,12 +653,12 @@ export function buildGuardrailsRuntimeConfigSetResult(params: {
   };
 }
 
-export function buildPragmaticAutonomySystemPrompt(
-  cfg: Pick<PragmaticAutonomyConfig, "enabled" | "noObviousQuestions">,
+export function buildOperatorCadenceSystemPrompt(
+  cfg: Pick<OperatorCadenceConfig, "enabled" | "noObviousQuestions">,
 ): string | undefined {
   if (!cfg.enabled || !cfg.noObviousQuestions) return undefined;
   return [
-    "Pragmatic autonomy policy is active for this turn.",
+    "Operator cadence policy is active for this turn.",
     "- Resolve low-risk ambiguities using deterministic safe defaults.",
     "- Do not ask obvious/format/order questions when progress can continue safely.",
     "- Escalate to user only for irreversible actions, data-loss risk, security risk, or explicit objective conflict.",

@@ -174,8 +174,8 @@ Escalonar pergunta apenas para:
 - conflito explícito de objetivo.
 
 Trilha auditável esperada no runtime:
-- `guardrails-core.pragmatic-autonomy-policy` (policy ativa por turno)
-- `guardrails-core.pragmatic-assumption-applied` (assunção automática aplicada)
+- `guardrails-core.operator-cadence-policy` (policy ativa por turno)
+- `guardrails-core.operator-cadence-assumption-applied` (assunção automática aplicada)
 
 ### Fronteiras modulares do runtime-guardrails (anti-bloat)
 

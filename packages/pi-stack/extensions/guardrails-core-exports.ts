@@ -66,11 +66,11 @@ export {
 } from "./guardrails-core-lane-queue";
 export {
   buildGuardrailsRuntimeConfigSetResult,
-  buildPragmaticAutonomySystemPrompt,
+  buildOperatorCadenceSystemPrompt,
   coerceGuardrailsRuntimeConfigValue,
   readGuardrailsRuntimeConfigSnapshot,
   resolveGuardrailsRuntimeConfigSpec,
-  resolvePragmaticAutonomyConfig,
+  resolveOperatorCadenceConfig,
 } from "./guardrails-core-runtime-config";
 export {
   buildProviderRetryExhaustedActionLines,
