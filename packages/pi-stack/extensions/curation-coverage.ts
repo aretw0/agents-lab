@@ -1,6 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+  formatAuthorizationEvidence,
+} from "./guardrails-core-authorization";
 
 export type CurationCoverageStrategy = "keep" | "suppress-by-filter" | "remove-from-profile" | "needs-decision";
 export type CurationCoverageStatus = "filtered" | "tracked" | "removed" | "missing-filter" | "needs-decision";
@@ -85,7 +90,7 @@ export const CURATION_FILTER_PATCHES: FilterPatchLike[] = [
 export interface CurationCoverageEvaluation {
   mode: "first-party-curation-coverage";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   mutationAllowed: false;
   registryVersion: string;
@@ -245,13 +250,13 @@ export function evaluateCurationCoverage(input: {
     `needsDecision=${summary.needsDecision}`,
     `activeOverlaps=${summary.activeThirdPartyOverlaps}`,
     "dispatch=no",
-    "authorization=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].join(" ");
 
   return {
     mode: "first-party-curation-coverage",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     mutationAllowed: false,
     registryVersion: input.registry.version,
