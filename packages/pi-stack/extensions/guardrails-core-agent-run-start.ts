@@ -9,6 +9,10 @@ import {
 import { buildEconomyGoalPrefix, buildEconomyInstructions, normalizeEconomyMode, normalizeMaxOutputLines } from "./guardrails-core-agent-run-worker-economy";
 import { resolveProviderExecutionBudgetEvidence, type ProviderExecutionBudgetDecision } from "./guardrails-core-provider-budget-evidence";
 import {
+  GUARDRAILS_AUTHORIZATION_NONE,
+  type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
+import {
   AGENT_RUN_START_TIMEOUT_MAX_MS,
   AGENT_RUN_START_TIMEOUT_MIN_MS,
   CODEX_SPARK_PROMOTED_ENVELOPES,
@@ -65,7 +69,7 @@ export interface AgentRunStartPacketInput {
 export interface AgentRunStartPacketResult {
   mode: "agent-run-start-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -148,7 +152,7 @@ export interface AgentRunOperatorPacketInput {
 export interface AgentRunOperatorPacketResult {
   mode: "agent-run-operator-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -184,7 +188,7 @@ export interface AgentInvocationSpecPacketInput extends AgentRunOperatorPacketIn
 export interface AgentInvocationSpecPacketResult {
   mode: "agent-invocation-spec-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   requiresOperatorDecision: true;
@@ -240,7 +244,7 @@ export interface AgentRunTaskPacketInput {
 export interface AgentRunTaskPacketResult {
   mode: "agent-run-task-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -282,7 +286,7 @@ export interface AgentRunTaskStartPacketInput extends AgentRunTaskPacketInput {
 export interface AgentRunTaskStartPacketResult {
   mode: "agent-run-task-start-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -329,7 +333,7 @@ export interface CodexSparkPromotedWorkerPacketInput extends AgentRunTaskStartPa
 export interface CodexSparkPromotedWorkerPacketResult {
   mode: "codex-spark-promoted-worker-packet";
   activation: "none";
-  authorization: "none";
+  authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   processStartAllowed: false;
   processStopAllowed: false;
@@ -436,7 +440,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   return {
     mode: "agent-run-start-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -554,7 +558,7 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
   return {
     mode: "agent-run-operator-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -633,7 +637,7 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
   return {
     mode: "agent-invocation-spec-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     requiresOperatorDecision: true,
@@ -737,7 +741,7 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
   return {
     mode: "agent-run-task-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -820,7 +824,7 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
   return {
     mode: "agent-run-task-start-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -899,7 +903,7 @@ export function buildCodexSparkPromotedWorkerPacket(input: CodexSparkPromotedWor
   return {
     mode: "codex-spark-promoted-worker-packet",
     activation: "none",
-    authorization: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
