@@ -18,6 +18,10 @@ test("ci workflow keeps the local parity gate canonical", () => {
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run docs:package:check/);
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run repo:discourse:audit/);
 	assert.match(workflow, /name: Smoke Tests/);
+	assert.match(workflow, /permissions:\n  contents: read\n\nconcurrency:/);
+	assert.doesNotMatch(workflow, /permissions:\n  contents: read\n  pull-requests: write\n\nconcurrency:/);
+	assert.match(workflow, /changes:\n\s+name: Change Discovery \(report-only\)\n\s+runs-on: ubuntu-latest\n\s+permissions:\n\s+contents: read\n\s+pull-requests: write/);
+	assert.match(workflow, /sovereignty-report:\n\s+name: Sovereignty Report\n\s+runs-on: ubuntu-latest\n\s+permissions:\n\s+contents: read\n\s+pull-requests: write/);
 	assert.match(workflow, /uses: \.\/\.github\/actions\/setup/);
 	assert.match(workflow, /run: pnpm run ci:smoke:gate/);
 	assert.match(workflow, /name: GitHub Action Pins/);
