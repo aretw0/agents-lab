@@ -37,6 +37,7 @@ repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
 repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}/store"
 repair_owned_dir /home/vscode/.local/share/claude
 repair_owned_dir /home/vscode/.local/bin
+repair_owned_dir /home/vscode/.config/gh
 repair_owned_dir /home/vscode/.pi
 repair_owned_dir /home/vscode/.claude
 repair_owned_dir /home/vscode/.codex
@@ -109,6 +110,10 @@ install_global_tool codex @openai/codex || true
 git config core.quotepath false
 git config i18n.commitEncoding UTF-8
 git config i18n.logOutputEncoding UTF-8
+
+if command -v gh >/dev/null 2>&1 && gh auth status -h github.com >/dev/null 2>&1; then
+  gh auth setup-git >/dev/null 2>&1 || true
+fi
 
 if [[ -f pnpm-lock.yaml ]]; then
   pnpm install --frozen-lockfile --prefer-offline --config.confirm-modules-purge=false

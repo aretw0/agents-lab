@@ -48,7 +48,8 @@
     "source=agents-lab-pnpm-store,target=/home/vscode/.local/share/pnpm/store,type=volume",
     "source=agents-lab-pi-home,target=/home/vscode/.pi,type=volume",
     "source=agents-lab-claude-home,target=/home/vscode/.claude,type=volume",
-    "source=agents-lab-codex-home,target=/home/vscode/.codex,type=volume"
+    "source=agents-lab-codex-home,target=/home/vscode/.codex,type=volume",
+    "source=agents-lab-gh-config,target=/home/vscode/.config/gh,type=volume"
   ],
   "postCreateCommand": "bash .devcontainer/postCreate.sh",
   "postStartCommand": "bash .devcontainer/postStart.sh",

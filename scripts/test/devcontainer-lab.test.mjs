@@ -82,11 +82,13 @@ test("devcontainer persists assistant homes and package caches across rebuilds",
 	assert.match(mounts, /source=agents-lab-pi-home,target=\/home\/vscode\/\.pi,type=volume/);
 	assert.match(mounts, /source=agents-lab-claude-home,target=\/home\/vscode\/\.claude,type=volume/);
 	assert.match(mounts, /source=agents-lab-codex-home,target=\/home\/vscode\/\.codex,type=volume/);
+	assert.match(mounts, /source=agents-lab-gh-config,target=\/home\/vscode\/\.config\/gh,type=volume/);
 });
 
 test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 	const postCreate = readFileSync(".devcontainer/postCreate.sh", "utf8");
 	const postStart = readFileSync(".devcontainer/postStart.sh", "utf8");
+	const dockerfile = readFileSync(".devcontainer/Dockerfile", "utf8");
 
 	assert.match(postCreate, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}"/);
 	assert.match(postStart, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}"/);
@@ -98,6 +100,8 @@ test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 	assert.match(postStart, /repair_owned_dir \/home\/vscode\/\.local\/state/);
 	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.config/);
 	assert.match(postStart, /repair_owned_dir \/home\/vscode\/\.config/);
+	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.config\/gh/);
+	assert.match(postStart, /repair_owned_dir \/home\/vscode\/\.config\/gh/);
 	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.cache/);
 	assert.match(postStart, /repair_owned_dir \/home\/vscode\/\.cache/);
 	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.local\/share\/claude/);
@@ -115,6 +119,13 @@ test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 	assert.match(postStart, /claude --version/);
 	assert.match(postCreate, /install_global_tool codex @openai\/codex/);
 	assert.match(postStart, /install_global_tool_if_missing codex @openai\/codex/);
+	assert.match(dockerfile, /https:\/\/cli\.github\.com\/packages stable main/);
+	assert.match(dockerfile, /apt-get install -y --no-install-recommends gh/);
+	assert.match(postCreate, /gh auth status -h github\.com/);
+	assert.match(postCreate, /gh auth setup-git/);
+	assert.match(postStart, /gh auth status -h github\.com/);
+	assert.match(postStart, /gh auth setup-git/);
+	assert.match(postStart, /Run: gh auth login/);
 	assert.match(postCreate, /pnpm install --frozen-lockfile --prefer-offline --config\.confirm-modules-purge=false/);
 	assert.match(postStart, /pnpm install --frozen-lockfile --prefer-offline --config\.confirm-modules-purge=false/);
 	assert.doesNotMatch(postStart, /(?<!p)npm run/);

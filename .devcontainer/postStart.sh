@@ -102,6 +102,7 @@ repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
 repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}/store"
 repair_owned_dir /home/vscode/.local/share/claude
 repair_owned_dir /home/vscode/.local/bin
+repair_owned_dir /home/vscode/.config/gh
 repair_owned_dir /home/vscode/.pi
 repair_owned_dir /home/vscode/.claude
 repair_owned_dir /home/vscode/.codex
@@ -118,6 +119,14 @@ fi
 install_claude_code_if_missing_or_broken
 install_global_tool_if_missing codex @openai/codex
 install_workspace_if_pi_missing
+
+if ! command -v gh >/dev/null 2>&1; then
+  echo "[agents-lab-devcontainer][warn] gh missing. Rebuild the devcontainer to install GitHub CLI."
+elif gh auth status -h github.com >/dev/null 2>&1; then
+  gh auth setup-git >/dev/null 2>&1 || true
+elif [[ -z "${GH_TOKEN:-}" ]]; then
+  echo "[agents-lab-devcontainer][info] GitHub CLI login not found yet. Run: gh auth login"
+fi
 
 if [[ ! -x "$REPO_ROOT/node_modules/.bin/pi" ]]; then
   echo "[agents-lab-devcontainer][warn] pi missing from node_modules. Run: pnpm install"
