@@ -23,6 +23,7 @@ jobs:
   commit-lint:
     name: Conventional Commits
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -57,6 +58,7 @@ jobs:
   changeset:
     name: Changeset
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: "!startsWith(github.event.head_commit.message, 'chore: release')"
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -74,6 +76,7 @@ jobs:
   action-pins:
     name: GitHub Action Pins
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -83,6 +86,7 @@ jobs:
   changes:
     name: Change Discovery (report-only)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: write
@@ -285,6 +289,7 @@ jobs:
   smoke:
     name: Smoke Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [changes]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -318,6 +323,7 @@ jobs:
   sovereignty-report:
     name: Sovereignty Report
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       pull-requests: write
@@ -377,3 +383,73 @@ jobs:
                 body,
               });
             }
+
+  ci-metrics:
+    name: CI Metrics
+    if: always()
+    needs: [commit-lint, changeset, action-pins, changes, smoke, sovereignty-report]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Export run metrics
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSfL \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs?per_page=100" \
+            > /tmp/ci-jobs.json
+
+          node - <<'NODE'
+          const fs = require('node:fs');
+
+          const payload = JSON.parse(fs.readFileSync('/tmp/ci-jobs.json', 'utf8'));
+          const jobs = (payload.jobs || []).map((job) => {
+            const started = job.started_at ? new Date(job.started_at).getTime() : null;
+            const ended = job.completed_at ? new Date(job.completed_at).getTime() : null;
+            const durationSec = started && ended ? Math.max(0, Math.round((ended - started) / 1000)) : 0;
+            return {
+              name: job.name,
+              status: job.status,
+              conclusion: job.conclusion || "-",
+              durationSec,
+            };
+          });
+
+          const totalDurationSec = jobs.reduce((acc, job) => acc + job.durationSec, 0);
+          const report = {
+            runId: process.env.GITHUB_RUN_ID,
+            workflow: process.env.GITHUB_WORKFLOW,
+            jobs,
+            totalDurationSec,
+          };
+
+          fs.writeFileSync('ci-run-metrics.json', `${JSON.stringify(report, null, 2)}\n`);
+
+          const lines = [
+            '## CI timing snapshot',
+            '',
+            '| Job | Status | Conclusion | Duration (s) |',
+            '|---|---|---|---:|',
+            ...jobs.map((job) => `| ${job.name} | ${job.status} | ${job.conclusion} | ${job.durationSec} |`),
+            '',
+            `**Total job-seconds:** ${totalDurationSec}`,
+          ];
+
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`);
+          NODE
+
+      - name: Upload CI metrics artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ci-run-metrics
+          path: ci-run-metrics.json
+          retention-days: 14
+          if-no-files-found: error
