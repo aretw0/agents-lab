@@ -16667,6 +16667,33 @@
       "method": "board-reconciliation-smoke",
       "timestamp": "2026-05-19T13:55:00.000Z",
       "evidence": "Reconciled TASK-BUD-1063 after finalTurnBrief implementation, localSafeMayContinue hardening, and the live turn-close reload ritual converged. The packet exposes context-rich option briefs instead of ids-only choices, includes title/context/why/currentState/recommendedAction, keeps recommended next steps bounded, explains reload only for clean runtime-extension closes, and suppresses reload for docs-only closes. Fresh validation: npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts -> 2 files passed, 20 tests passed."
+    },
+    {
+      "id": "VER-BUD-1047-FIRST-HATCH",
+      "target": "TASK-BUD-1047",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Implemented first_hatch_intake_packet report-only tool and primitive. Validation: `pnpm exec vitest run packages/pi-stack/test/smoke/project-intake-primitive.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts` => 3 files passed, 42 tests passed.",
+      "timestamp": "2026-05-20T04:25:38.148Z"
+    },
+    {
+      "id": "VERIF-TASK-BUD-1091-DOCS-GOVERNANCE-20260520",
+      "target": "TASK-BUD-1091",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "timestamp": "2026-05-20T05:07:10.844Z",
+      "evidence": "Docs navigation/MDT/architecture governance slice validated with docs:package:check, repo:discourse:audit, repo:bloat:audit, project:verification:check, and git diff --check."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1092-ACTIONS-CONTRACT-20260520",
+      "target": "TASK-BUD-1092",
+      "target_type": "task",
+      "status": "passed",
+      "method": "workflow-contract-test",
+      "timestamp": "2026-05-20T05:55:00.000Z",
+      "evidence": "Added local contract coverage for publish tag gating/provenance scope and release draft manual tag validation. Validation: pnpm run test:ci:workflow passed with 5 tests; pnpm run ci:local:parity passed."
     }
   ]
 }

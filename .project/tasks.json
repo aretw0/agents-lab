@@ -23312,14 +23312,16 @@
     {
       "id": "TASK-BUD-1047",
       "description": "[hard-intent/first-hatch] Implementar packet/tool report-only de primeiro hatch: descoberta local-safe de workspace, sandbox, artefatos e perguntas faltantes.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p0",
       "depends_on": [
         "TASK-BUD-1046"
       ],
       "files": [
         "packages/pi-stack/extensions/project-intake-primitive.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
         "packages/pi-stack/test/smoke/project-intake-primitive.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
         "docs/primitives/project-intake.md"
       ],
       "acceptance_criteria": [
@@ -23329,7 +23331,8 @@
         "Teste cobre pasta vazia, repo médio e protected_scope_requested bloqueado."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Hard intent: transformar o hatch documentado em superfície first-party testada.\n[provenance:human] source_task=none reason=Primeiro hatch deve ajudar qualquer instalação pi-stack a entender onde está."
+      "notes": "Hard intent: transformar o hatch documentado em superfície first-party testada.\n[provenance:human] source_task=none reason=Primeiro hatch deve ajudar qualquer instalação pi-stack a entender onde está.\n[2026-05-20T04:25:38.148Z] Implemented first_hatch_intake_packet as a report-only guardrails-core surface backed by project-intake primitive. Packet covers workspace/sandbox/artifact signals, empty workspace interview, sandbox/protected-scope blocking, and fixed no-dispatch/no-mutation authorization.",
+      "verification": "VER-BUD-1047-FIRST-HATCH"
     },
     {
       "id": "TASK-BUD-1048",
@@ -23726,10 +23729,10 @@
         "[agent-run] Exact-confirmed worker `task-bud-1063-final-turn-brief-implementation` dispatched after reload, but failed with exitCode=1 and no useful worker output; log only shows runner start/close, git stayed clean, outcome contract failed. Created TASK-BUD-1064 to harden silent runner failure feedback before more implementation dispatches.",
         "[agent-run] Diagnostic retry `task-bud-1063-final-turn-brief-diagnostic-retry` failed, but new diagnostics worked: log captured cwd/source/argv and `childOutputBytes=0` with `silent-runner-failure`. The argv shows provider `openai-codex/gpt-5.3-codex-spark` launched with `--no-extensions`; likely root cause is custom/provider extension unavailable under minimal-no-extensions. Do not retry blindly; fix packet support for provider-required extension isolation/inherit first.",
         "[agent-run] Exact-confirmed inherit-extension canary `task-bud-1063-final-turn-brief-inherit-live-canary` still failed with `silent-runner-failure`: argv correctly omitted `--no-extensions`, but childOutputBytes=0, exitCode=1, no files touched, git clean. This means TASK-BUD-1065 fixed one blocker but not the runner root cause; pause worker retries until a first-party runner preflight/capture task isolates why pi print exits before output.",
-    "[2026-05-14] Feedback humano reforçou o problema: o operador não consegue lembrar o significado de IDs nus (`TASK-BUD-*`) durante respostas, handoffs, auto-resume e decisões. Escopo deve ser tratado como padrão transversal de contexto operator-visible, não apenas final-turn: sempre que citar task, incluir título/objetivo curto/status ou ação sugerida, mantendo o ID apenas como âncora rastreável. [rationale:operator-experience] IDs nus reduzem orientação do operador e aumentam carga cognitiva; worker/control-plane outputs devem trazer contexto humano junto do identificador.",
-    "2026-05-14: Backlog enriquecido a partir de parada conservadora na lane TASK-BUD-1071. O padrão a endurecer não é só final-turn genérico: quando o operador já autorizou uma lane local-safe, o control-plane deve continuar para a próxima fatia local-safe ou, se parar, trazer motivo de parada, por que não continuou, opções com nomes humanos/impacto e recomendação objetiva. Isso evita que o operador precise perguntar “por que parou?” ou decodificar IDs antes de deliberar. [rationale:operator-experience] Continuidade fluida exige que a mensagem de parada carregue contexto decisório suficiente.",
-    "[completed] Reconciled after finalTurnBrief and turn-close surface coverage converged. buildTurnBoundaryDecisionPacket exposes context-rich option briefs with title/context/why/currentState/recommendedAction, keeps a single finalTurnBrief briefing object, includes concise reload ritual for clean runtime closes, suppresses reload for docs-only closes, and the live surface now accepts turn-close signals. Validation: npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts -> 2 files passed, 20 tests passed."
-  ],
+        "[2026-05-14] Feedback humano reforçou o problema: o operador não consegue lembrar o significado de IDs nus (`TASK-BUD-*`) durante respostas, handoffs, auto-resume e decisões. Escopo deve ser tratado como padrão transversal de contexto operator-visible, não apenas final-turn: sempre que citar task, incluir título/objetivo curto/status ou ação sugerida, mantendo o ID apenas como âncora rastreável. [rationale:operator-experience] IDs nus reduzem orientação do operador e aumentam carga cognitiva; worker/control-plane outputs devem trazer contexto humano junto do identificador.",
+        "2026-05-14: Backlog enriquecido a partir de parada conservadora na lane TASK-BUD-1071. O padrão a endurecer não é só final-turn genérico: quando o operador já autorizou uma lane local-safe, o control-plane deve continuar para a próxima fatia local-safe ou, se parar, trazer motivo de parada, por que não continuou, opções com nomes humanos/impacto e recomendação objetiva. Isso evita que o operador precise perguntar “por que parou?” ou decodificar IDs antes de deliberar. [rationale:operator-experience] Continuidade fluida exige que a mensagem de parada carregue contexto decisório suficiente.",
+        "[completed] Reconciled after finalTurnBrief and turn-close surface coverage converged. buildTurnBoundaryDecisionPacket exposes context-rich option briefs with title/context/why/currentState/recommendedAction, keeps a single finalTurnBrief briefing object, includes concise reload ritual for clean runtime closes, suppresses reload for docs-only closes, and the live surface now accepts turn-close signals. Validation: npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts -> 2 files passed, 20 tests passed."
+      ],
       "verification": "VERIF-TASK-BUD-1063-FINAL-TURN-BRIEF-2026-05-08"
     },
     {
@@ -24352,6 +24355,51 @@
       "milestone": "colony-readonly-batch-maturity",
       "notes": "Created from current local-safe slice after TASK-BUD-1088: reduce manual batch assembly friction while preserving exact-confirmed dispatch and fan-in gates.\n[rationale:risk-control] The packetizer is safe because it is report-only, derives only narrow read-only workers from declared task files, blocks protected scopes by default, reuses the existing batch packet/dispatch/fan-in contracts, and never starts workers without the separate exact-confirmed dispatch surface.\nCompleted in 6c5fff36. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed; git diff --check passed.",
       "verification": "VERIF-TASK-BUD-1090-SDK-TASK-BATCH-PACKETIZER-20260517"
+    },
+    {
+      "id": "TASK-BUD-1091",
+      "description": "[docs/governance] Reestruturar entrada documental e preparar trilha MDT/diagramas como acervo governado antes de novas mudanças runtime.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "README.md",
+        "docs/README.md",
+        "docs/start-here.md",
+        "docs/guides/README.md",
+        "docs/guides/doc-drift-mdt.md",
+        "docs/architecture/README.md"
+      ],
+      "acceptance_criteria": [
+        "Existe entrada por perfil para reduzir exploração manual da documentação.",
+        "MDT/doc-drift é descrito como trilha advisory check-first, sem gate bloqueante prematuro.",
+        "Arquitetura/diagramas possuem índice e regra de promoção.",
+        "README público reduz linguagem promocional e aponta para Start Here.",
+        "Validações de docs/discurso/bloat passam."
+      ],
+      "milestone": "queen-continuous-improvement-lane-2026-05",
+      "notes": "[2026-05-20T05:07:10.844Z] Criado e fechado como fatia documental local-safe após revisão de exploração, tom, MDT e Actions. Actions ficaram como próxima etapa protegida/report-only, sem mutação de workflow nesta fatia.",
+      "verification": "VERIF-TASK-BUD-1091-DOCS-GOVERNANCE-20260520"
+    },
+    {
+      "id": "TASK-BUD-1092",
+      "description": "[actions/governance] Endurecer contratos locais para publish e release draft sem ampliar permissões nem gatilhos automáticos.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "scripts/test/ci-workflow-contract.test.mjs",
+        ".github/workflows/publish.yml",
+        ".github/workflows/release-draft.yml"
+      ],
+      "acceptance_criteria": [
+        "Contrato local exige publish acionado por CI concluído com sucesso ou dispatch manual explícito.",
+        "Contrato local exige publish com permissão mínima e npm provenance.",
+        "Contrato local bloqueia pull_request e pull_request_target em publish/release draft.",
+        "Release draft permanece manual, tag-validado e draft por padrão.",
+        "Teste focal de workflow passa."
+      ],
+      "milestone": "release-0.8.0-governance",
+      "notes": "[2026-05-20T05:55:00.000Z] Criado e fechado como fatia de governança report-only: reforça o teste de contrato das Actions existentes sem alterar os workflows.",
+      "verification": "VERIF-TASK-BUD-1092-ACTIONS-CONTRACT-20260520"
     }
   ]
 }
