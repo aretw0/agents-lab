@@ -13,6 +13,7 @@ Guias práticos para operar, manter e distribuir a stack. Para escolher por perf
 | [monitor-overrides.md](./monitor-overrides.md) | Configuração provider-aware dos monitors (Copilot/Codex), diagnóstico e sincronização de overrides |
 | [testing-isolation.md](./testing-isolation.md) | Testando extensões e temas em isolamento — flags `--no-*`, `PI_CODING_AGENT_DIR` |
 | [pi-platform-compatibility.md](./pi-platform-compatibility.md) | Compatibilidade de plataforma (Windows/Linux/macOS) |
+| [devcontainer-factory-contract.md](./devcontainer-factory-contract.md) | Contrato mínimo para fábrica devcontainer-first, wrapper de operador/agente e CI first-party |
 
 ### Contribuição e Release
 
