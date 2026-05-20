@@ -20,6 +20,34 @@ repair_owned_dir() {
   fi
 }
 
+install_global_tool_if_missing() {
+  local command_name="$1"
+  local package_name="$2"
+
+  if command -v "$command_name" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "[agents-lab-devcontainer] $command_name missing; installing $package_name..."
+  pnpm add -g "$package_name" || {
+    echo "[agents-lab-devcontainer][warn] $command_name still missing. Retry later: pnpm add -g $package_name"
+    return 0
+  }
+}
+
+install_workspace_if_pi_missing() {
+  if [[ -x "$REPO_ROOT/node_modules/.bin/pi" ]]; then
+    return 0
+  fi
+
+  echo "[agents-lab-devcontainer] pi missing from node_modules; restoring workspace install..."
+  if [[ -f pnpm-lock.yaml ]]; then
+    pnpm install --frozen-lockfile --prefer-offline || pnpm install --prefer-offline || true
+  else
+    pnpm install --prefer-offline || true
+  fi
+}
+
 repair_owned_dir "${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
 repair_owned_dir "${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}"
 repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
@@ -36,16 +64,9 @@ if [[ -f package.json ]]; then
   pnpm run ops:disk:check --silent || true
 fi
 
-if [[ ! -d node_modules ]]; then
-  echo "[agents-lab-devcontainer][warn] node_modules missing. Run: pnpm install"
-fi
-
-for tool in claude codex; do
-  if ! command -v "$tool" >/dev/null 2>&1; then
-    package_name=$([[ "$tool" == "claude" ]] && echo "@anthropic-ai/claude-code" || echo "@openai/codex")
-    echo "[agents-lab-devcontainer][warn] $tool missing. Rebuild, or run: pnpm add -g $package_name"
-  fi
-done
+install_global_tool_if_missing claude @anthropic-ai/claude-code
+install_global_tool_if_missing codex @openai/codex
+install_workspace_if_pi_missing
 
 if [[ ! -x "$REPO_ROOT/node_modules/.bin/pi" ]]; then
   echo "[agents-lab-devcontainer][warn] pi missing from node_modules. Run: pnpm install"
