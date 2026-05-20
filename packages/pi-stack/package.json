@@ -65,6 +65,7 @@
 		]
 	},
 	"devDependencies": {
+		"@sinclair/typebox": "0.34.49",
 		"mitsupi": "*",
 		"pi-lens": "*",
 		"pi-web-access": "*",
