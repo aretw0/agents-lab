@@ -107,7 +107,7 @@ fi
 ensure_pnpm
 
 if [[ -f package.json ]]; then
-  pnpm run ops:disk:check --silent || true
+  pnpm --silent run ops:disk:check || true
 fi
 
 install_claude_code_if_missing_or_broken
