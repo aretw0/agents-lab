@@ -144,6 +144,136 @@ export interface LocalSliceBacklogGate {
   recommendation: string;
 }
 
+
+export type ControlPlaneProfileDecision = "ready-for-operator-decision" | "blocked";
+export type ControlPlaneProfileKind = "local-safe-single-slice" | "bounded-batch-candidate" | "worker-assisted-candidate" | "blocked-protected-scope";
+
+export interface ControlPlaneProfilePacketInput {
+  intent?: string;
+  autonomyRequest?: "single-slice" | "bounded-batch" | "worker-assisted" | "unknown" | string;
+  availableResources?: string[];
+  expectedRoi?: string;
+  limits?: string[];
+  stopConditions?: string[];
+  operatorFocusKnown?: boolean;
+  validationKnown?: boolean;
+  rollbackKnown?: boolean;
+  checkpointPlanned?: boolean;
+  protectedScopeRequested?: boolean;
+  schedulerRequested?: boolean;
+  remoteOrOffloadRequested?: boolean;
+  githubActionsRequested?: boolean;
+  workerRequested?: boolean;
+}
+
+export interface ControlPlaneProfilePacket {
+  effect: "none";
+  mode: "report-only";
+  activation: "none";
+  authorization: GuardrailsAuthorizationNone;
+  dispatchAllowed: false;
+  mutationAllowed: false;
+  decision: ControlPlaneProfileDecision;
+  profile: ControlPlaneProfileKind;
+  autonomy: "single-slice" | "bounded-batch-candidate" | "worker-assisted-candidate";
+  intent: string;
+  roi: string;
+  resources: string[];
+  limits: string[];
+  stopConditions: string[];
+  missingQuestions: string[];
+  blockedRequests: string[];
+  summary: string;
+  recommendation: string;
+}
+
+function boundedProfileList(value: unknown, maxItems: number): string[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const item of value) {
+    if (typeof item !== "string") continue;
+    const normalized = item.trim().toLowerCase();
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+    out.push(normalized.slice(0, 80));
+    if (out.length >= maxItems) break;
+  }
+  return out;
+}
+
+function boundedProfileText(value: unknown, fallback: string, maxLength = 120): string {
+  return typeof value === "string" && value.trim() ? value.trim().slice(0, maxLength) : fallback;
+}
+
+export function buildControlPlaneProfilePacket(input: ControlPlaneProfilePacketInput = {}): ControlPlaneProfilePacket {
+  const resources = boundedProfileList(input.availableResources, 8);
+  const limits = boundedProfileList(input.limits, 8);
+  const stopConditions = boundedProfileList(input.stopConditions, 8);
+  const intent = boundedProfileText(input.intent, "unspecified");
+  const roi = boundedProfileText(input.expectedRoi, "reduce operator ambiguity before local-safe work");
+  const blockedRequests: string[] = [];
+  const missingQuestions: string[] = [];
+
+  if (input.protectedScopeRequested) blockedRequests.push("protected-scope");
+  if (input.schedulerRequested) blockedRequests.push("scheduler");
+  if (input.remoteOrOffloadRequested) blockedRequests.push("remote-or-offload");
+  if (input.githubActionsRequested) blockedRequests.push("github-actions");
+
+  if (!input.operatorFocusKnown) missingQuestions.push("Which single focus should the control-plane optimize for first?");
+  if (!input.validationKnown) missingQuestions.push("Which focal validation proves the first slice?");
+  if (!input.rollbackKnown) missingQuestions.push("What rollback path is acceptable for this work?");
+  if (!input.checkpointPlanned) missingQuestions.push("Where should the checkpoint/handoff be recorded?");
+  if (limits.length === 0) missingQuestions.push("What limits should constrain autonomy, cost, scope, or time?");
+  if (stopConditions.length === 0) missingQuestions.push("Which stop conditions require pausing for the operator?");
+
+  const requested = input.autonomyRequest === "bounded-batch" || input.autonomyRequest === "worker-assisted" || input.autonomyRequest === "single-slice"
+    ? input.autonomyRequest
+    : input.workerRequested
+      ? "worker-assisted"
+      : "single-slice";
+  const autonomy = requested === "worker-assisted"
+    ? "worker-assisted-candidate"
+    : requested === "bounded-batch"
+      ? "bounded-batch-candidate"
+      : "single-slice";
+  const profile: ControlPlaneProfileKind = blockedRequests.length > 0
+    ? "blocked-protected-scope"
+    : autonomy === "worker-assisted-candidate"
+      ? "worker-assisted-candidate"
+      : autonomy === "bounded-batch-candidate"
+        ? "bounded-batch-candidate"
+        : "local-safe-single-slice";
+  const decision: ControlPlaneProfileDecision = blockedRequests.length > 0 ? "blocked" : "ready-for-operator-decision";
+  const recommendation = decision === "blocked"
+    ? "Keep the control-plane profile report-only; remove protected requests or ask for explicit operator authorization."
+    : autonomy === "single-slice"
+      ? "Prepare one local-safe slice with validation, rollback, checkpoint, and explicit stop conditions."
+      : "Present this as an operator decision packet; batch or worker capability remains candidate-only until lower gates approve it.";
+  const blockedSummary = blockedRequests.length > 0 ? " blocked=" + blockedRequests.slice(0, 4).join("|") : " blocked=none";
+
+  return {
+    effect: "none",
+    mode: "report-only",
+    activation: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    decision,
+    profile,
+    autonomy,
+    intent,
+    roi,
+    resources,
+    limits,
+    stopConditions,
+    missingQuestions: missingQuestions.slice(0, 4),
+    blockedRequests,
+    summary: "control-plane-profile-packet: decision=" + decision + " profile=" + profile + " autonomy=" + autonomy + " questions=" + Math.min(missingQuestions.length, 4) + blockedSummary + " " + formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
+    recommendation,
+  };
+}
+
 export function resolveLocalSliceCanaryPlan(input: LocalSliceCanaryInput): LocalSliceCanaryPlan {
   const reasons: string[] = [];
 

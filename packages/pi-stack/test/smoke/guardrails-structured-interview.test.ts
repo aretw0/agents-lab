@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
+import { buildControlPlaneProfilePacket, resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
 import { registerGuardrailsStructuredInterviewSurface } from "../../extensions/guardrails-core-structured-interview-surface";
 
 describe("structured interview primitive", () => {
@@ -64,6 +64,80 @@ describe("structured interview primitive", () => {
       "single-choice-value-not-in-options",
       "skip-not-allowed",
     ]);
+  });
+
+  it("builds a report-only control-plane profile packet", () => {
+    const ready = buildControlPlaneProfilePacket({
+      intent: "harden release governance",
+      autonomyRequest: "bounded-batch",
+      availableResources: ["first-hatch", "tool-hygiene", "first-hatch"],
+      expectedRoi: "reduce operator prompts while keeping gates explicit",
+      limits: ["local-safe only", "max 3 slices"],
+      stopConditions: ["validation fails", "protected scope appears"],
+      operatorFocusKnown: true,
+      validationKnown: true,
+      rollbackKnown: true,
+      checkpointPlanned: true,
+    });
+    const blocked = buildControlPlaneProfilePacket({
+      intent: "publish release",
+      autonomyRequest: "worker-assisted",
+      protectedScopeRequested: true,
+      githubActionsRequested: true,
+    });
+
+    expect(ready).toMatchObject({
+      effect: "none",
+      mode: "report-only",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      decision: "ready-for-operator-decision",
+      profile: "bounded-batch-candidate",
+      autonomy: "bounded-batch-candidate",
+      missingQuestions: [],
+      resources: ["first-hatch", "tool-hygiene"],
+    });
+    expect(ready.summary).toContain("blocked=none");
+    expect(blocked).toMatchObject({
+      decision: "blocked",
+      profile: "blocked-protected-scope",
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      blockedRequests: ["protected-scope", "github-actions"],
+    });
+    expect(blocked.summary).toContain("blocked=protected-scope|github-actions");
+  });
+
+  it("surface exposes control_plane_profile_packet as operator-visible report-only tool", () => {
+    const tools: Array<{ name: string; execute: (id: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> } }> = [];
+    registerGuardrailsStructuredInterviewSurface({
+      registerTool(tool: unknown) {
+        tools.push(tool as (typeof tools)[number]);
+      },
+    } as never);
+
+    const tool = tools.find((item) => item.name === "control_plane_profile_packet");
+    const result = tool?.execute("tc-profile", {
+      intent: "prepare local-safe batch",
+      autonomy_request: "bounded-batch",
+      available_resources: ["first-hatch", "tool-hygiene"],
+      expected_roi: "less operator ambiguity",
+      limits: ["local-safe"],
+      stop_conditions: ["validation fails"],
+      operator_focus_known: true,
+      validation_known: true,
+      rollback_known: true,
+      checkpoint_planned: true,
+    });
+
+    expect(result?.details.decision).toBe("ready-for-operator-decision");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.mutationAllowed).toBe(false);
+    expect(result?.content?.[0]?.text).toContain("control-plane-profile-packet: decision=ready-for-operator-decision");
+    expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(result?.content?.[0]?.text).not.toContain("\"intent\"");
   });
 
   it("surface retorna resumo operator-visible e preserva details", () => {

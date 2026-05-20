@@ -23337,7 +23337,7 @@
     {
       "id": "TASK-BUD-1048",
       "description": "[hard-intent/queen] Implementar packet report-only de descoberta de perfil queen: intenção, autonomia, recursos, ROI, limites e stop conditions.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p0",
       "depends_on": [
         "TASK-BUD-1046"
@@ -23345,7 +23345,9 @@
       "files": [
         "packages/pi-stack/extensions/guardrails-core-local-slice-contracts.ts",
         "packages/pi-stack/extensions/guardrails-core-structured-interview-surface.ts",
-        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts",
         "docs/primitives/nudge-free-local-continuity.md"
       ],
       "acceptance_criteria": [
@@ -23356,7 +23358,8 @@
         "Teste cobre perfil completo, perfil ausente e bloqueio protected."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Hard intent: tornar queen discoverability uma superfície report-only testável.\n[provenance:human] source_task=none reason=Control-plane deve descobrir perfil/contexto antes de ficar passivo ou pedir micro-autorização."
+      "notes": "Hard intent: tornar queen discoverability uma superfície report-only testável.\n[provenance:human] source_task=none reason=Control-plane deve descobrir perfil/contexto antes de ficar passivo ou pedir micro-autorização.\n[2026-05-20T12:12:00.000Z] Implemented control_plane_profile_packet as the report-only profile discovery surface for intent/autonomy/resources/ROI/limits/stop conditions. It avoids the legacy queen naming in runtime, blocks protected/scheduler/remote/GitHub Actions requests, and never authorizes dispatch or mutation.",
+      "verification": "VERIF-TASK-BUD-1048-CONTROL-PLANE-PROFILE-PACKET-20260520"
     },
     {
       "id": "TASK-BUD-1049",

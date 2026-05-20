@@ -8,6 +8,7 @@ A decisão canônica é **não criar uma família nova de loops**. O control-pla
 
 | Primitiva | Papel | Estado operacional |
 | --- | --- | --- |
+| `control_plane_profile_packet` | Descobrir intenção, perfil de autonomia, ROI, recursos, limites e stop conditions antes de qualquer batch. | Report-only/read-only; não executa e não autoriza dispatch. |
 | `local_continuity_audit` | Ler o estado local e dizer se existe uma próxima fatia local-safe. | Read-only/advisory; não executa. |
 | `nudge_free_loop_canary` | Avaliar se uma continuação sem empurrão do operador poderia ser segura. | Read-only/advisory; boolean do operador não libera `ready`. |
 | `context_watch_checkpoint` | Gravar handoff curto entre fatias e antes de compact/pausa. | Mutação bounded de checkpoint; não despacha execução. |
@@ -194,6 +195,19 @@ Antes de usar colônias, subagentes ou swarms, o primeiro batch local sem empurr
 4. deixar o board pronto para decisões do operador, sem aplicar candidates.
 
 O sucesso desse cenário não é um nome novo nem uma automação nova: é o operador conseguir voltar depois de um período longo e escolher rapidamente entre decisões já preparadas, sem encontrar automação irreversível já executada.
+
+## Perfil do control-plane
+
+Antes de aceitar uma manifestação de batch, o control-plane deve conseguir produzir um `control_plane_profile_packet`. Esse packet responde, em payload estruturado e bounded:
+
+- qual intenção/foco está sendo otimizado;
+- se a autonomia pedida é single-slice, batch bounded ou worker-assisted candidate;
+- qual ROI esperado justifica usar capacidade mais forte que edição local simples;
+- quais recursos/capacidades estão disponíveis;
+- quais limites e stop conditions estão explícitos;
+- quais perguntas faltam para o operador.
+
+Mesmo quando retorna `decision=ready-for-operator-decision`, o packet mantém `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none` e `mode=report-only`. Pedido de protected scope, GitHub Actions, scheduler ou remote/offload retorna bloqueio até autorização explícita fora do packet.
 
 ## Manifestação única do operador
 

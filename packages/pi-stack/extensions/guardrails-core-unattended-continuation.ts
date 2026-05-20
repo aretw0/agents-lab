@@ -6,6 +6,7 @@ import {
 export type * from "./guardrails-core-unattended-continuation-types";
 
 export {
+  buildControlPlaneProfilePacket,
   buildLocalSliceCanaryDispatchDecisionPacket,
   resolveLocalSliceBacklogGate,
   resolveLocalSliceCanaryPlan,
@@ -13,6 +14,10 @@ export {
 } from "./guardrails-core-local-slice-contracts";
 
 export type {
+  ControlPlaneProfileDecision,
+  ControlPlaneProfileKind,
+  ControlPlaneProfilePacket,
+  ControlPlaneProfilePacketInput,
   LocalSliceBacklogGate,
   LocalSliceBacklogGateDecision,
   LocalSliceBacklogGateInput,

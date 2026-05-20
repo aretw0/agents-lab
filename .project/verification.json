@@ -16703,6 +16703,15 @@
       "method": "smoke-test",
       "timestamp": "2026-05-20T11:50:00.000Z",
       "evidence": "Extended first_hatch_intake_packet with bounded available_tools and capability_signals, using existing tool hygiene classification to summarize safe local-loop tools, measured/protected tools, and gaps. Validation: pnpm exec vitest run packages/pi-stack/test/smoke/project-intake-primitive.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts passed with 2 files and 38 tests."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1048-CONTROL-PLANE-PROFILE-PACKET-20260520",
+      "target": "TASK-BUD-1048",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "timestamp": "2026-05-20T12:12:00.000Z",
+      "evidence": "Added buildControlPlaneProfilePacket and control_plane_profile_packet tool. It reports intent, autonomy candidate, resources, ROI, limits, stop conditions, missing questions, and blocked protected requests while keeping dispatchAllowed=false, mutationAllowed=false, authorization=none. Validation: pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts passed with 2 files and 22 tests."
     }
   ]
 }
