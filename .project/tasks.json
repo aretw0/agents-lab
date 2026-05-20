@@ -23602,7 +23602,7 @@
     {
       "id": "TASK-BUD-1059",
       "description": "[hard-intent/toolkit] Implementar contrato de toolkit por step: cada task/worker packet deve declarar capacidades/ferramentas mínimas antes de execução.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p0",
       "depends_on": [
         "TASK-BUD-1047",
@@ -23623,8 +23623,8 @@
         "Teste cobre research sem web tool, mutation sem edit/write, test-fix sem focal gate e caso pronto."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Hard intent do operador: não mandar worker/control-plane executar step sem dar toolkit necessário; falta de ferramenta é gap de contrato.\n[provenance:human] source_task=none reason=Garantir que control-plane e workers tenham o que precisam para executar cada step.\n[agent-run] First exact-confirmed worker attempt `task-bud-1059-toolkit-contract-implementation` dispatched, then failed with exitCode=1 and no useful worker output; no declared implementation files touched. Treat as runner/provider/toolkit feedback, not task completion. Prepared retry packet `task-bud-1059-toolkit-contract-implementation-retry` on route-recommended dashscope/qwen3-coder-plus; exact confirmation still required by dispatch gate.\n[agent-run] Retry `task-bud-1059-toolkit-contract-implementation-retry` used dashscope/qwen3-coder-plus after generic route advisory, but operator clarified OpenAI Codex Spark has separate quota and should remain preferred with model-specific evidence. Retry also failed exitCode=1 with no useful output and no implementation files touched. Treat both attempts as runner/toolkit feedback plus provider-routing evidence gap: do not let aggregate openai-codex blocked state override model-specific Spark capacity when explicit scoped evidence exists.",
-      "verification": "VERIF-TASK-BUD-1059-TOOLKIT-CONTRACT-2026-05-08"
+      "notes": "Hard intent do operador: não mandar worker/control-plane executar step sem dar toolkit necessário; falta de ferramenta é gap de contrato.\n[provenance:human] source_task=none reason=Garantir que control-plane e workers tenham o que precisam para executar cada step.\n[agent-run] First exact-confirmed worker attempt `task-bud-1059-toolkit-contract-implementation` dispatched, then failed with exitCode=1 and no useful worker output; no declared implementation files touched. Treat as runner/provider/toolkit feedback, not task completion. Prepared retry packet `task-bud-1059-toolkit-contract-implementation-retry` on route-recommended dashscope/qwen3-coder-plus; exact confirmation still required by dispatch gate.\n[agent-run] Retry `task-bud-1059-toolkit-contract-implementation-retry` used dashscope/qwen3-coder-plus after generic route advisory, but operator clarified OpenAI Codex Spark has separate quota and should remain preferred with model-specific evidence. Retry also failed exitCode=1 with no useful output and no implementation files touched. Treat both attempts as runner/toolkit feedback plus provider-routing evidence gap: do not let aggregate openai-codex blocked state override model-specific Spark capacity when explicit scoped evidence exists.\n[completion] Closed with VERIF-TASK-BUD-1059-TOOLKIT-CONTRACT-2026-05-20 after focal guardrails-agent-spawn-readiness smoke passed 21/21. [rationale:risk-control] Worker/step packets now expose required capabilities, available tools/capabilities, gaps, and block dispatch when required toolkit is missing.",
+      "verification": "VERIF-TASK-BUD-1059-TOOLKIT-CONTRACT-2026-05-20"
     },
     {
       "id": "TASK-BUD-1060",

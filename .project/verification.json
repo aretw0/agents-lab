@@ -16730,6 +16730,15 @@
       "method": "ci-local-parity",
       "evidence": "Capability ROI packet delivered as distributed pi-stack surface. Commits: 46947314 feat(pi-stack): add capability roi packet, f6257872 fix(pi-stack): annotate tool hygiene surface. Evidence: pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts passed 16/16; npm pack --dry-run for @aretw0/pi-stack included extensions/capability-roi-policy.ts; pnpm run ci:local:parity passed with Vitest 162 files / 1329 tests and package-boundary-audit findings=0 blockers=0.",
       "timestamp": "2026-05-20T15:17:01.955Z"
+    },
+    {
+      "id": "VERIF-TASK-BUD-1059-TOOLKIT-CONTRACT-2026-05-20",
+      "target": "TASK-BUD-1059",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "evidence": "Toolkit contract per step is implemented in guardrails-core-toolkit-contract.ts and integrated into agent-run start/operator/invocation packets. Focal validation: pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts passed 1 file / 21 tests. Coverage includes research blocked without web-research tool, test-fix blocked without focal validation, mutation requiring validation/rollback, ready toolkit contract with filesystem-read/write, toolkit gap analysis missingTools, and report-only dispatchAllowed=false/processStartAllowed=false packets.",
+      "timestamp": "2026-05-20T15:21:57.341Z"
     }
   ]
 }
