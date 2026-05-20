@@ -69,3 +69,22 @@ test("classifyDiscourseText reports uppercase semantic labels", () => {
 
   assert.deepEqual(findings.map((finding) => finding.rule), ["loaded-pragmatic-label"]);
 });
+
+
+test("classifyDiscourseText reports speculative control-plane aliases", () => {
+  const findings = classifyDiscourseText(
+    "docs/guides/control-plane-evolution-playbook.md",
+    "Contrato de operação do coordenador queen-of-queens.",
+  );
+
+  assert.deepEqual(findings.map((finding) => finding.rule), ["speculative-control-plane-alias"]);
+});
+
+test("classifyDiscourseText reports self-congratulatory claims", () => {
+  const findings = classifyDiscourseText(
+    "docs/guides/control-plane-glossary.md",
+    "Uma experiência world-class e incrível.",
+  );
+
+  assert.deepEqual(findings.map((finding) => finding.rule), ["self-congratulatory-claim"]);
+});

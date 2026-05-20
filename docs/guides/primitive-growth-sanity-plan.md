@@ -2,7 +2,7 @@
 
 Objetivo: aumentar produtividade com segurança, calibração e governança — sem caos, repetição de código ou crescimento descontrolado de débito técnico.
 
-Este guia define a trilha para evoluir de control-plane local-first para laboratório automatizado, fábrica de agentes e, no futuro, fábrica de fábricas de agentes.
+Este guia define a trilha para evoluir de control-plane local-first para automação local governada e, no futuro, coordenação federada com gates explícitos.
 
 ## Princípios não negociáveis
 

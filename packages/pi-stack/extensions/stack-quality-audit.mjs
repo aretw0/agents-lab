@@ -44,6 +44,18 @@ const DISCOURSE_RULES = [
     pattern: /\bPRAGMATIC\b/,
     message: "avoid uppercase semantic labels unless they map to a documented runtime contract",
   },
+  {
+    id: "speculative-control-plane-alias",
+    severity: "warning",
+    pattern: /\b(queen-of-queens|queen continuity|queen-continuity|fábrica de fábricas|factory of factories)\b/i,
+    message: "keep speculative role aliases parked in research; canonical docs should use control-plane/operator terminology",
+  },
+  {
+    id: "self-congratulatory-claim",
+    severity: "warning",
+    pattern: /\b(incr[ií]vel|world[- ]class|best[- ]in[- ]class|revolucion[aá]rio|m[aá]gico|sem esforço)\b/i,
+    message: "replace self-congratulatory claims with concrete capability, evidence, or roadmap status",
+  },
 ];
 
 export function normalizeRepoPath(input) {

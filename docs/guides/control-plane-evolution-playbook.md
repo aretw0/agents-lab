@@ -11,7 +11,7 @@ Radar estratégico relacionado: `docs/research/linux-agent-primitives-radar-2026
 1. **Playbook-first**: consolidar contrato operacional antes de ampliar arquitetura.
 2. **State in parent**: estado canônico permanece no control-plane principal (`.project/*`).
 3. **Workers are disposable**: subagentes/swarm são efêmeros (`spawn -> slice -> evidence -> kill`).
-4. **Federation is a phase, not a flag**: queen-of-queens entra apenas após estabilidade comprovada das fases anteriores.
+4. **Federation is a phase, not a flag**: coordenação federada entra apenas após estabilidade comprovada das fases anteriores.
 
 ## Três modos (não misturar)
 
@@ -162,7 +162,7 @@ Cada control-plane federado deve expor, no mínimo:
 - `workload`: fila pendente e task ativa (se houver).
 - `lastHandoffAtIso`: timestamp da última atualização canônica.
 
-Contrato de operação do coordenador (queen-of-queens):
+Contrato de operação do coordenador federado:
 - nunca decidir por contexto implícito de worker;
 - sempre agir com base em telemetria explícita + evidência do board local;
 - isolar instância degradada sem interromper as saudáveis.
