@@ -20,6 +20,10 @@ repair_owned_dir() {
 }
 
 repair_owned_dir "$LOCAL_AGENT_DIR"
+repair_owned_dir /home/vscode/.local
+repair_owned_dir /home/vscode/.local/state
+repair_owned_dir /home/vscode/.config
+repair_owned_dir /home/vscode/.cache
 repair_owned_dir "${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
 repair_owned_dir "${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}"
 repair_owned_dir "${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}/bin"

@@ -85,6 +85,14 @@ test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 
 	assert.match(postCreate, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}"/);
 	assert.match(postStart, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}"/);
+	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.local$/m);
+	assert.match(postStart, /repair_owned_dir \/home\/vscode\/\.local$/m);
+	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.local\/state/);
+	assert.match(postStart, /repair_owned_dir \/home\/vscode\/\.local\/state/);
+	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.config/);
+	assert.match(postStart, /repair_owned_dir \/home\/vscode\/\.config/);
+	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.cache/);
+	assert.match(postStart, /repair_owned_dir \/home\/vscode\/\.cache/);
 	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.local\/share\/claude/);
 	assert.match(postStart, /repair_owned_dir \/home\/vscode\/\.local\/share\/claude/);
 	assert.match(postCreate, /sudo chown -R "\$\(id -u\):\$\(id -g\)" "\$dir"/);
