@@ -87,8 +87,9 @@ test("site map documents promotion and publication boundaries", () => {
 	assert.match(siteMap, /Promote operational material to `docs\/guides\/`, `docs\/primitives\/` or `docs\/architecture\/`/);
 	assert.match(siteMap, /Do not publish `docs\/research\/data\/`/);
 	assert.match(siteMap, /pnpm run docs:site:serve/);
-	assert.match(siteMap, /If `docs\/CNAME` exists/);
-	assert.match(siteMap, /http:\/\/127\.0\.0\.1:4000\/agents-lab\//);
+	assert.match(siteMap, /`docs:site:build` mirrors the deploy target/);
+	assert.match(siteMap, /`docs:site:serve` uses local root/);
+	assert.match(siteMap, /http:\/\/127\.0\.0\.1:4000\//);
 });
 
 test("docs site can be served consistently from host or devcontainer", () => {
@@ -112,8 +113,10 @@ test("docs site can be served consistently from host or devcontainer", () => {
 	assert.match(script, /--site-mode=github-pages\|root/);
 	assert.match(script, /\["root", ""\]/);
 	assert.match(script, /existsSync\(CNAME_FILE\)/);
-	assert.match(script, /docs\/CNAME present: root deployment/);
+	assert.match(script, /serve: local root by default/);
+	assert.match(script, /local-root/);
 	assert.match(script, /"--baseurl",\s*baseurl/);
+	assert.match(script, /"--baseurl",\s*serveBaseurl/);
 	assert.match(script, /DOCS_SITE_BASEURL/);
 	assert.match(script, /--host",\s*"0\.0\.0\.0"/);
 	assert.match(script, /--port",\s*PORT/);

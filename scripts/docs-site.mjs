@@ -80,6 +80,17 @@ function resolveSiteModeLabel({ siteMode, baseurl }) {
 	return "config";
 }
 
+function resolveServeBaseurl({ siteMode, baseurl }) {
+	if (baseurl !== undefined || siteMode !== undefined) return resolveBaseurl({ siteMode, baseurl });
+	return "";
+}
+
+function resolveServeModeLabel({ siteMode, baseurl }) {
+	if (siteMode) return siteMode;
+	if (baseurl !== undefined) return "override";
+	return "local-root";
+}
+
 function ensureBundleInstalled() {
 	const result = spawnSync(bin("bundle"), ["check"], {
 		cwd: DOCS_DIR,
@@ -154,7 +165,7 @@ function ensureBundler() {
 	}
 }
 
-function usage(baseurl = "/agents-lab") {
+function usage(baseurl = "") {
 	console.log("Usage: node scripts/docs-site.mjs <install|build|serve> [--site-mode=github-pages|root] [--baseurl=/custom]");
 	console.log("");
 	console.log("Commands:");
@@ -163,8 +174,8 @@ function usage(baseurl = "/agents-lab") {
 	console.log(`  serve    Serve docs on ${localUrl(baseurl)}`);
 	console.log("");
 	console.log("Base URL detection:");
-	console.log("  docs/CNAME present: root deployment");
-	console.log("  docs/CNAME absent:  docs/_config.yml baseurl");
+	console.log("  build: docs/CNAME root, otherwise docs/_config.yml baseurl");
+	console.log("  serve: local root by default; pass --site-mode=github-pages to rehearse Pages path");
 }
 
 const opts = parseArgs(process.argv);
@@ -172,9 +183,11 @@ const command = opts.command;
 validateSiteMode(opts.siteMode);
 const baseurl = resolveBaseurl(opts);
 const siteModeLabel = resolveSiteModeLabel(opts);
+const serveBaseurl = resolveServeBaseurl(opts);
+const serveModeLabel = resolveServeModeLabel(opts);
 
 if (command === "help" || command === "--help" || command === "-h") {
-	usage(baseurl);
+	usage(serveBaseurl);
 	process.exit(0);
 }
 
@@ -198,7 +211,7 @@ if (command === "install") {
 	]);
 } else if (command === "serve") {
 	ensureBundleInstalled();
-	console.log(`docs-site: serving ${localUrl(baseurl)} (${siteModeLabel})`);
+	console.log(`docs-site: serving ${localUrl(serveBaseurl)} (${serveModeLabel})`);
 	run(bin("bundle"), [
 		"exec",
 		"jekyll",
@@ -212,7 +225,7 @@ if (command === "install") {
 		"--port",
 		PORT,
 		"--baseurl",
-		baseurl,
+		serveBaseurl,
 		"--livereload",
 		"--force_polling",
 	]);

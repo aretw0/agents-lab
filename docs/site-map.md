@@ -37,8 +37,8 @@ pnpm run docs:site:build
 pnpm run docs:site:serve
 ```
 
-The default target mirrors GitHub Pages project hosting at `http://127.0.0.1:4000/agents-lab/`.
-If `docs/CNAME` exists, the same commands switch to root deployment for a custom domain.
+`docs:site:build` mirrors the deploy target: GitHub Pages project hosting at `/agents-lab/`, or root when `docs/CNAME` exists.
+`docs:site:serve` uses local root at `http://127.0.0.1:4000/` for operator browsing.
 
 The devcontainer includes Ruby and Bundler. VS Code forwards port `4000` as `agents-lab docs site` and opens the operator browser.
 
