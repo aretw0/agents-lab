@@ -67,7 +67,7 @@ git config i18n.commitEncoding UTF-8
 git config i18n.logOutputEncoding UTF-8
 
 if [[ -f pnpm-lock.yaml ]]; then
-  pnpm install --frozen-lockfile --prefer-offline
+  pnpm install --frozen-lockfile --prefer-offline --config.confirm-modules-purge=false
 else
-  pnpm install --prefer-offline
+  pnpm install --prefer-offline --config.confirm-modules-purge=false
 fi

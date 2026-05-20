@@ -1,2 +1,7 @@
 packages:
   - "packages/*"
+allowBuilds:
+  "@google/genai": true
+  koffi: true
+  pi-lens: true
+  protobufjs: true

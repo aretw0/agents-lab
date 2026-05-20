@@ -37,13 +37,13 @@ test("pnpm build approvals stay explicit and non-interactive", () => {
 	const workspace = readFileSync("pnpm-workspace.yaml", "utf8");
 	const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
 
-	assert.doesNotMatch(workspace, /allowBuilds:/);
-	assert.deepEqual(packageJson.pnpm?.onlyBuiltDependencies, [
-		"@google/genai",
-		"koffi",
-		"pi-lens",
-		"protobufjs",
-	]);
+	assert.match(workspace, /allowBuilds:/);
+	assert.match(workspace, /"@google\/genai": true/);
+	assert.match(workspace, /koffi: true/);
+	assert.match(workspace, /pi-lens: true/);
+	assert.match(workspace, /protobufjs: true/);
+	assert.doesNotMatch(workspace, /set this to true or false/);
+	assert.equal(packageJson.pnpm?.onlyBuiltDependencies, undefined);
 });
 
 test("devcontainer lab helper enters through the versioned lab command", () => {
@@ -90,7 +90,8 @@ test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 	assert.match(postCreate, /pnpm add -g "\$package_name"/);
 	assert.match(postStart, /install_global_tool_if_missing claude @anthropic-ai\/claude-code/);
 	assert.match(postStart, /install_global_tool_if_missing codex @openai\/codex/);
-	assert.match(postStart, /pnpm install --frozen-lockfile --prefer-offline/);
+	assert.match(postCreate, /pnpm install --frozen-lockfile --prefer-offline --config\.confirm-modules-purge=false/);
+	assert.match(postStart, /pnpm install --frozen-lockfile --prefer-offline --config\.confirm-modules-purge=false/);
 	assert.doesNotMatch(postCreate, /npm install -g/);
 	assert.doesNotMatch(postStart, /npm install -g/);
 	assert.doesNotMatch(postStart, /(?<!p)npm run/);

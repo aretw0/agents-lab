@@ -42,9 +42,11 @@ install_workspace_if_pi_missing() {
 
   echo "[agents-lab-devcontainer] pi missing from node_modules; restoring workspace install..."
   if [[ -f pnpm-lock.yaml ]]; then
-    pnpm install --frozen-lockfile --prefer-offline || pnpm install --prefer-offline || true
+    pnpm install --frozen-lockfile --prefer-offline --config.confirm-modules-purge=false \
+      || pnpm install --prefer-offline --config.confirm-modules-purge=false \
+      || true
   else
-    pnpm install --prefer-offline || true
+    pnpm install --prefer-offline --config.confirm-modules-purge=false || true
   fi
 }
 
