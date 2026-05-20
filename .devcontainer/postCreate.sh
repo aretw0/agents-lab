@@ -46,6 +46,16 @@ install_global_tool() {
   pnpm add -g "$package_name"
 }
 
+install_claude_code() {
+  if command -v claude >/dev/null 2>&1 && claude --version >/dev/null 2>&1; then
+    echo "[agents-lab-devcontainer] claude already installed"
+    return 0
+  fi
+
+  echo "[agents-lab-devcontainer] Installing @anthropic-ai/claude-code with npm..."
+  npm install -g @anthropic-ai/claude-code
+}
+
 if [[ ! -f "$SETTINGS_FILE" ]]; then
   cat > "$SETTINGS_FILE" <<'JSON'
 {
@@ -58,7 +68,7 @@ fi
 corepack enable || true
 corepack prepare --activate || true
 
-install_global_tool claude @anthropic-ai/claude-code || true
+install_claude_code || true
 install_global_tool codex @openai/codex || true
 
 # Git — encoding PT-BR e nomes de arquivo legíveis em logs

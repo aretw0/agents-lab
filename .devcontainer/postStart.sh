@@ -35,6 +35,18 @@ install_global_tool_if_missing() {
   }
 }
 
+install_claude_code_if_missing_or_broken() {
+  if command -v claude >/dev/null 2>&1 && claude --version >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "[agents-lab-devcontainer] claude missing or incomplete; installing @anthropic-ai/claude-code with npm..."
+  npm install -g @anthropic-ai/claude-code || {
+    echo "[agents-lab-devcontainer][warn] claude still missing. Retry later: npm install -g @anthropic-ai/claude-code"
+    return 0
+  }
+}
+
 install_workspace_if_pi_missing() {
   if [[ -x "$REPO_ROOT/node_modules/.bin/pi" ]]; then
     return 0
@@ -66,7 +78,7 @@ if [[ -f package.json ]]; then
   pnpm run ops:disk:check --silent || true
 fi
 
-install_global_tool_if_missing claude @anthropic-ai/claude-code
+install_claude_code_if_missing_or_broken
 install_global_tool_if_missing codex @openai/codex
 install_workspace_if_pi_missing
 

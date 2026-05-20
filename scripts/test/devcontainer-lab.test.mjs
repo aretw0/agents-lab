@@ -87,12 +87,12 @@ test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 	assert.match(postStart, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}"/);
 	assert.match(postCreate, /sudo chown -R "\$\(id -u\):\$\(id -g\)" "\$dir"/);
 	assert.match(postStart, /sudo chown -R "\$\(id -u\):\$\(id -g\)" "\$dir"/);
-	assert.match(postCreate, /pnpm add -g "\$package_name"/);
-	assert.match(postStart, /install_global_tool_if_missing claude @anthropic-ai\/claude-code/);
+	assert.match(postCreate, /npm install -g @anthropic-ai\/claude-code/);
+	assert.match(postStart, /npm install -g @anthropic-ai\/claude-code/);
+	assert.match(postStart, /claude --version/);
+	assert.match(postCreate, /install_global_tool codex @openai\/codex/);
 	assert.match(postStart, /install_global_tool_if_missing codex @openai\/codex/);
 	assert.match(postCreate, /pnpm install --frozen-lockfile --prefer-offline --config\.confirm-modules-purge=false/);
 	assert.match(postStart, /pnpm install --frozen-lockfile --prefer-offline --config\.confirm-modules-purge=false/);
-	assert.doesNotMatch(postCreate, /npm install -g/);
-	assert.doesNotMatch(postStart, /npm install -g/);
 	assert.doesNotMatch(postStart, /(?<!p)npm run/);
 });
