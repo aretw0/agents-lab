@@ -23392,7 +23392,7 @@
     {
       "id": "TASK-BUD-1050",
       "description": "[hard-intent/capability-roi] Implementar packet de discoverability de capacidades/ROI para recomendar ferramentas, workers ou outras capacidades disponíveis.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1048"
@@ -23412,7 +23412,8 @@
         "Teste cobre capacidades locais, worker recomendado e capacidade bloqueada/protected."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Hard intent: tornar proatividade por ROI uma superfície explícita e auditável.\n[provenance:human] source_task=none reason=Control-plane deve revelar potencial disponível em vez de esconder o jogo."
+      "notes": "Hard intent: tornar proatividade por ROI uma superfície explícita e auditável.\n[provenance:human] source_task=none reason=Control-plane deve revelar potencial disponível em vez de esconder o jogo.\n[completion] Closed with VERIF-TASK-BUD-1050-CAPABILITY-ROI-2026-05-20 after distributed capability_roi_packet, focused smoke, package dry-run evidence, package-boundary audit, and ci:local:parity. [rationale:risk-control] Capability discoverability is report-only, dispatch=no, mutation=no, providerMutation=no, and stays packaged for users.",
+      "verification": "VERIF-TASK-BUD-1050-CAPABILITY-ROI-2026-05-20"
     },
     {
       "id": "TASK-BUD-1051",
