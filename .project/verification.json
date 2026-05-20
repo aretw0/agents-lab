@@ -16712,6 +16712,15 @@
       "method": "smoke-test",
       "timestamp": "2026-05-20T12:12:00.000Z",
       "evidence": "Added buildControlPlaneProfilePacket and control_plane_profile_packet tool. It reports intent, autonomy candidate, resources, ROI, limits, stop conditions, missing questions, and blocked protected requests while keeping dispatchAllowed=false, mutationAllowed=false, authorization=none. Validation: pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts passed with 2 files and 22 tests."
+    },
+    {
+      "id": "VERIF-TASK-BUD-1049-LOCAL-BATCH-MANIFEST-PACKET-20260520",
+      "target": "TASK-BUD-1049",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "timestamp": "2026-05-20T13:05:00.000Z",
+      "evidence": "Added buildLocalBatchManifestPacket and local_batch_manifest_packet tool. Packet normalizes minimal operator manifestation for local-safe batch, fails closed on missing contracts/protected requests, and never authorizes execution, dispatch, workers, or mutation. Validation: pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts passed with 2 files and 30 tests."
     }
   ]
 }

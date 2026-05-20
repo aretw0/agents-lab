@@ -9,6 +9,7 @@ A decisão canônica é **não criar uma família nova de loops**. O control-pla
 | Primitiva | Papel | Estado operacional |
 | --- | --- | --- |
 | `control_plane_profile_packet` | Descobrir intenção, perfil de autonomia, ROI, recursos, limites e stop conditions antes de qualquer batch. | Report-only/read-only; não executa e não autoriza dispatch. |
+| `local_batch_manifest_packet` | Normalizar a manifestação mínima do operador para um batch local-safe. | Report-only/read-only; batch=no, dispatch=no, worker=no. |
 | `local_continuity_audit` | Ler o estado local e dizer se existe uma próxima fatia local-safe. | Read-only/advisory; não executa. |
 | `nudge_free_loop_canary` | Avaliar se uma continuação sem empurrão do operador poderia ser segura. | Read-only/advisory; boolean do operador não libera `ready`. |
 | `context_watch_checkpoint` | Gravar handoff curto entre fatias e antes de compact/pausa. | Mutação bounded de checkpoint; não despacha execução. |
@@ -210,6 +211,8 @@ Antes de aceitar uma manifestação de batch, o control-plane deve conseguir pro
 Mesmo quando retorna `decision=ready-for-operator-decision`, o packet mantém `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none` e `mode=report-only`. Pedido de protected scope, GitHub Actions, scheduler ou remote/offload retorna bloqueio até autorização explícita fora do packet.
 
 ## Manifestação única do operador
+
+A manifestação mínima agora é representável por `local_batch_manifest_packet`. O packet aceita assunto/seed, foco inicial, limite de slices, orçamento conhecido, validação, rollback, checkpoint e stop conditions; ele depende de `control_plane_profile_packet` verde e falha fechado para protected scope, GitHub Actions, scheduler, remote/offload ou worker sem gate inferior. Mesmo quando `decision=ready-for-operator-decision`, a saída mantém `batchExecutionAllowed=false`, `dispatchAllowed=false`, `workerDispatchAllowed=false`, `mutationAllowed=false` e `authorization=none`.
 
 Não criar primitive nova para “autorização ampla”. A manifestação do operador deve ser pequena: ela informa o assunto, o foco e qualquer exceção aos defaults. O restante é processo normal de desenvolvimento, executado pelos contratos já existentes: `local_slice_human_contract_review`, `unattended_continuation_plan`, `nudge_free_loop_canary`, `context_watch_checkpoint`, gates de quota/máquina e, quando houver worker, `agent_run_task_dispatch` sem burlar o gate inferior.
 

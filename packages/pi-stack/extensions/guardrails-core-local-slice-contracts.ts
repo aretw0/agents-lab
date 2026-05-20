@@ -274,6 +274,119 @@ export function buildControlPlaneProfilePacket(input: ControlPlaneProfilePacketI
   };
 }
 
+
+export type LocalBatchManifestDecision = "ready-for-operator-decision" | "blocked";
+export type LocalBatchManifestKind = "missing" | "generic" | "explicit-local-batch";
+
+export interface LocalBatchManifestPacketInput {
+  profilePacket: Pick<ControlPlaneProfilePacket, "decision" | "profile" | "dispatchAllowed" | "mutationAllowed" | "authorization" | "mode">;
+  manifestation: LocalBatchManifestKind;
+  subject?: string;
+  focusTaskId?: string;
+  localSafeScope: boolean;
+  sliceLimit?: number;
+  timeBudgetKnown: boolean;
+  costBudgetKnown: boolean;
+  validationGateKnown: boolean;
+  rollbackPlanKnown: boolean;
+  checkpointPlanned: boolean;
+  stopConditions?: string[];
+  protectedScopeRequested?: boolean;
+  schedulerRequested?: boolean;
+  remoteOrOffloadRequested?: boolean;
+  githubActionsRequested?: boolean;
+  workerRequested?: boolean;
+}
+
+export interface LocalBatchManifestPacket {
+  effect: "none";
+  mode: "manifest-packet";
+  activation: "none";
+  authorization: GuardrailsAuthorizationNone;
+  dispatchAllowed: false;
+  mutationAllowed: false;
+  executorApproved: false;
+  batchExecutionAllowed: false;
+  workerDispatchAllowed: false;
+  requiresOperatorDecision: true;
+  decision: LocalBatchManifestDecision;
+  manifestation: LocalBatchManifestKind;
+  subject: string;
+  focusTaskId: string;
+  sliceLimit: number;
+  stopConditions: string[];
+  reasons: string[];
+  blockedRequests: string[];
+  summary: string;
+  recommendation: string;
+}
+
+function boundedSliceLimit(value: unknown): number {
+  return Number.isFinite(value) ? Math.max(1, Math.min(5, Math.floor(Number(value)))) : 3;
+}
+
+export function buildLocalBatchManifestPacket(input: LocalBatchManifestPacketInput): LocalBatchManifestPacket {
+  const reasons: string[] = [];
+  const blockedRequests: string[] = [];
+  const stopConditions = boundedProfileList(input.stopConditions, 8);
+  const subject = boundedProfileText(input.subject, "unspecified", 100);
+  const focusTaskId = boundedProfileText(input.focusTaskId, "unspecified", 80);
+  const sliceLimit = boundedSliceLimit(input.sliceLimit);
+
+  if (input.profilePacket.decision !== "ready-for-operator-decision") reasons.push("profile-packet-not-ready");
+  if (input.profilePacket.dispatchAllowed !== false) reasons.push("profile-dispatch-not-false");
+  if (input.profilePacket.mutationAllowed !== false) reasons.push("profile-mutation-not-false");
+  if (input.profilePacket.authorization !== "none") reasons.push("profile-authorization-not-none");
+  if (input.profilePacket.mode !== "report-only") reasons.push("profile-mode-not-report-only");
+  if (input.manifestation !== "explicit-local-batch") reasons.push(input.manifestation === "generic" ? "manifestation-generic" : "manifestation-missing");
+  if (subject === "unspecified") reasons.push("subject-missing");
+  if (focusTaskId === "unspecified") reasons.push("focus-task-missing");
+  if (!input.localSafeScope) reasons.push("local-safe-scope-missing");
+  if (!input.validationGateKnown) reasons.push("validation-gate-missing");
+  if (!input.rollbackPlanKnown) reasons.push("rollback-plan-missing");
+  if (!input.checkpointPlanned) reasons.push("checkpoint-plan-missing");
+  if (!input.timeBudgetKnown) reasons.push("time-budget-missing");
+  if (!input.costBudgetKnown) reasons.push("cost-budget-missing");
+  if (stopConditions.length === 0) reasons.push("stop-conditions-missing");
+
+  if (input.protectedScopeRequested) { reasons.push("protected-scope-requested"); blockedRequests.push("protected-scope"); }
+  if (input.schedulerRequested) { reasons.push("scheduler-requested"); blockedRequests.push("scheduler"); }
+  if (input.remoteOrOffloadRequested) { reasons.push("remote-or-offload-requested"); blockedRequests.push("remote-or-offload"); }
+  if (input.githubActionsRequested) { reasons.push("github-actions-requested"); blockedRequests.push("github-actions"); }
+  if (input.workerRequested) { reasons.push("worker-requested-needs-lower-gate"); blockedRequests.push("worker"); }
+
+  const decision: LocalBatchManifestDecision = reasons.length > 0 ? "blocked" : "ready-for-operator-decision";
+  const blockedSummary = blockedRequests.length > 0 ? " blockedRequests=" + blockedRequests.slice(0, 5).join("|") : "";
+  const summary = decision === "ready-for-operator-decision"
+    ? "local-batch-manifest-packet: decision=ready-for-operator-decision batch=no dispatch=no worker=no slices=" + sliceLimit + " reasons=manifest-explicit,contracts-present " + formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)
+    : "local-batch-manifest-packet: decision=blocked batch=no dispatch=no worker=no reasons=" + reasons.slice(0, 4).join(",") + blockedSummary + " " + formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE);
+
+  return {
+    effect: "none",
+    mode: "manifest-packet",
+    activation: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    executorApproved: false,
+    batchExecutionAllowed: false,
+    workerDispatchAllowed: false,
+    requiresOperatorDecision: true,
+    decision,
+    manifestation: input.manifestation,
+    subject,
+    focusTaskId,
+    sliceLimit,
+    stopConditions,
+    reasons: decision === "ready-for-operator-decision" ? ["manifest-explicit", "contracts-present", "execution-still-not-authorized"] : reasons,
+    blockedRequests,
+    summary,
+    recommendation: decision === "ready-for-operator-decision"
+      ? "Present the bounded local-safe batch manifestation for operator decision; do not dispatch or start workers from this packet."
+      : "Do not prepare a batch; resolve the missing local-safe contracts or protected requests first.",
+  };
+}
+
 export function resolveLocalSliceCanaryPlan(input: LocalSliceCanaryInput): LocalSliceCanaryPlan {
   const reasons: string[] = [];
 

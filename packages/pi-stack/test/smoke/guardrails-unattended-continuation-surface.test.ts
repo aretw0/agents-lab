@@ -383,6 +383,70 @@ describe("guardrails unattended continuation surface", () => {
     expect(result?.details.summary).toBe("unattended-continuation: decision=continue-local continue=yes reasons=local-safe-next-step,checkpoint-progress-saved");
   });
 
+  it("registers read-only local batch manifest packet tool", () => {
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsUnattendedContinuationSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const manifestTool = tools.find((tool) => tool.name === "local_batch_manifest_packet");
+    const ready = manifestTool?.execute("call-ready", {
+      profile_decision: "ready-for-operator-decision",
+      profile_kind: "bounded-batch-candidate",
+      profile_dispatch_allowed: false,
+      profile_mutation_allowed: false,
+      profile_authorization: "none",
+      profile_mode: "report-only",
+      manifestation: "explicit-local-batch",
+      subject: "release hardening",
+      focus_task_id: "TASK-BUD-1049",
+      local_safe_scope: true,
+      slice_limit: 3,
+      time_budget_known: true,
+      cost_budget_known: true,
+      validation_gate_known: true,
+      rollback_plan_known: true,
+      checkpoint_planned: true,
+      stop_conditions: ["validation fails"],
+    });
+    const blocked = manifestTool?.execute("call-blocked", {
+      profile_decision: "blocked",
+      profile_kind: "blocked-protected-scope",
+      profile_dispatch_allowed: false,
+      profile_mutation_allowed: false,
+      profile_authorization: "none",
+      profile_mode: "report-only",
+      manifestation: "generic",
+      local_safe_scope: false,
+      time_budget_known: false,
+      cost_budget_known: true,
+      validation_gate_known: false,
+      rollback_plan_known: false,
+      checkpoint_planned: false,
+      protected_scope_requested: true,
+      github_actions_requested: true,
+      worker_requested: true,
+    });
+
+    expect(ready?.content?.[0]?.text).toBe("local-batch-manifest-packet: decision=ready-for-operator-decision batch=no dispatch=no worker=no slices=3 reasons=manifest-explicit,contracts-present authorization=none");
+    expect(ready?.details).toMatchObject({
+      mode: "manifest-packet",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      executorApproved: false,
+      batchExecutionAllowed: false,
+      workerDispatchAllowed: false,
+      decision: "ready-for-operator-decision",
+    });
+    expect(blocked?.content?.[0]?.text).toContain("local-batch-manifest-packet: decision=blocked batch=no dispatch=no worker=no");
+    expect(blocked?.content?.[0]?.text).toContain("blockedRequests=protected-scope|github-actions|worker");
+    expect(blocked?.details.dispatchAllowed).toBe(false);
+    expect(blocked?.details.batchExecutionAllowed).toBe(false);
+    expect(blocked?.details.workerDispatchAllowed).toBe(false);
+  });
+
   it("registers read-only local-slice executor backlog gate tool", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsUnattendedContinuationSurface({

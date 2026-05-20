@@ -7,6 +7,7 @@ export type * from "./guardrails-core-unattended-continuation-types";
 
 export {
   buildControlPlaneProfilePacket,
+  buildLocalBatchManifestPacket,
   buildLocalSliceCanaryDispatchDecisionPacket,
   resolveLocalSliceBacklogGate,
   resolveLocalSliceCanaryPlan,
@@ -18,6 +19,10 @@ export type {
   ControlPlaneProfileKind,
   ControlPlaneProfilePacket,
   ControlPlaneProfilePacketInput,
+  LocalBatchManifestDecision,
+  LocalBatchManifestKind,
+  LocalBatchManifestPacket,
+  LocalBatchManifestPacketInput,
   LocalSliceBacklogGate,
   LocalSliceBacklogGateDecision,
   LocalSliceBacklogGateInput,

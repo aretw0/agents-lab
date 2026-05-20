@@ -23364,7 +23364,7 @@
     {
       "id": "TASK-BUD-1049",
       "description": "[hard-intent/local-batch] Implementar packet report-only de manifestação mínima do operador para batch local-safe.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p0",
       "depends_on": [
         "TASK-BUD-1048"
@@ -23372,7 +23372,10 @@
       "files": [
         "packages/pi-stack/extensions/guardrails-core-local-slice-contracts.ts",
         "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
-        "packages/pi-stack/test/smoke/guardrails-local-batch-contract.test.ts",
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
         "docs/primitives/nudge-free-local-continuity.md"
       ],
       "acceptance_criteria": [
@@ -23383,7 +23386,8 @@
         "Teste cobre manifestação mínima, limites customizados e tentativa protected."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Hard intent: o operador declara direção e exceções; o control-plane materializa contrato auditável sem verbosidade.\n[provenance:human] source_task=none reason=Reduzir repetição do operador e transformar sane defaults em schema."
+      "notes": "Hard intent: o operador declara direção e exceções; o control-plane materializa contrato auditável sem verbosidade.\n[provenance:human] source_task=none reason=Reduzir repetição do operador e transformar sane defaults em schema.\n[2026-05-20T13:05:00.000Z] Implemented local_batch_manifest_packet as the report-only minimal operator manifestation for bounded local-safe batches. It requires a green control_plane_profile_packet, explicit local-batch manifestation, focus, budgets, validation, rollback, checkpoint, and stop conditions; it keeps batchExecutionAllowed=false, dispatchAllowed=false, workerDispatchAllowed=false, mutationAllowed=false.",
+      "verification": "VERIF-TASK-BUD-1049-LOCAL-BATCH-MANIFEST-PACKET-20260520"
     },
     {
       "id": "TASK-BUD-1050",

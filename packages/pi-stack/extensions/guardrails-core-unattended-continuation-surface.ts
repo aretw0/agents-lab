@@ -11,6 +11,7 @@ import {
   buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts,
   resolveNudgeFreeLoopCanaryGate,
   resolveSelfReloadAutoresumeCanaryPlan,
+  buildLocalBatchManifestPacket,
   resolveLocalSliceBacklogGate,
   resolveUnattendedContinuationPlan,
   reviewLocalSliceOperatorApprovedContract,
@@ -363,6 +364,69 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
         ambiguous: asBooleanWithDefault(p.ambiguous, false),
         progressSaved: asBooleanWithDefault(p.progress_saved, false),
         contextLevel: normalizeContextLevel(p.context_level),
+      });
+      return {
+        content: [{ type: "text", text: result.summary }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "local_batch_manifest_packet",
+    label: "Local Batch Manifest Packet",
+    description: "Report-only packet for the operator minimal local-safe batch manifestation. Never dispatches, never approves workers, and never starts execution.",
+    parameters: Type.Object({
+      profile_decision: Type.String({ description: "Decision from control_plane_profile_packet." }),
+      profile_kind: Type.String({ description: "Profile from control_plane_profile_packet." }),
+      profile_dispatch_allowed: Type.Boolean({ description: "Must be false." }),
+      profile_mutation_allowed: Type.Boolean({ description: "Must be false." }),
+      profile_authorization: Type.Optional(Type.String({ description: "Expected none." })),
+      profile_mode: Type.Optional(Type.String({ description: "Expected report-only." })),
+      manifestation: Type.String({ description: "missing | generic | explicit-local-batch." }),
+      subject: Type.Optional(Type.String({ description: "Batch subject/seed." })),
+      focus_task_id: Type.Optional(Type.String({ description: "Initial focus task or theme id." })),
+      local_safe_scope: Type.Boolean({ description: "Whether all requested work is local-safe." }),
+      slice_limit: Type.Optional(Type.Number({ description: "Bounded number of slices, clamped to 1..5." })),
+      time_budget_known: Type.Boolean(),
+      cost_budget_known: Type.Boolean(),
+      validation_gate_known: Type.Boolean(),
+      rollback_plan_known: Type.Boolean(),
+      checkpoint_planned: Type.Boolean(),
+      stop_conditions: Type.Optional(Type.Array(Type.String({ description: "Batch stop conditions." }))),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
+      scheduler_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
+      remote_or_offload_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
+      github_actions_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
+      worker_requested: Type.Optional(Type.Boolean({ description: "Blocks until lower worker gate approves." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = buildLocalBatchManifestPacket({
+        profilePacket: {
+          decision: normalizePacketDecision(p.profile_decision),
+          profile: String(p.profile_kind ?? "local-safe-single-slice") as never,
+          dispatchAllowed: asBooleanWithDefault(p.profile_dispatch_allowed, false) as false,
+          mutationAllowed: asBooleanWithDefault(p.profile_mutation_allowed, false) as false,
+          authorization: (p.profile_authorization === "none" ? "none" : String(p.profile_authorization ?? "unknown")) as "none",
+          mode: (p.profile_mode === "report-only" ? "report-only" : String(p.profile_mode ?? "unknown")) as "report-only",
+        },
+        manifestation: p.manifestation === "explicit-local-batch" || p.manifestation === "generic" ? p.manifestation : "missing",
+        subject: typeof p.subject === "string" ? p.subject : undefined,
+        focusTaskId: typeof p.focus_task_id === "string" ? p.focus_task_id : undefined,
+        localSafeScope: asBooleanWithDefault(p.local_safe_scope, false),
+        sliceLimit: typeof p.slice_limit === "number" ? p.slice_limit : undefined,
+        timeBudgetKnown: asBooleanWithDefault(p.time_budget_known, false),
+        costBudgetKnown: asBooleanWithDefault(p.cost_budget_known, false),
+        validationGateKnown: asBooleanWithDefault(p.validation_gate_known, false),
+        rollbackPlanKnown: asBooleanWithDefault(p.rollback_plan_known, false),
+        checkpointPlanned: asBooleanWithDefault(p.checkpoint_planned, false),
+        stopConditions: Array.isArray(p.stop_conditions) ? p.stop_conditions as string[] : undefined,
+        protectedScopeRequested: asBooleanWithDefault(p.protected_scope_requested, false),
+        schedulerRequested: asBooleanWithDefault(p.scheduler_requested, false),
+        remoteOrOffloadRequested: asBooleanWithDefault(p.remote_or_offload_requested, false),
+        githubActionsRequested: asBooleanWithDefault(p.github_actions_requested, false),
+        workerRequested: asBooleanWithDefault(p.worker_requested, false),
       });
       return {
         content: [{ type: "text", text: result.summary }],
