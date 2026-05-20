@@ -70,7 +70,16 @@ install_claude_code() {
   fi
 
   echo "[agents-lab-devcontainer] Installing Claude Code native binary..."
-  curl -fsSL https://claude.ai/install.sh | bash
+  if curl -fsSL https://claude.ai/install.sh | bash; then
+    return 0
+  fi
+
+  if command -v claude >/dev/null 2>&1 && claude --version >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "[agents-lab-devcontainer] Retrying Claude Code native install with --force..."
+  curl -fsSL https://claude.ai/install.sh | bash -s -- --force
 }
 
 if [[ ! -f "$SETTINGS_FILE" ]]; then

@@ -56,8 +56,17 @@ install_claude_code_if_missing_or_broken() {
   fi
 
   echo "[agents-lab-devcontainer] claude missing or incomplete; installing Claude Code native binary..."
-  curl -fsSL https://claude.ai/install.sh | bash || {
-    echo "[agents-lab-devcontainer][warn] claude still missing. Retry later: curl -fsSL https://claude.ai/install.sh | bash"
+  if curl -fsSL https://claude.ai/install.sh | bash; then
+    return 0
+  fi
+
+  if command -v claude >/dev/null 2>&1 && claude --version >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "[agents-lab-devcontainer] Retrying Claude Code native install with --force..."
+  curl -fsSL https://claude.ai/install.sh | bash -s -- --force || {
+    echo "[agents-lab-devcontainer][warn] claude still missing. Retry later: curl -fsSL https://claude.ai/install.sh | bash -s -- --force"
     return 0
   }
 }

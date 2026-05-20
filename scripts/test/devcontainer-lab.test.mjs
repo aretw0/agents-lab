@@ -95,6 +95,8 @@ test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 	assert.match(postStart, /exec corepack pnpm "\$@"/);
 	assert.match(postCreate, /curl -fsSL https:\/\/claude\.ai\/install\.sh \| bash/);
 	assert.match(postStart, /curl -fsSL https:\/\/claude\.ai\/install\.sh \| bash/);
+	assert.match(postCreate, /bash -s -- --force/);
+	assert.match(postStart, /bash -s -- --force/);
 	assert.match(postStart, /claude --version/);
 	assert.match(postCreate, /install_global_tool codex @openai\/codex/);
 	assert.match(postStart, /install_global_tool_if_missing codex @openai\/codex/);
