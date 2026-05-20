@@ -5,12 +5,12 @@
     "context": "."
   },
   "runArgs": [
-    "--memory=4g",
-    "--cpus=4"
+    "--memory=3g",
+    "--cpus=3"
   ],
   "hostRequirements": {
-    "cpus": 4,
-    "memory": "8gb"
+    "cpus": 2,
+    "memory": "4gb"
   },
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {

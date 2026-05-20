@@ -13,6 +13,13 @@ test("devcontainer build context stays scoped to .devcontainer", () => {
 	assert.doesNotMatch(dockerfile, /COPY \.devcontainer\/lab/);
 });
 
+test("devcontainer stays lean enough to coexist with refarm", () => {
+	const config = JSON.parse(readFileSync(".devcontainer/devcontainer.json", "utf8"));
+
+	assert.deepEqual(config.runArgs, ["--memory=3g", "--cpus=3"]);
+	assert.deepEqual(config.hostRequirements, { cpus: 2, memory: "4gb" });
+});
+
 test("devcontainer lab helper enters through the versioned lab command", () => {
 	assert.deepEqual(
 		buildDockerExecArgs({
