@@ -5,12 +5,33 @@ REPO_ROOT="/workspaces/agents-lab"
 LOCAL_AGENT_DIR="$REPO_ROOT/.sandbox/pi-agent"
 SETTINGS_FILE="$LOCAL_AGENT_DIR/settings.json"
 
-mkdir -p "$LOCAL_AGENT_DIR"
-mkdir -p "${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
-mkdir -p "${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}/bin"
-mkdir -p "${PNPM_HOME:-/home/vscode/.local/share/pnpm}/store"
-mkdir -p /home/vscode/.local/bin
-mkdir -p /home/vscode/.pi /home/vscode/.claude /home/vscode/.codex
+repair_owned_dir() {
+  local dir="$1"
+  mkdir -p "$dir" 2>/dev/null || {
+    if command -v sudo >/dev/null 2>&1; then
+      sudo mkdir -p "$dir"
+    else
+      return 0
+    fi
+  }
+  if [[ ! -w "$dir" ]] && command -v sudo >/dev/null 2>&1; then
+    sudo chown -R "$(id -u):$(id -g)" "$dir" || true
+  fi
+}
+
+repair_owned_dir "$LOCAL_AGENT_DIR"
+repair_owned_dir "${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
+repair_owned_dir "${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}"
+repair_owned_dir "${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}/bin"
+repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
+repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}/store"
+repair_owned_dir /home/vscode/.local/bin
+repair_owned_dir /home/vscode/.pi
+repair_owned_dir /home/vscode/.claude
+repair_owned_dir /home/vscode/.codex
+if [[ -d "$REPO_ROOT/node_modules" ]]; then
+  repair_owned_dir "$REPO_ROOT/node_modules"
+fi
 
 install_global_tool() {
   local command_name="$1"

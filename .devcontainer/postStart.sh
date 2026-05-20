@@ -6,6 +6,32 @@ cd "$REPO_ROOT"
 
 echo "[agents-lab-devcontainer] Post-start sanity check..."
 
+repair_owned_dir() {
+  local dir="$1"
+  mkdir -p "$dir" 2>/dev/null || {
+    if command -v sudo >/dev/null 2>&1; then
+      sudo mkdir -p "$dir"
+    else
+      return 0
+    fi
+  }
+  if [[ ! -w "$dir" ]] && command -v sudo >/dev/null 2>&1; then
+    sudo chown -R "$(id -u):$(id -g)" "$dir" || true
+  fi
+}
+
+repair_owned_dir "${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
+repair_owned_dir "${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}"
+repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
+repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}/store"
+repair_owned_dir /home/vscode/.local/bin
+repair_owned_dir /home/vscode/.pi
+repair_owned_dir /home/vscode/.claude
+repair_owned_dir /home/vscode/.codex
+if [[ -d "$REPO_ROOT/node_modules" ]]; then
+  repair_owned_dir "$REPO_ROOT/node_modules"
+fi
+
 if [[ -f package.json ]]; then
   pnpm run ops:disk:check --silent || true
 fi

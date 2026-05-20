@@ -20,6 +20,19 @@ test("devcontainer stays lean enough to coexist with refarm", () => {
 	assert.deepEqual(config.hostRequirements, { cpus: 2, memory: "4gb" });
 });
 
+test("devcontainer feature lock pins feature digests", () => {
+	const lock = JSON.parse(readFileSync(".devcontainer/devcontainer-lock.json", "utf8"));
+	const features = lock.features ?? {};
+
+	for (const name of [
+		"ghcr.io/devcontainers/features/common-utils:2",
+		"ghcr.io/jsburckhardt/devcontainer-features/uv:1",
+	]) {
+		assert.match(features[name]?.resolved ?? "", /@sha256:/);
+		assert.match(features[name]?.integrity ?? "", /^sha256:/);
+	}
+});
+
 test("devcontainer lab helper enters through the versioned lab command", () => {
 	assert.deepEqual(
 		buildDockerExecArgs({
@@ -57,6 +70,10 @@ test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 	const postCreate = readFileSync(".devcontainer/postCreate.sh", "utf8");
 	const postStart = readFileSync(".devcontainer/postStart.sh", "utf8");
 
+	assert.match(postCreate, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}"/);
+	assert.match(postStart, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}"/);
+	assert.match(postCreate, /sudo chown -R "\$\(id -u\):\$\(id -g\)" "\$dir"/);
+	assert.match(postStart, /sudo chown -R "\$\(id -u\):\$\(id -g\)" "\$dir"/);
 	assert.match(postCreate, /pnpm add -g "\$package_name"/);
 	assert.doesNotMatch(postCreate, /npm install -g/);
 	assert.doesNotMatch(postStart, /npm install -g/);
