@@ -902,6 +902,11 @@ describe("autonomy lane surface", () => {
       top_level_entries: ["package.json", ".project", "packages"],
       dominant_artifacts: ["typescript", "markdown"],
       package_managers: ["pnpm"],
+      available_tools: [
+        { name: "structured_interview_plan", description: "Read-only plan; never authorizes dispatch" },
+        { name: "ant_colony", description: "Launch autonomous long run" },
+      ],
+      capability_signals: ["provider-ready", "tests-present"],
       has_git: true,
       has_project_board: true,
       has_tests: true,
@@ -912,7 +917,11 @@ describe("autonomy lane surface", () => {
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
+    expect(result?.details.capabilityInventory.availableTools).toBe(2);
+    expect(result?.details.capabilityInventory.requiresOperatorApproval).toBe(1);
+    expect(result?.details.capabilityInventory.recommendedToolNames).toEqual(["structured_interview_plan"]);
     expect(String(result?.content?.[0]?.text ?? "")).toContain("first-hatch-intake: decision=ready-for-operator-decision");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("tools=2");
     expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
     expect(String(result?.content?.[0]?.text ?? "")).not.toContain('"workspace"');
   });

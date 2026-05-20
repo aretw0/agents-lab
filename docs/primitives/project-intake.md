@@ -47,6 +47,7 @@ Quando a `pi-stack` é instalada ou invocada em um workspace novo, o primeiro ha
 - onde estamos: repositório, pasta solta, sandbox, worktree ou pasta vazia;
 - quais artefatos locais existem: README, manifests, testes, docs, configs, scripts, `.project`, `.pi`;
 - quais recursos da sandbox estão disponíveis: ferramentas locais, providers configurados, espaço/pressão de máquina, permissões e limites visíveis;
+- quais ferramentas/capacidades são seguras para loop local, quais exigem evidência medida e quais continuam protegidas por aprovação explícita;
 - qual perfil de control-plane parece aplicável: defaults da distro, contexto do projeto, recursos disponíveis e sinais do operador.
 
 Pasta vazia ou falta de diretrizes não é fracasso. É sinal de que o operador é o gargalo de contexto, então o control-plane deve entrevistar com poucas perguntas em vez de ficar passivo:
@@ -72,6 +73,10 @@ A evolução desse hatch pode aprender com o ecossistema pi, Claude Code e outra
     "top_level_entries": ["package.json", ".project", "packages"],
     "dominant_artifacts": ["typescript", "markdown"],
     "package_managers": ["pnpm"],
+    "available_tools": [
+      { "name": "structured_interview_plan", "description": "Read-only plan; never authorizes dispatch" }
+    ],
+    "capability_signals": ["provider-ready", "tests-present"],
     "has_git": true,
     "has_project_board": true,
     "has_tests": true,
@@ -84,6 +89,7 @@ Leitura esperada da saída:
 
 - `recommendationCode` (`first-hatch-ready-local-safe`, `first-hatch-empty-workspace-interview`, `first-hatch-sandbox-blocked` ou `first-hatch-protected-scope`);
 - `workspace` e `sandbox` resumidos em payload estruturado;
+- `capabilityInventory` com contagem de ferramentas visíveis, maturidade, sinais e gaps prováveis;
 - até três `missingQuestions`;
 - `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`.
 

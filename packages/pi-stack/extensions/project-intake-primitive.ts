@@ -2,6 +2,11 @@ import {
   GUARDRAILS_AUTHORIZATION_NONE,
   type GuardrailsAuthorizationNone,
 } from "./guardrails-core-authorization";
+import {
+  classifyToolHygiene,
+  type ToolHygieneInputTool,
+  type ToolHygieneMaturity,
+} from "./guardrails-core-tool-hygiene";
 
 export type ProjectIntakeProfile = "light-notes" | "app-medium" | "monorepo-heavy";
 
@@ -66,6 +71,8 @@ export interface FirstHatchIntakeInput {
   topLevelEntries?: string[];
   dominantArtifacts?: string[];
   packageManagers?: string[];
+  availableTools?: ToolHygieneInputTool[];
+  capabilitySignals?: string[];
   hasGit?: boolean;
   hasProjectBoard?: boolean;
   hasTests?: boolean;
@@ -95,6 +102,16 @@ export interface FirstHatchIntakePacket {
     writeBlocked: boolean;
     localSafeMutationPossible: boolean;
   };
+  capabilityInventory: {
+    availableTools: number;
+    safeForLocalLoop: number;
+    needsMeasuredEvidence: number;
+    requiresOperatorApproval: number;
+    hideBeforeLongLoop: number;
+    capabilitySignals: string[];
+    recommendedToolNames: string[];
+    gaps: string[];
+  };
   missingQuestions: string[];
   nextAction: string;
   dispatchAllowed: false;
@@ -118,11 +135,70 @@ function boundedList(value: unknown, maxItems: number): string[] {
   return out;
 }
 
+function boundedTools(value: unknown, maxItems: number): ToolHygieneInputTool[] {
+  if (!Array.isArray(value)) return [];
+  const out: ToolHygieneInputTool[] = [];
+  const seen = new Set<string>();
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue;
+    const record = item as Record<string, unknown>;
+    if (typeof record.name !== "string") continue;
+    const name = record.name.trim();
+    const key = name.toLowerCase();
+    if (!name || seen.has(key)) continue;
+    seen.add(key);
+    out.push({
+      name: name.slice(0, 80),
+      description: typeof record.description === "string" ? record.description.slice(0, 240) : undefined,
+    });
+    if (out.length >= maxItems) break;
+  }
+  return out;
+}
+
+function buildCapabilityInventory(input: {
+  tools: ToolHygieneInputTool[];
+  capabilitySignals: string[];
+  hasTests: boolean;
+  hasCi: boolean;
+  writeBlocked: boolean;
+  protectedScopeRequested: boolean;
+}): FirstHatchIntakePacket["capabilityInventory"] {
+  const rows = input.tools.map(classifyToolHygiene);
+  const countByMaturity = (maturity: ToolHygieneMaturity) => rows.filter((row) => row.maturity === maturity).length;
+  const recommendedToolNames = rows
+    .filter((row) => row.maturity === "safe-for-local-loop")
+    .map((row) => row.name)
+    .sort((a, b) => a.localeCompare(b))
+    .slice(0, 5);
+  const gaps: string[] = [];
+
+  if (rows.length === 0) gaps.push("available-tools-not-reported");
+  if (recommendedToolNames.length === 0) gaps.push("no-safe-local-loop-tool-reported");
+  if (!input.hasTests) gaps.push("focal-validation-tool-unknown");
+  if (!input.hasCi) gaps.push("ci-signal-unknown");
+  if (input.writeBlocked) gaps.push("sandbox-write-blocked");
+  if (input.protectedScopeRequested) gaps.push("protected-scope-needs-explicit-authorization");
+
+  return {
+    availableTools: rows.length,
+    safeForLocalLoop: countByMaturity("safe-for-local-loop"),
+    needsMeasuredEvidence: countByMaturity("needs-measured-evidence"),
+    requiresOperatorApproval: countByMaturity("requires-operator-approval"),
+    hideBeforeLongLoop: countByMaturity("hide-before-long-loop"),
+    capabilitySignals: input.capabilitySignals,
+    recommendedToolNames,
+    gaps: gaps.slice(0, 6),
+  };
+}
+
 export function buildFirstHatchIntakePacket(raw: FirstHatchIntakeInput): FirstHatchIntakePacket {
   const input = raw ?? {};
   const topLevelEntries = boundedList(input.topLevelEntries, 12);
   const artifactKinds = boundedList(input.dominantArtifacts, 8);
   const packageManagers = boundedList(input.packageManagers, 4);
+  const availableTools = boundedTools(input.availableTools, 40);
+  const capabilitySignals = boundedList(input.capabilitySignals, 12);
   const workspaceName = typeof input.workspaceName === "string" && input.workspaceName.trim()
     ? input.workspaceName.trim().slice(0, 64)
     : "workspace";
@@ -131,6 +207,14 @@ export function buildFirstHatchIntakePacket(raw: FirstHatchIntakeInput): FirstHa
     : "unknown";
   const empty = topLevelEntries.length === 0 && artifactKinds.length === 0 && input.hasGit !== true;
   const writeBlocked = input.sandboxWriteBlocked === true || sandboxMode === "read-only" || sandboxMode === "restricted";
+  const capabilityInventory = buildCapabilityInventory({
+    tools: availableTools,
+    capabilitySignals,
+    hasTests: input.hasTests === true,
+    hasCi: input.hasCi === true,
+    writeBlocked,
+    protectedScopeRequested: input.protectedScopeRequested === true,
+  });
 
   let recommendationCode: FirstHatchIntakePacket["recommendationCode"] = FIRST_HATCH_READY_CODE;
   let decision: FirstHatchIntakePacket["decision"] = "ready-for-operator-decision";
@@ -172,6 +256,7 @@ export function buildFirstHatchIntakePacket(raw: FirstHatchIntakeInput): FirstHa
       writeBlocked,
       localSafeMutationPossible: !writeBlocked && decision !== "blocked",
     },
+    capabilityInventory,
     missingQuestions: missingQuestions.slice(0, 3),
     nextAction,
     dispatchAllowed: false,

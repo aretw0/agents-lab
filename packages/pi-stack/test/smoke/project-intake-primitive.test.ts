@@ -113,6 +113,40 @@ describe("project-intake-primitive", () => {
     expect(packet.mode).toBe("report-only");
   });
 
+  it("summarizes first hatch capability inventory without authorizing dispatch", () => {
+    const packet = buildFirstHatchIntakePacket({
+      workspaceName: "agents-lab",
+      topLevelEntries: ["package.json", "packages"],
+      dominantArtifacts: ["typescript"],
+      packageManagers: ["pnpm"],
+      availableTools: [
+        { name: "structured_interview_plan", description: "Read-only plan; never authorizes dispatch" },
+        { name: "board_task_complete", description: "mutates board evidence" },
+        { name: "ant_colony", description: "Launch autonomous long run" },
+        { name: "structured_interview_plan", description: "duplicate should be ignored" },
+      ],
+      capabilitySignals: ["provider-ready", "provider-ready", "board-present"],
+      hasGit: true,
+      hasProjectBoard: true,
+      hasTests: true,
+      hasCi: true,
+      sandboxMode: "workspace-write",
+    });
+
+    expect(packet.capabilityInventory).toMatchObject({
+      availableTools: 3,
+      safeForLocalLoop: 1,
+      needsMeasuredEvidence: 1,
+      requiresOperatorApproval: 1,
+      hideBeforeLongLoop: 0,
+      capabilitySignals: ["provider-ready", "board-present"],
+      recommendedToolNames: ["structured_interview_plan"],
+      gaps: [],
+    });
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.mutationAllowed).toBe(false);
+  });
+
   it("keeps first hatch empty workspace interview short", () => {
     const packet = buildFirstHatchIntakePacket({ sandboxMode: "workspace-write" });
 

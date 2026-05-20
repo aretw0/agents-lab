@@ -23645,7 +23645,7 @@
     {
       "id": "TASK-BUD-1061",
       "description": "[hard-intent/hatch-toolkit] Estender first hatch para inventariar ferramentas/capacidades disponíveis e gaps prováveis do workspace/sandbox.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1047",
@@ -23653,8 +23653,9 @@
       ],
       "files": [
         "packages/pi-stack/extensions/project-intake-primitive.ts",
-        "packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
         "packages/pi-stack/test/smoke/project-intake-primitive.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
         "docs/primitives/project-intake.md"
       ],
       "acceptance_criteria": [
@@ -23665,7 +23666,8 @@
         "Teste cobre pasta vazia com tools mínimas, projeto com testes, e objetivo que requer web/tool ausente."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Hard intent: no hatch, aprender o que temos na sandbox e o que falta antes de prometer trabalho.\n[provenance:human] source_task=none reason=Dar ao control-plane e subagentes o toolkit ideal necessário desde o começo."
+      "notes": "Hard intent: no hatch, aprender o que temos na sandbox e o que falta antes de prometer trabalho.\n[provenance:human] source_task=none reason=Dar ao control-plane e subagentes o toolkit ideal necessário desde o começo.\n[2026-05-20T11:50:00.000Z] Extended first_hatch_intake_packet with report-only capability inventory: visible tool hygiene maturity counts, bounded capability signals, recommended safe local-loop tools, and probable gaps. No dispatch or mutation authorization added.",
+      "verification": "VERIF-TASK-BUD-1061-FIRST-HATCH-CAPABILITY-INVENTORY-20260520"
     },
     {
       "id": "TASK-BUD-1062",

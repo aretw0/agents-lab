@@ -587,6 +587,11 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       top_level_entries: Type.Optional(Type.Array(Type.String({ description: "Observed top-level entries, bounded by caller." }))),
       dominant_artifacts: Type.Optional(Type.Array(Type.String({ description: "Dominant artifact kinds/languages." }))),
       package_managers: Type.Optional(Type.Array(Type.String({ description: "Detected package managers." }))),
+      available_tools: Type.Optional(Type.Array(Type.Object({
+        name: Type.String({ description: "Tool/capability name visible in the current session." }),
+        description: Type.Optional(Type.String({ description: "Short bounded tool description." })),
+      }), { description: "Visible tools/capabilities for first-hatch hygiene classification." })),
+      capability_signals: Type.Optional(Type.Array(Type.String({ description: "Short capability signals such as provider-ready, tests-present, or board-present." }))),
       has_git: Type.Optional(Type.Boolean()),
       has_project_board: Type.Optional(Type.Boolean()),
       has_tests: Type.Optional(Type.Boolean()),
@@ -602,6 +607,8 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         topLevelEntries: p.top_level_entries as string[] | undefined,
         dominantArtifacts: p.dominant_artifacts as string[] | undefined,
         packageManagers: p.package_managers as string[] | undefined,
+        availableTools: p.available_tools as { name: string; description?: string }[] | undefined,
+        capabilitySignals: p.capability_signals as string[] | undefined,
         hasGit: p.has_git === true,
         hasProjectBoard: p.has_project_board === true,
         hasTests: p.has_tests === true,
@@ -612,7 +619,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       });
       return buildOperatorVisibleToolResponse({
         label: "first_hatch_intake_packet",
-        summary: "first-hatch-intake: decision=" + packet.decision + " code=" + packet.recommendationCode + " sandbox=" + packet.sandbox.mode + " questions=" + packet.missingQuestions.length + " authorization=" + packet.authorization,
+        summary: "first-hatch-intake: decision=" + packet.decision + " code=" + packet.recommendationCode + " sandbox=" + packet.sandbox.mode + " tools=" + packet.capabilityInventory.availableTools + " gaps=" + packet.capabilityInventory.gaps.length + " questions=" + packet.missingQuestions.length + " authorization=" + packet.authorization,
         details: packet,
       });
     },
