@@ -40,9 +40,9 @@ install_claude_code_if_missing_or_broken() {
     return 0
   fi
 
-  echo "[agents-lab-devcontainer] claude missing or incomplete; installing @anthropic-ai/claude-code with npm..."
-  npm install -g @anthropic-ai/claude-code || {
-    echo "[agents-lab-devcontainer][warn] claude still missing. Retry later: npm install -g @anthropic-ai/claude-code"
+  echo "[agents-lab-devcontainer] claude missing or incomplete; installing Claude Code native binary..."
+  curl -fsSL https://claude.ai/install.sh | bash || {
+    echo "[agents-lab-devcontainer][warn] claude still missing. Retry later: curl -fsSL https://claude.ai/install.sh | bash"
     return 0
   }
 }

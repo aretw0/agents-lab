@@ -52,8 +52,8 @@ install_claude_code() {
     return 0
   fi
 
-  echo "[agents-lab-devcontainer] Installing @anthropic-ai/claude-code with npm..."
-  npm install -g @anthropic-ai/claude-code
+  echo "[agents-lab-devcontainer] Installing Claude Code native binary..."
+  curl -fsSL https://claude.ai/install.sh | bash
 }
 
 if [[ ! -f "$SETTINGS_FILE" ]]; then
