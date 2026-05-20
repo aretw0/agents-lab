@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 
 const CI_WORKFLOW = ".github/workflows/ci.yml";
 const SECURITY_WORKFLOW = ".github/workflows/security-audit.yml";
+const SETUP_ACTION = ".github/actions/setup/action.yml";
 
 function read(path) {
 	return readFileSync(path, "utf8");
@@ -17,6 +18,7 @@ test("ci workflow keeps the local parity gate canonical", () => {
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run docs:package:check/);
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run repo:discourse:audit/);
 	assert.match(workflow, /name: Smoke Tests/);
+	assert.match(workflow, /uses: \.\/\.github\/actions\/setup/);
 	assert.match(workflow, /run: pnpm run ci:smoke:gate/);
 	assert.match(workflow, /name: GitHub Action Pins/);
 	assert.match(workflow, /run: node scripts\/ci\/check-github-action-pins\.mjs/);
@@ -32,6 +34,7 @@ test("security audit workflow stays isolated and least-privilege", () => {
 	assert.match(workflow, /permissions:\s*\n\s+contents: read/);
 	assert.doesNotMatch(workflow, /pull_request:/);
 	assert.doesNotMatch(workflow, /pull_request_target:/);
+	assert.match(workflow, /uses: \.\/\.github\/actions\/setup/);
 	assert.match(workflow, /run: pnpm run security:audit/);
 	assert.match(workflow, /pnpm audit --json > \.artifacts\/security-audit\/pnpm-audit-all\.json \|\| true/);
 	assert.match(workflow, /pnpm audit --json --prod > \.artifacts\/security-audit\/pnpm-audit-prod\.json \|\| true/);
@@ -50,6 +53,21 @@ test("workflow permissions are explicit at the top level", () => {
 	}
 });
 
+test("shared setup action owns deterministic Node and pnpm install", () => {
+	const action = read(SETUP_ACTION);
+	const ci = read(CI_WORKFLOW);
+	const security = read(SECURITY_WORKFLOW);
+
+	assert.match(action, /name: Agents Lab Setup/);
+	assert.match(action, /uses: pnpm\/action-setup@[0-9a-f]{40}/);
+	assert.match(action, /uses: actions\/setup-node@[0-9a-f]{40}/);
+	assert.match(action, /cache: pnpm/);
+	assert.match(action, /run: pnpm install --frozen-lockfile/);
+	assert.match(ci, /uses: \.\/\.github\/actions\/setup/);
+	assert.match(security, /uses: \.\/\.github\/actions\/setup/);
+	assert.doesNotMatch(ci, /corepack prepare --activate/);
+	assert.doesNotMatch(security, /corepack prepare --activate/);
+});
 
 test("publish workflow stays tag-gated and provenance-scoped", () => {
 	const workflow = read(".github/workflows/publish.yml");
