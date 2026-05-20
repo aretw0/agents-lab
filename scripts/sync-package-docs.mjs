@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -178,7 +178,7 @@ function syncOne(packageName, spec, check) {
         stale.push(`stale:${path.relative(REPO_ROOT, target)}`);
       }
     } else {
-      copyFileSync(src, target);
+      writeFileSync(target, readFileSync(src, "utf8"), "utf8");
     }
   }
 
