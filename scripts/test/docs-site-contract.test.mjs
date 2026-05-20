@@ -15,6 +15,8 @@ test("docs site uses the minimal Hacker Jekyll surface", () => {
 	assert.match(config, /^\s+- jekyll-remote-theme$/m);
 	assert.match(config, /^baseurl: \/agents-lab$/m);
 	assert.match(config, /^repo_url: https:\/\/github\.com\/aretw0\/agents-lab$/m);
+	assert.match(config, /^\s+repository_url: https:\/\/github\.com\/aretw0\/agents-lab$/m);
+	assert.match(config, /^\s+repository_nwo: aretw0\/agents-lab$/m);
 	assert.match(gemfile, /gem "github-pages"/);
 	assert.match(gemfile, /gem "jekyll-remote-theme"/);
 	assert.match(lockfile, /github-pages \(232\)/);

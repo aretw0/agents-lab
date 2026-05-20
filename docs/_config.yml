@@ -8,6 +8,12 @@ plugins:
   - jekyll-remote-theme
 
 repo_url: https://github.com/aretw0/agents-lab
+github:
+  repository_url: https://github.com/aretw0/agents-lab
+  repository_nwo: aretw0/agents-lab
+  repository_name: agents-lab
+  owner_name: aretw0
+  owner_url: https://github.com/aretw0
 show_downloads: false
 
 defaults:
