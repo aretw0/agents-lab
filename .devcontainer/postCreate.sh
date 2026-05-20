@@ -23,8 +23,10 @@ repair_owned_dir "$LOCAL_AGENT_DIR"
 repair_owned_dir "${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
 repair_owned_dir "${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}"
 repair_owned_dir "${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}/bin"
+repair_owned_dir /home/vscode/.local/share
 repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
 repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}/store"
+repair_owned_dir /home/vscode/.local/share/claude
 repair_owned_dir /home/vscode/.local/bin
 repair_owned_dir /home/vscode/.pi
 repair_owned_dir /home/vscode/.claude
@@ -46,6 +48,21 @@ install_global_tool() {
   pnpm add -g "$package_name"
 }
 
+ensure_pnpm() {
+  local pnpm_home="${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
+  repair_owned_dir "$pnpm_home"
+
+  corepack prepare --activate || true
+
+  if ! command -v pnpm >/dev/null 2>&1; then
+    cat > "$pnpm_home/pnpm" <<'SH'
+#!/usr/bin/env bash
+exec corepack pnpm "$@"
+SH
+    chmod +x "$pnpm_home/pnpm"
+  fi
+}
+
 install_claude_code() {
   if command -v claude >/dev/null 2>&1 && claude --version >/dev/null 2>&1; then
     echo "[agents-lab-devcontainer] claude already installed"
@@ -65,8 +82,7 @@ if [[ ! -f "$SETTINGS_FILE" ]]; then
 JSON
 fi
 
-corepack enable || true
-corepack prepare --activate || true
+ensure_pnpm
 
 install_claude_code || true
 install_global_tool codex @openai/codex || true

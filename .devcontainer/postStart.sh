@@ -20,6 +20,21 @@ repair_owned_dir() {
   fi
 }
 
+ensure_pnpm() {
+  local pnpm_home="${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
+  repair_owned_dir "$pnpm_home"
+
+  corepack prepare --activate || true
+
+  if ! command -v pnpm >/dev/null 2>&1; then
+    cat > "$pnpm_home/pnpm" <<'SH'
+#!/usr/bin/env bash
+exec corepack pnpm "$@"
+SH
+    chmod +x "$pnpm_home/pnpm"
+  fi
+}
+
 install_global_tool_if_missing() {
   local command_name="$1"
   local package_name="$2"
@@ -64,8 +79,10 @@ install_workspace_if_pi_missing() {
 
 repair_owned_dir "${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
 repair_owned_dir "${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}"
+repair_owned_dir /home/vscode/.local/share
 repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
 repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}/store"
+repair_owned_dir /home/vscode/.local/share/claude
 repair_owned_dir /home/vscode/.local/bin
 repair_owned_dir /home/vscode/.pi
 repair_owned_dir /home/vscode/.claude
@@ -73,6 +90,8 @@ repair_owned_dir /home/vscode/.codex
 if [[ -d "$REPO_ROOT/node_modules" ]]; then
   repair_owned_dir "$REPO_ROOT/node_modules"
 fi
+
+ensure_pnpm
 
 if [[ -f package.json ]]; then
   pnpm run ops:disk:check --silent || true
