@@ -92,7 +92,18 @@ describe("guardrails git maintenance surface", () => {
     registerGuardrailsGitMaintenanceSurface({
       registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
       registerCommand(name: string, command: unknown) { commands.push({ name, ...(command as Omit<RegisteredCommand, "name">) }); },
-    } as never);
+    } as never, {
+      runGit(args, cwd) {
+        expect(cwd).toBe("/repo");
+        if (args[0] === "count-objects") return COUNT_OBJECTS_SAMPLE;
+        if (args.includes("status")) return STATUS_PORCELAIN_SAMPLE;
+        throw new Error(`unexpected git args: ${args.join(" ")}`);
+      },
+      exists(path) {
+        expect(path.replace(/\\/g, "/")).toContain("/repo/.git/gc.log");
+        return false;
+      },
+    });
 
     const maintenanceTool = tools.find((item) => item.name === "git_maintenance_status");
     const dirtyTool = tools.find((item) => item.name === "git_dirty_snapshot");
@@ -101,7 +112,7 @@ describe("guardrails git maintenance surface", () => {
     expect(dirtyTool?.name).toBe("git_dirty_snapshot");
     expect(typeof dirtyCommand?.handler).toBe("function");
 
-    const maintenanceResult = maintenanceTool?.execute("tc-git-maintenance", {}, undefined, undefined, { cwd: process.cwd() });
+    const maintenanceResult = maintenanceTool?.execute("tc-git-maintenance", {}, undefined, undefined, { cwd: "/repo" });
     expect(maintenanceResult?.details.summary).toContain("git-maintenance:");
     expect(maintenanceResult?.content?.[0]?.text).toContain("git-maintenance:");
     expect(maintenanceResult?.content?.[0]?.text).toContain("payload completo disponível em details");

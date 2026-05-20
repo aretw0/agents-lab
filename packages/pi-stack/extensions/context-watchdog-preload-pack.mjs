@@ -98,7 +98,11 @@ export function normalizeContextPreloadReadPath(rawPath, workspaceRoot) {
     return asPosix;
   }
 
-  if (asPosix.startsWith("/")) return asPosix;
+  if (asPosix.startsWith("/")) {
+    if (asPosix.toLowerCase().startsWith(ws.toLowerCase() + "/")) return asPosix.slice(ws.length + 1);
+    if (asPosix.toLowerCase() === ws.toLowerCase()) return ".";
+    return asPosix;
+  }
   return asPosix.replace(/^\.\//, "");
 }
 
@@ -108,6 +112,7 @@ export function classifyContextPreloadPath(filePath) {
   if (value.startsWith("node_modules/") || value.includes("/node_modules/")) return "noise";
   if (value.startsWith(".sandbox/") || value.includes("/.sandbox/")) return "noise";
   if (value.startsWith("c:/") || value.startsWith("/mnt/")) return "external";
+  if (value.startsWith("/")) return "external";
   if (value.startsWith(".project/")) return "project";
   if (value.startsWith(".pi/")) return "runtime";
   if (value.startsWith("docs/")) return "docs";

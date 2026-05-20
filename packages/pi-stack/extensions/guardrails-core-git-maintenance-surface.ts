@@ -202,7 +202,7 @@ function formatGitDirtyRow(row: GitDirtyRow): string {
   return `- [${status}] ${row.path}`;
 }
 
-export function registerGuardrailsGitMaintenanceSurface(pi: ExtensionAPI): void {
+export function registerGuardrailsGitMaintenanceSurface(pi: ExtensionAPI, deps: GitMaintenanceReadDeps = {}): void {
   pi.registerTool({
     name: "git_maintenance_status",
     label: "Git Maintenance Status",
@@ -213,7 +213,7 @@ export function registerGuardrailsGitMaintenanceSurface(pi: ExtensionAPI): void 
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const diagnostics = readGitMaintenanceDiagnostics(ctx.cwd);
+      const diagnostics = readGitMaintenanceDiagnostics(ctx.cwd, deps);
       const signal = evaluateGitMaintenanceSignal({
         ...diagnostics,
         diskLow: p.disk_low === true,
@@ -240,7 +240,7 @@ export function registerGuardrailsGitMaintenanceSurface(pi: ExtensionAPI): void 
     execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
       let snapshot: GitDirtySnapshotEnvelope;
       try {
-        snapshot = readGitDirtySnapshot(ctx.cwd);
+        snapshot = readGitDirtySnapshot(ctx.cwd, deps);
       } catch (error) {
         snapshot = buildUnavailableGitDirtySnapshot(error);
       }
@@ -256,7 +256,7 @@ export function registerGuardrailsGitMaintenanceSurface(pi: ExtensionAPI): void 
     description: "Show a read-only git dirty snapshot without temp files.",
     async handler(_args, ctx) {
       try {
-        const snapshot = readGitDirtySnapshot(ctx.cwd);
+        const snapshot = readGitDirtySnapshot(ctx.cwd, deps);
         const lines = [
           snapshot.summary,
           ...snapshot.rows.slice(0, 8).map(formatGitDirtyRow),
