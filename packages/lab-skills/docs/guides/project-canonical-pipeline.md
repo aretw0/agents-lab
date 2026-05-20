@@ -1,3 +1,8 @@
+---
+title: Project Canonical Pipeline
+description: Canonical project-board and posterity pipeline.
+---
+
 # Pipeline canônico de posteridade (.project-first)
 
 Objetivo: preservar contexto de forma durável e retomável com baixo custo.

@@ -1,3 +1,8 @@
+---
+title: Control-Plane Operating Doctrine
+description: Operating doctrine for unattended control-plane work.
+---
+
 # Doutrina operacional do control-plane unattended
 
 Este guia consolida as opiniões operacionais que devem orientar o agente quando estiver trabalhando em modo local-first, com pouco atrito do operador, sem perder governança. Para nomenclatura canônica e aliases, use `docs/guides/control-plane-glossary.md` antes de criar novos termos ou surfaces.

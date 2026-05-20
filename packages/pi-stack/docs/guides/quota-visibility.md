@@ -1,3 +1,8 @@
+---
+title: Quota Visibility
+description: Consumer-facing guide for quota and usage visibility.
+---
+
 # Visibilidade de Cota e Consumo (perspectiva do consumidor)
 
 Guia para auditar consumo de tokens/custo localmente e gerar evidências para contestação com fornecedores de modelo.
