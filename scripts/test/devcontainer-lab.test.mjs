@@ -47,6 +47,11 @@ test("pnpm build approvals stay explicit and non-interactive", () => {
 });
 
 test("devcontainer lab helper enters through the versioned lab command", () => {
+	const lab = readFileSync(".devcontainer/lab", "utf8");
+
+	assert.match(lab, /\$\{PROJECT_DIR\}\/node_modules\/\.bin/);
+	assert.match(lab, /if \[ "\$\(id -un\)" = "\$TARGET_USER" \]; then/);
+	assert.match(lab, /exec bash -lc "\. '\$INIT_FILE'; \$\{command_text\}"/);
 	assert.deepEqual(
 		buildDockerExecArgs({
 			container: "agents-lab-dev",
@@ -85,6 +90,8 @@ test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 
 	assert.match(postCreate, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}"/);
 	assert.match(postStart, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}"/);
+	assert.match(postCreate, /export PATH="\$REPO_ROOT\/node_modules\/\.bin:\$PNPM_HOME:\$NPM_CONFIG_PREFIX\/bin:\/home\/vscode\/\.local\/bin:\$PATH"/);
+	assert.match(postStart, /export PATH="\$REPO_ROOT\/node_modules\/\.bin:\$PNPM_HOME:\$NPM_CONFIG_PREFIX\/bin:\/home\/vscode\/\.local\/bin:\$PATH"/);
 	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.local$/m);
 	assert.match(postStart, /repair_owned_dir \/home\/vscode\/\.local$/m);
 	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.local\/state/);

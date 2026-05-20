@@ -4,6 +4,11 @@ set -euo pipefail
 REPO_ROOT="/workspaces/agents-lab"
 cd "$REPO_ROOT"
 
+export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
+export NPM_CONFIG_PREFIX="${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}"
+export PNPM_HOME="${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
+export PATH="$REPO_ROOT/node_modules/.bin:$PNPM_HOME:$NPM_CONFIG_PREFIX/bin:/home/vscode/.local/bin:$PATH"
+
 echo "[agents-lab-devcontainer] Post-start sanity check..."
 
 repair_owned_dir() {

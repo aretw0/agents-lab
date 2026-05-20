@@ -33,11 +33,20 @@ export NPM_CONFIG_CACHE=/home/${TARGET_USER}/.npm-cache
 export NPM_CONFIG_PREFIX=/home/${TARGET_USER}/.npm-global
 export PNPM_HOME=/home/${TARGET_USER}/.local/share/pnpm
 export PI_CODING_AGENT_DIR=/workspaces/agents-lab/.sandbox/pi-agent
-export PATH=/home/${TARGET_USER}/.local/share/pnpm:/home/${TARGET_USER}/.npm-global/bin:/home/${TARGET_USER}/.local/bin:\$PATH
+export PATH=${PROJECT_DIR}/node_modules/.bin:/home/${TARGET_USER}/.local/share/pnpm:/home/${TARGET_USER}/.npm-global/bin:/home/${TARGET_USER}/.local/bin:\$PATH
 cd "${PROJECT_DIR}"
 INIT
 
 chmod 644 "$INIT_FILE"
+
+if [ "$(id -un)" = "$TARGET_USER" ]; then
+  if [ "$#" -gt 0 ]; then
+    command_text=$(printf "%q " "$@")
+    exec bash -lc ". '$INIT_FILE'; ${command_text}"
+  fi
+
+  exec bash --init-file "$INIT_FILE"
+fi
 
 if [ "$#" -gt 0 ]; then
   command_text=$(printf "%q " "$@")

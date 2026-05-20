@@ -5,6 +5,11 @@ REPO_ROOT="/workspaces/agents-lab"
 LOCAL_AGENT_DIR="$REPO_ROOT/.sandbox/pi-agent"
 SETTINGS_FILE="$LOCAL_AGENT_DIR/settings.json"
 
+export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
+export NPM_CONFIG_PREFIX="${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}"
+export PNPM_HOME="${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
+export PATH="$REPO_ROOT/node_modules/.bin:$PNPM_HOME:$NPM_CONFIG_PREFIX/bin:/home/vscode/.local/bin:$PATH"
+
 repair_owned_dir() {
   local dir="$1"
   mkdir -p "$dir" 2>/dev/null || {
