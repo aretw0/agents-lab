@@ -9,7 +9,7 @@
     "list": "pnpm list -r --depth=0",
     "test": "node --test packages/*/test/*.test.mjs",
     "test:smoke": "pnpm exec vitest run",
-    "ci:smoke:gate": "pnpm run actions:pins && pnpm run test:ci:workflow && pnpm run test:smoke && pnpm run test:verify-pi-stack && pnpm run test:audit:sovereignty && pnpm run test:pi-stack:user-surface && pnpm run test:pi:dev:pressure && pnpm run test:pi:isolated && pnpm run test:ops:disk-guard && pnpm run audit:sovereignty && pnpm run audit:sovereignty:diff && pnpm run repo:complexity:strict && pnpm run repo:bloat:audit:strict",
+    "ci:smoke:gate": "pnpm run actions:pins && pnpm run test:ci:workflow && pnpm run test:smoke && pnpm run test:verify-pi-stack && pnpm run test:audit:sovereignty && pnpm run test:pi-stack:user-surface && pnpm run test:pi:dev:pressure && pnpm run test:pi:isolated && pnpm run test:ops:disk-guard && pnpm run docs:package:check && pnpm run repo:discourse:audit && pnpm run audit:sovereignty && pnpm run audit:sovereignty:diff && pnpm run repo:complexity:strict && pnpm run repo:bloat:audit:strict",
     "ci:local:parity": "pnpm run ci:smoke:gate",
     "test:monitor:regression": "node --test packages/pi-stack/test/monitor-context-budget.test.mjs packages/pi-stack/test/monitor-gates-regression.test.mjs packages/pi-stack/test/monitor-chaos-policy.test.mjs packages/pi-stack/test/monitor-interference-matrix.test.mjs packages/pi-stack/test/monitor-profile-policy.test.mjs packages/pi-stack/test/monitor-provider-patch.test.mjs packages/pi-stack/test/monitor-replay-regression.test.mjs packages/pi-stack/test/tool-execute-signature.test.mjs",
     "gate:monitor:regression": "pnpm run test:monitor:regression --silent",
