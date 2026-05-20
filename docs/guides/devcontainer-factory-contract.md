@@ -1,3 +1,8 @@
+---
+title: Devcontainer Factory Contract
+description: Minimal devcontainer contract for operator and agent work.
+---
+
 # Devcontainer Factory Contract
 
 Contrato mínimo para operar um projeto com agentes em devcontainer sem depender
@@ -80,4 +85,3 @@ entre o contrato do agents-lab e as necessidades reais deste repositório.
 - `162` arquivos Vitest passaram, com `1329` testes.
 - Gates de soberania, complexidade e bloat passaram.
 - O wrapper `lab` expõe `pi`, `codex`, `claude` e `pnpm` como usuário `vscode`.
-

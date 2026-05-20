@@ -1,3 +1,8 @@
+---
+title: Primitives
+description: Catalog of reusable agent primitives.
+---
+
 # Primitivas de Agentes — Conceitos e Catálogo
 
 Este diretório documenta os conceitos fundamentais de primitivas de agentes e o catálogo de primitivas que este laboratório desenvolve e mantém.

@@ -1,3 +1,8 @@
+---
+title: Terminal Setup
+description: Terminal setup guidance for Pi and operator workflows.
+---
+
 # Configuração de Terminal para Pi
 
 Guia de setup por terminal para garantir que o pi funcione corretamente — teclado, atalhos e compatibilidade.

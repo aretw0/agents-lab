@@ -1,3 +1,8 @@
+---
+title: Architecture
+description: Architecture index for agents-lab.
+---
+
 # Arquitetura - agents-lab
 
 Este diretório reúne decisões arquiteturais, ownership por capability, diagramas e designs de superfícies de sistema.

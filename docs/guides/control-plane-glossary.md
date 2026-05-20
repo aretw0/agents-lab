@@ -1,3 +1,8 @@
+---
+title: Control-Plane Glossary
+description: Glossary for control-plane concepts and operator language.
+---
+
 # Glossário do control-plane
 
 Este glossário existe para reduzir gordura conceitual. O objetivo da stack não é criar uma taxonomia infinita; é construir um **relógio de trabalho digno e auditável**: escolher o próximo trabalho, executar uma fatia pequena, validar, registrar evidência, decidir se continua ou para, e retomar sem perder contexto.

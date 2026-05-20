@@ -1,3 +1,8 @@
+---
+title: CI Governance
+description: Troubleshooting and governance guide for CI gates.
+---
+
 # CI Governance — Troubleshooting dos gates de soberania
 
 Guia rápido para diagnosticar e corrigir falhas de governança no CI.

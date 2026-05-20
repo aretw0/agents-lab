@@ -1,3 +1,8 @@
+---
+title: Agents-Lab Editorial Pipeline
+description: Editorial pipeline for agents-lab public documentation.
+---
+
 # Pipeline editorial agents-lab
 
 ## Objetivo

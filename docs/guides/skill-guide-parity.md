@@ -1,3 +1,8 @@
+---
+title: Package Docs Parity
+description: Guide-skill parity and documentation drift control.
+---
+
 # Paridade guide-skill e controle de drift documental
 
 Este protocolo define como manter guides e skills alinhados sem duplicação cega. O objetivo é aumentar discoverability para o modelo e para o usuário, preservando os guides como referência canônica quando a explicação completa for necessária.

@@ -1,3 +1,8 @@
+---
+title: Recommended pi-stack
+description: Recommended Pi stack for agents-lab users and maintainers.
+---
+
 # Stack Recomendada de Pi para o agents-lab
 
 ## Estado Atual

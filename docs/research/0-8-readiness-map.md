@@ -1,3 +1,8 @@
+---
+title: 0.8 Readiness Map
+description: Readiness map for agents-lab and pi-stack 0.8.
+---
+
 # Mapa de readiness 0.8.0 — agents-lab / pi-stack
 
 Data: 2026-05-06  

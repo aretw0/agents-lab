@@ -1,3 +1,8 @@
+---
+title: GitHub Repo Presence
+description: Checklist for public GitHub repository presence.
+---
+
 # Checklist: presença do repositório no GitHub
 
 Objetivo: manter a apresentação pública do `agents-lab` coerente com o posicionamento real do projeto: laboratório local-first, stack pi simple-first e primitivas reutilizáveis de agentes sem acoplamento a um único outcome.

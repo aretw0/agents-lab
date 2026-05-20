@@ -9,34 +9,34 @@ Local-first lab for reusable AI-agent primitives, with Pi as the first runtime e
 
 ## Start
 
-- [Start Here](./start-here.md) - choose the right reading path by role.
+- [Start Here]({{ '/start-here.html' | relative_url }}) - choose the right reading path by role.
 - [Repository README]({{ site.repo_url }}/blob/main/README.md) - mission, packages and local development.
 - [Roadmap]({{ site.repo_url }}/blob/main/ROADMAP.md) - planned milestones and release direction.
 - [Contributing]({{ site.repo_url }}/blob/main/CONTRIBUTING.md) - contribution and release workflow.
 
 ## Use the Stack
 
-- [Recommended pi-stack](./guides/recommended-pi-stack.md)
-- [Stack sovereignty user guide](./guides/stack-sovereignty-user-guide.md)
-- [Terminal setup](./guides/terminal-setup.md)
-- [Devcontainer factory contract](./guides/devcontainer-factory-contract.md)
-- [Publishing](./guides/publishing.md)
+- [Recommended pi-stack]({{ '/guides/recommended-pi-stack.html' | relative_url }})
+- [Stack sovereignty user guide]({{ '/guides/stack-sovereignty-user-guide.html' | relative_url }})
+- [Terminal setup]({{ '/guides/terminal-setup.html' | relative_url }})
+- [Devcontainer factory contract]({{ '/guides/devcontainer-factory-contract.html' | relative_url }})
+- [Publishing]({{ '/guides/publishing.html' | relative_url }})
 
 ## Maintain the Factory
 
-- [CI governance](./guides/ci-governance.md)
-- [Package docs parity](./guides/skill-guide-parity.md)
-- [Control-plane operating doctrine](./guides/control-plane-operating-doctrine.md)
-- [Control-plane glossary](./guides/control-plane-glossary.md)
-- [Project canonical pipeline](./guides/project-canonical-pipeline.md)
+- [CI governance]({{ '/guides/ci-governance.html' | relative_url }})
+- [Package docs parity]({{ '/guides/skill-guide-parity.html' | relative_url }})
+- [Control-plane operating doctrine]({{ '/guides/control-plane-operating-doctrine.html' | relative_url }})
+- [Control-plane glossary]({{ '/guides/control-plane-glossary.html' | relative_url }})
+- [Project canonical pipeline]({{ '/guides/project-canonical-pipeline.html' | relative_url }})
 
 ## Architecture and Primitives
 
-- [Architecture index](./architecture/)
-- [Primitives catalog](./primitives/)
-- [Engine map](./engines/)
-- [0.8 readiness map](./research/0-8-readiness-map.md)
-- [Site map and editorial contract](./site-map.md)
+- [Architecture index]({{ '/architecture/README.html' | relative_url }})
+- [Primitives catalog]({{ '/primitives/README.html' | relative_url }})
+- [Engine map]({{ '/engines/README.html' | relative_url }})
+- [0.8 readiness map]({{ '/research/0-8-readiness-map.html' | relative_url }})
+- [Site map and editorial contract]({{ '/site-map.html' | relative_url }})
 
 ## Packages
 

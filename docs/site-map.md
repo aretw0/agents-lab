@@ -11,13 +11,13 @@ This site keeps the public entrypoint small while the repository can continue to
 
 | Section | Canonical source | Purpose |
 |---|---|---|
-| Start | [start-here.md](./start-here.md) | Route readers by role before they open long docs. |
-| Use the Stack | [guides/recommended-pi-stack.md](./guides/recommended-pi-stack.md) | Explain the installable `@aretw0/pi-stack` surface. |
-| Maintain the Factory | [guides/ci-governance.md](./guides/ci-governance.md) | Keep CI, release and package docs governance discoverable. |
-| Control Plane | [guides/control-plane-operating-doctrine.md](./guides/control-plane-operating-doctrine.md) | Document the daily operating model without making it the only use case. |
-| Architecture | [architecture/README.md](./architecture/README.md) | Surface accepted decisions and ownership. |
-| Primitives | [primitives/README.md](./primitives/README.md) | Surface reusable contracts before raw research. |
-| Research | [research/0-8-readiness-map.md](./research/0-8-readiness-map.md) | Link selected evidence and readiness maps only. |
+| Start | [Start Here]({{ '/start-here.html' | relative_url }}) | Route readers by role before they open long docs. |
+| Use the Stack | [Recommended pi-stack]({{ '/guides/recommended-pi-stack.html' | relative_url }}) | Explain the installable `@aretw0/pi-stack` surface. |
+| Maintain the Factory | [CI governance]({{ '/guides/ci-governance.html' | relative_url }}) | Keep CI, release and package docs governance discoverable. |
+| Control Plane | [Control-plane operating doctrine]({{ '/guides/control-plane-operating-doctrine.html' | relative_url }}) | Document the daily operating model without making it the only use case. |
+| Architecture | [Architecture]({{ '/architecture/README.html' | relative_url }}) | Surface accepted decisions and ownership. |
+| Primitives | [Primitives]({{ '/primitives/README.html' | relative_url }}) | Surface reusable contracts before raw research. |
+| Research | [0.8 readiness map]({{ '/research/0-8-readiness-map.html' | relative_url }}) | Link selected evidence and readiness maps only. |
 
 ## Publication Rules
 
@@ -37,7 +37,10 @@ pnpm run docs:site:build
 pnpm run docs:site:serve
 ```
 
-The devcontainer includes Ruby and Bundler. VS Code forwards port `4000` as `agents-lab docs site` and opens the operator browser for `http://127.0.0.1:4000/agents-lab/`.
+The default target mirrors GitHub Pages project hosting at `http://127.0.0.1:4000/agents-lab/`.
+If `docs/CNAME` exists, the same commands switch to root deployment for a custom domain.
+
+The devcontainer includes Ruby and Bundler. VS Code forwards port `4000` as `agents-lab docs site` and opens the operator browser.
 
 ## Excluded from Jekyll
 

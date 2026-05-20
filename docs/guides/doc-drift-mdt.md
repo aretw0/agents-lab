@@ -1,3 +1,8 @@
+---
+title: Doc Drift and MDT
+description: Documentation drift and MDT operating guide.
+---
+
 # Doc Drift e MDT
 
 Este guia define como tratar documentação repetida, snippets de política e diagramas como superfície governada. O objetivo é reduzir drift sem transformar docs em um pipeline pesado.

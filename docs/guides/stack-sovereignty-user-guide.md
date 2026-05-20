@@ -1,3 +1,8 @@
+---
+title: Stack Sovereignty User Guide
+description: User-facing guide for agents-lab stack sovereignty.
+---
+
 # Guia operacional — Soberania da Stack (usuários)
 
 ## Princípios

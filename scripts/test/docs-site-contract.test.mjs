@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 function read(path) {
 	return readFileSync(path, "utf8");
@@ -33,23 +33,48 @@ test("docs homepage routes readers through canonical information architecture", 
 	const index = read("docs/index.md");
 
 	for (const link of [
-		"./start-here.md",
+		"{{ '/start-here.html' | relative_url }}",
 		"{{ site.repo_url }}/blob/main/README.md",
 		"{{ site.repo_url }}/blob/main/ROADMAP.md",
 		"{{ site.repo_url }}/blob/main/CONTRIBUTING.md",
-		"./guides/recommended-pi-stack.md",
-		"./guides/ci-governance.md",
-		"./guides/control-plane-operating-doctrine.md",
-		"./architecture/",
-		"./primitives/",
-		"./engines/",
-		"./research/0-8-readiness-map.md",
-		"./site-map.md",
+		"{{ '/guides/recommended-pi-stack.html' | relative_url }}",
+		"{{ '/guides/ci-governance.html' | relative_url }}",
+		"{{ '/guides/control-plane-operating-doctrine.html' | relative_url }}",
+		"{{ '/architecture/README.html' | relative_url }}",
+		"{{ '/primitives/README.html' | relative_url }}",
+		"{{ '/engines/README.html' | relative_url }}",
+		"{{ '/research/0-8-readiness-map.html' | relative_url }}",
+		"{{ '/site-map.html' | relative_url }}",
 	]) {
 		assert.match(index, new RegExp(link.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 	}
 
 	assert.match(index, /This site is a curated entrypoint/);
+});
+
+test("public entrypoint pages do not route site readers to raw markdown", () => {
+	for (const file of ["docs/index.md", "docs/start-here.md", "docs/site-map.md"]) {
+		const source = read(file);
+		const rawMarkdownLinks = [...source.matchAll(/\]\(([^)]*\.md)\)/g)]
+			.map((match) => match[1])
+			.filter((href) => !href.startsWith("{{ site.repo_url }}"));
+
+		assert.deepEqual(rawMarkdownLinks, [], `${file} has internal raw markdown links`);
+	}
+});
+
+test("public entrypoint html links point to Jekyll-rendered sources", () => {
+	for (const file of ["docs/index.md", "docs/start-here.md", "docs/site-map.md"]) {
+		const source = read(file);
+		const htmlLinks = [...source.matchAll(/\{\{\s*'\/([^']+\.html)'\s*\|\s*relative_url\s*\}\}/g)]
+			.map((match) => match[1]);
+
+		for (const href of htmlLinks) {
+			const sourcePath = `docs/${href.replace(/\.html$/, ".md")}`;
+			assert.equal(existsSync(sourcePath), true, `${file} links to missing source ${sourcePath}`);
+			assert.match(read(sourcePath), /^---\r?\n/, `${sourcePath} needs front matter to render as html`);
+		}
+	}
 });
 
 test("site map documents promotion and publication boundaries", () => {
@@ -62,6 +87,7 @@ test("site map documents promotion and publication boundaries", () => {
 	assert.match(siteMap, /Promote operational material to `docs\/guides\/`, `docs\/primitives\/` or `docs\/architecture\/`/);
 	assert.match(siteMap, /Do not publish `docs\/research\/data\/`/);
 	assert.match(siteMap, /pnpm run docs:site:serve/);
+	assert.match(siteMap, /If `docs\/CNAME` exists/);
 	assert.match(siteMap, /http:\/\/127\.0\.0\.1:4000\/agents-lab\//);
 });
 
@@ -76,8 +102,19 @@ test("docs site can be served consistently from host or devcontainer", () => {
 	assert.equal(packageJson.scripts["docs:site:build"], "node scripts/docs-site.mjs build");
 	assert.equal(packageJson.scripts["docs:site:serve"], "node scripts/docs-site.mjs serve");
 	assert.match(script, /BUNDLE_GEMFILE/);
+	assert.match(script, /BUNDLE_PATH/);
+	assert.match(script, /BUNDLE_APP_CONFIG/);
+	assert.match(script, /BUNDLE_FROZEN/);
+	assert.match(script, /\.cache", "bundle"/);
 	assert.match(script, /bundle"\), \["check"\]/);
-	assert.match(script, /pnpm run docs:site:install/);
+	assert.match(script, /\["install", "--jobs", "4", "--retry", "3"\]/);
+	assert.match(script, /Run once: pnpm run docs:site:install/);
+	assert.match(script, /--site-mode=github-pages\|root/);
+	assert.match(script, /\["root", ""\]/);
+	assert.match(script, /existsSync\(CNAME_FILE\)/);
+	assert.match(script, /docs\/CNAME present: root deployment/);
+	assert.match(script, /"--baseurl",\s*baseurl/);
+	assert.match(script, /DOCS_SITE_BASEURL/);
 	assert.match(script, /--host",\s*"0\.0\.0\.0"/);
 	assert.match(script, /--port",\s*PORT/);
 	assert.match(script, /Install Ruby\/Bundler, or rebuild the devcontainer/);

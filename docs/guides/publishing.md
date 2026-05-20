@@ -1,3 +1,8 @@
+---
+title: Publishing
+description: Release workflow for agents-lab first-party packages.
+---
+
 # Publicando Pacotes `@aretw0/*`
 
 Guia completo para fazer releases dos pacotes first-party do agents-lab.
