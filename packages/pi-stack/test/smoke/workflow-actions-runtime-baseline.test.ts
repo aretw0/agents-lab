@@ -9,10 +9,12 @@ function repoPath(...segments: string[]): string {
 describe("workflow actions runtime baseline", () => {
   it("keeps publish workflow aligned to Node24 action runtime baseline", () => {
     const publishWorkflow = readFileSync(repoPath(".github", "workflows", "publish.yml"), "utf8");
+    const setupAction = readFileSync(repoPath(".github", "actions", "setup", "action.yml"), "utf8");
 
     expect(publishWorkflow).toContain('FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"');
     expect(publishWorkflow).toContain("uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2");
-    expect(publishWorkflow).toContain("uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0");
+    expect(publishWorkflow).toContain("uses: ./.github/actions/setup");
+    expect(setupAction).toContain("uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0");
   });
 
   it("does not regress to legacy Node20-bound action majors in CI/Publish lane", () => {
@@ -37,6 +39,7 @@ describe("workflow actions runtime baseline", () => {
   it("keeps critical CI actions pinned by SHA (no floating major tags)", () => {
     const ciWorkflow = readFileSync(repoPath(".github", "workflows", "ci.yml"), "utf8");
     const publishWorkflow = readFileSync(repoPath(".github", "workflows", "publish.yml"), "utf8");
+    const setupAction = readFileSync(repoPath(".github", "actions", "setup", "action.yml"), "utf8");
 
     const pinnedAnchors = [
       "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2",
@@ -46,11 +49,12 @@ describe("workflow actions runtime baseline", () => {
     ];
 
     for (const anchor of pinnedAnchors) {
-      expect(ciWorkflow + "\n" + publishWorkflow).toContain(anchor);
+      expect(ciWorkflow + "\n" + publishWorkflow + "\n" + setupAction).toContain(anchor);
     }
 
     const floatingRegex = /actions\/(checkout|setup-node|upload-artifact|github-script)@v\d+/;
     expect(ciWorkflow).not.toMatch(floatingRegex);
     expect(publishWorkflow).not.toMatch(floatingRegex);
+    expect(setupAction).not.toMatch(floatingRegex);
   });
 });
