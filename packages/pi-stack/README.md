@@ -43,7 +43,7 @@ pi install https://github.com/aretw0/agents-lab
 | `environment-doctor` | Health check do ambiente na startup + comando `/doctor`, `/doctor pressure`, tools `environment_doctor_status` e `environment_dev_pressure_status` |
 | `claude-code-adapter` | Scaffold experimental para runtime externo Claude Code (`/claude-code status|login|auth-status`, sem persistência de credenciais) |
 | `guardrails-core` | Guardrail unificado first-party: proteção de paths sensíveis + roteamento web determinístico por escopo + bloqueio de conflito de porta reservada pelo session-web + bloqueio de scans de conteúdo em `~/.pi/agent/sessions` e scans recursivos de conteúdo na raiz `.pi` (evita explosão de saída/stack overflow no TUI) |
-| `colony-pilot` | Primitiva de orquestração/visibilidade: prepara runbooks manuais para pilot (monitors/remote/colony) e mantém snapshot de colonies em background |
+| `colony-pilot` | Primitiva de orquestração/visibilidade: prepara runbooks manuais para monitors, remote e colony, mantendo snapshot de colonies em background |
 | `web-session-gateway` | Gateway web first-party para observabilidade local da sessão (URL determinística, `/api/health` e painel web local) |
 | `quota-visibility` | Observabilidade de consumo/cota a partir de `~/.pi/agent/sessions` (burn rate, janelas de 5h/peak hours por provider, budgets provider/model, OpenAI Codex WHAM probe read-only, export de evidências) |
 | `machine-maintenance` | Gate determinístico de pressão de máquina + `workspace_storage_pressure_report` e `workspace_disk_cleanup_plan` report-only |
@@ -121,7 +121,7 @@ Ativar: `/settings` → selecionar `agents-lab`
 | Comando | O que faz |
 |---|---|
 | `/doctor` | Diagnóstico canônico do ambiente (`/doctor` e `/doctor hatch`) — verifica tools/auth/shell/terminal e readiness operacional |
-| `/colony-pilot` | Guia pilot (`hatch/check/models/preflight/baseline/run/status/stop/web/monitors/tui/artifacts`), incluindo `hatch doctor` plugin-aware com quick-recovery e hard-gates para `ant_colony` |
+| `/colony-pilot` | Guia de orquestração (`hatch/check/models/preflight/baseline/run/status/stop/web/monitors/tui/artifacts`), incluindo `hatch doctor` plugin-aware com quick-recovery e hard-gates para `ant_colony` |
 | `/session-web` | Controla gateway web first-party (`start/status/open/stop`) para inspeção local da sessão sem UI hospedada externa |
 | `/monitor-provider` | Diagnostica e sincroniza modelos dos classifiers dos monitors por provider (`status/apply/template`) |
 | `/quota-visibility` | Mostra consumo estimado da janela, projeção semanal, janelas/peak hours, budgets por provider/model e `route` advisory determinístico (`cheap|balanced|reliable`, `--execute` opt-in) |
@@ -225,7 +225,7 @@ Para evitar regressão de UX, operamos em duas trilhas:
    - Exemplos já publicados: `monitor-summary`, `monitor-sovereign`, `guardrails-core`, `colony-pilot`, `subagent-readiness`, `context-watchdog`.
 
 2. **Utilitários de laboratório (workspace scripts)**
-   - Scripts como `monitor:stability:*`, `subagent:readiness:*`, `pi:pilot:*` aceleram estabilização no lab (mesmo com `subagent-readiness` já publicado como tool/command, os scripts continuam úteis para CI/reports).
+   - Scripts como `monitor:stability:*`, `subagent:readiness:*` e `pi:parity:*` aceleram estabilização no lab (mesmo com `subagent-readiness` já publicado como tool/command, os scripts continuam úteis para CI/reports).
    - Eles **não** fazem parte automaticamente da superfície npm publicada enquanto não virarem extensão/tool first-party.
 
 Auditoria rápida da fronteira publicada vs lab:

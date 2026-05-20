@@ -1,6 +1,6 @@
 # Guias — agents-lab
 
-Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
+Guias práticos para operar, manter e distribuir a stack. Para escolher por perfil de leitura, use [../start-here.md](../start-here.md).
 
 ## Índice
 
@@ -48,6 +48,7 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 | [ci-governance.md](./ci-governance.md) | Troubleshooting dos gates de soberania no CI (annotations, registry, criticality, owner) |
 | [lab-user-surface-parity.md](./lab-user-surface-parity.md) | Higiene de paridade entre superfícies do laboratório e distribuídas para usuários |
 | [github-repo-presence.md](./github-repo-presence.md) | Checklist de presença pública do repositório no GitHub: metadata, README e drift de docs/MDT |
+| [doc-drift-mdt.md](./doc-drift-mdt.md) | Contrato advisory para MDT/doc-drift: check first, escopo pequeno e integração futura com CI |
 | [dependency-upstream-governance.md](./dependency-upstream-governance.md) | Governança para atribuir mudanças entre stack local, upstream Pi e dependências antes de decidir `assimilate|hold|reject` |
 | [agents-lab-editorial-pipeline.md](./agents-lab-editorial-pipeline.md) | Pipeline/template editorial para release notes e posts separando nossa stack, upstream Pi, deps e curadoria |
 | [i18n-intents.md](./i18n-intents.md) | Runbook de intents soft/hard de internacionalização para comunicação e artefatos |
@@ -73,21 +74,24 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 
 ## Pré-requisitos Gerais
 
+Para desenvolvimento deste monorepo:
+
 - **Node.js** >= 22
-- **npm** >= 9
-- **Pi** instalado: `npm install -g @earendil-works/pi-coding-agent`
-- Chave de API de pelo menos um provider (GitHub Copilot, Anthropic, OpenAI, Google, etc.)
+- **pnpm** via Corepack
+- devcontainer recomendado para paridade local
+
+Para uso público da `@aretw0/pi-stack` fora do monorepo:
+
+- **Pi** instalado pelo método oficial atual
+- Chave de API ou login de pelo menos um provider suportado
 
 ### Instalação Rápida
 
 ```bash
-# Instalar pi
-npm install -g @earendil-works/pi-coding-agent
+# Instalar a stack curada publicada
+npx @aretw0/pi-stack
 
-# Instalar a stack curada (via npm)
-pi install npm:@aretw0/pi-stack
-
-# Ou via git (sempre atualizado)
+# Ou instalar a partir do repositório
 pi install https://github.com/aretw0/agents-lab
 ```
 

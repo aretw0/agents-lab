@@ -1,16 +1,16 @@
-# agents-lab 🧪
+# agents-lab
 
-> Um laboratório para experimentar, discutir e construir primitivas reutilizáveis de agentes de IA.
+> Laboratório local-first para construir, calibrar e distribuir primitivas reutilizáveis de agentes de IA.
 
 ## Missão
 
-**agents-lab** é um espaço de pesquisa e desenvolvimento dedicado ao ecossistema de agentes de IA. O objetivo central é canalizar todo o potencial ao redor em um único local onde possamos:
+**agents-lab** é um workspace de pesquisa e engenharia para transformar experimentos com agentes em contratos reutilizáveis, testados e documentados. O projeto prioriza:
 
-- 🔬 **Experimentar** — rodar experimentos controlados com diferentes engines de agentes
-- 📚 **Documentar** — organizar pesquisas, análises e aprendizados de forma acessível
-- 🧩 **Construir primitivas** — criar blocos reutilizáveis que possam ser compartilhados com a comunidade
-- 📊 **Avaliar** — comparar abordagens, frameworks e filosofias de design
-- 🚀 **Evoluir** — superar qualquer engine específica caso o ecossistema avance
+- experimentos controlados com diferentes engines de agentes;
+- documentação operacional e evidência auditável;
+- primitivas reutilizáveis para pi e stacks relacionadas;
+- comparação objetiva de abordagens, frameworks e padrões;
+- portabilidade para evitar acoplamento a uma engine específica.
 
 ## Posicionamento público
 
@@ -23,18 +23,18 @@ Metadata sugerida para o GitHub:
 
 ## Engine Principal: Pi
 
-A engine primária deste laboratório é o **[pi](https://github.com/badlogic/pi-mono)** — um toolkit altamente extensível para construção de agentes de IA e gerenciamento de LLMs. Pi se prova excelente para "mess around and find out" e serve como engine de sistemas maiores.
+A engine primária deste laboratório é o **[pi](https://github.com/badlogic/pi-mono)** — um toolkit extensível para construção de agentes de IA e gerenciamento de LLMs. No agents-lab, Pi é tratado como engine principal, com contratos locais para curadoria, testes e distribuição.
 
 ### Por que Pi?
 
 - **Extensibilidade** — projetado para ser a fundação de outros sistemas (ex.: openclaw)
-- **Filosofia sólida** — convergência natural para o que uma engine de agentes precisa ser
-- **Ecossistema crescente** — [pacotes disponíveis](https://pi.dev/packages) em constante expansão
+- **Modelo operacional claro** — extensões, skills, tools e runtime testáveis
+- **Ecossistema ativo** — pacotes e integrações avaliáveis por contrato
 - **Multi-provider** — suporta OpenAI, Anthropic, Google e outros via `@earendil-works/pi-ai`
 
 ### Pacotes First-Party (`@aretw0/*`)
 
-Este repositório é a fábrica onde a curadoria nasce. Os pacotes first-party são construídos aqui e distribuídos via npm:
+Este repositório é o workspace onde a curadoria é implementada, testada e distribuída. Os pacotes first-party são publicados via npm:
 
 | Pacote | Descrição |
 |--------|----------|
@@ -54,7 +54,7 @@ Este repositório é a fábrica onde a curadoria nasce. Os pacotes first-party s
 | `@earendil-works/pi-tui` | Terminal UI com renderização diferencial |
 | `@marcfargas/pi-test-harness` | Test harness para extensões pi |
 
-> **Nota:** Apesar do Pi ser a engine principal, a estrutura do laboratório é deliberadamente engine-agnóstica. Caso surjam implementações superiores, podemos migrar sem perder o trabalho acumulado.
+> **Nota:** Apesar do Pi ser a engine principal, a estrutura do laboratório é deliberadamente engine-agnóstica. Caso outra engine seja adotada no futuro, as primitivas e decisões devem continuar portáveis.
 
 ## Estrutura do Repositório
 
@@ -72,6 +72,7 @@ agents-lab/
 │   ├── research/       # Pesquisas, análises e material de referência
 │   ├── guides/         # Guias práticos de uso, configuração e publicação
 │   ├── primitives/     # Conceitos e catálogo de primitivas de agentes
+│   ├── architecture/   # Decisões, ownership e diagramas
 │   └── engines/        # Comparações e análises de engines (Pi e alternativas)
 ├── experiments/        # Experimentos práticos e provas de conceito
 ├── primitives/         # Código reutilizável de primitivas de agentes
@@ -188,6 +189,7 @@ Limites de segurança (bounded-by-default):
 ### Recursos Recomendados
 
 - [pi-mono — repositório oficial](https://github.com/badlogic/pi-mono)
+- [Start Here](./docs/start-here.md)
 - [Guias deste laboratório](./docs/guides/)
   - [GitHub Repo Presence](./docs/guides/github-repo-presence.md)
   - [Web Session Gateway](./docs/guides/web-session-gateway.md)
