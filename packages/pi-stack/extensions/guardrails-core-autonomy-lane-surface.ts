@@ -15,7 +15,7 @@ import {
 } from "./guardrails-core-autonomy-task-selector";
 import { readProjectTasksBlock } from "./colony-pilot-task-sync";
 import { buildLaneBrainstormPacket, buildLaneBrainstormSeedPreview } from "./lane-brainstorm-packet";
-import { evaluateProjectIntakePlan } from "./project-intake-primitive";
+import { buildFirstHatchIntakePacket, evaluateProjectIntakePlan } from "./project-intake-primitive";
 import {
   buildRunwayReadinessCue,
   readDelegationFreshnessSignals,
@@ -574,6 +574,46 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         label: "lane_brainstorm_seed_preview",
         summary: `lane-brainstorm-seed-preview: decision=${preview.decision} code=${preview.recommendationCode} proposals=${preview.proposals.length} source=${preview.source} confirmation=yes`,
         details: preview,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "first_hatch_intake_packet",
+    label: "First Hatch Intake Packet",
+    description: "Report-only first-hatch packet for workspace/sandbox/artifact discovery before local-safe work.",
+    parameters: Type.Object({
+      workspace_name: Type.Optional(Type.String({ description: "Short workspace/project name." })),
+      top_level_entries: Type.Optional(Type.Array(Type.String({ description: "Observed top-level entries, bounded by caller." }))),
+      dominant_artifacts: Type.Optional(Type.Array(Type.String({ description: "Dominant artifact kinds/languages." }))),
+      package_managers: Type.Optional(Type.Array(Type.String({ description: "Detected package managers." }))),
+      has_git: Type.Optional(Type.Boolean()),
+      has_project_board: Type.Optional(Type.Boolean()),
+      has_tests: Type.Optional(Type.Boolean()),
+      has_ci: Type.Optional(Type.Boolean()),
+      sandbox_mode: Type.Optional(Type.String({ description: "workspace-write | read-only | restricted | unknown" })),
+      sandbox_write_blocked: Type.Optional(Type.Boolean()),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "When true, packet blocks and asks exact operator focus." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const packet = buildFirstHatchIntakePacket({
+        workspaceName: typeof p.workspace_name === "string" ? p.workspace_name : undefined,
+        topLevelEntries: p.top_level_entries as string[] | undefined,
+        dominantArtifacts: p.dominant_artifacts as string[] | undefined,
+        packageManagers: p.package_managers as string[] | undefined,
+        hasGit: p.has_git === true,
+        hasProjectBoard: p.has_project_board === true,
+        hasTests: p.has_tests === true,
+        hasCi: p.has_ci === true,
+        sandboxMode: typeof p.sandbox_mode === "string" ? p.sandbox_mode : undefined,
+        sandboxWriteBlocked: p.sandbox_write_blocked === true,
+        protectedScopeRequested: p.protected_scope_requested === true,
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "first_hatch_intake_packet",
+        summary: "first-hatch-intake: decision=" + packet.decision + " code=" + packet.recommendationCode + " sandbox=" + packet.sandbox.mode + " questions=" + packet.missingQuestions.length + " authorization=" + packet.authorization,
+        details: packet,
       });
     },
   });

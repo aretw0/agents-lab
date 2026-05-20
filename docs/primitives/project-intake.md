@@ -30,7 +30,8 @@ Saída (determinística):
 ## Implementação de referência
 
 - Primitive: `packages/pi-stack/extensions/project-intake-primitive.ts`
-- Smoke: `packages/pi-stack/test/smoke/project-intake-primitive.test.ts`
+- Tool surface: `first_hatch_intake_packet` e `project_intake_plan` via `guardrails-core`
+- Smoke: `packages/pi-stack/test/smoke/project-intake-primitive.test.ts` e `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts`
 
 ## Uso operacional
 
@@ -61,7 +62,32 @@ Esse hatch continua report-only/local-safe por default. Ele pode propor o uso de
 
 A evolução desse hatch pode aprender com o ecossistema pi, Claude Code e outras ferramentas, mas o default mínimo já é suficiente: descobrir contexto local, explicar oportunidades ao operador e pedir apenas o alinhamento que falta.
 
-### Exemplo rápido (tool surface)
+### Exemplo rápido (first hatch)
+
+```json
+{
+  "tool": "first_hatch_intake_packet",
+  "params": {
+    "workspace_name": "agents-lab",
+    "top_level_entries": ["package.json", ".project", "packages"],
+    "dominant_artifacts": ["typescript", "markdown"],
+    "package_managers": ["pnpm"],
+    "has_git": true,
+    "has_project_board": true,
+    "has_tests": true,
+    "sandbox_mode": "workspace-write"
+  }
+}
+```
+
+Leitura esperada da saída:
+
+- `recommendationCode` (`first-hatch-ready-local-safe`, `first-hatch-empty-workspace-interview`, `first-hatch-sandbox-blocked` ou `first-hatch-protected-scope`);
+- `workspace` e `sandbox` resumidos em payload estruturado;
+- até três `missingQuestions`;
+- `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`.
+
+### Exemplo rápido (profile/first slice)
 
 ```json
 {

@@ -889,6 +889,34 @@ describe("autonomy lane surface", () => {
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).not.toContain("seedCount=");
   });
 
+
+  it("emits report-only first_hatch_intake_packet before local-safe work", () => {
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const hatchTool = tools.find((tool) => tool.name === "first_hatch_intake_packet");
+    const result = hatchTool?.execute("call-hatch", {
+      workspace_name: "agents-lab",
+      top_level_entries: ["package.json", ".project", "packages"],
+      dominant_artifacts: ["typescript", "markdown"],
+      package_managers: ["pnpm"],
+      has_git: true,
+      has_project_board: true,
+      has_tests: true,
+      sandbox_mode: "workspace-write",
+    });
+
+    expect(result?.details.recommendationCode).toBe("first-hatch-ready-local-safe");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.mutationAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("first-hatch-intake: decision=ready-for-operator-decision");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String(result?.content?.[0]?.text ?? "")).not.toContain('"workspace"');
+  });
+
   it("emits report-only project_intake_plan for lightweight project", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsAutonomyLaneSurface({

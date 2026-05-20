@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildFirstHatchIntakePacket,
   evaluateProjectIntakePlan,
   INTAKE_NEEDS_OPERATOR_FOCUS_PROTECTED_CODE,
   INTAKE_PLAN_FIRST_SLICE_CODE,
+  FIRST_HATCH_EMPTY_WORKSPACE_CODE,
+  FIRST_HATCH_READY_CODE,
+  FIRST_HATCH_SANDBOX_BLOCKED_CODE,
 } from "../../extensions/project-intake-primitive";
 import { GUARDRAILS_AUTHORIZATION_NONE } from "../../extensions/guardrails-core-authorization";
 
@@ -86,4 +90,52 @@ describe("project-intake-primitive", () => {
     expect(plan.firstSlice.title.length).toBeLessThanOrEqual(90);
     expect(plan.firstSlice.validation.length).toBeLessThanOrEqual(80);
   });
+
+  it("builds first hatch packet for a ready local-safe workspace", () => {
+    const packet = buildFirstHatchIntakePacket({
+      workspaceName: "agents-lab",
+      topLevelEntries: ["package.json", ".project", "packages"],
+      dominantArtifacts: ["typescript", "markdown", "typescript"],
+      packageManagers: ["pnpm"],
+      hasGit: true,
+      hasProjectBoard: true,
+      hasTests: true,
+      sandboxMode: "workspace-write",
+    });
+
+    expect(packet.decision).toBe("ready-for-operator-decision");
+    expect(packet.recommendationCode).toBe(FIRST_HATCH_READY_CODE);
+    expect(packet.workspace.artifactKinds).toEqual(["typescript", "markdown"]);
+    expect(packet.sandbox.localSafeMutationPossible).toBe(true);
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.mutationAllowed).toBe(false);
+    expect(packet.authorization).toBe(GUARDRAILS_AUTHORIZATION_NONE);
+    expect(packet.mode).toBe("report-only");
+  });
+
+  it("keeps first hatch empty workspace interview short", () => {
+    const packet = buildFirstHatchIntakePacket({ sandboxMode: "workspace-write" });
+
+    expect(packet.recommendationCode).toBe(FIRST_HATCH_EMPTY_WORKSPACE_CODE);
+    expect(packet.missingQuestions.length).toBeLessThanOrEqual(3);
+    expect(packet.missingQuestions.join(" ")).toContain("workspace");
+    expect(packet.nextAction.length).toBeLessThanOrEqual(100);
+    expect(packet.dispatchAllowed).toBe(false);
+  });
+
+  it("blocks first hatch mutation when sandbox is read-only", () => {
+    const packet = buildFirstHatchIntakePacket({
+      topLevelEntries: ["README.md"],
+      dominantArtifacts: ["markdown"],
+      hasGit: true,
+      sandboxMode: "read-only",
+    });
+
+    expect(packet.decision).toBe("blocked");
+    expect(packet.recommendationCode).toBe(FIRST_HATCH_SANDBOX_BLOCKED_CODE);
+    expect(packet.sandbox.writeBlocked).toBe(true);
+    expect(packet.sandbox.localSafeMutationPossible).toBe(false);
+    expect(packet.mutationAllowed).toBe(false);
+  });
+
 });
