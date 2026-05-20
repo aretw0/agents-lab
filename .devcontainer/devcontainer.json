@@ -52,6 +52,13 @@
   ],
   "postCreateCommand": "bash .devcontainer/postCreate.sh",
   "postStartCommand": "bash .devcontainer/postStart.sh",
+  "forwardPorts": [4000],
+  "portsAttributes": {
+    "4000": {
+      "label": "agents-lab docs site",
+      "onAutoForward": "openBrowser"
+    }
+  },
   "customizations": {
     "vscode": {
       "settings": {

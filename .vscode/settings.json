@@ -47,6 +47,12 @@
 
   "remote.autoForwardPorts": false,
   "remote.autoForwardPortsSource": "process",
+  "remote.portsAttributes": {
+    "4000": {
+      "label": "agents-lab docs site",
+      "onAutoForward": "openBrowser"
+    }
+  },
 
   "debug.javascript.autoAttachFilter": "disabled",
 

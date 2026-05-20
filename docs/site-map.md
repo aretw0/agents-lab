@@ -27,6 +27,18 @@ This site keeps the public entrypoint small while the repository can continue to
 - Do not publish `docs/research/data/` or archived handoffs through Jekyll.
 - Prefer repository links for package implementation details instead of mirroring package internals into the site.
 
+## Local Validation
+
+Use the same commands on the host or inside the devcontainer:
+
+```bash
+pnpm run docs:site:install
+pnpm run docs:site:build
+pnpm run docs:site:serve
+```
+
+The devcontainer includes Ruby and Bundler. VS Code forwards port `4000` as `agents-lab docs site` and opens the operator browser for `http://127.0.0.1:4000/agents-lab/`.
+
 ## Excluded from Jekyll
 
 The Jekyll config excludes:

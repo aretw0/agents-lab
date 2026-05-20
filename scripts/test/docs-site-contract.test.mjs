@@ -8,11 +8,17 @@ function read(path) {
 
 test("docs site uses the minimal Hacker Jekyll surface", () => {
 	const config = read("docs/_config.yml");
+	const gemfile = read("docs/Gemfile");
+	const lockfile = read("docs/Gemfile.lock");
 
 	assert.match(config, /^remote_theme: pages-themes\/hacker@v0\.2\.0$/m);
 	assert.match(config, /^\s+- jekyll-remote-theme$/m);
 	assert.match(config, /^baseurl: \/agents-lab$/m);
 	assert.match(config, /^repo_url: https:\/\/github\.com\/aretw0\/agents-lab$/m);
+	assert.match(gemfile, /gem "github-pages"/);
+	assert.match(gemfile, /gem "jekyll-remote-theme"/);
+	assert.match(lockfile, /github-pages \(232\)/);
+	assert.match(lockfile, /jekyll-theme-hacker \(0\.2\.0\)/);
 });
 
 test("docs site excludes heavy or non-canonical material", () => {
@@ -51,7 +57,35 @@ test("site map documents promotion and publication boundaries", () => {
 
 	assert.match(siteMap, /Public Navigation/);
 	assert.match(siteMap, /Publication Rules/);
+	assert.match(siteMap, /Local Validation/);
 	assert.match(siteMap, /Excluded from Jekyll/);
 	assert.match(siteMap, /Promote operational material to `docs\/guides\/`, `docs\/primitives\/` or `docs\/architecture\/`/);
 	assert.match(siteMap, /Do not publish `docs\/research\/data\/`/);
+	assert.match(siteMap, /pnpm run docs:site:serve/);
+	assert.match(siteMap, /http:\/\/127\.0\.0\.1:4000\/agents-lab\//);
+});
+
+test("docs site can be served consistently from host or devcontainer", () => {
+	const packageJson = JSON.parse(read("package.json"));
+	const script = read("scripts/docs-site.mjs");
+	const devcontainer = JSON.parse(read(".devcontainer/devcontainer.json"));
+	const dockerfile = read(".devcontainer/Dockerfile");
+	const vscodeSettings = JSON.parse(read(".vscode/settings.json"));
+
+	assert.equal(packageJson.scripts["docs:site:install"], "node scripts/docs-site.mjs install");
+	assert.equal(packageJson.scripts["docs:site:build"], "node scripts/docs-site.mjs build");
+	assert.equal(packageJson.scripts["docs:site:serve"], "node scripts/docs-site.mjs serve");
+	assert.match(script, /BUNDLE_GEMFILE/);
+	assert.match(script, /bundle"\), \["check"\]/);
+	assert.match(script, /pnpm run docs:site:install/);
+	assert.match(script, /--host",\s*"0\.0\.0\.0"/);
+	assert.match(script, /--port",\s*PORT/);
+	assert.match(script, /Install Ruby\/Bundler, or rebuild the devcontainer/);
+	assert.match(dockerfile, /ruby-full build-essential zlib1g-dev/);
+	assert.match(dockerfile, /gem install bundler --no-document/);
+	assert.deepEqual(devcontainer.forwardPorts, [4000]);
+	assert.equal(devcontainer.portsAttributes["4000"].label, "agents-lab docs site");
+	assert.equal(devcontainer.portsAttributes["4000"].onAutoForward, "openBrowser");
+	assert.equal(vscodeSettings["remote.portsAttributes"]["4000"].label, "agents-lab docs site");
+	assert.equal(vscodeSettings["remote.portsAttributes"]["4000"].onAutoForward, "openBrowser");
 });
