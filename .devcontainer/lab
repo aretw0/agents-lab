@@ -3,13 +3,24 @@ set -euo pipefail
 
 TARGET_USER="vscode"
 PROJECT_DIR="/workspaces/agents-lab"
+PI_SHORTCUT="0"
 
-if [ "$#" -gt 0 ]; then
+if [ "$#" -gt 0 ] && [ "$1" = "pi" ]; then
+  PI_SHORTCUT="1"
+  shift
+  if [ "$#" -gt 0 ]; then
+    set -- pnpm run pi:dev -- "$@"
+  else
+    set -- pnpm run pi:dev
+  fi
+fi
+
+if [ "$PI_SHORTCUT" = "0" ] && [ "$#" -gt 0 ]; then
   TARGET_USER="$1"
   shift
 fi
 
-if [ "$#" -gt 0 ]; then
+if [ "$PI_SHORTCUT" = "0" ] && [ "$#" -gt 0 ]; then
   PROJECT_DIR="$1"
   shift
 fi

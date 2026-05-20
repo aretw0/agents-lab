@@ -50,6 +50,8 @@ test("devcontainer lab helper enters through the versioned lab command", () => {
 	const lab = readFileSync(".devcontainer/lab", "utf8");
 
 	assert.match(lab, /\$\{PROJECT_DIR\}\/node_modules\/\.bin/);
+	assert.match(lab, /\[ "\$1" = "pi" \]/);
+	assert.match(lab, /set -- pnpm run pi:dev/);
 	assert.match(lab, /if \[ "\$\(id -un\)" = "\$TARGET_USER" \]; then/);
 	assert.match(lab, /exec bash -lc "\. '\$INIT_FILE'; \$\{command_text\}"/);
 	assert.deepEqual(
