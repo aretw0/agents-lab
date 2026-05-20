@@ -33,8 +33,8 @@ Options:
       --yes               Execute (without this flag, dry-run only)
 
 Examples:
-  npm run release:deprecate -- --version 0.3.10 --yes
-  npm run release:deprecate -- --version 0.3.10 --message "broken CI release" --yes
+  pnpm run release:deprecate -- --version 0.3.10 --yes
+  pnpm run release:deprecate -- --version 0.3.10 --message "broken CI release" --yes
 `);
       process.exit(0);
     }

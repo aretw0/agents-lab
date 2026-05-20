@@ -14,13 +14,13 @@ Se `npm whoami` falhar, faça login (`npm login`) ou use um token com permissão
 ## 2) Dry-run da depreciação
 
 ```bash
-npm run release:deprecate -- --version 0.3.10
+pnpm run release:deprecate -- --version 0.3.10
 ```
 
 ## 3) Executar depreciação
 
 ```bash
-npm run release:deprecate -- --version 0.3.10 --yes
+pnpm run release:deprecate -- --version 0.3.10 --yes
 ```
 
 Mensagem padrão:
@@ -30,7 +30,7 @@ Mensagem padrão:
 Mensagem custom:
 
 ```bash
-npm run release:deprecate -- --version 0.3.10 --message "broken CI release; use >= 0.4.1" --yes
+pnpm run release:deprecate -- --version 0.3.10 --message "broken CI release; use >= 0.4.1" --yes
 ```
 
 ## 4) Verificar resultado
