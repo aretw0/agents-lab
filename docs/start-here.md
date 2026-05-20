@@ -2,6 +2,8 @@
 
 Use este mapa para entrar no repositório sem precisar ler todos os guias.
 
+Para a navegação pública mínima do site, use [index.md](./index.md) e [site-map.md](./site-map.md).
+
 ## Perfis de leitura
 
 | Perfil | Comece por | Depois leia |

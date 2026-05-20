@@ -1,11 +1,13 @@
 # Documentação — agents-lab
 
-Este diretório centraliza a documentação operacional, arquitetural e de pesquisa do laboratório. Comece por [start-here.md](./start-here.md) para escolher o caminho de leitura correto.
+Este diretório centraliza a documentação operacional, arquitetural e de pesquisa do laboratório. Comece por [index.md](./index.md) para a entrada pública mínima ou por [start-here.md](./start-here.md) para escolher o caminho de leitura correto.
 
 ## Estrutura
 
 | Pasta | Conteúdo |
 |-------|----------|
+| [`index.md`](./index.md) | Homepage Jekyll mínima e curada para GitHub Pages |
+| [`site-map.md`](./site-map.md) | Contrato editorial da navegação pública e limites de publicação |
 | [`start-here.md`](./start-here.md) | Entrada por perfil: usuário, maintainer, operador control-plane, arquitetura e docs |
 | [`research/`](./research/) | Pesquisas, análises e material de referência sobre agentes |
 | [`guides/`](./guides/) | Guias práticos de uso, configuração e boas práticas |

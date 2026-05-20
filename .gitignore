@@ -110,6 +110,11 @@ dist
 # Docusaurus cache and generated files
 .docusaurus
 
+# Jekyll/GitHub Pages local build output
+docs/_site/
+.jekyll-cache/
+.sass-cache/
+
 # Serverless directories
 .serverless/
 

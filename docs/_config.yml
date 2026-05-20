@@ -1,0 +1,26 @@
+title: agents-lab
+description: Local-first lab for reusable AI-agent primitives and the curated pi-stack.
+url: https://aretw0.github.io
+baseurl: /agents-lab
+
+remote_theme: pages-themes/hacker@v0.2.0
+plugins:
+  - jekyll-remote-theme
+
+repo_url: https://github.com/aretw0/agents-lab
+show_downloads: false
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+
+exclude:
+  - archive
+  - research/data
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - _site
