@@ -3,7 +3,7 @@ title: Engines
 description: Agent engine map and comparison index.
 ---
 
-# Engines de Agentes — Análise e Comparação
+# Engines de agentes
 
 Este diretório documenta análises, comparações e avaliações das diferentes engines de agentes relevantes para o laboratório.
 
@@ -14,7 +14,7 @@ Este diretório documenta análises, comparações e avaliações das diferentes
 **Repositório:** [badlogic/pi-mono](https://github.com/badlogic/pi-mono)
 **Status:** Engine primária do laboratório
 
-Pi é um toolkit para construção de agentes de IA e gerenciamento de LLMs. Sua filosofia de extensibilidade e sua convergência natural para os padrões do ecossistema de agentes o tornam a engine principal deste laboratório.
+Pi é um toolkit para construção de agentes de IA e gerenciamento de LLMs. O laboratório usa Pi como engine principal porque ele oferece extensão local, TUI, skills, tools e integração direta com o fluxo de desenvolvimento deste repositório.
 
 #### Pacotes Principais
 
@@ -30,9 +30,9 @@ Pi é um toolkit para construção de agentes de IA e gerenciamento de LLMs. Sua
 
 #### Pontos Fortes
 
-- Altamente extensível e modular
-- Ótimo para prototipagem rápida ("mess around and find out")
-- Serve como engine de sistemas maiores (ex.: openclaw)
+- Extensível e modular
+- Adequado para prototipagem e validação local
+- Pode operar como engine de sistemas maiores
 - Suporte nativo a múltiplos providers de LLM
 - Tool calling com modo paralelo e sequencial
 - Streaming de eventos com API clara
@@ -71,6 +71,6 @@ Para cada engine avaliada, analisamos:
 5. **DX (Developer Experience)** — facilidade de uso, documentação, erros claros
 6. **Portabilidade** — quão fácil é migrar primitivas entre engines
 
-## Objetivo desta Análise
+## Objetivo desta análise
 
-O laboratório usa Pi como engine principal, mas mantém consciência do estado da arte para garantir que podemos **superar o Pi** caso surjam implementações superiores. A análise contínua de engines alternativas é parte essencial desta estratégia.
+O laboratório usa Pi como engine principal, mas compara alternativas para manter critérios claros de portabilidade, custo, segurança operacional e experiência de desenvolvimento.

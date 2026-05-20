@@ -26,18 +26,18 @@ Este diretório armazena pesquisas, análises e material de referência sobre o 
 | [colony-monitor-interference-assessment.md](./colony-monitor-interference-assessment.md) | Avaliação inicial de interferência entre monitores de sessão e colônia | Draft |
 | [colony-monitor-interference-run-2026-04-13-r1.md](./colony-monitor-interference-run-2026-04-13-r1.md) | Resultado A/B (monitors on/off) em execução real de colônia | Draft |
 | [session-triage-run-2026-04-15.md](./session-triage-run-2026-04-15.md) | Execução de tidy up + triagem de sessões recentes para backlog operacional | Draft |
-| _(em breve)_ | Estado da arte em primitivas de agentes | Pendente |
+| _(em breve)_ | Primitivas de agentes comparadas por critério operacional | Pendente |
 | _(em breve)_ | Padrões de design para sistemas multi-agentes | Pendente |
 
 ## Temas de Pesquisa
 
 ### Convergência do Ecossistema
 
-Análise de como ferramentas e frameworks independentes estão convergindo para conceitos similares — o que Pi "padronizou" e como isso se relaciona com o restante do ecossistema.
+Análise de como ferramentas e frameworks independentes implementam conceitos similares e onde isso afeta a stack do laboratório.
 
 ### Baixa Fricção Cognitiva
 
-Pesquisa sobre qual é o estado da arte em **estruturas de baixa fricção cognitiva** para trabalhar com agentes:
+Pesquisa sobre estruturas de baixa fricção cognitiva para trabalhar com agentes:
 
 - Quais abstrações reduzem a carga mental?
 - Como organizar primitivas para máxima reutilização?
@@ -45,7 +45,7 @@ Pesquisa sobre qual é o estado da arte em **estruturas de baixa fricção cogni
 
 ### Avaliação de Engines
 
-Critérios e metodologias para comparar engines de agentes além do Pi, garantindo que o laboratório possa **superar o Pi** caso necessário.
+Critérios e metodologias para comparar engines de agentes além do Pi e preservar portabilidade das primitivas quando fizer sentido.
 
 ## Formato de Pesquisa
 

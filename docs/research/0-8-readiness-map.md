@@ -12,8 +12,6 @@ Task: `TASK-BUD-918`
 
 ## Leitura executiva
 
-A fase atual terminou uma sequência de abas abertas e voltou para a lane de poder controlado/auditado.
-
 O estado recomendado para a 0.8.0 é:
 
 1. **curto prazo:** consolidar estabilidade local-safe, clareza de board, handoff, docs e fila de fatias pequenas;
@@ -48,7 +46,7 @@ O estado recomendado para a 0.8.0 é:
 | Influências externas adicionais (`hermes-agent`, `sandcastle`, `claude-mem`, colônias antigas) | úteis como inspiração, mas desviam da convergência 0.8 se retomadas antes da lane local-safe amadurecer |
 | Remote/offload/GitHub Actions como executor | protegido; só depois de maturidade local e contrato de cancelamento/rollback claro |
 | Publish/release 0.8.0 | só após readiness, CI/CD, install/smoke e docs estarem consistentes |
-| Ajustes agressivos de provider routing | dependem de canário, quota, rollback e decisão humana |
+| Ajustes agressivos de provider routing | dependem de canário, quota, rollback e decisão do operador |
 
 ## Próxima fila recomendada — 3 a 7 fatias
 
@@ -62,7 +60,7 @@ O estado recomendado para a 0.8.0 é:
 | 6 | `TASK-BUD-914` | CI/CD report-only | coletar GitHub Actions failure evidence | parar antes de workflow mutation |
 | 7 | `TASK-BUD-916` | startup warning/noise report-only | reproduzir warning sem apply | parar antes de `/monitor-provider apply` |
 
-## Critério de avanço sem interação humana
+## Critério de avanço sem interação do operador
 
 Pode continuar automaticamente quando a próxima fatia:
 
@@ -82,16 +80,14 @@ Parar e pedir decisão quando:
 - o próximo passo aumentaria autonomia operacional em vez de apenas preparar readiness report-only;
 - a fila local-safe cair abaixo de 3 fatias com validação clara.
 
-## Definição pragmática de 0.8.0 incrível
-
-Para esta jornada, “incrível” significa:
+## Critérios mínimos para 0.8.0
 
 - instala e opera com defaults curados;
 - mantém board/handoff/rollback auditáveis;
 - reduz ruído e custo de monitores;
 - não surpreende o usuário com CI, providers, publish, remote ou automação forte;
-- prepara delegação/long-run com gates, não com fé;
-- assimila influências externas como padrões pequenos e mensuráveis;
+- prepara delegação/long-run apenas com gates report-only e rollback definido;
+- incorpora influências externas apenas como padrões pequenos e mensuráveis;
 - funciona bem em contextos variados de usuário sem depender do laboratório.
 
 ## Higiene de planejamento da lane
@@ -106,6 +102,6 @@ Atualização local-safe (`TASK-BUD-923`): a referência planejada a `docs/primi
 
 Arquivos futuros declarados em `TASK-BUD-924..931` permanecem intencionalmente ausentes até execução das respectivas fatias.
 
-## Resumo para resume
+## Resumo operacional
 
-Foco atual: seguir a fila stocked após `TASK-BUD-919`. A prioridade é executar fatias local-safe validadas para permitir evolução contínua com baixa iteração humana, mantendo CI/CD, monitor runtime amplo, provider routing, publish/deploy e remote/offload como escopos protegidos.
+Foco atual: seguir a fila stocked após `TASK-BUD-919`. A prioridade é executar fatias local-safe validadas para permitir evolução contínua com baixa intervenção do operador, mantendo CI/CD, monitor runtime amplo, provider routing, publish/deploy e remote/offload como escopos protegidos.

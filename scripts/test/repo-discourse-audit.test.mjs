@@ -83,7 +83,16 @@ test("classifyDiscourseText reports speculative control-plane aliases", () => {
 test("classifyDiscourseText reports self-congratulatory claims", () => {
   const findings = classifyDiscourseText(
     "docs/guides/control-plane-glossary.md",
-    "Uma experiência world-class e incrível.",
+    "Uma experiência world-class e incrível para liberar o potencial da jornada.",
+  );
+
+  assert.deepEqual(findings.map((finding) => finding.rule), ["self-congratulatory-claim"]);
+});
+
+test("classifyDiscourseText keeps the public 0.8 map free of release slogans", () => {
+  const findings = classifyDiscourseText(
+    "docs/research/0-8-readiness-map.md",
+    "A release incrível é o estado da arte para liberar o potencial da jornada.",
   );
 
   assert.deepEqual(findings.map((finding) => finding.rule), ["self-congratulatory-claim"]);

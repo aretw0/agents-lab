@@ -53,10 +53,15 @@ const DISCOURSE_RULES = [
   {
     id: "self-congratulatory-claim",
     severity: "warning",
-    pattern: /\b(incr[ií]vel|world[- ]class|best[- ]in[- ]class|revolucion[aá]rio|m[aá]gico|sem esforço)\b/i,
+    pattern: /\b(incr[ií]vel|world[- ]class|best[- ]in[- ]class|estado da arte|revolucion[aá]rio|m[aá]gico|sem esforço|liberar o potencial|jornada)\b/i,
     message: "replace self-congratulatory claims with concrete capability, evidence, or roadmap status",
   },
 ];
+
+const PUBLIC_RESEARCH_DISCOURSE_SURFACES = new Set([
+  "docs/research/0-8-readiness-map.md",
+  "docs/research/README.md",
+]);
 
 export function normalizeRepoPath(input) {
   return String(input ?? "").trim().replace(/\\/g, "/").replace(/^\.\//, "");
@@ -307,6 +312,7 @@ function isDiscourseSurface(filePath) {
   if (p.startsWith("docs/guides/")) return true;
   if (p.startsWith("docs/primitives/")) return true;
   if (p.startsWith("docs/architecture/")) return true;
+  if (PUBLIC_RESEARCH_DISCOURSE_SURFACES.has(p)) return true;
   if (/^packages\/[^/]+\/docs\/guides\//.test(p)) return false;
   if (/^packages\/[^/]+\/(skills|docs)\//.test(p)) return true;
   if (p.startsWith("packages/pi-stack/extensions/") && /\.(ts|mjs|md)$/.test(p)) return true;

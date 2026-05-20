@@ -89,4 +89,4 @@ gh api repos/aretw0/agents-lab/contents/experiments --jq '.[].name'
 gh api repos/aretw0/agents-lab/contents/docs/research --jq '.[].name'
 ```
 
-A jornada típica: sessão de trabalho → padrão emerge → experimento documenta → primitiva formaliza → PR com review.
+Fluxo típico: sessão de trabalho → padrão emerge → experimento documenta → primitiva formaliza → PR com review.
