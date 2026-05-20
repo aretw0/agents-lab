@@ -65,6 +65,7 @@ test("shared setup action owns deterministic Node and pnpm install", () => {
 	assert.match(action, /name: Agents Lab Setup/);
 	assert.match(action, /uses: pnpm\/action-setup@[0-9a-f]{40}/);
 	assert.match(action, /uses: actions\/setup-node@[0-9a-f]{40}/);
+	assert.match(action, /registry-url: \$\{\{ inputs\.registry-url \}\}/);
 	assert.match(action, /cache: pnpm/);
 	assert.match(action, /run: pnpm install --frozen-lockfile/);
 	assert.match(ci, /uses: \.\/\.github\/actions\/setup/);
@@ -81,6 +82,9 @@ test("publish workflow stays tag-gated and provenance-scoped", () => {
 	assert.ok(workflow.includes('types: [completed]'));
 	assert.match(workflow, /workflow_dispatch:/);
 	assert.match(workflow, /permissions:\s*\n\s+contents: read\n\s+id-token: write/);
+	assert.match(workflow, /uses: \.\/\.github\/actions\/setup/);
+	assert.match(workflow, /registry-url: "https:\/\/registry\.npmjs\.org"/);
+	assert.doesNotMatch(workflow, /corepack prepare --activate/);
 	assert.ok(workflow.includes("github.event.workflow_run.conclusion == 'success'"));
 	assert.ok(workflow.includes('git tag --points-at "$SHA" | grep -E'));
 	assert.ok(workflow.includes('npm publish --workspace packages/pi-stack --provenance --access public'));
@@ -94,6 +98,9 @@ test("release draft workflow remains manual and tag-validated", () => {
 	assert.match(workflow, /workflow_dispatch:/);
 	assert.match(workflow, /inputs:\s*\n\s+tag:/);
 	assert.match(workflow, /permissions:\s*\n\s+contents: write/);
+	assert.match(workflow, /uses: \.\/\.github\/actions\/setup/);
+	assert.match(workflow, /install: "false"/);
+	assert.doesNotMatch(workflow, /actions\/setup-node@/);
 	assert.ok(workflow.includes("grep -Eq '^v"));
 	assert.match(workflow, /draft: true/);
 	assert.doesNotMatch(workflow, /schedule:/);
