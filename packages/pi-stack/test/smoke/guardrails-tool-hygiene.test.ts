@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { registerGuardrailsToolHygieneSurface } from "../../extensions/guardrails-core-tool-hygiene-surface";
 import {
   buildAgentsAsToolsCalibrationScore,
+  buildCapabilityRoiPacket,
   buildLineBudgetSnapshot,
   buildSyntaxHygieneSummary,
   buildToolHygieneScorecard,
@@ -154,6 +155,38 @@ describe("tool hygiene scorecard", () => {
       },
     });
     expect(scorecard.evidence).toContain("dispatch=no");
+  });
+
+  it("builds capability ROI packet for local tools, worker candidates, and protected capabilities", () => {
+    const packet = buildCapabilityRoiPacket({
+      capabilities: [
+        { name: "structured_interview_plan", description: "Read-only plan; never authorizes dispatch", capabilityKind: "local-tool", value: "medium", effort: "low" },
+        { name: "codex_spark_worker", description: "worker candidate for bounded implementation", capabilityKind: "worker", value: "high", effort: "medium" },
+        { name: "github_actions_publish", description: "protected GitHub Actions publish", capabilityKind: "protected", value: "high", effort: "high" },
+        { name: "web_research", description: "external web research", capabilityKind: "local-tool", available: false },
+      ],
+    });
+
+    expect(packet).toMatchObject({
+      mode: "capability-roi-packet",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      providerMutationAllowed: false,
+      total: 4,
+      recommended: 2,
+      blocked: 2,
+    });
+    expect(packet.rows.map((row) => row.recommendationCode)).toEqual(expect.arrayContaining([
+      "capability-roi-use-local-tool",
+      "capability-roi-recommend-worker-candidate",
+      "capability-roi-needs-operator-authorization",
+      "capability-roi-missing-capability",
+    ]));
+    expect(packet.rows.find((row) => row.capabilityKind === "worker")?.authorizationQuestion).toContain("worker candidate");
+    expect(packet.summary).toContain("dispatch=no");
+    expect(packet.summary).toContain("providerMutation=no");
   });
 
   it("builds strong agents-as-tools calibration score for governed bounded stack", () => {

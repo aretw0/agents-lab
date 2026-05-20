@@ -115,6 +115,7 @@ export { resolveStructuredInterview } from "./guardrails-core-structured-intervi
 export { resolveSkillAccessRoot, resolveSkillReadAccess, resolveTrustedGlobalSkillReadAccess } from "./guardrails-core-skill-access-policy";
 export { resolveToolCadenceDecision } from "./guardrails-core-tool-cadence";
 export { buildAgentsAsToolsCalibrationScore, buildLineBudgetSnapshot, buildSyntaxHygieneSummary, buildToolHygieneScorecard, classifyToolHygiene, detectSyntaxHygieneFindings } from "./guardrails-core-tool-hygiene";
+export { buildCapabilityRoiPacket } from "./capability-roi-policy";
 export { evaluateGrowthMaturityScorePacket } from "./guardrails-core-growth-maturity";
 export { buildShellSpoofingCoverageScore } from "./guardrails-core-shell-spoofing-score";
 export { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent } from "./guardrails-core-background-process";

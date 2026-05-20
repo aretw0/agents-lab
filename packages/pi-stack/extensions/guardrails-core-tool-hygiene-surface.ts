@@ -9,6 +9,7 @@ import {
   type SyntaxHygieneSource,
   type ToolHygieneInputTool,
 } from "./guardrails-core-tool-hygiene";
+import { buildCapabilityRoiPacket, type CapabilityRoiInputCapability } from "./capability-roi-policy";
 import { buildExtensionLineBudgetEntries } from "./guardrails-core-line-budget-files";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
@@ -97,6 +98,44 @@ export function registerGuardrailsToolHygieneSurface(pi: ExtensionAPI): void {
         content: [{ type: "text", text: result.summary }],
         details: result,
       };
+    },
+  });
+
+
+  pi.registerTool({
+    name: "capability_roi_packet",
+    label: "Capability ROI Packet",
+    description: "Report-only discoverability packet for available tools, workers, providers, and protected capabilities. Never dispatches or mutates settings/providers.",
+    parameters: Type.Object({
+      capabilities: Type.Optional(Type.Array(Type.Object({
+        name: Type.String({ description: "Capability/tool/worker/provider name." }),
+        description: Type.Optional(Type.String({ description: "Short capability description." })),
+        capabilityKind: Type.Optional(Type.String({ description: "local-tool | worker | provider | protected." })),
+        value: Type.Optional(Type.String({ description: "low | medium | high." })),
+        effort: Type.Optional(Type.String({ description: "low | medium | high." })),
+        available: Type.Optional(Type.Boolean({ description: "False when capability is known missing/unavailable." })),
+      }))),
+      tool_names: Type.Optional(Type.Array(Type.String({ description: "Fallback: exposed tool names to include as local-tool capabilities." }))),
+      limit: Type.Optional(Type.Number({ description: "Max rows to return, 1..80. Default 20." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const explicit = Array.isArray(p.capabilities) ? p.capabilities as CapabilityRoiInputCapability[] : [];
+      const selectedNames = Array.isArray(p.tool_names)
+        ? new Set(p.tool_names.filter((name): name is string => typeof name === "string"))
+        : undefined;
+      const allTools = pi.getAllTools().map(toolInfoToInput).filter((tool): tool is ToolHygieneInputTool => Boolean(tool));
+      const fallbackTools = selectedNames ? allTools.filter((tool) => selectedNames.has(tool.name)) : [];
+      const capabilities = explicit.length > 0 ? explicit : fallbackTools.map((tool) => ({ ...tool, capabilityKind: "local-tool" }));
+      const result = buildCapabilityRoiPacket({
+        capabilities,
+        limit: typeof p.limit === "number" ? p.limit : undefined,
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "capability_roi_packet",
+        summary: result.summary,
+        details: result,
+      });
     },
   });
 
