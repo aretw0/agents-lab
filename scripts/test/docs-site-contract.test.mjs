@@ -315,8 +315,11 @@ test("docs site can be served consistently from host or devcontainer", () => {
 	assert.match(script, /bundle"\), \["check"\]/);
 	assert.match(script, /\["install", "--jobs", "4", "--retry", "3"\]/);
 	assert.match(script, /Run once: pnpm run docs:site:install/);
-	assert.match(script, /--site-mode=github-pages\|root/);
-	assert.match(script, /\["root", ""\]/);
+	assert.match(script, /--site-mode=github-pages\|pages\|root/);
+	assert.match(script, /SITE_MODES = new Set\(\["github-pages", "pages", "root"\]\)/);
+	assert.match(script, /readConfiguredBaseurl/);
+	assert.doesNotMatch(script, /SITE_MODES = new Map/);
+	assert.doesNotMatch(script, /"\/agents-lab"\]/);
 	assert.match(script, /existsSync\(CNAME_FILE\)/);
 	assert.match(script, /serve: local root by default/);
 	assert.match(script, /local-root/);

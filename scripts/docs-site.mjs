@@ -12,11 +12,7 @@ const CNAME_FILE = path.join(DOCS_DIR, "CNAME");
 const BUNDLE_PATH = path.join(REPO_ROOT, ".cache", "bundle");
 const BUNDLE_APP_CONFIG = path.join(REPO_ROOT, ".cache", "bundle-config");
 const PORT = process.env.DOCS_SITE_PORT || "4000";
-const SITE_MODES = new Map([
-	["github-pages", "/agents-lab"],
-	["pages", "/agents-lab"],
-	["root", ""],
-]);
+const SITE_MODES = new Set(["github-pages", "pages", "root"]);
 
 function bin(name) {
 	return process.platform === "win32" ? `${name}.cmd` : name;
@@ -57,14 +53,16 @@ function parseArgs(argv) {
 function resolveBaseurl({ siteMode, baseurl }) {
 	if (baseurl !== undefined) return baseurl;
 	if (siteMode !== undefined) {
-		if (!SITE_MODES.has(siteMode)) {
-			console.error(`docs-site: unknown site mode '${siteMode}'. Use github-pages or root.`);
-			process.exit(2);
-		}
-		return SITE_MODES.get(siteMode);
+		validateSiteMode(siteMode);
+		if (siteMode === "root") return "";
+		return readConfiguredBaseurl();
 	}
 	if (existsSync(CNAME_FILE)) return "";
 
+	return readConfiguredBaseurl();
+}
+
+function readConfiguredBaseurl() {
 	const config = readFileSync(CONFIG_FILE, "utf8");
 	const match = /^baseurl:\s*(.*)$/m.exec(config);
 	if (!match) return "";
@@ -107,7 +105,7 @@ function ensureBundleInstalled() {
 
 function validateSiteMode(siteMode) {
 	if (siteMode !== undefined && !SITE_MODES.has(siteMode)) {
-		console.error(`docs-site: unknown site mode '${siteMode}'. Use github-pages or root.`);
+		console.error(`docs-site: unknown site mode '${siteMode}'. Use github-pages, pages or root.`);
 		process.exit(2);
 	}
 }
@@ -166,7 +164,7 @@ function ensureBundler() {
 }
 
 function usage(baseurl = "") {
-	console.log("Usage: node scripts/docs-site.mjs <install|build|serve> [--site-mode=github-pages|root] [--baseurl=/custom]");
+	console.log("Usage: node scripts/docs-site.mjs <install|build|serve> [--site-mode=github-pages|pages|root] [--baseurl=/custom]");
 	console.log("");
 	console.log("Commands:");
 	console.log("  install  Install Jekyll/GitHub Pages gems from docs/Gemfile");
