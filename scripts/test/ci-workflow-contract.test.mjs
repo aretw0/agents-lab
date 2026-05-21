@@ -13,7 +13,10 @@ function read(path) {
 test("ci workflow keeps the local parity gate canonical", () => {
 	const workflow = read(CI_WORKFLOW);
 	const packageJson = JSON.parse(read("package.json"));
+	const workspace = read("pnpm-workspace.yaml");
 
+	assert.equal(packageJson.workspaces, undefined);
+	assert.match(workspace, /packages:\n\s+- "packages\/\*"/);
 	assert.equal(packageJson.scripts["ci:local:parity"], "pnpm run ci:smoke:gate");
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run docs:package:check/);
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run repo:discourse:audit/);

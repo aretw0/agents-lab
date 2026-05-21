@@ -2,9 +2,6 @@
   "name": "agents-lab",
   "private": true,
   "description": "Monorepo — solo de curadoria e experimentação para o ecossistema pi",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "list": "pnpm list -r --depth=0",
     "test": "node --test packages/*/test/*.test.mjs",
