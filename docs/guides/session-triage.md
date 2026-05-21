@@ -1,6 +1,12 @@
 # Session Triage — histórico -> backlog revisável
 
-Este guia transforma sessões, eventos ou resumos recentes em pendências claras. No `agents-lab`, o destino canônico é `.project/tasks`; em outros projetos, use o adaptador local equivalente ou trate a saída como backlog revisável.
+Este guia transforma sessões, eventos ou resumos recentes em pendências claras.
+Use-o para recuperar continuidade sem depender de uma sessão gigante ou de memória
+implícita do operador.
+
+O destino canônico pode ser `.project/tasks`, outro board local, um vault Markdown
+ou apenas uma lista revisável. O ponto é separar evidência, decisão e próximo lote
+antes de executar trabalho novo.
 
 ## Quando usar
 
@@ -25,7 +31,7 @@ Antes de rodar triagem, escolha o modo de operação:
    - projeção para vault Markdown renderizável (referência: https://github.com/aretw0/vault-seed).
 
 Checklist de spawn rápido por modo:
-- `context_preload_pack` no Pi, ou `pnpm run context:preload` como wrapper de laboratório, para sugerir carga mínima recente;
+- `context_preload_pack` no Pi, ou wrapper local equivalente, para sugerir carga mínima recente;
 - coordenador carrega `control-plane-core`;
 - workers carregam `agent-worker-lean`.
 
@@ -46,27 +52,9 @@ A saída deve ser lida como contrato de arranque:
 - `firstSlice.validation` + `firstSlice.rollback`,
 - sempre `dispatchAllowed=false` / `mutationAllowed=false`.
 
-## Comando principal
+## Entrada de eventos
 
-No `agents-lab`:
-
-```bash
-pnpm run session:triage
-```
-
-Padrão atual de coleta (context-economy):
-- **local-first**: `.sandbox/pi-agent/sessions/<workspaceKey>`
-- **tail-batch**: lê só a cauda da sessão por janela, em vez de scan completo
-- fallback global só com `--allow-global-fallback`
-
-JSON (para automação):
-
-```bash
-pnpm run session:triage:json
-```
-
-Em outros projetos, chame o script/ferramenta equivalente com uma fonte
-provider-agnostic de eventos:
+Use uma fonte provider-agnostic de eventos quando ela existir:
 
 ```bash
 node scripts/session-triage.mjs --events ./data/canonical-events.json
@@ -76,6 +64,29 @@ Também aceita JSONL (um evento por linha):
 
 ```bash
 node scripts/session-triage.mjs --events ./data/canonical-events.jsonl
+```
+
+## Wrapper local
+
+Projetos podem oferecer atalhos próprios para apontar a triagem para o store local
+correto. Neste repositório:
+
+```bash
+pnpm run session:triage
+pnpm run session:triage:json
+```
+
+Padrão atual de coleta no laboratório:
+
+- **local-first**: `.sandbox/pi-agent/sessions/<workspaceKey>`
+- **tail-batch**: lê só a cauda da sessão por janela, em vez de scan completo
+- fallback global só com `--allow-global-fallback`
+
+Projetos que não usam esse wrapper podem chamar a ferramenta equivalente com
+eventos canônicos:
+
+```bash
+node scripts/session-triage.mjs --events ./data/canonical-events.json
 ```
 
 Idea Inbox Primitive (captura sem aplicar automaticamente):
