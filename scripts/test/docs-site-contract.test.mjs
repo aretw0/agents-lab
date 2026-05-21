@@ -39,6 +39,7 @@ test("docs site uses the minimal Hacker Jekyll surface", () => {
 	const config = read("docs/_config.yml");
 	const gemfile = read("docs/Gemfile");
 	const lockfile = read("docs/Gemfile.lock");
+	const headCustom = read("docs/_includes/head-custom.html");
 
 	assert.match(config, /^remote_theme: pages-themes\/hacker@v0\.2\.0$/m);
 	assert.match(config, /^\s+- jekyll-remote-theme$/m);
@@ -50,6 +51,9 @@ test("docs site uses the minimal Hacker Jekyll surface", () => {
 	assert.match(gemfile, /gem "jekyll-remote-theme"/);
 	assert.match(lockfile, /github-pages \(232\)/);
 	assert.match(lockfile, /jekyll-theme-hacker \(0\.2\.0\)/);
+	assert.match(headCustom, /mermaid\.esm\.min\.mjs/);
+	assert.match(headCustom, /pre > code\.language-mermaid/);
+	assert.match(headCustom, /leaving source block unrendered/);
 });
 
 test("docs site excludes heavy or non-canonical material", () => {
