@@ -8,6 +8,33 @@ function read(path) {
 	return readFileSync(path, "utf8");
 }
 
+function internalRawMarkdownLinks(source) {
+	return [...source.matchAll(/\]\(([^)]*\.md)\)/g)]
+		.map((match) => match[1])
+		.filter((href) => !href.startsWith("{{ site.repo_url }}"))
+		.filter((href) => !href.startsWith("https://github.com/aretw0/agents-lab/blob/main/"));
+}
+
+function listMarkdownFiles(root) {
+	const entries = readdirSync(root, { withFileTypes: true });
+	const files = [];
+	for (const entry of entries) {
+		const fullPath = join(root, entry.name);
+		if (entry.isDirectory()) {
+			if (["_site", "archive", "node_modules", "vendor"].includes(entry.name)) continue;
+			if (normalize(fullPath).replaceAll("\\", "/").includes("docs/research/data")) continue;
+			files.push(...listMarkdownFiles(fullPath));
+		} else if (entry.isFile() && entry.name.endsWith(".md")) {
+			files.push(normalize(fullPath).replaceAll("\\", "/"));
+		}
+	}
+	return files;
+}
+
+function listPublishedMarkdownFiles() {
+	return listMarkdownFiles("docs").filter((file) => read(file).match(/^---\r?\n/));
+}
+
 test("docs site uses the minimal Hacker Jekyll surface", () => {
 	const config = read("docs/_config.yml");
 	const gemfile = read("docs/Gemfile");
@@ -98,9 +125,7 @@ test("engine documentation matches the zero-exception boundary audit", () => {
 test("public entrypoint pages do not route site readers to raw markdown", () => {
 	for (const file of ["docs/index.md", "docs/start-here.md", "docs/site-map.md"]) {
 		const source = read(file);
-		const rawMarkdownLinks = [...source.matchAll(/\]\(([^)]*\.md)\)/g)]
-			.map((match) => match[1])
-			.filter((href) => !href.startsWith("{{ site.repo_url }}"));
+		const rawMarkdownLinks = internalRawMarkdownLinks(source);
 
 		assert.deepEqual(rawMarkdownLinks, [], `${file} has internal raw markdown links`);
 	}
@@ -115,9 +140,16 @@ test("published index pages do not route site readers to raw markdown", () => {
 		"docs/engines/README.md",
 	]) {
 		const source = read(file);
-		const rawMarkdownLinks = [...source.matchAll(/\]\(([^)]*\.md)\)/g)]
-			.map((match) => match[1])
-			.filter((href) => !href.startsWith("{{ site.repo_url }}"));
+		const rawMarkdownLinks = internalRawMarkdownLinks(source);
+
+		assert.deepEqual(rawMarkdownLinks, [], `${file} has internal raw markdown links`);
+	}
+});
+
+test("published front matter pages do not route site readers to raw markdown", () => {
+	for (const file of listPublishedMarkdownFiles()) {
+		const source = read(file);
+		const rawMarkdownLinks = internalRawMarkdownLinks(source);
 
 		assert.deepEqual(rawMarkdownLinks, [], `${file} has internal raw markdown links`);
 	}

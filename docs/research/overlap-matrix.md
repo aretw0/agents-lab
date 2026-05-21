@@ -35,9 +35,9 @@ Mapear sobreposição entre pacotes da stack atual para decidir, por capability:
    - deep research: `source-research` + `pi-web-access`,
    - browser interaction: `web-browser` first-party.
 
-Referência detalhada: [`web-overlap-scorecard.md`](./web-overlap-scorecard.md).
-Validação runtime: [`web-runtime-benchmark-run-2026-04-13.md`](./web-runtime-benchmark-run-2026-04-13.md).
-Validações A/B: [`web-routing-ab-run-2026-04-13.md`](./web-routing-ab-run-2026-04-13.md), [`web-routing-ab-run-2026-04-13-novpn-cf.md`](./web-routing-ab-run-2026-04-13-novpn-cf.md) e estabilidade [`web-routing-ab-stability-2026-04-13.md`](./web-routing-ab-stability-2026-04-13.md).
+Referência detalhada: [`web-overlap-scorecard.md`]({{ '/research/web-overlap-scorecard.html' | relative_url }}).
+Validação runtime: [`web-runtime-benchmark-run-2026-04-13.md`]({{ '/research/web-runtime-benchmark-run-2026-04-13.html' | relative_url }}).
+Validações A/B: [`web-routing-ab-run-2026-04-13.md`]({{ '/research/web-routing-ab-run-2026-04-13.html' | relative_url }}), [`web-routing-ab-run-2026-04-13-novpn-cf.md`]({{ '/research/web-routing-ab-run-2026-04-13-novpn-cf.html' | relative_url }}) e estabilidade [`web-routing-ab-stability-2026-04-13.md`]({{ '/research/web-routing-ab-stability-2026-04-13.html' | relative_url }}).
 
 ---
 

@@ -14,7 +14,7 @@ Gerar notas internas, release notes e posts futuros sobre o ecossistema agents-l
 - mudanças de **dependências/terceiros**;
 - aprendizado/curadoria ainda não assimilado.
 
-O pipeline depende da evidência definida em [`dependency-upstream-governance.md`](./dependency-upstream-governance.md). Sem atribuição verificável, o item editorial fica em `hold`.
+O pipeline depende da evidência definida em [`dependency-upstream-governance.md`]({{ '/guides/dependency-upstream-governance.html' | relative_url }}). Sem atribuição verificável, o item editorial fica em `hold`.
 
 ## Categorias editoriais
 

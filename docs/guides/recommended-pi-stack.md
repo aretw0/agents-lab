@@ -64,12 +64,12 @@ Pacotes de terceiros curados entram quando têm uso real, valor comprovado e ove
 
 ## Guias Operacionais
 
-- [quota-visibility.md](./quota-visibility.md): consumo, quota e leitura de sinais de provider.
-- [consumption-visibility-surfaces.md](./consumption-visibility-surfaces.md): mapa de superfícies de consumo quando a stack completa está ativa.
-- [budget-governance.md](./budget-governance.md): envelopes de budget para delegação, long-run e swarm.
-- [subagent-readiness-gate.md](./subagent-readiness-gate.md): critérios antes de delegar para workers.
-- [swarm-preflight-15m.md](./swarm-preflight-15m.md): preflight curto antes de colônia/swarm.
-- [host-disk-recovery.md](./host-disk-recovery.md): manutenção local sem limpeza destrutiva automática.
+- [quota-visibility.md]({{ '/guides/quota-visibility.html' | relative_url }}): consumo, quota e leitura de sinais de provider.
+- [consumption-visibility-surfaces.md]({{ '/guides/consumption-visibility-surfaces.html' | relative_url }}): mapa de superfícies de consumo quando a stack completa está ativa.
+- [budget-governance.md]({{ '/guides/budget-governance.html' | relative_url }}): envelopes de budget para delegação, long-run e swarm.
+- [subagent-readiness-gate.md]({{ '/guides/subagent-readiness-gate.html' | relative_url }}): critérios antes de delegar para workers.
+- [swarm-preflight-15m.md]({{ '/guides/swarm-preflight-15m.html' | relative_url }}): preflight curto antes de colônia/swarm.
+- [host-disk-recovery.md]({{ '/guides/host-disk-recovery.html' | relative_url }}): manutenção local sem limpeza destrutiva automática.
 
 ## Control Plane
 
@@ -93,7 +93,7 @@ pnpm run test:docs:site
 pnpm run repo:discourse:audit
 ```
 
-Guias internos de CI, publicação e curadoria do laboratório ficam em [README de guias](./README.md). Eles não são empacotados automaticamente para usuários.
+Guias internos de CI, publicação e curadoria do laboratório ficam em [README de guias]({{ '/guides/README.html' | relative_url }}). Eles não são empacotados automaticamente para usuários.
 
 ## Referências Históricas
 

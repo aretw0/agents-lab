@@ -768,7 +768,7 @@ Critério de maturidade: três ou mais slices locais seguidos com foco preservad
 
 A primitiva `evaluateUnattendedRehearsalGate` formaliza esse scorecard: `continue-local` enquanto faltarem critérios, `blocked` quando houver drift/protected-scope ou blockers, e `ready-for-canary` apenas quando todos os critérios locais estiverem verdes. A tool `unattended_rehearsal_gate` também retorna `summary`; use esse resumo compacto em handoff/auto-resume quando a decisão operacional basta, preservando o payload detalhado para auditoria ou debug.
 
-A decisão operacional após foco completo deve seguir a [doutrina operacional do control-plane unattended](./control-plane-operating-doctrine.md): continuar sozinho em mudanças locais pequenas e reversíveis; parar apenas em risco, ambiguidade real ou escopo protegido.
+A decisão operacional após foco completo deve seguir a [doutrina operacional do control-plane unattended]({{ '/guides/control-plane-operating-doctrine.html' | relative_url }}): continuar sozinho em mudanças locais pequenas e reversíveis; parar apenas em risco, ambiguidade real ou escopo protegido.
 
 Durante o rehearsal, cada slice deve registrar uma evidência curta em formato estável: `slice=<n> focus=<task|milestone> gate=<comando|inspeção> commit=<sha> drift=<yes|no> next=<ação>`. O registro pode ficar em nota do board/handoff, evitando uma nova superfície grande de tracking.
 
