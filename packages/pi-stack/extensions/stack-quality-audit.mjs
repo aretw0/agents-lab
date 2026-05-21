@@ -62,6 +62,13 @@ const DISCOURSE_RULES = [
     pattern: /\b(CI|CI\/CD|GitHub Actions|Pages)\b.{0,80}\b(est[aá]\s+falhando|falhando|quebrad[ao]|failing|failure evidence)\b/i,
     message: "avoid stale CI failure claims in public docs; cite current run status or move historical evidence out of promoted surfaces",
   },
+  {
+    id: "deprecated-local-slice-human-contract",
+    severity: "warning",
+    pattern: /\blocal_slice_human_contract_review\b/,
+    scanCode: true,
+    message: "use local_slice_operator_contract_review in promoted docs",
+  },
 ];
 
 const PUBLIC_RESEARCH_DISCOURSE_SURFACES = new Set([
@@ -361,7 +368,8 @@ export function classifyDiscourseText(filePath, text, rules = DISCOURSE_RULES) {
     if (inCodeFence) continue;
     const prose = stripMarkdownCode(line);
     for (const rule of rules) {
-      if (!rule.pattern.test(prose)) continue;
+      const scanText = rule.scanCode ? line : prose;
+      if (!rule.pattern.test(scanText)) continue;
       findings.push({
         path: normalized,
         line: index + 1,

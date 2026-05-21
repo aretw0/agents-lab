@@ -52,6 +52,15 @@ test("classifyDiscourseText ignores legacy terms inside fenced code", () => {
   assert.equal(findings.length, 0);
 });
 
+test("classifyDiscourseText reports deprecated local slice human contract alias inside inline code", () => {
+  const findings = classifyDiscourseText(
+    "docs/primitives/nudge-free-local-continuity.md",
+    "`local_slice_human_contract_review` should not return to public primitive docs.",
+  );
+
+  assert.deepEqual(findings.map((finding) => finding.rule), ["deprecated-local-slice-human-contract"]);
+});
+
 test("classifyDiscourseText reports aspirational language in canonical docs", () => {
   const findings = classifyDiscourseText(
     "docs/primitives/example.md",
