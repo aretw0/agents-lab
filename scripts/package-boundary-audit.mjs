@@ -120,11 +120,11 @@ function auditPackage(packageRoot) {
     const rel = normalizeRel(ref.value);
     const abs = path.resolve(packageRoot, rel);
     if (!existsSync(abs)) {
-      findings.push({ package: manifest.name, severity: "blocker", code: "manifest-ref-missing", field: ref.field, path: rel });
+      findings.push({ package: manifest.name, code: "manifest-ref-missing", field: ref.field, path: rel });
       continue;
     }
     if (files.length > 0 && !isCoveredByFiles(rel, files)) {
-      findings.push({ package: manifest.name, severity: "blocker", code: "manifest-ref-not-in-files", field: ref.field, path: rel });
+      findings.push({ package: manifest.name, code: "manifest-ref-not-in-files", field: ref.field, path: rel });
     }
   }
 
@@ -140,7 +140,6 @@ function auditPackage(packageRoot) {
       if (!isInside(packageRoot, resolved)) {
         findings.push({
           package: manifest.name,
-          severity: "blocker",
           code: "package-source-imports-repo-local-file",
           source: relSource,
           specifier,
@@ -161,14 +160,13 @@ function auditPackage(packageRoot) {
 export function buildPackageBoundaryAudit(cwd = process.cwd()) {
   const packageReports = listPackageRoots(cwd).map(auditPackage);
   const findings = packageReports.flatMap((report) => report.findings);
-  const blockers = findings.filter((finding) => finding.severity === "blocker");
   return {
     packageCount: packageReports.length,
-    blockerCount: blockers.length,
+    blockerCount: findings.length,
     findingCount: findings.length,
     packages: packageReports,
     findings,
-    blockers,
+    blockers: findings,
   };
 }
 
