@@ -17,6 +17,8 @@ test("ci workflow keeps the local parity gate canonical", () => {
 	assert.equal(packageJson.scripts["ci:local:parity"], "pnpm run ci:smoke:gate");
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run docs:package:check/);
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run repo:discourse:audit/);
+	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run test:release:package:smoke/);
+	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run release:package:smoke/);
 	assert.match(workflow, /name: Smoke Tests/);
 	assert.match(workflow, /permissions:\n  contents: read\n\nconcurrency:/);
 	assert.doesNotMatch(workflow, /permissions:\n  contents: read\n  pull-requests: write\n\nconcurrency:/);
