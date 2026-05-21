@@ -13,21 +13,23 @@ Escopo: `agents-lab`, `@aretw0/pi-stack`, GitHub Pages e CI
 
 O estado atual para 0.8.0 é:
 
-1. **Base publicada:** CI e GitHub Pages estão verdes no commit `ba0d8a6c` em 2026-05-21.
+1. **Base publicada:** CI e GitHub Pages estão verdes em `main` na revisão desta página.
 2. **Base local:** desenvolvimento usa `pnpm`, devcontainer, `lab pi`, gates locais e `pi:dev` com capacidades frias por padrão.
 3. **Base de produto:** `@aretw0/pi-stack` deve continuar `strict-curated` por default; capacidades caras ficam opt-in.
 4. **Fronteira protegida:** publish npm, provider routing, remote/offload, GitHub Actions como executor e automação forte exigem intenção explícita do operador.
+5. **Roadmap canônico:** direção macro fica em [ROADMAP.md]({{ site.repo_url }}/blob/main/ROADMAP.md); este arquivo registra readiness e evidência selecionada.
 
 ## Pronto
 
 | Área | Estado | Evidência |
 |---|---|---|
-| CI local e GitHub Actions | verde | `pnpm run ci:local:parity`; workflow `CI` passou no commit `ba0d8a6c` |
+| CI local e GitHub Actions | verde | `pnpm run ci:local:parity`; workflow `CI` passa em `main` |
 | GitHub Pages | publicado | `pages-build-deployment` passou; fonte `main /docs` |
 | README público | enxuto | README reduzido e alinhado ao perfil `strict-curated` |
 | Licença | alinhada | `LICENSE` raiz e pacotes `@aretw0/*` usam MIT |
 | Discurso público | auditado | `repo:discourse:audit` cobre README, guias, primitives, architecture e research promovido |
 | Instalação padrão | conservadora | `npx @aretw0/pi-stack` instala perfil `strict-curated` |
+| Fronteira de engine | protegida | `engine:boundary:audit` mantém core portable e acoplamentos Pi declarados |
 
 ## Preparado, mas ainda protegido
 
@@ -55,6 +57,7 @@ O estado atual para 0.8.0 é:
 | Revisar docs públicas restantes | `repo:discourse:audit`, links do site e remoção de snapshots stale |
 | Preparar release readiness | `release:readiness:v0.8.0`, install/smoke e changelog |
 | Auditar superfície de instalação | confirmar que README, `package-list.mjs`, installer e docs da `pi-stack` descrevem o mesmo default |
+| Reduzir acoplamentos de engine | remover dependências Pi de core quando bastar contrato estrutural |
 
 ## Critério de parada
 

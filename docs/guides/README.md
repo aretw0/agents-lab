@@ -20,6 +20,7 @@ Guias práticos para usar, operar, manter e distribuir a stack. Para escolher po
 | Guia | Descrição |
 |------|-----------|
 | [publishing.md](./publishing.md) | Workflow de release — changesets, versionamento lockstep, publish via tag |
+| [ROADMAP.md](../../ROADMAP.md) | Direção macro da 0.8.0; estado diário continua em `.project/*` |
 
 ### Operação da stack
 

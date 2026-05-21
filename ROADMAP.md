@@ -1,140 +1,105 @@
-# Roadmap — agents-lab
+# Roadmap - agents-lab
 
-Planejamento e milestones do laboratório. Este é um documento vivo — evolui conforme o laboratório cresce.
+Este roadmap mantém direção macro. O estado diário vive em `.project/*`; evidência datada fica em `docs/research/`; contratos estáveis devem ser promovidos para `docs/guides/`, `docs/primitives/` ou `docs/architecture/`.
 
-> Fonte canônica de execução diária: `.project/*`.
-> Este roadmap mantém direção macro; handoff fica em formato de delta curto.
-> Guia do fluxo: `docs/guides/project-canonical-pipeline.md`.
+## Norte
 
-## Fase 0 — Fundação (concluída)
+O `agents-lab` deve entregar uma stack local-first para agentes de IA que seja:
 
-**Objetivo:** Criar o solo que vai receber o brainstorm e as pesquisas futuras.
+- pequena no uso diário;
+- explícita sobre custo, quota, cache, publish e automação;
+- testável por CI e smoke local;
+- extensível por primitives e adapters;
+- compatível com Pi hoje e preparada para Refarm como engine futura.
 
-- [x] Estrutura inicial do repositório
-- [x] README com missão, visão e filosofia
-- [x] Estrutura de diretórios (`docs/`, `experiments/`, `primitives/`)
-- [x] Documentação de convenções e contribuição
-- [x] Definir estrutura de longo prazo do repositório
-  - **Decisão:** monorepo com npm workspaces (`packages/*`)
-  - [x] Criar `package.json` raiz com workspaces
-  - [x] Criar meta-pacote `@aretw0/pi-stack` com `npx @aretw0/pi-stack`
-  - [x] Configurar `.pi/settings.json` para dogfood local
-  - [x] Bootstrap de changesets, CI e workflow de publish (tag → npm)
+Pi continua sendo a primeira engine operacional. Refarm é a próxima fronteira de compatibilidade, então novas primitivas devem separar core de runtime adapter.
 
-## Fase 1 — Pesquisa e Documentação
+## Estado Atual
 
-**Objetivo:** Organizar o material existente e construir base de conhecimento.
+| Área | Estado |
+|---|---|
+| Monorepo | `pnpm`, packages first-party e devcontainer operando como baseline |
+| Distribuição | `@aretw0/pi-stack` e skills first-party publicados por npm/changesets |
+| CI | GitHub Actions com pins, permissões explícitas, paridade local e publish tag-gated |
+| Site | GitHub Pages minimalista via Jekyll Hacker, com navegação pública pequena |
+| Devcontainer | `lab pi`, Node 24, pnpm global bin, cache de assistentes e ferramentas básicas |
+| Runtime Pi | `pi:dev` com perfil control-plane e capacidades caras frias por padrão |
+| Fronteira de engine | `engine:boundary:audit` impede novo acoplamento Pi em core por acidente |
+| Docs | README e site separados por usuário, mantenedor, operador e arquitetura |
 
-- [ ] Análise aprofundada do ecossistema Pi
-  - [x] Mapa inicial do ecossistema e suas camadas
-  - [ ] Mapeamento de todos os pacotes e suas responsabilidades
-  - [x] Identificação inicial dos padrões de design usados
-  - [ ] Análise de casos de uso (openclaw e outros)
-  - [x] Scorecard inicial de referências e pacotes prioritários
-  - [x] Avaliação de pi-lens como referência de qualidade de código
-  - [x] Taxonomia inicial por workflow
-- [ ] Catalogar material de referência externo
-  - [ ] [tuts-agentic-ai-examples](https://github.com/nilayparikh/tuts-agentic-ai-examples) — padrões de AI Agents
-  - [ ] Protocolo A2A (Agent-to-Agent)
-- [ ] Pesquisa sobre estrutura de baixa fricção cognitiva
-  - [ ] Avaliação de monorepo vs. repositórios independentes
-  - [ ] Análise de projetos similares na comunidade
-  - [x] Blueprint inicial da futura fábrica de extensões Pi
-  - [x] Análise inicial das fricções da factory
-  - [ ] Resolver modelo de workspace meta (dogfooding vs. consumo) — [experimento](experiments/202604-pi-meta-workspace/README.md)
-- [ ] Análise de engines alternativas ao Pi (LangChain, AutoGen, CrewAI, etc.)
-- [ ] Preparação para migração controlada de Copilot para Pi
-  - [x] Definição da stack inicial recomendada
-  - [x] Guia inicial de migração incremental
-  - [x] Análise de compatibilidade de plataforma (Windows/Linux/macOS)
-  - [x] Decisão sobre devcontainer (adiado para Fase 2-3)
-  - [x] Instalar Pi e validar a stack no uso real
-  - [x] Registrar a primeira validação prática e os artefatos gerados no workspace
+## 0.8.0 - Convergência
 
-## Fase 2 — Primeiros Experimentos
+Objetivo: publicar uma baseline madura da `pi-stack` e do laboratório sem prometer automação forte antes dos gates.
 
-**Objetivo:** Rodar experimentos concretos e começar a identificar primitivas.
+### 1. Baseline Operacional
 
-- [ ] Investigar monitores comportamentais do Pi stack (`hedge` e similares)
-  - [x] Reproduzir a falha do `hedge` em ambiente autenticado com `github-copilot`
-  - [x] Confirmar override local via `.pi/agents/hedge-classifier.agent.yaml`
-  - [x] Verificar que o padrão de modelo sem provider se repete nos classificadores embutidos
-  - [x] Validar em execução que `work-quality` também exige alinhamento explícito de provider
-  - [x] Validar em execução um sensor orientado a tool use (`fragility`)
-  - [x] Padronizar overrides locais para todos os classificadores empacotados
-  - [x] Separar configuração versionável (`.pi/agents/`) de saída operacional de runtime (`.project/`)
-  - [x] Abrir issue upstream com a reprodução consolidada e a hipótese causal
-  - [x] Confirmar recorrência `No tool call in response` + `Instructions are required` em runtime OpenAI-only
-  - [ ] Definir mitigação padrão de sessão para evitar flood de warnings (monitors off + reativação gradual)
-  - [ ] Subir correção upstream/fork para `classifyViaAgent` em providers que exigem `instructions`
-  - [ ] Revalidar monitores (hedge/fragility/unauthorized-action) após patch com budget controlado
-- [x] Primeiro experimento com `pi-agent-core`
-- [ ] Experimento com tool calling em Pi
-  - [x] Validar baseline de `read`, `write` e `bash` no núcleo puro do Pi
-  - [x] Validar uma microedição real em arquivo existente do projeto (`README.md`) no núcleo puro
-  - [ ] Rodar fluxo multi-etapa com tool calling em arquivos reais do projeto
-  - [ ] Comparar o mesmo tipo de tarefa com a stack completa ativada
-- [ ] Experimento de paridade GitHub via `gh`
-  - [x] Confirmar ausência inicial do `gh` no ambiente
-  - [x] Instalar `gh` em escopo de usuário sem depender de admin
-  - [x] Confirmar que a próxima fricção é autenticação do `gh`, não inferência do Pi
-  - [x] Autenticar `gh` e validar leitura de `issues` e `prs`
-  - [x] Definir política de isolamento entre credenciais de provider e credenciais operacionais de utilitários externos
-  - [x] Validar uma primeira operação de escrita controlada via `gh`
-  - [ ] Medir ergonomia de Pi + `gh` contra o fluxo atual com GitHub Copilot
-  - [ ] Avançar de issue ops para PR ops com o mesmo modelo controlado e reversível
-- [ ] Experimento com múltiplos providers de LLM
-- [ ] Experimento com A2A protocol
-- [ ] Identificar padrões recorrentes candidatos a primitivas
+- manter `ci:local:parity` e GitHub Actions verdes;
+- manter devcontainer e host com comandos equivalentes;
+- garantir instalação `npx @aretw0/pi-stack` e `pi install` sem surpresa;
+- manter publish com provenance, tag semver e cache de dependência desligado em job privilegiado;
+- manter docs publicadas testadas localmente e no Pages.
 
-## Fase 3 — Primeiras Primitivas (atual)
+### 2. Curadoria da pi-stack
 
-**Objetivo:** Formalizar as primeiras primitivas reutilizáveis como pacotes first-party.
+- preservar `strict-curated` como default;
+- manter extras caros como opt-in;
+- reduzir colisões e duplicações de skills/tools por filtro ou first-party ownership;
+- separar manutenção genérica distribuível de manutenção específica do laboratório;
+- manter terceiros curados documentados sem vender dependência externa como first-party.
 
-- [x] Definir estrutura padrão de pacote (`packages/*`, npm workspaces)
-- [x] Definir estratégia de versionamento (lockstep com changesets)
-- [x] Criar `@aretw0/git-skills` — commit, git-workflow, github, glab
-- [x] Criar `@aretw0/web-skills` — native-web-search, web-browser CDP
-- [x] Criar `@aretw0/pi-skills` — terminal-setup, create-pi-skill/extension/theme/prompt
-- [x] Criar `@aretw0/lab-skills` — evaluate-extension, cultivate-primitive, stack-feedback
-- [x] Criar `@aretw0/pi-stack` com `install.mjs` (npx + fallback Windows)
-- [x] Extension `monitor-provider-patch` — fix automático de classifiers para github-copilot (14 testes)
-- [x] Publicar scope `@aretw0` no npm e configurar `NPM_TOKEN` no repositório
-- [x] Primeiro release (`v0.1.0`) publicado no npm
-- [x] Branch protection ativada — PRs + 1 review + conventional commits
-- [ ] Release `v0.2.0` com todos os 5 pacotes
-- [ ] Avaliar e migrar primitivas de monitors (`@davidorex/pi-behavior-monitors`)
-- [ ] Avaliar e migrar primitivas de extensions (`@ifi/oh-pi-extensions`)
-- [ ] Avaliar Adaptive Routing do `@ifi/oh-pi` como primitiva futura de roteamento
-- [x] Consolidar guardrails first-party em uma extensão única (`guardrails-core`)
-- [x] Definir gate objetivo de colony-readiness (guardrails + regressão + observabilidade)
+### 3. Primitives Portáveis
 
-## Fase 4 — Comunidade e Escala
+- reduzir a allowlist do `engine:boundary:audit` gradualmente;
+- manter core sem import direto de `@earendil-works/pi-coding-agent`;
+- expor Pi por surfaces/adapters;
+- preparar contratos de board, intent, approval, cache, release e runtime health para futura engine Refarm;
+- evitar renomear pacotes por antecipação quando um contrato e um teste resolvem melhor.
 
-**Objetivo:** Abrir o laboratório para contribuições externas e escalar o ecossistema.
+### 4. Control Plane
 
-- [x] Branch protection e gateways de qualidade
-- [x] Primeiro contribuidor adicionado
-- [ ] Guia de onboarding para novos colaboradores (skills `pi-skills` e `lab-skills` cobrem parcialmente)
-- [ ] Processo de avaliação e promoção de primitivas (skill `evaluate-extension` + `cultivate-primitive`)
-- [ ] Validar instalação via `pi install https://github.com/aretw0/agents-lab`
-- [ ] Avaliar `@aretw0/terminal-configs` como pacote de configuração puro (issue #3)
+- manter execução local-safe como default;
+- promover delegação e long-run apenas por packets report-only, canários e rollback;
+- usar milestones como unidade de continuidade;
+- preservar operador como origem de intenção, aprovação e orçamento;
+- evitar que diagnósticos pesados entrem no hot path sem sinal.
 
----
+### 5. Release Readiness
 
-## Decisões Pendentes
+- gerar relatório de readiness apenas quando CI, docs, installer e pacote estiverem coerentes;
+- revisar changelog/release notes antes de tag;
+- validar instalação e smoke em ambiente limpo;
+- publicar somente com tag semver, provenance e rollback/deprecation documentado.
 
-| Decisão | Contexto | Prazo |
-|---------|----------|-------|
-| ~~Monorepo ou não?~~ | **Decidido:** monorepo com npm workspaces | ✅ Fase 0 |
-| Linguagem principal | TypeScript (Pi) vs. Python vs. poliglota | Fase 2 |
-| Modelo de workspace meta | Monorepo unificado vs. separado vs. perfis — como dogfoodar sem poluir | Fase 2-3 |
-| ~~Estratégia de publicação~~ | **Decidido:** npm com changesets + lockstep + publish on tag | ✅ Fase 3 |
+## Depois da 0.8.0
 
-## Notas
+| Tema | Direção |
+|---|---|
+| Refarm engine | criar adapter quando a engine estiver pronta, reaproveitando primitives já desacopladas |
+| Workers e colônia | promover de report-only para execução apenas com métricas, budget e cancelamento confiáveis |
+| GitHub Actions como executor | manter protegido até existir contrato de task, artifact, rollback e permissão mínima |
+| Provider routing | canários pequenos, quota visível e decisão explícita antes de troca real |
+| Docs distribuídas | sincronizar guias genéricos para pacotes, mantendo docs do laboratório fora do pacote |
+| Site público | manter navegação curta; research só aparece quando vira evidência selecionada |
 
-- O roadmap é orientativo, não prescritivo. A natureza experimental do laboratório exige flexibilidade.
-- Novas descobertas nas fases iniciais podem reordenar ou reescrever fases futuras.
-- Cada milestone deve ser discutido antes de ser iniciado.
-- Comportamentos opinativos de engines e extensões devem ser entendidos antes de serem limpos, ignorados ou removidos.
-- Integrações futuras com utilitários autenticados devem começar com isolamento de credenciais; qualquer compartilhamento entre autenticação do provider e autenticação operacional deve ser explícito, configurável e reversível.
+## Não Objetivos Agora
+
+- trocar Pi por outra engine;
+- publicar automação remota forte sem gates locais;
+- criar pacote novo só por nomenclatura;
+- transformar `.project` em banco definitivo;
+- misturar docs internas de manutenção com guias de usuário;
+- perseguir toda influência externa antes de estabilizar a baseline local.
+
+## Gates De Mudança
+
+Antes de promover uma lane como pronta, valide pelo menor conjunto relevante:
+
+```bash
+pnpm run test:docs:site
+pnpm run test:ci:workflow
+pnpm run test:engine:boundary
+pnpm run engine:boundary:audit
+pnpm run ci:local:parity
+```
+
+Use `ci:local:parity` para mudanças em runtime compartilhado, empacotamento, CI, release ou superfície pública. Para docs simples, prefira `test:docs:site`, `repo:discourse:audit` e `docs:package:check`.

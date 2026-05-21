@@ -17,6 +17,7 @@ This site keeps the public entrypoint small while the repository can continue to
 | Control Plane | [Control-plane operating doctrine]({{ '/guides/control-plane-operating-doctrine.html' | relative_url }}) | Document the daily operating model without making it the only use case. |
 | Architecture | [Architecture]({{ '/architecture/README.html' | relative_url }}) | Surface accepted decisions and ownership. |
 | Primitives | [Primitives]({{ '/primitives/README.html' | relative_url }}) | Surface reusable contracts before raw research. |
+| Roadmap | [Roadmap]({{ site.repo_url }}/blob/main/ROADMAP.md) | Keep planned direction separate from daily board state and raw research. |
 | Selected Evidence | [0.8 readiness map]({{ '/research/0-8-readiness-map.html' | relative_url }}) | Keep readiness evidence available without making research the homepage path. |
 
 ## Publication Rules

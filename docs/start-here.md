@@ -17,7 +17,7 @@ Para a navegação pública mínima do site, use [Home]({{ '/' | relative_url }}
 | Mantenedor do monorepo | [Contributing]({{ site.repo_url }}/blob/main/CONTRIBUTING.md) | [CI governance]({{ '/guides/ci-governance.html' | relative_url }}), [Publishing]({{ '/guides/publishing.html' | relative_url }}) |
 | Operador do control plane | [Control-plane operating doctrine]({{ '/guides/control-plane-operating-doctrine.html' | relative_url }}) | [Project canonical pipeline]({{ '/guides/project-canonical-pipeline.html' | relative_url }}), [Control-plane glossary]({{ '/guides/control-plane-glossary.html' | relative_url }}) |
 | Curadoria e arquitetura | [Architecture]({{ '/architecture/README.html' | relative_url }}) | [Primitives]({{ '/primitives/README.html' | relative_url }}), [Engine map]({{ '/engines/README.html' | relative_url }}) |
-| Evidência de release | [0.8 readiness map]({{ '/research/0-8-readiness-map.html' | relative_url }}) | [Agents-lab editorial pipeline]({{ '/guides/agents-lab-editorial-pipeline.html' | relative_url }}) |
+| Roadmap e release | [Roadmap]({{ site.repo_url }}/blob/main/ROADMAP.md) | [0.8 readiness map]({{ '/research/0-8-readiness-map.html' | relative_url }}), [Agents-lab editorial pipeline]({{ '/guides/agents-lab-editorial-pipeline.html' | relative_url }}) |
 | Docs e release notes | [Doc drift MDT]({{ '/guides/doc-drift-mdt.html' | relative_url }}) | [GitHub repo presence]({{ '/guides/github-repo-presence.html' | relative_url }}), [Agents-lab editorial pipeline]({{ '/guides/agents-lab-editorial-pipeline.html' | relative_url }}) |
 
 ## Caminho recomendado

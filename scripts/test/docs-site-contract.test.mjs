@@ -72,6 +72,17 @@ test("root README keeps user and maintainer surfaces separate", () => {
 	assert.doesNotMatch(readme, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
 });
 
+test("root roadmap stays current and macro-level", () => {
+	const roadmap = read("ROADMAP.md");
+
+	assert.match(roadmap, /^# Roadmap - agents-lab$/m);
+	assert.match(roadmap, /## 0\.8\.0 - Convergência/);
+	assert.match(roadmap, /engine:boundary:audit/);
+	assert.match(roadmap, /Refarm é a próxima fronteira de compatibilidade/);
+	assert.doesNotMatch(roadmap, /npm workspaces|Release `v0\.2\.0`|Fase 0|Fase 1|Fase 2|Fase 3|Fase 4/);
+	assert.doesNotMatch(roadmap, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
+});
+
 test("public entrypoint pages do not route site readers to raw markdown", () => {
 	for (const file of ["docs/index.md", "docs/start-here.md", "docs/site-map.md"]) {
 		const source = read(file);
