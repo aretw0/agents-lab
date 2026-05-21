@@ -114,7 +114,7 @@ Para calibrar execução contínua entre máquina local, container e CI:
 
 ### Budget de reinflação do orchestrator (`guardrails-core.ts`)
 
-Para manter a stack pronta para jornadas rasas e profundas sem acoplamento opinativo:
+Para manter a stack pronta para usos simples e avançados sem acoplamento opinativo:
 
 - tratar `guardrails-core.ts` como **orquestrador de wiring**; lógica nova deve nascer em primitiva/surface dedicada (`guardrails-core-*.ts`);
 - quando uma mudança adicionar bloco grande no core (ordem de dezenas de linhas), priorizar extração no mesmo ciclo ou no slice imediatamente seguinte;

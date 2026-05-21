@@ -96,7 +96,7 @@ Stop reasons canônicos (interação do operador obrigatória):
 - `PROTECTED_SCOPE_REQUIRED`
 - `BLOCKING_RELOAD_REQUIRED`
 - `VALIDATION_FAILED`
-- `AMBIGUOUS_HUMAN_OBJECTIVE`
+- `AMBIGUOUS_OPERATOR_OBJECTIVE`
 
 Evidência mínima por fatia (baixo custo de token):
 
@@ -751,7 +751,7 @@ context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice
 
 Esse caso prova que foco único não equivale a escopo reversível. `task.files` ou evidência equivalente precisa existir antes de qualquer execução futura.
 
-O operator packet reduz fricção para jornadas longas porque coloca a evidência em uma linha, mas não substitui autorização. Ele não cobre repetition, scheduler, self-reload, remote/offload, GitHub Actions, protected scopes ou manutenção destrutiva.
+O operator packet reduz fricção em runs longas porque coloca a evidência em uma linha, mas não substitui autorização. Ele não cobre repetition, scheduler, self-reload, remote/offload, GitHub Actions, protected scopes ou manutenção destrutiva.
 
 ### Gate de backlog para executor one-slice
 
