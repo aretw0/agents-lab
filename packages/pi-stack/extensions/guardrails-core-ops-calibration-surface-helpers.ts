@@ -11,7 +11,8 @@ import {
   GUARDRAILS_AUTHORIZATION_NONE,
 } from "./guardrails-core-authorization";
 import { buildAgentsAsToolsCalibrationScore, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
-import { evaluateAutonomyLaneTaskSelection, readAutonomyHandoffFocusTaskIds } from "./guardrails-core-autonomy-task-selector";
+import { readProjectTasksBlock } from "./colony-pilot-task-sync";
+import { readAutonomyHandoffFocusTaskIds, selectAutonomyLaneTask } from "./guardrails-core-autonomy-task-selector";
 import { consumeContextPreloadPack } from "./context-watchdog-continuation";
 import { buildUnavailableGitDirtySnapshot, readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
 import { asOptionalBoolean } from "./guardrails-core-param-normalizers";
@@ -52,12 +53,13 @@ export type AutoAdvanceCompositeDecision = {
 
 export function inferLiveAutoAdvanceSnapshot(cwd: string): AutoAdvanceCompositeDecision["liveSnapshot"] {
   const focusTaskIds = readAutonomyHandoffFocusTaskIds(cwd);
-  const focusSelection = evaluateAutonomyLaneTaskSelection(cwd, {
+  const tasks = readProjectTasksBlock(cwd).tasks;
+  const focusSelection = selectAutonomyLaneTask(tasks, {
     sampleLimit: 5,
     focusTaskIds,
     focusSource: focusTaskIds.length > 0 ? "handoff" : undefined,
   });
-  const fallbackSelection = evaluateAutonomyLaneTaskSelection(cwd, { sampleLimit: 5 });
+  const fallbackSelection = selectAutonomyLaneTask(tasks, { sampleLimit: 5 });
 
   if (!(focusSelection.reason === "focus-complete" && focusTaskIds.length > 0)) {
     return {
