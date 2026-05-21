@@ -593,18 +593,25 @@ describe("guardrails-core long-run intent queue", () => {
 
   it("builds help/status discoverability hints for lane-queue", () => {
     const helpLines = buildLaneQueueHelpLines();
-    expect(helpLines.join("\n")).toContain("/lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence [--milestone <label>|-m <label>|-m=<label>|--no-milestone]]");
-    expect(helpLines.join("\n")).toContain("lane-now:<mensagem>");
+    const helpText = helpLines.join("\n");
+    expect(helpText).toContain("/lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence [--milestone <label>|-m <label>|-m=<label>|--no-milestone]]");
+    expect(helpText).toContain("lane-now:<mensagem>");
+    expect(helpText).toContain("deferred intents for long-run continuity");
+    expect(helpText).toContain("follow-up/steering nativos seguem caminho padrão");
+    expect(helpText).toContain("não como primitiva de steering");
+    expect(helpText).not.toMatch(/general-purpose|primitiva geral|generic steering/i);
 
     expect(buildLaneQueueStatusUsage()).toContain("/lane-queue status");
     expect(buildLaneQueueBoardNextUsage()).toContain("/lane-queue board-next");
     expect(buildLaneQueueEvidenceUsage()).toContain("/lane-queue evidence");
 
     const queuedTips = buildLaneQueueStatusTips(2).join("\n");
+    expect(queuedTips).toContain("native follow-up");
     expect(queuedTips).toContain("/lane-queue list");
     expect(queuedTips).toContain("/lane-queue clear");
 
     const emptyTips = buildLaneQueueStatusTips(0).join("\n");
+    expect(emptyTips).toContain("native follow-up");
     expect(emptyTips).toContain("/lane-queue add <text>");
   });
 
