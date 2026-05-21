@@ -28,7 +28,7 @@ pi install npm:@aretw0/lab-skills
 
 ## Qualidade e Slop
 
-A skill `evaluate-extension` inclui critérios anti-slop — sinais de alerta para extensões de baixa qualidade. O lab não curadoria extensões automaticamente; toda inclusão na stack passa por avaliação estruturada e review humano.
+A skill `evaluate-extension` inclui critérios anti-slop — sinais de alerta para extensões de baixa qualidade. O lab não faz curadoria automática de extensões; toda inclusão na stack passa por avaliação estruturada e revisão do operador.
 
 ## Instalação via git
 
