@@ -111,6 +111,22 @@ test("site map documents promotion and publication boundaries", () => {
 	assert.match(siteMap, /http:\/\/127\.0\.0\.1:4000\//);
 });
 
+test("published documentation indexes keep audience boundaries explicit", () => {
+	const guides = read("docs/guides/README.md");
+	const primitives = read("docs/primitives/README.md");
+	const research = read("docs/research/README.md");
+
+	for (const heading of ["Operação da stack", "Operação do control plane", "Manutenção do laboratório", "Evidência selecionada"]) {
+		assert.match(guides, new RegExp(`### ${heading}`));
+	}
+	assert.match(guides, /Research não é guia operacional por padrão/);
+	assert.match(primitives, /não são ideias soltas/);
+	assert.doesNotMatch(primitives, /🚧|em breve|Chain-of-Thought/i);
+	assert.match(research, /não é contrato público nem documentação operacional/);
+	assert.match(research, /Prefira guias, primitives e architecture para comportamento atual/);
+	assert.doesNotMatch(research, /🚧|em construção|\|\s*Pendente\s*\|/i);
+});
+
 test("docs site can be served consistently from host or devcontainer", () => {
 	const packageJson = JSON.parse(read("package.json"));
 	const script = read("scripts/docs-site.mjs");

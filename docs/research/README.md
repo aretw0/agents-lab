@@ -1,18 +1,26 @@
 # Pesquisa — agents-lab
 
-Este diretório armazena pesquisas, análises e material de referência sobre o ecossistema de agentes de IA.
+Este diretório guarda evidência datada, investigações, scorecards e checkpoints. Research pode orientar decisão, mas não é contrato público nem documentação operacional até ser promovido para `docs/guides`, `docs/primitives` ou `docs/architecture`.
 
-## Índice
+## Como ler
 
-> 🚧 Em construção — novos documentos serão adicionados conforme as sessões de pesquisa acontecem.
+- Use research para entender contexto, decisão e evidência histórica.
+- Prefira guias, primitives e architecture para comportamento atual.
+- Trate `draft`, `run`, `checkpoint` e `closure` como material de bastidor.
+- Ao promover uma conclusão, crie ou atualize a página canônica menor e deixe o research como referência.
+
+## Índices selecionados
 
 | Documento | Descrição | Status |
 |-----------|-----------|--------|
+| [0-8-readiness-map.md](./0-8-readiness-map.md) | Estado verificável e próximos passos da 0.8.0 | Promovido como evidência selecionada |
+| [0-8-local-safe-compounding-lane.md](./0-8-local-safe-compounding-lane.md) | Lane local-safe de estabilização 0.8 | Evidência selecionada |
+| [0-8-delegation-long-run-runway.md](./0-8-delegation-long-run-runway.md) | Runway de delegação e long-run | Evidência selecionada |
+| [overlap-matrix.md](./overlap-matrix.md) | Matriz de sobreposição entre pacotes da stack e direção de consolidação first-party | Ativo |
 | [pi-extension-scorecard.md](./pi-extension-scorecard.md) | Avaliação das principais referências e pacotes do ecossistema Pi | Inicial |
 | [pi-extension-categories.md](./pi-extension-categories.md) | Taxonomia de extensões Pi por workflow do laboratório | Inicial |
 | [extension-factory-blueprint.md](./extension-factory-blueprint.md) | Blueprint de como estruturar futura fábrica de extensões Pi | Inicial |
 | [extension-factory-friction-analysis.md](./extension-factory-friction-analysis.md) | Fricções e riscos antes de abrir uma trilha in-house | Inicial |
-| [overlap-matrix.md](./overlap-matrix.md) | Matriz de sobreposição entre pacotes da stack e direção de consolidação first-party | Draft |
 | [web-overlap-scorecard.md](./web-overlap-scorecard.md) | Avaliação específica de overlap Web (oh-pi, pi-web-access, first-party) | Draft |
 | [web-runtime-benchmark-plan.md](./web-runtime-benchmark-plan.md) | Plano de benchmark runtime para validar overlap Web em uso real | Draft |
 | [web-runtime-benchmark-run-2026-04-13.md](./web-runtime-benchmark-run-2026-04-13.md) | Resultado completo do benchmark Web (6/6 tarefas) com evidências de roteamento | Draft |
@@ -26,8 +34,6 @@ Este diretório armazena pesquisas, análises e material de referência sobre o 
 | [colony-monitor-interference-assessment.md](./colony-monitor-interference-assessment.md) | Avaliação inicial de interferência entre monitores de sessão e colônia | Draft |
 | [colony-monitor-interference-run-2026-04-13-r1.md](./colony-monitor-interference-run-2026-04-13-r1.md) | Resultado A/B (monitors on/off) em execução real de colônia | Draft |
 | [session-triage-run-2026-04-15.md](./session-triage-run-2026-04-15.md) | Execução de tidy up + triagem de sessões recentes para backlog operacional | Draft |
-| _(em breve)_ | Primitivas de agentes comparadas por critério operacional | Pendente |
-| _(em breve)_ | Padrões de design para sistemas multi-agentes | Pendente |
 
 ## Temas de Pesquisa
 
@@ -47,12 +53,12 @@ Pesquisa sobre estruturas de baixa fricção cognitiva para trabalhar com agente
 
 Critérios e metodologias para comparar engines de agentes além do Pi e preservar portabilidade das primitivas quando fizer sentido.
 
-## Formato de Pesquisa
+## Formato recomendado
 
 Cada documento de pesquisa deve conter:
 
-- **Contexto** — por que essa pesquisa é relevante
-- **Metodologia** — como a pesquisa foi conduzida
-- **Descobertas** — resultados e análises
-- **Conclusões** — implicações práticas para o laboratório
-- **Referências** — links e fontes
+- **Contexto** — por que essa pesquisa existe.
+- **Método** — como a evidência foi coletada.
+- **Achados** — o que foi observado.
+- **Decisão ou próximo passo** — promover, manter em research ou descartar.
+- **Referências** — links, comandos, commits ou artefatos usados.

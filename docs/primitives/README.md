@@ -5,15 +5,15 @@ description: Catalog of reusable agent primitives.
 
 # Primitivas de Agentes — Conceitos e Catálogo
 
-Este diretório documenta os conceitos fundamentais de primitivas de agentes e o catálogo de primitivas que este laboratório desenvolve e mantém.
+Este diretório registra contratos reutilizáveis que já aparecem em código, testes, guias ou operação recorrente. Uma primitiva aqui deve ser pequena o bastante para ser testada e clara o bastante para sobreviver a engines diferentes.
 
 ## O que são Primitivas de Agentes?
 
-Primitivas de agentes são **blocos de construção reutilizáveis** que encapsulam padrões comuns no design de sistemas de agentes. Assim como primitivas em linguagens de programação (loops, condicionais, funções), primitivas de agentes oferecem abstrações de alto nível que podem ser compostas para construir sistemas mais complexos.
+Primitivas de agentes são blocos de construção reutilizáveis para decisões, gates, packets, métricas e superfícies de operação. Elas não são ideias soltas: precisam declarar fronteira, evidência, validação e critério de promoção.
 
 ## Categorias de Primitivas
 
-### 🧠 Memória
+### Memória e continuidade
 Como agentes armazenam, recuperam e gerenciam contexto ao longo do tempo.
 
 - **Memória de Contexto** — janela de contexto da conversa atual
@@ -21,7 +21,7 @@ Como agentes armazenam, recuperam e gerenciam contexto ao longo do tempo.
 - **Memória Semântica** — conhecimento estruturado e factual
 - **Memória de Trabalho** — estado temporário durante uma tarefa
 
-### 🔧 Ferramentas (Tools)
+### Ferramentas e superfícies
 Como agentes interagem com o mundo externo.
 
 - **Leitura de Arquivos** — acesso ao sistema de arquivos
@@ -30,15 +30,14 @@ Como agentes interagem com o mundo externo.
 - **APIs** — integração com serviços externos
 - **Comunicação** — enviar mensagens, notificações
 
-### 📋 Planejamento
+### Planejamento e decisão
 Como agentes decompõem e executam tarefas complexas.
 
-- **Chain-of-Thought** — raciocínio passo a passo
 - **ReAct** — ciclos de Reason + Act
 - **Task Decomposition** — divisão hierárquica de tarefas
 - **Reflection** — auto-avaliação e correção
 
-### 🤝 Coordenação
+### Coordenação
 Como múltiplos agentes colaboram.
 
 - **A2A (Agent-to-Agent)** — protocolos de comunicação entre agentes
@@ -46,7 +45,7 @@ Como múltiplos agentes colaboram.
 - **Especialização** — agentes com papéis bem definidos
 - **Consenso** — mecanismos de decisão coletiva
 
-### 📊 Avaliação
+### Avaliação e governança
 Como medir e garantir a qualidade de agentes.
 
 - **Evals** — suítes de avaliação automatizada
@@ -54,8 +53,6 @@ Como medir e garantir a qualidade de agentes.
 - **Benchmarks** — métricas de desempenho padronizadas
 
 ## Catálogo de Primitivas do Laboratório
-
-> 🚧 Em construção — primitivas serão adicionadas conforme desenvolvidas.
 
 | Primitiva | Categoria | Descrição | Status |
 |-----------|-----------|-----------|--------|
@@ -87,14 +84,10 @@ Como medir e garantir a qualidade de agentes.
 | [project-intake.md](./project-intake.md) | Planejamento / Governança / Continuidade | Triagem inicial universal report-only para classificar projeto e sugerir primeira fatia local-safe sem autorização implícita | Inicial |
 | [emergent-tangent-capture.md](./emergent-tangent-capture.md) | Coordenação / Governança / Continuidade | Registro de trabalho emergente aprovado com proveniência explícita no board (`origin`, `source_task`, `reason`) | Inicial |
 | [capability-gap-claim.md](./capability-gap-claim.md) | Coordenação / Ferramentas / Governança | Detecta ausência de ferramenta/capability e exige claim de bootstrap/permissão antes da execução principal | Em evolução |
-| _(em breve)_ | Memória | Context window manager | Planejado |
-| _(em breve)_ | Ferramentas | File system tools para Pi | Planejado |
-| _(em breve)_ | Planejamento | ReAct loop para pi-agent-core | Planejado |
-
 ## Princípios de Design
 
-1. **Composabilidade** — primitivas devem se combinar naturalmente
-2. **Engine-agnóstico** — idealmente funcionar com Pi e outras engines
-3. **Testabilidade** — cada primitiva deve ser testável isoladamente
-4. **Documentação** — cada primitiva deve ter exemplos claros de uso
-5. **Minimalismo** — fazer uma coisa bem, sem dependências desnecessárias
+1. **Composabilidade** — primitivas devem se combinar naturalmente.
+2. **Engine-agnóstico** — contratos não devem depender de uma runtime quando isso puder ser evitado.
+3. **Testabilidade** — cada primitiva deve ter teste ou gate focal quando virar superfície operacional.
+4. **Documentação** — cada primitiva precisa dizer como é usada e quando não deve ser usada.
+5. **Minimalismo** — fazer uma coisa bem, sem dependências ou nomes duplicados.
