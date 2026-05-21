@@ -109,3 +109,12 @@ test("classifyDiscourseText keeps the public 0.8 map free of release slogans", (
 
   assert.deepEqual(findings.map((finding) => finding.rule), ["self-congratulatory-claim"]);
 });
+
+test("classifyDiscourseText reports stale CI failure claims in public docs", () => {
+  const findings = classifyDiscourseText(
+    "docs/research/0-8-readiness-map.md",
+    "GitHub Actions está falhando e precisa coesão com gates locais.",
+  );
+
+  assert.deepEqual(findings.map((finding) => finding.rule), ["stale-ci-failure-claim"]);
+});

@@ -5,39 +5,39 @@ description: Readiness map for agents-lab and pi-stack 0.8.
 
 # Mapa de readiness 0.8.0 — agents-lab / pi-stack
 
-Data: 2026-05-06  
-Status: mapa operacional local-safe  
-Lane: `0.8-local-safe-compounding-lane`  
-Task: `TASK-BUD-918`
+Última revisão: 2026-05-21
+Status: mapa público de readiness
+Escopo: `agents-lab`, `@aretw0/pi-stack`, GitHub Pages e CI
 
 ## Leitura executiva
 
-O estado recomendado para a 0.8.0 é:
+O estado atual para 0.8.0 é:
 
-1. **curto prazo:** consolidar estabilidade local-safe, clareza de board, handoff, docs e fila de fatias pequenas;
-2. **médio prazo:** calibrar monitores/token economy e alinhar CI/CD quando houver aprovação protegida;
-3. **longo prazo:** amadurecer model infrastructure, delegação e long-runs mais fortes somente depois de gates locais e report-only ficarem confiáveis.
+1. **Base publicada:** CI e GitHub Pages estão verdes no commit `ba0d8a6c` em 2026-05-21.
+2. **Base local:** desenvolvimento usa `pnpm`, devcontainer, `lab pi`, gates locais e `pi:dev` com capacidades frias por padrão.
+3. **Base de produto:** `@aretw0/pi-stack` deve continuar `strict-curated` por default; capacidades caras ficam opt-in.
+4. **Fronteira protegida:** publish npm, provider routing, remote/offload, GitHub Actions como executor e automação forte exigem intenção explícita do operador.
 
-## Pronto agora
+## Pronto
 
 | Área | Estado | Evidência |
 |---|---|---|
-| Provider economy inicial | pronto para uso conservador | `TASK-BUD-912` / `VERIFY-BUD-912`: Qwen/DashScope para classifiers advisory `commit-hygiene` e `work-quality`; OpenAI Codex preservado como cockpit/fallback crítico |
-| Qwen classifier canary | pronto para modelo aprovado | `qwen3.6-flash` com thinking off passou; `qwen-turbo` rejeitado após falso `clean` crítico |
-| Free quota guardrail operacional | pronto como evidência externa do operador | operador confirmou Alibaba `Free quota only`; quotas dashboard registradas |
-| Reload/model catalog signal | pronto | `TASK-BUD-913` / `VERIFY-BUD-913`: context-watch detecta mudanças em `.pi/settings.json`, `.sandbox/pi-agent/settings.json`, `.sandbox/pi-agent/models.json`, `.pi/agents/*.agent.yaml|yml` |
-| Lane local-safe 0.8.0 | pronta para execução | `TASK-BUD-917` documenta charter e boundaries |
-| Backlogs de tangentes atuais | capturados | `TASK-BUD-914`, `TASK-BUD-915`, `TASK-BUD-916` |
+| CI local e GitHub Actions | verde | `pnpm run ci:local:parity`; workflow `CI` passou no commit `ba0d8a6c` |
+| GitHub Pages | publicado | `pages-build-deployment` passou; fonte `main /docs` |
+| README público | enxuto | README reduzido e alinhado ao perfil `strict-curated` |
+| Licença | alinhada | `LICENSE` raiz e pacotes `@aretw0/*` usam MIT |
+| Discurso público | auditado | `repo:discourse:audit` cobre README, guias, primitives, architecture e research promovido |
+| Instalação padrão | conservadora | `npx @aretw0/pi-stack` instala perfil `strict-curated` |
 
 ## Preparado, mas ainda protegido
 
 | Área | Por que importa | Próximo passo seguro |
 |---|---|---|
-| CI/CD e GitHub Actions | GitHub Actions está falhando e precisa coesão com gates locais | `TASK-BUD-914`: começar por coleta report-only de falhas e mapa local↔Actions; mutação de workflow exige aprovação explícita |
-| Monitor stale feedback/token economy | feedback atrasado e classifiers podem gastar tokens demais | `TASK-BUD-915`: coletar exemplos com `docs/research/monitor-stale-feedback-intake-template-2026-05.md`, criar pre-filtro determinístico/cooldown e regressões antes de mexer em runtime amplo |
-| Warning de monitor-provider overrides | reload mostra warning possivelmente legado: `overrides divergentes detectados (2)` | `TASK-BUD-916`: reproduzir e decidir downgrade/dedupe/removal; não rodar `/monitor-provider apply` sem aprovação |
-| Model infrastructure ampla | independência de provider e roteamento por tarefa continuam valiosos | manter `TASK-BUD-849` como guarda-chuva protegido; avançar só por canários bounded |
-| Delegação/long-run mais forte | pode acelerar limpeza/pesquisa de forma composta | `TASK-BUD-921`: sintetizar readiness report-only; sem auto-dispatch/scheduler/remote |
+| Publish npm | afeta usuários e provenance | release por changesets/tag semver; `Publish` só em condição de release |
+| GitHub Actions como executor | muda fronteira local-first | manter report-only até existir task protegida explícita |
+| Provider routing | pode gastar quota e trocar modelo real | canários bounded, rollback e decisão do operador |
+| Monitor runtime amplo | pode adicionar ruído/custo | calibrar com evidência e regressões antes de ampliar default |
+| Delegação/long-run | pode acelerar trabalho, mas aumenta superfície de falha | promover por packets report-only e gates de rollback |
 
 ## Parked para médio/longo prazo
 
@@ -45,30 +45,16 @@ O estado recomendado para a 0.8.0 é:
 |---|---|
 | Influências externas adicionais (`hermes-agent`, `sandcastle`, `claude-mem`, colônias antigas) | úteis como inspiração, mas desviam da convergência 0.8 se retomadas antes da lane local-safe amadurecer |
 | Remote/offload/GitHub Actions como executor | protegido; só depois de maturidade local e contrato de cancelamento/rollback claro |
-| Publish/release 0.8.0 | só após readiness, CI/CD, install/smoke e docs estarem consistentes |
+| Publish/release 0.8.0 | só após release readiness, install/smoke e docs estarem consistentes |
 | Ajustes agressivos de provider routing | dependem de canário, quota, rollback e decisão do operador |
 
-## Próxima fila recomendada — 3 a 7 fatias
+## Próximas Fatias
 
-| Ordem | Task | Tipo | Validação | Rollback |
-|---:|---|---|---|---|
-| 1 | `TASK-BUD-918` | readiness map | marker check + i18n lint + link no índice | reverter commit de docs/board |
-| 2 | `TASK-BUD-919` | estoque de slices | board dependency/planning reports | reverter commit de board/handoff |
-| 3 | `TASK-BUD-920` | higiene de board/foco | `board_planning_clarity_score` e `board_dependency_health_snapshot` | reverter commit de board |
-| 4 | `TASK-BUD-921` | síntese delegation/long-run report-only | marker check + readiness packet tools | reverter commit de docs |
-| 5 | `TASK-BUD-915` | monitor economy report-only | coletar evidência antes de runtime change | parar antes de mutação protegida |
-| 6 | `TASK-BUD-914` | CI/CD report-only | coletar GitHub Actions failure evidence | parar antes de workflow mutation |
-| 7 | `TASK-BUD-916` | startup warning/noise report-only | reproduzir warning sem apply | parar antes de `/monitor-provider apply` |
-
-## Critério de avanço sem interação do operador
-
-Pode continuar automaticamente quando a próxima fatia:
-
-- está na milestone `0.8-local-safe-compounding-lane`;
-- é docs/board/test/report-only;
-- tem validação focal conhecida;
-- não toca CI/CD, provider/settings/routing, monitor override apply, publish/deploy, remote/offload ou limpeza destrutiva;
-- pode ser revertida por um commit.
+| Fatia | Validação |
+|---|---|
+| Propagar baseline para `refarm` e `vault-seed` | comparar devcontainer, cache, `gh`, Pi, terminal e CI antes de editar |
+| Revisar docs públicas restantes | `repo:discourse:audit`, links do site e remoção de snapshots stale |
+| Preparar release readiness | `release:readiness:v0.8.0`, install/smoke e changelog |
 
 ## Critério de parada
 
@@ -90,18 +76,6 @@ Parar e pedir decisão quando:
 - incorpora influências externas apenas como padrões pequenos e mensuráveis;
 - funciona bem em contextos variados de usuário sem depender do laboratório.
 
-## Higiene de planejamento da lane
+## Regra Editorial
 
-Atualização local-safe (`TASK-BUD-920`): após auto-resume, os focos `TASK-BUD-925` e `TASK-BUD-931` foram concluídos e `TASK-BUD-849` continua protegido/defer por decisão de protected-focus packet. A continuação local-safe deve realinhar para fatias planejadas da lane, especialmente `TASK-BUD-926`, `TASK-BUD-928`, `TASK-BUD-929` e `TASK-BUD-930`, antes de sínteses mais amplas como `TASK-BUD-921`.
-
-Tentativa dry-run de adicionar dependências explícitas em `TASK-BUD-921` foi bloqueada por protected-coupling herdado de `TASK-BUD-917`; a decisão segura é não forçar a mutação estrutural e manter o alinhamento documentado aqui.
-
-## Auditoria de referências da lane
-
-Atualização local-safe (`TASK-BUD-923`): a referência planejada a `docs/primitives/control-plane-overnight-local-loop.md` foi corrigida porque o arquivo não existe no repositório atual. A task `TASK-BUD-921` agora aponta para o pacote existente `docs/research/control-plane-long-run-maturity-packet-2026-05-01.md` e para `docs/primitives/nudge-free-local-continuity.md`, mantendo `docs/research/0-8-delegation-long-run-runway.md` como artefato futuro da própria task.
-
-Arquivos futuros declarados em `TASK-BUD-924..931` permanecem intencionalmente ausentes até execução das respectivas fatias.
-
-## Resumo operacional
-
-Foco atual: seguir a fila stocked após `TASK-BUD-919`. A prioridade é executar fatias local-safe validadas para permitir evolução contínua com baixa intervenção do operador, mantendo CI/CD, monitor runtime amplo, provider routing, publish/deploy e remote/offload como escopos protegidos.
+Este mapa deve conter apenas estado verificável e próximos passos acionáveis. Snapshots históricos, IDs de board antigos e falhas já resolvidas devem ficar em research não promovido ou no board, não na página pública.

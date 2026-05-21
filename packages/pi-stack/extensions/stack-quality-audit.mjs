@@ -56,6 +56,12 @@ const DISCOURSE_RULES = [
     pattern: /\b(incr[ií]vel|world[- ]class|best[- ]in[- ]class|estado da arte|revolucion[aá]rio|m[aá]gico|sem esforço|liberar o potencial|jornada)\b/i,
     message: "replace self-congratulatory claims with concrete capability, evidence, or roadmap status",
   },
+  {
+    id: "stale-ci-failure-claim",
+    severity: "warning",
+    pattern: /\b(CI|CI\/CD|GitHub Actions|Pages)\b.{0,80}\b(est[aá]\s+falhando|falhando|quebrad[ao]|failing|failure evidence)\b/i,
+    message: "avoid stale CI failure claims in public docs; cite current run status or move historical evidence out of promoted surfaces",
+  },
 ];
 
 const PUBLIC_RESEARCH_DISCOURSE_SURFACES = new Set([
