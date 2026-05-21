@@ -54,6 +54,21 @@ test("docs homepage routes readers through canonical information architecture", 
 	assert.match(index, /This site is a curated entrypoint/);
 });
 
+test("root README keeps user and maintainer surfaces separate", () => {
+	const readme = read("README.md");
+
+	const userStart = readme.indexOf("## Instalação");
+	const maintainerStart = readme.indexOf("## Desenvolvimento");
+	const qualityStart = readme.indexOf("## Gates De Qualidade");
+
+	assert.ok(userStart > 0, "README needs a user installation section");
+	assert.ok(maintainerStart > userStart, "development section should follow user installation");
+	assert.ok(qualityStart > maintainerStart, "quality gates should stay in maintainer surface");
+	assert.match(readme, /Para usuários Pi:/);
+	assert.match(readme, /Terceiros Curados/);
+	assert.doesNotMatch(readme, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
+});
+
 test("public entrypoint pages do not route site readers to raw markdown", () => {
 	for (const file of ["docs/index.md", "docs/start-here.md", "docs/site-map.md"]) {
 		const source = read(file);
