@@ -30,6 +30,8 @@ Guias práticos para usar, operar, manter e distribuir a stack. Para escolher po
 | [budget-governance.md](./budget-governance.md) | Budget envelope por execução, governança de colônia com `maxCost`, paridade e isolamento |
 | [quota-visibility.md](./quota-visibility.md) | Como auditar consumo/cota local, projetar burn semanal e exportar evidência para contestação |
 | [stack-sovereignty-user-guide.md](./stack-sovereignty-user-guide.md) | Guia operacional da soberania da stack (owners, defaults seguros, convivência) |
+| [subagent-readiness-gate.md](./subagent-readiness-gate.md) | Gate para decidir delegação/subagentes com sinais reproduzíveis |
+| [swarm-preflight-15m.md](./swarm-preflight-15m.md) | Checklist curto antes de lançar swarm com budget e contexto sob controle |
 
 ### Operação do control plane
 

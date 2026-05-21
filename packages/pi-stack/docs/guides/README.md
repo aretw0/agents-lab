@@ -7,10 +7,14 @@ Package: @aretw0/pi-stack
 
 ## Included guides
 
+- budget-governance.md
 - colony-provider-model-governance.md
+- consumption-visibility-surfaces.md
 - host-disk-recovery.md
 - i18n-intents.md
 - monitor-overrides.md
 - quota-visibility.md
 - scheduler-governance.md
 - stack-sovereignty-user-guide.md
+- subagent-readiness-gate.md
+- swarm-preflight-15m.md
