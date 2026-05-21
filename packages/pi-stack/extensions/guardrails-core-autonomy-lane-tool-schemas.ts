@@ -19,6 +19,7 @@ export function buildAutonomyTaskSelectionParameters(options: {
   }
   props.focus_task_ids = Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." }));
   props.use_handoff_focus = Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." }));
+  props.workspace_clean = Type.Optional(Type.Boolean({ description: "Explicit workspace cleanliness signal; when omitted, the tool reads git status conservatively." }));
   props.sample_limit = Type.Optional(Type.Number({ description: options.sampleLimitDescription ?? "Max eligible ids to return (1..20)." }));
   return Type.Object({ ...props, ...(options.extra ?? {}) });
 }

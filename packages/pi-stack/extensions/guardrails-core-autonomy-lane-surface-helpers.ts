@@ -6,7 +6,7 @@ import {
   normalizeContextLevel,
   resolveAutoAdvanceFailClosedReasons,
   resolveFocusTaskIds,
-  workspaceLooksClean,
+  resolveWorkspaceCleanSignal,
 } from "./guardrails-core-autonomy-lane-common";
 import {
   asBooleanWithDefault as asBool,
@@ -87,7 +87,7 @@ export function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd:
   else if (!focusKnown) blockedReasons.push("focus-task-not-found");
   else if (!focusValidationKnown) blockedReasons.push("focus-validation-unknown");
 
-  if (!workspaceLooksClean(cwd)) blockedReasons.push("reload-required-or-dirty");
+  if (!resolveWorkspaceCleanSignal(p, cwd)) blockedReasons.push("reload-required-or-dirty");
 
   if (validationKnown.length <= 0) blockedReasons.push("no-local-safe-material");
   if (!selection.ready) blockedReasons.push(`selection-${selection.reason}`);
@@ -427,7 +427,7 @@ export function buildInfluenceAssimilationWindowPacket(p: Record<string, unknown
   }, cwd);
 
   const blockedReasons: string[] = [];
-  if (!workspaceLooksClean(cwd)) blockedReasons.push("reload-required-or-dirty");
+  if (!resolveWorkspaceCleanSignal(p, cwd)) blockedReasons.push("reload-required-or-dirty");
   if (readiness.decision === "blocked") blockedReasons.push("local-safe-readiness-blocked");
   if (readiness.material.validationKnownCount < minReadySlices) blockedReasons.push("local-safe-stock-low");
   if (readiness.material.validationCoveragePct < minValidationCoveragePct) blockedReasons.push("validation-coverage-low");
@@ -603,7 +603,7 @@ export function buildAutonomyLaneBatchPreviewPacket(p: Record<string, unknown>, 
 
   const slices = eligibleSlices.slice(0, requestedSliceCount);
   const blockedReasons: string[] = [];
-  if (!workspaceLooksClean(cwd)) blockedReasons.push("reload-required-or-dirty");
+  if (!resolveWorkspaceCleanSignal(p, cwd)) blockedReasons.push("reload-required-or-dirty");
   if (!selection.ready && eligibleSlices.length <= 0) blockedReasons.push(`selection-${selection.reason}`);
 
   let decision: "ready" | "seed-backlog" | "blocked" = "ready";

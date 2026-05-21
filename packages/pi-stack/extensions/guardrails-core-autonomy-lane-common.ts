@@ -318,6 +318,12 @@ export function workspaceLooksClean(cwd: string): boolean {
   }
 }
 
+export function resolveWorkspaceCleanSignal(p: Record<string, unknown>, cwd: string): boolean {
+  if (p.workspace_clean === true) return true;
+  if (p.workspace_clean === false) return false;
+  return workspaceLooksClean(cwd);
+}
+
 export function resolveAutoAdvanceFailClosedReasons(input: {
   cwd: string;
   params: Record<string, unknown>;
@@ -325,7 +331,7 @@ export function resolveAutoAdvanceFailClosedReasons(input: {
 }): string[] {
   const reasons: string[] = [];
   if (input.params.include_protected_scopes === true) reasons.push("protected-opt-in");
-  if (!workspaceLooksClean(input.cwd)) reasons.push("reload-required-or-dirty");
+  if (!resolveWorkspaceCleanSignal(input.params, input.cwd)) reasons.push("reload-required-or-dirty");
   if (!input.nextTask) {
     reasons.push("next-task-not-found");
     return reasons;

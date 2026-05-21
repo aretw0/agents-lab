@@ -108,6 +108,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       monitor_sovereign_divergence: Type.Optional(Type.Number()),
       subagents_ready: Type.Optional(Type.Boolean()),
       unexpected_dirty: Type.Optional(Type.Boolean()),
+      workspace_clean: Type.Optional(Type.Boolean({ description: "Explicit workspace cleanliness signal; when omitted, runtime material cues read git status conservatively." })),
       milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
       include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
       include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),

@@ -71,6 +71,57 @@ describe("autonomy lane material packets", () => {
     expect(result?.details.authorization).toBe("none");
   });
 
+  it("trusts explicit workspace cleanliness without requiring git", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-material-explicit-clean-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-FOCUS",
+          description: "[P1] focused local slice",
+          status: "in-progress",
+          acceptance_criteria: ["run smoke test"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] explicit clean signal",
+        },
+        {
+          id: "TASK-NEXT-1",
+          description: "[P2] local slice 1",
+          status: "planned",
+          acceptance_criteria: ["run test"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] keep stock",
+        },
+        {
+          id: "TASK-NEXT-2",
+          description: "[P2] local slice 2",
+          status: "planned",
+          acceptance_criteria: ["run test"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] keep stock",
+        },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const packetTool = tools.find((tool) => tool.name === "autonomy_lane_material_readiness_packet");
+    const result = packetTool?.execute("call-test", {
+      focus_task_ids: ["TASK-FOCUS"],
+      use_handoff_focus: false,
+      workspace_clean: true,
+      min_ready_slices: 3,
+    }, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("continue");
+    expect(result?.details.blockedReasons).not.toContain("reload-required-or-dirty");
+    expect(result?.details.focusSource).toBe("explicit");
+    expect(result?.details.authorization).toBe("none");
+  });
+
   it("emits ready autonomy-lane-batch-preview packet with local-safe slices", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-batch-preview-ready-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });
