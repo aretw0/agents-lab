@@ -1,6 +1,7 @@
 import { readProjectTasksBlock, type ProjectTaskItem } from "./colony-pilot-task-sync";
 import {
   evaluateAutonomyLaneTaskSelection,
+  selectAutonomyLaneTask,
 } from "./guardrails-core-autonomy-task-selector";
 import {
   normalizeContextLevel,
@@ -52,8 +53,8 @@ export function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd:
   const minReadySlices = Math.max(1, Math.min(20, Math.floor(asNumber(p.min_ready_slices, 3))));
   const targetSlices = Math.max(minReadySlices, Math.min(20, Math.floor(asNumber(p.target_slices, 7))));
 
-  const selection = resolveTaskSelection(p, cwd);
   const tasks = readProjectTasksBlock(cwd).tasks;
+  const selection = resolveTaskSelection(p, cwd, tasks);
   const completedTaskIds = new Set(
     tasks
       .filter((task) => task.status === "completed")
@@ -548,10 +549,10 @@ function buildSliceRollback(task: ProjectTaskItem): string {
 }
 
 export function buildAutonomyLaneBatchPreviewPacket(p: Record<string, unknown>, cwd: string) {
-  const selection = resolveTaskSelection(p, cwd);
   const requestedSliceCount = Math.max(3, Math.min(7, Math.floor(asNumber(p.slice_count, 5))));
   const sampleLimit = Math.max(requestedSliceCount, Math.min(20, Math.floor(asNumber(p.sample_limit, 20))));
   const tasks = readProjectTasksBlock(cwd).tasks;
+  const selection = resolveTaskSelection(p, cwd, tasks);
 
   const milestone = typeof p.milestone === "string" ? p.milestone : undefined;
   const includeProtectedScopes = p.include_protected_scopes === true;
@@ -656,31 +657,37 @@ export function buildAutonomyLaneBatchPreviewPacket(p: Record<string, unknown>, 
   };
 }
 
-export function resolveTaskSelection(p: Record<string, unknown>, cwd: string) {
+export function resolveTaskSelection(p: Record<string, unknown>, cwd: string, tasks?: ProjectTaskItem[]) {
   const focus = resolveFocusTaskIds(p, cwd);
   const milestone = typeof p.milestone === "string" ? p.milestone : undefined;
   const includeProtectedScopes = p.include_protected_scopes === true;
   const includeMissingRationale = p.include_missing_rationale === true;
   const sampleLimit = asNumber(p.sample_limit, 5);
 
-  const selection = evaluateAutonomyLaneTaskSelection(cwd, {
+  const selectionOptions = {
     milestone,
     includeProtectedScopes,
     includeMissingRationale,
     sampleLimit,
     focusTaskIds: focus.ids,
     focusSource: focus.source,
-  });
+  };
+  const selection = tasks
+    ? selectAutonomyLaneTask(tasks, selectionOptions)
+    : evaluateAutonomyLaneTaskSelection(cwd, selectionOptions);
 
   const hardIntentEligible = selection.reason === "focus-complete" && focus.source === "handoff";
   if (!hardIntentEligible) return selection;
 
-  const fallback = evaluateAutonomyLaneTaskSelection(cwd, {
+  const fallbackOptions = {
     milestone,
     includeProtectedScopes,
     includeMissingRationale,
     sampleLimit,
-  });
+  };
+  const fallback = tasks
+    ? selectAutonomyLaneTask(tasks, fallbackOptions)
+    : evaluateAutonomyLaneTaskSelection(cwd, fallbackOptions);
 
   if (!fallback.ready || !fallback.nextTaskId) {
     return {
@@ -690,8 +697,8 @@ export function resolveTaskSelection(p: Record<string, unknown>, cwd: string) {
     };
   }
 
-  const tasks = readProjectTasksBlock(cwd).tasks;
-  const nextTask = findTaskById(tasks, fallback.nextTaskId);
+  const taskRows = tasks ?? readProjectTasksBlock(cwd).tasks;
+  const nextTask = findTaskById(taskRows, fallback.nextTaskId);
   const failClosedReasons = resolveAutoAdvanceFailClosedReasons({ cwd, params: p, nextTask });
   if (failClosedReasons.length > 0) {
     return {

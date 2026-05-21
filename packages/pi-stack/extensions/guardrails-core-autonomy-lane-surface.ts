@@ -160,9 +160,9 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const selection = resolveTaskSelection(p, ctx.cwd);
       const includeProtectedScopes = p.include_protected_scopes === true;
       const tasks = readProjectTasksBlock(ctx.cwd).tasks;
+      const selection = resolveTaskSelection(p, ctx.cwd, tasks);
       const nextTask = selection.nextTaskId ? findTaskById(tasks, selection.nextTaskId) : undefined;
       const nextTaskMnemonic = toTaskMnemonic(nextTask);
       const handoffFreshness = readHandoffFreshnessSignal(ctx.cwd);
@@ -218,7 +218,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
           include_protected_scopes: true,
           focus_task_ids: protectedFocusTaskIds,
           use_handoff_focus: false,
-        }, ctx.cwd)
+        }, ctx.cwd, tasks)
         : undefined;
       const protectedReadyCue = {
         decision: influenceWindowCue.decision === "ready-window" && protectedSelection?.ready ? "ready" : "hold",
