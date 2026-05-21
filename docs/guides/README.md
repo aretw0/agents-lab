@@ -1,3 +1,9 @@
+---
+title: Guides
+description: Practical guides for agents-lab users, operators and maintainers.
+permalink: /guides/
+---
+
 # Guias — agents-lab
 
 Guias práticos para usar, operar, manter e distribuir a stack. Para escolher por perfil de leitura, use [Start Here]({{ '/start-here.html' | relative_url }}).

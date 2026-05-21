@@ -35,9 +35,9 @@ Local-first lab for reusable AI-agent primitives. Pi is the first runtime engine
 
 ## Architecture and Primitives
 
-- [Architecture index]({{ '/architecture/README.html' | relative_url }})
-- [Primitives catalog]({{ '/primitives/README.html' | relative_url }})
-- [Engine map]({{ '/engines/README.html' | relative_url }})
+- [Architecture index]({{ '/architecture/' | relative_url }})
+- [Primitives catalog]({{ '/primitives/' | relative_url }})
+- [Engine map]({{ '/engines/' | relative_url }})
 - [Site map and editorial contract]({{ '/site-map.html' | relative_url }})
 
 ## Packages

@@ -1,3 +1,9 @@
+---
+title: Research
+description: Selected evidence and dated investigations for agents-lab.
+permalink: /research/
+---
+
 # Pesquisa — agents-lab
 
 Este diretório guarda evidência datada, investigações, scorecards e checkpoints. Research pode orientar decisão, mas não é contrato público nem documentação operacional até ser promovido para `docs/guides`, `docs/primitives` ou `docs/architecture`.

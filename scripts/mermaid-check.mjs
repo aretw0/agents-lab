@@ -18,7 +18,9 @@ const IGNORED_DIRS = new Set([
   ".sass-cache",
   ".sandbox",
   ".tmp",
+  "_site",
   "node_modules",
+  "vendor",
 ]);
 
 const VALID_DIAGRAM_TYPES = new Set([

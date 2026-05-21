@@ -87,7 +87,9 @@ O comando força usuário/workdir/env corretos ao anexar no container.
 1. Reopen in Container no VS Code.
 2. Descobrir nome do container:
    ```bash
+   {% raw %}
    docker ps --format '{{.Names}}' | grep agents-lab-dev
+   {% endraw %}
    ```
 3. Entrar com lab:
    ```bash
@@ -98,7 +100,9 @@ O comando força usuário/workdir/env corretos ao anexar no container.
 1. Reopen in Container no VS Code.
 2. Descobrir nome do container:
    ```powershell
+   {% raw %}
    $c = docker ps --format "{{.Names}}" | Where-Object { $_ -like "*agents-lab-dev*" } | Select-Object -First 1
+   {% endraw %}
    ```
 3. Entrar com lab:
    ```powershell

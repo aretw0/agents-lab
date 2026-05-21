@@ -15,8 +15,8 @@ This site keeps the public entrypoint small while the repository can continue to
 | Use the Stack | [Recommended pi-stack]({{ '/guides/recommended-pi-stack.html' | relative_url }}) | Explain the installable `@aretw0/pi-stack` surface. |
 | Develop and Release | [CI governance]({{ '/guides/ci-governance.html' | relative_url }}) | Keep CI, release and package docs governance discoverable. |
 | Control Plane | [Control-plane operating doctrine]({{ '/guides/control-plane-operating-doctrine.html' | relative_url }}) | Document the daily operating model without making it the only use case. |
-| Architecture | [Architecture]({{ '/architecture/README.html' | relative_url }}) | Surface accepted decisions and ownership. |
-| Primitives | [Primitives]({{ '/primitives/README.html' | relative_url }}) | Surface reusable contracts before raw research. |
+| Architecture | [Architecture]({{ '/architecture/' | relative_url }}) | Surface accepted decisions and ownership. |
+| Primitives | [Primitives]({{ '/primitives/' | relative_url }}) | Surface reusable contracts before raw research. |
 | Roadmap | [Roadmap]({{ site.repo_url }}/blob/main/ROADMAP.md) | Keep planned direction separate from daily board state and raw research. |
 | Selected Evidence | [0.8 readiness map]({{ '/research/0-8-readiness-map.html' | relative_url }}) | Keep readiness evidence available without making research the homepage path. |
 
@@ -35,10 +35,12 @@ Use the same commands on the host or inside the devcontainer:
 ```bash
 pnpm run docs:site:install
 pnpm run docs:site:build
+pnpm run docs:site:smoke
 pnpm run docs:site:serve
 ```
 
 `docs:site:build` mirrors the deploy target: GitHub Pages project hosting at `/agents-lab/`, or root when `docs/CNAME` exists.
+`docs:site:smoke` validates the generated `_site` navigation, required directory indexes and Mermaid renderer hook.
 `docs:site:serve` uses local root at `http://127.0.0.1:4000/` for operator browsing.
 
 The devcontainer includes Ruby and Bundler. VS Code forwards port `4000` as `agents-lab docs site` and opens the operator browser.

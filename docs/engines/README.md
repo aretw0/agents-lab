@@ -1,6 +1,7 @@
 ---
 title: Engines
 description: Agent engine map and comparison index.
+permalink: /engines/
 ---
 
 # Engines de agentes

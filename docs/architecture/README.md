@@ -1,6 +1,7 @@
 ---
 title: Architecture
 description: Architecture index for agents-lab.
+permalink: /architecture/
 ---
 
 # Arquitetura - agents-lab

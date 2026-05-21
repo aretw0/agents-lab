@@ -1,6 +1,7 @@
 ---
 title: Primitives
 description: Catalog of reusable agent primitives.
+permalink: /primitives/
 ---
 
 # Primitivas de Agentes — Conceitos e Catálogo

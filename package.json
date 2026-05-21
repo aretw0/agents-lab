@@ -18,6 +18,8 @@
     "docs:package:check": "node scripts/sync-package-docs.mjs --check",
     "docs:site:install": "node scripts/docs-site.mjs install",
     "docs:site:build": "node scripts/docs-site.mjs build",
+    "docs:site:smoke": "node scripts/docs-site-smoke.mjs",
+    "docs:site:build:smoke": "pnpm run docs:site:build && pnpm run docs:site:smoke",
     "docs:site:serve": "node scripts/docs-site.mjs serve",
     "mermaid:check": "node scripts/mermaid-check.mjs",
     "mermaid:check:lab": "node scripts/mermaid-check.mjs --max-lines 80",

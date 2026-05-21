@@ -43,6 +43,9 @@ test("docs site uses the minimal Hacker Jekyll surface", () => {
 
 	assert.match(config, /^remote_theme: pages-themes\/hacker@v0\.2\.0$/m);
 	assert.match(config, /^\s+- jekyll-remote-theme$/m);
+	assert.match(config, /^\s+- jekyll-optional-front-matter$/m);
+	assert.match(config, /^\s+- jekyll-readme-index$/m);
+	assert.match(config, /^\s+- jekyll-titles-from-headings$/m);
 	assert.match(config, /^baseurl: \/agents-lab$/m);
 	assert.match(config, /^repo_url: https:\/\/github\.com\/aretw0\/agents-lab$/m);
 	assert.match(config, /^\s+repository_url: https:\/\/github\.com\/aretw0\/agents-lab$/m);
@@ -76,9 +79,9 @@ test("docs homepage routes readers through canonical information architecture", 
 		"{{ '/guides/devcontainer-factory-contract.html' | relative_url }}",
 		"{{ '/guides/ci-governance.html' | relative_url }}",
 		"{{ '/guides/control-plane-operating-doctrine.html' | relative_url }}",
-		"{{ '/architecture/README.html' | relative_url }}",
-		"{{ '/primitives/README.html' | relative_url }}",
-		"{{ '/engines/README.html' | relative_url }}",
+		"{{ '/architecture/' | relative_url }}",
+		"{{ '/primitives/' | relative_url }}",
+		"{{ '/engines/' | relative_url }}",
 		"{{ '/site-map.html' | relative_url }}",
 	]) {
 		assert.match(index, new RegExp(link.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
@@ -147,6 +150,7 @@ test("published index pages do not route site readers to raw markdown", () => {
 		const rawMarkdownLinks = internalRawMarkdownLinks(source);
 
 		assert.deepEqual(rawMarkdownLinks, [], `${file} has internal raw markdown links`);
+		assert.match(source, /^---\r?\n/, `${file} should render as an html index`);
 	}
 });
 
@@ -156,6 +160,16 @@ test("published front matter pages do not route site readers to raw markdown", (
 		const rawMarkdownLinks = internalRawMarkdownLinks(source);
 
 		assert.deepEqual(rawMarkdownLinks, [], `${file} has internal raw markdown links`);
+	}
+});
+
+test("published Markdown escapes snippets that look like Liquid templates", () => {
+	for (const file of listMarkdownFiles("docs")) {
+		if (file.includes("/_site/") || file.includes("/archive/")) continue;
+		const source = read(file);
+		const rawProtected = source.replace(/\{% raw %\}[\s\S]*?\{% endraw %\}/g, "");
+
+		assert.doesNotMatch(rawProtected, /\{\{\.[A-Za-z_]/, `${file} has an unescaped Go-template style snippet`);
 	}
 });
 
@@ -185,6 +199,7 @@ test("site map documents promotion and publication boundaries", () => {
 	assert.match(siteMap, /Do not publish `docs\/research\/data\/`/);
 	assert.match(siteMap, /pnpm run docs:site:serve/);
 	assert.match(siteMap, /`docs:site:build` mirrors the deploy target/);
+	assert.match(siteMap, /`docs:site:smoke` validates the generated `_site` navigation/);
 	assert.match(siteMap, /`docs:site:serve` uses local root/);
 	assert.match(siteMap, /http:\/\/127\.0\.0\.1:4000\//);
 });
@@ -321,6 +336,7 @@ test("package guide sync derives published URLs from Jekyll config", () => {
 test("docs site can be served consistently from host or devcontainer", () => {
 	const packageJson = JSON.parse(read("package.json"));
 	const script = read("scripts/docs-site.mjs");
+	const smokeScript = read("scripts/docs-site-smoke.mjs");
 	const devcontainer = JSON.parse(read(".devcontainer/devcontainer.json"));
 	const dockerfile = read(".devcontainer/Dockerfile");
 	const nodeVersion = read(".node-version").trim();
@@ -328,6 +344,8 @@ test("docs site can be served consistently from host or devcontainer", () => {
 
 	assert.equal(packageJson.scripts["docs:site:install"], "node scripts/docs-site.mjs install");
 	assert.equal(packageJson.scripts["docs:site:build"], "node scripts/docs-site.mjs build");
+	assert.equal(packageJson.scripts["docs:site:smoke"], "node scripts/docs-site-smoke.mjs");
+	assert.equal(packageJson.scripts["docs:site:build:smoke"], "pnpm run docs:site:build && pnpm run docs:site:smoke");
 	assert.equal(packageJson.scripts["docs:site:serve"], "node scripts/docs-site.mjs serve");
 	assert.match(script, /BUNDLE_GEMFILE/);
 	assert.match(script, /BUNDLE_PATH/);
@@ -354,6 +372,10 @@ test("docs site can be served consistently from host or devcontainer", () => {
 	assert.match(script, /--host",\s*"0\.0\.0\.0"/);
 	assert.match(script, /--port",\s*PORT/);
 	assert.match(script, /Install Ruby\/Bundler, or rebuild the devcontainer/);
+	assert.match(smokeScript, /REQUIRED_ROUTES/);
+	assert.match(smokeScript, /"\/architecture\/"/);
+	assert.match(smokeScript, /README\.html instead of a directory route/);
+	assert.match(smokeScript, /mermaid\.esm\.min\.mjs/);
 	assert.match(dockerfile, /ruby-full build-essential zlib1g-dev/);
 	assert.match(dockerfile, /typescript-node:24-bookworm/);
 	assert.match(dockerfile, /gem install bundler --no-document/);
