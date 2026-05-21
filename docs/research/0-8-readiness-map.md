@@ -29,7 +29,7 @@ O estado atual para 0.8.0 é:
 | Licença | alinhada | `LICENSE` raiz e pacotes `@aretw0/*` usam MIT |
 | Discurso público | auditado | `repo:discourse:audit` cobre README, guias, primitives, architecture e research promovido |
 | Instalação padrão | conservadora | `npx @aretw0/pi-stack` instala perfil `strict-curated` |
-| Fronteira de engine | protegida | `engine:boundary:audit` mantém core portable e acoplamentos Pi declarados |
+| Fronteira de engine | protegida | `engine:boundary:audit` mantém core portable e Pi em surfaces/adapters |
 
 ## Preparado, mas ainda protegido
 

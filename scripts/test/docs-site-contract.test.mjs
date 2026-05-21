@@ -79,8 +79,20 @@ test("root roadmap stays current and macro-level", () => {
 	assert.match(roadmap, /## 0\.8\.0 - Convergência/);
 	assert.match(roadmap, /engine:boundary:audit/);
 	assert.match(roadmap, /Refarm é a próxima fronteira de compatibilidade/);
+	assert.match(roadmap, /sem exceções para core acoplado/);
+	assert.doesNotMatch(roadmap, /reduzir a allowlist|acoplamentos Pi declarados/);
 	assert.doesNotMatch(roadmap, /npm workspaces|Release `v0\.2\.0`|Fase 0|Fase 1|Fase 2|Fase 3|Fase 4/);
 	assert.doesNotMatch(roadmap, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
+});
+
+test("engine documentation matches the zero-exception boundary audit", () => {
+	const engines = read("docs/engines/README.md");
+	const readiness = read("docs/research/0-8-readiness-map.md");
+
+	assert.match(engines, /falha quando um novo `guardrails-core-\*` importa runtime Pi diretamente/);
+	assert.match(engines, /Pi em surfaces\/adapters|surface\/adapter/);
+	assert.match(readiness, /Pi em surfaces\/adapters/);
+	assert.doesNotMatch(`${engines}\n${readiness}`, /allowlist|acoplamento intencional|acoplamentos Pi declarados/);
 });
 
 test("public entrypoint pages do not route site readers to raw markdown", () => {

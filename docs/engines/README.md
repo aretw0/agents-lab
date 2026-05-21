@@ -15,9 +15,9 @@ A regra de organização é:
 
 - **Primitive/core**: decisão pura, contrato, schema, classificação, plano ou envelope. Não importa API de runtime.
 - **Surface/adapter**: comando, tool, extensão, TUI, sessão, storage de runtime ou integração com provider/engine.
-- **Runtime glue explícito**: arquivo que ainda está no core por proximidade histórica, mas depende de Pi. Deve estar coberto pelo audit e ter motivo claro.
+- **Runtime glue explícito**: wiring de engine mantido fora do core, em surface/adapter, com contrato pequeno para a primitiva reutilizável.
 
-O gate local é `pnpm run engine:boundary:audit`. Ele falha quando um novo `guardrails-core-*` importa runtime Pi sem estar declarado como acoplamento intencional. Isso cria uma trilha de extração gradual para uma segunda engine sem exigir renomeação prematura do pacote `pi-stack`.
+O gate local é `pnpm run engine:boundary:audit`. Ele falha quando um novo `guardrails-core-*` importa runtime Pi diretamente. Isso mantém a trilha para uma segunda engine sem exigir renomeação prematura do pacote `pi-stack`.
 
 ## Engines em análise
 

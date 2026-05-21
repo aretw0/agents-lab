@@ -24,7 +24,7 @@ Pi continua sendo a primeira engine operacional. Refarm é a próxima fronteira 
 | Site | GitHub Pages minimalista via Jekyll Hacker, com navegação pública pequena |
 | Devcontainer | `lab pi`, Node 24, pnpm global bin, cache de assistentes e ferramentas básicas |
 | Runtime Pi | `pi:dev` com perfil control-plane e capacidades caras frias por padrão |
-| Fronteira de engine | `engine:boundary:audit` impede novo acoplamento Pi em core por acidente |
+| Fronteira de engine | `engine:boundary:audit` exige core portable e deixa Pi em surfaces/adapters |
 | Docs | README e site separados por usuário, mantenedor, operador e arquitetura |
 
 ## 0.8.0 - Convergência
@@ -49,7 +49,7 @@ Objetivo: publicar uma baseline madura da `pi-stack` e do laboratório sem prome
 
 ### 3. Primitives Portáveis
 
-- reduzir a allowlist do `engine:boundary:audit` gradualmente;
+- manter `engine:boundary:audit` sem exceções para core acoplado;
 - manter core sem import direto de `@earendil-works/pi-coding-agent`;
 - expor Pi por surfaces/adapters;
 - preparar contratos de board, intent, approval, cache, release e runtime health para futura engine Refarm;
