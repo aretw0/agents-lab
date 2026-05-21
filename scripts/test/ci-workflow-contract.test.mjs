@@ -81,7 +81,9 @@ test("shared setup action owns deterministic Node and pnpm install", () => {
 	assert.doesNotMatch(action, /default: "22"/);
 	assert.doesNotMatch(action, /node-version: \$\{\{ inputs\.node-version \}\}/);
 	assert.match(action, /registry-url: \$\{\{ inputs\.registry-url \}\}/);
+	assert.match(action, /cache-mode:/);
 	assert.match(action, /cache: pnpm/);
+	assert.match(action, /Setup Node\.js without dependency cache/);
 	assert.match(action, /name: Validate lockfile/);
 	assert.match(action, /pnpm-lock\.yaml is required for deterministic CI/);
 	assert.match(action, /pnpm install --frozen-lockfile/);
@@ -102,6 +104,7 @@ test("publish workflow stays tag-gated and provenance-scoped", () => {
 	assert.match(workflow, /publish:\n\s+name: Publish to npm\n\s+runs-on: ubuntu-latest\n\s+timeout-minutes: 30/);
 	assert.match(workflow, /uses: \.\/\.github\/actions\/setup/);
 	assert.match(workflow, /registry-url: "https:\/\/registry\.npmjs\.org"/);
+	assert.match(workflow, /cache-mode: "off"/);
 	assert.doesNotMatch(workflow, /corepack prepare --activate/);
 	assert.ok(workflow.includes("github.event.workflow_run.conclusion == 'success'"));
 	assert.ok(workflow.includes('git tag --points-at "$SHA" | grep -E'));
