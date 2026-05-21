@@ -7,14 +7,28 @@ description: Agent engine map and comparison index.
 
 Este diretório documenta análises, comparações e avaliações das diferentes engines de agentes relevantes para o laboratório.
 
-## Engines em Análise
+## Fronteira de engine
+
+Pi é a primeira engine operacional do laboratório. Isso não deve transformar as primitivas em lock-in de Pi por acidente.
+
+A regra de organização é:
+
+- **Primitive/core**: decisão pura, contrato, schema, classificação, plano ou envelope. Não importa API de runtime.
+- **Surface/adapter**: comando, tool, extensão, TUI, sessão, storage de runtime ou integração com provider/engine.
+- **Runtime glue explícito**: arquivo que ainda está no core por proximidade histórica, mas depende de Pi. Deve estar coberto pelo audit e ter motivo claro.
+
+O gate local é `pnpm run engine:boundary:audit`. Ele falha quando um novo `guardrails-core-*` importa runtime Pi sem estar declarado como acoplamento intencional. Isso cria uma trilha de extração gradual para uma segunda engine sem exigir renomeação prematura do pacote `pi-stack`.
+
+## Engines em análise
 
 ### Pi (engine principal)
 
 **Repositório:** [badlogic/pi-mono](https://github.com/badlogic/pi-mono)
-**Status:** Engine primária do laboratório
+**Status:** engine primária do laboratório
 
 Pi é um toolkit para construção de agentes de IA e gerenciamento de LLMs. O laboratório usa Pi como engine principal porque ele oferece extensão local, TUI, skills, tools e integração direta com o fluxo de desenvolvimento deste repositório.
+
+O código distribuído hoje continua sendo uma stack Pi, mas as primitivas novas devem nascer com fronteira clara entre core e adapter.
 
 #### Pacotes Principais
 
@@ -48,9 +62,18 @@ Pi é um toolkit para construção de agentes de IA e gerenciamento de LLMs. O l
 |-----------|-----------|--------|
 | [pi-ecosystem-map.md](./pi-ecosystem-map.md) | Mapa do ecossistema Pi, camadas, extensibilidade e padrões emergentes | Inicial |
 
-### Alternativas para Avaliação
+### Refarm (engine futura)
 
-> 🚧 Análises serão adicionadas conforme o laboratório evolui.
+**Repositório:** [aretw0/refarm](https://github.com/aretw0/refarm)
+**Status:** acompanhamento arquitetural
+
+Refarm ainda não é engine de execução para este repositório, mas deve ser considerado no desenho de contratos novos. O critério prático é simples: uma decisão de control plane que não precisa de TUI, sessão Pi ou `ExtensionAPI` deve poder virar primitiva reaproveitável.
+
+O trabalho aqui não é antecipar integração. É evitar que a semântica madura fique presa a nomes e APIs de uma única engine.
+
+### Alternativas para avaliação
+
+Análises adicionais entram quando houver necessidade real de comparação ou adapter.
 
 | Engine | Repositório | Foco | Status da Análise |
 |--------|-------------|------|-------------------|
@@ -60,7 +83,7 @@ Pi é um toolkit para construção de agentes de IA e gerenciamento de LLMs. O l
 | CrewAI | [crewAIInc/crewAI](https://github.com/crewAIInc/crewAI) | Agentes colaborativos | Pendente |
 | OpenAI Agents SDK | [openai/openai-agents-python](https://github.com/openai/openai-agents-python) | Agentes OpenAI | Pendente |
 
-## Critérios de Avaliação
+## Critérios de avaliação
 
 Para cada engine avaliada, analisamos:
 
