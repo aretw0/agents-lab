@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
+import { PACKAGE_DOCS } from "../sync-package-docs.mjs";
 
 function read(path) {
 	return readFileSync(path, "utf8");
@@ -116,15 +117,35 @@ test("published documentation indexes keep audience boundaries explicit", () => 
 	const primitives = read("docs/primitives/README.md");
 	const research = read("docs/research/README.md");
 
-	for (const heading of ["Operação da stack", "Operação do control plane", "Manutenção do laboratório", "Evidência selecionada"]) {
+	for (const heading of ["Operação da stack", "Operação do control plane", "Manutenção distribuível", "Manutenção do laboratório", "Evidência selecionada"]) {
 		assert.match(guides, new RegExp(`### ${heading}`));
 	}
+	assert.match(guides, /[Nn]ão entram em pacotes distribuídos salvo decisão explícita/);
 	assert.match(guides, /Research não é guia operacional por padrão/);
 	assert.match(primitives, /não são ideias soltas/);
 	assert.doesNotMatch(primitives, /🚧|em breve|Chain-of-Thought/i);
 	assert.match(research, /não é contrato público nem documentação operacional/);
 	assert.match(research, /Prefira guias, primitives e architecture para comportamento atual/);
 	assert.doesNotMatch(research, /🚧|em construção|\|\s*Pendente\s*\|/i);
+});
+
+test("package guide sync keeps lab-only maintenance out of distributed docs", () => {
+	const packagedGuides = new Set(Object.values(PACKAGE_DOCS).flatMap((spec) => spec.guides));
+	const labOnlyGuides = [
+		"agents-lab-editorial-pipeline.md",
+		"ci-governance.md",
+		"doc-drift-mdt.md",
+		"first-party-assimilation-notes.md",
+		"github-repo-presence.md",
+		"host-disk-recovery.md",
+		"lab-user-surface-parity.md",
+		"session-triage.md",
+		"skill-guide-parity.md",
+	];
+
+	for (const guide of labOnlyGuides) {
+		assert.equal(packagedGuides.has(guide), false, `${guide} should stay repository-only`);
+	}
 });
 
 test("docs site can be served consistently from host or devcontainer", () => {

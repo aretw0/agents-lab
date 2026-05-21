@@ -30,9 +30,6 @@ Guias práticos para usar, operar, manter e distribuir a stack. Para escolher po
 | [budget-governance.md](./budget-governance.md) | Budget envelope por execução, governança de colônia com `maxCost`, paridade e isolamento |
 | [quota-visibility.md](./quota-visibility.md) | Como auditar consumo/cota local, projetar burn semanal e exportar evidência para contestação |
 | [stack-sovereignty-user-guide.md](./stack-sovereignty-user-guide.md) | Guia operacional da soberania da stack (owners, defaults seguros, convivência) |
-| [lab-user-surface-parity.md](./lab-user-surface-parity.md) | Higiene de paridade entre superfícies do laboratório e distribuídas para usuários |
-| [github-repo-presence.md](./github-repo-presence.md) | Checklist de presença pública do repositório no GitHub: metadata, README e drift de docs/MDT |
-| [doc-drift-mdt.md](./doc-drift-mdt.md) | Contrato advisory para MDT/doc-drift: check first, escopo pequeno e integração futura com CI |
 
 ### Operação do control plane
 
@@ -50,19 +47,31 @@ Guias práticos para usar, operar, manter e distribuir a stack. Para escolher po
 | [swarm-cleanroom-protocol.md](./swarm-cleanroom-protocol.md) | Protocolo cleanroom para runs de swarm (pre-run, execução, promoção, reconciliação) |
 | [unattended-swarm-execution-plan.md](./unattended-swarm-execution-plan.md) | Plano de execução unattended por lotes P0 (OpenAI-only) com go/no-go e rollback |
 
+### Manutenção distribuível
+
+Estes guias descrevem manutenção que pode acompanhar a stack ou inspirar outros projetos. Se um guia for necessário para uma skill ou extensão instalada via pacote, ele deve estar listado em `scripts/sync-package-docs.mjs`.
+
+| Guia | Descrição |
+|------|-----------|
+| [scheduler-governance.md](./scheduler-governance.md) | Governança forte de ownership/lease do scheduler para evitar conflito entre sessões |
+| [extension-acceptance-checklist.md](./extension-acceptance-checklist.md) | Checklist para aceitar nova extensão sem aumentar fragmentação |
+| [dependency-upstream-governance.md](./dependency-upstream-governance.md) | Governança para atribuir mudanças entre stack local, upstream Pi e dependências antes de decidir `assimilate|hold|reject` |
+| [i18n-intents.md](./i18n-intents.md) | Runbook de intents soft/hard de internacionalização para comunicação e artefatos |
+
 ### Manutenção do laboratório
+
+Estes guias existem para manter este monorepo, seus fluxos de release, seu site e seu histórico. Não entram em pacotes distribuídos salvo decisão explícita de promoção para a seção distribuível.
 
 | Guia | Descrição |
 |------|-----------|
 | [host-disk-recovery.md](./host-disk-recovery.md) | Runbook de recuperação de espaço em disco (dry-run, limpeza segura, modo agressivo com proteção de sessões) |
 | [session-triage.md](./session-triage.md) | Triage do histórico recente de sessões/branches para consolidar pendências no board canônico |
-| [scheduler-governance.md](./scheduler-governance.md) | Governança forte de ownership/lease do scheduler para evitar conflito entre sessões |
-| [extension-acceptance-checklist.md](./extension-acceptance-checklist.md) | Checklist para aceitar nova extensão sem aumentar fragmentação |
 | [first-party-assimilation-notes.md](./first-party-assimilation-notes.md) | Memória técnica de capacidades suprimidas por conflito para futura centralização first-party |
 | [ci-governance.md](./ci-governance.md) | Troubleshooting dos gates de soberania no CI (annotations, registry, criticality, owner) |
-| [dependency-upstream-governance.md](./dependency-upstream-governance.md) | Governança para atribuir mudanças entre stack local, upstream Pi e dependências antes de decidir `assimilate|hold|reject` |
+| [lab-user-surface-parity.md](./lab-user-surface-parity.md) | Higiene de paridade entre superfícies do laboratório e distribuídas para usuários |
+| [github-repo-presence.md](./github-repo-presence.md) | Checklist de presença pública do repositório no GitHub: metadata, README e drift de docs/MDT |
+| [doc-drift-mdt.md](./doc-drift-mdt.md) | Contrato advisory para MDT/doc-drift: check first, escopo pequeno e integração futura com CI |
 | [agents-lab-editorial-pipeline.md](./agents-lab-editorial-pipeline.md) | Pipeline/template editorial para release notes e posts separando nossa stack, upstream Pi, deps e curadoria |
-| [i18n-intents.md](./i18n-intents.md) | Runbook de intents soft/hard de internacionalização para comunicação e artefatos |
 | [skill-guide-parity.md](./skill-guide-parity.md) | Protocolo de paridade guide-skill para discoverability e controle de drift documental |
 
 ### Evidência selecionada
