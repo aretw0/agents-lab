@@ -1,7 +1,7 @@
 # Guia de Embedding do Pi em CLIs Externas
 
 **Relacionado:** colony-c3, TASK-BUD-033, TASK-BUD-035  
-**Pré-requisitos:** Pi instalado, Node >= 22 e ambiente de teste isolado via `PI_CODING_AGENT_DIR`.
+**Pré-requisitos:** Pi instalado, Node >= 22 (Node 24 recomendado para desenvolvimento) e ambiente de teste isolado via `PI_CODING_AGENT_DIR`.
 
 ---
 
@@ -262,7 +262,7 @@ Antes de distribuir um projeto com pi embedded:
 - [ ] `.pi/settings.json` está versionado e documentado
 - [ ] Budget caps estão definidos (não deixar padrões abertos)
 - [ ] Modo de delivery está explícito para o caso de uso
-- [ ] README descreve pré-requisitos (pi global, Node >= 22)
+- [ ] README descreve pré-requisitos (pi global, Node >= 22; Node 24 recomendado para desenvolvimento)
 - [ ] Testado com `PI_CODING_AGENT_DIR` isolado
 - [ ] Sessões de CI não misturadas com sessões de usuário
 

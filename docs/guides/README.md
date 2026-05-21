@@ -105,7 +105,7 @@ Research não é guia operacional por padrão. Estas páginas ficam aqui apenas 
 
 Para desenvolvimento deste monorepo:
 
-- **Node.js** >= 22
+- **Node.js** >= 22; Node 24 recomendado para desenvolvimento diário
 - **pnpm** via Corepack
 - devcontainer recomendado para paridade local
 

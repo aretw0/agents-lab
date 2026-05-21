@@ -52,7 +52,8 @@ O devcontainer é caminho suportado para desenvolvimento do agents-lab e para us
 
 Contrato atual:
 
-- Node.js 22;
+- Node.js 24 no devcontainer;
+- compatibilidade de pacote mantida em Node.js >=22;
 - bash, Git, GitHub CLI e toolchain de build;
 - Ruby/Bundler para o site Jekyll;
 - locale `pt_BR.UTF-8` com fallback prático para inglês;

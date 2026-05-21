@@ -199,6 +199,7 @@ test("docs site can be served consistently from host or devcontainer", () => {
 	const script = read("scripts/docs-site.mjs");
 	const devcontainer = JSON.parse(read(".devcontainer/devcontainer.json"));
 	const dockerfile = read(".devcontainer/Dockerfile");
+	const nodeVersion = read(".node-version").trim();
 	const vscodeSettings = JSON.parse(read(".vscode/settings.json"));
 
 	assert.equal(packageJson.scripts["docs:site:install"], "node scripts/docs-site.mjs install");
@@ -224,7 +225,9 @@ test("docs site can be served consistently from host or devcontainer", () => {
 	assert.match(script, /--port",\s*PORT/);
 	assert.match(script, /Install Ruby\/Bundler, or rebuild the devcontainer/);
 	assert.match(dockerfile, /ruby-full build-essential zlib1g-dev/);
+	assert.match(dockerfile, /typescript-node:24-bookworm/);
 	assert.match(dockerfile, /gem install bundler --no-document/);
+	assert.equal(nodeVersion, "24");
 	assert.deepEqual(devcontainer.forwardPorts, [4000]);
 	assert.equal(devcontainer.portsAttributes["4000"].label, "agents-lab docs site");
 	assert.equal(devcontainer.portsAttributes["4000"].onAutoForward, "openBrowser");
