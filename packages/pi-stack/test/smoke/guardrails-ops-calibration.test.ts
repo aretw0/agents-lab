@@ -492,7 +492,7 @@ describe("ops calibration decision packet", () => {
     expect(result.details.recommendedOption).toBe("delegate");
     expect(String(result.details.summary)).toContain("delegate-or-execute-packet:");
     expect(result.details.scan.totalBytesRead).toBe(0);
-    expect(result.details.mix.recommendation).toContain("session scan skipped");
+    expect(`${result.details.capability.recommendation} ${result.details.mix.recommendation}`).toMatch(/defaults skipped.*session scan skipped/);
   });
 
   it("registers delegation_readiness_status_packet as unified read-only readiness tool", async () => {

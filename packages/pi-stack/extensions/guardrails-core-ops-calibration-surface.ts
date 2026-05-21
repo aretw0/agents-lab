@@ -15,7 +15,10 @@ import {
   buildDelegationRehearsalStartPacket,
 } from "./guardrails-core-ops-calibration";
 import { buildAgentsAsToolsCalibrationScore, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
-import { evaluateDelegationLaneCapabilitySnapshot } from "./guardrails-core-autonomy-lane";
+import {
+  evaluateDelegationLaneCapabilitySnapshot,
+  type DelegationLaneCapabilitySnapshot,
+} from "./guardrails-core-autonomy-lane";
 import {
   evaluateAutonomyLaneTaskSelection,
   readAutonomyHandoffFocusTaskIds,
@@ -61,6 +64,36 @@ function emptySessionScan(): SessionAnalyticsScanSummary {
     parseErrors: 0,
     recordsCappedFiles: 0,
     readErrors: 0,
+  };
+}
+
+function buildDelegationCapabilityOverride(
+  p: Record<string, unknown>,
+): DelegationLaneCapabilitySnapshot | undefined {
+  if (typeof p.capability_decision !== "string" || typeof p.capability_recommendation_code !== "string") {
+    return undefined;
+  }
+
+  const decision = p.capability_decision === "blocked"
+    ? "blocked"
+    : p.capability_decision === "needs-evidence"
+      ? "needs-evidence"
+      : "ready";
+
+  return {
+    decision,
+    recommendationCode: p.capability_recommendation_code,
+    recommendation: "delegation capability supplied by explicit override; preload and git defaults skipped.",
+    signals: {
+      preloadDecision: p.preload_decision === "fallback-canonical" ? "fallback-canonical" : "use-pack",
+      dirtySignal: p.dirty_signal === "dirty" || p.dirty_signal === "unknown" ? p.dirty_signal : "clean",
+      monitorClassifyFailures: typeof p.monitor_classify_failures === "number"
+        ? Math.max(0, Math.floor(p.monitor_classify_failures))
+        : 0,
+      subagentsReady: p.subagents_ready !== false,
+    },
+    blockers: Array.isArray(p.capability_blockers) ? p.capability_blockers as string[] : [],
+    evidenceGaps: Array.isArray(p.capability_evidence_gaps) ? p.capability_evidence_gaps as string[] : [],
   };
 }
 
@@ -172,8 +205,14 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         : 24;
       const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
 
-      const inferredCapabilityDefaults = inferDelegationCapabilityDefaults(cwd);
-      const capability = evaluateDelegationLaneCapabilitySnapshot({
+      const capabilityOverride = buildDelegationCapabilityOverride(p);
+      const inferredCapabilityDefaults = capabilityOverride
+        ? {
+          preloadDecision: capabilityOverride.signals.preloadDecision,
+          dirtySignal: capabilityOverride.signals.dirtySignal,
+        }
+        : inferDelegationCapabilityDefaults(cwd);
+      const capability = capabilityOverride ?? evaluateDelegationLaneCapabilitySnapshot({
         preloadDecision: typeof p.preload_decision === "string"
           ? p.preload_decision
           : inferredCapabilityDefaults.preloadDecision,
