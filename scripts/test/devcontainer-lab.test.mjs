@@ -91,11 +91,15 @@ test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 	const postCreate = readFileSync(".devcontainer/postCreate.sh", "utf8");
 	const postStart = readFileSync(".devcontainer/postStart.sh", "utf8");
 	const dockerfile = readFileSync(".devcontainer/Dockerfile", "utf8");
+	const config = JSON.parse(readFileSync(".devcontainer/devcontainer.json", "utf8"));
 
 	assert.match(postCreate, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}"/);
 	assert.match(postStart, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}"/);
-	assert.match(postCreate, /export PATH="\$REPO_ROOT\/node_modules\/\.bin:\$PNPM_HOME:\$NPM_CONFIG_PREFIX\/bin:\/home\/vscode\/\.local\/bin:\$PATH"/);
-	assert.match(postStart, /export PATH="\$REPO_ROOT\/node_modules\/\.bin:\$PNPM_HOME:\$NPM_CONFIG_PREFIX\/bin:\/home\/vscode\/\.local\/bin:\$PATH"/);
+	assert.match(postCreate, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}\/bin"/);
+	assert.match(postStart, /repair_owned_dir "\$\{PNPM_HOME:-\/home\/vscode\/\.local\/share\/pnpm\}\/bin"/);
+	assert.match(config.remoteEnv.PATH, /^\/home\/vscode\/\.local\/share\/pnpm\/bin:/);
+	assert.match(postCreate, /export PATH="\$REPO_ROOT\/node_modules\/\.bin:\$PNPM_HOME\/bin:\$PNPM_HOME:\$NPM_CONFIG_PREFIX\/bin:\/home\/vscode\/\.local\/bin:\$PATH"/);
+	assert.match(postStart, /export PATH="\$REPO_ROOT\/node_modules\/\.bin:\$PNPM_HOME\/bin:\$PNPM_HOME:\$NPM_CONFIG_PREFIX\/bin:\/home\/vscode\/\.local\/bin:\$PATH"/);
 	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.local$/m);
 	assert.match(postStart, /repair_owned_dir \/home\/vscode\/\.local$/m);
 	assert.match(postCreate, /repair_owned_dir \/home\/vscode\/\.local\/state/);

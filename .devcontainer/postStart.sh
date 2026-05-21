@@ -7,7 +7,7 @@ cd "$REPO_ROOT"
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
 export NPM_CONFIG_PREFIX="${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}"
 export PNPM_HOME="${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
-export PATH="$REPO_ROOT/node_modules/.bin:$PNPM_HOME:$NPM_CONFIG_PREFIX/bin:/home/vscode/.local/bin:$PATH"
+export PATH="$REPO_ROOT/node_modules/.bin:$PNPM_HOME/bin:$PNPM_HOME:$NPM_CONFIG_PREFIX/bin:/home/vscode/.local/bin:$PATH"
 
 echo "[agents-lab-devcontainer] Post-start sanity check..."
 
@@ -28,6 +28,7 @@ repair_owned_dir() {
 ensure_pnpm() {
   local pnpm_home="${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
   repair_owned_dir "$pnpm_home"
+  repair_owned_dir "$pnpm_home/bin"
 
   corepack prepare --activate || true
 
@@ -99,6 +100,7 @@ repair_owned_dir "${NPM_CONFIG_CACHE:-/home/vscode/.npm-cache}"
 repair_owned_dir "${NPM_CONFIG_PREFIX:-/home/vscode/.npm-global}"
 repair_owned_dir /home/vscode/.local/share
 repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}"
+repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}/bin"
 repair_owned_dir "${PNPM_HOME:-/home/vscode/.local/share/pnpm}/store"
 repair_owned_dir /home/vscode/.local/share/claude
 repair_owned_dir /home/vscode/.local/bin
