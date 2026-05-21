@@ -491,6 +491,8 @@ describe("ops calibration decision packet", () => {
     expect(result.details.mutationAllowed).toBe(false);
     expect(result.details.recommendedOption).toBe("delegate");
     expect(String(result.details.summary)).toContain("delegate-or-execute-packet:");
+    expect(result.details.scan.totalBytesRead).toBe(0);
+    expect(result.details.mix.recommendation).toContain("session scan skipped");
   });
 
   it("registers delegation_readiness_status_packet as unified read-only readiness tool", async () => {
@@ -994,5 +996,4 @@ describe("ops calibration decision packet", () => {
       rmSync(cwd, { recursive: true, force: true });
     }
   });
-
 });

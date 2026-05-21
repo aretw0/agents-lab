@@ -26,6 +26,8 @@ import {
   collectSessionRecords,
   parseAutoAdvanceHardIntentTelemetry,
   parseDelegationMixScore,
+  type DelegationMixScore,
+  type SessionAnalyticsScanSummary,
 } from "./session-analytics";
 import { GUARDRAILS_AUTHORIZATION_NONE } from "./guardrails-core-authorization";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
@@ -45,6 +47,101 @@ import {
   resolveEffectiveTelemetrySignals,
   toolInfoToInput,
 } from "./guardrails-core-ops-calibration-surface-helpers";
+
+function emptySessionScan(): SessionAnalyticsScanSummary {
+  return {
+    maxTailBytes: 0,
+    maxLineChars: 0,
+    maxRecordsPerFile: 0,
+    totalFileBytes: 0,
+    totalBytesRead: 0,
+    tailWindowFiles: 0,
+    droppedLeadingPartialLines: 0,
+    skippedLongLines: 0,
+    parseErrors: 0,
+    recordsCappedFiles: 0,
+    readErrors: 0,
+  };
+}
+
+function buildDelegationMixOverrideScore(
+  p: Record<string, unknown>,
+  lookbackHours: number,
+): DelegationMixScore | undefined {
+  if (
+    typeof p.mix_decision !== "string"
+    || typeof p.mix_score !== "number"
+    || typeof p.mix_delegation_events !== "number"
+    || typeof p.mix_swarm_events !== "number"
+  ) {
+    return undefined;
+  }
+
+  const decision = p.mix_decision === "ready" ? "ready" : "needs-evidence";
+  const delegate = Math.max(0, Math.floor(p.mix_delegation_events));
+  const swarm = Math.max(0, Math.floor(p.mix_swarm_events));
+  const totalEvents = delegate + swarm;
+  const recommendationCode = typeof p.mix_recommendation_code === "string"
+    ? p.mix_recommendation_code as DelegationMixScore["recommendationCode"]
+    : decision === "ready"
+      ? "delegation-mix-ready-diverse"
+      : "delegation-mix-needs-evidence-no-data";
+
+  const summary = [
+    "delegation-mix-score:",
+    `decision=${decision}`,
+    `score=${p.mix_score}`,
+    `events=${totalEvents}`,
+    "local=0",
+    "manual=0",
+    `delegate=${delegate}`,
+    `swarm=${swarm}`,
+    `code=${recommendationCode}`,
+    `authorization=${GUARDRAILS_AUTHORIZATION_NONE}`,
+  ].join(" ");
+
+  return {
+    mode: "delegation-mix-score",
+    decision,
+    score: Math.max(0, Math.min(100, Math.round(p.mix_score))),
+    recommendationCode,
+    recommendation: "delegation mix supplied by explicit override; session scan skipped.",
+    window: {
+      lookbackHours,
+      filesScanned: 0,
+      totalRecords: 0,
+    },
+    totals: {
+      totalEvents,
+      local: 0,
+      manual: 0,
+      delegate,
+      swarm,
+      diversityModes: [delegate, swarm].filter((value) => value > 0).length,
+      delegatedSharePct: totalEvents > 0 ? 100 : 0,
+    },
+    buckets: [
+      { mode: "local", count: 0, sharePct: 0, examples: [] },
+      { mode: "manual", count: 0, sharePct: 0, examples: [] },
+      {
+        mode: "delegate",
+        count: delegate,
+        sharePct: totalEvents > 0 ? Math.round((delegate / totalEvents) * 100) : 0,
+        examples: ["override:mix_delegation_events"],
+      },
+      {
+        mode: "swarm",
+        count: swarm,
+        sharePct: totalEvents > 0 ? Math.round((swarm / totalEvents) * 100) : 0,
+        examples: ["override:mix_swarm_events"],
+      },
+    ],
+    dispatchAllowed: false,
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
+    mutationAllowed: false,
+    summary,
+  };
+}
 
 export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void {
   pi.registerTool({
@@ -87,8 +184,9 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : true,
       });
 
-      const collected = collectSessionRecords(cwd, lookbackHours);
-      const mix = parseDelegationMixScore(collected.allRecords, lookbackHours, collected.files.length);
+      const mixOverride = buildDelegationMixOverrideScore(p, lookbackHours);
+      const collected = mixOverride ? { files: [], allRecords: [], scan: emptySessionScan() } : collectSessionRecords(cwd, lookbackHours);
+      const mix = mixOverride ?? parseDelegationMixScore(collected.allRecords, lookbackHours, collected.files.length);
 
       const packet = buildDelegateOrExecuteDecisionPacket({
         capabilityDecision: typeof p.capability_decision === "string"
