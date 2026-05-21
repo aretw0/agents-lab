@@ -1,5 +1,3 @@
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { isToolCallEventType } from "@earendil-works/pi-coding-agent";
 import { evaluateBashGuardPolicies } from "./guardrails-core-bash-guard-policies";
 import type { BloatSmellConfig } from "./guardrails-core-bloat";
 import { appendAuditEntry } from "./guardrails-core-confirmation-audit";
@@ -10,7 +8,28 @@ import { resolveBashCommandRoutingDecision, type CommandRoutingProfile } from ".
 import { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
 import { detectPortConflict, isDisallowedBash, readReservedSessionWebPort, type GuardrailsPortConflictConfig } from "./guardrails-core-web-routing";
 
+export interface GuardrailsCoreToolCallGuardContext {
+	cwd: string;
+}
+
+export interface GuardrailsCoreToolCallGuardEvent<TInput extends Record<string, unknown> = Record<string, unknown>> {
+	input: TInput;
+}
+
+export type GuardrailsCoreToolCallEventMatcher = <TInput extends Record<string, unknown>>(
+	toolName: string,
+	event: unknown,
+) => event is GuardrailsCoreToolCallGuardEvent<TInput>;
+
+export interface GuardrailsCoreToolCallEmitter {
+	on(
+		eventName: "tool_call",
+		handler: (event: unknown, ctx: GuardrailsCoreToolCallGuardContext) => unknown | Promise<unknown>,
+	): void;
+}
+
 export interface GuardrailsCoreToolCallGuardRuntime {
+	isToolCallEventType: GuardrailsCoreToolCallEventMatcher;
 	getShellRoutingProfile(): CommandRoutingProfile;
 	getStrictInteractiveMode(): boolean;
 	getPortConflictConfig(): GuardrailsPortConflictConfig;
@@ -19,15 +38,15 @@ export interface GuardrailsCoreToolCallGuardRuntime {
 }
 
 export function registerGuardrailsCoreToolCallGuard(
-	pi: ExtensionAPI,
+	emitter: GuardrailsCoreToolCallEmitter,
 	runtime: GuardrailsCoreToolCallGuardRuntime,
 ): void {
-	pi.on("tool_call", async (event, ctx) => {
-		if (isToolCallEventType("read", event)) {
+	emitter.on("tool_call", async (event, ctx) => {
+		if (runtime.isToolCallEventType<{ path?: string }>("read", event)) {
 			return await guardReadPath(event.input.path ?? "", ctx);
 		}
 
-		if (isToolCallEventType("bash", event)) {
+		if (runtime.isToolCallEventType<{ command?: string }>("bash", event)) {
 			const command = event.input.command ?? "";
 			const shellRoutingProfile = runtime.getShellRoutingProfile();
 
@@ -88,10 +107,10 @@ export function registerGuardrailsCoreToolCallGuard(
 
 		let structuredMutationToolType: "edit" | "write" | undefined;
 		let structuredMutationPath: string | undefined;
-		if (isToolCallEventType("edit", event)) {
+		if (runtime.isToolCallEventType<{ path?: string }>("edit", event)) {
 			structuredMutationToolType = "edit";
 			structuredMutationPath = event.input.path;
-		} else if (isToolCallEventType("write", event)) {
+		} else if (runtime.isToolCallEventType<{ path?: string }>("write", event)) {
 			structuredMutationToolType = "write";
 			structuredMutationPath = event.input.path;
 		}

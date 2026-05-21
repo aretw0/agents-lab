@@ -21,11 +21,6 @@ const PI_RUNTIME_IMPORTS = [
   "@mariozechner/pi-web-ui",
 ];
 
-const INTENTIONAL_RUNTIME_COUPLED_CORE = new Map([
-  ["guardrails-core-auto-drain.ts", "runtime loop glue; split decision logic before sharing with another engine"],
-  ["guardrails-core-tool-call-guard.ts", "Pi tool-call event adapter"],
-]);
-
 function normalizeRel(value) {
   return value.replace(/\\/g, "/");
 }
@@ -74,13 +69,10 @@ function isCorePrimitiveFile(filePath) {
 }
 
 function buildFinding(cwd, filePath, specifier) {
-  const name = path.basename(filePath);
-  const allowedReason = INTENTIONAL_RUNTIME_COUPLED_CORE.get(name);
   return {
-    severity: allowedReason ? "allowed-runtime-coupling" : "blocker",
+    severity: "blocker",
     file: normalizeRel(path.relative(cwd, filePath)),
     specifier,
-    reason: allowedReason,
   };
 }
 

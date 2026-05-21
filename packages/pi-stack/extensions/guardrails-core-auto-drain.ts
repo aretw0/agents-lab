@@ -1,4 +1,3 @@
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { evaluateBoardLongRunReadiness } from "./guardrails-core-board-readiness";
 import type { GuardrailsCoreAppendAuditEntry } from "./guardrails-core-surface-registration";
 import { buildBoardExecuteNextIntent, encodeGuardrailsIntent, summarizeGuardrailsIntent } from "./guardrails-core-intent-bus";
@@ -42,6 +41,19 @@ import {
 
 export type GuardrailsCoreAutoDrainReason = "agent_end" | "lane_pop" | "idle_timer";
 
+export interface GuardrailsCoreAutoDrainContext {
+	cwd: string;
+	isIdle(): boolean;
+	hasPendingMessages(): boolean;
+	ui: {
+		notify(message: string, level?: "info" | "warning" | "error"): void;
+	};
+}
+
+export interface GuardrailsCoreAutoDrainMessenger {
+	sendUserMessage(message: string, options: { deliverAs: "followUp" }): void;
+}
+
 export interface GuardrailsCoreDispatchFailureTrackResult {
 	fingerprint: string;
 	streak: number;
@@ -71,26 +83,26 @@ export interface GuardrailsCoreAutoDrainState {
 }
 
 export interface GuardrailsCoreAutoDrainRuntime {
-	pi: ExtensionAPI;
+	messenger: GuardrailsCoreAutoDrainMessenger;
 	appendAuditEntry: GuardrailsCoreAppendAuditEntry;
 	state: GuardrailsCoreAutoDrainState;
-	updateLongRunLaneStatus(ctx: ExtensionContext, activeLongRun: boolean, runtimeState?: LongRunLoopRuntimeState): void;
-	scheduleAutoDrainDeferredIntent(ctx: ExtensionContext, reason: GuardrailsCoreAutoDrainReason, delayOverrideMs?: number): void;
-	markLoopDispatch(ctx: ExtensionContext, itemId: string): void;
-	markLoopHealthy(ctx: ExtensionContext, reason: string): void;
-	markLoopDegraded(ctx: ExtensionContext, reason: string, errorText?: string): void;
-	trackDispatchFailureFingerprint(ctx: ExtensionContext, reason: string, errorText: string, options?: { errorClass?: DispatchFailureClass; pauseAfterOverride?: number; windowMsOverride?: number }): GuardrailsCoreDispatchFailureTrackResult;
-	trackClassifiedDispatchFailure(ctx: ExtensionContext, reason: string, errorText: string): GuardrailsCoreDispatchFailureTrackResult;
+	updateLongRunLaneStatus(ctx: GuardrailsCoreAutoDrainContext, activeLongRun: boolean, runtimeState?: LongRunLoopRuntimeState): void;
+	scheduleAutoDrainDeferredIntent(ctx: GuardrailsCoreAutoDrainContext, reason: GuardrailsCoreAutoDrainReason, delayOverrideMs?: number): void;
+	markLoopDispatch(ctx: GuardrailsCoreAutoDrainContext, itemId: string): void;
+	markLoopHealthy(ctx: GuardrailsCoreAutoDrainContext, reason: string): void;
+	markLoopDegraded(ctx: GuardrailsCoreAutoDrainContext, reason: string, errorText?: string): void;
+	trackDispatchFailureFingerprint(ctx: GuardrailsCoreAutoDrainContext, reason: string, errorText: string, options?: { errorClass?: DispatchFailureClass; pauseAfterOverride?: number; windowMsOverride?: number }): GuardrailsCoreDispatchFailureTrackResult;
+	trackClassifiedDispatchFailure(ctx: GuardrailsCoreAutoDrainContext, reason: string, errorText: string): GuardrailsCoreDispatchFailureTrackResult;
 	trackToolOutputOrphanCallId(errorText: string): ReturnType<typeof resolveToolOutputOrphanRedispatchDecision>;
-	recordLoopReadyEvidence(ctx: ExtensionContext, markersLabel: string, runtimeCodeState: RuntimeCodeActivationState, boardAutoAdvanceGate: BoardAutoAdvanceGateReason, nextTaskId?: string, milestone?: string): void;
-	recordBoardAutoAdvanceEvidence(ctx: ExtensionContext, taskId: string, milestone: string | undefined, runtimeCodeState: RuntimeCodeActivationState, markersLabel: string, emLoop: boolean): void;
-	refreshLoopEvidenceHeartbeat(ctx: ExtensionContext, markersLabel: string, runtimeCodeState: RuntimeCodeActivationState, boardAutoAdvanceGate: BoardAutoAdvanceGateReason, nextTaskId?: string, milestone?: string): void;
+	recordLoopReadyEvidence(ctx: GuardrailsCoreAutoDrainContext, markersLabel: string, runtimeCodeState: RuntimeCodeActivationState, boardAutoAdvanceGate: BoardAutoAdvanceGateReason, nextTaskId?: string, milestone?: string): void;
+	recordBoardAutoAdvanceEvidence(ctx: GuardrailsCoreAutoDrainContext, taskId: string, milestone: string | undefined, runtimeCodeState: RuntimeCodeActivationState, markersLabel: string, emLoop: boolean): void;
+	refreshLoopEvidenceHeartbeat(ctx: GuardrailsCoreAutoDrainContext, markersLabel: string, runtimeCodeState: RuntimeCodeActivationState, boardAutoAdvanceGate: BoardAutoAdvanceGateReason, nextTaskId?: string, milestone?: string): void;
 	currentRuntimeCodeState(): RuntimeCodeActivationState;
 }
 
-export function createGuardrailsCoreAutoDrain(runtime: GuardrailsCoreAutoDrainRuntime): (ctx: ExtensionContext, reason: GuardrailsCoreAutoDrainReason) => boolean {
+export function createGuardrailsCoreAutoDrain(runtime: GuardrailsCoreAutoDrainRuntime): (ctx: GuardrailsCoreAutoDrainContext, reason: GuardrailsCoreAutoDrainReason) => boolean {
 	const {
-		pi,
+		messenger,
 		appendAuditEntry,
 		state,
 		updateLongRunLaneStatus,
@@ -107,7 +119,7 @@ export function createGuardrailsCoreAutoDrain(runtime: GuardrailsCoreAutoDrainRu
 		currentRuntimeCodeState,
 	} = runtime;
 
-	function tryAutoDrainDeferredIntent(ctx: ExtensionContext, reason: GuardrailsCoreAutoDrainReason): boolean {
+	function tryAutoDrainDeferredIntent(ctx: GuardrailsCoreAutoDrainContext, reason: GuardrailsCoreAutoDrainReason): boolean {
 	  const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
 	  const queuedCount = getDeferredIntentQueueCount(ctx.cwd);
 	  const nowMs = Date.now();
@@ -401,7 +413,7 @@ export function createGuardrailsCoreAutoDrain(runtime: GuardrailsCoreAutoDrainRu
 	    }
 	
 	    try {
-	      pi.sendUserMessage(intentText, { deliverAs: "followUp" });
+	      messenger.sendUserMessage(intentText, { deliverAs: "followUp" });
 	      appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance", {
 	        atIso: new Date().toISOString(),
 	        reason,
@@ -551,7 +563,7 @@ export function createGuardrailsCoreAutoDrain(runtime: GuardrailsCoreAutoDrainRu
 	    });
 	
 	    try {
-	      pi.sendUserMessage(popped.item.text, { deliverAs: "followUp" });
+	      messenger.sendUserMessage(popped.item.text, { deliverAs: "followUp" });
 	      markLoopDispatch(ctx, popped.item.id);
 	      dispatched += 1;
 	    } catch (error) {

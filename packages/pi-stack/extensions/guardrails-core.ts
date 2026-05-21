@@ -8,6 +8,7 @@
  * - deterministic scoped web routing enforcement (former web-routing-guard)
  */
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { isToolCallEventType } from "@earendil-works/pi-coding-agent";
 import { statSync } from "node:fs";
 import { createGuardrailsCoreAutoDrain, type GuardrailsCoreAutoDrainState } from "./guardrails-core-auto-drain";
 import { fileURLToPath } from "node:url";
@@ -487,7 +488,7 @@ export default function (pi: ExtensionAPI) {
   };
 
   const tryAutoDrainDeferredIntent = createGuardrailsCoreAutoDrain({
-    pi,
+    messenger: pi,
     appendAuditEntry,
     state: autoDrainState,
     updateLongRunLaneStatus,
@@ -663,6 +664,7 @@ export default function (pi: ExtensionAPI) {
   registerGuardrailsCoreEventSurface(pi, eventSurfaceRuntime);
 
   registerGuardrailsCoreToolCallGuard(pi, {
+    isToolCallEventType: (toolName, event) => isToolCallEventType(toolName, event),
     getShellRoutingProfile: () => shellRoutingProfile,
     getStrictInteractiveMode: () => strictInteractiveMode,
     getPortConflictConfig: () => portConflictConfig,
