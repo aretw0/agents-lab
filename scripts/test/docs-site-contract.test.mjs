@@ -273,6 +273,19 @@ test("packaged guide markdown links resolve inside each package", () => {
 	}
 });
 
+test("packaged guides render site-only Liquid links before distribution", () => {
+	for (const spec of Object.values(PACKAGE_DOCS)) {
+		const guideDir = join(spec.dir, "docs", "guides");
+		if (!existsSync(guideDir)) continue;
+
+		for (const fileName of readdirSync(guideDir).filter((entry) => entry.endsWith(".md"))) {
+			const file = join(guideDir, fileName);
+			const source = read(file);
+			assert.doesNotMatch(source, /relative_url|site\.repo_url/, `${file} should not ship Jekyll-only links`);
+		}
+	}
+});
+
 test("docs site can be served consistently from host or devcontainer", () => {
 	const packageJson = JSON.parse(read("package.json"));
 	const script = read("scripts/docs-site.mjs");

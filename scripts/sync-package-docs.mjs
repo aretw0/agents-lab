@@ -6,6 +6,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
+const SITE_BASE_URL = "https://aretw0.github.io/agents-lab";
+const REPO_URL = "https://github.com/aretw0/agents-lab";
 
 export const PACKAGE_DOCS = {
   "@aretw0/lab-skills": {
@@ -155,6 +157,20 @@ function findGuideReferences(file) {
   return [...refs];
 }
 
+function renderPackageGuideContent(content, spec) {
+  const packagedGuides = new Set([...spec.guides, "README.md"]);
+  return content
+    .replace(/\{\{\s*'\/([^']+)\.html'\s*\|\s*relative_url\s*\}\}/g, (_match, route) => {
+      if (route.startsWith("guides/")) {
+        const guide = `${path.basename(route)}.md`;
+        if (packagedGuides.has(guide)) return `./${guide}`;
+      }
+      return `${SITE_BASE_URL}/${route}.html`;
+    })
+    .replace(/\{\{\s*'\/'\s*\|\s*relative_url\s*\}\}/g, `${SITE_BASE_URL}/`)
+    .replace(/\{\{\s*site\.repo_url\s*\}\}/g, REPO_URL);
+}
+
 function checkReferencedGuidesArePackaged(packageName, spec) {
   const packageDir = path.join(REPO_ROOT, spec.dir);
   const declared = new Set(spec.guides);
@@ -189,12 +205,13 @@ function syncOne(packageName, spec, check) {
   for (const guide of spec.guides) {
     const src = guideSourcePath(guide);
     const target = path.join(targetDir, guide);
+    const next = renderPackageGuideContent(readFileSync(src, "utf8"), spec);
     if (check) {
-      if (readIfExists(target) !== readFileSync(src, "utf8")) {
+      if (readIfExists(target) !== next) {
         stale.push(`stale:${path.relative(REPO_ROOT, target)}`);
       }
     } else {
-      writeFileSync(target, readFileSync(src, "utf8"), "utf8");
+      writeFileSync(target, next, "utf8");
     }
   }
 
