@@ -97,4 +97,8 @@ Guias internos de CI, publicação e curadoria do laboratório ficam em [README 
 
 ## Referências Históricas
 
-Research é evidência datada, não contrato operacional. Use scorecards, blueprints e mapas de ecossistema apenas como contexto histórico quando estiverem presentes no repositório fonte.
+Research é evidência datada, não contrato operacional. Use scorecards, blueprints e mapas de ecossistema apenas como contexto histórico:
+
+- [pi-extension-scorecard.md](https://github.com/aretw0/agents-lab/blob/main/docs/research/pi-extension-scorecard.md)
+- [extension-factory-blueprint.md](https://github.com/aretw0/agents-lab/blob/main/docs/research/extension-factory-blueprint.md)
+- [pi-ecosystem-map.md](https://github.com/aretw0/agents-lab/blob/main/docs/engines/pi-ecosystem-map.md)

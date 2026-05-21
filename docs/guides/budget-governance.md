@@ -195,9 +195,9 @@ Isso permite pesquisar e desenvolver sem confundir ausência de pacote com ausê
 5. Coletar evidência (`/usage`, `/quota-visibility export`).
 6. Revisar resultados com o operador antes de fechar tasks.
 
-> Para disciplina operacional completa (cleanroom, promoção de candidate e reconciliação de drift), use o protocolo cleanroom de swarm quando ele estiver presente no pacote/projeto.
+> Para disciplina operacional completa (cleanroom, promoção de candidate e reconciliação de drift), veja [swarm-cleanroom-protocol.md](https://github.com/aretw0/agents-lab/blob/main/docs/guides/swarm-cleanroom-protocol.md).
 
-Para fronteira explícita entre baseline agnóstico e estilos opt-in, consulte o inventário de perfil lean quando ele estiver presente no repositório fonte.
+Para fronteira explícita entre baseline agnóstico e estilos opt-in, consulte [opt-in-lean-profile-inventory.md](https://github.com/aretw0/agents-lab/blob/main/docs/guides/opt-in-lean-profile-inventory.md).
 
 ---
 

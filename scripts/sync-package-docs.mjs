@@ -24,6 +24,9 @@ export const PACKAGE_DOCS = {
     guides: [
       "control-plane-glossary.md",
       "control-plane-operating-doctrine.md",
+      "dependency-upstream-governance.md",
+      "pi-platform-compatibility.md",
+      "terminal-setup.md",
       "testing-isolation.md",
       "web-session-gateway.md",
     ],
@@ -34,6 +37,8 @@ export const PACKAGE_DOCS = {
       "budget-governance.md",
       "colony-provider-model-governance.md",
       "consumption-visibility-surfaces.md",
+      "dependency-upstream-governance.md",
+      "extension-acceptance-checklist.md",
       "host-disk-recovery.md",
       "i18n-intents.md",
       "mini-handoff-template.md",

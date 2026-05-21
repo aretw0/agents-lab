@@ -274,5 +274,5 @@ Antes de distribuir um projeto com pi embedded:
 - `testing-isolation.md` — isolamento via `PI_CODING_AGENT_DIR`
 - `budget-governance.md` — governança de budget
 - `swarm-cleanroom-protocol.md` — protocolo para runs autônomas
-- `docs/research/pi-embedding-ecosystem-survey.md` — pesquisa técnica de base
-- `packages/pi-stack/extensions/claude-code-adapter.ts` — exemplo de extension mínima
+- [pi-embedding-ecosystem-survey.md](https://github.com/aretw0/agents-lab/blob/main/docs/research/pi-embedding-ecosystem-survey.md) — pesquisa técnica de base
+- [claude-code-adapter.ts](https://github.com/aretw0/agents-lab/blob/main/packages/pi-stack/extensions/claude-code-adapter.ts) — exemplo de extension mínima

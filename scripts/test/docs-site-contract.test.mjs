@@ -150,8 +150,13 @@ test("package guide sync keeps lab-only maintenance out of distributed docs", ()
 test("package guide sync includes generic maintenance guides", () => {
 	assert.ok(PACKAGE_DOCS["@aretw0/lab-skills"].guides.includes("control-plane-glossary.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-skills"].guides.includes("control-plane-glossary.md"));
+	assert.ok(PACKAGE_DOCS["@aretw0/pi-skills"].guides.includes("dependency-upstream-governance.md"));
+	assert.ok(PACKAGE_DOCS["@aretw0/pi-skills"].guides.includes("pi-platform-compatibility.md"));
+	assert.ok(PACKAGE_DOCS["@aretw0/pi-skills"].guides.includes("terminal-setup.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("budget-governance.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("consumption-visibility-surfaces.md"));
+	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("dependency-upstream-governance.md"));
+	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("extension-acceptance-checklist.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("host-disk-recovery.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("mini-handoff-template.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("recommended-pi-stack.md"));

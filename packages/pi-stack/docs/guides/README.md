@@ -10,6 +10,8 @@ Package: @aretw0/pi-stack
 - budget-governance.md
 - colony-provider-model-governance.md
 - consumption-visibility-surfaces.md
+- dependency-upstream-governance.md
+- extension-acceptance-checklist.md
 - host-disk-recovery.md
 - i18n-intents.md
 - mini-handoff-template.md

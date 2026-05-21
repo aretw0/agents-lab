@@ -2,7 +2,7 @@
 
 Práticas para reduzir consumo de tokens em sessões com Pi, com foco em workflows com monitores de comportamento.
 
-Baseado no experimento `experiments/202604-token-efficiency-calibration` no repositório fonte.
+Baseado no experimento [202604-token-efficiency-calibration](https://github.com/aretw0/agents-lab/blob/main/experiments/202604-token-efficiency-calibration/README.md).
 
 ---
 

@@ -9,5 +9,8 @@ Package: @aretw0/pi-skills
 
 - control-plane-glossary.md
 - control-plane-operating-doctrine.md
+- dependency-upstream-governance.md
+- pi-platform-compatibility.md
+- terminal-setup.md
 - testing-isolation.md
 - web-session-gateway.md
