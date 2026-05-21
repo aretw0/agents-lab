@@ -3,9 +3,7 @@
 /**
  * engine-boundary-audit
  *
- * Keeps engine-agnostic primitives separate from Pi runtime adapters. Existing
- * runtime-coupled core files are explicit so new coupling cannot drift in
- * unnoticed under a neutral "core" name.
+ * Keeps engine-agnostic primitives separate from Pi runtime adapters.
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
@@ -70,7 +68,6 @@ function isCorePrimitiveFile(filePath) {
 
 function buildFinding(cwd, filePath, specifier) {
   return {
-    severity: "blocker",
     file: normalizeRel(path.relative(cwd, filePath)),
     specifier,
   };
@@ -91,18 +88,15 @@ export function buildEngineBoundaryAudit(cwd = process.cwd()) {
     }
   }
 
-  const blockers = findings.filter((finding) => finding.severity === "blocker");
-  const allowedRuntimeCouplings = findings.filter((finding) => finding.severity === "allowed-runtime-coupling");
-  const portableCoreCount = corePrimitiveFiles.length - new Set(allowedRuntimeCouplings.map((finding) => finding.file)).size - new Set(blockers.map((finding) => finding.file)).size;
+  const blockerFiles = new Set(findings.map((finding) => finding.file));
+  const portableCoreCount = corePrimitiveFiles.length - blockerFiles.size;
 
   return {
     corePrimitiveCount: corePrimitiveFiles.length,
     portableCoreCount,
-    allowedRuntimeCouplingCount: allowedRuntimeCouplings.length,
-    blockerCount: blockers.length,
+    blockerCount: findings.length,
     findings,
-    blockers,
-    allowedRuntimeCouplings,
+    blockers: findings,
   };
 }
 
@@ -114,10 +108,9 @@ function main() {
   if (json) {
     console.log(JSON.stringify(report, null, 2));
   } else {
-    console.log(`engine-boundary-audit: core=${report.corePrimitiveCount} portable=${report.portableCoreCount} allowed-runtime-couplings=${report.allowedRuntimeCouplingCount} blockers=${report.blockerCount}`);
+    console.log(`engine-boundary-audit: core=${report.corePrimitiveCount} portable=${report.portableCoreCount} blockers=${report.blockerCount}`);
     for (const finding of report.findings.slice(0, 80)) {
-      const suffix = finding.reason ? ` (${finding.reason})` : "";
-      console.log(`  - ${finding.severity}: ${finding.file} imports ${finding.specifier}${suffix}`);
+      console.log(`  - blocker: ${finding.file} imports ${finding.specifier}`);
     }
     if (report.findings.length > 80) {
       console.log(`  ... (+${report.findings.length - 80} additional findings)`);
