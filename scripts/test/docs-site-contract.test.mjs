@@ -335,6 +335,9 @@ test("docs site can be served consistently from host or devcontainer", () => {
 	assert.match(script, /BUNDLE_FROZEN/);
 	assert.match(script, /\.cache", "bundle"/);
 	assert.match(script, /bundle"\), \["check"\]/);
+	assert.match(script, /SITE_DESTINATION = path\.join\(DOCS_DIR, "_site"\)/);
+	assert.match(script, /cleanGeneratedSite/);
+	assert.match(script, /rmSync\(SITE_DESTINATION, \{ recursive: true, force: true \}\)/);
 	assert.match(script, /\["install", "--jobs", "4", "--retry", "3"\]/);
 	assert.match(script, /Run once: pnpm run docs:site:install/);
 	assert.match(script, /--site-mode=github-pages\|pages\|root/);

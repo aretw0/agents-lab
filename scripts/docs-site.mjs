@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, rmSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,6 +11,7 @@ const CONFIG_FILE = path.join(DOCS_DIR, "_config.yml");
 const CNAME_FILE = path.join(DOCS_DIR, "CNAME");
 const BUNDLE_PATH = path.join(REPO_ROOT, ".cache", "bundle");
 const BUNDLE_APP_CONFIG = path.join(REPO_ROOT, ".cache", "bundle-config");
+const SITE_DESTINATION = path.join(DOCS_DIR, "_site");
 const PORT = process.env.DOCS_SITE_PORT || "4000";
 const SITE_MODES = new Set(["github-pages", "pages", "root"]);
 
@@ -143,6 +144,24 @@ function run(command, args, options = {}) {
 	}
 }
 
+function cleanGeneratedSite() {
+	const relative = path.relative(DOCS_DIR, SITE_DESTINATION);
+	if (relative !== "_site" || path.isAbsolute(relative) || relative.startsWith("..")) {
+		console.error(`docs-site: refusing to clean unexpected destination '${SITE_DESTINATION}'`);
+		process.exit(2);
+	}
+
+	try {
+		rmSync(SITE_DESTINATION, { recursive: true, force: true });
+	} catch (error) {
+		console.error(`docs-site: cannot clean generated site at ${SITE_DESTINATION}`);
+		console.error("docs-site: this usually means docs/_site contains files owned by another user.");
+		console.error("docs-site: fix ownership or remove docs/_site, then retry.");
+		console.error(String(error?.message ?? error));
+		process.exit(1);
+	}
+}
+
 function ensureBundler() {
 	const result = spawnSync(bin("bundle"), ["--version"], {
 		cwd: REPO_ROOT,
@@ -195,6 +214,7 @@ if (command === "install") {
 	run(bin("bundle"), ["install", "--jobs", "4", "--retry", "3"], { cwd: DOCS_DIR });
 } else if (command === "build") {
 	ensureBundleInstalled();
+	cleanGeneratedSite();
 	console.log(`docs-site: building ${localUrl(baseurl)} (${siteModeLabel})`);
 	run(bin("bundle"), [
 		"exec",
@@ -203,12 +223,13 @@ if (command === "install") {
 		"--source",
 		DOCS_DIR,
 		"--destination",
-		path.join(DOCS_DIR, "_site"),
+		SITE_DESTINATION,
 		"--baseurl",
 		baseurl,
 	]);
 } else if (command === "serve") {
 	ensureBundleInstalled();
+	cleanGeneratedSite();
 	console.log(`docs-site: serving ${localUrl(serveBaseurl)} (${serveModeLabel})`);
 	run(bin("bundle"), [
 		"exec",
@@ -217,7 +238,7 @@ if (command === "install") {
 		"--source",
 		DOCS_DIR,
 		"--destination",
-		path.join(DOCS_DIR, "_site"),
+		SITE_DESTINATION,
 		"--host",
 		"0.0.0.0",
 		"--port",
