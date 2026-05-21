@@ -8,6 +8,7 @@ Package: @aretw0/pi-stack
 ## Included guides
 
 - colony-provider-model-governance.md
+- host-disk-recovery.md
 - i18n-intents.md
 - monitor-overrides.md
 - quota-visibility.md

@@ -137,15 +137,18 @@ test("package guide sync keeps lab-only maintenance out of distributed docs", ()
 		"doc-drift-mdt.md",
 		"first-party-assimilation-notes.md",
 		"github-repo-presence.md",
-		"host-disk-recovery.md",
 		"lab-user-surface-parity.md",
-		"session-triage.md",
 		"skill-guide-parity.md",
 	];
 
 	for (const guide of labOnlyGuides) {
 		assert.equal(packagedGuides.has(guide), false, `${guide} should stay repository-only`);
 	}
+});
+
+test("package guide sync includes generic maintenance guides", () => {
+	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("host-disk-recovery.md"));
+	assert.ok(PACKAGE_DOCS["@aretw0/lab-skills"].guides.includes("session-triage.md"));
 });
 
 test("docs site can be served consistently from host or devcontainer", () => {

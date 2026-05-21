@@ -15,6 +15,7 @@ export const PACKAGE_DOCS = {
       "control-plane-evolution-playbook.md",
       "pi-embedding-cli.md",
       "project-canonical-pipeline.md",
+      "session-triage.md",
     ],
   },
   "@aretw0/pi-skills": {
@@ -29,6 +30,7 @@ export const PACKAGE_DOCS = {
     dir: "packages/pi-stack",
     guides: [
       "colony-provider-model-governance.md",
+      "host-disk-recovery.md",
       "i18n-intents.md",
       "monitor-overrides.md",
       "quota-visibility.md",

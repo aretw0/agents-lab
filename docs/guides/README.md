@@ -56,6 +56,8 @@ Estes guias descrevem manutenção que pode acompanhar a stack ou inspirar outro
 | [scheduler-governance.md](./scheduler-governance.md) | Governança forte de ownership/lease do scheduler para evitar conflito entre sessões |
 | [extension-acceptance-checklist.md](./extension-acceptance-checklist.md) | Checklist para aceitar nova extensão sem aumentar fragmentação |
 | [dependency-upstream-governance.md](./dependency-upstream-governance.md) | Governança para atribuir mudanças entre stack local, upstream Pi e dependências antes de decidir `assimilate|hold|reject` |
+| [host-disk-recovery.md](./host-disk-recovery.md) | Recuperação dry-first de disco, cache e artefatos de sandbox sem perder continuidade |
+| [session-triage.md](./session-triage.md) | Triagem de sessões/eventos recentes para transformar histórico em backlog revisável |
 | [i18n-intents.md](./i18n-intents.md) | Runbook de intents soft/hard de internacionalização para comunicação e artefatos |
 
 ### Manutenção do laboratório
@@ -64,8 +66,6 @@ Estes guias existem para manter este monorepo, seus fluxos de release, seu site 
 
 | Guia | Descrição |
 |------|-----------|
-| [host-disk-recovery.md](./host-disk-recovery.md) | Runbook de recuperação de espaço em disco (dry-run, limpeza segura, modo agressivo com proteção de sessões) |
-| [session-triage.md](./session-triage.md) | Triage do histórico recente de sessões/branches para consolidar pendências no board canônico |
 | [first-party-assimilation-notes.md](./first-party-assimilation-notes.md) | Memória técnica de capacidades suprimidas por conflito para futura centralização first-party |
 | [ci-governance.md](./ci-governance.md) | Troubleshooting dos gates de soberania no CI (annotations, registry, criticality, owner) |
 | [lab-user-surface-parity.md](./lab-user-surface-parity.md) | Higiene de paridade entre superfícies do laboratório e distribuídas para usuários |

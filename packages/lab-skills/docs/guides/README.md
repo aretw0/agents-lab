@@ -11,3 +11,4 @@ Package: @aretw0/lab-skills
 - control-plane-evolution-playbook.md
 - pi-embedding-cli.md
 - project-canonical-pipeline.md
+- session-triage.md

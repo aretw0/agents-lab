@@ -49,24 +49,17 @@ fluidez do repo antes de virar tarefa maior:
 Os scripts `repo:*` continuam úteis como wrappers de CI/lab, mas a superfície
 distribuída para usuários é `stack_quality_audit` e o comando `/stack-quality`.
 
-## CI: relatório de soberania (artifact + PR)
-- O CI publica um artifact `stack-sovereignty-audit` com o arquivo:
-  - `docs/architecture/stack-sovereignty-audit-latest.md`
-- Em Pull Requests, o CI também mantém um comentário atualizado com marcador:
-  - `<!-- stack-sovereignty-report -->`
+## Relatórios de repositório
 
-### Como usar no review
-1. Abra o artifact do job **Sovereignty Report** para ver o relatório completo.
-2. Verifique no comentário do PR:
-   - `ownerMissing`
-   - `coexisting`
-   - `highRisk`
-3. Se houver regressão, trate antes de merge (owner faltando, mismatch de criticality, etc.).
+Alguns projetos podem publicar snapshots de soberania em CI ou comentários de
+PR. Trate esses relatórios como evidência de revisão, não como interface
+obrigatória da stack.
 
-### Relação com os gates de bloqueio
-- `smoke` continua sendo o gate de fail/pass:
-  - `pnpm run audit:sovereignty` (strict)
-  - `pnpm run audit:sovereignty:diff` (strict)
-- `sovereignty-report` é de visibilidade operacional (artifact + comentário no PR).
+Para uso diário, prefira as superfícies locais e read-only:
 
-Troubleshooting rápido de falhas no CI: [`ci-governance.md`](./ci-governance.md)
+- `/stack-status`
+- `/stack-quality`
+- `/scheduler-governance status`
+
+Se um relatório de CI apontar `ownerMissing`, `coexisting` ou `highRisk`,
+reproduza localmente com as tools acima antes de alterar owners ou políticas.
