@@ -214,7 +214,7 @@ Mesmo quando retorna `decision=ready-for-operator-decision`, o packet mantém `d
 
 A manifestação mínima agora é representável por `local_batch_manifest_packet`. O packet aceita assunto/seed, foco inicial, limite de slices, orçamento conhecido, validação, rollback, checkpoint e stop conditions; ele depende de `control_plane_profile_packet` verde e falha fechado para protected scope, GitHub Actions, scheduler, remote/offload ou worker sem gate inferior. Mesmo quando `decision=ready-for-operator-decision`, a saída mantém `batchExecutionAllowed=false`, `dispatchAllowed=false`, `workerDispatchAllowed=false`, `mutationAllowed=false` e `authorization=none`.
 
-Não criar primitive nova para “autorização ampla”. A manifestação do operador deve ser pequena: ela informa o assunto, o foco e qualquer exceção aos defaults. O restante é processo normal de desenvolvimento, executado pelos contratos já existentes: `local_slice_human_contract_review`, `unattended_continuation_plan`, `nudge_free_loop_canary`, `context_watch_checkpoint`, gates de quota/máquina e, quando houver worker, `agent_run_task_dispatch` sem burlar o gate inferior.
+Não criar primitive nova para “autorização ampla”. A manifestação do operador deve ser pequena: ela informa o assunto, o foco e qualquer exceção aos defaults. O restante é processo normal de desenvolvimento, executado pelos contratos já existentes: `local_slice_operator_contract_review`, `unattended_continuation_plan`, `nudge_free_loop_canary`, `context_watch_checkpoint`, gates de quota/máquina e, quando houver worker, `agent_run_task_dispatch` sem burlar o gate inferior.
 
 Template mínimo recomendado:
 

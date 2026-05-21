@@ -153,6 +153,13 @@ test("published documentation indexes keep audience boundaries explicit", () => 
 	assert.doesNotMatch(research, /🚧|em construção|\|\s*Pendente\s*\|/i);
 });
 
+test("published primitives use operator terminology for local contracts", () => {
+	const continuity = read("docs/primitives/nudge-free-local-continuity.md");
+
+	assert.match(continuity, /local_slice_operator_contract_review/);
+	assert.doesNotMatch(continuity, /local_slice_human_contract_review/);
+});
+
 test("package guide sync keeps lab-only maintenance out of distributed docs", () => {
 	const packagedGuides = new Set(Object.values(PACKAGE_DOCS).flatMap((spec) => spec.guides));
 	const labOnlyGuides = [
