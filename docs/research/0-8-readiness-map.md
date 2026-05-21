@@ -52,9 +52,9 @@ O estado atual para 0.8.0 é:
 
 | Fatia | Validação |
 |---|---|
-| Propagar baseline para `refarm` e `vault-seed` | comparar devcontainer, cache, `gh`, Pi, terminal e CI antes de editar |
 | Revisar docs públicas restantes | `repo:discourse:audit`, links do site e remoção de snapshots stale |
 | Preparar release readiness | `release:readiness:v0.8.0`, install/smoke e changelog |
+| Auditar superfície de instalação | confirmar que README, `package-list.mjs`, installer e docs da `pi-stack` descrevem o mesmo default |
 
 ## Critério de parada
 
