@@ -24,8 +24,6 @@ const PI_RUNTIME_IMPORTS = [
 const INTENTIONAL_RUNTIME_COUPLED_CORE = new Map([
   ["guardrails-core-auto-drain.ts", "runtime loop glue; split decision logic before sharing with another engine"],
   ["guardrails-core-autonomy-lane-runway.ts", "tool inventory currently reads Pi runtime capabilities"],
-  ["guardrails-core-confirmation-audit.ts", "writes trusted confirmation audit entries through Pi context"],
-  ["guardrails-core-read-path-runtime.ts", "read guard wrapper depends on Pi extension context"],
   ["guardrails-core-tool-call-guard.ts", "Pi tool-call event adapter"],
   ["guardrails-core-tool-policy.ts", "Pi built-in tool definition adapter"],
 ]);

@@ -1,4 +1,3 @@
-import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { appendTrustedUiConfirmationEvidence } from "./guardrails-core-confirmation-audit";
 import {
   extractPathsFromBash,
@@ -16,6 +15,15 @@ const STRUCTURED_STATE_READ_REDIRECTS = [
   { path: ".pi/reports/agent-runs.json", use: "agent_run_status, agent_run_log_tail, agent_run_follow ou agent_run_outcome_packet" },
 ];
 
+export type GuardrailsCoreReadPathRuntimeContext = {
+  cwd: string;
+  hasUI?: boolean;
+  ui: {
+    confirm(title: string, message: string): Promise<boolean>;
+  };
+  appendEntry?: (key: string, value: Record<string, unknown>) => void;
+};
+
 function resolveStructuredStateReadRedirect(filePath: string): { path: string; use: string } | undefined {
   const normalized = filePath.replace(/\\/g, "/").toLowerCase();
   return STRUCTURED_STATE_READ_REDIRECTS.find((entry) => normalized === entry.path || normalized.endsWith(`/${entry.path}`));
@@ -28,7 +36,7 @@ function structuredStateReadBlock(filePath: string, redirect: { path: string; us
   };
 }
 
-export async function guardReadPath(filePath: string, ctx: ExtensionContext) {
+export async function guardReadPath(filePath: string, ctx: GuardrailsCoreReadPathRuntimeContext) {
   if (!filePath) return undefined;
 
   const structuredRedirect = resolveStructuredStateReadRedirect(filePath);
@@ -81,7 +89,7 @@ export async function guardReadPath(filePath: string, ctx: ExtensionContext) {
   return undefined;
 }
 
-export async function guardBashPathReads(command: string, ctx: ExtensionContext) {
+export async function guardBashPathReads(command: string, ctx: GuardrailsCoreReadPathRuntimeContext) {
   const paths = extractPathsFromBash(command);
 
   for (const filePath of paths) {
