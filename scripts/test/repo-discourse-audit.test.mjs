@@ -89,6 +89,18 @@ test("classifyDiscourseText reports self-congratulatory claims", () => {
   assert.deepEqual(findings.map((finding) => finding.rule), ["self-congratulatory-claim"]);
 });
 
+test("classifyDiscourseText scans the root README as public surface", () => {
+  const findings = classifyDiscourseText(
+    "README.md",
+    "Uma experiencia incrivel para human-in-the-loop.",
+  );
+
+  assert.deepEqual(findings.map((finding) => finding.rule), [
+    "legacy-human-term",
+    "self-congratulatory-claim",
+  ]);
+});
+
 test("classifyDiscourseText keeps the public 0.8 map free of release slogans", () => {
   const findings = classifyDiscourseText(
     "docs/research/0-8-readiness-map.md",

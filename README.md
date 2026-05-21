@@ -1,209 +1,136 @@
 # agents-lab
 
-> Laboratório local-first para construir, calibrar e distribuir primitivas reutilizáveis de agentes de IA.
+Laboratório local-first para curar, testar e distribuir primitivas reutilizáveis para agentes de IA, com foco atual no ecossistema Pi.
 
-## Missão
+Site: <https://aretw0.github.io/agents-lab/>
 
-**agents-lab** é um workspace de pesquisa e engenharia para transformar experimentos com agentes em contratos reutilizáveis, testados e documentados. O projeto prioriza:
+## O Que Este Repositório Entrega
 
-- experimentos controlados com diferentes engines de agentes;
-- documentação operacional e evidência auditável;
-- primitivas reutilizáveis para pi e stacks relacionadas;
-- comparação objetiva de abordagens, frameworks e padrões;
-- portabilidade para evitar acoplamento a uma engine específica.
+- `@aretw0/pi-stack`: stack curada para Pi, instalada por `npx @aretw0/pi-stack`.
+- Skills first-party para git, web, desenvolvimento Pi e operação do laboratório.
+- Extensões first-party com guardrails, diagnóstico, quota visibility, context watchdog, board/project surfaces e auditoria de stack.
+- Docs e testes que separam superfície publicada, material de pesquisa e utilitários internos do laboratório.
 
-## Posicionamento público
+O objetivo é manter uma stack pequena o bastante para uso diário e extensível o bastante para pesquisa, delegação e long-runs quando houver gates claros.
 
-Este repositório é local-first e outcome-agnostic: ele serve tanto para uso simples e manual quanto para evolução gradual rumo a control-plane, long-run e automação com evidência. A distribuição da `@aretw0/pi-stack` segue **simple-first** por padrão; superfícies avançadas ficam documentadas como opt-in.
+## Instalação
 
-Metadata sugerida para o GitHub:
-
-- **Descrição:** Laboratório local-first para construir, calibrar e distribuir primitivas reutilizáveis de agentes de IA, incluindo a stack curada `@aretw0/pi-stack` para pi.
-- **Topics:** `ai-agents`, `pi`, `coding-agent`, `agent-tools`, `local-first`, `developer-tools`, `typescript`, `llm`, `automation`
-
-## Engine Principal: Pi
-
-A engine primária deste laboratório é o **[pi](https://github.com/badlogic/pi-mono)** — um toolkit extensível para construção de agentes de IA e gerenciamento de LLMs. No agents-lab, Pi é tratado como engine principal, com contratos locais para curadoria, testes e distribuição.
-
-### Por que Pi?
-
-- **Extensibilidade** — projetado para ser a fundação de outros sistemas (ex.: openclaw)
-- **Modelo operacional claro** — extensões, skills, tools e runtime testáveis
-- **Ecossistema ativo** — pacotes e integrações avaliáveis por contrato
-- **Multi-provider** — suporta OpenAI, Anthropic, Google e outros via `@earendil-works/pi-ai`
-
-### Pacotes First-Party (`@aretw0/*`)
-
-Este repositório é o workspace onde a curadoria é implementada, testada e distribuída. Os pacotes first-party são publicados via npm:
-
-| Pacote | Descrição |
-|--------|----------|
-| `@aretw0/pi-stack` | Installer da stack curada — instala todos os pacotes via `npx @aretw0/pi-stack` |
-| `@aretw0/git-skills` | Skills de git: `commit`, `git-workflow`, `github` (`gh`), `glab` |
-| `@aretw0/web-skills` | Skills de web: `web-browser` (CDP) |
-| `@aretw0/pi-skills` | Skills de fábrica: `terminal-setup`, `create-pi-skill/extension/theme/prompt`, `test-pi-extension` |
-| `@aretw0/lab-skills` | Skills experimentais: `evaluate-extension`, `cultivate-primitive`, `stack-feedback`, `provider-model-discovery` |
-
-### Pacotes Pi Relevantes (Terceiros)
-
-| Pacote | Descrição |
-|--------|-----------|
-| `@earendil-works/pi-ai` | API unificada multi-provider para LLMs |
-| `@earendil-works/pi-agent-core` | Runtime de agentes com tool calling e state management |
-| `@earendil-works/pi-coding-agent` | CLI de coding agent interativo |
-| `@earendil-works/pi-tui` | Terminal UI com renderização diferencial |
-| `@marcfargas/pi-test-harness` | Test harness para extensões pi |
-
-> **Nota:** Apesar do Pi ser a engine principal, a estrutura do laboratório é deliberadamente engine-agnóstica. Caso outra engine seja adotada no futuro, as primitivas e decisões devem continuar portáveis.
-
-## Estrutura do Repositório
-
-```text
-agents-lab/
-├── packages/
-│   ├── pi-stack/       # @aretw0/pi-stack — installer + extensions first-party
-│   ├── git-skills/     # @aretw0/git-skills — commit, git-workflow, github, glab
-│   ├── web-skills/     # @aretw0/web-skills — web-browser (CDP)
-│   ├── pi-skills/      # @aretw0/pi-skills — terminal-setup, create-pi-*, test-pi-extension
-│   └── lab-skills/     # @aretw0/lab-skills — evaluate, cultivate, feedback, provider discovery
-├── scripts/
-│   └── pi-source-switch.mjs  # Alterna entre dev local e pacotes npm
-├── docs/
-│   ├── research/       # Pesquisas, análises e material de referência
-│   ├── guides/         # Guias práticos de uso, configuração e publicação
-│   ├── primitives/     # Conceitos e catálogo de primitivas de agentes
-│   ├── architecture/   # Decisões, ownership e diagramas
-│   └── engines/        # Comparações e análises de engines (Pi e alternativas)
-├── experiments/        # Experimentos práticos e provas de conceito
-├── primitives/         # Código reutilizável de primitivas de agentes
-├── .changeset/         # Changesets pendentes para o próximo release
-├── .github/workflows/  # CI (conventional commits) e publish (tag → npm)
-├── CONTRIBUTING.md     # Como contribuir e como fazer releases
-└── ROADMAP.md          # Planejamento e milestones futuros
-```
-
-## Começando
-
-### Instalando a Stack
-
-A stack curada instala cada pacote individualmente no pi (mesmo padrão do oh-pi):
+Para usuários Pi:
 
 ```bash
-# Stack completa — instala 17 pacotes via pi install
 npx @aretw0/pi-stack
+```
 
-# Com versão fixa para @aretw0/*
-npx @aretw0/pi-stack --version 0.3.0
+O perfil padrão é `strict-curated`: instala os pacotes first-party e o mínimo terceiro necessário para monitores/projeto.
 
-# Instalação local (projeto)
+Perfis explícitos:
+
+```bash
+npx @aretw0/pi-stack --runtime-extras
+npx @aretw0/pi-stack --stack-full
 npx @aretw0/pi-stack --local
-
-# Remover tudo
+npx @aretw0/pi-stack --local --baseline
 npx @aretw0/pi-stack --remove
 ```
 
-Ou instale pacotes individuais:
-
-```bash
-pi install npm:@aretw0/git-skills
-pi install npm:@aretw0/pi-skills
-pi install npm:@ifi/oh-pi-themes
-```
-
-**Via git** (sempre atualizado, sem esperar publish):
+Instalação via git, para testar o estado atual do repositório:
 
 ```bash
 pi install https://github.com/aretw0/agents-lab
 ```
 
-### Desenvolvimento Local
+Detalhes da stack: [packages/pi-stack/README.md](./packages/pi-stack/README.md).
 
-Para desenvolver pacotes do monorepo usando o pi:
+## Pacotes First-Party
+
+| Pacote | Papel |
+|---|---|
+| `@aretw0/pi-stack` | Installer, extensões, tema e governança da stack |
+| `@aretw0/git-skills` | Skills `commit`, `git-workflow`, `github`, `glab` |
+| `@aretw0/web-skills` | Skills de pesquisa/ferramentas web, incluindo CDP local |
+| `@aretw0/pi-skills` | Skills para criar/testar skills, extensoes, temas e prompts Pi |
+| `@aretw0/lab-skills` | Skills de curadoria: intake, primitive cultivation, stack feedback e provider discovery |
+
+## Terceiros Curados
+
+A stack não tenta vender dependência externa como first-party. Ela instala, filtra ou usa pacotes terceiros com ownership explícito:
+
+| Pacote | Uso na curadoria |
+|---|---|
+| `@earendil-works/pi-coding-agent`, `@earendil-works/pi-ai`, `@earendil-works/pi-tui` | Runtime Pi usado para desenvolver e executar a stack |
+| `@marcfargas/pi-test-harness` | Harness de testes para extensões Pi |
+| `@davidorex/pi-project-workflows` | Monitores, project blocks e workflows usados no perfil padrao |
+| `@ifi/oh-pi-extensions` | Extras de runtime; parte entra como opt-in e parte é filtrada quando conflita com first-party |
+| `@ifi/oh-pi-skills`, `@ifi/oh-pi-themes`, `@ifi/oh-pi-prompts` | Skills, temas e prompts curados para perfis ampliados |
+| `@ifi/oh-pi-ant-colony`, `@ifi/pi-web-remote`, `@ifi/pi-extension-subagents` | Capacidades de colônia, remoto e subagentes, mantidas como opt-in |
+| `@ifi/pi-plan`, `@ifi/pi-spec` | Fluxos de planejamento/spec para perfis ampliados |
+| `mitsupi`, `pi-lens`, `pi-web-access` | Capacidades complementares avaliadas, com filtros quando há colisão de skill/tool |
+
+O contrato de instalação vive em [packages/pi-stack/package-list.mjs](./packages/pi-stack/package-list.mjs). Colisões conhecidas devem ser resolvidas por filtros do installer e cobertas por testes.
+
+## Desenvolvimento
 
 ```bash
 git clone https://github.com/aretw0/agents-lab.git
 cd agents-lab
 pnpm install
-
-# Apontar pi para os pacotes locais do workspace
-pnpm run pi:local
-
-# Verificar configuração atual
-pnpm run pi:status
-
-# Checar paridade user-like vs laboratório (consumo/quota/superfícies)
-pnpm run pi:parity
-pnpm run pi:parity:project
-
-# Voltar para pacotes publicados no npm
-pnpm run pi:published
-
-# Isolamento forte (recomendado para curadoria):
-# roda o pi com PI_CODING_AGENT_DIR local do workspace (.sandbox/pi-agent)
-pnpm run pi:isolated
-# para retomar sessão isolada existente
-pnpm run pi:isolated:resume
-pnpm run pi:isolated:status
-pnpm run pi:isolated:help
-# copiar a sessão global mais recente para o sandbox local (quando necessário)
-pnpm run pi:isolated:adopt-latest
-# preview sem alterar arquivos (sem depender de flags do npm)
-pnpm run pi:isolated:adopt-latest:dry
-# reset do sandbox local quando quiser começar "do zero"
-pnpm run pi:isolated:reset
 ```
 
-O `.pi/settings.json` do projeto já aponta para os pacotes locais automaticamente.
-O perfil diário do laboratório mantém capacidades caras frias até intenção explícita do operador.
-
-### Testando Extensões
-
-Este monorepo usa `@marcfargas/pi-test-harness` para testes automatizados:
+Comandos principais:
 
 ```bash
-# Rodar todos os testes
+pnpm run pi:dev
+pnpm run ci:local:parity
 pnpm run test:smoke
-
-# Testes unitários de extensões
-pnpm test
+pnpm run test:docs:site
+pnpm run repo:discourse:audit
+pnpm run docs:site:serve
 ```
 
-A skill `test-pi-extension` (em `@aretw0/pi-skills`) documenta como criar testes para suas próprias extensões.
-
-### Benchmark canônico — economia de contexto
+No devcontainer, o atalho do operador é:
 
 ```bash
-pnpm run benchmark:context
+lab pi
 ```
 
-O benchmark roda A/B reproduzível (`pi puro` vs `pi-stack default`) com prompt curto e gera artefato auditável em:
+## Documentação
 
-- `docs/research/data/context-economy/<run-id>/results.json`
-
-Limites de segurança (bounded-by-default):
-
-- sem logs brutos no output
-- captura com teto de buffer por execução
-- apenas métricas resumidas (tokens, latência, custo, tool calls)
-
-### Recursos Recomendados
-
-- [pi-mono — repositório oficial](https://github.com/badlogic/pi-mono)
 - [Start Here](./docs/start-here.md)
-- [Guias deste laboratório](./docs/guides/)
-  - [GitHub Repo Presence](./docs/guides/github-repo-presence.md)
-  - [Web Session Gateway](./docs/guides/web-session-gateway.md)
-  - [Colony Runtime Recovery](./docs/guides/colony-runtime-recovery.md)
-- [Pesquisas e análises](./docs/research/)
+- [Site map](./docs/site-map.md)
+- [Guias](./docs/guides/)
+- [Primitivas](./docs/primitives/)
+- [Arquitetura](./docs/architecture/)
+- [Engines](./docs/engines/)
+- [Research](./docs/research/)
 
-### Contribuindo
+O site público é gerado a partir de `docs/` via GitHub Pages. Localmente:
 
-Veja [CONTRIBUTING.md](./CONTRIBUTING.md) para como participar deste laboratório.
+```bash
+pnpm run docs:site:install
+pnpm run docs:site:serve
+```
 
-## Roadmap
+## Gates De Qualidade
 
-Veja [ROADMAP.md](./ROADMAP.md) para os próximos passos planejados.
+O CI roda a paridade local por `pnpm run ci:local:parity`, incluindo:
+
+- pins de GitHub Actions;
+- testes de workflow, docs, package boundary e smoke;
+- checks de installabilidade e superfície de usuário;
+- auditoria de soberania, complexidade, bloat e discurso.
+
+Antes de publicar material novo, prefira:
+
+```bash
+pnpm run test:docs:site
+pnpm run repo:discourse:audit
+pnpm run docs:package:check
+```
+
+## Release
+
+Releases npm usam changesets e tags semver. O workflow `Publish` publica pacotes; GitHub Pages e publicado separadamente a partir de `main /docs`.
 
 ## Licença
 
-MIT — veja [LICENSE](./LICENSE).
+MIT - veja [LICENSE](./LICENSE).

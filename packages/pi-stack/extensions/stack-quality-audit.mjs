@@ -306,6 +306,7 @@ export function buildRepoComplexityReport(cwd = process.cwd(), options = {}) {
 
 function isDiscourseSurface(filePath) {
   const p = normalizeRepoPath(filePath);
+  if (p === "README.md") return true;
   if (p.endsWith("packages/pi-stack/extensions/stack-quality-audit.mjs")) return false;
   if (p.startsWith("docs/archive/")) return false;
   if (p.startsWith("docs/research/data/")) return false;
