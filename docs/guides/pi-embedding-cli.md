@@ -1,7 +1,7 @@
 # Guia de Embedding do Pi em CLIs Externas
 
 **Relacionado:** colony-c3, TASK-BUD-033, TASK-BUD-035  
-**Pré-requisitos:** [recommended-pi-stack.md](./recommended-pi-stack.md), [testing-isolation.md](./testing-isolation.md)
+**Pré-requisitos:** Pi instalado, Node >= 22 e ambiente de teste isolado via `PI_CODING_AGENT_DIR`.
 
 ---
 
@@ -270,9 +270,9 @@ Antes de distribuir um projeto com pi embedded:
 
 ## Referências
 
-- [recommended-pi-stack.md](./recommended-pi-stack.md) — stack curada de referência
-- [testing-isolation.md](./testing-isolation.md) — isolamento via `PI_CODING_AGENT_DIR`
-- [budget-governance.md](./budget-governance.md) — governança de budget
-- [swarm-cleanroom-protocol.md](./swarm-cleanroom-protocol.md) — protocolo para runs autônomas
+- `recommended-pi-stack.md` — stack curada de referência
+- `testing-isolation.md` — isolamento via `PI_CODING_AGENT_DIR`
+- `budget-governance.md` — governança de budget
+- `swarm-cleanroom-protocol.md` — protocolo para runs autônomas
 - `docs/research/pi-embedding-ecosystem-survey.md` — pesquisa técnica de base
 - `packages/pi-stack/extensions/claude-code-adapter.ts` — exemplo de extension mínima

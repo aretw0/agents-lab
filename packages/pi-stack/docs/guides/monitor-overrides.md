@@ -20,7 +20,7 @@ No setup `openai-codex`, havia ainda uma falha adicional: classifiers sem `promp
 No tool call in response (...) error: {"detail":"Instructions are required"}
 ```
 
-Investigação: [`experiments/202604-pi-hedge-monitor-investigation`](../../experiments/202604-pi-hedge-monitor-investigation/README.md)  
+Investigação base: `experiments/202604-pi-hedge-monitor-investigation` no repositório fonte.
 Issue upstream: [davidorex/pi-project-workflows#1](https://github.com/davidorex/pi-project-workflows/issues/1)
 
 ---

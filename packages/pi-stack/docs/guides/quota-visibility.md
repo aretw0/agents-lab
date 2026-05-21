@@ -278,7 +278,7 @@ Sugestão de framing:
 
 ## Otimização prática (sem perder qualidade)
 
-Cruze este guia com [`token-efficiency.md`](./token-efficiency.md):
+Cruze este guia com o guia de eficiência de tokens:
 
 - use modelos leves para sensores/monitores;
 - reduza contexto desnecessário (`conversation_history` quando não agrega);

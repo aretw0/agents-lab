@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { dirname, join, normalize } from "node:path";
 import { PACKAGE_DOCS } from "../sync-package-docs.mjs";
 
 function read(path) {
@@ -148,7 +149,6 @@ test("package guide sync keeps lab-only maintenance out of distributed docs", ()
 
 test("package guide sync includes generic maintenance guides", () => {
 	assert.ok(PACKAGE_DOCS["@aretw0/lab-skills"].guides.includes("control-plane-glossary.md"));
-	assert.ok(PACKAGE_DOCS["@aretw0/lab-skills"].guides.includes("recommended-pi-stack.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-skills"].guides.includes("control-plane-glossary.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("budget-governance.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("consumption-visibility-surfaces.md"));
@@ -157,6 +157,7 @@ test("package guide sync includes generic maintenance guides", () => {
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("recommended-pi-stack.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("subagent-readiness-gate.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("swarm-preflight-15m.md"));
+	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("token-efficiency.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/lab-skills"].guides.includes("session-triage.md"));
 });
 
@@ -168,6 +169,24 @@ test("recommended stack guide stays user-first and concise", () => {
 	assert.match(guide, /Guias internos de CI, publicação e curadoria do laboratório/);
 	assert.doesNotMatch(guide, /Stack Recomendada de Pi para o agents-lab/);
 	assert.doesNotMatch(guide, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
+});
+
+test("packaged guide markdown links resolve inside each package", () => {
+	for (const spec of Object.values(PACKAGE_DOCS)) {
+		const guideDir = join(spec.dir, "docs", "guides");
+		if (!existsSync(guideDir)) continue;
+
+		for (const fileName of readdirSync(guideDir).filter((entry) => entry.endsWith(".md"))) {
+			const file = join(guideDir, fileName);
+			const source = read(file);
+			const links = [...source.matchAll(/\]\((\.{1,2}\/[^)#]+\.md)(?:#[^)]+)?\)/g)].map((match) => match[1]);
+
+			for (const href of links) {
+				const target = normalize(join(dirname(file), href));
+				assert.equal(existsSync(target), true, `${file} links to missing packaged doc ${href}`);
+			}
+		}
+	}
 });
 
 test("docs site can be served consistently from host or devcontainer", () => {

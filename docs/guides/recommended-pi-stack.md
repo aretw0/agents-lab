@@ -81,7 +81,7 @@ A stack favorece um control plane simples por padrão:
 4. registrar evidência;
 5. decidir se continua, delega ou para.
 
-Use [control-plane-operating-doctrine.md](./control-plane-operating-doctrine.md) para a doutrina operacional e [control-plane-glossary.md](./control-plane-glossary.md) para evitar criar termos novos quando já existe um contrato canônico.
+Use a doutrina operacional do control plane e o glossário canônico quando estiverem disponíveis no pacote/projeto. O objetivo é evitar criar termos novos quando já existe um contrato operacional.
 
 ## Para Mantenedores Do Repositório
 
@@ -97,8 +97,4 @@ Guias internos de CI, publicação e curadoria do laboratório ficam em [README 
 
 ## Referências Históricas
 
-Research é evidência datada, não contrato operacional. Use estas referências apenas para contexto:
-
-- [pi-extension-scorecard.md](../research/pi-extension-scorecard.md)
-- [extension-factory-blueprint.md](../research/extension-factory-blueprint.md)
-- [pi-ecosystem-map.md](../engines/pi-ecosystem-map.md)
+Research é evidência datada, não contrato operacional. Use scorecards, blueprints e mapas de ecossistema apenas como contexto histórico quando estiverem presentes no repositório fonte.

@@ -159,7 +159,7 @@ node scripts/session-triage.mjs --no-summary-store
 - recomendação de **delegation lane** (`recommendation`) para escalar com pragmatismo: `bootstrap-first` -> `subagent-as-tool` -> `swarm-candidate`
 
 Contrato canônico de eventos (v1):
-- [`docs/primitives/conversation-event-canonical-schema.md`](../primitives/conversation-event-canonical-schema.md)
+- `docs/primitives/conversation-event-canonical-schema.md`
 
 ## Loop operacional estendido (15-30 min, em controle)
 

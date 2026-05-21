@@ -15,6 +15,7 @@ Package: @aretw0/pi-stack
 - mini-handoff-template.md
 - monitor-overrides.md
 - quota-visibility.md
+- token-efficiency.md
 - recommended-pi-stack.md
 - scheduler-governance.md
 - stack-sovereignty-user-guide.md
