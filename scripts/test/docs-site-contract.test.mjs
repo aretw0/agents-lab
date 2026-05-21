@@ -286,6 +286,16 @@ test("packaged guides render site-only Liquid links before distribution", () => 
 	}
 });
 
+test("package guide sync derives published URLs from Jekyll config", () => {
+	const script = read("scripts/sync-package-docs.mjs");
+
+	assert.match(script, /DOCS_CONFIG_PATH/);
+	assert.match(script, /resolvePublishedDocsUrls/);
+	assert.doesNotMatch(script, /SITE_BASE_URL|REPO_URL/);
+	assert.doesNotMatch(script, /https:\/\/aretw0\.github\.io\/agents-lab/);
+	assert.doesNotMatch(script, /https:\/\/github\.com\/aretw0\/agents-lab/);
+});
+
 test("docs site can be served consistently from host or devcontainer", () => {
 	const packageJson = JSON.parse(read("package.json"));
 	const script = read("scripts/docs-site.mjs");

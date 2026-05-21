@@ -6,8 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
-const SITE_BASE_URL = "https://aretw0.github.io/agents-lab";
-const REPO_URL = "https://github.com/aretw0/agents-lab";
+const DOCS_CONFIG_PATH = path.join(REPO_ROOT, "docs", "_config.yml");
 
 export const PACKAGE_DOCS = {
   "@aretw0/lab-skills": {
@@ -157,7 +156,27 @@ function findGuideReferences(file) {
   return [...refs];
 }
 
-function renderPackageGuideContent(content, spec) {
+function readDocsConfig() {
+  return readFileSync(DOCS_CONFIG_PATH, "utf8");
+}
+
+function readYamlScalar(config, key) {
+  const match = new RegExp(`^${key}:\\s*(.*)$`, "m").exec(config);
+  if (!match) throw new Error(`Missing docs config key: ${key}`);
+  return match[1].trim().replace(/^["']|["']$/g, "");
+}
+
+function resolvePublishedDocsUrls(config = readDocsConfig()) {
+  const siteUrl = readYamlScalar(config, "url").replace(/\/+$/, "");
+  const baseurl = readYamlScalar(config, "baseurl").replace(/^\/?/, "/").replace(/\/+$/, "");
+  const repoUrl = readYamlScalar(config, "repo_url").replace(/\/+$/, "");
+  return {
+    siteBaseUrl: `${siteUrl}${baseurl}`,
+    repoUrl,
+  };
+}
+
+function renderPackageGuideContent(content, spec, urls = resolvePublishedDocsUrls()) {
   const packagedGuides = new Set([...spec.guides, "README.md"]);
   return content
     .replace(/\{\{\s*'\/([^']+)\.html'\s*\|\s*relative_url\s*\}\}/g, (_match, route) => {
@@ -165,10 +184,10 @@ function renderPackageGuideContent(content, spec) {
         const guide = `${path.basename(route)}.md`;
         if (packagedGuides.has(guide)) return `./${guide}`;
       }
-      return `${SITE_BASE_URL}/${route}.html`;
+      return `${urls.siteBaseUrl}/${route}.html`;
     })
-    .replace(/\{\{\s*'\/'\s*\|\s*relative_url\s*\}\}/g, `${SITE_BASE_URL}/`)
-    .replace(/\{\{\s*site\.repo_url\s*\}\}/g, REPO_URL);
+    .replace(/\{\{\s*'\/'\s*\|\s*relative_url\s*\}\}/g, `${urls.siteBaseUrl}/`)
+    .replace(/\{\{\s*site\.repo_url\s*\}\}/g, urls.repoUrl);
 }
 
 function checkReferencedGuidesArePackaged(packageName, spec) {
