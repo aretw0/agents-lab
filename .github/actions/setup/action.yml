@@ -2,10 +2,6 @@ name: Agents Lab Setup
 description: Install the pinned pnpm version and workspace dependencies.
 
 inputs:
-  node-version:
-    description: Node.js version.
-    required: false
-    default: "22"
   install:
     description: Whether to run pnpm install --frozen-lockfile.
     required: false
@@ -27,14 +23,14 @@ runs:
       if: ${{ inputs.registry-url == '' }}
       uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
       with:
-        node-version: ${{ inputs.node-version }}
+        node-version-file: .node-version
         cache: pnpm
 
     - name: Setup Node.js with registry
       if: ${{ inputs.registry-url != '' }}
       uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
       with:
-        node-version: ${{ inputs.node-version }}
+        node-version-file: .node-version
         registry-url: ${{ inputs.registry-url }}
         cache: pnpm
 

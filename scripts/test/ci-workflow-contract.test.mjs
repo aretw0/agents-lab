@@ -68,10 +68,15 @@ test("shared setup action owns deterministic Node and pnpm install", () => {
 	const action = read(SETUP_ACTION);
 	const ci = read(CI_WORKFLOW);
 	const security = read(SECURITY_WORKFLOW);
+	const nodeVersion = read(".node-version").trim();
 
 	assert.match(action, /name: Agents Lab Setup/);
 	assert.match(action, /uses: pnpm\/action-setup@[0-9a-f]{40}/);
 	assert.match(action, /uses: actions\/setup-node@[0-9a-f]{40}/);
+	assert.equal(nodeVersion, "24");
+	assert.match(action, /node-version-file: \.node-version/);
+	assert.doesNotMatch(action, /default: "22"/);
+	assert.doesNotMatch(action, /node-version: \$\{\{ inputs\.node-version \}\}/);
 	assert.match(action, /registry-url: \$\{\{ inputs\.registry-url \}\}/);
 	assert.match(action, /cache: pnpm/);
 	assert.match(action, /name: Validate lockfile/);
