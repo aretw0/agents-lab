@@ -62,6 +62,7 @@ Estes guias descrevem manutenção que pode acompanhar a stack ou inspirar outro
 | [host-disk-recovery.md]({{ '/guides/host-disk-recovery.html' | relative_url }}) | Recuperação dry-first de disco, cache e artefatos de sandbox sem perder continuidade |
 | [session-triage.md]({{ '/guides/session-triage.html' | relative_url }}) | Triagem de sessões/eventos recentes para transformar histórico em backlog revisável |
 | [i18n-intents.md]({{ '/guides/i18n-intents.html' | relative_url }}) | Runbook de intents soft/hard de internacionalização para comunicação e artefatos |
+| [mermaid-authoring.md]({{ '/guides/mermaid-authoring.html' | relative_url }}) | Regras portáveis para escrever Mermaid em Markdown, GitHub, Jekyll, Astro e Obsidian |
 
 ### Manutenção do laboratório
 

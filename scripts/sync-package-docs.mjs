@@ -26,6 +26,7 @@ export const PACKAGE_DOCS = {
       "control-plane-glossary.md",
       "control-plane-operating-doctrine.md",
       "dependency-upstream-governance.md",
+      "mermaid-authoring.md",
       "pi-platform-compatibility.md",
       "terminal-setup.md",
       "testing-isolation.md",

@@ -14,13 +14,14 @@ Este diretório reúne decisões arquiteturais, ownership por capability, diagra
 | [stack-sovereignty-rfc-2026-04.md]({{ '/architecture/stack-sovereignty-rfc-2026-04.html' | relative_url }}) | RFC aplicado em partes | Owner por capability, filtros, política engine vs policy |
 | [stack-sovereignty-audit-latest.md]({{ '/architecture/stack-sovereignty-audit-latest.html' | relative_url }}) | gerado/report | Snapshot local de soberania da stack |
 | [provider-usage-tui-design.md]({{ '/architecture/provider-usage-tui-design.html' | relative_url }}) | design/rascunho | Diagramas Mermaid e proposta de painel de quota/provider |
+| [control-plane-runtime-map.md]({{ '/architecture/control-plane-runtime-map.html' | relative_url }}) | draft | Mapas Mermaid pequenos do runtime e do loop local-safe |
 
 ## Como promover um diagrama
 
 1. Comece em `docs/research/` quando a ideia ainda for exploração.
 2. Promova para `docs/architecture/` quando houver contrato, owner ou decisão recorrente.
 3. Inclua status no topo: `draft`, `proposed`, `accepted`, `implemented`, `superseded`.
-4. Se usar Mermaid, mantenha o texto ao redor como fonte de verdade operacional.
+4. Se usar Mermaid, rode `pnpm run mermaid:check`; para docs deste laboratório, rode também `pnpm run mermaid:check:lab`.
 5. Atualize este índice ao promover ou substituir um diagrama.
 
 ## Diagramas esperados antes da 0.8

@@ -13,6 +13,7 @@
 | `create-pi-theme` | Como criar um tema visual para o TUI |
 | `create-pi-prompt` | Como criar prompt templates — argumentos, empacotamento |
 | `project-intake` | Triagem inicial agnóstica para iniciar projetos com primeira fatia local-safe |
+| `mermaid-authoring` | Escrita e revisão de diagramas Mermaid com sintaxe portável entre Markdown, GitHub, Jekyll, Astro e Obsidian |
 
 ## Uso
 
