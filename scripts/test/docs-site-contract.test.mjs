@@ -230,6 +230,7 @@ test("package guide sync includes generic maintenance guides", () => {
 	assert.ok(PACKAGE_DOCS["@aretw0/lab-skills"].guides.includes("control-plane-glossary.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-skills"].guides.includes("control-plane-glossary.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-skills"].guides.includes("dependency-upstream-governance.md"));
+	assert.ok(PACKAGE_DOCS["@aretw0/pi-skills"].guides.includes("mermaid-authoring.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-skills"].guides.includes("pi-platform-compatibility.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-skills"].guides.includes("terminal-setup.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("budget-governance.md"));
@@ -243,6 +244,23 @@ test("package guide sync includes generic maintenance guides", () => {
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("swarm-preflight-15m.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("token-efficiency.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/lab-skills"].guides.includes("session-triage.md"));
+});
+
+test("Mermaid authoring separates portable skill rules from lab editorial policy", () => {
+	const packageJson = JSON.parse(read("package.json"));
+	const guide = read("docs/guides/mermaid-authoring.md");
+	const packagedGuide = read("packages/pi-skills/docs/guides/mermaid-authoring.md");
+	const skill = read("packages/pi-skills/skills/mermaid-authoring/SKILL.md");
+	const architecture = read("docs/architecture/control-plane-runtime-map.md");
+
+	assert.equal(packageJson.scripts["mermaid:check"], "node scripts/mermaid-check.mjs");
+	assert.equal(packageJson.scripts["mermaid:check:lab"], "node scripts/mermaid-check.mjs --max-lines 80");
+	assert.match(skill, /^name: mermaid-authoring$/m);
+	assert.match(skill, /ASCII ids/);
+	assert.match(skill, /Portuguese, accents and domain language in quoted labels/);
+	assert.doesNotMatch(`${skill}\n${guide}\n${packagedGuide}`, /max-lines|small diagrams|diagramas pequenos|tamanho máximo/i);
+	assert.match(architecture, /local editorial policy/);
+	assert.match(architecture, /do not impose size/);
 });
 
 test("recommended stack guide stays user-first and concise", () => {
