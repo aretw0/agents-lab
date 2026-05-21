@@ -7,8 +7,10 @@ Package: @aretw0/lab-skills
 
 ## Included guides
 
+- control-plane-glossary.md
 - control-plane-operating-doctrine.md
 - control-plane-evolution-playbook.md
 - pi-embedding-cli.md
 - project-canonical-pipeline.md
+- recommended-pi-stack.md
 - session-triage.md

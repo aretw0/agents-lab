@@ -7,6 +7,7 @@ Package: @aretw0/pi-skills
 
 ## Included guides
 
+- control-plane-glossary.md
 - control-plane-operating-doctrine.md
 - testing-isolation.md
 - web-session-gateway.md

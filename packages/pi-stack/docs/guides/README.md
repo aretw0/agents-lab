@@ -12,8 +12,10 @@ Package: @aretw0/pi-stack
 - consumption-visibility-surfaces.md
 - host-disk-recovery.md
 - i18n-intents.md
+- mini-handoff-template.md
 - monitor-overrides.md
 - quota-visibility.md
+- recommended-pi-stack.md
 - scheduler-governance.md
 - stack-sovereignty-user-guide.md
 - subagent-readiness-gate.md

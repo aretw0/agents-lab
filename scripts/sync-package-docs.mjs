@@ -11,16 +11,19 @@ export const PACKAGE_DOCS = {
   "@aretw0/lab-skills": {
     dir: "packages/lab-skills",
     guides: [
+      "control-plane-glossary.md",
       "control-plane-operating-doctrine.md",
       "control-plane-evolution-playbook.md",
       "pi-embedding-cli.md",
       "project-canonical-pipeline.md",
+      "recommended-pi-stack.md",
       "session-triage.md",
     ],
   },
   "@aretw0/pi-skills": {
     dir: "packages/pi-skills",
     guides: [
+      "control-plane-glossary.md",
       "control-plane-operating-doctrine.md",
       "testing-isolation.md",
       "web-session-gateway.md",
@@ -34,8 +37,10 @@ export const PACKAGE_DOCS = {
       "consumption-visibility-surfaces.md",
       "host-disk-recovery.md",
       "i18n-intents.md",
+      "mini-handoff-template.md",
       "monitor-overrides.md",
       "quota-visibility.md",
+      "recommended-pi-stack.md",
       "scheduler-governance.md",
       "stack-sovereignty-user-guide.md",
       "subagent-readiness-gate.md",

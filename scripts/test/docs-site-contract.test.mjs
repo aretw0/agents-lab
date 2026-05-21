@@ -147,12 +147,27 @@ test("package guide sync keeps lab-only maintenance out of distributed docs", ()
 });
 
 test("package guide sync includes generic maintenance guides", () => {
+	assert.ok(PACKAGE_DOCS["@aretw0/lab-skills"].guides.includes("control-plane-glossary.md"));
+	assert.ok(PACKAGE_DOCS["@aretw0/lab-skills"].guides.includes("recommended-pi-stack.md"));
+	assert.ok(PACKAGE_DOCS["@aretw0/pi-skills"].guides.includes("control-plane-glossary.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("budget-governance.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("consumption-visibility-surfaces.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("host-disk-recovery.md"));
+	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("mini-handoff-template.md"));
+	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("recommended-pi-stack.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("subagent-readiness-gate.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-stack"].guides.includes("swarm-preflight-15m.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/lab-skills"].guides.includes("session-triage.md"));
+});
+
+test("recommended stack guide stays user-first and concise", () => {
+	const guide = read("docs/guides/recommended-pi-stack.md");
+
+	assert.match(guide, /^# Stack Recomendada de Pi$/m);
+	assert.ok(guide.indexOf("## Para usuários Pi") < guide.indexOf("## Para Mantenedores Do Repositório"));
+	assert.match(guide, /Guias internos de CI, publicação e curadoria do laboratório/);
+	assert.doesNotMatch(guide, /Stack Recomendada de Pi para o agents-lab/);
+	assert.doesNotMatch(guide, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
 });
 
 test("docs site can be served consistently from host or devcontainer", () => {
