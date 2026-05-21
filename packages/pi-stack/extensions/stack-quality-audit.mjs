@@ -122,6 +122,11 @@ function isRawLogPath(filePath) {
   return isResearchDataPath(p) && (p.includes("/raw/") || p.endsWith(".log"));
 }
 
+function isGeneratedSiteOutputPath(filePath) {
+  const p = normalizeRepoPath(filePath);
+  return p.startsWith("docs/_site/") || p.startsWith(".jekyll-cache/") || p.startsWith(".sass-cache/");
+}
+
 export function classifyTrackedBloat(files, thresholds = DEFAULT_BLOAT_THRESHOLDS) {
   const rows = Array.isArray(files) ? files : [];
   const violations = [];
@@ -134,6 +139,11 @@ export function classifyTrackedBloat(files, thresholds = DEFAULT_BLOAT_THRESHOLD
 
     if (isRawLogPath(filePath)) {
       violations.push({ path: filePath, reason: "tracked-raw-research-log", bytes });
+      continue;
+    }
+
+    if (isGeneratedSiteOutputPath(filePath)) {
+      violations.push({ path: filePath, reason: "tracked-generated-site-output", bytes });
       continue;
     }
 
