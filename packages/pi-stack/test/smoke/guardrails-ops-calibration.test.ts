@@ -533,7 +533,7 @@ describe("ops calibration decision packet", () => {
       expect(result.details.mode).toBe("delegation-readiness-status-packet");
       expect(result.details.dispatchAllowed).toBe(false);
       expect(result.details.authorization).toBe("none");
-      expect(result.details.mutationAllowed).toBe(false);
+      expect(result.details.scan.totalBytesRead).toBe(0);
       expect(result.details.decision).toBe("ready-delegation-rehearsal");
       expect(result.details.recommendationCode).toBe("delegation-readiness-ready-delegation-rehearsal");
       expect(String(result.details.nextAction)).toContain("delegation_rehearsal_start_packet");
@@ -698,7 +698,7 @@ describe("ops calibration decision packet", () => {
       expect(result.details.mode).toBe("delegation-rehearsal-readiness-packet");
       expect(result.details.dispatchAllowed).toBe(false);
       expect(result.details.authorization).toBe("none");
-      expect(result.details.mutationAllowed).toBe(false);
+      expect(result.details.scan.totalBytesRead).toBe(0);
       expect(String(result.details.summary)).toContain("delegation-rehearsal-packet:");
     } finally {
       rmSync(cwd, { recursive: true, force: true });

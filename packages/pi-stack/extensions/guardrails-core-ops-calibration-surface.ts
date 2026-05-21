@@ -2,8 +2,6 @@
  * @capability-id runtime-guardrails
  * @capability-criticality high
  */
-import { existsSync, readFileSync } from "node:fs";
-import path from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan } from "./guardrails-core-background-process";
@@ -19,16 +17,12 @@ import {
   evaluateDelegationLaneCapabilitySnapshot,
   type DelegationLaneCapabilitySnapshot,
 } from "./guardrails-core-autonomy-lane";
-import {
-  evaluateAutonomyLaneTaskSelection,
-  readAutonomyHandoffFocusTaskIds,
-} from "./guardrails-core-autonomy-task-selector";
-import { consumeContextPreloadPack } from "./context-watchdog-continuation";
-import { buildUnavailableGitDirtySnapshot, readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
+import { readAutonomyHandoffFocusTaskIds } from "./guardrails-core-autonomy-task-selector";
 import {
   collectSessionRecords,
   parseAutoAdvanceHardIntentTelemetry,
   parseDelegationMixScore,
+  type AutoAdvanceHardIntentTelemetry,
   type DelegationMixScore,
   type SessionAnalyticsScanSummary,
 } from "./session-analytics";
@@ -67,6 +61,21 @@ function emptySessionScan(): SessionAnalyticsScanSummary {
   };
 }
 
+function emptyCollectedSessionRecords(): ReturnType<typeof collectSessionRecords> {
+  return {
+    files: [],
+    allRecords: [],
+    scan: emptySessionScan(),
+  };
+}
+
+function parseLookbackHours(p: Record<string, unknown>): number {
+  const lookbackHoursRaw = Number(p.lookback_hours);
+  return Number.isFinite(lookbackHoursRaw) && lookbackHoursRaw > 0
+    ? lookbackHoursRaw
+    : 24;
+}
+
 function buildDelegationCapabilityOverride(
   p: Record<string, unknown>,
 ): DelegationLaneCapabilitySnapshot | undefined {
@@ -95,6 +104,37 @@ function buildDelegationCapabilityOverride(
     blockers: Array.isArray(p.capability_blockers) ? p.capability_blockers as string[] : [],
     evidenceGaps: Array.isArray(p.capability_evidence_gaps) ? p.capability_evidence_gaps as string[] : [],
   };
+}
+
+function buildDelegationCapabilityState(
+  p: Record<string, unknown>,
+  cwd: string,
+): {
+  capability: DelegationLaneCapabilitySnapshot;
+  inferredCapabilityDefaults: {
+    preloadDecision: "use-pack" | "fallback-canonical";
+    dirtySignal: "clean" | "dirty" | "unknown";
+  };
+} {
+  const capabilityOverride = buildDelegationCapabilityOverride(p);
+  const inferredCapabilityDefaults = capabilityOverride
+    ? {
+      preloadDecision: capabilityOverride.signals.preloadDecision,
+      dirtySignal: capabilityOverride.signals.dirtySignal,
+    }
+    : inferDelegationCapabilityDefaults(cwd);
+  const capability = capabilityOverride ?? evaluateDelegationLaneCapabilitySnapshot({
+    preloadDecision: typeof p.preload_decision === "string"
+      ? p.preload_decision
+      : inferredCapabilityDefaults.preloadDecision,
+    dirtySignal: typeof p.dirty_signal === "string"
+      ? p.dirty_signal
+      : inferredCapabilityDefaults.dirtySignal,
+    monitorClassifyFailures: typeof p.monitor_classify_failures === "number" ? p.monitor_classify_failures : 0,
+    subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : true,
+  });
+
+  return { capability, inferredCapabilityDefaults };
 }
 
 function buildDelegationMixOverrideScore(
@@ -176,6 +216,118 @@ function buildDelegationMixOverrideScore(
   };
 }
 
+function buildAutoAdvanceTelemetryOverride(
+  p: Record<string, unknown>,
+  lookbackHours: number,
+): AutoAdvanceHardIntentTelemetry | undefined {
+  if (
+    typeof p.auto_advance_decision !== "string"
+    || typeof p.telemetry_decision !== "string"
+    || typeof p.telemetry_score !== "number"
+    || typeof p.telemetry_blocked_rate_pct !== "number"
+  ) {
+    return undefined;
+  }
+
+  const decision = p.telemetry_decision === "ready" ? "ready" : "needs-evidence";
+  const autoAdvanceEligible = p.auto_advance_decision === "eligible";
+  const blockedReasons = Array.isArray(p.auto_advance_blocked_reasons)
+    ? (p.auto_advance_blocked_reasons as unknown[])
+      .filter((row): row is string => typeof row === "string" && row.trim().length > 0)
+      .map((reason) => ({ reason, count: 1 }))
+    : [];
+  const score = Math.max(0, Math.min(100, Math.round(p.telemetry_score)));
+  const blockedRatePct = Math.max(0, Math.min(100, Math.round(p.telemetry_blocked_rate_pct)));
+  const recommendationCode = decision === "ready"
+    ? "auto-advance-telemetry-ready"
+    : autoAdvanceEligible
+      ? "auto-advance-telemetry-needs-hardening-block-rate"
+      : "auto-advance-telemetry-needs-evidence-eligible-missing";
+  const summary = [
+    "auto-advance-hard-intent-telemetry:",
+    `decision=${decision}`,
+    `score=${score}`,
+    "events=0",
+    `eligible=${autoAdvanceEligible ? 1 : 0}`,
+    `blocked=${autoAdvanceEligible ? 0 : 1}`,
+    `blockedRatePct=${blockedRatePct}`,
+    `code=${recommendationCode}`,
+    `authorization=${GUARDRAILS_AUTHORIZATION_NONE}`,
+  ].join(" ");
+
+  return {
+    mode: "auto-advance-hard-intent-telemetry",
+    decision,
+    score,
+    recommendationCode,
+    recommendation: "auto-advance telemetry supplied by explicit override; session scan skipped.",
+    window: {
+      lookbackHours,
+      filesScanned: 0,
+      totalRecords: 0,
+    },
+    totals: {
+      totalEvents: 0,
+      eligibleEvents: autoAdvanceEligible ? 1 : 0,
+      blockedEvents: autoAdvanceEligible ? 0 : 1,
+      blockedRatePct,
+    },
+    blockedReasons,
+    examples: {
+      eligible: autoAdvanceEligible ? ["override:auto_advance_decision=eligible"] : [],
+      blocked: autoAdvanceEligible ? [] : ["override:auto_advance_decision=blocked"],
+    },
+    dispatchAllowed: false,
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
+    mutationAllowed: false,
+    summary,
+  };
+}
+
+function buildSessionTelemetryState(
+  p: Record<string, unknown>,
+  cwd: string,
+  lookbackHours: number,
+): {
+  collected: ReturnType<typeof collectSessionRecords>;
+  mix: DelegationMixScore;
+  autoAdvanceTelemetry: AutoAdvanceHardIntentTelemetry;
+} {
+  const mixOverride = buildDelegationMixOverrideScore(p, lookbackHours);
+  const autoAdvanceTelemetryOverride = buildAutoAdvanceTelemetryOverride(p, lookbackHours);
+  const collected = mixOverride && autoAdvanceTelemetryOverride
+    ? emptyCollectedSessionRecords()
+    : collectSessionRecords(cwd, lookbackHours);
+
+  return {
+    collected,
+    mix: mixOverride ?? parseDelegationMixScore(collected.allRecords, lookbackHours, collected.files.length),
+    autoAdvanceTelemetry: autoAdvanceTelemetryOverride
+      ?? parseAutoAdvanceHardIntentTelemetry(collected.allRecords, lookbackHours, collected.files.length),
+  };
+}
+
+function buildAutoAdvanceLiveSnapshot(
+  p: Record<string, unknown>,
+  cwd: string,
+): ReturnType<typeof inferLiveAutoAdvanceSnapshot> {
+  if (typeof p.auto_advance_decision !== "string") {
+    return inferLiveAutoAdvanceSnapshot(cwd);
+  }
+
+  const decision = p.auto_advance_decision === "eligible" ? "eligible" : "blocked";
+  const blockedReasons = Array.isArray(p.auto_advance_blocked_reasons)
+    ? (p.auto_advance_blocked_reasons as unknown[]).filter((row): row is string => typeof row === "string")
+    : [];
+
+  return {
+    decision,
+    blockedReasons: decision === "blocked" ? (blockedReasons.length > 0 ? blockedReasons : ["override-blocked"]) : [],
+    focusTaskIds: [],
+    focusSelectionReason: "override-supplied",
+  };
+}
+
 export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "delegate_or_execute_decision_packet",
@@ -199,32 +351,12 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const lookbackHoursRaw = Number(p.lookback_hours);
-      const lookbackHours = Number.isFinite(lookbackHoursRaw) && lookbackHoursRaw > 0
-        ? lookbackHoursRaw
-        : 24;
+      const lookbackHours = parseLookbackHours(p);
       const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
 
-      const capabilityOverride = buildDelegationCapabilityOverride(p);
-      const inferredCapabilityDefaults = capabilityOverride
-        ? {
-          preloadDecision: capabilityOverride.signals.preloadDecision,
-          dirtySignal: capabilityOverride.signals.dirtySignal,
-        }
-        : inferDelegationCapabilityDefaults(cwd);
-      const capability = capabilityOverride ?? evaluateDelegationLaneCapabilitySnapshot({
-        preloadDecision: typeof p.preload_decision === "string"
-          ? p.preload_decision
-          : inferredCapabilityDefaults.preloadDecision,
-        dirtySignal: typeof p.dirty_signal === "string"
-          ? p.dirty_signal
-          : inferredCapabilityDefaults.dirtySignal,
-        monitorClassifyFailures: typeof p.monitor_classify_failures === "number" ? p.monitor_classify_failures : 0,
-        subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : true,
-      });
-
+      const { capability, inferredCapabilityDefaults } = buildDelegationCapabilityState(p, cwd);
       const mixOverride = buildDelegationMixOverrideScore(p, lookbackHours);
-      const collected = mixOverride ? { files: [], allRecords: [], scan: emptySessionScan() } : collectSessionRecords(cwd, lookbackHours);
+      const collected = mixOverride ? emptyCollectedSessionRecords() : collectSessionRecords(cwd, lookbackHours);
       const mix = mixOverride ?? parseDelegationMixScore(collected.allRecords, lookbackHours, collected.files.length);
 
       const packet = buildDelegateOrExecuteDecisionPacket({
@@ -288,30 +420,14 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const lookbackHoursRaw = Number(p.lookback_hours);
-      const lookbackHours = Number.isFinite(lookbackHoursRaw) && lookbackHoursRaw > 0
-        ? lookbackHoursRaw
-        : 24;
+      const lookbackHours = parseLookbackHours(p);
       const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
 
-      const inferredCapabilityDefaults = inferDelegationCapabilityDefaults(cwd);
-      const capability = evaluateDelegationLaneCapabilitySnapshot({
-        preloadDecision: typeof p.preload_decision === "string"
-          ? p.preload_decision
-          : inferredCapabilityDefaults.preloadDecision,
-        dirtySignal: typeof p.dirty_signal === "string"
-          ? p.dirty_signal
-          : inferredCapabilityDefaults.dirtySignal,
-        monitorClassifyFailures: typeof p.monitor_classify_failures === "number" ? p.monitor_classify_failures : 0,
-        subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : true,
-      });
-
-      const collected = collectSessionRecords(cwd, lookbackHours);
-      const mix = parseDelegationMixScore(collected.allRecords, lookbackHours, collected.files.length);
-      const autoAdvanceTelemetry = parseAutoAdvanceHardIntentTelemetry(collected.allRecords, lookbackHours, collected.files.length);
+      const { capability, inferredCapabilityDefaults } = buildDelegationCapabilityState(p, cwd);
+      const { collected, mix, autoAdvanceTelemetry } = buildSessionTelemetryState(p, cwd, lookbackHours);
 
       const telemetryBlockedReasons = autoAdvanceTelemetry.blockedReasons.map((row) => row.reason);
-      const liveAutoAdvanceSnapshot = inferLiveAutoAdvanceSnapshot(cwd);
+      const liveAutoAdvanceSnapshot = buildAutoAdvanceLiveSnapshot(p, cwd);
       const autoAdvanceComposite = resolveAutoAdvanceCompositeDecision({
         autoAdvanceDecisionOverride: p.auto_advance_decision,
         autoAdvanceBlockedReasonsOverride: p.auto_advance_blocked_reasons,
@@ -432,30 +548,14 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const lookbackHoursRaw = Number(p.lookback_hours);
-      const lookbackHours = Number.isFinite(lookbackHoursRaw) && lookbackHoursRaw > 0
-        ? lookbackHoursRaw
-        : 24;
+      const lookbackHours = parseLookbackHours(p);
       const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
 
-      const inferredCapabilityDefaults = inferDelegationCapabilityDefaults(cwd);
-      const capability = evaluateDelegationLaneCapabilitySnapshot({
-        preloadDecision: typeof p.preload_decision === "string"
-          ? p.preload_decision
-          : inferredCapabilityDefaults.preloadDecision,
-        dirtySignal: typeof p.dirty_signal === "string"
-          ? p.dirty_signal
-          : inferredCapabilityDefaults.dirtySignal,
-        monitorClassifyFailures: typeof p.monitor_classify_failures === "number" ? p.monitor_classify_failures : 0,
-        subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : true,
-      });
-
-      const collected = collectSessionRecords(cwd, lookbackHours);
-      const mix = parseDelegationMixScore(collected.allRecords, lookbackHours, collected.files.length);
-      const autoAdvanceTelemetry = parseAutoAdvanceHardIntentTelemetry(collected.allRecords, lookbackHours, collected.files.length);
+      const { capability, inferredCapabilityDefaults } = buildDelegationCapabilityState(p, cwd);
+      const { collected, mix, autoAdvanceTelemetry } = buildSessionTelemetryState(p, cwd, lookbackHours);
 
       const telemetryBlockedReasons = autoAdvanceTelemetry.blockedReasons.map((row) => row.reason);
-      const liveAutoAdvanceSnapshot = inferLiveAutoAdvanceSnapshot(cwd);
+      const liveAutoAdvanceSnapshot = buildAutoAdvanceLiveSnapshot(p, cwd);
       const autoAdvanceComposite = resolveAutoAdvanceCompositeDecision({
         autoAdvanceDecisionOverride: p.auto_advance_decision,
         autoAdvanceBlockedReasonsOverride: p.auto_advance_blocked_reasons,
@@ -647,30 +747,14 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const lookbackHoursRaw = Number(p.lookback_hours);
-      const lookbackHours = Number.isFinite(lookbackHoursRaw) && lookbackHoursRaw > 0
-        ? lookbackHoursRaw
-        : 24;
+      const lookbackHours = parseLookbackHours(p);
       const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
 
-      const inferredCapabilityDefaults = inferDelegationCapabilityDefaults(cwd);
-      const capability = evaluateDelegationLaneCapabilitySnapshot({
-        preloadDecision: typeof p.preload_decision === "string"
-          ? p.preload_decision
-          : inferredCapabilityDefaults.preloadDecision,
-        dirtySignal: typeof p.dirty_signal === "string"
-          ? p.dirty_signal
-          : inferredCapabilityDefaults.dirtySignal,
-        monitorClassifyFailures: typeof p.monitor_classify_failures === "number" ? p.monitor_classify_failures : 0,
-        subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : true,
-      });
-
-      const collected = collectSessionRecords(cwd, lookbackHours);
-      const mix = parseDelegationMixScore(collected.allRecords, lookbackHours, collected.files.length);
-      const autoAdvanceTelemetry = parseAutoAdvanceHardIntentTelemetry(collected.allRecords, lookbackHours, collected.files.length);
+      const { capability, inferredCapabilityDefaults } = buildDelegationCapabilityState(p, cwd);
+      const { collected, mix, autoAdvanceTelemetry } = buildSessionTelemetryState(p, cwd, lookbackHours);
 
       const telemetryBlockedReasons = autoAdvanceTelemetry.blockedReasons.map((row) => row.reason);
-      const liveAutoAdvanceSnapshot = inferLiveAutoAdvanceSnapshot(cwd);
+      const liveAutoAdvanceSnapshot = buildAutoAdvanceLiveSnapshot(p, cwd);
       const autoAdvanceComposite = resolveAutoAdvanceCompositeDecision({
         autoAdvanceDecisionOverride: p.auto_advance_decision,
         autoAdvanceBlockedReasonsOverride: p.auto_advance_blocked_reasons,
@@ -722,7 +806,9 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         rollbackPlanKnown: p.rollback_plan_known === true,
       });
 
-      const handoffFocusTaskId = readAutonomyHandoffFocusTaskIds(cwd)[0];
+      const handoffFocusTaskId = typeof p.auto_advance_decision === "string"
+        ? undefined
+        : readAutonomyHandoffFocusTaskIds(cwd)[0];
       const operatorPauseBrief = buildDelegationRehearsalOperatorPauseBrief({
         cwd,
         startDecision: startPacket.decision,
