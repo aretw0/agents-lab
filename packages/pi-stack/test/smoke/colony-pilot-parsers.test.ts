@@ -380,7 +380,6 @@ describe("colony-pilot parsers", () => {
 		expect(merged.piStack.colonyPilot.preflight.requiredExecutables).toEqual([
 			"node",
 			"git",
-			"npm",
 		]);
 	});
 
@@ -392,8 +391,6 @@ describe("colony-pilot parsers", () => {
 		expect(phase2.piStack.colonyPilot.preflight.requiredExecutables).toEqual([
 			"node",
 			"git",
-			"npm",
-			"npx",
 		]);
 		expect(
 			phase2.piStack.colonyPilot.preflight.requireColonyCapabilities,

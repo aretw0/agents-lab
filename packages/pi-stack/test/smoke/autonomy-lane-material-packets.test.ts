@@ -323,6 +323,8 @@ describe("autonomy lane material packets", () => {
     expect(Array.isArray(result?.details.seedTemplates)).toBe(true);
     expect((result?.details.seedTemplates as Array<unknown>).length).toBeGreaterThan(0);
     expect((result?.details.seedTemplates as Array<unknown>).length).toBeLessThanOrEqual(3);
+    const seedTemplates = result?.details.seedTemplates as Array<{ validationGate?: string }>;
+    expect(seedTemplates.map((template) => template.validationGate).join("\n")).not.toMatch(/\b(?:npm|pnpm|yarn)\s+run\b/);
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
   });

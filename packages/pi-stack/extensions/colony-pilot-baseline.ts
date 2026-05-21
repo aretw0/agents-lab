@@ -32,7 +32,7 @@ export function buildProjectBaselineSettings(
 				preflight: {
 					enabled: true,
 					enforceOnAntColonyTool: true,
-					requiredExecutables: ["node", "git", "npm"],
+					requiredExecutables: ["node", "git"],
 					requireColonyCapabilities: ["colony", "colonyStop"],
 				},
 				modelPolicy: {
@@ -116,7 +116,6 @@ export function buildProjectBaselineSettings(
 		piStack: {
 			colonyPilot: {
 				preflight: {
-					requiredExecutables: ["node", "git", "npm", "npx"],
 					requireColonyCapabilities: [
 						"colony",
 						"colonyStop",

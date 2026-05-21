@@ -396,7 +396,7 @@ export function createGuardrailsCoreAutoDrain(runtime: GuardrailsCoreAutoDrainRu
 	        runtimeCodeState,
 	      });
 	      updateLongRunLaneStatus(ctx, activeLongRun, state.longRunLoopRuntimeState);
-	      if (!failureTrack.pauseTriggered) ctx.ui.notify(`lane-queue: rapid re-dispatch blocked for ${nextTaskId} (${Math.round(sinceMs / 1000)}s since last dispatch) — possible silent execution failure. Investigate session state then run: npm run pi:loop:resume`, "warning");
+	      if (!failureTrack.pauseTriggered) ctx.ui.notify(`lane-queue: rapid re-dispatch blocked for ${nextTaskId} (${Math.round(sinceMs / 1000)}s since last dispatch) — possible silent execution failure. Investigate session state then run /lane-queue resume`, "warning");
 	      return false;
 	    }
 	

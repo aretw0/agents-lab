@@ -196,6 +196,6 @@ export function buildToolOutputOrphanRecoveryActionLines(): string[] {
   return [
     "action: run /reload to clear stale function_call_output context",
     "action: run /lane-queue status to confirm failSig/failClass reset",
-    "action: resume dispatch via /lane-queue resume (or npm run pi:loop:resume)",
+    "action: resume dispatch via /lane-queue resume",
   ];
 }

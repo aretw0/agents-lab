@@ -58,7 +58,7 @@ describe("reload safety after /colony-pilot baseline apply", () => {
     const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
 
     expect(Array.isArray(settings.extensions)).toBe(true);
-    expect(settings.piStack?.colonyPilot?.preflight?.requiredExecutables).toEqual(["node", "git", "npm", "npx"]);
+    expect(settings.piStack?.colonyPilot?.preflight?.requiredExecutables).toEqual(["node", "git"]);
     expect(settings.piStack?.webSessionGateway?.port).toBe(3100);
 
     await expect(t.session.prompt("/reload")).resolves.toBeUndefined();

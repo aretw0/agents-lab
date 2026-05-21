@@ -223,6 +223,8 @@ describe("guardrails-core long-run dispatch failure gates", () => {
     expect(orphanActions).toHaveLength(3);
     expect(orphanActions.join("\n")).toContain("/reload");
     expect(orphanActions.join("\n")).toContain("/lane-queue status");
+    expect(orphanActions.join("\n")).toContain("/lane-queue resume");
+    expect(orphanActions.join("\n")).not.toMatch(/\b(?:npm|pnpm|yarn)\s+run\b/);
   });
 
   it("computes deterministic exponential retry delay for transient provider failures", () => {

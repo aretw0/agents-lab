@@ -181,7 +181,7 @@ function buildBootstrapSeedTemplates(input: { suggestedSeedCount: number; maxSee
     {
       id: "seed-local-safe-smoke-guard",
       description: "Adicionar/ajustar um smoke test local-safe para reduzir regressão de surface crítica.",
-      validationGate: "npm run test:smoke -- <suite-focal>",
+      validationGate: "focal smoke/test gate for the changed surface",
       rollback: "git restore -- <arquivo(s)>",
       filesHint: ["packages/pi-stack/test/smoke/<suite>.test.ts"],
     },

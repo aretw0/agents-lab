@@ -35,7 +35,7 @@ export interface ColonyPilotPreflightResult {
 const DEFAULT_PREFLIGHT_CONFIG: ColonyPilotPreflightConfig = {
 	enabled: true,
 	enforceOnAntColonyTool: true,
-	requiredExecutables: ["node", "git", "npm"],
+	requiredExecutables: ["node", "git"],
 	requireColonyCapabilities: ["colony", "colonyStop"],
 	enforceMachineMaintenance: true,
 	machineMaintenanceBlockOn: "warn",
