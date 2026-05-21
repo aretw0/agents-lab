@@ -140,7 +140,7 @@ export type { AgentRunSdkCachePackPacketInput, AgentRunSdkCachePackPacketResult,
 export { buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaPacket } from "./guardrails-core-agent-run-sdk-arena";
 export type { AgentRunSdkArenaEnvelope, AgentRunSdkProviderModelArenaArtifactPacketInput, AgentRunSdkProviderModelArenaArtifactPacketResult, AgentRunSdkProviderModelArenaPacketInput, AgentRunSdkProviderModelArenaPacketResult } from "./guardrails-core-agent-run-sdk-arena";
 export { buildDeclaredFileScopedSdkWorkerTools, DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOLS, evaluateDeclaredPathPolicy, findUnsupportedDeclaredFileScopedSdkWorkerTools, wrapToolDefinitionWithDeclaredPathPolicy } from "./guardrails-core-tool-policy";
-export type { DeclaredPathPolicy, SdkWorkerToolPolicyPlan, ToolPolicyDecision } from "./guardrails-core-tool-policy";
+export type { DeclaredFileScopedToolFactory, DeclaredPathPolicy, SdkWorkerToolPolicyPlan, ToolDefinitionLike, ToolPolicyDecision } from "./guardrails-core-tool-policy";
 export { buildToolkitContract } from "./guardrails-core-toolkit-contract";
 export { buildOperatorApprovalPacket, hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 export type { OperatorApprovalDecision, OperatorApprovalIntentKind, OperatorApprovalInteraction, OperatorApprovalPacket, OperatorApprovalPacketInput } from "./guardrails-core-operator-approval";

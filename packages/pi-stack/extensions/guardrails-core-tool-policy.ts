@@ -1,6 +1,12 @@
-import { createEditToolDefinition, createGrepToolDefinition, createReadToolDefinition, createWriteToolDefinition, type ToolDefinition } from "@earendil-works/pi-coding-agent";
 import { existsSync, statSync } from "node:fs";
 import path from "node:path";
+
+export type ToolDefinitionLike = {
+  name: string;
+  description: string;
+  promptGuidelines?: string[];
+  execute: (...args: unknown[]) => unknown;
+};
 
 export interface DeclaredPathPolicy {
   cwd: string;
@@ -81,10 +87,10 @@ export function evaluateDeclaredPathPolicy(params: unknown, policy: DeclaredPath
   return { ok: true };
 }
 
-export function wrapToolDefinitionWithDeclaredPathPolicy<TParams extends Parameters<ToolDefinition["execute"]>[1] = Parameters<ToolDefinition["execute"]>[1]>(
-  tool: ToolDefinition,
+export function wrapToolDefinitionWithDeclaredPathPolicy(
+  tool: ToolDefinitionLike,
   policy: DeclaredPathPolicy,
-): ToolDefinition {
+): ToolDefinitionLike {
   const policyLabel = policy.policyLabel ?? "declared-file-scope";
   return {
     ...tool,
@@ -93,20 +99,27 @@ export function wrapToolDefinitionWithDeclaredPathPolicy<TParams extends Paramet
       ...(tool.promptGuidelines ?? []),
       `Policy: use ${tool.name} only for declared files; outside paths are blocked by the runtime guard.`,
     ],
-    async execute(toolCallId, params, signal, onUpdate, ctx) {
+    async execute(toolCallId: unknown, params: unknown, signal: unknown, onUpdate: unknown, ctx: unknown) {
       const decision = evaluateDeclaredPathPolicy(params, policy);
       if (!decision.ok) {
         throw new Error(`[tool-policy:${policyLabel}] ${tool.name} blocked: ${decision.reason}${decision.field ? ` field=${decision.field}` : ""}${decision.value ? ` value=${decision.value}` : ""}`);
       }
-      return tool.execute(toolCallId, params as TParams, signal, onUpdate, ctx);
+      return tool.execute(toolCallId, params, signal, onUpdate, ctx);
     },
   };
 }
 
 export interface SdkWorkerToolPolicyPlan {
-  customTools: ToolDefinition[];
+  customTools: ToolDefinitionLike[];
   unsupportedTools: string[];
   policySummary: string[];
+}
+
+export interface DeclaredFileScopedToolFactory {
+  read(cwd: string): ToolDefinitionLike;
+  grep(cwd: string): ToolDefinitionLike;
+  write(cwd: string): ToolDefinitionLike;
+  edit(cwd: string): ToolDefinitionLike;
 }
 
 export const DECLARED_FILE_SCOPED_SDK_WORKER_SUPPORTED_TOOLS = ["read", "grep", "write", "edit"] as const;
@@ -122,15 +135,16 @@ export function buildDeclaredFileScopedSdkWorkerTools(input: {
   cwd: string;
   declaredFiles: string[];
   toolAllowlist: string[];
+  toolFactory: DeclaredFileScopedToolFactory;
 }): SdkWorkerToolPolicyPlan {
-  const customTools: ToolDefinition[] = [];
+  const customTools: ToolDefinitionLike[] = [];
   const policySummary: string[] = [];
   const uniqueTools = [...new Set(input.toolAllowlist.map((tool) => tool.trim()).filter(Boolean))];
   const unsupportedTools = findUnsupportedDeclaredFileScopedSdkWorkerTools(uniqueTools);
 
   for (const toolName of uniqueTools) {
     if (toolName === "read") {
-      customTools.push(wrapToolDefinitionWithDeclaredPathPolicy(createReadToolDefinition(input.cwd), {
+      customTools.push(wrapToolDefinitionWithDeclaredPathPolicy(input.toolFactory.read(input.cwd), {
         cwd: input.cwd,
         declaredFiles: input.declaredFiles,
         pathFields: ["path"],
@@ -139,7 +153,7 @@ export function buildDeclaredFileScopedSdkWorkerTools(input: {
       }));
       policySummary.push("read:path=>declared-files");
     } else if (toolName === "grep") {
-      customTools.push(wrapToolDefinitionWithDeclaredPathPolicy(createGrepToolDefinition(input.cwd), {
+      customTools.push(wrapToolDefinitionWithDeclaredPathPolicy(input.toolFactory.grep(input.cwd), {
         cwd: input.cwd,
         declaredFiles: input.declaredFiles,
         pathFields: ["path"],
@@ -149,7 +163,7 @@ export function buildDeclaredFileScopedSdkWorkerTools(input: {
       }));
       policySummary.push("grep:path=>declared-files;glob=blocked");
     } else if (toolName === "write") {
-      customTools.push(wrapToolDefinitionWithDeclaredPathPolicy(createWriteToolDefinition(input.cwd), {
+      customTools.push(wrapToolDefinitionWithDeclaredPathPolicy(input.toolFactory.write(input.cwd), {
         cwd: input.cwd,
         declaredFiles: input.declaredFiles,
         pathFields: ["path"],
@@ -158,7 +172,7 @@ export function buildDeclaredFileScopedSdkWorkerTools(input: {
       }));
       policySummary.push("write:path=>declared-files");
     } else if (toolName === "edit") {
-      customTools.push(wrapToolDefinitionWithDeclaredPathPolicy(createEditToolDefinition(input.cwd), {
+      customTools.push(wrapToolDefinitionWithDeclaredPathPolicy(input.toolFactory.edit(input.cwd), {
         cwd: input.cwd,
         declaredFiles: input.declaredFiles,
         pathFields: ["path"],

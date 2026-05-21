@@ -1,4 +1,3 @@
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { evaluateDelegationLaneCapabilitySnapshot } from "./guardrails-core-autonomy-lane";
 import { buildDelegateOrExecuteDecisionPacket, buildDelegationRehearsalDecisionPacket } from "./guardrails-core-ops-calibration";
 import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan } from "./guardrails-core-background-process";
@@ -73,6 +72,10 @@ export type RunwayReadinessCue = {
   delegation: DelegationRunwayCue;
   background: BackgroundRunwayCue;
   summary: string;
+};
+
+export type ToolInventoryProvider = {
+  getAllTools?: () => unknown[];
 };
 
 function inferBackgroundCapabilitySignals(toolNames: Set<string>): {
@@ -257,10 +260,10 @@ function buildBackgroundRunwayCue(
 export function buildRunwayReadinessCue(
   p: Record<string, unknown>,
   ctx: { cwd: string },
-  pi: Pick<ExtensionAPI, "getAllTools">,
+  toolInventory: ToolInventoryProvider,
 ): RunwayReadinessCue {
   const toolNames = new Set(
-    (typeof pi.getAllTools === "function" ? pi.getAllTools() : [])
+    (typeof toolInventory.getAllTools === "function" ? toolInventory.getAllTools() : [])
       .map((tool) => (tool && typeof tool === "object" ? (tool as { name?: unknown }).name : undefined))
       .filter((name): name is string => typeof name === "string"),
   );

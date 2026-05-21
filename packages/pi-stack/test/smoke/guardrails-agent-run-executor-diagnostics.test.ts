@@ -221,6 +221,12 @@ describe("agent run executor diagnostics", () => {
       cwd,
       declaredFiles: ["packages/pi-stack/README.md"],
       toolAllowlist: ["read", "grep", "write", "edit", "find"],
+      toolFactory: {
+        read: () => ({ name: "read", description: "read", execute: vi.fn() }),
+        grep: () => ({ name: "grep", description: "grep", execute: vi.fn() }),
+        write: () => ({ name: "write", description: "write", execute: vi.fn() }),
+        edit: () => ({ name: "edit", description: "edit", execute: vi.fn() }),
+      },
     });
     expect(plan.customTools.map((tool) => tool.name)).toEqual(["read", "grep", "write", "edit"]);
     expect(plan.unsupportedTools).toEqual(["find"]);

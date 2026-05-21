@@ -28,6 +28,14 @@ test("keeps current guardrails core free from unapproved Pi runtime imports", ()
     !report.allowedRuntimeCouplings.some((finding) => finding.file.endsWith("guardrails-core-read-path-runtime.ts")),
     "read path runtime guard must stay engine-agnostic",
   );
+  assert.ok(
+    !report.allowedRuntimeCouplings.some((finding) => finding.file.endsWith("guardrails-core-autonomy-lane-runway.ts")),
+    "autonomy lane runway must stay engine-agnostic",
+  );
+  assert.ok(
+    !report.allowedRuntimeCouplings.some((finding) => finding.file.endsWith("guardrails-core-tool-policy.ts")),
+    "tool policy must stay engine-agnostic",
+  );
 });
 
 test("blocks new core primitive files that import the Pi runtime directly", () => withWorkspace("engine-boundary-block", (root) => {

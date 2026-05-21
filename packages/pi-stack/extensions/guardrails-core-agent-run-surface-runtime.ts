@@ -1,4 +1,4 @@
-import { AuthStorage, createAgentSession, DefaultResourceLoader, getAgentDir, ModelRegistry, SessionManager, SettingsManager } from "@earendil-works/pi-coding-agent";
+import { AuthStorage, createAgentSession, createEditToolDefinition, createGrepToolDefinition, createReadToolDefinition, createWriteToolDefinition, DefaultResourceLoader, getAgentDir, ModelRegistry, SessionManager, SettingsManager } from "@earendil-works/pi-coding-agent";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type AgentRunSdkInProcessPacketResult } from "./guardrails-core-agent-run-sdk-preview";
@@ -310,6 +310,12 @@ export function startSdkInProcessWorker(ctxCwd: string, packet: AgentRunSdkInPro
         cwd: packet.runSpec.cwd,
         declaredFiles: packet.runSpec.declaredFiles,
         toolAllowlist: packet.runSpec.toolAllowlist,
+        toolFactory: {
+          read: createReadToolDefinition,
+          grep: createGrepToolDefinition,
+          write: createWriteToolDefinition,
+          edit: createEditToolDefinition,
+        },
       });
       appendAgentRunLogLine(logPath, `[sdk-runner] toolPolicy=${toolPolicy.policySummary.join(",") || "none"}`);
       if (toolPolicy.unsupportedTools.length > 0) {
