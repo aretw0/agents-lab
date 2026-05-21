@@ -101,7 +101,7 @@ lab pi
 - [Primitivas](./docs/primitives/)
 - [Arquitetura](./docs/architecture/)
 - [Engines](./docs/engines/)
-- [Research](./docs/research/)
+- [Research](./docs/research/) - evidência datada; não é a fonte canônica pública até promoção
 
 O site público é gerado a partir de `docs/` via GitHub Pages. Localmente:
 
@@ -129,7 +129,7 @@ pnpm run docs:package:check
 
 ## Release
 
-Releases npm usam changesets e tags semver. O workflow `Publish` publica pacotes; GitHub Pages e publicado separadamente a partir de `main /docs`.
+Releases npm usam changesets e tags semver. O workflow `Publish` publica pacotes; GitHub Pages é publicado separadamente a partir de `main /docs`.
 
 ## Licença
 

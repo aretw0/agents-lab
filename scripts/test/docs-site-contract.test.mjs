@@ -40,18 +40,19 @@ test("docs homepage routes readers through canonical information architecture", 
 		"{{ site.repo_url }}/blob/main/ROADMAP.md",
 		"{{ site.repo_url }}/blob/main/CONTRIBUTING.md",
 		"{{ '/guides/recommended-pi-stack.html' | relative_url }}",
+		"{{ '/guides/devcontainer-factory-contract.html' | relative_url }}",
 		"{{ '/guides/ci-governance.html' | relative_url }}",
 		"{{ '/guides/control-plane-operating-doctrine.html' | relative_url }}",
 		"{{ '/architecture/README.html' | relative_url }}",
 		"{{ '/primitives/README.html' | relative_url }}",
 		"{{ '/engines/README.html' | relative_url }}",
-		"{{ '/research/0-8-readiness-map.html' | relative_url }}",
 		"{{ '/site-map.html' | relative_url }}",
 	]) {
 		assert.match(index, new RegExp(link.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 	}
 
 	assert.match(index, /This site is a curated entrypoint/);
+	assert.doesNotMatch(index, /\/research\/0-8-readiness-map\.html/);
 });
 
 test("root README keeps user and maintainer surfaces separate", () => {
@@ -102,6 +103,7 @@ test("site map documents promotion and publication boundaries", () => {
 	assert.match(siteMap, /Local Validation/);
 	assert.match(siteMap, /Excluded from Jekyll/);
 	assert.match(siteMap, /Promote operational material to `docs\/guides\/`, `docs\/primitives\/` or `docs\/architecture\/`/);
+	assert.match(siteMap, /not the homepage/);
 	assert.match(siteMap, /Do not publish `docs\/research\/data\/`/);
 	assert.match(siteMap, /pnpm run docs:site:serve/);
 	assert.match(siteMap, /`docs:site:build` mirrors the deploy target/);

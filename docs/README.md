@@ -8,8 +8,8 @@ Este diretório centraliza a documentação operacional, arquitetural e de pesqu
 |-------|----------|
 | [`index.md`](./index.md) | Homepage Jekyll mínima e curada para GitHub Pages |
 | [`site-map.md`](./site-map.md) | Contrato editorial da navegação pública e limites de publicação |
-| [`start-here.md`](./start-here.md) | Entrada por perfil: usuário, maintainer, operador control-plane, arquitetura e docs |
-| [`research/`](./research/) | Pesquisas, análises e material de referência sobre agentes |
+| [`start-here.md`](./start-here.md) | Entrada por perfil: usuário, mantenedor, operador do control plane, curadoria e evidência |
+| [`research/`](./research/) | Evidência datada e investigação; não é fonte canônica pública até promoção |
 | [`guides/`](./guides/) | Guias práticos de uso, configuração e boas práticas |
 | [`primitives/`](./primitives/) | Conceitos, catálogo e especificações de primitivas reutilizáveis |
 | [`engines/`](./engines/) | Comparações e análises de engines (Pi e alternativas) |
