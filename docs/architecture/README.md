@@ -11,9 +11,9 @@ Este diretório reúne decisões arquiteturais, ownership por capability, diagra
 
 | Documento | Status | Uso |
 |---|---|---|
-| [stack-sovereignty-rfc-2026-04.md](./stack-sovereignty-rfc-2026-04.md) | RFC aplicado em partes | Owner por capability, filtros, política engine vs policy |
-| [stack-sovereignty-audit-latest.md](./stack-sovereignty-audit-latest.md) | gerado/report | Snapshot local de soberania da stack |
-| [provider-usage-tui-design.md](./provider-usage-tui-design.md) | design/rascunho | Diagramas Mermaid e proposta de painel de quota/provider |
+| [stack-sovereignty-rfc-2026-04.md]({{ '/architecture/stack-sovereignty-rfc-2026-04.html' | relative_url }}) | RFC aplicado em partes | Owner por capability, filtros, política engine vs policy |
+| [stack-sovereignty-audit-latest.md]({{ '/architecture/stack-sovereignty-audit-latest.html' | relative_url }}) | gerado/report | Snapshot local de soberania da stack |
+| [provider-usage-tui-design.md]({{ '/architecture/provider-usage-tui-design.html' | relative_url }}) | design/rascunho | Diagramas Mermaid e proposta de painel de quota/provider |
 
 ## Como promover um diagrama
 

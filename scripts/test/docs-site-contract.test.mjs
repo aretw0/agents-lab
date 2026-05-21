@@ -106,6 +106,23 @@ test("public entrypoint pages do not route site readers to raw markdown", () => 
 	}
 });
 
+test("published index pages do not route site readers to raw markdown", () => {
+	for (const file of [
+		"docs/guides/README.md",
+		"docs/primitives/README.md",
+		"docs/research/README.md",
+		"docs/architecture/README.md",
+		"docs/engines/README.md",
+	]) {
+		const source = read(file);
+		const rawMarkdownLinks = [...source.matchAll(/\]\(([^)]*\.md)\)/g)]
+			.map((match) => match[1])
+			.filter((href) => !href.startsWith("{{ site.repo_url }}"));
+
+		assert.deepEqual(rawMarkdownLinks, [], `${file} has internal raw markdown links`);
+	}
+});
+
 test("public entrypoint html links point to Jekyll-rendered sources", () => {
 	for (const file of ["docs/index.md", "docs/start-here.md", "docs/site-map.md"]) {
 		const source = read(file);

@@ -60,7 +60,7 @@ O código distribuído hoje continua sendo uma stack Pi, mas as primitivas novas
 
 | Documento | Descrição | Status |
 |-----------|-----------|--------|
-| [pi-ecosystem-map.md](./pi-ecosystem-map.md) | Mapa do ecossistema Pi, camadas, extensibilidade e padrões emergentes | Inicial |
+| [pi-ecosystem-map.md]({{ '/engines/pi-ecosystem-map.html' | relative_url }}) | Mapa do ecossistema Pi, camadas, extensibilidade e padrões emergentes | Inicial |
 
 ### Refarm (engine futura)
 
