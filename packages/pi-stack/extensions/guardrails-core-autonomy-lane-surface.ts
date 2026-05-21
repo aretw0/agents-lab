@@ -330,7 +330,14 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const freshness = readDelegationFreshnessSignals(ctx.cwd);
+      const hasExplicitPreload = p.preload_decision === "use-pack" || p.preload_decision === "fallback-canonical";
+      const hasExplicitDirty = p.dirty_signal === "clean" || p.dirty_signal === "dirty" || p.dirty_signal === "unknown";
+      const freshness = hasExplicitPreload && hasExplicitDirty
+        ? {
+          preloadDecision: p.preload_decision as "use-pack" | "fallback-canonical",
+          dirtySignal: p.dirty_signal as "clean" | "dirty" | "unknown",
+        }
+        : readDelegationFreshnessSignals(ctx.cwd);
       const snapshot = evaluateDelegationLaneCapabilitySnapshot({
         preloadDecision: typeof p.preload_decision === "string" ? p.preload_decision : freshness.preloadDecision,
         dirtySignal: typeof p.dirty_signal === "string" ? p.dirty_signal : freshness.dirtySignal,

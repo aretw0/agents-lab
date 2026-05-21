@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { registerGuardrailsAutonomyLaneSurface } from "../../extensions/guardrails-core-autonomy-lane-surface";
+import { buildRunwayReadinessCue } from "../../extensions/guardrails-core-autonomy-lane-runway";
 
 type RegisteredTool = {
   name: string;
@@ -493,6 +494,27 @@ describe("autonomy lane surface", () => {
     expect(runwayCue?.delegation?.decision).toBe("ready-delegation-rehearsal");
     expect(runwayCue?.background?.decision).toBe("ready-window");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("runway=ready-window");
+  });
+
+  it("builds runway readiness from explicit signals without freshness filesystem reads", () => {
+    const result = buildRunwayReadinessCue({
+      delegation_preload_decision: "use-pack", delegation_dirty_signal: "clean",
+      delegation_mix_decision: "ready", delegation_mix_score: 82, delegation_mix_delegation_events: 1,
+      delegation_mix_swarm_events: 1, delegation_auto_advance_decision: "eligible",
+      delegation_telemetry_decision: "ready", delegation_telemetry_score: 78,
+      delegation_telemetry_blocked_rate_pct: 10, background_needs_server: false,
+      background_has_process_registry: true, background_has_port_lease_lock: true,
+      background_has_bounded_log_tail: true, background_has_structured_stacktrace_capture: true,
+      background_has_healthcheck_probe: true, background_has_graceful_stop_then_kill: true,
+      background_has_reload_handoff_cleanup: true, background_has_plan_surface: true,
+      background_has_lifecycle_surface: true, background_rehearsal_slices: 2,
+      background_stop_source_coverage_pct: 92, background_lifecycle_classified: true,
+      background_rollback_plan_known: true, background_unresolved_blockers: 0,
+    }, { cwd: "\0invalid-cwd" }, { getAllTools: () => [{ name: "background_process_plan" }, { name: "background_process_lifecycle_plan" }] });
+
+    expect(result.decision).toBe("ready-window");
+    expect(result.delegation.decision).toBe("ready-delegation-rehearsal");
+    expect(result.background.decision).toBe("ready-window");
   });
 
   it("exposes report-only anti-bloat cue in autonomy lane status", () => {

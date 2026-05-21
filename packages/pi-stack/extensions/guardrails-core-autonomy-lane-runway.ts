@@ -40,6 +40,20 @@ export function readDelegationFreshnessSignals(cwd: string): {
   };
 }
 
+function resolveDelegationFreshnessSignals(p: Record<string, unknown>, cwd: string): {
+  preloadDecision: "use-pack" | "fallback-canonical";
+  dirtySignal: "clean" | "dirty" | "unknown";
+} {
+  const preloadDecision = pickEnumValue(p.delegation_preload_decision, ["use-pack", "fallback-canonical"]);
+  const dirtySignal = pickEnumValue(p.delegation_dirty_signal, ["clean", "dirty", "unknown"]);
+  if (preloadDecision && dirtySignal) return { preloadDecision, dirtySignal };
+  const freshness = readDelegationFreshnessSignals(cwd);
+  return {
+    preloadDecision: preloadDecision ?? freshness.preloadDecision,
+    dirtySignal: dirtySignal ?? freshness.dirtySignal,
+  };
+}
+
 export type DelegationRunwayCue = {
   decision: "ready-delegation-rehearsal" | "local-execute-first" | "defer";
   recommendationCode:
@@ -114,10 +128,10 @@ function normalizeBackgroundMode(value: unknown): "auto" | "shared-service" | "i
 }
 
 function buildDelegationRunwayCue(p: Record<string, unknown>, cwd: string): DelegationRunwayCue {
-  const freshness = readDelegationFreshnessSignals(cwd);
+  const freshness = resolveDelegationFreshnessSignals(p, cwd);
   const capability = evaluateDelegationLaneCapabilitySnapshot({
-    preloadDecision: pickEnumValue(p.delegation_preload_decision, ["use-pack", "fallback-canonical"]) ?? freshness.preloadDecision,
-    dirtySignal: pickEnumValue(p.delegation_dirty_signal, ["clean", "dirty", "unknown"]) ?? freshness.dirtySignal,
+    preloadDecision: freshness.preloadDecision,
+    dirtySignal: freshness.dirtySignal,
     monitorClassifyFailures: asNumberWithDefault(p.monitor_classify_failures, 0),
     subagentsReady: asBooleanWithDefault(p.subagents_ready, true),
   });
