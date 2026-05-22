@@ -16865,6 +16865,15 @@
       "method": "automated-test",
       "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts; pnpm run test:smoke; pnpm run test:engine:boundary; pnpm run repo:complexity:strict",
       "timestamp": "2026-05-22T20:44:54.154Z"
+    },
+    {
+      "id": "VER-BUD-1051-agent-run-batch-dry-run",
+      "target": "TASK-BUD-1051",
+      "target_type": "task",
+      "status": "passed",
+      "method": "automated-test",
+      "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-batch-dry-run.test.ts; pnpm run test:engine:boundary; pnpm run test:docs:site; pnpm run repo:discourse:audit; pnpm run test:smoke; pnpm run repo:complexity:strict",
+      "timestamp": "2026-05-22T20:57:27.302Z"
     }
   ]
 }

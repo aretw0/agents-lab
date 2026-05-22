@@ -47,7 +47,7 @@ Code/runtime/tooling work that should eventually be implemented with tests:
 9. `TASK-BUD-1060` — missing/weak tool feedback loop: classify capability gaps and prepare retry with the right toolkit.
 10. `TASK-BUD-1061` — first-hatch toolkit inventory for workspace/sandbox capabilities and missing tools.
 
-Implemented status: `TASK-BUD-1056` now has the report-only `context_watch_reload_before_compact_packet`, which reuses the existing reload gate and never dispatches reload, compact, resume or mutation. `TASK-BUD-1060` is covered in `agent_run_outcome_packet`: worker-reported `missing-tool`, `weak-tool`, or `capability-gap` feedback becomes a fail/retry-with-toolkit outcome with a report-only retry packet. `TASK-BUD-1062` is covered by `turn_boundary_decision_packet` inputs for clean runtime closes, keeping the reload/canary/next-slice ritual short.
+Implemented status: `TASK-BUD-1051` now has the report-only `agent_run_batch_dry_run` packet for validating planned batch runIds against lower worker gates without starting a worker. `TASK-BUD-1056` has the report-only `context_watch_reload_before_compact_packet`, which reuses the existing reload gate and never dispatches reload, compact, resume or mutation. `TASK-BUD-1060` is covered in `agent_run_outcome_packet`: worker-reported `missing-tool`, `weak-tool`, or `capability-gap` feedback becomes a fail/retry-with-toolkit outcome with a report-only retry packet. `TASK-BUD-1062` is covered by `turn_boundary_decision_packet` inputs for clean runtime closes, keeping the reload/canary/next-slice ritual short.
 
 ## Soft intent backlog
 

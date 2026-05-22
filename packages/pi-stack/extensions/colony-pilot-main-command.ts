@@ -1,3 +1,7 @@
+/**
+ * @capability-id colony-runtime-governance
+ * @capability-criticality medium
+ */
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import type { HatchExperienceMode } from "./colony-pilot-hatch";
 import { capabilityGuidance, evaluateHatchReadiness, formatHatchReadiness, formatHatchRunbook } from "./colony-pilot-hatch";

@@ -23424,7 +23424,7 @@
     {
       "id": "TASK-BUD-1051",
       "description": "[hard-intent/batch-dispatch] Projetar e implementar canário dry-run para consumir autorização de batch sem burlar gates de dispatch inferiores.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1049",
@@ -23444,7 +23444,8 @@
         "Teste cobre autorização válida, runId fora do batch e protected scope."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Hard intent: ponte segura entre contrato de batch e gate de dispatch, sem bypass.\n[provenance:human] source_task=none reason=Operador quer parar de autorizar worker por worker, mas preservar contratos inferiores."
+      "notes": "Hard intent: ponte segura entre contrato de batch e gate de dispatch, sem bypass.\n[provenance:human] source_task=none reason=Operador quer parar de autorizar worker por worker, mas preservar contratos inferiores.\n2026-05-22: Added report-only agent_run_batch_dry_run packet/tool. It validates explicit local-batch authorization, planned runIds, lower agent_run_start_packet gates, protected/scheduler/repeat/concurrency blockers, and keeps dispatch/process start disabled.",
+      "verification": "VER-BUD-1051-agent-run-batch-dry-run"
     },
     {
       "id": "TASK-BUD-1052",

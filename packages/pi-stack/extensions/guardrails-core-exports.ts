@@ -130,6 +130,8 @@ export type { AgentWorkerLaneReadiness, AgentWorkerLaneReadinessInput, AgentWork
 export { normalizeProviderExecutionBudgetDecision, resolveProviderExecutionBudgetEvidence } from "./guardrails-core-provider-budget-evidence";
 export type { ProviderExecutionBudgetDecision, ProviderExecutionBudgetEvidence, ProviderExecutionBudgetEvidenceInput } from "./guardrails-core-provider-budget-evidence";
 export { buildAgentRunPlan } from "./guardrails-core-agent-run-plan";
+export { buildAgentRunBatchDryRunPacket } from "./guardrails-core-agent-run-batch-dry-run";
+export type { AgentRunBatchDryRunPacket, AgentRunBatchDryRunPacketInput, AgentRunBatchDryRunWorkerInput, AgentRunBatchDryRunWorkerPlan } from "./guardrails-core-agent-run-batch-dry-run";
 export { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildCodexSparkPromotedWorkerPacket } from "./guardrails-core-agent-run-start";
 export { buildAgentRunAbortPlan, buildAgentRunBatchOutcomePacket, buildAgentRunOutcomePacket, buildAgentRunRegistryUpsertPacket, buildAgentRunStatus } from "./guardrails-core-agent-run-runtime";
 export { buildAgentRunArgvDiagnostics, buildAgentRunStartupDiagnosticPacket, classifyAgentRunFailure } from "./guardrails-core-agent-run-diagnostics";

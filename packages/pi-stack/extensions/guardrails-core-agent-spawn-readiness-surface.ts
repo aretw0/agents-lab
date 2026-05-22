@@ -10,6 +10,7 @@ import { Type } from "@sinclair/typebox";
 import { asOptionalBoolean, asOptionalStringArray, registerAgentRunBasicTools } from "./guardrails-core-agent-run-basic-surface";
 import { buildAgentRunExecutorStrategyPacket } from "./guardrails-core-agent-run-executor-strategy";
 import { evaluateAgentWorkerLaneReadiness } from "./guardrails-core-agent-worker-lane";
+import { buildAgentRunBatchDryRunPacket } from "./guardrails-core-agent-run-batch-dry-run";
 import { registerAgentRunSdkProviderModelArenaTool } from "./guardrails-core-agent-run-sdk-arena-surface";
 import { registerAgentRunSdkReadOnlyBatchTools } from "./guardrails-core-agent-run-sdk-batch-surface";
 import { registerAgentRunLifecycleTools } from "./guardrails-core-agent-run-lifecycle-surface";
@@ -24,6 +25,82 @@ import { appendAgentRunLogLine, buildPiSubprocessPreflightLines, createAgentRunC
 
 export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): void {
   registerAgentRunBasicTools(pi);
+
+  pi.registerTool({
+    name: "agent_run_batch_dry_run",
+    label: "Agent Run Batch Dry Run",
+    description: "Report-only batch canary for planned local-safe worker runIds. Never starts workers; each planned run must still pass lower agent-run gates.",
+    parameters: Type.Object({
+      batch_id: Type.Optional(Type.String({ description: "Stable batch id for deriving planned runIds." })),
+      authorization: Type.Optional(Type.String({ description: "Must be explicit-local-batch. Generic authorization is blocked." })),
+      workers: Type.Optional(Type.Array(Type.Object({
+        task_id: Type.Optional(Type.String({ description: "Task id or local slice label for this planned worker." })),
+        run_id: Type.Optional(Type.String({ description: "Optional explicit planned run id." })),
+        goal: Type.Optional(Type.String({ description: "Worker goal/prompt." })),
+        provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference." })),
+        cwd: Type.Optional(Type.String({ description: "Worker cwd. Defaults to current cwd when omitted." })),
+        declared_files: Type.Optional(Type.Array(Type.String(), { description: "Exact file scope for this worker." })),
+        timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds." })),
+        file_contract: Type.Optional(Type.String({ description: "read-only or mutation." })),
+        budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision." })),
+        budget_evidence: Type.Optional(Type.String({ description: "Short provider/model budget evidence." })),
+        protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks this worker when protected scope is requested." })),
+      }), { description: "Planned workers for dry-run preview. Initial batch canary stays report-only and concurrency=1." })),
+      requested_run_id: Type.Optional(Type.String({ description: "Optional selected runId to verify it belongs to this batch." })),
+      local_safe_scope: Type.Optional(Type.Boolean({ description: "Whether the batch scope is local-safe." })),
+      validation_gate_known: Type.Optional(Type.Boolean({ description: "Whether parent-side validation is known." })),
+      rollback_plan_known: Type.Optional(Type.Boolean({ description: "Whether rollback is known." })),
+      stop_conditions_clear: Type.Optional(Type.Boolean({ description: "Whether stop conditions are clear." })),
+      concurrent_worker_limit: Type.Optional(Type.Number({ description: "Must be 1 for the first canary." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks protected scope." })),
+      scheduler_requested: Type.Optional(Type.Boolean({ description: "Blocks scheduler requests." })),
+      repeat_requested: Type.Optional(Type.Boolean({ description: "Blocks persistent repeat requests." })),
+      remote_or_offload_requested: Type.Optional(Type.Boolean({ description: "Blocks remote/offload requests." })),
+      github_actions_requested: Type.Optional(Type.Boolean({ description: "Blocks GitHub Actions/protected CI requests." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const workers = Array.isArray(p.workers)
+        ? p.workers.map((worker) => {
+            const record = (worker ?? {}) as Record<string, unknown>;
+            return {
+              taskId: typeof record.task_id === "string" ? record.task_id : undefined,
+              runId: typeof record.run_id === "string" ? record.run_id : undefined,
+              goal: typeof record.goal === "string" ? record.goal : undefined,
+              providerModelRef: typeof record.provider_model_ref === "string" ? record.provider_model_ref : undefined,
+              cwd: typeof record.cwd === "string" ? record.cwd : ctx?.cwd,
+              declaredFiles: asOptionalStringArray(record.declared_files),
+              timeoutMs: typeof record.timeout_ms === "number" ? record.timeout_ms : undefined,
+              fileContract: typeof record.file_contract === "string" ? record.file_contract : undefined,
+              budgetDecision: typeof record.budget_decision === "string" ? record.budget_decision : undefined,
+              budgetEvidence: typeof record.budget_evidence === "string" ? record.budget_evidence : undefined,
+              protectedScopeRequested: asOptionalBoolean(record.protected_scope_requested),
+            };
+          })
+        : [];
+      const result = buildAgentRunBatchDryRunPacket({
+        batchId: typeof p.batch_id === "string" ? p.batch_id : undefined,
+        authorization: typeof p.authorization === "string" ? p.authorization : undefined,
+        workers,
+        requestedRunId: typeof p.requested_run_id === "string" ? p.requested_run_id : undefined,
+        localSafeScope: asOptionalBoolean(p.local_safe_scope),
+        validationGateKnown: asOptionalBoolean(p.validation_gate_known),
+        rollbackPlanKnown: asOptionalBoolean(p.rollback_plan_known),
+        stopConditionsClear: asOptionalBoolean(p.stop_conditions_clear),
+        concurrentWorkerLimit: typeof p.concurrent_worker_limit === "number" ? p.concurrent_worker_limit : undefined,
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+        schedulerRequested: asOptionalBoolean(p.scheduler_requested),
+        repeatRequested: asOptionalBoolean(p.repeat_requested),
+        remoteOrOffloadRequested: asOptionalBoolean(p.remote_or_offload_requested),
+        githubActionsRequested: asOptionalBoolean(p.github_actions_requested),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "agent_run_batch_dry_run",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
 
   pi.registerTool({
     name: "agent_run_start_packet",
