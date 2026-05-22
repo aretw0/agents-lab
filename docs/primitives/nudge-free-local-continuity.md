@@ -260,4 +260,4 @@ Perfil atual do `agents-lab`: iteração contínua de melhoramento. Jogando em c
 
 Quando falta explicitude, o control-plane deve tentar descobrir esse perfil com entrevista curta: objetivo, apetite de autonomia, capacidades aceitáveis, limites e exceções. Depois disso, ele continua usando os mesmos mecanismos: board, nudge-free/local-continuity, checkpoints, gates de quota/máquina, dispatch/outcome de workers quando aplicável e paradas graciosas.
 
-`queen` fica estacionado como hipótese futura para swarms/colônias: um papel delegado pelo control-plane para coordenar trabalho de colônia quando essa maturidade existir, não o nome do perfil operacional atual.
+Um coordenador de colônia pode surgir como papel delegado pelo control-plane quando essa maturidade existir. Esse papel não é o nome do perfil operacional atual.

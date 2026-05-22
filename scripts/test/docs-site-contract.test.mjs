@@ -233,6 +233,7 @@ test("published primitives use operator terminology for local contracts", () => 
 
 	assert.match(continuity, /local_slice_operator_contract_review/);
 	assert.doesNotMatch(continuity, /local_slice_human_contract_review/);
+	assert.doesNotMatch(continuity, /\bqueen\b/i);
 });
 
 test("package guide sync keeps lab-only maintenance out of distributed docs", () => {
