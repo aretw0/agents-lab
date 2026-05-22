@@ -16775,6 +16775,15 @@
       "method": "focal-smoke",
       "evidence": "Added distributed lab skill packages/lab-skills/skills/reality-check/SKILL.md with a minimal prior-art decision contract: external_or_cached_sources, local_artifacts, unsupported_hypotheses, adopt/adapt/reject/defer recommendation, license/security/budget/governance checks, smallest safe slice, and validation. Wired discovery from cultivate-primitive, control-plane-ops, primitive proposal template, lab-skills README, and pi-stack README. Validation: pnpm exec vitest run packages/pi-stack/test/smoke/lab-reality-check-skill.test.ts packages/pi-stack/test/smoke/package-list.test.ts packages/pi-stack/test/smoke/manifest-integrity.test.ts packages/pi-stack/test/smoke/skill-collisions.test.ts passed in agents-lab devcontainer, 4 files, 76 tests.",
       "timestamp": "2026-05-22T19:31:19.954Z"
+    },
+    {
+      "id": "VERIF-TASK-BUD-1078-PNPM-SUPPLY-CHAIN-HARDENING-20260522",
+      "target": "TASK-BUD-1078",
+      "target_type": "task",
+      "status": "passed",
+      "method": "ci:local:parity",
+      "evidence": "Passed in devcontainer eb303930747d: pnpm install --frozen-lockfile --offline; pnpm run test:ci:workflow; pnpm run test:docs:site; pnpm run docs:site:build:smoke; pnpm run ci:local:parity. Implemented pnpm workspace hardening, PR dependency cache trust scoping in CI, and repository supply-chain CI rollback runbook. Commits: 0adce033, 7384c39c.",
+      "timestamp": "2026-05-22T19:47:41.706Z"
     }
   ]
 }

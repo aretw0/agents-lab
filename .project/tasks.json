@@ -24105,7 +24105,7 @@
     {
       "id": "TASK-BUD-1078",
       "description": "[p0/security/supply-chain] Avaliar e migrar o monorepo para pnpm com postura de blindagem contra supply-chain attacks, aplicando recursos de segurança do pnpm e hardening de CI/cache/release antes de confiar em installs/builds sensíveis.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p0",
       "depends_on": [
         "TASK-BUD-1076",
@@ -24131,7 +24131,8 @@
         "Registrar verificação e runbook de rollback; não executar installs remotos ou package-manager switch global sem confirmação explícita."
       ],
       "milestone": "supply-chain-hardening",
-      "notes": "Criado por steering do operador: worms e ataques de supply-chain tornam inseguro confiar em npm install; pnpm deve virar base de segurança, mas com prior-art/check de realidade e gates de protected scope."
+      "notes": "Criado por steering do operador: worms e ataques de supply-chain tornam inseguro confiar em npm install; pnpm deve virar base de segurança, mas com prior-art/check de realidade e gates de protected scope.\n2026-05-22: Completed supply-chain hardening slice. CI now disables dependency cache writes on PRs, pnpm workspace declares minimumReleaseAge plus explicit allowBuilds, and docs/guides/supply-chain-ci-hardening.md records inventory, validation gates, protected npm/npx exceptions, prior-art evidence link and rollback paths. Validation passed in devcontainer: pnpm install --frozen-lockfile --offline; pnpm run test:ci:workflow; pnpm run test:docs:site; pnpm run docs:site:build:smoke; pnpm run ci:local:parity.",
+      "verification": "VERIF-TASK-BUD-1078-PNPM-SUPPLY-CHAIN-HARDENING-20260522"
     },
     {
       "id": "TASK-BUD-1079",
