@@ -16955,6 +16955,33 @@
       "method": "automated-test",
       "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/quota-visibility-formatters.test.ts packages/pi-stack/test/smoke/custom-footer-registration.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts; pnpm run docs:package:check; pnpm run repo:complexity:strict; pnpm run repo:discourse:audit",
       "timestamp": "2026-05-22T21:50:45.924Z"
+    },
+    {
+      "id": "VER-STALE-COLONY-C2-PROMOTION-DISPOSITION-20260522",
+      "target": "colony-c2-promotion",
+      "target_type": "task",
+      "status": "passed",
+      "method": "disposition-packet",
+      "evidence": "Reviewed stale colony-c2-promotion in docs/research/stale-colony-promotion-disposition-2026-05-22.md. No files promoted; source telemetry already had stale disposition and historical recovery notes. Validation: pnpm run test:docs:site; pnpm run repo:discourse:audit; pnpm run release:readiness:v0.8.0.",
+      "timestamp": "2026-05-22T21:57:01.382Z"
+    },
+    {
+      "id": "VER-STALE-COLONY-C-123-PROMOTION-DISPOSITION-20260522",
+      "target": "colony-c-123-promotion",
+      "target_type": "task",
+      "status": "passed",
+      "method": "disposition-packet",
+      "evidence": "Reviewed stale colony-c-123-promotion in docs/research/stale-colony-promotion-disposition-2026-05-22.md. No files promoted; source telemetry lacked workspace report, task summary, file inventory, and validation log. Validation: pnpm run test:docs:site; pnpm run repo:discourse:audit; pnpm run release:readiness:v0.8.0.",
+      "timestamp": "2026-05-22T21:57:10.062Z"
+    },
+    {
+      "id": "VER-STALE-COLONY-C-RET-1-PROMOTION-DISPOSITION-20260522",
+      "target": "colony-c-ret-1-promotion",
+      "target_type": "task",
+      "status": "passed",
+      "method": "disposition-packet",
+      "evidence": "Reviewed stale colony-c-ret-1-promotion in docs/research/stale-colony-promotion-disposition-2026-05-22.md. No files promoted; COMPLETE-like telemetry had no complete delivery packet or rollback plan. Validation: pnpm run test:docs:site; pnpm run repo:discourse:audit; pnpm run release:readiness:v0.8.0.",
+      "timestamp": "2026-05-22T21:57:20.003Z"
     }
   ]
 }
