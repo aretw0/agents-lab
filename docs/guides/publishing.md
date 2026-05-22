@@ -32,7 +32,7 @@ O workflow já usa `--provenance`. Para funcionar, o repositório precisa ter **
 Toda alteração em `packages/` que mereça chegar aos usuários precisa de um changeset:
 
 ```bash
-npx changeset
+pnpm exec changeset
 # Escolha os pacotes afetados
 # Escolha o tipo: patch (correção), minor (novo recurso), major (breaking change)
 # Escreva uma descrição da mudança
@@ -56,7 +56,7 @@ pnpm run release
 Isso executa `changeset version`, que:
 - Lê todos os changesets pendentes em `.changeset/`
 - Bumpa as versões de todos os pacotes `@aretw0/*` em lockstep
-- Atualiza o `CHANGELOG.md` na raiz
+- Atualiza os `CHANGELOG.md` dos pacotes afetados
 - Remove os arquivos `.changeset/*.md` usados
 
 Revise as mudanças antes de commitar:
@@ -76,8 +76,9 @@ git push && git push --tags
 
 O push da tag dispara `.github/workflows/publish.yml` que:
 1. Valida que a tag bate com a versão em todos os `package.json`
-2. Roda `npm install`
-3. Publica `@aretw0/pi-stack`, `@aretw0/git-skills`, `@aretw0/web-skills`, `@aretw0/pi-skills` e `@aretw0/lab-skills` com provenance
+2. Instala dependências pelo setup compartilhado com pnpm e cache privilegiado desligado
+3. Roda smoke/testes/auditorias antes de publicar
+4. Publica `@aretw0/pi-stack`, `@aretw0/git-skills`, `@aretw0/web-skills`, `@aretw0/pi-skills` e `@aretw0/lab-skills` com `npm publish --provenance`
 
 > **Nota para usuários via git:** Quem instalou via `pi install https://github.com/aretw0/agents-lab` recebe atualizações com `pi update` sem esperar o publish no npm.
 
