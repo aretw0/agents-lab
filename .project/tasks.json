@@ -23475,14 +23475,14 @@
     },
     {
       "id": "TASK-BUD-1053",
-      "description": "[soft-intent/skill] Criar skill leve para queen/first-hatch/local-continuity: como descobrir perfil, entrevistar operador e aplicar defaults sem verbosidade.",
-      "status": "planned",
+      "description": "[soft-intent/skill] Criar skill leve para control-plane/first-hatch/local-continuity: como descobrir perfil, entrevistar operador e aplicar defaults sem verbosidade.",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1046"
       ],
       "files": [
-        "packages/pi-skills/skills/queen-continuity/SKILL.md",
+        "packages/pi-skills/skills/control-plane-continuity/SKILL.md",
         "packages/pi-skills/package.json",
         "packages/pi-skills/README.md"
       ],
@@ -23494,7 +23494,8 @@
         "Validação por marker check e i18n lint."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Soft intent: tornar o padrão recuperável como skill para futuras sessões/projetos.\n[provenance:human] source_task=none reason=Não depender de repetir a conversa; transformar em instrução reaproveitável."
+      "notes": "Soft intent: tornar o padrão recuperável como skill para futuras sessões/projetos.\n[provenance:human] source_task=none reason=Não depender de repetir a conversa; transformar em instrução reaproveitável.\n2026-05-22: Added control-plane-continuity skill instead of legacy queen-continuity wording. The skill recovers the continuity profile with a short interview, canonical packets, local-safe slice defaults, worker gate reminders, protected-scope stops, and compact operator-facing output.",
+      "verification": "VER-BUD-1053-control-plane-continuity-skill"
     },
     {
       "id": "TASK-BUD-1054",
@@ -23568,7 +23569,7 @@
     },
     {
       "id": "TASK-BUD-1057",
-      "description": "[soft-intent/queen] Documentar que o loop queen/agents-lab é assistido e auto-crítico, não desassistido: usar recursos maduros, pedir intervenção só quando necessário.",
+      "description": "[soft-intent/control-plane] Documentar que o loop control-plane/agents-lab é assistido e auto-crítico, não desassistido: usar recursos maduros, pedir intervenção só quando necessário.",
       "status": "planned",
       "priority": "p1",
       "depends_on": [
@@ -23576,7 +23577,7 @@
       ],
       "files": [
         "docs/research/queen-continuous-improvement-lane-2026-05.md",
-        "packages/pi-skills/skills/queen-continuity/SKILL.md"
+        "packages/pi-skills/skills/control-plane-continuity/SKILL.md"
       ],
       "acceptance_criteria": [
         "Documento/skill diferencia loop assistido de unattended/desassistido.",
