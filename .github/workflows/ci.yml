@@ -297,6 +297,8 @@ jobs:
           fetch-depth: 0
 
       - uses: ./.github/actions/setup
+        with:
+          cache-mode: ${{ github.event_name == 'pull_request' && 'off' || 'auto' }}
 
       - name: Factory mode advisory (runtime/channel)
         run: |
@@ -331,6 +333,8 @@ jobs:
           fetch-depth: 0
 
       - uses: ./.github/actions/setup
+        with:
+          cache-mode: ${{ github.event_name == 'pull_request' && 'off' || 'auto' }}
 
       - name: Install Ruby build dependencies
         run: |
@@ -356,6 +360,8 @@ jobs:
           fetch-depth: 0
 
       - uses: ./.github/actions/setup
+        with:
+          cache-mode: ${{ github.event_name == 'pull_request' && 'off' || 'auto' }}
 
       - name: Gerar relatório de soberania (non-strict)
         run: node scripts/stack-sovereignty-audit.mjs --no-strict

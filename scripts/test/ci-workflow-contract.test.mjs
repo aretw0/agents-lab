@@ -143,6 +143,22 @@ test("publish workflow stays tag-gated and provenance-scoped", () => {
 	assert.doesNotMatch(workflow, /pull_request_target:/);
 });
 
+test("pnpm supply-chain policy is explicit and cache writes are trust-scoped", () => {
+	const workspace = read("pnpm-workspace.yaml");
+	const ci = read(CI_WORKFLOW);
+	const publish = read(".github/workflows/publish.yml");
+	const expectedCacheMode = "cache-mode: ${{ github.event_name == 'pull_request' && 'off' || 'auto' }}";
+
+	assert.match(workspace, /minimumReleaseAge: 1440/);
+	assert.match(workspace, /allowBuilds:\n\s+"@google\/genai": true\n\s+koffi: true\n\s+pi-lens: true\n\s+protobufjs: true/);
+	assert.equal((ci.match(/uses: \.\/\.github\/actions\/setup/g) || []).length, 3);
+	assert.equal((ci.match(/cache-mode: \$\{\{ github\.event_name == 'pull_request' && 'off' \|\| 'auto' \}\}/g) || []).length, 3);
+	assert.ok(ci.includes(expectedCacheMode));
+	assert.match(publish, /cache-mode: "off"/);
+	assert.doesNotMatch(publish, /pull_request:/);
+	assert.doesNotMatch(publish, /pull_request_target:/);
+});
+
 test("release draft workflow remains manual and tag-validated", () => {
 	const workflow = read(".github/workflows/release-draft.yml");
 
