@@ -34,7 +34,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ruby-full build-essential zlib1g-dev
-          gem install bundler --no-document
+          sudo gem install bundler --no-document
 
       - name: Build and smoke test site
         run: |
@@ -51,4 +51,4 @@ jobs:
 
       - name: Deploy Pages artifact
         id: deployment
-        uses: actions/deploy-pages@8e1c030f1b681925fd9eb4fbfd52d15856875dd7 # v5.0.1
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

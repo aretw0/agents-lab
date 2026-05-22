@@ -30,7 +30,7 @@ test("ci workflow keeps the local parity gate canonical", () => {
 	assert.match(workflow, /sovereignty-report:\n\s+name: Sovereignty Report\n\s+runs-on: ubuntu-latest\n\s+timeout-minutes: 15\n\s+permissions:\n\s+contents: read\n\s+pull-requests: write/);
 	assert.match(workflow, /docs-site:\n\s+name: Docs Site Build\n\s+runs-on: ubuntu-latest\n\s+timeout-minutes: 15\n\s+needs: \[changes\]/);
 	assert.match(workflow, /sudo apt-get install -y ruby-full build-essential zlib1g-dev/);
-	assert.match(workflow, /gem install bundler --no-document/);
+	assert.match(workflow, /sudo gem install bundler --no-document/);
 	assert.match(workflow, /pnpm run docs:site:build:smoke/);
 	assert.match(workflow, /uses: \.\/\.github\/actions\/setup/);
 	assert.match(workflow, /run: pnpm run ci:smoke:gate/);
@@ -83,11 +83,15 @@ test("pages workflow publishes the validated docs artifact", () => {
 	assert.match(workflow, /environment:\n\s+name: github-pages\n\s+url: \$\{\{ steps\.deployment\.outputs\.page_url \}\}/);
 	assert.match(workflow, /uses: \.\/\.github\/actions\/setup/);
 	assert.match(workflow, /sudo apt-get install -y ruby-full build-essential zlib1g-dev/);
+	assert.match(workflow, /sudo gem install bundler --no-document/);
 	assert.match(workflow, /pnpm run docs:site:build:smoke/);
 	assert.match(workflow, /uses: actions\/configure-pages@[0-9a-f]{40}/);
 	assert.match(workflow, /uses: actions\/upload-pages-artifact@[0-9a-f]{40}/);
 	assert.match(workflow, /path: docs\/_site/);
-	assert.match(workflow, /uses: actions\/deploy-pages@[0-9a-f]{40}/);
+	assert.match(
+		workflow,
+		/uses: actions\/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5\.0\.0/,
+	);
 	assert.doesNotMatch(workflow, /pull_request:/);
 	assert.doesNotMatch(workflow, /pull_request_target:/);
 	assert.doesNotMatch(workflow, /path: docs\s*$/m);
