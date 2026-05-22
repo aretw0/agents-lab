@@ -24010,7 +24010,7 @@
     {
       "id": "TASK-BUD-1074",
       "description": "Make pi-stack guardrail scoring surfaces dogfood user/project configuration instead of hardcoded local assumptions",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-1066",
@@ -24031,7 +24031,8 @@
         "Work remains backlog until agent-lane stabilization makes the extraction low-risk."
       ],
       "milestone": "agent-lane-stabilization-followup",
-      "notes": "2026-05-13: Captured from operator feedback: if this tooling is meant for other pi users/projects, agents-lab must be its own user. Guardrail scoring should become configurable via normal user/project config rather than hardcoded local package assumptions. Keep after current stabilization focus on TASK-BUD-1066/TASK-BUD-1071 so agents can help reduce control-plane dependence.\n[provenance:human] source_task=TASK-BUD-1073 reason=Follow-up from line-budget hardening: package-wide scan is useful locally, but reusable tooling should dogfood user/project configuration."
+      "notes": "2026-05-13: Captured from operator feedback: if this tooling is meant for other pi users/projects, agents-lab must be its own user. Guardrail scoring should become configurable via normal user/project config rather than hardcoded local package assumptions. Keep after current stabilization focus on TASK-BUD-1066/TASK-BUD-1071 so agents can help reduce control-plane dependence.\n[provenance:human] source_task=TASK-BUD-1073 reason=Follow-up from line-budget hardening: package-wide scan is useful locally, but reusable tooling should dogfood user/project configuration.\n2026-05-22: Line-budget scanning now dogfoods piStack.guardrailsCore.lineBudget from .pi/settings.json before falling back to packaged defaults. The report-only packet exposes configSource, scanRoots, configWarnings, and thresholds; tests cover default config, custom project config, and ignored generated/vendor directories.",
+      "verification": "VER-BUD-1074-LINE-BUDGET-CONFIG"
     },
     {
       "id": "TASK-BUD-1075",

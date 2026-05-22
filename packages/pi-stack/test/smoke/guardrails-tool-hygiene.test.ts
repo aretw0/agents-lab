@@ -451,6 +451,7 @@ describe("tool hygiene scorecard", () => {
     expect(packet.dispatchAllowed).toBe(false);
     expect(packet.recommendation).toBe("extract");
     expect(packet.recommendationCode).toBe("line-budget-extract");
+    expect(packet.configSource).toBe("default");
     expect(packet.totals.aboveWatch).toBe(2);
     expect(packet.totals.aboveCritical).toBe(1);
     expect(packet.blockers).toContain("line-budget-extract-required");
@@ -507,10 +508,126 @@ describe("tool hygiene scorecard", () => {
     expect(["ok", "watch", "extract"]).toContain(result.details?.recommendation as string);
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.authorization).toBe("none");
+    expect(result.details?.configSource).toBe("default");
+    expect(result.details?.scanRoots).toEqual(["packages/pi-stack"]);
     expect(Array.isArray(result.details?.rows)).toBe(true);
     expect((result.details?.rows as Array<{ path: string }>).some((row) => row.path === "packages/pi-stack/test/smoke/oversized.test.ts")).toBe(true);
     expect((result.details?.rows as Array<{ path: string }>).some((row) => row.path === "packages/pi-stack/test/helpers/new-helper.ts")).toBe(true);
     expect((result.details?.rows as Array<{ path: string }>).some((row) => row.path === "packages/pi-stack/themes/new-package-surface.ts")).toBe(true);
     expect((result.details?.rows as Array<{ path: string }>).some((row) => row.path.includes("node_modules/ignored-package/vendor.ts"))).toBe(false);
+  });
+
+  it("line_budget_snapshot dogfoods project settings for roots, thresholds, and ignored dirs", async () => {
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof registerGuardrailsToolHygieneSurface>[0];
+
+    const cwd = mkdtempSync(path.join(tmpdir(), "line-budget-configured-"));
+    registerGuardrailsToolHygieneSurface(pi);
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "line_budget_snapshot");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ details?: Record<string, unknown>; content?: Array<{ text?: string }> }> | { details?: Record<string, unknown>; content?: Array<{ text?: string }> };
+    };
+
+    mkdirSync(path.join(cwd, ".pi"), { recursive: true });
+    mkdirSync(path.join(cwd, "src"), { recursive: true });
+    mkdirSync(path.join(cwd, "generated"), { recursive: true });
+    writeFileSync(path.join(cwd, ".pi", "settings.json"), JSON.stringify({
+      piStack: {
+        guardrailsCore: {
+          lineBudget: {
+            roots: ["src", "generated"],
+            ignoredDirs: ["generated"],
+            extensions: [".ts"],
+            thresholds: { watch: 500, extract: 700, critical: 900 },
+          },
+        },
+      },
+    }, null, 2), "utf8");
+    writeFileSync(path.join(cwd, "src", "large.ts"), `${"x\n".repeat(750)}`, "utf8");
+    writeFileSync(path.join(cwd, "generated", "ignored.ts"), `${"x\n".repeat(100)}`, "utf8");
+
+    const result = await tool.execute(
+      "tc-line-budget-configured",
+      {},
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+
+    expect(result.details?.configSource).toBe("project-settings");
+    expect(result.details?.scanRoots).toEqual(["src", "generated"]);
+    expect(result.details?.thresholds).toEqual({ watch: 500, extract: 700, critical: 900 });
+    expect(result.details?.recommendation).toBe("extract");
+    expect(result.content?.[0]?.text).toContain("configSource=project-settings");
+    expect((result.details?.rows as Array<{ path: string }>).map((row) => row.path)).toEqual(["src/large.ts"]);
+  });
+
+  it("line_budget_snapshot reports invalid project scan scope instead of silently trusting it", async () => {
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof registerGuardrailsToolHygieneSurface>[0];
+
+    const cwd = mkdtempSync(path.join(tmpdir(), "line-budget-invalid-config-"));
+    registerGuardrailsToolHygieneSurface(pi);
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "line_budget_snapshot");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ details?: Record<string, unknown>; content?: Array<{ text?: string }> }> | { details?: Record<string, unknown>; content?: Array<{ text?: string }> };
+    };
+
+    mkdirSync(path.join(cwd, ".pi"), { recursive: true });
+    mkdirSync(path.join(cwd, "packages", "pi-stack"), { recursive: true });
+    writeFileSync(path.join(cwd, ".pi", "settings.json"), JSON.stringify({
+      piStack: {
+        guardrailsCore: {
+          lineBudget: {
+            roots: ["/tmp/outside", "../outside"],
+            ignoredDirs: ["/tmp/outside"],
+            extensions: ["../ts"],
+          },
+        },
+      },
+    }, null, 2), "utf8");
+    writeFileSync(path.join(cwd, "packages", "pi-stack", "small.ts"), "export {};\n", "utf8");
+
+    const result = await tool.execute(
+      "tc-line-budget-invalid-config",
+      {},
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+
+    expect(result.details?.configSource).toBe("invalid");
+    expect(result.details?.scanRoots).toEqual(["packages/pi-stack"]);
+    expect(result.details?.configWarnings).toEqual([
+      "line-budget-roots-invalid",
+      "line-budget-ignored-dirs-invalid",
+      "line-budget-extensions-invalid",
+    ]);
+    expect(result.details?.blockers).toContain("line-budget-config-invalid");
+    expect(result.details?.risks).toContain("line-budget-config-warning");
   });
 });

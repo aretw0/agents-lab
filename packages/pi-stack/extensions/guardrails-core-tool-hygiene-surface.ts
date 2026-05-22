@@ -15,7 +15,7 @@ import {
 } from "./guardrails-core-tool-hygiene";
 import { buildToolSchemaValidationPacket } from "./guardrails-core-tool-schema-validation";
 import { buildCapabilityRoiPacket, type CapabilityRoiInputCapability } from "./capability-roi-policy";
-import { buildExtensionLineBudgetEntries } from "./guardrails-core-line-budget-files";
+import { collectExtensionLineBudgetEntries } from "./guardrails-core-line-budget-files";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function toolInfoToInput(tool: unknown): ToolHygieneInputTool | undefined {
@@ -91,13 +91,16 @@ export function registerGuardrailsToolHygieneSurface(pi: ExtensionAPI): void {
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const entries = buildExtensionLineBudgetEntries(ctx.cwd);
+      const collection = collectExtensionLineBudgetEntries(ctx.cwd);
       const result = buildLineBudgetSnapshot({
-        files: entries,
+        files: collection.entries,
         limit: typeof p.limit === "number" ? p.limit : undefined,
-        watchThreshold: typeof p.watch_threshold === "number" ? p.watch_threshold : undefined,
-        extractThreshold: typeof p.extract_threshold === "number" ? p.extract_threshold : undefined,
-        criticalThreshold: typeof p.critical_threshold === "number" ? p.critical_threshold : undefined,
+        watchThreshold: typeof p.watch_threshold === "number" ? p.watch_threshold : collection.config.thresholds.watch,
+        extractThreshold: typeof p.extract_threshold === "number" ? p.extract_threshold : collection.config.thresholds.extract,
+        criticalThreshold: typeof p.critical_threshold === "number" ? p.critical_threshold : collection.config.thresholds.critical,
+        configSource: collection.config.source,
+        scanRoots: collection.config.roots,
+        configWarnings: collection.config.warnings,
       });
       return {
         content: [{ type: "text", text: result.summary }],

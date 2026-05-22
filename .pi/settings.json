@@ -134,6 +134,28 @@
       "surfaces": {
         "enabled": false
       },
+      "lineBudget": {
+        "roots": [
+          "packages/pi-stack"
+        ],
+        "ignoredDirs": [
+          ".cache",
+          ".pi-lens",
+          "_site",
+          "coverage",
+          "dist",
+          "node_modules"
+        ],
+        "extensions": [
+          ".ts"
+        ],
+        "ignoreDeclarationFiles": true,
+        "thresholds": {
+          "watch": 1000,
+          "extract": 1400,
+          "critical": 2000
+        }
+      },
       "providerBudgetGovernor": {
         "enabled": true,
         "lookbackDays": 30,

@@ -16937,6 +16937,15 @@
       "method": "automated-test",
       "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-surfaces.test.ts",
       "timestamp": "2026-05-22T21:37:51.547Z"
+    },
+    {
+      "id": "VER-BUD-1074-LINE-BUDGET-CONFIG",
+      "target": "TASK-BUD-1074",
+      "target_type": "task",
+      "status": "passed",
+      "method": "automated-test",
+      "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts; pnpm run docs:package:check; pnpm run repo:complexity:strict",
+      "timestamp": "2026-05-22T21:42:49.682Z"
     }
   ]
 }

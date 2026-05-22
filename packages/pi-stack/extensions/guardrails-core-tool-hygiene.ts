@@ -125,6 +125,9 @@ export interface LineBudgetSnapshot {
     aboveCritical: number;
   };
   rows: LineBudgetSnapshotRow[];
+  configSource: string;
+  scanRoots: string[];
+  configWarnings: string[];
   blockers: string[];
   risks: string[];
   summary: string;
@@ -408,11 +411,25 @@ export function buildLineBudgetSnapshot(input: {
   watchThreshold?: number;
   extractThreshold?: number;
   criticalThreshold?: number;
+  configSource?: string;
+  scanRoots?: string[];
+  configWarnings?: string[];
 }): LineBudgetSnapshot {
   const watch = Math.max(400, Math.floor(input.watchThreshold ?? 1000));
   const extract = Math.max(watch + 1, Math.floor(input.extractThreshold ?? 1400));
   const critical = Math.max(extract + 1, Math.floor(input.criticalThreshold ?? 2000));
   const limit = Math.max(1, Math.min(100, Math.floor(input.limit ?? 20)));
+  const configSource = typeof input.configSource === "string" && input.configSource.trim().length > 0
+    ? input.configSource.trim()
+    : "default";
+  const scanRoots = (input.scanRoots ?? [])
+    .filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0)
+    .map((entry) => entry.trim())
+    .slice(0, 20);
+  const configWarnings = (input.configWarnings ?? [])
+    .filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0)
+    .map((entry) => entry.trim())
+    .slice(0, 20);
 
   const normalizePhase = (lines: number): LineBudgetPhase => {
     if (lines > critical) return "critical";
@@ -467,10 +484,12 @@ export function buildLineBudgetSnapshot(input: {
   const blockers = recommendation === "extract"
     ? ["line-budget-extract-required"]
     : [];
+  if (configSource === "invalid") blockers.push("line-budget-config-invalid");
 
   const risks = [
     totals.aboveCritical > 0 ? "critical-files-present" : undefined,
     rowsAll.some((row) => row.riskFlags.includes("mega-file-3000-plus")) ? "mega-file-present" : undefined,
+    configWarnings.length > 0 ? "line-budget-config-warning" : undefined,
   ].filter((value): value is string => Boolean(value));
 
   const summary = [
@@ -481,6 +500,8 @@ export function buildLineBudgetSnapshot(input: {
     `aboveWatch=${totals.aboveWatch}`,
     `aboveExtract=${totals.aboveExtract}`,
     `aboveCritical=${totals.aboveCritical}`,
+    `configSource=${configSource}`,
+    scanRoots.length > 0 ? `roots=${scanRoots.join(",")}` : undefined,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
@@ -500,6 +521,9 @@ export function buildLineBudgetSnapshot(input: {
     },
     totals,
     rows,
+    configSource,
+    scanRoots,
+    configWarnings,
     blockers,
     risks,
     summary,
