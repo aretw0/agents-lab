@@ -36,6 +36,8 @@ graph LR
 - Inline fenced blocks are best for GitHub, Jekyll, Astro and Obsidian-style notes.
 - `.mermaid` source files are best when the project also commits generated SVGs.
 - Generated SVGs require a renderer such as `mmdc` and usually Chromium/Puppeteer. Keep that as a project policy, not a generic requirement.
+- Site generators can wrap code blocks. If a project renders Mermaid client-side, smoke-test the generated HTML to ensure the source can still be reconstructed.
+- Template engines such as Liquid may interpret double-curly template delimiters. Escape those snippets with the project-supported raw block before publishing.
 
 ## Validation
 
@@ -43,6 +45,7 @@ In agents-lab:
 
 ```bash
 pnpm run mermaid:check
+pnpm run docs:site:build:smoke
 ```
 
-That command checks portable syntax in Markdown fences and `.mermaid` files. It does not enforce a diagram size policy. Projects may add their own stricter script when they want editorial rules.
+The Mermaid check validates portable syntax in Markdown fences and `.mermaid` files. It does not enforce a diagram size policy. A site smoke validates the generated artifact when diagrams are published through a static site.

@@ -180,6 +180,9 @@ function resolvePublishedDocsUrls(config = readDocsConfig()) {
 function renderPackageGuideContent(content, spec, urls = resolvePublishedDocsUrls()) {
   const packagedGuides = new Set([...spec.guides, "README.md"]);
   return content
+    .replace(/\{\{\s*'\/([^']+\/)'\s*\|\s*relative_url\s*\}\}/g, (_match, route) => {
+      return `${urls.siteBaseUrl}/${route}`;
+    })
     .replace(/\{\{\s*'\/([^']+)\.html'\s*\|\s*relative_url\s*\}\}/g, (_match, route) => {
       if (route.startsWith("guides/")) {
         const guide = `${path.basename(route)}.md`;

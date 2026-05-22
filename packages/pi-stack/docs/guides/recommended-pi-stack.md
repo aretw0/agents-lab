@@ -93,7 +93,7 @@ pnpm run test:docs:site
 pnpm run repo:discourse:audit
 ```
 
-Guias internos de CI, publicação e curadoria do laboratório ficam em [README de guias](./README.md). Eles não são empacotados automaticamente para usuários.
+Guias internos de CI, publicação e curadoria do laboratório ficam no [índice de guias](https://aretw0.github.io/agents-lab/guides/). Eles não são empacotados automaticamente para usuários.
 
 ## Referências Históricas
 

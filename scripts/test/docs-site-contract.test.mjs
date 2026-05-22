@@ -168,8 +168,13 @@ test("published Markdown escapes snippets that look like Liquid templates", () =
 		if (file.includes("/_site/") || file.includes("/archive/")) continue;
 		const source = read(file);
 		const rawProtected = source.replace(/\{% raw %\}[\s\S]*?\{% endraw %\}/g, "");
+		const unsupportedLiquidSnippets = [...rawProtected.matchAll(/\{\{\s*([^}]+?)\s*\}\}/g)]
+			.map((match) => match[1].trim())
+			.filter((snippet) => snippet !== "site.repo_url")
+			.filter((snippet) => !/^'\/[^']*'\s*\|\s*relative_url$/.test(snippet));
 
 		assert.doesNotMatch(rawProtected, /\{\{\.[A-Za-z_]/, `${file} has an unescaped Go-template style snippet`);
+		assert.deepEqual(unsupportedLiquidSnippets, [], `${file} has an unescaped Liquid-style template snippet`);
 	}
 });
 

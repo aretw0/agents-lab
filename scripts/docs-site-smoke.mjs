@@ -27,6 +27,29 @@ const REQUIRED_MERMAID_PAGES = [
 	"/guides/mermaid-authoring.html",
 ];
 
+const KNOWN_MERMAID_TYPES = [
+	"architecture-beta",
+	"block-beta",
+	"c4context",
+	"classDiagram",
+	"erDiagram",
+	"flowchart",
+	"gantt",
+	"gitGraph",
+	"graph",
+	"journey",
+	"mindmap",
+	"packet-beta",
+	"pie",
+	"quadrantChart",
+	"requirementDiagram",
+	"sequenceDiagram",
+	"stateDiagram",
+	"stateDiagram-v2",
+	"timeline",
+	"xyChart-beta",
+];
+
 const PUBLIC_LINK_ROUTES = [
 	"/",
 	"/start-here.html",
@@ -78,6 +101,27 @@ function isExternal(href) {
 	return /^(https?:|mailto:|tel:|#)/.test(href);
 }
 
+function decodeHtml(value) {
+	return value
+		.replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
+		.replace(/&#([0-9]+);/g, (_, dec) => String.fromCodePoint(Number.parseInt(dec, 10)))
+		.replace(/&quot;/g, "\"")
+		.replace(/&#39;/g, "'")
+		.replace(/&amp;/g, "&")
+		.replace(/&lt;/g, "<")
+		.replace(/&gt;/g, ">");
+}
+
+function extractMermaidSources(html) {
+	const sources = [];
+	const codeRe = /<code class="language-mermaid">([\s\S]*?)<\/code>/g;
+	for (const match of html.matchAll(codeRe)) {
+		const source = decodeHtml(match[1].replace(/<[^>]*>/g, "")).trim();
+		if (source) sources.push(source);
+	}
+	return sources;
+}
+
 function distExists(route) {
 	const cleanRoute = route.split("#")[0].split("?")[0];
 	if (!cleanRoute) return true;
@@ -114,6 +158,15 @@ for (const route of REQUIRED_MERMAID_PAGES) {
 	}
 	if (!html.includes("language-mermaid")) {
 		errors.push(`${route} has no Mermaid source blocks`);
+	}
+	const sources = extractMermaidSources(html);
+	if (sources.length === 0) errors.push(`${route} has no reconstructable Mermaid sources`);
+	for (const [index, source] of sources.entries()) {
+		if (!source.includes("\n")) errors.push(`${route} diagram ${index + 1} source lost newlines`);
+		const firstLine = source.split(/\r?\n/)[0]?.trim() ?? "";
+		if (!KNOWN_MERMAID_TYPES.some((type) => firstLine.startsWith(type))) {
+			errors.push(`${route} diagram ${index + 1} starts with unknown Mermaid type '${firstLine}'`);
+		}
 	}
 }
 
