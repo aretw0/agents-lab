@@ -16,8 +16,18 @@ test("devcontainer build context stays scoped to .devcontainer", () => {
 test("devcontainer stays lean enough to coexist with refarm", () => {
 	const config = JSON.parse(readFileSync(".devcontainer/devcontainer.json", "utf8"));
 
-	assert.deepEqual(config.runArgs, ["--memory=3g", "--cpus=3"]);
+	assert.ok(config.runArgs.includes("--memory=3g"));
+	assert.ok(config.runArgs.includes("--cpus=3"));
+	assert.ok(config.runArgs.includes("--publish"));
+	assert.ok(config.runArgs.includes("127.0.0.1:4000:4000"));
 	assert.deepEqual(config.hostRequirements, { cpus: 2, memory: "4gb" });
+});
+
+test("devcontainer shell scripts stay LF-only for Linux bash", () => {
+	for (const path of [".devcontainer/postCreate.sh", ".devcontainer/postStart.sh", ".devcontainer/lab"]) {
+		const content = readFileSync(path, "utf8");
+		assert.equal(content.includes("\r"), false, `${path} must stay LF-only`);
+	}
 });
 
 test("devcontainer feature lock pins feature digests", () => {
