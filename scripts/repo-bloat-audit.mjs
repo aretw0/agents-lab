@@ -20,6 +20,14 @@ import {
 
 export { buildRepoBloatReport, classifyTrackedBloat, normalizeRepoPath };
 
+export function summarizeLocalAdvisories(localAdvisories = []) {
+  const rows = Array.isArray(localAdvisories) ? localAdvisories : [];
+  return {
+    count: rows.length,
+    bytes: rows.reduce((sum, row) => sum + Number(row?.bytes ?? 0), 0),
+  };
+}
+
 function parseArgs(argv) {
   const out = { strict: false, json: false, help: false };
   for (const arg of argv.slice(2)) {
@@ -84,10 +92,12 @@ function main() {
       }
     }
     if (report.localAdvisories.length > 0) {
-      console.log("local ignored raw logs:");
+      const localSummary = summarizeLocalAdvisories(report.localAdvisories);
+      console.log(`local ignored raw logs: ${localSummary.count} files, ${formatBytes(localSummary.bytes)} total`);
       for (const row of report.localAdvisories.slice(0, 10)) {
         console.log(`- ${row.path} (${formatBytes(row.bytes)})`);
       }
+      console.log("local ignored raw logs are advisory only; strict mode fails only on tracked bloat violations.");
     }
   }
 

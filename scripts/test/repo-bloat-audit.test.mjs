@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   classifyTrackedBloat,
   normalizeRepoPath,
+  summarizeLocalAdvisories,
 } from "../repo-bloat-audit.mjs";
 
 test("normalizeRepoPath normalizes separators and leading dot", () => {
@@ -48,4 +49,14 @@ test("classifyTrackedBloat warns on large canonical board files without blocking
 
   assert.equal(report.violations.length, 0);
   assert.deepEqual(report.warnings.map((row) => row.reason), ["large-canonical-board-file"]);
+});
+
+test("summarizeLocalAdvisories reports ignored local raw log pressure", () => {
+  assert.deepEqual(summarizeLocalAdvisories([
+    { path: "docs/research/data/run/raw/A.log", bytes: 10 },
+    { path: "docs/research/data/run/raw/B.log", bytes: 15 },
+  ]), {
+    count: 2,
+    bytes: 25,
+  });
 });
