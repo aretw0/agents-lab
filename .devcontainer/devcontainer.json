@@ -6,7 +6,9 @@
   },
   "runArgs": [
     "--memory=3g",
-    "--cpus=3"
+    "--cpus=3",
+    "--publish",
+    "127.0.0.1:4000:4000"
   ],
   "hostRequirements": {
     "cpus": 2,

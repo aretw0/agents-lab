@@ -206,6 +206,8 @@ test("site map documents promotion and publication boundaries", () => {
 	assert.match(siteMap, /`docs:site:build` mirrors the deploy target/);
 	assert.match(siteMap, /`docs:site:smoke` validates the generated `_site` navigation/);
 	assert.match(siteMap, /`docs:site:serve` uses local root/);
+	assert.match(siteMap, /publishes `127\.0\.0\.1:4000:4000`/);
+	assert.match(siteMap, /do not depend on VS Code auto-forwarding/);
 	assert.match(siteMap, /http:\/\/127\.0\.0\.1:4000\//);
 });
 
@@ -390,6 +392,8 @@ test("docs site can be served consistently from host or devcontainer", () => {
 	assert.match(dockerfile, /typescript-node:24-bookworm/);
 	assert.match(dockerfile, /gem install bundler --no-document/);
 	assert.equal(nodeVersion, "24");
+	assert.ok(devcontainer.runArgs.includes("--publish"));
+	assert.ok(devcontainer.runArgs.includes("127.0.0.1:4000:4000"));
 	assert.deepEqual(devcontainer.forwardPorts, [4000]);
 	assert.equal(devcontainer.portsAttributes["4000"].label, "agents-lab docs site");
 	assert.equal(devcontainer.portsAttributes["4000"].onAutoForward, "openBrowser");

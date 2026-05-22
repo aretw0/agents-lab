@@ -42,8 +42,9 @@ pnpm run docs:site:serve
 `docs:site:build` mirrors the deploy target: GitHub Pages project hosting at `/agents-lab/`, or root when `docs/CNAME` exists.
 `docs:site:smoke` validates the generated `_site` navigation, required directory indexes and Mermaid renderer hook.
 `docs:site:serve` uses local root at `http://127.0.0.1:4000/` for operator browsing.
+The devcontainer publishes `127.0.0.1:4000:4000` so Docker Desktop and Windows Terminal sessions do not depend on VS Code auto-forwarding.
 
-The devcontainer includes Ruby and Bundler. VS Code forwards port `4000` as `agents-lab docs site` and opens the operator browser.
+The devcontainer includes Ruby and Bundler. VS Code still labels port `4000` as `agents-lab docs site` when its Ports surface is active.
 
 ## Excluded from Jekyll
 
