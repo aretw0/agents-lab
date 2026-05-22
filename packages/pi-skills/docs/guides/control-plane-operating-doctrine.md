@@ -551,7 +551,7 @@ Decisão operacional no batch lane:
 2. **quando checkpointar:** após cada slice concluído (commit pequeno + checkpoint bounded) ou antes de fronteira de compact;
 3. **quando pausar para decisão estratégica:** qualquer blocker hard-intent, necessidade de escopo protegido, ou conflito entre caminhos estratégicos.
 
-Quando a lane cair em `no-eligible-tasks`, ler `seedingGuidance` no `autonomy_lane_status` (mesmos sinais de `seedWhy` + `seedPriority`) para decisão rápida. O próprio `summary` do status também deve carregar esse cue curto (`code/next/queue` + `seedCount/seedWhy/seedPriority` quando houver) para reduzir nudge operacional, e o `nextAction` pode vir enriquecido com diretiva direta (`seed <n> local-safe ...`). Além disso, acompanhar `influenceWindowCue` e `protectedReadyCue` no status para saber quando a janela protected está `ready-window` com candidato elegível, sem abrir packet separado a cada ciclo. Quando quiser um gatilho único, usar `decisionCue` (`seed-local-safe-required` ou `protected-focus-ready`) para saber se há decisão pendente do operador. Em compact com `reload-required`, tratar supressão de auto-resume como defer temporário: persistir intent no handoff e reavaliar dispatch após `/reload`, mantendo gates de checkpoint/board/queue fail-closed; quando houver intent pendente, `context_watch_status`, `context_watch_continuation_readiness` e `context_watch_one_slice_canary_preview` devem sinalizar `postReloadResume=pending` no summary curto. Se precisar detalhe completo, usar `autonomy_lane_material_seed_packet` (`seed-now|wait|blocked`) e `autonomy_lane_influence_assimilation_packet`. Ao reseedar, registrar `seedWhy`/`reseedJustification`, `seedPriority` e `seedCount` no fechamento curto para manter motivo auditável e prioridade de longo prazo explícita.
+Quando a lane cair em `no-eligible-tasks`, ler `seedingGuidance` no `autonomy_lane_status` (mesmos sinais de `seedWhy` + `seedPriority`) para decisão rápida. O próprio `summary` do status também deve carregar esse cue curto (`code/next/queue` + `seedCount/seedWhy/seedPriority` quando houver) para reduzir nudge operacional, e o `nextAction` pode vir enriquecido com diretiva direta (`seed <n> local-safe ...`). Além disso, acompanhar `influenceWindowCue` e `protectedReadyCue` no status para saber quando a janela protected está `ready-window` com candidato elegível, sem abrir packet separado a cada ciclo. Quando quiser um gatilho único, usar `decisionCue` (`seed-local-safe-required` ou `protected-focus-ready`) para saber se há decisão pendente do operador. Em compact com `reload-required`, tratar supressão de auto-resume como defer temporário: persistir intent no handoff e reavaliar dispatch após `/reload`, mantendo gates de checkpoint/board/queue fail-closed; quando houver intent pendente, `context_watch_status`, `context_watch_continuation_readiness` e `context_watch_local_slice_preview` devem sinalizar `postReloadResume=pending` no summary curto. Se precisar detalhe completo, usar `autonomy_lane_material_seed_packet` (`seed-now|wait|blocked`) e `autonomy_lane_influence_assimilation_packet`. Ao reseedar, registrar `seedWhy`/`reseedJustification`, `seedPriority` e `seedCount` no fechamento curto para manter motivo auditável e prioridade de longo prazo explícita.
 
 Stop condition para estoque baixo:
 - `stop: backlog-material-insuficiente`.
@@ -666,7 +666,7 @@ A cadeia compacta validada para o canário local é:
 
 ```text
 context_watch_continuation_readiness: ready=yes ... authorization=none
-context_watch_one_slice_canary_preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-operator-decision dispatch=no ... authorization=none
+context_watch_local_slice_preview: decision=prepare-local-slice prepare=yes stop=yes singleSliceOnly=yes packet=ready-for-operator-decision dispatch=no ... authorization=none
 turn_boundary_decision_packet: ... growthDecision=go|hold|needs-evidence growthCode=... authorization=none
 ```
 
@@ -725,7 +725,7 @@ Se qualquer pré-condição cair entre o packet e a execução — diff inespera
 
 ### Operator packet sem executor
 
-`context_watch_one_slice_operator_packet_preview` é o pacote composto read-only para reduzir fricção sem liberar execução. Ele junta readiness, preview one-slice, decision packet e contract review em uma única linha de operador.
+`context_watch_local_slice_operator_packet_preview` é o pacote composto read-only para reduzir fricção sem liberar execução. Ele junta readiness, preview local-slice, decision packet e contract review em uma única linha de operador.
 
 Caminho verde atual, ainda sem executor:
 
@@ -758,7 +758,7 @@ O operator packet reduz fricção em runs longas porque coloca a evidência em u
 Implementar um executor one-slice só entra na fila quando todos os critérios abaixo estiverem verdadeiros:
 
 1. estratégia de `.project` resolvida para a lane atual: hard intent local ou soft evidence/cache com ownership claro;
-2. `context_watch_one_slice_operator_packet_preview` live-validado em caminhos verde, fail-closed e missing-files;
+2. `context_watch_local_slice_operator_packet_preview` live-validado em caminhos verde, fail-closed e missing-files;
 3. contrato explícito do operador definido por tarefa e ação, não confirmação genérica;
 4. arquivos declarados e rollback não destrutivo para cada arquivo;
 5. validação conhecida antes da edição;

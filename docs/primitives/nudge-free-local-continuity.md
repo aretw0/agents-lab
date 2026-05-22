@@ -12,6 +12,7 @@ A decisão canônica é **não criar uma família nova de loops**. O control-pla
 | `local_batch_manifest_packet` | Normalizar a manifestação mínima do operador para um batch local-safe. | Report-only/read-only; batch=no, dispatch=no, worker=no. |
 | `local_continuity_audit` | Ler o estado local e dizer se existe uma próxima fatia local-safe. | Read-only/advisory; não executa. |
 | `nudge_free_loop_canary` | Avaliar se uma continuação sem empurrão do operador poderia ser segura. | Read-only/advisory; boolean do operador não libera `ready`. |
+| `local_continuity_loop_canary_packet` | Auditar uma fatia local-safe bounded: selecionar, packetizar/executar evidência, validar, commitar, checkpointar e re-checar stops. | Dry-run/report-only; não libera dispatch, commit, checkpoint automático, repetição, scheduler ou remote/offload. |
 | `context_watch_checkpoint` | Gravar handoff curto entre fatias e antes de compact/pausa. | Mutação bounded de checkpoint; não despacha execução. |
 | `autonomy_lane_next_task` | Selecionar conservadoramente uma task local-safe do board. | Read-only; `no-eligible-tasks` é stop condition. |
 | `autonomy_lane_auto_advance_snapshot` | Auditar decisão hard-intent de auto-advance após `focus-complete` (`eligible` vs `blocked`). | Report-only/read-only; fail-closed para protected/risk/reload/validation unknown. |

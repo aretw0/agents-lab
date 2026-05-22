@@ -22,6 +22,7 @@ import {
   type LocalSliceOperatorDecisionKind,
   type UnattendedContinuationContextLevel,
 } from "./guardrails-core-unattended-continuation";
+import { buildLocalContinuityLoopCanaryPacket } from "./guardrails-core-local-continuity-loop-canary";
 import { buildReloadLifecycleDiagnosticPacket } from "./guardrails-core-reload-lifecycle-diagnostic";
 import { asBooleanWithDefault } from "./guardrails-core-param-normalizers";
 import {
@@ -327,6 +328,63 @@ export function buildLocalContinuityAudit(cwd: string) {
 }
 
 export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI): void {
+  pi.registerTool({
+    name: "local_continuity_loop_canary_packet",
+    label: "Local Continuity Loop Canary Packet",
+    description: "Dry-run canary for one bounded local-safe loop slice. It checks select/packetize/validate/commit/checkpoint/stop evidence and never dispatches or repeats work.",
+    parameters: Type.Object({
+      opt_in: Type.Optional(Type.Boolean({ description: "Explicit opt-in for evaluating this dry-run canary." })),
+      dry_run: Type.Optional(Type.Boolean({ description: "Must remain true/omitted; false blocks because execution is not implemented here." })),
+      selected_task_id: Type.Optional(Type.String({ description: "Selected local-safe task id." })),
+      packet_ready: Type.Optional(Type.Boolean({ description: "Whether the local-slice packet/preview is ready." })),
+      slice_executed: Type.Optional(Type.Boolean({ description: "Whether one bounded slice has been executed or explicitly packetized for review." })),
+      validation_passed: Type.Optional(Type.Boolean({ description: "Whether the planned focal validation passed." })),
+      commit_recorded: Type.Optional(Type.Boolean({ description: "Whether the small intended commit is recorded." })),
+      checkpoint_recorded: Type.Optional(Type.Boolean({ description: "Whether handoff/checkpoint evidence was recorded." })),
+      stop_conditions_rechecked: Type.Optional(Type.Boolean({ description: "Whether stop conditions were rechecked after the slice." })),
+      git_state_expected: Type.Optional(Type.Boolean({ description: "Whether git state is clean or expected for this local slice." })),
+      protected_scopes_clear: Type.Optional(Type.Boolean({ description: "Whether protected scopes are absent." })),
+      rollback_plan_known: Type.Optional(Type.Boolean({ description: "Whether rollback is known." })),
+      budget_known: Type.Optional(Type.Boolean({ description: "Whether local time/cost budget is known." })),
+      context_level: Type.Optional(Type.String({ description: "ok | warn | checkpoint | compact" })),
+      stop_condition_present: Type.Optional(Type.Boolean({ description: "Blocks when a real stop condition is present." })),
+      repeat_requested: Type.Optional(Type.Boolean({ description: "Blocks repetition." })),
+      scheduler_requested: Type.Optional(Type.Boolean({ description: "Blocks scheduler requests." })),
+      remote_or_offload_requested: Type.Optional(Type.Boolean({ description: "Blocks remote/offload requests." })),
+      github_actions_requested: Type.Optional(Type.Boolean({ description: "Blocks GitHub Actions/protected CI requests." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks protected scope requests." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = buildLocalContinuityLoopCanaryPacket({
+        optIn: asBooleanWithDefault(p.opt_in, false),
+        dryRun: asBooleanWithDefault(p.dry_run, true),
+        selectedTaskId: typeof p.selected_task_id === "string" ? p.selected_task_id : undefined,
+        packetReady: asBooleanWithDefault(p.packet_ready, false),
+        sliceExecuted: asBooleanWithDefault(p.slice_executed, false),
+        validationPassed: asBooleanWithDefault(p.validation_passed, false),
+        commitRecorded: asBooleanWithDefault(p.commit_recorded, false),
+        checkpointRecorded: asBooleanWithDefault(p.checkpoint_recorded, false),
+        stopConditionsRechecked: asBooleanWithDefault(p.stop_conditions_rechecked, false),
+        gitStateExpected: asBooleanWithDefault(p.git_state_expected, false),
+        protectedScopesClear: asBooleanWithDefault(p.protected_scopes_clear, false),
+        rollbackPlanKnown: asBooleanWithDefault(p.rollback_plan_known, false),
+        budgetKnown: asBooleanWithDefault(p.budget_known, false),
+        contextLevel: typeof p.context_level === "string" ? p.context_level : undefined,
+        stopConditionPresent: asBooleanWithDefault(p.stop_condition_present, false),
+        repeatRequested: asBooleanWithDefault(p.repeat_requested, false),
+        schedulerRequested: asBooleanWithDefault(p.scheduler_requested, false),
+        remoteOrOffloadRequested: asBooleanWithDefault(p.remote_or_offload_requested, false),
+        githubActionsRequested: asBooleanWithDefault(p.github_actions_requested, false),
+        protectedScopeRequested: asBooleanWithDefault(p.protected_scope_requested, false),
+      });
+      return {
+        content: [{ type: "text", text: result.summary }],
+        details: result,
+      };
+    },
+  });
+
   pi.registerTool({
     name: "local_continuity_audit",
     label: "Local Continuity Audit",

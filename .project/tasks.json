@@ -23450,7 +23450,7 @@
     {
       "id": "TASK-BUD-1052",
       "description": "[hard-intent/loop-canary] Implementar canário de loop local-safe bounded para melhoria contínua: selecionar, executar/packetizar, validar, commitar, checkpointar e reavaliar stop conditions.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1049",
@@ -23470,7 +23470,8 @@
         "Teste cobre continue, checkpoint, stop por dirty, stop por protected e stop por compact."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Hard intent: materializar melhoria contínua local-safe como canário, sem autopromoção insegura.\n[provenance:human] source_task=none reason=Operador quer deixar o control-plane em loop de melhoramento contínuo com graciosidade."
+      "notes": "Hard intent: materializar melhoria contínua local-safe como canário, sem autopromoção insegura.\n[provenance:human] source_task=none reason=Operador quer deixar o control-plane em loop de melhoramento contínuo com graciosidade.\n2026-05-22: Added local_continuity_loop_canary_packet as a dry-run/report-only canary for one bounded local-safe loop slice. It checks selection, packetize/execute evidence, validation, commit, checkpoint and stop-condition recheck while keeping dispatch, execution, commit, checkpoint and repeat disabled.",
+      "verification": "VER-BUD-1052-local-continuity-loop-canary"
     },
     {
       "id": "TASK-BUD-1053",

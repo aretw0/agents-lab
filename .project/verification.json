@@ -16874,6 +16874,15 @@
       "method": "automated-test",
       "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-batch-dry-run.test.ts; pnpm run test:engine:boundary; pnpm run test:docs:site; pnpm run repo:discourse:audit; pnpm run test:smoke; pnpm run repo:complexity:strict",
       "timestamp": "2026-05-22T20:57:27.302Z"
+    },
+    {
+      "id": "VER-BUD-1052-local-continuity-loop-canary",
+      "target": "TASK-BUD-1052",
+      "target_type": "task",
+      "status": "passed",
+      "method": "automated-test",
+      "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/local-continuity-loop-canary.test.ts packages/pi-stack/test/smoke/context-watchdog-decision-surfaces.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts; pnpm run test:docs:site; pnpm run test:engine:boundary; pnpm run repo:discourse:audit; pnpm run repo:complexity:strict",
+      "timestamp": "2026-05-22T21:10:20.298Z"
     }
   ]
 }
