@@ -22,7 +22,7 @@ function findWorkspaceRoot(startDir) {
 }
 
 export function parseArgs(argv) {
-  const opts = { cwd: process.cwd(), maxNoteLines: 20, help: false };
+  const opts = { cwd: process.cwd(), maxNoteLines: 20, useExistingVerification: false, help: false };
   const firstArg = argv[2] === "--" ? 3 : 2;
   for (let i = firstArg; i < argv.length; i++) {
     const arg = argv[i];
@@ -35,6 +35,7 @@ export function parseArgs(argv) {
     else if (arg === "--timestamp") opts.timestamp = requireValue(argv, ++i, arg);
     else if (arg === "--cwd") opts.cwd = requireValue(argv, ++i, arg);
     else if (arg === "--max-note-lines") opts.maxNoteLines = Number(requireValue(argv, ++i, arg));
+    else if (arg === "--use-existing-verification") opts.useExistingVerification = true;
     else throw new Error(`Unknown argument: ${arg}`);
   }
   return opts;
@@ -86,7 +87,12 @@ export function completeProjectTask(cwd, input) {
   const verifications = Array.isArray(verificationData.verifications) ? verificationData.verifications : [];
   const taskIndex = tasks.findIndex((task) => task?.id === taskId);
   if (taskIndex < 0) throw new Error(`task not found: ${taskId}`);
-  if (verifications.some((row) => row?.id === verificationId)) throw new Error(`verification already exists: ${verificationId}`);
+  const existingVerification = verifications.find((row) => row?.id === verificationId);
+  if (existingVerification) {
+    if (!input.useExistingVerification) throw new Error(`verification already exists: ${verificationId}`);
+    if (existingVerification.target !== taskId) throw new Error(`verification target mismatch: ${verificationId}`);
+    if (existingVerification.status !== "passed") throw new Error(`verification is not passed: ${verificationId}`);
+  }
 
   const task = { ...tasks[taskIndex] };
   task.status = "completed";
@@ -94,15 +100,17 @@ export function completeProjectTask(cwd, input) {
   if (append) task.notes = appendNote(task.notes, append, input.maxNoteLines);
   tasks[taskIndex] = task;
 
-  verifications.push({
-    id: verificationId,
-    target: taskId,
-    target_type: "task",
-    status: "passed",
-    method,
-    evidence,
-    timestamp,
-  });
+  if (!existingVerification) {
+    verifications.push({
+      id: verificationId,
+      target: taskId,
+      target_type: "task",
+      status: "passed",
+      method,
+      evidence,
+      timestamp,
+    });
+  }
 
   tasksData.tasks = tasks;
   verificationData.verifications = verifications;
@@ -114,6 +122,7 @@ export function completeProjectTask(cwd, input) {
     taskId,
     verificationId,
     status: "completed",
+    verificationReused: Boolean(existingVerification),
     tasksPath: path.relative(root, tasksPath).replace(/\\/g, "/"),
     verificationPath: path.relative(root, verificationPath).replace(/\\/g, "/"),
   };
@@ -125,6 +134,7 @@ function printHelp() {
     "",
     "Usage:",
     "  node scripts/project/task-complete.mjs --task-id <id> --verification-id <id> --method <method> --evidence <text> [--append-note <text>]",
+    "  node scripts/project/task-complete.mjs --task-id <id> --verification-id <existing-id> --method <method> --evidence <text> --use-existing-verification",
   ].join("\n"));
 }
 
