@@ -83,6 +83,7 @@
     "context:preload:consume:scout": "node scripts/context-preload-consume.mjs --profile swarm-scout-min --json",
     "git:dirty:snapshot": "node scripts/git-dirty-snapshot.mjs --json",
     "pi-stack:user-surface": "node scripts/pi-stack-user-surface-audit.mjs",
+    "pi-stack:user-surface:json": "node scripts/pi-stack-user-surface-audit.mjs --json",
     "pi:artifact:audit": "node scripts/pi-runtime-artifact-audit.mjs",
     "pi:artifact:audit:strict": "node scripts/pi-runtime-artifact-audit.mjs --strict",
     "pi:dev:pressure": "node scripts/pi-dev-pressure.mjs",

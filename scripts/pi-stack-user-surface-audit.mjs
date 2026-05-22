@@ -249,10 +249,78 @@ export function buildUserSurfaceAudit(cwd = process.cwd(), now = new Date()) {
 	};
 }
 
+export function formatUserSurfaceAuditSummary(audit) {
+	const categoryCounts = audit?.categoryCounts ?? {};
+	const lines = [
+		"pi-stack user surface audit",
+		`generatedAt: ${audit?.generatedAtIso ?? "unknown"}`,
+		`stack: ${audit?.stackPackage?.name ?? "unknown"}@${audit?.stackPackage?.version ?? "unknown"}`,
+		`scripts: lab-only=${categoryCounts["lab-only"] ?? 0} repo-internal=${categoryCounts["repo-internal"] ?? 0} distributed-wrapper=${categoryCounts["distributed-wrapper"] ?? 0}`,
+		`promotion candidates: ${audit?.distributionCandidates?.length ?? 0}`,
+		`wrapper groups: ${audit?.wrapperGroups?.length ?? 0}`,
+	];
+
+	if (Array.isArray(audit?.promotionGroups) && audit.promotionGroups.length > 0) {
+		lines.push("promotion targets:");
+		for (const group of audit.promotionGroups.slice(0, 10)) {
+			lines.push(`- ${group.targetSurface}: ${group.count} script(s)`);
+		}
+	} else {
+		lines.push("promotion targets: none");
+	}
+
+	if (Array.isArray(audit?.wrapperGroups) && audit.wrapperGroups.length > 0) {
+		lines.push("largest wrapper groups:");
+		for (const group of audit.wrapperGroups.slice(0, 5)) {
+			lines.push(`- ${group.targetSurface}: ${group.count} script(s)`);
+		}
+	}
+
+	lines.push("Use --json for the full script inventory.");
+	return lines.join("\n");
+}
+
+function parseArgs(argv) {
+	const out = { json: false, help: false };
+	for (const arg of argv.slice(2)) {
+		if (arg === "--json") out.json = true;
+		else if (arg === "--help" || arg === "-h") out.help = true;
+		else throw new Error(`Unknown argument: ${arg}`);
+	}
+	return out;
+}
+
+function printHelp() {
+	console.log([
+		"pi-stack user surface audit",
+		"",
+		"Usage:",
+		"  pnpm run pi-stack:user-surface",
+		"  pnpm run pi-stack:user-surface:json",
+		"  node scripts/pi-stack-user-surface-audit.mjs --json",
+		"",
+		"Options:",
+		"  --json     full machine-readable inventory",
+		"  -h, --help",
+	].join("\n"));
+}
+
 function main() {
+	let opts;
+	try {
+		opts = parseArgs(process.argv);
+	} catch (error) {
+		console.error(String(error?.message ?? error));
+		process.exit(2);
+	}
+	if (opts.help) {
+		printHelp();
+		process.exit(0);
+	}
+
 	const audit = buildUserSurfaceAudit();
 
-	console.log(JSON.stringify(audit, null, 2));
+	console.log(opts.json ? JSON.stringify(audit, null, 2) : formatUserSurfaceAuditSummary(audit));
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {

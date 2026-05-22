@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { buildUserSurfaceAudit, classifyRootScript } from "../pi-stack-user-surface-audit.mjs";
+import { buildUserSurfaceAudit, classifyRootScript, formatUserSurfaceAuditSummary } from "../pi-stack-user-surface-audit.mjs";
 
 const shipped = [
 	"context-watchdog",
@@ -116,4 +116,16 @@ test("buildUserSurfaceAudit exposes grouped promotion targets", () => {
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:bloat:audit:strict")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:discourse:audit")));
 	assert.deepEqual(audit.promotionGroups, []);
+});
+
+test("formatUserSurfaceAuditSummary keeps operator output compact", () => {
+	const audit = buildUserSurfaceAudit(process.cwd(), new Date("2026-05-18T00:00:00.000Z"));
+	const summary = formatUserSurfaceAuditSummary(audit);
+
+	assert.match(summary, /^pi-stack user surface audit/m);
+	assert.match(summary, /promotion targets: none/);
+	assert.match(summary, /largest wrapper groups:/);
+	assert.match(summary, /Use --json for the full script inventory\./);
+	assert.doesNotMatch(summary, /"scriptInventory"/);
+	assert.ok(summary.split(/\r?\n/).length <= 20);
 });
