@@ -5,7 +5,7 @@ description: Readiness map for agents-lab and pi-stack 0.8.
 
 # Mapa de readiness 0.8.0 — agents-lab / pi-stack
 
-Última revisão: 2026-05-21
+Última revisão: 2026-05-22
 Status: mapa público de readiness
 Escopo: `agents-lab`, `@aretw0/pi-stack`, GitHub Pages e CI
 
@@ -17,7 +17,8 @@ O estado atual para 0.8.0 é:
 2. **Base local:** desenvolvimento usa `pnpm`, devcontainer, `lab pi`, gates locais e `pi:dev` com capacidades frias por padrão.
 3. **Base de produto:** `@aretw0/pi-stack` deve continuar `strict-curated` por default; capacidades caras ficam opt-in.
 4. **Fronteira protegida:** publish npm, provider routing, remote/offload, GitHub Actions como executor e automação forte exigem intenção explícita do operador.
-5. **Roadmap canônico:** direção macro fica em [ROADMAP.md]({{ site.repo_url }}/blob/main/ROADMAP.md); este arquivo registra readiness e evidência selecionada.
+5. **Release readiness:** `board-release-clear` está verde; o bloqueio restante é deliberado: pacotes ainda estão em `0.7.0`, então `target-version-ready` segue falso até decisão de release.
+6. **Roadmap canônico:** direção macro fica em [ROADMAP.md]({{ site.repo_url }}/blob/main/ROADMAP.md); este arquivo registra readiness e evidência selecionada.
 
 ## Pronto
 
@@ -30,6 +31,7 @@ O estado atual para 0.8.0 é:
 | Discurso público | auditado | `repo:discourse:audit` cobre README, guias, primitives, architecture e research promovido |
 | Instalação padrão | conservadora | `npx @aretw0/pi-stack` instala perfil `strict-curated` |
 | Fronteira de engine | protegida | `engine:boundary:audit` mantém core portable e Pi em surfaces/adapters |
+| Board de release | limpo | `release:readiness:v0.8.0` reporta `board-release-clear` verde, sem P0 aberto, in-progress ou blocked |
 
 ## Preparado, mas ainda protegido
 
@@ -40,24 +42,26 @@ O estado atual para 0.8.0 é:
 | Provider routing | pode gastar quota e trocar modelo real | canários bounded, rollback e decisão do operador |
 | Monitor runtime amplo | pode adicionar ruído/custo | calibrar com evidência e regressões antes de ampliar default |
 | Delegação/long-run | pode acelerar trabalho, mas aumenta superfície de falha | promover por packets report-only e gates de rollback |
+| Versionamento 0.8.0 | transforma readiness em release real | bump/tag só após decisão explícita e revisão de release notes/changelog |
 
 ## Parked para médio/longo prazo
 
 | Item | Motivo de park |
 |---|---|
-| Influências externas adicionais (`hermes-agent`, `sandcastle`, `claude-mem`, colônias antigas) | úteis como inspiração, mas desviam da convergência 0.8 se retomadas antes da lane local-safe amadurecer |
+| Influências externas adicionais (`hermes-agent`, `sandcastle`, `claude-mem`) | úteis como inspiração, mas desviam da convergência 0.8 se retomadas antes da lane local-safe amadurecer |
+| Colônias antigas | reconciliadas como telemetria histórica; não devem voltar como blockers sem candidate novo e evidência verificável |
 | Remote/offload/GitHub Actions como executor | protegido; só depois de maturidade local e contrato de cancelamento/rollback claro |
-| Publish/release 0.8.0 | só após release readiness, install/smoke e docs estarem consistentes |
+| Publish/release 0.8.0 | só após decisão de versionamento, release notes/changelog e validação final |
 | Ajustes agressivos de provider routing | dependem de canário, quota, rollback e decisão do operador |
 
 ## Próximas Fatias
 
 | Fatia | Validação |
 |---|---|
-| Revisar docs públicas restantes | `repo:discourse:audit`, links do site e remoção de snapshots stale |
-| Preparar release readiness | `release:readiness:v0.8.0`, install/smoke e changelog |
-| Auditar superfície de instalação | confirmar que README, `package-list.mjs`, installer e docs da `pi-stack` descrevem o mesmo default |
-| Reduzir acoplamentos de engine | remover dependências Pi de core quando bastar contrato estrutural |
+| Revisar release notes/changelog | confirmar mudanças desde `v0.7.0`, riscos e rollback antes de tag |
+| Decidir bump 0.8.0 | `release:readiness:v0.8.0` deve ficar verde exceto antes do bump; depois, verde completo |
+| Revalidar instalação limpa | `release:package:smoke`, `docs:package:check`, install/smoke em ambiente limpo |
+| Manter acoplamentos de engine sob controle | `engine:boundary:audit`, sem dependências Pi em core portable |
 
 ## Critério de parada
 
@@ -67,7 +71,7 @@ Parar e pedir decisão quando:
 - a evidência apontar conflito real de produto;
 - a validação falhar e a correção não for local-safe óbvia;
 - o próximo passo aumentaria autonomia operacional em vez de apenas preparar readiness report-only;
-- a fila local-safe cair abaixo de 3 fatias com validação clara.
+- a próxima ação for bump/tag/publish/release.
 
 ## Critérios mínimos para 0.8.0
 
@@ -77,6 +81,7 @@ Parar e pedir decisão quando:
 - não surpreende o usuário com CI, providers, publish, remote ou automação forte;
 - prepara delegação/long-run apenas com gates report-only e rollback definido;
 - incorpora influências externas apenas como padrões pequenos e mensuráveis;
+- mantém colônias antigas fora do caminho de release quando não há candidate verificável;
 - funciona bem em contextos variados de usuário sem depender do laboratório.
 
 ## Regra Editorial
