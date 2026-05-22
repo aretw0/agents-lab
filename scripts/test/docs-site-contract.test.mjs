@@ -245,11 +245,33 @@ test("package guide sync keeps lab-only maintenance out of distributed docs", ()
 		"github-repo-presence.md",
 		"lab-user-surface-parity.md",
 		"skill-guide-parity.md",
+		"supply-chain-ci-hardening.md",
 	];
 
 	for (const guide of labOnlyGuides) {
 		assert.equal(packagedGuides.has(guide), false, `${guide} should stay repository-only`);
 	}
+});
+
+test("supply-chain CI hardening guide stays operational and repo-scoped", () => {
+	const guides = read("docs/guides/README.md");
+	const guide = read("docs/guides/supply-chain-ci-hardening.md");
+
+	assert.match(guides, /supply-chain-ci-hardening\.html/);
+	assert.match(guide, /repository maintenance material/);
+	assert.match(guide, /`pnpm-workspace.yaml` owns `packages\/\*`, `minimumReleaseAge: 1440` and the explicit `allowBuilds` list/);
+	assert.match(guide, /`pnpm install --frozen-lockfile`/);
+	assert.match(guide, /Root scripts: workspace install, tests, audits, docs and release preparation use `pnpm`\/`pnpm exec`/);
+	assert.match(guide, /`npm` use is intentional only for registry semantics/);
+	assert.match(guide, /`npx` use is public installer UX for `@aretw0\/pi-stack`/);
+	assert.match(guide, /cache-mode: \$\{\{ github\.event_name == 'pull_request' && 'off' \|\| 'auto' \}\}/);
+	assert.match(guide, /pnpm install --frozen-lockfile --offline/);
+	assert.match(guide, /pnpm run test:ci:workflow/);
+	assert.match(guide, /pnpm run ci:local:parity/);
+	assert.match(guide, /package-manager rollback to npm as protected scope/);
+	assert.match(guide, /do not retry manually until the release tag, package versions, provenance permission and npm token scope are rechecked/);
+	assert.match(guide, /source-backed-pnpm-supply-chain-evidence-2026-05\.html/);
+	assert.doesNotMatch(guide, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
 });
 
 test("package guide sync includes generic maintenance guides", () => {

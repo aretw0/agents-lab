@@ -83,6 +83,7 @@ Estes guias existem para manter este monorepo, seus fluxos de release, seu site 
 | [doc-drift-mdt.md]({{ '/guides/doc-drift-mdt.html' | relative_url }}) | Contrato advisory para MDT/doc-drift: check first, escopo pequeno e integração futura com CI |
 | [agents-lab-editorial-pipeline.md]({{ '/guides/agents-lab-editorial-pipeline.html' | relative_url }}) | Pipeline/template editorial para release notes e posts separando nossa stack, upstream Pi, deps e curadoria |
 | [skill-guide-parity.md]({{ '/guides/skill-guide-parity.html' | relative_url }}) | Protocolo de paridade guide-skill para discoverability e controle de drift documental |
+| [supply-chain-ci-hardening.md]({{ '/guides/supply-chain-ci-hardening.html' | relative_url }}) | Runbook do laboratório para pnpm, cache de dependências no CI e publish seguro |
 
 ### Evidência selecionada
 
