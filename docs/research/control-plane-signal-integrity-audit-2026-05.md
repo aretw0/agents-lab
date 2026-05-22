@@ -82,3 +82,9 @@ A lane pode ser considerada madura quando houver:
 - Incerteza restante: a origem exata ainda não está provada sem transcript reproduzível; o caminho mais provável continua sendo fan-out/renderização, não retry explícito.
 - Próximo escopo se repetir: fixture com `runId`/tool event real e assert de uma única mensagem por chave de erro.
 - `task-bud-946-duplicate-edit-warning-triage`
+
+## TASK-BUD-947 near-noop edit metrics
+- Métrica local adicionada: `assessEditNoopNoiseFromEditInput` compara `oldText/newText` para no-op exato, trailing whitespace-only e whitespace por linha em payloads pequenos.
+- Semântica: report-only, `activation=none`; edições legítimas de formatação continuam permitidas.
+- Uso esperado: agregar repetição antes de gastar atenção do operador, não bloquear uma edição isolada.
+- `task-bud-947-near-noop-edit-metrics`

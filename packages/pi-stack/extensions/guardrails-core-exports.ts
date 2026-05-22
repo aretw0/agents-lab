@@ -6,6 +6,7 @@ export {
   shouldEmitBloatSmellSignal,
   extractAssistantTextFromTurnMessage,
   estimateCodeBloatFromEditInput,
+  assessEditNoopNoiseFromEditInput,
   estimateCodeBloatFromWriteInput,
   buildTextBloatStatusLabel,
   buildCodeBloatStatusLabel,

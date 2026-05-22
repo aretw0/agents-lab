@@ -21179,7 +21179,7 @@
     {
       "id": "TASK-BUD-947",
       "description": "[P3/backlog] Monitorar e quantificar operações de edição no-op ou quase no-op do agente para reduzir ruído e custo sem bloquear correções triviais.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "files": [
         "packages/pi-stack/extensions",
@@ -21194,7 +21194,8 @@
         "Adicionar regressão/fixture se uma implementação for feita futuramente."
       ],
       "milestone": "operator-noise-backlog",
-      "notes": "[intake:user] Operador observou uma edição com diff aparentemente idêntico em `context-watchdog-handoff.ts` e pediu backlog sem prioridade. Análise inicial: no caso mostrado provavelmente havia remoção de whitespace invisível/trailing space, então não era necessariamente no-op real; o problema é medir frequência e ruído dessas operações, não bloquear a edição automaticamente.\n[provenance:human] source_task=none reason=Feedback explícito do operador sobre operação de edit visualmente sem sentido/no-op aparente.\nPost-reload continuation selected TASK-BUD-947 as the next normal-use single-worker read-only candidate instead of parked TASK-BUD-1006 UI/footer tangent. Prepared board-derived start packet for runId `task-bud-947-monitor-noop-edit-review`; dispatch_check is confirmation=missing, so no worker was dispatched from generic `prossiga`."
+      "notes": "[intake:user] Operador observou uma edição com diff aparentemente idêntico em `context-watchdog-handoff.ts` e pediu backlog sem prioridade. Análise inicial: no caso mostrado provavelmente havia remoção de whitespace invisível/trailing space, então não era necessariamente no-op real; o problema é medir frequência e ruído dessas operações, não bloquear a edição automaticamente.\n[provenance:human] source_task=none reason=Feedback explícito do operador sobre operação de edit visualmente sem sentido/no-op aparente.\nPost-reload continuation selected TASK-BUD-947 as the next normal-use single-worker read-only candidate instead of parked TASK-BUD-1006 UI/footer tangent. Prepared board-derived start packet for runId `task-bud-947-monitor-noop-edit-review`; dispatch_check is confirmation=missing, so no worker was dispatched from generic `prossiga`.\nClosed with report-only near-noop edit metric in guardrails-core-bloat. The metric stays activation=none and preserves legitimate formatting edits; repeated near-noop findings are advisory for operator-noise aggregation only.",
+      "verification": "VER-BUD-947-EDIT-NOOP-NOISE-METRICS"
     },
     {
       "id": "TASK-BUD-948",

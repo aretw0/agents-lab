@@ -241,6 +241,22 @@ export interface WideSingleFileSliceAssessment {
   };
 }
 
+export interface EditNoopNoiseAssessment {
+  mode: "edit-noop-noise";
+  activation: "none";
+  decision: "none" | "single" | "repeated";
+  totalEdits: number;
+  exactNoop: number;
+  trailingWhitespaceOnly: number;
+  lineWhitespaceOnly: number;
+  semanticEdits: number;
+  skippedLargePayloads: number;
+  nearNoopCount: number;
+  reasons: string[];
+  recommendation: string;
+  summary: string;
+}
+
 export function evaluateTextBloatSmell(
   text: string,
   thresholds?: Partial<{ chars: number; lines: number; repeatedLineRatio: number }>,
@@ -307,6 +323,116 @@ export function evaluateCodeBloatSmell(
       hunks,
       filesTouched,
     },
+  };
+}
+
+function normalizeLineEndings(text: string): string {
+  return String(text ?? "").replace(/\r\n/g, "\n");
+}
+
+function stripTrailingWhitespace(text: string): string {
+  return normalizeLineEndings(text).replace(/[ \t]+$/gm, "");
+}
+
+function normalizeLineWhitespace(text: string): string {
+  return normalizeLineEndings(text)
+    .split("\n")
+    .map((line) => line.trim().replace(/[ \t]+/g, " "))
+    .join("\n")
+    .trim();
+}
+
+export function assessEditNoopNoiseFromEditInput(
+  input: unknown,
+  options?: { maxTextChars?: number; repeatedThreshold?: number },
+): EditNoopNoiseAssessment {
+  const row = input as Record<string, unknown> | undefined;
+  const edits = Array.isArray(row?.edits) ? (row.edits as unknown[]) : [];
+  const maxTextChars = Math.max(
+    200,
+    Math.min(100_000, Math.floor(Number(options?.maxTextChars ?? 8_000))),
+  );
+  const repeatedThreshold = Math.max(1, Math.floor(Number(options?.repeatedThreshold ?? 2)));
+  let exactNoop = 0;
+  let trailingWhitespaceOnly = 0;
+  let lineWhitespaceOnly = 0;
+  let semanticEdits = 0;
+  let skippedLargePayloads = 0;
+
+  for (const raw of edits) {
+    if (!raw || typeof raw !== "object") continue;
+    const editRow = raw as Record<string, unknown>;
+    const oldText = typeof editRow.oldText === "string" ? editRow.oldText : "";
+    const newText = typeof editRow.newText === "string" ? editRow.newText : "";
+    if (oldText.length + newText.length > maxTextChars) {
+      skippedLargePayloads += 1;
+      continue;
+    }
+
+    if (oldText === newText) {
+      exactNoop += 1;
+    } else if (stripTrailingWhitespace(oldText) === stripTrailingWhitespace(newText)) {
+      trailingWhitespaceOnly += 1;
+    } else if (normalizeLineWhitespace(oldText) === normalizeLineWhitespace(newText)) {
+      lineWhitespaceOnly += 1;
+    } else {
+      semanticEdits += 1;
+    }
+  }
+
+  const totalEdits =
+    exactNoop +
+    trailingWhitespaceOnly +
+    lineWhitespaceOnly +
+    semanticEdits +
+    skippedLargePayloads;
+  const nearNoopCount = exactNoop + trailingWhitespaceOnly + lineWhitespaceOnly;
+  const decision: EditNoopNoiseAssessment["decision"] = nearNoopCount <= 0
+    ? "none"
+    : nearNoopCount >= repeatedThreshold
+      ? "repeated"
+      : "single";
+  const reasons = decision === "none"
+    ? ["no-near-noop-edit"]
+    : [
+      exactNoop > 0 ? `exact-noop:${exactNoop}` : undefined,
+      trailingWhitespaceOnly > 0 ? `trailing-whitespace-only:${trailingWhitespaceOnly}` : undefined,
+      lineWhitespaceOnly > 0 ? `line-whitespace-only:${lineWhitespaceOnly}` : undefined,
+      skippedLargePayloads > 0 ? `skipped-large-payloads:${skippedLargePayloads}` : undefined,
+    ].filter((reason): reason is string => typeof reason === "string");
+
+  return {
+    mode: "edit-noop-noise",
+    activation: "none",
+    decision,
+    totalEdits,
+    exactNoop,
+    trailingWhitespaceOnly,
+    lineWhitespaceOnly,
+    semanticEdits,
+    skippedLargePayloads,
+    nearNoopCount,
+    reasons,
+    recommendation: decision === "repeated"
+      ? [
+        "edit-noop-noise advisory: aggregate repeated near-noop edits",
+        "and inspect whether the agent is spending turns on invisible churn;",
+        "do not block legitimate formatting.",
+      ].join(" ")
+      : decision === "single"
+        ? "edit-noop-noise: single near-noop edit, preserve as advisory only."
+        : "edit-noop-noise: healthy",
+    summary: [
+      "edit-noop-noise:",
+      `decision=${decision}`,
+      `nearNoop=${nearNoopCount}`,
+      `exact=${exactNoop}`,
+      `trailing=${trailingWhitespaceOnly}`,
+      `lineWhitespace=${lineWhitespaceOnly}`,
+      `semantic=${semanticEdits}`,
+      `skipped=${skippedLargePayloads}`,
+      "activation=none",
+    ].join(" "),
   };
 }
 

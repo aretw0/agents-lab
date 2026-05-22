@@ -16991,6 +16991,15 @@
       "method": "automated-smoke",
       "evidence": "monitor_tool_failure_noise_evidence report-only primitive preserves one edit oldText mismatch and reports duplicates; vitest smoke, docs site, complexity, discourse passed",
       "timestamp": "2026-05-22T22:03:56.628Z"
+    },
+    {
+      "id": "VER-BUD-947-EDIT-NOOP-NOISE-METRICS",
+      "target": "TASK-BUD-947",
+      "target_type": "task",
+      "status": "passed",
+      "method": "automated-smoke",
+      "evidence": "assessEditNoopNoiseFromEditInput classifies exact no-op, trailing-whitespace-only, line-whitespace-only, semantic, and skipped-large edit payloads as report-only metrics; smoke/docs/complexity/discourse passed",
+      "timestamp": "2026-05-22T22:09:48.056Z"
     }
   ]
 }
