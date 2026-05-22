@@ -22,6 +22,7 @@ import {
   type LocalSliceOperatorDecisionKind,
   type UnattendedContinuationContextLevel,
 } from "./guardrails-core-unattended-continuation";
+import { buildReloadLifecycleDiagnosticPacket } from "./guardrails-core-reload-lifecycle-diagnostic";
 import { asBooleanWithDefault } from "./guardrails-core-param-normalizers";
 import {
   formatAuthorizationEvidence,
@@ -610,6 +611,70 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
         githubActionsRequested: asBooleanWithDefault(p.github_actions_requested, false),
         protectedScopeRequested: asBooleanWithDefault(p.protected_scope_requested, false),
         destructiveMaintenanceRequested: asBooleanWithDefault(p.destructive_maintenance_requested, false),
+      });
+      return {
+        content: [{ type: "text", text: result.summary }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "reload_lifecycle_diagnostic_packet",
+    label: "Reload Lifecycle Diagnostic Packet",
+    description: "Read-only reload diagnostic packet. Classifies bounded phase timings as healthy, slow-progressing, possibly-hung, failed, or insufficient-evidence without running tests or restarting.",
+    parameters: Type.Object({
+      phases: Type.Array(Type.Object({
+        phase: Type.Union([
+          Type.Literal("package-discovery"),
+          Type.Literal("extension-load"),
+          Type.Literal("tool-registration"),
+          Type.Literal("monitor-startup"),
+          Type.Literal("session-resume-hooks"),
+        ], { description: "Canonical reload phase." }),
+        status: Type.Union([
+          Type.Literal("pending"),
+          Type.Literal("running"),
+          Type.Literal("completed"),
+          Type.Literal("failed"),
+          Type.Literal("unknown"),
+        ], { description: "Observed phase status." }),
+        duration_ms: Type.Optional(Type.Integer({ minimum: 0, description: "Observed phase duration in milliseconds." })),
+        started_at_iso: Type.Optional(Type.String({ description: "Optional phase start timestamp." })),
+        ended_at_iso: Type.Optional(Type.String({ description: "Optional phase end timestamp." })),
+        note: Type.Optional(Type.String({ description: "Short bounded note for this phase." })),
+      }), { description: "Bounded reload phase timings." }),
+      last_visible_phase: Type.Optional(Type.String({ description: "Last visible phase from runtime output if known." })),
+      last_progress_at_iso: Type.Optional(Type.String({ description: "Timestamp for last visible progress." })),
+      session_path: Type.Optional(Type.String({ description: "Session path or sandbox root for evidence capture." })),
+      cpu_pressure: Type.Optional(Type.Boolean({ description: "Whether CPU pressure was observed." })),
+      disk_pressure: Type.Optional(Type.Boolean({ description: "Whether disk pressure was observed." })),
+      auto_resume_suppressed: Type.Optional(Type.Boolean({ description: "Whether auto-resume suppression was active." })),
+      reload_suppression_active: Type.Optional(Type.Boolean({ description: "Whether reload suppression/defer state was active." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const rawPhases = Array.isArray(p.phases) ? p.phases : [];
+      const result = buildReloadLifecycleDiagnosticPacket({
+        nowMs: Date.now(),
+        phases: rawPhases.map((phase) => {
+          const row = (phase ?? {}) as Record<string, unknown>;
+          return {
+            phase: row.phase as never,
+            status: row.status as never,
+            durationMs: typeof row.duration_ms === "number" ? row.duration_ms : undefined,
+            startedAtIso: typeof row.started_at_iso === "string" ? row.started_at_iso : undefined,
+            endedAtIso: typeof row.ended_at_iso === "string" ? row.ended_at_iso : undefined,
+            note: typeof row.note === "string" ? row.note : undefined,
+          };
+        }),
+        lastVisiblePhase: typeof p.last_visible_phase === "string" ? p.last_visible_phase : undefined,
+        lastProgressAtIso: typeof p.last_progress_at_iso === "string" ? p.last_progress_at_iso : undefined,
+        sessionPath: typeof p.session_path === "string" ? p.session_path : undefined,
+        cpuPressure: asBooleanWithDefault(p.cpu_pressure, false),
+        diskPressure: asBooleanWithDefault(p.disk_pressure, false),
+        autoResumeSuppressed: asBooleanWithDefault(p.auto_resume_suppressed, false),
+        reloadSuppressionActive: asBooleanWithDefault(p.reload_suppression_active, false),
       });
       return {
         content: [{ type: "text", text: result.summary }],

@@ -67,6 +67,7 @@ Estes guias descrevem manutenção que pode acompanhar a stack ou inspirar outro
 | [dependency-upstream-governance.md]({{ '/guides/dependency-upstream-governance.html' | relative_url }}) | Governança para atribuir mudanças entre stack local, upstream Pi e dependências antes de decidir `assimilate|hold|reject` |
 | [host-disk-recovery.md]({{ '/guides/host-disk-recovery.html' | relative_url }}) | Recuperação dry-first de disco, cache e artefatos de sandbox sem perder continuidade |
 | [session-triage.md]({{ '/guides/session-triage.html' | relative_url }}) | Triagem de sessões/eventos recentes para transformar histórico em backlog revisável |
+| [reload-lifecycle-diagnostic.md]({{ '/guides/reload-lifecycle-diagnostic.html' | relative_url }}) | Packet read-only para diferenciar reload lento, reload travado e evidência insuficiente |
 | [i18n-intents.md]({{ '/guides/i18n-intents.html' | relative_url }}) | Runbook de intents soft/hard de internacionalização para comunicação e artefatos |
 | [mermaid-authoring.md]({{ '/guides/mermaid-authoring.html' | relative_url }}) | Regras portáveis para escrever Mermaid em Markdown, GitHub, Jekyll, Astro e Obsidian |
 

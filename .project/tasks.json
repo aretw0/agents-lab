@@ -24188,7 +24188,7 @@
     {
       "id": "TASK-BUD-1082",
       "description": "Instrument and diagnose slow or apparently unbounded reload after extension/runtime changes.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "acceptance_criteria": [
         "Reload lifecycle records bounded phase timings for package discovery, extension load, tool registration, monitor startup, and session resume hooks.",
@@ -24197,7 +24197,8 @@
         "Add timeout/diagnostic guidance without forcing destructive restart."
       ],
       "milestone": "continuity-hardening",
-      "notes": "User feedback after forced compact/reload: reload appeared not to end; unclear whether tool/runtime hang or local machine slowness. Keep as diagnostic backlog for next occurrence; ask operator to capture phase/timing evidence if it repeats.\n2026-05-15 follow-up: user retried reload and it did not hang this time. Keep diagnostic task open because the previous slow/unbounded reload remains unexplained; next occurrence should capture phase/timing evidence rather than assuming operator waited too little."
+      "notes": "User feedback after forced compact/reload: reload appeared not to end; unclear whether tool/runtime hang or local machine slowness. Keep as diagnostic backlog for next occurrence; ask operator to capture phase/timing evidence if it repeats.\n2026-05-15 follow-up: user retried reload and it did not hang this time. Keep diagnostic task open because the previous slow/unbounded reload remains unexplained; next occurrence should capture phase/timing evidence rather than assuming operator waited too little.\n2026-05-22: Added report-only reload lifecycle diagnostic packet with bounded phase timings, operator-visible slow/hung distinction, packaged evidence guide, and smoke/docs validation.",
+      "verification": "VER-BUD-1082-reload-lifecycle-diagnostic"
     },
     {
       "id": "TASK-BUD-1083",

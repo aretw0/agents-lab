@@ -19,6 +19,7 @@ Package: @aretw0/pi-stack
 - quota-visibility.md
 - token-efficiency.md
 - recommended-pi-stack.md
+- reload-lifecycle-diagnostic.md
 - scheduler-governance.md
 - stack-sovereignty-user-guide.md
 - subagent-readiness-gate.md

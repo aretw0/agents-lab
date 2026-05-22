@@ -16847,6 +16847,15 @@
       "method": "automated-test",
       "evidence": "Loop-paused post-reload auto-resume guard implemented and validated. Focal checks: pnpm exec vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts; node --test scripts/test/pi-isolated-resume-intent.test.mjs scripts/test/pi-loop-pause-state-contract.test.mjs. Broader checks: pnpm run test:pi:isolated; pnpm run test:smoke => 166 files passed, 1339 tests passed.",
       "timestamp": "2026-05-22T20:19:30.246Z"
+    },
+    {
+      "id": "VER-BUD-1082-reload-lifecycle-diagnostic",
+      "target": "TASK-BUD-1082",
+      "target_type": "task",
+      "status": "passed",
+      "method": "automated-test",
+      "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts; pnpm run docs:package:check; pnpm run test:docs:site; pnpm run test:smoke",
+      "timestamp": "2026-05-22T20:27:33.183Z"
     }
   ]
 }

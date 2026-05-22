@@ -654,6 +654,42 @@ describe("guardrails unattended continuation surface", () => {
     ]));
   });
 
+  it("registers read-only reload lifecycle diagnostic packet tool", () => {
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsUnattendedContinuationSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const diagnosticTool = tools.find((tool) => tool.name === "reload_lifecycle_diagnostic_packet");
+    const schemaText = JSON.stringify(diagnosticTool?.parameters ?? {});
+    expect(schemaText).toContain("package-discovery");
+    expect(schemaText).toContain("session-resume-hooks");
+
+    const result = diagnosticTool?.execute("call-reload-diagnostic", {
+      phases: [
+        { phase: "package-discovery", status: "completed", duration_ms: 2_000 },
+        { phase: "extension-load", status: "completed", duration_ms: 10_000 },
+        { phase: "tool-registration", status: "running", duration_ms: 130_000 },
+      ],
+      last_visible_phase: "tool-registration",
+      last_progress_at_iso: "2026-05-22T20:27:00.000Z",
+      disk_pressure: true,
+      auto_resume_suppressed: true,
+      reload_suppression_active: true,
+    });
+
+    expect(result?.content?.[0]?.text).toContain("reload-lifecycle-diagnostic: decision=possibly-hung");
+    expect(result?.content?.[0]?.text).toContain("last=tool-registration");
+    expect(result?.details).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      decision: "possibly-hung",
+      missingPhases: ["monitor-startup", "session-resume-hooks"],
+    });
+  });
+
   it("registers compact read-only nudge-free loop canary tool", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsUnattendedContinuationSurface({

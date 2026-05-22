@@ -281,6 +281,53 @@ export interface SelfReloadAutoresumeCanaryPlan {
   recommendation: string;
 }
 
+export type ReloadLifecyclePhaseName =
+  | "package-discovery"
+  | "extension-load"
+  | "tool-registration"
+  | "monitor-startup"
+  | "session-resume-hooks";
+
+export type ReloadLifecyclePhaseStatus = "pending" | "running" | "completed" | "failed" | "unknown";
+export type ReloadLifecycleDecision = "healthy" | "slow-progressing" | "possibly-hung" | "failed" | "insufficient-evidence";
+
+export interface ReloadLifecyclePhaseTiming {
+  phase: ReloadLifecyclePhaseName;
+  status: ReloadLifecyclePhaseStatus;
+  durationMs?: number;
+  startedAtIso?: string;
+  endedAtIso?: string;
+  note?: string;
+}
+
+export interface ReloadLifecycleDiagnosticInput {
+  nowMs: number;
+  phases: ReloadLifecyclePhaseTiming[];
+  lastVisiblePhase?: ReloadLifecyclePhaseName | string;
+  lastProgressAtIso?: string;
+  sessionPath?: string;
+  cpuPressure?: boolean;
+  diskPressure?: boolean;
+  autoResumeSuppressed?: boolean;
+  reloadSuppressionActive?: boolean;
+}
+
+export interface ReloadLifecycleDiagnosticPacket {
+  effect: "none";
+  mode: "advisory";
+  activation: "none";
+  authorization: GuardrailsAuthorizationNone;
+  decision: ReloadLifecycleDecision;
+  phases: ReloadLifecyclePhaseTiming[];
+  totalKnownDurationMs: number;
+  slowPhases: string[];
+  missingPhases: ReloadLifecyclePhaseName[];
+  evidenceChecklist: string[];
+  rollbackPath: string[];
+  summary: string;
+  recommendation: string;
+}
+
 export interface NudgeFreeLoopCanaryGate {
   effect: "none";
   mode: "advisory";
