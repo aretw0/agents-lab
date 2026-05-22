@@ -230,16 +230,17 @@ describe("custom-footer — buildFooterLines", () => {
 
 	it("linha 2 inclui budgetStatus quando presente", () => {
 		const lines = buildFooterLines(
-			{ ...baseInput, budgetStatus: "✓copilot:38% ⚠codex:46%" },
+			{ ...baseInput, budgetStatus: "✓copilot:used=38% ⚠codex:used=46%" },
 			plainTheme,
 			200,
 		);
-		expect(lines[1]).toContain("✓copilot:38% ⚠codex:46%");
+		expect(lines[1]).toContain("✓copilot:used=38% ⚠codex:used=46%");
 	});
 
 	it("expõe legenda de budget para /status quando budgetStatus existe", () => {
-		const legend = formatFooterBudgetLegend("✓copilot:38% ⚠codex:46%").join("\n");
+		const legend = formatFooterBudgetLegend("✓copilot:used=38% ⚠codex:used=46%").join("\n");
 		expect(legend).toContain("✓=OK, ⚠=WARN, ✗=BLOCK");
+		expect(legend).toContain("used=%");
 		expect(legend).toContain("not remaining quota");
 		expect(legend).toContain("WHAM headroom");
 	});
@@ -284,7 +285,7 @@ describe("custom-footer — buildFooterLines", () => {
 		const lines = buildFooterLines(
 			{
 				...baseInput,
-				budgetStatus: "✓openai:12% ✓copilot:38% ⚠codex:92%",
+				budgetStatus: "✓openai:used=12% ✓copilot:used=38% ⚠codex:used=92%",
 				pilotStatus: "[pilot] monitors=off · web=on · colonies=12",
 				monitorSummaryStatus: "[mon] 5/5 · fail=0",
 				boardClockStatus: "[board] ip=2 blk=1 plan=4",
@@ -292,7 +293,7 @@ describe("custom-footer — buildFooterLines", () => {
 			plainTheme,
 			64,
 		);
-			expect(lines[1]).toContain("✓openai:12% +2");
+		expect(lines[1]).toContain("✓openai:u=12% +2");
 		expect(lines[1]).toContain("[board] ip=2 blk=1");
 		expect(lines[1]).not.toContain("[pilot]");
 		expect(lines[1]).not.toContain("[mon]");
@@ -321,7 +322,7 @@ describe("custom-footer — buildFooterLines", () => {
 		const lines = buildFooterLines(
 			{
 				...baseInput,
-				budgetStatus: "✓openai:12% ✓copilot:38% ⚠codex:92%",
+				budgetStatus: "✓openai:used=12% ✓copilot:used=38% ⚠codex:used=92%",
 				pilotStatus: "[pilot] monitors=off · web=on · colonies=12",
 			},
 			plainTheme,
@@ -337,7 +338,7 @@ describe("custom-footer — buildFooterLines", () => {
 describe("custom-footer — status overlay", () => {
 	it("builds bounded status lines with extension statuses and budget legend", () => {
 		const plainTheme = { fg: (_: string, text: string) => text };
-		const statuses = new Map<string, string>([["quota-budgets", "✓codex:12%"]]);
+		const statuses = new Map<string, string>([["quota-budgets", "✓codex:used=12%"]]);
 		const lines = buildStatusLines({
 			sessionStart: Date.now() - 30_000,
 			usageTotals: { input: 1200, output: 300, cost: 0.02 },

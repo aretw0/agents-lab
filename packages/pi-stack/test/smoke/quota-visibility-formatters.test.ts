@@ -59,17 +59,17 @@ describe("quota-visibility TUI footer formatters", () => {
 
     it("usa ✓ para estado ok", () => {
       const parts = formatBudgetStatusParts([makeBudgetStatus("openai-codex", "ok", 12)]);
-      expect(parts).toEqual(["✓codex:12%"]);
+      expect(parts).toEqual(["✓codex:used=12%"]);
     });
 
     it("usa ⚠ para estado warning", () => {
       const parts = formatBudgetStatusParts([makeBudgetStatus("github-copilot", "warning", 78)]);
-      expect(parts).toEqual(["⚠copilot:78%"]);
+      expect(parts).toEqual(["⚠copilot:used=78%"]);
     });
 
     it("usa ✗ para estado blocked", () => {
       const parts = formatBudgetStatusParts([makeBudgetStatus("github-copilot", "blocked", 100)]);
-      expect(parts).toEqual(["✗copilot:100%"]);
+      expect(parts).toEqual(["✗copilot:used=100%"]);
     });
 
     it("usa o maior pct entre tokens/cost/requests", () => {
@@ -80,12 +80,12 @@ describe("quota-visibility TUI footer formatters", () => {
         usedPctRequests: 30,
       };
       const [part] = formatBudgetStatusParts([b]);
-      expect(part).toBe("✓codex:55%");
+      expect(part).toBe("✓codex:used=55%");
     });
 
     it("arredonda pct fracionário", () => {
       const parts = formatBudgetStatusParts([makeBudgetStatus("openai-codex", "ok", 12.7)]);
-      expect(parts).toEqual(["✓codex:13%"]);
+      expect(parts).toEqual(["✓codex:used=13%"]);
     });
 
     it("formata múltiplos providers na ordem recebida", () => {
@@ -94,7 +94,7 @@ describe("quota-visibility TUI footer formatters", () => {
         makeBudgetStatus("github-copilot", "blocked", 100),
         makeBudgetStatus("google-gemini-cli", "ok", 8),
       ]);
-      expect(parts).toEqual(["✓codex:0%", "✗copilot:100%", "✓gemini:8%"]);
+      expect(parts).toEqual(["✓codex:used=0%", "✗copilot:used=100%", "✓gemini:used=8%"]);
     });
 
     it("trata undefined como 0 (safeNum)", () => {
@@ -104,12 +104,13 @@ describe("quota-visibility TUI footer formatters", () => {
         usedPctTokens: undefined,
       };
       const [part] = formatBudgetStatusParts([b]);
-      expect(part).toBe("✓codex:0%");
+      expect(part).toBe("✓codex:used=0%");
     });
 
     it("explica símbolos, percentual local usado e diferença de WHAM", () => {
       const legend = formatBudgetStatusLegend().join("\n");
       expect(legend).toContain("✓=OK, ⚠=WARN, ✗=BLOCK");
+      expect(legend).toContain("used=%");
       expect(legend).toContain("max local used pressure");
       expect(legend).toContain("not remaining quota");
       expect(legend).toContain("WHAM headroom");

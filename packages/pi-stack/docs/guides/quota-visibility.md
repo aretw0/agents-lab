@@ -295,6 +295,8 @@ O painel de visibilidade pode ser fixado no footer da TUI para monitoramento con
 
 > **Pré-requisito:** o painel só exibe dados se `providerBudgets` estiver configurado em `.pi/settings.json` (seção `piStack.quotaVisibility`). Sem essa configuração, o painel mostrará uma mensagem de aviso ao invés de dados. Use `/qp snapshot` para confirmar se a leitura está funcionando antes de ativar um modo persistente.
 
+O footer compacto usa tokens como `✓codex:used=12%`, `⚠codex:used=78%` e `✗codex:used=100%`. `✓/⚠/✗` são estados da política local (`OK/WARN/BLOCK`) e `used=%` é pressão local usada/projetada contra o budget configurado. Não é quota restante do dashboard nem prova de headroom WHAM live.
+
 ### Modos
 
 | Comando | Comportamento |
@@ -320,7 +322,7 @@ Quando ativo, o footer expande com 3 seções:
 ───── Rolling Windows ───────────────────────────────────────
   codex      recent=45k max=182k  peak:14h 15h → start:09h
 ───── Route Advisory ────────────────────────────────────────
-  balanced → antigrav  [ ✓antigrav 10%  ⚠codex 46%  ✓copilot 38% ]
+  balanced → antigrav  [ ✓antigrav:used=10%  ⚠codex:used=46%  ✓copilot:used=38% ]
 ```
 
 > Os dados são atualizados automaticamente a cada turno de conversa com cache de 30s para não impactar performance.

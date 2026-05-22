@@ -81,8 +81,11 @@ function compactBudgetStatus(status: string | undefined, density: FooterDensity)
   if (!status) return undefined;
   const tokens = status.split(/\s+/).filter(Boolean);
   const maxTokens = density === "wide" ? 99 : density === "medium" ? 2 : 1;
-  if (tokens.length <= maxTokens) return status;
-  return `${tokens.slice(0, maxTokens).join(" ")} +${tokens.length - maxTokens}`;
+  const visibleTokens = tokens
+    .slice(0, maxTokens)
+    .map((token) => density === "narrow" ? token.replace(/:used=/g, ":u=") : token);
+  if (tokens.length <= maxTokens) return visibleTokens.join(" ");
+  return `${visibleTokens.join(" ")} +${tokens.length - maxTokens}`;
 }
 
 export function formatFooterBudgetLegend(status: string | undefined): string[] {

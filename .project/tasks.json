@@ -22438,7 +22438,7 @@
     {
       "id": "TASK-BUD-1006",
       "description": "[P2/UI] Reabrir ambiguidade do footer compacto de quota: símbolos e percentuais como `✓dashscope:0% ✗codex:96%` continuam pouco autoexplicativos para operador, apesar da legenda já existir em docs.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-968"
@@ -22456,7 +22456,8 @@
         "Validar com teste/snapshot focal de copy operator-visible."
       ],
       "milestone": "operator-visible-ui-clarity-2026-05",
-      "notes": "Criada por feedback humano após ver footer `✓dashscope:0% ✗codex:96%`: o usuário não entendeu o significado dos símbolos nem percentuais. TASK-BUD-968 já existia/completou legenda, mas a experiência ainda falha na superfície visível.\n[provenance:human] source_task=TASK-BUD-968 reason=Feedback real mostra que a legenda/documentação ainda não torna o footer autoexplicativo no momento de uso.\n2026-05-10: Evidência nova do caso OpenAI Codex/Spark deve ser tratada aqui, não em task nova. Exemplo observado no footer: `✓dashscope:0% ✗codex:122% ✓codex/gpt-5.3-codex-spark:0%`. Diagnóstico provável: `formatBudgetStatusParts` mostra pressão local por `usedPctTokens|usedPctCost|usedPctRequests` e ignora `dashboardUsedPct`/`dashboardRemainingPct` do WHAM; isso é enganoso quando o agregado Codex está alto/bloqueado mas `gpt-5.3-codex-spark` tem janela/cota separada viva. TASK-BUD-1069 foi cancelada como duplicada desta task."
+      "notes": "Criada por feedback humano após ver footer `✓dashscope:0% ✗codex:96%`: o usuário não entendeu o significado dos símbolos nem percentuais. TASK-BUD-968 já existia/completou legenda, mas a experiência ainda falha na superfície visível.\n[provenance:human] source_task=TASK-BUD-968 reason=Feedback real mostra que a legenda/documentação ainda não torna o footer autoexplicativo no momento de uso.\n2026-05-10: Evidência nova do caso OpenAI Codex/Spark deve ser tratada aqui, não em task nova. Exemplo observado no footer: `✓dashscope:0% ✗codex:122% ✓codex/gpt-5.3-codex-spark:0%`. Diagnóstico provável: `formatBudgetStatusParts` mostra pressão local por `usedPctTokens|usedPctCost|usedPctRequests` e ignora `dashboardUsedPct`/`dashboardRemainingPct` do WHAM; isso é enganoso quando o agregado Codex está alto/bloqueado mas `gpt-5.3-codex-spark` tem janela/cota separada viva. TASK-BUD-1069 foi cancelada como duplicada desta task.\n2026-05-22: Footer budget tokens now render used pressure explicitly as provider:used=N% while narrow density abbreviates to provider:u=N% to preserve board/status visibility. Legend, guide, package docs, and tests now distinguish local OK/WARN/BLOCK policy from dashboard remaining quota and WHAM headroom.",
+      "verification": "VER-BUD-1006-QUOTA-FOOTER-USED-COPY"
     },
     {
       "id": "TASK-BUD-1007",

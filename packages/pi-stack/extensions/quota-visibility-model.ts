@@ -87,7 +87,7 @@ export function shortProviderLabel(p: string): string {
 
 /**
  * Format per-provider budget state into compact footer tokens.
- * Each entry: "✓codex:12%", "✗copilot:100%", "⚠gemini:78%".
+ * Each entry: "✓codex:used=12%", "✗copilot:used=100%", "⚠gemini:used=78%".
  * The percent is local used pressure: max(used tokens, used cost, used requests).
  * Pure — no I/O, no pi APIs.
  */
@@ -109,14 +109,14 @@ export function formatBudgetStatusParts(
 			: b.account
 				? `${shortProviderLabel(b.provider)}@${b.account}`
 				: shortProviderLabel(b.provider);
-		return `${icon}${scope}:${pct}%`;
+		return `${icon}${scope}:used=${pct}%`;
 	});
 }
 
 export function formatBudgetStatusLegend(): string[] {
 	return [
 		"quota footer legend: ✓=OK, ⚠=WARN, ✗=BLOCK from local providerBudgets.",
-		"quota footer percent: max local used pressure across tokens, cost, and requests; not remaining quota.",
+		"quota footer used=%: max local used pressure across tokens, cost, and requests; not remaining quota.",
 		"WHAM note: a BLOCK/✗ local gate can differ from model-specific dashboard or live WHAM headroom.",
 	];
 }

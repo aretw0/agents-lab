@@ -914,7 +914,7 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 	// Control plane: live budget + model status in footer
 	// ---------------------------------------------------------------------------
 
-	/** Compact budget summary: "✓codex:12% ✗copilot:100% ✓gemini:8%". */
+	/** Compact budget summary: "✓codex:used=12% ✗copilot:used=100% ✓gemini:used=8%". */
 	async function refreshBudgetStatus(ctx: ExtensionContext): Promise<void> {
 		try {
 			const cfg = readSettings(ctx.cwd);

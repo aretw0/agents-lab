@@ -40,7 +40,7 @@ graph LR
         E --> I["/quota-visibility route"]
         F --> J["/quota-visibility status"]
         F --> K["refreshBudgetStatus → setStatus('quota-budgets')"]
-        K --> L["Footer linha 2 atual\n✓copilot:38% ✓antigrav:10%"]
+        K --> L["Footer linha 2 atual\n✓copilot:used=38% ✓antigrav:used=10%"]
     end
 
     subgraph "O que falta"
@@ -67,7 +67,7 @@ Antes de desenhar o painel, é preciso entender o que é e o que não é control
 ├─────────────────────────────────────────────────────────────────┤
 │  CUSTOM FOOTER — setFooter() (nosso controle total)             │
 │  LINE 1: ◆ provider/model | tokens $cost ctx% | ⏱elapsed       │
-│  LINE 2: ⌂ cwd | ⎇ branch | ✓copilot:38% ✓antigrav:10%        │
+│  LINE 2: ⌂ cwd | ⎇ branch | ✓copilot:used=38% ✓antigrav:used=10% │
 │  [LINE 3+: PAINEL TOGGLÁVEL — a proposta]                       │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -103,11 +103,11 @@ O modo `auto` é o primeiro passo de "políticas de perfil" (REQ-BUD-022) — mo
 ```
 MODO off (padrão — 2 linhas):
 ◆ openai-codex/gpt-5.3-codex-spark | 23k/8k $0.04 2% | ⏱12m
-⌂ agents-lab | ⎇ main | ✓copilot:38% ✓antigrav:10% ✓gemini:2% !codex:46%
+⌂ agents-lab | ⎇ main | ✓copilot:used=38% ✓antigrav:used=10% ✓gemini:used=2% ⚠codex:used=46%
 
 MODO on ou auto-triggered (footer expandido):
 ◆ openai-codex/gpt-5.3-codex-spark | 23k/8k $0.04 2% | ⏱12m
-⌂ agents-lab | ⎇ main | ✓copilot:38% ✓antigrav:10% ✓gemini:2% !codex:46%
+⌂ agents-lab | ⎇ main | ✓copilot:used=38% ✓antigrav:used=10% ✓gemini:used=2% ⚠codex:used=46%
 ────── Provider Usage Panel ──────────────────────────────
   copilot   MONTHLY  requests  38%  ████░░░░░░  380/1000req  $0.00
   antigrav  MONTHLY  cost      10%  █░░░░░░░░░  $6.04/$60    243Mtok

@@ -16946,6 +16946,15 @@
       "method": "automated-test",
       "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts; pnpm run docs:package:check; pnpm run repo:complexity:strict",
       "timestamp": "2026-05-22T21:42:49.682Z"
+    },
+    {
+      "id": "VER-BUD-1006-QUOTA-FOOTER-USED-COPY",
+      "target": "TASK-BUD-1006",
+      "target_type": "task",
+      "status": "passed",
+      "method": "automated-test",
+      "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/quota-visibility-formatters.test.ts packages/pi-stack/test/smoke/custom-footer-registration.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts; pnpm run docs:package:check; pnpm run repo:complexity:strict; pnpm run repo:discourse:audit",
+      "timestamp": "2026-05-22T21:50:45.924Z"
     }
   ]
 }
