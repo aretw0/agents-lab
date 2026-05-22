@@ -27,11 +27,15 @@ test("ci workflow keeps the local parity gate canonical", () => {
 	assert.doesNotMatch(workflow, /permissions:\n  contents: read\n  pull-requests: write\n\nconcurrency:/);
 	assert.match(workflow, /changes:\n\s+name: Change Discovery \(report-only\)\n\s+runs-on: ubuntu-latest\n\s+timeout-minutes: 10\n\s+permissions:\n\s+contents: read\n\s+pull-requests: write/);
 	assert.match(workflow, /sovereignty-report:\n\s+name: Sovereignty Report\n\s+runs-on: ubuntu-latest\n\s+timeout-minutes: 15\n\s+permissions:\n\s+contents: read\n\s+pull-requests: write/);
+	assert.match(workflow, /docs-site:\n\s+name: Docs Site Build\n\s+runs-on: ubuntu-latest\n\s+timeout-minutes: 15\n\s+needs: \[changes\]/);
+	assert.match(workflow, /sudo apt-get install -y ruby-full build-essential zlib1g-dev/);
+	assert.match(workflow, /gem install bundler --no-document/);
+	assert.match(workflow, /pnpm run docs:site:build:smoke/);
 	assert.match(workflow, /uses: \.\/\.github\/actions\/setup/);
 	assert.match(workflow, /run: pnpm run ci:smoke:gate/);
 	assert.match(workflow, /name: GitHub Action Pins/);
 	assert.match(workflow, /run: node scripts\/ci\/check-github-action-pins\.mjs/);
-	assert.match(workflow, /ci-metrics:\n\s+name: CI Metrics\n\s+if: always\(\)\n\s+needs: \[commit-lint, changeset, action-pins, changes, smoke, sovereignty-report\]/);
+	assert.match(workflow, /ci-metrics:\n\s+name: CI Metrics\n\s+if: always\(\)\n\s+needs: \[commit-lint, changeset, action-pins, changes, smoke, docs-site, sovereignty-report\]/);
 	assert.match(workflow, /ci-metrics:[\s\S]*?permissions:\n\s+contents: read\n\s+actions: read/);
 	assert.match(workflow, /name: ci-run-metrics/);
 	assert.match(workflow, /totalDurationSec/);
@@ -138,6 +142,7 @@ test("ci workflow jobs have explicit runtime budgets", () => {
 		["action-pins", 10],
 		["changes", 10],
 		["smoke", 30],
+		["docs-site", 15],
 		["sovereignty-report", 15],
 		["ci-metrics", 10],
 	]);

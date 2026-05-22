@@ -320,6 +320,29 @@ jobs:
       - name: Parity gate local↔CI (smoke + sovereignty strict)
         run: pnpm run ci:smoke:gate
 
+  docs-site:
+    name: Docs Site Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [changes]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+
+      - name: Install Ruby build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby-full build-essential zlib1g-dev
+          gem install bundler --no-document
+
+      - name: Build and smoke test GitHub Pages site
+        run: |
+          pnpm run docs:site:install
+          pnpm run docs:site:build:smoke
+
   sovereignty-report:
     name: Sovereignty Report
     runs-on: ubuntu-latest
@@ -387,7 +410,7 @@ jobs:
   ci-metrics:
     name: CI Metrics
     if: always()
-    needs: [commit-lint, changeset, action-pins, changes, smoke, sovereignty-report]
+    needs: [commit-lint, changeset, action-pins, changes, smoke, docs-site, sovereignty-report]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

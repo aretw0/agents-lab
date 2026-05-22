@@ -381,6 +381,11 @@ test("docs site can be served consistently from host or devcontainer", () => {
 	assert.match(smokeScript, /"\/architecture\/"/);
 	assert.match(smokeScript, /README\.html instead of a directory route/);
 	assert.match(smokeScript, /mermaid\.esm\.min\.mjs/);
+	assert.match(smokeScript, /collectLocalAssetReferences/);
+	assert.match(smokeScript, /references missing local asset/);
+	assert.match(smokeScript, /<link\\s\[\^>\]\*href/);
+	assert.match(smokeScript, /<script\\s\[\^>\]\*src/);
+	assert.match(smokeScript, /<img\\s\[\^>\]\*src/);
 	assert.match(dockerfile, /ruby-full build-essential zlib1g-dev/);
 	assert.match(dockerfile, /typescript-node:24-bookworm/);
 	assert.match(dockerfile, /gem install bundler --no-document/);

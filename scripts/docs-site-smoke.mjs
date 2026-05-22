@@ -98,7 +98,7 @@ function stripBaseurl(href, baseurl) {
 }
 
 function isExternal(href) {
-	return /^(https?:|mailto:|tel:|#)/.test(href);
+	return /^(https?:|mailto:|tel:|#|data:)/.test(href);
 }
 
 function decodeHtml(value) {
@@ -129,6 +129,33 @@ function distExists(route) {
 	if (existsSync(target)) return true;
 	const asIndex = path.join(SITE_DIR, cleanRoute.replace(/^\//, ""), "index.html");
 	return existsSync(asIndex);
+}
+
+function collectLocalAssetReferences(html) {
+	const refs = [];
+	const patterns = [
+		/<link\s[^>]*href="([^"]+)"/g,
+		/<script\s[^>]*src="([^"]+)"/g,
+		/<img\s[^>]*src="([^"]+)"/g,
+	];
+	for (const pattern of patterns) {
+		for (const match of html.matchAll(pattern)) {
+			const href = match[1];
+			if (!href || isExternal(href)) continue;
+			refs.push(href);
+		}
+	}
+	return refs;
+}
+
+function collectLocalAnchorReferences(html) {
+	const refs = [];
+	for (const match of html.matchAll(/<a\s[^>]*href="([^"]+)"/g)) {
+		const href = match[1];
+		if (!href || isExternal(href)) continue;
+		refs.push(href);
+	}
+	return refs;
 }
 
 function fail(errors) {
@@ -183,17 +210,28 @@ for (const routePath of PUBLIC_LINK_ROUTES) {
 	const html = read(file);
 	if (/href="[^"]*README\.html/.test(html)) errors.push(`${rel} links to README.html instead of a directory route`);
 
-	for (const match of html.matchAll(/<a\s[^>]*href="([^"]+)"/g)) {
-		const href = match[1];
-		if (isExternal(href)) continue;
+	for (const href of collectLocalAnchorReferences(html)) {
 		if (href.startsWith("//")) {
 			errors.push(`${rel} contains protocol-relative href ${href}`);
 			continue;
 		}
 		const route = stripBaseurl(href, baseurl);
 		if (/\.md(?:[#?]|$)/.test(route)) errors.push(`${rel} links to raw Markdown route ${href}`);
-		if (route.startsWith("assets/") || route.startsWith("/assets/")) continue;
 		if (!distExists(route)) errors.push(`${rel} links to missing internal route ${href}`);
+	}
+}
+
+for (const file of listHtmlFiles(SITE_DIR)) {
+	const rel = path.relative(SITE_DIR, file).replaceAll("\\", "/");
+	const html = read(file);
+
+	for (const href of collectLocalAssetReferences(html)) {
+		if (href.startsWith("//")) {
+			errors.push(`${rel} contains protocol-relative href ${href}`);
+			continue;
+		}
+		const route = stripBaseurl(href, baseurl);
+		if (!distExists(route)) errors.push(`${rel} references missing local asset ${href}`);
 	}
 }
 
