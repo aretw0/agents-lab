@@ -16910,6 +16910,15 @@
       "method": "automated-test",
       "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/control-plane-continuity-skill.test.ts; pnpm run test:docs:site; pnpm run repo:discourse:audit; pnpm run repo:complexity:strict",
       "timestamp": "2026-05-22T21:26:18.879Z"
+    },
+    {
+      "id": "VER-BUD-1084-ARENA-CALIBRATION-PREP",
+      "target": "TASK-BUD-1084",
+      "target_type": "task",
+      "status": "passed",
+      "method": "automated-test",
+      "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk-arena.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk-arena-fan-in.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+      "timestamp": "2026-05-22T21:29:55.578Z"
     }
   ]
 }

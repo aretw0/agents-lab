@@ -121,4 +121,42 @@ describe("agent run SDK arena fan-in", () => {
     expect(result?.content?.[0]?.text).toContain("dispatch=no");
     expect(result?.content?.[0]?.text).toContain("write=no");
   });
+
+  it("registers a calibration prep surface without dispatch or paid calls", () => {
+    const tools: RegisteredTool[] = [];
+    guardrailsAgentRun({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+      registerCommand() {},
+    } as never);
+
+    const tool = tools.find((entry) => entry.name === "agent_run_sdk_provider_model_arena_calibration_packet");
+    expect(tool?.parameters).toMatchObject({
+      type: "object",
+      properties: {
+        provider_model_ref: expect.any(Object),
+        readiness_decision: expect.any(Object),
+        readiness_evidence: expect.any(Object),
+        baseline_provider_model_refs: expect.any(Object),
+      },
+    });
+
+    const result = tool?.execute("tc-arena-calibration", {
+      arena_id: "arena-calibration-surface",
+      provider_model_ref: "dashscope/qwen3.6-flash",
+      readiness_decision: "ready",
+      readiness_evidence: "provider_readiness=ready budget=ok source=operator-check",
+      baseline_provider_model_refs: ["openai-codex/gpt-5.3-codex-spark"],
+      envelopes: ["readonly-one-file"],
+      max_calls: 1,
+      timeout_ms: 45_000,
+      max_estimated_cost_usd: 0.25,
+      budget_decision: "ok",
+      budget_evidence: "manual budget evidence for dashscope/qwen3.6-flash",
+    }, undefined as unknown as AbortSignal, vi.fn(), { cwd: process.cwd() });
+
+    expect(result?.details?.mode).toBe("agent-run-sdk-provider-model-arena-calibration-packet");
+    expect(result?.content?.[0]?.text).toContain("decision=ready-for-operator-decision");
+    expect(result?.content?.[0]?.text).toContain("paidCalls=no");
+    expect(result?.content?.[0]?.text).toContain("dispatch=no");
+  });
 });

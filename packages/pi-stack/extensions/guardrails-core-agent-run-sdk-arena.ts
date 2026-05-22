@@ -52,9 +52,50 @@ export interface AgentRunSdkProviderModelArenaPacketInput {
   unexpectedDirty?: boolean;
 }
 
+export interface AgentRunSdkProviderModelArenaCalibrationPacketInput extends AgentRunSdkProviderModelArenaPacketInput {
+  readinessDecision?: string;
+  readinessEvidence?: string;
+  baselineProviderModelRefs?: string[];
+}
+
 export interface AgentRunSdkProviderModelArenaArtifactPacketInput extends AgentRunSdkProviderModelArenaPacketInput {
   apply?: boolean;
   operatorApproval?: unknown;
+}
+
+export interface AgentRunSdkProviderModelArenaCalibrationPacketResult {
+  mode: "agent-run-sdk-provider-model-arena-calibration-packet";
+  activation: "none";
+  authorization: GuardrailsAuthorizationNone;
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  paidModelCallsAllowed: false;
+  writeAllowed: false;
+  requiresOperatorDecision: true;
+  decision: "ready-for-operator-decision" | "blocked";
+  blockers: string[];
+  readiness: {
+    decision: "ready" | "blocked" | "unconfigured" | "unknown";
+    evidence: string;
+  };
+  arenaPacket: AgentRunSdkProviderModelArenaPacketResult;
+  calibrationPlan: {
+    providerModelRef: string;
+    envelopes: AgentRunSdkArenaEnvelope[];
+    maxCalls: number;
+    maxEstimatedCostUsd: number;
+    timeoutMs: number;
+    scorecardArtifactPath: string;
+    fanInArtifactPath: string;
+    noInheritedEvidence: true;
+  };
+  comparisonPlan: {
+    baselineProviderModelRefs: string[];
+    compareBy: string[];
+    promotionScope: "provider-model-envelope";
+  };
+  nextActions: string[];
+  summary: string;
 }
 
 export interface AgentRunSdkProviderModelArenaArtifactPacketResult {
@@ -390,6 +431,10 @@ function isSafeArtifactArenaId(arenaId: string): boolean {
   return /^[A-Za-z0-9._-]+$/.test(arenaId);
 }
 
+function normalizeReadinessDecision(value: unknown): AgentRunSdkProviderModelArenaCalibrationPacketResult["readiness"]["decision"] {
+  return value === "ready" || value === "blocked" || value === "unconfigured" || value === "unknown" ? value : "unknown";
+}
+
 function asRecord(value: unknown): Record<string, unknown> | undefined {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
 }
@@ -565,6 +610,84 @@ export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRun
       `artifacts=${artifactPreviews.length}`,
       `apply=${applyRequested ? "yes" : "no"}`,
       `write=${writeAllowed ? "yes" : "no"}`,
+      "dispatch=no",
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+    ].filter(Boolean).join(" "),
+  };
+}
+
+export function buildAgentRunSdkProviderModelArenaCalibrationPacket(input: AgentRunSdkProviderModelArenaCalibrationPacketInput = {}): AgentRunSdkProviderModelArenaCalibrationPacketResult {
+  const arenaPacket = buildAgentRunSdkProviderModelArenaPacket(input);
+  const readinessDecision = normalizeReadinessDecision(input.readinessDecision);
+  const readinessEvidence = normalizeText(input.readinessEvidence);
+  const baselineProviderModelRefs = normalizeFiles(input.baselineProviderModelRefs).filter((entry) => entry.includes("/"));
+  const blockers = [...arenaPacket.blockers];
+
+  if (readinessDecision !== "ready") blockers.push(`provider-readiness-not-ready:${readinessDecision}`);
+  if (!readinessEvidence) blockers.push("provider-readiness-evidence-missing");
+  if (baselineProviderModelRefs.includes(arenaPacket.arenaSpec.providerModelRef)) blockers.push("baseline-must-not-be-same-provider-model");
+
+  const decision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
+  const calibrationPlan = {
+    providerModelRef: arenaPacket.arenaSpec.providerModelRef,
+    envelopes: arenaPacket.arenaSpec.envelopes,
+    maxCalls: arenaPacket.arenaSpec.maxCalls,
+    maxEstimatedCostUsd: arenaPacket.arenaSpec.maxEstimatedCostUsd,
+    timeoutMs: arenaPacket.arenaSpec.timeoutMs,
+    scorecardArtifactPath: arenaPacket.scorecardTemplate.artifactPath,
+    fanInArtifactPath: arenaPacket.fanInPlan.artifactPath,
+    noInheritedEvidence: true as const,
+  };
+  const comparisonPlan = {
+    baselineProviderModelRefs,
+    compareBy: [
+      "same envelope id",
+      "same declared files/tools",
+      "same parent-side validation",
+      "terminal outcome packet",
+      "scorecard/fan-in decision",
+      "cost/latency/error class",
+    ],
+    promotionScope: "provider-model-envelope" as const,
+  };
+
+  return {
+    mode: "agent-run-sdk-provider-model-arena-calibration-packet",
+    activation: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    paidModelCallsAllowed: false,
+    writeAllowed: false,
+    requiresOperatorDecision: true,
+    decision,
+    blockers,
+    readiness: {
+      decision: readinessDecision,
+      evidence: readinessEvidence,
+    },
+    arenaPacket,
+    calibrationPlan,
+    comparisonPlan,
+    nextActions: decision === "ready-for-operator-decision"
+      ? [
+        "review provider readiness and budget evidence before any model call",
+        "persist arena artifacts only through the structured artifact packet or explicit operator action",
+        "run no paid/model calls until exact operator approval declares provider/model, max calls, max cost, and timeout",
+        "compare scorecard rows by provider/model/envelope; do not inherit baseline capability evidence",
+      ]
+      : [
+        "resolve readiness, budget, or arena blockers before calibration",
+        "keep the calibration pass report-only until provider/model evidence is fresh",
+      ],
+    summary: [
+      "agent-run-sdk-provider-model-arena-calibration-packet:",
+      `decision=${decision}`,
+      `model=${arenaPacket.arenaSpec.providerModelRef || "missing"}`,
+      `readiness=${readinessDecision}`,
+      `envelopes=${arenaPacket.arenaSpec.envelopes.length}`,
+      `baselines=${baselineProviderModelRefs.length}`,
+      "paidCalls=no",
       "dispatch=no",
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),

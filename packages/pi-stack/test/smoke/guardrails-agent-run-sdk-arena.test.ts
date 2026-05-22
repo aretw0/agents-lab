@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildAgentRunSdkProviderModelArenaArtifactPacket,
+  buildAgentRunSdkProviderModelArenaCalibrationPacket,
   buildAgentRunSdkProviderModelArenaPacket,
 } from "../../extensions/guardrails-core-exports";
 
@@ -227,6 +228,59 @@ describe("agent run SDK arena packets", () => {
     expect(arenaBlocked.blockers).toContain("unknown-envelope");
     expect(arenaBlocked.blockers).toContain("max-estimated-cost-missing");
     expect(arenaBlocked.blockers).toContain("budget-evidence-missing");
+  });
+
+  it("prepares provider/model calibration without inheriting baseline evidence or dispatching calls", () => {
+    const calibration = buildAgentRunSdkProviderModelArenaCalibrationPacket({
+      arenaId: "arena-dashscope-qwen-calibration",
+      providerModelRef: "dashscope/qwen3.6-flash",
+      readinessDecision: "ready",
+      readinessEvidence: "provider_readiness=ready budget=ok source=operator-check",
+      baselineProviderModelRefs: ["openai-codex/gpt-5.3-codex-spark"],
+      envelopes: ["readonly-one-file", "readonly-source-backed-evidence-synthesis"],
+      maxCalls: 2,
+      timeoutMs: 45_000,
+      maxEstimatedCostUsd: 0.25,
+      budgetDecision: "ok",
+      budgetEvidence: "manual budget evidence for dashscope/qwen3.6-flash",
+    });
+
+    expect(calibration).toMatchObject({
+      mode: "agent-run-sdk-provider-model-arena-calibration-packet",
+      decision: "ready-for-operator-decision",
+      dispatchAllowed: false,
+      paidModelCallsAllowed: false,
+      writeAllowed: false,
+      readiness: {
+        decision: "ready",
+      },
+      calibrationPlan: {
+        providerModelRef: "dashscope/qwen3.6-flash",
+        noInheritedEvidence: true,
+      },
+      comparisonPlan: {
+        baselineProviderModelRefs: ["openai-codex/gpt-5.3-codex-spark"],
+        promotionScope: "provider-model-envelope",
+      },
+    });
+    expect(calibration.calibrationPlan.envelopes).toEqual(["readonly-one-file", "readonly-source-backed-evidence-synthesis"]);
+    expect(calibration.nextActions.join("\n")).toContain("do not inherit baseline capability evidence");
+    expect(calibration.summary).toContain("paidCalls=no");
+
+    const blocked = buildAgentRunSdkProviderModelArenaCalibrationPacket({
+      arenaId: "arena-missing-readiness",
+      providerModelRef: "dashscope/qwen3.6-flash",
+      readinessDecision: "unknown",
+      envelopes: ["readonly-one-file"],
+      maxCalls: 1,
+      timeoutMs: 45_000,
+      maxEstimatedCostUsd: 0.25,
+      budgetDecision: "ok",
+      budgetEvidence: "manual budget evidence",
+    });
+    expect(blocked.decision).toBe("blocked");
+    expect(blocked.blockers).toContain("provider-readiness-not-ready:unknown");
+    expect(blocked.blockers).toContain("provider-readiness-evidence-missing");
   });
 });
 

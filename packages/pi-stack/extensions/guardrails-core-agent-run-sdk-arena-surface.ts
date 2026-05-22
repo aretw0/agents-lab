@@ -6,7 +6,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import * as path from "node:path";
 import { type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaFanInPacket, buildAgentRunSdkProviderModelArenaPacket, type AgentRunSdkProviderModelArenaArtifactPacketResult } from "./guardrails-core-agent-run-sdk-arena";
+import { buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaCalibrationPacket, buildAgentRunSdkProviderModelArenaFanInPacket, buildAgentRunSdkProviderModelArenaPacket, type AgentRunSdkProviderModelArenaArtifactPacketResult } from "./guardrails-core-agent-run-sdk-arena";
 import { resolveExecutionCwdParam } from "./guardrails-core-execution-context";
 import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-param-normalizers";
 import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
@@ -75,6 +75,28 @@ export function registerAgentRunSdkProviderModelArenaTool(pi: ExtensionAPI): voi
       const p = (params ?? {}) as Record<string, unknown>;
       const result = buildAgentRunSdkProviderModelArenaPacket(buildArenaInput(p, ctx.cwd));
       return buildOperatorVisibleToolResponse({ label: "agent_run_sdk_provider_model_arena_packet", summary: result.summary, details: result });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_sdk_provider_model_arena_calibration_packet",
+    label: "Agent Run SDK Provider/Model Arena Calibration Packet",
+    description: "Report-only calibration preparation for any provider/model using the arena suite and scorecard/fan-in contract. Never dispatches paid/model calls.",
+    parameters: Type.Object({
+      ...arenaToolParameters.properties,
+      readiness_decision: Type.Optional(Type.String({ description: "Fresh provider/model readiness decision: ready, blocked, unconfigured, or unknown." })),
+      readiness_evidence: Type.Optional(Type.String({ description: "Fresh provider/model readiness evidence. Do not include secrets." })),
+      baseline_provider_model_refs: Type.Optional(Type.Array(Type.String(), { description: "Provider/model refs used only for comparison; evidence is not inherited." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = buildAgentRunSdkProviderModelArenaCalibrationPacket({
+        ...buildArenaInput(p, ctx.cwd),
+        readinessDecision: typeof p.readiness_decision === "string" ? p.readiness_decision : undefined,
+        readinessEvidence: typeof p.readiness_evidence === "string" ? p.readiness_evidence : undefined,
+        baselineProviderModelRefs: asOptionalStringArray(p.baseline_provider_model_refs),
+      });
+      return buildOperatorVisibleToolResponse({ label: "agent_run_sdk_provider_model_arena_calibration_packet", summary: result.summary, details: result });
     },
   });
 

@@ -24223,7 +24223,7 @@
     {
       "id": "TASK-BUD-1084",
       "description": "Prepare a provider/model-agnostic arena calibration pass for Dashscope or any future model using the same generic envelope suite and scorecard/fan-in contract.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1079"
@@ -24236,7 +24236,8 @@
         "Compare results against local Codex Spark rows and external/prior-art evaluation techniques before promotion."
       ],
       "milestone": "worker-arena",
-      "notes": "Created from user steering: after Codex Spark unlocks the harness, the same arena should put Dashscope/other models to the test with reusable capability proofs."
+      "notes": "Created from user steering: after Codex Spark unlocks the harness, the same arena should put Dashscope/other models to the test with reusable capability proofs.\n2026-05-22: Added a report-only provider/model arena calibration packet and tool surface. It requires fresh readiness and budget evidence, reuses the generic suite manifest/scorecard/fan-in contract, compares against baseline provider/model rows without inheriting capability evidence, and keeps dispatch, writes, and paid/model calls disabled.",
+      "verification": "VER-BUD-1084-ARENA-CALIBRATION-PREP"
     },
     {
       "id": "TASK-BUD-1085",
