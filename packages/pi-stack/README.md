@@ -33,7 +33,7 @@ pi install https://github.com/aretw0/agents-lab
 | [`@aretw0/git-skills`](https://www.npmjs.com/package/@aretw0/git-skills) | `commit`, `git-workflow`, `github` (gh CLI), `glab` |
 | [`@aretw0/web-skills`](https://www.npmjs.com/package/@aretw0/web-skills) | `native-web-search`, `web-browser` (CDP) |
 | [`@aretw0/pi-skills`](https://www.npmjs.com/package/@aretw0/pi-skills) | `terminal-setup`, `create-pi-skill/extension/theme/prompt` |
-| [`@aretw0/lab-skills`](https://www.npmjs.com/package/@aretw0/lab-skills) | `evaluate-extension`, `cultivate-primitive`, `stack-feedback`, `provider-model-discovery` |
+| [`@aretw0/lab-skills`](https://www.npmjs.com/package/@aretw0/lab-skills) | `evaluate-extension`, `cultivate-primitive`, `stack-feedback`, `provider-model-discovery`, `reality-check` |
 
 ### Extensions Incluídas
 

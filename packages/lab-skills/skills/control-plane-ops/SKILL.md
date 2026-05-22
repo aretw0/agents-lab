@@ -16,7 +16,8 @@ Use esta skill quando a tarefa envolver long-runs, board-first, continuidade, ha
 3. **Continuidade unattended com trilho**: se o foco terminar e houver próxima fatia local-safe óbvia, continue; pare apenas em risco, ambiguidade real ou escopo protegido.
 4. **Handoff antes de risco de contexto**: em checkpoint, refresque `.project/handoff.json`; em compact, pare novo trabalho e deixe auto-resume continuar.
 5. **Escala progressiva**: L1 control-plane direto por default; L2 subagente só com readiness; L3 swarm só com preflight/budget/escopo paralelo.
-5. **Sem auto-close externo**: GitHub/Gitea/trackers espelham o board; completion local requer verificação local.
+6. **Reality-check antes de gates amplos**: package manager, provider/model, worker capability, CI/publish e políticas distribuídas precisam de prior art/evidência cached + comparação local.
+7. **Sem auto-close externo**: GitHub/Gitea/trackers espelham o board; completion local requer verificação local.
 
 ## Paridade guide-skill
 
@@ -46,6 +47,7 @@ Use esta skill como superfície de descoberta. O guide canônico continua sendo 
 - Não fazer diagnóstico que despeje source maps/bundles/logs grandes; usar leitura bounded, filename/count-only ou exclusão explícita de `*.map`.
 - Não iniciar servers/processos em background automaticamente até existir primitiva com owner/workspace/session, port lock, tail bounded e cleanup.
 - Leitura bounded de `SKILL.md` confiável fora do projeto pode ser permitida; execução/instalação/scan recursivo continuam protegidos.
+- Não promover decisão ampla baseada em self-dialogue: use `reality-check` para separar evidência, hipótese, adoção, adaptação e rejeição.
 
 ## Influências operacionais (sem desvio de foco)
 

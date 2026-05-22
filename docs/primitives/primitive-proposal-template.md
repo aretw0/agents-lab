@@ -26,6 +26,18 @@ Template canônico para propor uma nova primitiva sem inflar a stack com abstra�
 - **Código duplicado que será removido/consolidado**:
 - **Impacto esperado em simplicidade**:
 
+## 3.1) Reality-check para decisão ampla
+
+Preencha quando a proposta afetar usuários, publicação, segurança, package manager, providers/modelos, workers ou governança distribuída.
+
+- **Fontes externas ou cached**:
+- **Artefatos locais comparados**:
+- **Adotar**:
+- **Adaptar**:
+- **Rejeitar**:
+- **Hipóteses sem evidência**:
+- **Checks** (licença/segurança/budget/governança):
+
 ## 4) Segurança e rollback
 
 - **Escopo** (local-safe/protected):

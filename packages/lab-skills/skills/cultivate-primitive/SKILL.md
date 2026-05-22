@@ -27,6 +27,8 @@ Pergunte ao usuário:
 
 ### 2. Classificar a Forma
 
+Antes de promover uma forma ampla, aplique `reality-check` quando a primitiva afetar usuários, governança, segurança, package manager, workers/providers, publicação ou contratos distribuídos.
+
 | Forma | Quando usar |
 |---|---|
 | **Skill** | Instruções recorrentes que o agente segue |
@@ -73,6 +75,7 @@ Se a primitiva é para a stack (`@aretw0/pi-stack`):
 - Abstração prematura — espere pelo terceiro caso
 - Skill gigante que mistura várias preocupações
 - Extensão onde uma skill bastaria
+- Promoção sem prior art, evidência externa/cached ou comparação local quando a decisão afeta superfície distribuída
 
 ## Referência
 

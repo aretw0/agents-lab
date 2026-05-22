@@ -16757,6 +16757,24 @@
       "method": "focal-smoke",
       "evidence": "Implemented read-only arena fan-in packet to validate persisted suite manifest, scorecard, and fan-in artifacts before provider/model/envelope promotion. It fails closed on missing scorecard rows, non-completed processes, non-pass contracts, empty output, read-only touched files, and mutation touches outside declared files. Surface agent_run_sdk_provider_model_arena_fan_in_packet is read-only: dispatch=no, write=no, paidModelCalls=no. Validation: pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk-arena-fan-in.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed in agents-lab devcontainer, 2 files, 4 tests.",
       "timestamp": "2026-05-22T19:25:39.035Z"
+    },
+    {
+      "id": "VERIF-TASK-BUD-1076-ARENA-SUITE-CONSOLIDATED-20260522",
+      "target": "TASK-BUD-1076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "full-gate+focal-smoke",
+      "evidence": "Provider/model arena is now a reproducible local-first suite surface: registry-backed envelope matrix, explicit budget packet, report-only separation from paid/model calls, comparable scorecard and fan-in artifacts, exact-confirmed artifact writer, read-only fan-in validator, and provider/model/envelope scoped promotion. Validation: pnpm run ci:local:parity passed in agents-lab devcontainer after the fan-in validator commit; release readiness now shows TASK-BUD-1079 completed and no arena implementation gap for TASK-BUD-1076.",
+      "timestamp": "2026-05-22T19:28:56.771Z"
+    },
+    {
+      "id": "VERIF-TASK-BUD-1077-REALITY-CHECK-SKILL-20260522",
+      "target": "TASK-BUD-1077",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-smoke",
+      "evidence": "Added distributed lab skill packages/lab-skills/skills/reality-check/SKILL.md with a minimal prior-art decision contract: external_or_cached_sources, local_artifacts, unsupported_hypotheses, adopt/adapt/reject/defer recommendation, license/security/budget/governance checks, smallest safe slice, and validation. Wired discovery from cultivate-primitive, control-plane-ops, primitive proposal template, lab-skills README, and pi-stack README. Validation: pnpm exec vitest run packages/pi-stack/test/smoke/lab-reality-check-skill.test.ts packages/pi-stack/test/smoke/package-list.test.ts packages/pi-stack/test/smoke/manifest-integrity.test.ts packages/pi-stack/test/smoke/skill-collisions.test.ts passed in agents-lab devcontainer, 4 files, 76 tests.",
+      "timestamp": "2026-05-22T19:31:19.954Z"
     }
   ]
 }
