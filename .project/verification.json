@@ -16784,6 +16784,60 @@
       "method": "ci:local:parity",
       "evidence": "Passed in devcontainer eb303930747d: pnpm install --frozen-lockfile --offline; pnpm run test:ci:workflow; pnpm run test:docs:site; pnpm run docs:site:build:smoke; pnpm run ci:local:parity. Implemented pnpm workspace hardening, PR dependency cache trust scoping in CI, and repository supply-chain CI rollback runbook. Commits: 0adce033, 7384c39c.",
       "timestamp": "2026-05-22T19:47:41.706Z"
+    },
+    {
+      "id": "VER-COLONY-C1-PROMOTION-DISPOSITION-20260522",
+      "target": "colony-c1-promotion",
+      "target_type": "task",
+      "status": "passed",
+      "method": "disposition-packet",
+      "evidence": "Reviewed stale colony-c1 promotion as read-only disposition. Added docs/research/colony-c1-promotion-disposition-2026-05-22.md with Workspace report, Task summary, Promoted file inventory, Skipped file inventory, Validation command log, Rollback, and Operator review. No candidate files were promoted because c1|colony-mnzmi243-lk2d0 has no verifiable candidate snapshot, declared file list, diff/apply evidence, validation gate, or rollback plan in the current workspace. Focal validation passed in devcontainer: pnpm exec vitest run packages/pi-stack/test/smoke/colony-pilot-delivery-recovery.test.ts packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts packages/pi-stack/test/smoke/colony-pilot-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-artifacts-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-status-retention.test.ts => 5 files, 34 tests. Prior baseline pnpm run ci:local:parity passed; release readiness showed no open P0 but stale colony board blockers.",
+      "timestamp": "2026-05-22T19:54:07.573Z"
+    },
+    {
+      "id": "VER-STALE-COLONY-COLONY_C1-DISPOSITION-20260522",
+      "target": "colony-c1",
+      "target_type": "task",
+      "status": "passed",
+      "method": "stale-colony-disposition",
+      "evidence": "Closed stale blocked colony telemetry task via docs/research/stale-colony-board-disposition-2026-05-22.md. No colony work was resumed and no candidate files were promoted. Focal validation passed in devcontainer: pnpm exec vitest run packages/pi-stack/test/smoke/colony-pilot-delivery-recovery.test.ts packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts packages/pi-stack/test/smoke/colony-pilot-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-artifacts-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-status-retention.test.ts => 5 files, 34 tests. Docs site contract passed. Release readiness before closure showed no open P0 tasks and identified this stale colony set as the board-release-clear blocker.",
+      "timestamp": "2026-05-22T19:55:19.354Z"
+    },
+    {
+      "id": "VER-STALE-COLONY-COLONY_C2-DISPOSITION-20260522",
+      "target": "colony-c2",
+      "target_type": "task",
+      "status": "passed",
+      "method": "stale-colony-disposition",
+      "evidence": "Closed stale blocked colony telemetry task via docs/research/stale-colony-board-disposition-2026-05-22.md. No colony work was resumed and no candidate files were promoted. Focal validation passed in devcontainer: pnpm exec vitest run packages/pi-stack/test/smoke/colony-pilot-delivery-recovery.test.ts packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts packages/pi-stack/test/smoke/colony-pilot-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-artifacts-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-status-retention.test.ts => 5 files, 34 tests. Docs site contract passed. Release readiness before closure showed no open P0 tasks and identified this stale colony set as the board-release-clear blocker.",
+      "timestamp": "2026-05-22T19:55:19.494Z"
+    },
+    {
+      "id": "VER-STALE-COLONY-COLONY_C_123-DISPOSITION-20260522",
+      "target": "colony-c-123",
+      "target_type": "task",
+      "status": "passed",
+      "method": "stale-colony-disposition",
+      "evidence": "Closed stale blocked colony telemetry task via docs/research/stale-colony-board-disposition-2026-05-22.md. No colony work was resumed and no candidate files were promoted. Focal validation passed in devcontainer: pnpm exec vitest run packages/pi-stack/test/smoke/colony-pilot-delivery-recovery.test.ts packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts packages/pi-stack/test/smoke/colony-pilot-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-artifacts-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-status-retention.test.ts => 5 files, 34 tests. Docs site contract passed. Release readiness before closure showed no open P0 tasks and identified this stale colony set as the board-release-clear blocker.",
+      "timestamp": "2026-05-22T19:55:19.676Z"
+    },
+    {
+      "id": "VER-STALE-COLONY-COLONY_C_RET_1-DISPOSITION-20260522",
+      "target": "colony-c-ret-1",
+      "target_type": "task",
+      "status": "passed",
+      "method": "stale-colony-disposition",
+      "evidence": "Closed stale blocked colony telemetry task via docs/research/stale-colony-board-disposition-2026-05-22.md. No colony work was resumed and no candidate files were promoted. Focal validation passed in devcontainer: pnpm exec vitest run packages/pi-stack/test/smoke/colony-pilot-delivery-recovery.test.ts packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts packages/pi-stack/test/smoke/colony-pilot-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-artifacts-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-status-retention.test.ts => 5 files, 34 tests. Docs site contract passed. Release readiness before closure showed no open P0 tasks and identified this stale colony set as the board-release-clear blocker.",
+      "timestamp": "2026-05-22T19:55:19.883Z"
+    },
+    {
+      "id": "VER-STALE-COLONY-COLONY_COLONY_A-DISPOSITION-20260522",
+      "target": "colony-colony-a",
+      "target_type": "task",
+      "status": "passed",
+      "method": "stale-colony-disposition",
+      "evidence": "Closed stale blocked colony telemetry task via docs/research/stale-colony-board-disposition-2026-05-22.md. No colony work was resumed and no candidate files were promoted. Focal validation passed in devcontainer: pnpm exec vitest run packages/pi-stack/test/smoke/colony-pilot-delivery-recovery.test.ts packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts packages/pi-stack/test/smoke/colony-pilot-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-artifacts-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-status-retention.test.ts => 5 files, 34 tests. Docs site contract passed. Release readiness before closure showed no open P0 tasks and identified this stale colony set as the board-release-clear blocker.",
+      "timestamp": "2026-05-22T19:55:20.067Z"
     }
   ]
 }
