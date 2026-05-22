@@ -6,7 +6,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import * as path from "node:path";
 import { type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaPacket, type AgentRunSdkProviderModelArenaArtifactPacketResult } from "./guardrails-core-agent-run-sdk-arena";
+import { buildAgentRunSdkProviderModelArenaArtifactPacket, buildAgentRunSdkProviderModelArenaFanInPacket, buildAgentRunSdkProviderModelArenaPacket, type AgentRunSdkProviderModelArenaArtifactPacketResult } from "./guardrails-core-agent-run-sdk-arena";
 import { resolveExecutionCwdParam } from "./guardrails-core-execution-context";
 import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-param-normalizers";
 import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
@@ -101,6 +101,26 @@ export function registerAgentRunSdkProviderModelArenaTool(pi: ExtensionAPI): voi
         summary: persistedArtifacts.length > 0 ? `${packet.summary} persisted=${persistedArtifacts.length}` : packet.summary,
       };
       return buildOperatorVisibleToolResponse({ label: "agent_run_sdk_provider_model_arena_artifact_packet", summary: result.summary, details: result });
+    },
+  });
+
+  pi.registerTool({
+    name: "agent_run_sdk_provider_model_arena_fan_in_packet",
+    label: "Agent Run SDK Provider/Model Arena Fan-In Packet",
+    description: "Read-only fan-in validator for persisted arena manifest, scorecard, and fan-in artifacts. Never dispatches workers or writes files.",
+    parameters: Type.Object({
+      suite_manifest: Type.Optional(Type.Any({ description: "Persisted arena suite manifest payload." })),
+      scorecard: Type.Optional(Type.Any({ description: "Persisted arena scorecard payload with terminal rows." })),
+      fan_in_plan: Type.Optional(Type.Any({ description: "Persisted arena fan-in plan payload." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = buildAgentRunSdkProviderModelArenaFanInPacket({
+        suiteManifest: p.suite_manifest as never,
+        scorecard: p.scorecard as never,
+        fanInPlan: p.fan_in_plan as never,
+      });
+      return buildOperatorVisibleToolResponse({ label: "agent_run_sdk_provider_model_arena_fan_in_packet", summary: result.summary, details: result });
     },
   });
 }

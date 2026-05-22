@@ -16748,6 +16748,15 @@
       "method": "focused-runtime-surface-tests",
       "evidence": "Implemented toolkit feedback loop in agent_run_outcome_packet: missing-tool, weak-tool, and capability-gap feedback now produce contractDecision=fail, recommendation=retry-with-toolkit, recommendationCode=agent-run-outcome-fail-toolkit-gap, and a report-only toolkitRetry packet with dispatchAllowed=false. Validation: pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-agent-run-runtime.test.ts and packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts passed in agents-lab devcontainer.",
       "timestamp": "2026-05-22T19:15:26.238Z"
+    },
+    {
+      "id": "VERIF-TASK-BUD-1079-ARENA-FAN-IN-VALIDATOR-20260522",
+      "target": "TASK-BUD-1079",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal-smoke",
+      "evidence": "Implemented read-only arena fan-in packet to validate persisted suite manifest, scorecard, and fan-in artifacts before provider/model/envelope promotion. It fails closed on missing scorecard rows, non-completed processes, non-pass contracts, empty output, read-only touched files, and mutation touches outside declared files. Surface agent_run_sdk_provider_model_arena_fan_in_packet is read-only: dispatch=no, write=no, paidModelCalls=no. Validation: pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-agent-run-sdk-arena-fan-in.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts passed in agents-lab devcontainer, 2 files, 4 tests.",
+      "timestamp": "2026-05-22T19:25:39.035Z"
     }
   ]
 }

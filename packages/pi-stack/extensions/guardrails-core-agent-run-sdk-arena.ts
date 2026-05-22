@@ -82,6 +82,32 @@ export interface AgentRunSdkProviderModelArenaArtifactPacketResult {
   summary: string;
 }
 
+export interface AgentRunSdkProviderModelArenaFanInPacketInput {
+  suiteManifest?: unknown;
+  scorecard?: unknown;
+  fanInPlan?: unknown;
+}
+
+export interface AgentRunSdkProviderModelArenaFanInPacketResult {
+  mode: "agent-run-sdk-provider-model-arena-fan-in-packet";
+  activation: "none";
+  authorization: GuardrailsAuthorizationNone;
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  paidModelCallsAllowed: false;
+  writeAllowed: false;
+  requiresOperatorDecision: false;
+  decision: "pass" | "fail";
+  suiteId: string;
+  providerModelRef: string;
+  expectedRunIds: string[];
+  checkedRows: number;
+  blockers: string[];
+  promotionReady: boolean;
+  nextActions: string[];
+  summary: string;
+}
+
 export interface AgentRunSdkProviderModelArenaPacketResult {
   mode: "agent-run-sdk-provider-model-arena-packet";
   activation: "none";
@@ -362,6 +388,119 @@ function jsonSizeBytes(payload: unknown): number {
 
 function isSafeArtifactArenaId(arenaId: string): boolean {
   return /^[A-Za-z0-9._-]+$/.test(arenaId);
+}
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
+}
+
+function asString(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+function asStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+}
+
+function validateArenaFanInRow(
+  row: Record<string, unknown>,
+  envelope: Record<string, unknown> | undefined,
+): string[] {
+  const blockers: string[] = [];
+  const runId = asString(row.runId);
+  const processState = asString(row.processState);
+  const contractDecision = asString(row.contractDecision);
+  const outputBytes = typeof row.outputBytes === "number" && Number.isFinite(row.outputBytes) ? row.outputBytes : 0;
+  const touchedFiles = asStringArray(row.touchedFiles);
+  const fileContract = asString(envelope?.fileContract);
+  const declaredFiles = asStringArray(envelope?.declaredFiles);
+
+  if (processState !== "completed") blockers.push(`worker-process-not-completed:${runId || "unknown"}:${processState || "unknown"}`);
+  if (contractDecision !== "pass") blockers.push(`worker-contract-not-pass:${runId || "unknown"}:${contractDecision || "unknown"}`);
+  if (outputBytes <= 0) blockers.push(`worker-empty-output:${runId || "unknown"}`);
+  if (fileContract === "read-only" && touchedFiles.length > 0) blockers.push(`read-only-worker-touched-files:${runId || "unknown"}`);
+  if (fileContract === "mutation") {
+    const unexpectedTouched = touchedFiles.filter((file) => !declaredFiles.includes(file));
+    if (unexpectedTouched.length > 0) blockers.push(`mutation-worker-touched-undeclared-files:${runId || "unknown"}:${unexpectedTouched.join(",")}`);
+  }
+  if (fileContract !== "read-only" && fileContract !== "mutation") blockers.push(`worker-file-contract-unknown:${runId || "unknown"}`);
+  return blockers;
+}
+
+export function buildAgentRunSdkProviderModelArenaFanInPacket(input: AgentRunSdkProviderModelArenaFanInPacketInput = {}): AgentRunSdkProviderModelArenaFanInPacketResult {
+  const suiteManifest = asRecord(input.suiteManifest);
+  const scorecard = asRecord(input.scorecard);
+  const fanInPlan = asRecord(input.fanInPlan);
+  const suiteId = asString(suiteManifest?.suiteId);
+  const providerModelRef = asString(suiteManifest?.providerModelRef);
+  const manifestRunIds = asStringArray(suiteManifest?.runIds);
+  const expectedRunIds = asStringArray(fanInPlan?.expectedRunIds);
+  const expected = expectedRunIds.length > 0 ? expectedRunIds : manifestRunIds;
+  const envelopes = Array.isArray(suiteManifest?.envelopes) ? suiteManifest.envelopes.map(asRecord).filter(Boolean) : [];
+  const rows = Array.isArray(scorecard?.rows) ? scorecard.rows.map(asRecord).filter(Boolean) : [];
+  const blockers: string[] = [];
+
+  if (!suiteId) blockers.push("suite-id-missing");
+  if (!providerModelRef || !providerModelRef.includes("/")) blockers.push("provider-model-ref-missing");
+  if (expected.length === 0) blockers.push("expected-run-ids-missing");
+  if (rows.length === 0) blockers.push("scorecard-rows-missing");
+
+  const rowsByRunId = new Map(rows.map((row) => [asString(row.runId), row]));
+  const envelopesByRunId = new Map(envelopes.map((envelope) => [asString(envelope?.runId), envelope]));
+  for (const runId of expected) {
+    const row = rowsByRunId.get(runId);
+    const envelope = envelopesByRunId.get(runId);
+    if (!row) {
+      blockers.push(`scorecard-row-missing:${runId}`);
+      continue;
+    }
+    if (!envelope) blockers.push(`manifest-envelope-missing:${runId}`);
+    blockers.push(...validateArenaFanInRow(row, envelope));
+  }
+
+  for (const row of rows) {
+    const runId = asString(row.runId);
+    if (runId && !expected.includes(runId)) blockers.push(`scorecard-row-unexpected:${runId}`);
+  }
+
+  const decision = blockers.length === 0 ? "pass" : "fail";
+  return {
+    mode: "agent-run-sdk-provider-model-arena-fan-in-packet",
+    activation: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    paidModelCallsAllowed: false,
+    writeAllowed: false,
+    requiresOperatorDecision: false,
+    decision,
+    suiteId,
+    providerModelRef,
+    expectedRunIds: expected,
+    checkedRows: rows.length,
+    blockers,
+    promotionReady: decision === "pass",
+    nextActions: decision === "pass"
+      ? [
+        "record this fan-in result as evidence before promoting provider/model/envelope capability",
+        "keep promotion scoped to this provider/model and these envelopes",
+      ]
+      : [
+        "resolve fan-in blockers before promotion",
+        "do not retry workers automatically from fan-in validation",
+      ],
+    summary: [
+      "agent-run-sdk-provider-model-arena-fan-in-packet:",
+      `decision=${decision}`,
+      `suiteId=${suiteId || "missing"}`,
+      `model=${providerModelRef || "missing"}`,
+      `runs=${expected.length}`,
+      `rows=${rows.length}`,
+      "dispatch=no",
+      "write=no",
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+    ].filter(Boolean).join(" "),
+  };
 }
 
 export function buildAgentRunSdkProviderModelArenaArtifactPacket(input: AgentRunSdkProviderModelArenaArtifactPacketInput = {}): AgentRunSdkProviderModelArenaArtifactPacketResult {
