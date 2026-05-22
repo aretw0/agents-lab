@@ -13,8 +13,9 @@ import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approv
 export type AgentRunState = "planned" | "running" | "completed" | "failed" | "timed-out" | "aborted" | "unknown";
 export type AgentRunAbortDecision = "dry-run" | "abort-ready" | "blocked";
 export type AgentRunContractDecision = "pass" | "partial" | "fail";
-export type AgentRunOutcomeRecommendation = "stop" | "retry-once" | "ask-operator";
+export type AgentRunOutcomeRecommendation = "stop" | "retry-once" | "retry-with-toolkit" | "ask-operator";
 export type AgentRunRegistryUpsertDecision = "dry-run" | "write-ready" | "blocked";
+export type AgentRunToolkitFeedbackKind = "missing-tool" | "weak-tool" | "capability-gap";
 
 export interface AgentRunRegistryEntry {
   runId?: string;
@@ -114,6 +115,12 @@ export interface AgentRunOutcomeInput {
   outputBytes?: number;
   fileContract?: AgentRunFileContract | string;
   mutationTargetFiles?: string[];
+  toolkitFeedback?: {
+    kind?: string;
+    capability?: string;
+    tool?: string;
+    message?: string;
+  };
 }
 
 export interface AgentRunOutcomeResult {
@@ -137,6 +144,7 @@ export interface AgentRunOutcomeResult {
     | "agent-run-outcome-fail-read-only-touched-files"
     | "agent-run-outcome-fail-unexpected-files"
     | "agent-run-outcome-fail-missing-declared-files"
+    | "agent-run-outcome-fail-toolkit-gap"
     | "agent-run-outcome-fail-marker";
   declaredFiles: string[];
   mutationTargetFiles: string[];
@@ -147,6 +155,19 @@ export interface AgentRunOutcomeResult {
   outputBytes?: number;
   fileContract: AgentRunFileContract;
   rollbackFiles: string[];
+  toolkitFeedback?: {
+    kind: AgentRunToolkitFeedbackKind;
+    capability: string;
+    tool: string;
+    message: string;
+  };
+  toolkitRetry?: {
+    action: "retry-with-toolkit";
+    dispatchAllowed: false;
+    requiredCapability: string;
+    requestedTool: string;
+    reason: string;
+  };
   blockers: string[];
   summary: string;
 }
@@ -263,6 +284,10 @@ function normalizeNonNegativeInteger(value: unknown): number | undefined {
   if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
   const normalized = Math.floor(value);
   return normalized >= 0 ? normalized : undefined;
+}
+
+function normalizeToolkitFeedbackKind(value: unknown): AgentRunToolkitFeedbackKind | undefined {
+  return value === "missing-tool" || value === "weak-tool" || value === "capability-gap" ? value : undefined;
 }
 
 function parseIsoMs(value: unknown): number | undefined {
@@ -403,6 +428,13 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
   const touchedFiles = normalizeFiles(input.touchedFiles);
   const outputBytes = normalizeNonNegativeInteger(input.outputBytes) ?? normalizeNonNegativeInteger(input.entry?.outputBytes);
   const fileContract: AgentRunFileContract = input.fileContract === "read-only" ? "read-only" : "mutation";
+  const toolkitFeedbackKind = normalizeToolkitFeedbackKind(input.toolkitFeedback?.kind);
+  const toolkitFeedback = toolkitFeedbackKind ? {
+    kind: toolkitFeedbackKind,
+    capability: normalizeText(input.toolkitFeedback?.capability) || "unknown",
+    tool: normalizeText(input.toolkitFeedback?.tool) || "unspecified",
+    message: normalizeText(input.toolkitFeedback?.message) || `${toolkitFeedbackKind} reported by worker`,
+  } : undefined;
   const mutationTargetFiles = fileContract === "mutation" && normalizeFiles(input.mutationTargetFiles).length > 0 ? normalizeFiles(input.mutationTargetFiles) : declaredFiles;
   const declaredSet = new Set(declaredFiles);
   const expectedTouchedSet = new Set(fileContract === "mutation" ? mutationTargetFiles : declaredFiles);
@@ -421,6 +453,7 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
   if (fileContract === "read-only" && touchedFiles.length > 0) blockers.push("read-only-touched-files");
   if (unexpectedFiles.length > 0) blockers.push("unexpected-files");
   if (fileContract !== "read-only" && touchedFiles.length > 0 && missingDeclaredFiles.length > 0) blockers.push("declared-files-missing");
+  if (toolkitFeedback) blockers.push(`toolkit-feedback:${toolkitFeedback.kind}:${toolkitFeedback.capability}`);
   if (markerFailures.length > 0) blockers.push("marker-failures");
 
   let contractDecision: AgentRunContractDecision = "pass";
@@ -451,6 +484,10 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
     contractDecision = "fail";
     recommendation = "ask-operator";
     recommendationCode = "agent-run-outcome-fail-missing-declared-files";
+  } else if (toolkitFeedback) {
+    contractDecision = "fail";
+    recommendation = "retry-with-toolkit";
+    recommendationCode = "agent-run-outcome-fail-toolkit-gap";
   } else if (markerFailures.length > 0) {
     contractDecision = "fail";
     recommendation = "ask-operator";
@@ -474,6 +511,7 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
     unexpectedFiles.length > 0 ? `unexpected=${unexpectedFiles.length}` : undefined,
     missingDeclaredFiles.length > 0 && touchedFiles.length > 0 ? `missing=${missingDeclaredFiles.length}` : undefined,
     markerFailures.length > 0 ? `markerFailures=${markerFailures.length}` : undefined,
+    toolkitFeedback ? `toolkitFeedback=${toolkitFeedback.kind}:${toolkitFeedback.capability}` : undefined,
     outputBytes !== undefined ? `outputBytes=${outputBytes}` : undefined,
     "dispatch=no",
     formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
@@ -501,6 +539,16 @@ export function buildAgentRunOutcomePacket(input: AgentRunOutcomeInput = {}): Ag
     ...(outputBytes !== undefined ? { outputBytes } : {}),
     fileContract,
     rollbackFiles,
+    ...(toolkitFeedback ? { toolkitFeedback } : {}),
+    ...(toolkitFeedback ? {
+      toolkitRetry: {
+        action: "retry-with-toolkit",
+        dispatchAllowed: false,
+        requiredCapability: toolkitFeedback.capability,
+        requestedTool: toolkitFeedback.tool,
+        reason: toolkitFeedback.message,
+      },
+    } : {}),
     blockers,
     summary,
   };

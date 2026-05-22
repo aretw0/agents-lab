@@ -274,6 +274,10 @@ export function registerAgentRunLifecycleTools(pi: ExtensionAPI): void {
       output_bytes: Type.Optional(Type.Number({ description: "Worker stdout/output byte count. Zero is a contract failure even when process exit succeeds." })),
       file_contract: Type.Optional(Type.String({ description: "Expected file contract: mutation (default) or read-only. Read-only can pass with no file changes when markers/output pass." })),
       mutation_target_files: Type.Optional(Type.Array(Type.String(), { description: "For mutation runs with read-only packet/input attachments, files expected to be mutated. Touched files must be within this set." })),
+      toolkit_feedback_kind: Type.Optional(Type.String({ description: "Worker-reported toolkit feedback kind: missing-tool, weak-tool, or capability-gap." })),
+      toolkit_feedback_capability: Type.Optional(Type.String({ description: "Capability the worker could not satisfy, e.g. web-research or focal-validation." })),
+      toolkit_feedback_tool: Type.Optional(Type.String({ description: "Tool or tool family needed for a retry." })),
+      toolkit_feedback_message: Type.Optional(Type.String({ description: "Bounded worker/operator-readable explanation of the toolkit gap." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -287,6 +291,12 @@ export function registerAgentRunLifecycleTools(pi: ExtensionAPI): void {
         outputBytes: typeof p.output_bytes === "number" ? p.output_bytes : undefined,
         fileContract: typeof p.file_contract === "string" ? p.file_contract : undefined,
         mutationTargetFiles: asOptionalStringArray(p.mutation_target_files),
+        toolkitFeedback: {
+          kind: typeof p.toolkit_feedback_kind === "string" ? p.toolkit_feedback_kind : undefined,
+          capability: typeof p.toolkit_feedback_capability === "string" ? p.toolkit_feedback_capability : undefined,
+          tool: typeof p.toolkit_feedback_tool === "string" ? p.toolkit_feedback_tool : undefined,
+          message: typeof p.toolkit_feedback_message === "string" ? p.toolkit_feedback_message : undefined,
+        },
       });
       return buildOperatorVisibleToolResponse({
         label: "agent_run_outcome_packet",

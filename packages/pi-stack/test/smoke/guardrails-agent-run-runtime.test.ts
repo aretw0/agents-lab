@@ -224,6 +224,52 @@ describe("agent run runtime packets", () => {
       markerFailures: ["dashscope-path-marker"],
       rollbackFiles: ["file1.txt", "file2.txt"],
     });
+
+    const missingToolFeedback = buildAgentRunOutcomePacket({
+      runId: "run-outcome",
+      entry: entryWithOutput,
+      touchedFiles: [],
+      fileContract: "read-only",
+      toolkitFeedback: {
+        kind: "missing-tool",
+        capability: "web-research",
+        tool: "web_search|browse_url|web-browser",
+        message: "Worker needs web research before it can cite current sources.",
+      },
+    });
+    expect(missingToolFeedback).toMatchObject({
+      processState: "completed",
+      contractDecision: "fail",
+      recommendation: "retry-with-toolkit",
+      recommendationCode: "agent-run-outcome-fail-toolkit-gap",
+      blockers: ["toolkit-feedback:missing-tool:web-research"],
+      toolkitFeedback: {
+        kind: "missing-tool",
+        capability: "web-research",
+        tool: "web_search|browse_url|web-browser",
+      },
+      toolkitRetry: {
+        action: "retry-with-toolkit",
+        dispatchAllowed: false,
+        requiredCapability: "web-research",
+        requestedTool: "web_search|browse_url|web-browser",
+      },
+    });
+    expect(missingToolFeedback.summary).toContain("toolkitFeedback=missing-tool:web-research");
+
+    const weakToolFeedback = buildAgentRunOutcomePacket({
+      runId: "run-outcome",
+      entry: entryWithOutput,
+      touchedFiles: [],
+      fileContract: "read-only",
+      toolkitFeedback: {
+        kind: "weak-tool",
+        capability: "focal-validation",
+        tool: "run_tests|execute_command",
+      },
+    });
+    expect(weakToolFeedback.recommendation).toBe("retry-with-toolkit");
+    expect(weakToolFeedback.toolkitRetry?.requiredCapability).toBe("focal-validation");
   });
 
   it("aggregates SDK batch worker outcomes with fail-closed fan-in", () => {

@@ -23629,7 +23629,7 @@
     {
       "id": "TASK-BUD-1060",
       "description": "[hard-intent/toolkit-feedback] Implementar feedback acionável de missing/weak tool: outcome deve classificar falta de ferramenta como blocker recuperável e sugerir retry com toolkit adequado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p0",
       "depends_on": [
         "TASK-BUD-1059"
@@ -23648,7 +23648,8 @@
         "Teste cobre worker pedindo web search sem ferramenta, ferramenta fraca para tarefa, e re-run packet sugerido."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Hard intent: da visão do worker, não ter ferramenta boa é feedback para resolver e iniciar novamente com o que precisa.\n[provenance:human] source_task=none reason=Aprender continuamente com gaps de toolkit e não culpar o worker por contrato incompleto."
+      "notes": "Hard intent: da visão do worker, não ter ferramenta boa é feedback para resolver e iniciar novamente com o que precisa.\n[provenance:human] source_task=none reason=Aprender continuamente com gaps de toolkit e não culpar o worker por contrato incompleto.\n[completed:2026-05-22] Outcome packet now treats missing/weak tooling as recoverable toolkit feedback and prepares retry-with-toolkit without auto-dispatch.",
+      "verification": "VERIF-TASK-BUD-1060-TOOLKIT-FEEDBACK-2026-05-22"
     },
     {
       "id": "TASK-BUD-1061",
@@ -23748,7 +23749,7 @@
     {
       "id": "TASK-BUD-1064",
       "description": "[hard-intent/agent-runner] Hardenecer falha silenciosa do first-party worker runner: quando subprocesso sai exitCode=1 sem output útil, registrar argv/cwd/source/exit evidence e classificar como runner/toolkit gap recuperável.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p0",
       "depends_on": [
         "TASK-BUD-1024",
@@ -23768,13 +23769,13 @@
         "Não muda o gate de confirmação nem faz auto-dispatch."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Criada após três workers first-party falharem com log apenas `[agent-runner] starting ...` e `close exitCode=1`, sem output útil nem arquivos tocados. Isso bloqueia agents-as-tools até o runner dar feedback acionável.\n[provenance:human] source_task=TASK-BUD-1063 reason=Worker exact-confirmed de TASK-BUD-1063 repetiu a falha silenciosa observada em TASK-BUD-1059.\n[diagnostic-result] Retry `task-bud-1063-final-turn-brief-diagnostic-retry` confirmed the diagnostics are actionable: argv/cwd/source were captured and showed `--no-extensions` for `openai-codex/gpt-5.3-codex-spark`, with `childOutputBytes=0` and `silent-runner-failure`. Follow-up TASK-BUD-1065 now propagates `extensionIsolation=inherit` for custom-provider worker packets.",
+      "notes": "Criada após três workers first-party falharem com log apenas `[agent-runner] starting ...` e `close exitCode=1`, sem output útil nem arquivos tocados. Isso bloqueia agents-as-tools até o runner dar feedback acionável.\n[provenance:human] source_task=TASK-BUD-1063 reason=Worker exact-confirmed de TASK-BUD-1063 repetiu a falha silenciosa observada em TASK-BUD-1059.\n[diagnostic-result] Retry `task-bud-1063-final-turn-brief-diagnostic-retry` confirmed the diagnostics are actionable: argv/cwd/source were captured and showed `--no-extensions` for `openai-codex/gpt-5.3-codex-spark`, with `childOutputBytes=0` and `silent-runner-failure`. Follow-up TASK-BUD-1065 now propagates `extensionIsolation=inherit` for custom-provider worker packets.\n[board-sync:2026-05-22] Completed using existing passed verification after dependencies TASK-BUD-1024, TASK-BUD-1059 and TASK-BUD-1063 were resolved.",
       "verification": "VERIF-TASK-BUD-1064-SILENT-RUNNER-DIAGNOSTICS-2026-05-08"
     },
     {
       "id": "TASK-BUD-1065",
       "description": "[hard-intent/agent-runner] Propagar extension isolation nos task/dispatch packets para providers customizados: permitir `inherit` quando o provider/model depende de extensão, em vez de forçar minimal-no-extensions.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p0",
       "depends_on": [
         "TASK-BUD-1064"
@@ -23792,7 +23793,7 @@
         "Não relaxa confirmação humana, protected-scope gate, budget gate ou single-run gate."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Criada após retry diagnosticável de TASK-BUD-1063 revelar argv com `--no-extensions` para openai-codex/gpt-5.3-codex-spark e childOutputBytes=0/silent-runner-failure. Provável root cause: provider customizado indisponível dentro de worker minimal-no-extensions.\n[provenance:human] source_task=TASK-BUD-1063 reason=Tornar workers realmente capazes de usar providers customizados sem perder governança.",
+      "notes": "Criada após retry diagnosticável de TASK-BUD-1063 revelar argv com `--no-extensions` para openai-codex/gpt-5.3-codex-spark e childOutputBytes=0/silent-runner-failure. Provável root cause: provider customizado indisponível dentro de worker minimal-no-extensions.\n[provenance:human] source_task=TASK-BUD-1063 reason=Tornar workers realmente capazes de usar providers customizados sem perder governança.\n[board-sync:2026-05-22] Completed using existing passed verification after dependency TASK-BUD-1064 was resolved.",
       "verification": "VERIF-TASK-BUD-1065-EXTENSION-ISOLATION-2026-05-08"
     },
     {
