@@ -18,6 +18,7 @@ import { Type } from "@sinclair/typebox";
 import {
 	bumpClassifyFailureFromText,
 	buildMonitorEmptyResponseEvidence,
+	buildMonitorToolFailureNoiseEvidence,
 	cloneClassifyFailureSummary,
 	newClassifyFailureSummary,
 	resolveMonitorClassifyFailureReadiness,
@@ -259,6 +260,27 @@ export default function monitorSummaryExtension(pi: ExtensionAPI) {
 				content: [{ type: "text", text: result.summary }],
 				details: result,
 			};
+		},
+	});
+
+	pi.registerTool({
+		name: "monitor_tool_failure_noise_evidence",
+		label: "Monitor Tool Failure Noise Evidence",
+		description:
+			"Report-only deterministic evidence for duplicated structured tool failure text. Preserves the real error; only classifies repeated operator-visible noise.",
+		parameters: Type.Object({
+			text: Type.String({ description: "Operator-visible transcript/log text to inspect." }),
+		}),
+		execute(_id, params) {
+			const p = (params ?? {}) as Record<string, unknown>;
+			const result = buildMonitorToolFailureNoiseEvidence(
+				typeof p.text === "string" ? p.text : "",
+			);
+			return buildOperatorVisibleToolResponse({
+				label: "monitor_tool_failure_noise_evidence",
+				summary: result.summary,
+				details: result,
+			});
 		},
 	});
 

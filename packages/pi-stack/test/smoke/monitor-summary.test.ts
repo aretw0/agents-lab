@@ -76,6 +76,37 @@ describe("monitor-summary", () => {
 		});
 	});
 
+	it("classifica falha edit oldText duplicada sem suprimir o erro real", async () => {
+		const pi = makeMockPi();
+		monitorSummaryExtension(pi as any);
+
+		const tool = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls
+			.map(([registered]) => registered)
+			.find((registered) => registered?.name === "monitor_tool_failure_noise_evidence");
+		expect(tool).toBeTruthy();
+
+		const text = [
+			"Could not find edits[1]; oldText must match exactly",
+			"Could not find edits[1]; oldText must match exactly",
+			"unrelated visible output",
+		].join("\n");
+		const result = await tool.execute("tc-tool-noise", { text });
+
+		expect(result.content?.[0]?.text).toContain("decision=duplicate");
+		expect(result.details).toMatchObject({
+			mode: "monitor-tool-failure-noise-evidence",
+			decision: "duplicate",
+			errorClass: "edit-oldtext-mismatch",
+			total: 2,
+			unique: 1,
+			duplicateCount: 1,
+			authorization: "none",
+			dispatchAllowed: false,
+		});
+		expect(result.details.nextActions).toContain("preserve-one-visible-error");
+		expect(result.details.canonicalMessages[0]).toContain("edits[*]");
+	});
+
 	it("carrega monitores do workspace e expõe compact tool", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "monitor-summary-"));
 		mkdirSync(join(cwd, ".pi", "monitors"), { recursive: true });

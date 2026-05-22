@@ -35,6 +35,7 @@ export type MonitorClassifyFailureDecision = "ok" | "warn" | "degrade" | "block"
 export type MonitorEmptyResponseDecision = "empty-response" | "monitor-context-divergence" | "insufficient-evidence";
 export type MonitorEmptyResponseEvidenceSource = "jsonl" | "worker-log" | "missing-session" | "unreadable-session" | "classifier-only";
 export type MonitorEmptyResponseTarget = "control-plane-assistant-turn" | "worker-subprocess-output" | "monitor-classifier" | "unknown";
+export type MonitorToolFailureNoiseDecision = "none" | "single" | "duplicate";
 
 export interface MonitorClassifyFailureReadinessOptions {
 	warnAfter?: number;
@@ -82,8 +83,26 @@ export interface MonitorEmptyResponseEvidence {
 	summary: string;
 }
 
+export interface MonitorToolFailureNoiseEvidence {
+	mode: "monitor-tool-failure-noise-evidence";
+	activation: "none";
+	authorization: GuardrailsAuthorizationNone;
+	dispatchAllowed: false;
+	decision: MonitorToolFailureNoiseDecision;
+	errorClass: "edit-oldtext-mismatch" | "unknown";
+	total: number;
+	unique: number;
+	duplicateCount: number;
+	canonicalMessages: string[];
+	reasons: string[];
+	nextActions: string[];
+	summary: string;
+}
+
 const CLASSIFY_FAIL_LINE_RE =
 	/^(?:Warning:\s*)?\[([a-z0-9-]+)\]\s+classify failed:\s*(.*)$/i;
+const EDIT_OLDTEXT_MISMATCH_RE =
+	/(?:Could not find\s+)?edits?\[\d+\].*oldText must match(?: exactly)?|oldText must match(?: exactly)?/i;
 
 export const DEFAULT_CLASSIFY_SCAN_BYTES = 512_000;
 
@@ -223,6 +242,67 @@ export function bumpClassifyFailureFromText(
 		}
 	}
 	return changed;
+}
+
+function normalizeEditOldTextMismatchLine(line: string): string | undefined {
+	const compact = line.replace(/\s+/g, " ").trim();
+	if (!EDIT_OLDTEXT_MISMATCH_RE.test(compact)) return undefined;
+	return compact
+		.replace(/edits?\[\d+\]/gi, "edits[*]")
+		.replace(/oldText must match exactly/gi, "oldText must match exactly")
+		.slice(0, 240);
+}
+
+export function buildMonitorToolFailureNoiseEvidence(text: string): MonitorToolFailureNoiseEvidence {
+	const canonicalMessages = new Map<string, number>();
+	for (const line of text.split(/\r?\n/)) {
+		const canonical = normalizeEditOldTextMismatchLine(line);
+		if (!canonical) continue;
+		canonicalMessages.set(canonical, (canonicalMessages.get(canonical) ?? 0) + 1);
+	}
+
+	const total = [...canonicalMessages.values()].reduce((sum, count) => sum + count, 0);
+	const unique = canonicalMessages.size;
+	const duplicateCount = Math.max(0, total - unique);
+	const decision: MonitorToolFailureNoiseDecision = total <= 0
+		? "none"
+		: duplicateCount > 0
+			? "duplicate"
+			: "single";
+	const reasons = decision === "none"
+		? ["no-edit-oldtext-mismatch"]
+		: decision === "duplicate"
+			? ["same-edit-failure-seen-more-than-once", "report-only-preserve-first-error"]
+			: ["single-edit-failure"];
+	const nextActions = decision === "duplicate"
+		? ["preserve-one-visible-error", "inspect-event-fanout-or-render-path", "avoid-retry-assumption-without-runid-evidence"]
+		: decision === "single"
+			? ["preserve-error", "no-dedupe-action-needed"]
+			: ["collect-session-or-transcript-evidence"];
+
+	return {
+		mode: "monitor-tool-failure-noise-evidence",
+		activation: "none",
+		authorization: GUARDRAILS_AUTHORIZATION_NONE,
+		dispatchAllowed: false,
+		decision,
+		errorClass: total > 0 ? "edit-oldtext-mismatch" : "unknown",
+		total,
+		unique,
+		duplicateCount,
+		canonicalMessages: [...canonicalMessages.keys()],
+		reasons,
+		nextActions,
+		summary: [
+			"monitor-tool-failure-noise:",
+			`decision=${decision}`,
+			`errorClass=${total > 0 ? "edit-oldtext-mismatch" : "unknown"}`,
+			`total=${total}`,
+			`unique=${unique}`,
+			`duplicates=${duplicateCount}`,
+			formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
+		].join(" "),
+	};
 }
 
 function collectTextParts(value: unknown, out: string[], depth = 0): void {

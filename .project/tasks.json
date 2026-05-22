@@ -21134,7 +21134,7 @@
     {
       "id": "TASK-BUD-946",
       "description": "[P3/backlog] Investigar duplicação de aviso de falha do tool `edit` quando `oldText` não casa, para reduzir ruído operador sem mascarar o erro real.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "files": [
         "packages/pi-stack/extensions",
@@ -21146,7 +21146,8 @@
         "Propor correção report-only ou teste de regressão que preserve a mensagem de erro uma vez sem suprimir erros reais."
       ],
       "milestone": "operator-noise-backlog",
-      "notes": "[intake:user] Operador observou duplicação do aviso `Could not find edits[1]... oldText must match exactly`. Não é prioridade; registrar para não esquecer. O problema é ruído duplicado, não o erro em si.\n[provenance:human] source_task=none reason=Feedback explícito do operador durante TASK-BUD-944 follow-up: mensagem de falha do edit apareceu duplicada."
+      "notes": "[intake:user] Operador observou duplicação do aviso `Could not find edits[1]... oldText must match exactly`. Não é prioridade; registrar para não esquecer. O problema é ruído duplicado, não o erro em si.\n[provenance:human] source_task=none reason=Feedback explícito do operador durante TASK-BUD-944 follow-up: mensagem de falha do edit apareceu duplicada.\nClosed with report-only duplicate edit failure evidence primitive. Exact TUI fan-out source remains unproven without live transcript, but regression now classifies duplicated oldText mismatch text without suppressing the real error.",
+      "verification": "VER-BUD-946-EDIT-FAILURE-NOISE-EVIDENCE"
     },
     {
       "id": "TASK-BUD-945",

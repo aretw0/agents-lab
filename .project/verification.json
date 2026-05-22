@@ -16982,6 +16982,15 @@
       "method": "disposition-packet",
       "evidence": "Reviewed stale colony-c-ret-1-promotion in docs/research/stale-colony-promotion-disposition-2026-05-22.md. No files promoted; COMPLETE-like telemetry had no complete delivery packet or rollback plan. Validation: pnpm run test:docs:site; pnpm run repo:discourse:audit; pnpm run release:readiness:v0.8.0.",
       "timestamp": "2026-05-22T21:57:20.003Z"
+    },
+    {
+      "id": "VER-BUD-946-EDIT-FAILURE-NOISE-EVIDENCE",
+      "target": "TASK-BUD-946",
+      "target_type": "task",
+      "status": "passed",
+      "method": "automated-smoke",
+      "evidence": "monitor_tool_failure_noise_evidence report-only primitive preserves one edit oldText mismatch and reports duplicates; vitest smoke, docs site, complexity, discourse passed",
+      "timestamp": "2026-05-22T22:03:56.628Z"
     }
   ]
 }
