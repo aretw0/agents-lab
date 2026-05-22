@@ -20457,7 +20457,7 @@
     {
       "id": "TASK-BUD-914",
       "description": "Backlog short/mid-term: consolidate CI/CD and GitHub Actions cohesion after current initiatives stabilize.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         ".github/workflows/ci.yml",
@@ -20474,7 +20474,8 @@
         "Preserve existing local smoke/sovereignty gates or explain any intentional changes."
       ],
       "milestone": "short-mid-ci-cd-cohesion",
-      "notes": "[provenance:human] User requested a short/mid-term backlog tangent for CI/CD cohesion because GitHub Actions is failing, to pick up after current initiatives reach a stable state. [rationale:risk-control] CI/CD and GitHub Actions are protected scope; keep as explicit backlog/planning item, no auto-dispatch or workflow mutation without later approval. Existing related completed history includes TASK-BUD-910 and TASK-BUD-622, but no open backlog item was found.\n[provenance:human] source_task=TASK-BUD-849 reason=User wants future tangent after current provider/model/runtime initiatives stabilize."
+      "notes": "[provenance:human] User requested a short/mid-term backlog tangent for CI/CD cohesion because GitHub Actions is failing, to pick up after current initiatives reach a stable state. [rationale:risk-control] CI/CD and GitHub Actions are protected scope; keep as explicit backlog/planning item, no auto-dispatch or workflow mutation without later approval. Existing related completed history includes TASK-BUD-910 and TASK-BUD-622, but no open backlog item was found.\n[provenance:human] source_task=TASK-BUD-849 reason=User wants future tangent after current provider/model/runtime initiatives stabilize.\n2026-05-22: Closed as report-only CI/CD cohesion checkpoint. Latest main CI and Pages are green after the prior docs deployment failure. Local parity remains ci:local:parity -> ci:smoke:gate, CI smoke runs the same gate, Pages deploys docs/_site, publish remains tag/provenance scoped, and no workflow mutation is needed without fresh failure evidence.",
+      "verification": "VER-BUD-914-CI-CD-COHESION-REPORT"
     },
     {
       "id": "TASK-BUD-915",
