@@ -63,9 +63,8 @@ export function buildColonyPilotHatchLines(input: {
 		"colony-pilot hatch",
 		`mode: ${input.mode} ${input.mode === "guided" ? "(default guided, no swarm CTA)" : "(explicit opt-in for swarm/delegation)"}`,
 		...input.readinessLines,
-		"",
-		...input.runbookLines,
 	];
+	if (input.ready) lines.push("", ...input.runbookLines);
 	if (input.mode === "guided") lines.push("", "scale opt-in: /colony-pilot hatch check --advanced");
 	if (!input.ready) lines.push("", "ação sugerida: /colony-pilot hatch apply default");
 	return lines;

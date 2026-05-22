@@ -1,4 +1,6 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { ContextWatchdogConfig } from "./context-watchdog-config";
 import {
 	buildAutoResumePromptEnvelopeFromHandoff,
@@ -42,6 +44,12 @@ import {
 } from "./context-watchdog-storage";
 import type { ContextWatchTimeoutPressureState } from "./context-watchdog-runtime-state";
 import { readLongRunLoopRuntimeState } from "./guardrails-core-lane-queue-runtime";
+import {
+	buildToolSchemaValidationPacket,
+	type ToolSchemaValidationCache,
+	type ToolSchemaValidationPacket,
+	type ToolSchemaValidationTool,
+} from "./guardrails-core-tool-schema-validation";
 
 export interface ContextWatchPostReloadAutoResumeResult {
 	postReloadPendingNotifyMemory: PostReloadPendingNotifyMemory;
@@ -49,6 +57,49 @@ export interface ContextWatchPostReloadAutoResumeResult {
 	lastAutoResumeDecision?: AutoResumeDecisionSnapshot & {
 		promptDiagnostics?: AutoResumePromptDiagnostics;
 	};
+	lastToolSchemaValidation?: ToolSchemaValidationPacket;
+}
+
+function toolInfoToSchemaValidationTool(tool: unknown): ToolSchemaValidationTool | undefined {
+	if (!tool || typeof tool !== "object") return undefined;
+	const record = tool as Record<string, unknown>;
+	if (typeof record.name !== "string" || !record.name.trim()) return undefined;
+	return {
+		name: record.name.trim(),
+		parameters: record.parameters,
+	};
+}
+
+export function readToolSchemaValidationCache(cwd: string): ToolSchemaValidationCache | undefined {
+	const filePath = join(cwd, ".pi", "cache", "tool-schema-validation.json");
+	if (!existsSync(filePath)) return undefined;
+	try {
+		const parsed = JSON.parse(readFileSync(filePath, "utf8"));
+		if (!parsed || typeof parsed !== "object") return undefined;
+		const record = parsed as Record<string, unknown>;
+		if (typeof record.fingerprint !== "string") return undefined;
+		if (record.decision !== "valid" && record.decision !== "cached-valid") return undefined;
+		return {
+			fingerprint: record.fingerprint,
+			decision: record.decision,
+			validatedAtIso: typeof record.validatedAtIso === "string" ? record.validatedAtIso : undefined,
+		};
+	} catch {
+		return undefined;
+	}
+}
+
+export function resolvePostReloadToolSchemaValidation(params: {
+	cwd: string;
+	tools: unknown[];
+	nowMs: number;
+	cache?: ToolSchemaValidationCache;
+}): ToolSchemaValidationPacket {
+	return buildToolSchemaValidationPacket({
+		tools: params.tools.map(toolInfoToSchemaValidationTool).filter((tool): tool is ToolSchemaValidationTool => Boolean(tool)),
+		cache: params.cache ?? readToolSchemaValidationCache(params.cwd),
+		nowIso: new Date(params.nowMs).toISOString(),
+	});
 }
 
 export function handlePostReloadAutoResume(params: {
@@ -70,6 +121,36 @@ export function handlePostReloadAutoResume(params: {
 	}
 	if (reloadRequiredAtRunStart) {
 		return { postReloadPendingNotifyMemory };
+	}
+
+	const toolSchemaValidation = resolvePostReloadToolSchemaValidation({
+		cwd: ctx.cwd,
+		tools: (pi as unknown as { getAllTools?: () => unknown[] }).getAllTools?.() ?? [],
+		nowMs,
+	});
+	if (toolSchemaValidation.decision === "invalid") {
+		const blockingSchemaFailure = toolSchemaValidation.findings.some((finding) => finding.reason !== "parameters-not-object");
+		(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+			"context-watchdog.post-reload-tool-schema-invalid",
+			{
+				atIso: new Date(nowMs).toISOString(),
+				summary: toolSchemaValidation.summary,
+				findings: toolSchemaValidation.findings.slice(0, 5),
+				rollbackPath: toolSchemaValidation.rollbackPath,
+				blocking: blockingSchemaFailure,
+			},
+		);
+		if (config.notify) {
+			ctx.ui.notify(
+				blockingSchemaFailure
+					? "context-watch: post-reload tool schema invalid; keeping auto-resume pending"
+					: "context-watch: post-reload tool schema warning recorded",
+				"warning",
+			);
+		}
+		if (blockingSchemaFailure) {
+			return { postReloadPendingNotifyMemory, lastToolSchemaValidation: toolSchemaValidation };
+		}
 	}
 
 	const hasPendingMessages = ctx.hasPendingMessages();

@@ -9,6 +9,7 @@ import {
   buildLineBudgetSnapshot,
   buildSyntaxHygieneSummary,
   buildToolHygieneScorecard,
+  buildToolSchemaValidationPacket,
   classifyToolHygiene,
 } from "../../extensions/guardrails-core-exports";
 
@@ -128,6 +129,43 @@ describe("tool hygiene scorecard", () => {
     });
     expect(scorecard.evidence).toContain("syntaxFindings=1");
     expect(scorecard.evidence).toContain("syntaxRequiresRationale=1");
+  });
+
+  it("validates tool parameter schemas with cache fingerprint evidence", () => {
+    const valid = buildToolSchemaValidationPacket({
+      nowIso: "2026-05-22T21:00:00.000Z",
+      tools: [
+        { name: "safe_tool", parameters: { type: "object", properties: { goal: { type: "string" } } } },
+      ],
+    });
+
+    expect(valid.decision).toBe("valid");
+    expect(valid.invalid).toBe(0);
+    expect(valid.summary).toContain("mutation=no");
+
+    const cached = buildToolSchemaValidationPacket({
+      tools: [
+        { name: "safe_tool", parameters: { type: "object", properties: { goal: { type: "string" } } } },
+      ],
+      cache: { fingerprint: valid.fingerprint, decision: "valid", validatedAtIso: valid.validatedAtIso },
+    });
+
+    expect(cached.decision).toBe("cached-valid");
+    expect(cached.cacheStatus).toBe("hit");
+
+    const invalid = buildToolSchemaValidationPacket({
+      tools: [
+        { name: "intersect_tool", parameters: { allOf: [{ type: "object" }, { type: "object" }] } },
+      ],
+      cache: { fingerprint: valid.fingerprint, decision: "valid" },
+    });
+
+    expect(invalid.decision).toBe("invalid");
+    expect(invalid.cacheStatus).toBe("miss");
+    expect(invalid.findings).toEqual([
+      { tool: "intersect_tool", reason: "parameters-root-not-json-object" },
+    ]);
+    expect(invalid.rollbackPath.join("\n")).toContain("do not reload into invalid tool schemas");
   });
 
   it("builds a no-dispatch scorecard with risk counts", () => {
@@ -312,6 +350,47 @@ describe("tool hygiene scorecard", () => {
     expect(result.content?.[0]?.text).toContain("tool-hygiene-scorecard:");
     expect(result.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(result.content?.[0]?.text).not.toContain('\"mode\"');
+  });
+
+  it("exposes tool_schema_validation_packet as read-only reload/hatch evidence", async () => {
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => [
+      ...(rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool),
+      { name: "bad_intersect", parameters: { allOf: [{ type: "object" }] } },
+    ]);
+    const pi = rawPi as unknown as Parameters<typeof registerGuardrailsToolHygieneSurface>[0];
+
+    registerGuardrailsToolHygieneSurface(pi);
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "tool_schema_validation_packet");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+
+    const result = await tool.execute(
+      "tc-tool-schema-validation",
+      {},
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+
+    expect(result.details?.mode).toBe("tool-schema-validation");
+    expect(result.details?.activation).toBe("none");
+    expect(result.details?.authorization).toBe("none");
+    expect(result.details?.decision).toBe("invalid");
+    expect(result.content?.[0]?.text).toContain("tool-schema-validation: decision=invalid");
+    expect(result.content?.[0]?.text).toContain("payload completo disponível em details");
   });
 
   it("exposes syntax hygiene findings through tool_hygiene_scorecard", async () => {

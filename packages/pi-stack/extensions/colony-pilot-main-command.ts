@@ -20,6 +20,7 @@ import type { ColonyPilotBudgetPolicyConfig, ColonyPilotProjectTaskSyncConfig } 
 import { buildColonyPilotCheckLines, buildColonyPilotHatchLines, buildColonyPilotStatusLines, collectColonyPilotCheckModelIssues, formatColonyPilotHelp } from "./colony-pilot-summary";
 import type { ProviderBudgetGateCacheEntry } from "./colony-pilot-provider-budget-gate";
 import { parseQuotaVisibilityBudgetSettings as parseQuotaVisibilityBudgetSettingsImpl } from "./colony-pilot-settings";
+import { buildToolSchemaValidationPacket, type ToolSchemaValidationTool } from "./guardrails-core-tool-schema-validation";
 
 export interface ColonyPilotMainCommandRuntimeSettings {
 	preflightConfig: ColonyPilotPreflightConfig;
@@ -43,6 +44,16 @@ export interface ColonyPilotMainCommandRuntime {
 	setPreflightCache(entry: { at: number; result: ColonyPilotPreflightResult } | undefined): void;
 	setProviderBudgetGateCache(entry: ProviderBudgetGateCacheEntry | undefined): void;
 	reloadSettingsFromProject(cwd: string): ColonyPilotMainCommandRuntimeSettings;
+}
+
+function toolInfoToSchemaValidationTool(tool: unknown): ToolSchemaValidationTool | undefined {
+	if (!tool || typeof tool !== "object") return undefined;
+	const record = tool as Record<string, unknown>;
+	if (typeof record.name !== "string" || !record.name.trim()) return undefined;
+	return {
+		name: record.name.trim(),
+		parameters: record.parameters,
+	};
 }
 
 export function registerColonyPilotMainCommand(pi: ExtensionAPI, runtime: ColonyPilotMainCommandRuntime): void {
@@ -231,10 +242,23 @@ export function registerColonyPilotMainCommand(pi: ExtensionAPI, runtime: Colony
 					budgetPolicyConfig,
 				);
 				const quotaCfg = parseQuotaVisibilityBudgetSettingsImpl(ctx.cwd);
+				const toolSchemaValidation = buildToolSchemaValidationPacket({
+					tools: ((pi as unknown as { getAllTools?: () => unknown[] }).getAllTools?.() ?? [])
+						.map(toolInfoToSchemaValidationTool)
+						.filter((tool): tool is ToolSchemaValidationTool => Boolean(tool)),
+					nowIso: new Date().toISOString(),
+				});
+				const blockingToolSchemaFailure = toolSchemaValidation.findings.some((finding) => finding.reason !== "parameters-not-object");
 
 				const readiness = evaluateHatchReadiness({
 					capabilitiesMissing: missing,
 					preflightOk: preflight.ok,
+					toolSchemaOk: !blockingToolSchemaFailure,
+					toolSchemaDetail: blockingToolSchemaFailure
+						? `${toolSchemaValidation.invalid} invalid (${toolSchemaValidation.findings[0]?.tool}:${toolSchemaValidation.findings[0]?.reason})`
+						: toolSchemaValidation.decision === "cached-valid"
+							? `cached ${toolSchemaValidation.fingerprint}`
+							: "ok",
 					modelPolicyOk: modelEval.ok,
 					budgetPolicyOk: budgetEval.ok,
 					budgetPolicy: budgetPolicyConfig,

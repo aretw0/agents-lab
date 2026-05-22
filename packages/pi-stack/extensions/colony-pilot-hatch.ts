@@ -17,6 +17,8 @@ export interface HatchReadiness {
 export interface HatchReadinessInput {
 	capabilitiesMissing: Array<keyof PilotCapabilities>;
 	preflightOk: boolean;
+	toolSchemaOk?: boolean;
+	toolSchemaDetail?: string;
 	modelPolicyOk: boolean;
 	budgetPolicyOk: boolean;
 	budgetPolicy: { enforceProviderBudgetBlock: boolean };
@@ -44,6 +46,15 @@ export function evaluateHatchReadiness(
 		status: input.preflightOk ? "pass" : "fail",
 		detail: input.preflightOk ? "ok" : "falhou (rode /colony-pilot preflight)",
 	});
+
+	if (input.toolSchemaOk !== undefined) {
+		items.push({
+			id: "tool-schema",
+			label: "tool schemas",
+			status: input.toolSchemaOk ? "pass" : "fail",
+			detail: input.toolSchemaDetail ?? (input.toolSchemaOk ? "ok" : "schema inválido"),
+		});
+	}
 
 	items.push({
 		id: "models",

@@ -26,6 +26,17 @@ function fakePilotDepsExtension() {
   };
 }
 
+function fakeInvalidToolSchemaExtension() {
+  return function (pi: any) {
+    pi.registerTool({
+      name: "bad_intersect_tool",
+      description: "invalid schema fixture",
+      parameters: { allOf: [{ type: "object" }] },
+      execute: () => ({ content: [{ type: "text", text: "unused" }] }),
+    });
+  };
+}
+
 function tempCwdWithHatchSettings() {
   const cwd = mkdtempSync(join(tmpdir(), "pi-colony-hatch-"));
   mkdirSync(join(cwd, ".pi"), { recursive: true });
@@ -173,5 +184,23 @@ describe("colony-pilot hatch e2e (pi-test-harness)", () => {
     expect(msg).toContain("mode: advanced");
     expect(msg).toContain("advanced lane (explicit scale):");
     expect(msg).toContain("/colony <goal>");
+  });
+
+  it("hatch check blocks advanced readiness on invalid tool schema", async () => {
+    const cwd = tempCwdWithHatchSettings();
+
+    t = await createTestSession({
+      cwd,
+      extensionFactories: [fakeInvalidToolSchemaExtension(), colonyPilot, fakePilotDepsExtension()],
+    });
+    patchHarnessAgentCompat(t);
+
+    await t.session.prompt("/colony-pilot hatch check --advanced");
+
+    const msg = lastNotifyMessage(t);
+    expect(msg).toContain("[FAIL] tool schemas:");
+    expect(msg).toContain("bad_intersect_tool:parameters-root-not-json-object");
+    expect(msg).toContain("ready: no");
+    expect(msg).not.toContain("/colony <goal>");
   });
 });

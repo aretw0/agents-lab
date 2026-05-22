@@ -16856,6 +16856,15 @@
       "method": "automated-test",
       "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts; pnpm run docs:package:check; pnpm run test:docs:site; pnpm run test:smoke",
       "timestamp": "2026-05-22T20:27:33.183Z"
+    },
+    {
+      "id": "VER-BUD-1085-tool-schema-reload-hatch-gate",
+      "target": "TASK-BUD-1085",
+      "target_type": "task",
+      "status": "passed",
+      "method": "automated-test",
+      "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts; pnpm run test:smoke; pnpm run test:engine:boundary; pnpm run repo:complexity:strict",
+      "timestamp": "2026-05-22T20:44:54.154Z"
     }
   ]
 }

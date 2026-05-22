@@ -24236,7 +24236,7 @@
     {
       "id": "TASK-BUD-1085",
       "description": "Harden pre/post reload and hatch gates so invalid tool schemas or extension registration failures fail early with cached validation evidence instead of trapping the live session after reload.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1082"
@@ -24254,7 +24254,8 @@
         "Record a rollback path that restores L1/manual operation if reload validation fails."
       ],
       "milestone": "continuity-hardening",
-      "notes": "Created from user incident: Type.Intersect in agent_run_sdk_provider_model_arena_artifact_packet produced invalid function schema during reload. User had to fix outside pi. Need cached pre/post-reload schema guard so reload either blocks/alerts before live trap or reuses prior validation for unchanged surfaces."
+      "notes": "Created from user incident: Type.Intersect in agent_run_sdk_provider_model_arena_artifact_packet produced invalid function schema during reload. User had to fix outside pi. Need cached pre/post-reload schema guard so reload either blocks/alerts before live trap or reuses prior validation for unchanged surfaces.\n2026-05-22: Added lightweight tool-schema validation fingerprint/cache packet, post-reload invalid-schema warning/blocking gate, and hatch readiness gate that blocks advanced runbook when schema validation fails.",
+      "verification": "VER-BUD-1085-tool-schema-reload-hatch-gate"
     },
     {
       "id": "TASK-BUD-1086",

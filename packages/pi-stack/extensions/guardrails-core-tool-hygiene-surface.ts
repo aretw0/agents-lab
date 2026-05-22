@@ -13,6 +13,7 @@ import {
   type SyntaxHygieneSource,
   type ToolHygieneInputTool,
 } from "./guardrails-core-tool-hygiene";
+import { buildToolSchemaValidationPacket } from "./guardrails-core-tool-schema-validation";
 import { buildCapabilityRoiPacket, type CapabilityRoiInputCapability } from "./capability-roi-policy";
 import { buildExtensionLineBudgetEntries } from "./guardrails-core-line-budget-files";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
@@ -160,6 +161,37 @@ export function registerGuardrailsToolHygieneSurface(pi: ExtensionAPI): void {
       const result = buildAgentsAsToolsCalibrationScore({ tools });
       return buildOperatorVisibleToolResponse({
         label: "agents_as_tools_calibration_score",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "tool_schema_validation_packet",
+    label: "Tool Schema Validation Packet",
+    description: "Read-only validation packet for registered tool parameter schemas before reload/hatch. Uses a lightweight fingerprint and never runs tests, reloads, or writes cache.",
+    parameters: Type.Object({
+      cached_fingerprint: Type.Optional(Type.String({ description: "Previously validated schema fingerprint." })),
+      cached_decision: Type.Optional(Type.String({ description: "Previously validated decision: valid or cached-valid." })),
+      cached_validated_at_iso: Type.Optional(Type.String({ description: "Timestamp for previous validation evidence." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const cachedDecision = p.cached_decision === "valid" || p.cached_decision === "cached-valid" ? p.cached_decision : undefined;
+      const result = buildToolSchemaValidationPacket({
+        tools: pi.getAllTools().map(toolInfoToInput).filter((tool): tool is ToolHygieneInputTool => Boolean(tool)),
+        cache: typeof p.cached_fingerprint === "string" && cachedDecision
+          ? {
+              fingerprint: p.cached_fingerprint,
+              decision: cachedDecision,
+              validatedAtIso: typeof p.cached_validated_at_iso === "string" ? p.cached_validated_at_iso : undefined,
+            }
+          : undefined,
+        nowIso: new Date().toISOString(),
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "tool_schema_validation_packet",
         summary: result.summary,
         details: result,
       });

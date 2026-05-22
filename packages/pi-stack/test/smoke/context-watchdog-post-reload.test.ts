@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import contextWatchdogExtension from "../../extensions/context-watchdog";
 import contextWatchdogSurfacesExtension from "../../extensions/context-watchdog-surfaces";
+import { handlePostReloadAutoResume } from "../../extensions/context-watchdog-post-reload-runtime";
 import {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
@@ -166,6 +167,62 @@ describe("context-watchdog", () => {
 				} as any,
 			);
 			expect((clearedResult.details as { autoCompact?: { autoResumeAfterReloadPending?: boolean } } | undefined)?.autoCompact?.autoResumeAfterReloadPending).toBe(false);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("keeps post-reload auto-resume pending when blocking tool schema validation fails", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-post-reload-tool-schema-invalid-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: "2026-05-22T21:00:00.000Z",
+				current_tasks: ["TASK-BUD-1085"],
+				context_watch: {
+					auto_resume_after_reload: {
+						pending: true,
+						createdAtIso: "2026-05-22T21:00:00.000Z",
+						reason: "reload-required-after-compact",
+						focusTasks: ["TASK-BUD-1085"],
+					},
+				},
+			}), "utf8");
+			const pi = {
+				appendEntry: vi.fn(),
+				sendUserMessage: vi.fn(),
+				getAllTools: vi.fn(() => [
+					{ name: "bad_intersect_tool", parameters: { allOf: [{ type: "object" }] } },
+				]),
+			} as unknown as Parameters<typeof handlePostReloadAutoResume>[0]["pi"];
+			const notify = vi.fn();
+
+			const result = handlePostReloadAutoResume({
+				pi,
+				ctx: {
+					cwd,
+					hasPendingMessages: vi.fn(() => false),
+					ui: { notify },
+				} as unknown as Parameters<typeof handlePostReloadAutoResume>[0]["ctx"],
+				config: { notify: true } as Parameters<typeof handlePostReloadAutoResume>[0]["config"],
+				nowMs: Date.parse("2026-05-22T21:01:00.000Z"),
+				reloadRequiredAtRunStart: false,
+				timeoutPressure: { active: false, count: 0, threshold: 3 },
+				postReloadPendingNotifyMemory: {},
+				postReloadPendingNotifyMinCooldownMs: 0,
+			});
+
+			expect(result.lastToolSchemaValidation?.decision).toBe("invalid");
+			expect(result.lastAutoResumeDecision).toBeUndefined();
+			expect((pi as any).sendUserMessage).not.toHaveBeenCalled();
+			expect((pi as any).appendEntry).toHaveBeenCalledWith(
+				"context-watchdog.post-reload-tool-schema-invalid",
+				expect.objectContaining({ blocking: true }),
+			);
+			expect(notify).toHaveBeenCalledWith(
+				"context-watch: post-reload tool schema invalid; keeping auto-resume pending",
+				"warning",
+			);
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
