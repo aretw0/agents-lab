@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { detectSessionResumeIntent, resolvePiDevPressureGate } from "../pi-isolated.mjs";
+import { detectSessionResumeIntent, resolvePiDevPressureGate, resolvePiDevStartupState } from "../pi-isolated.mjs";
 
 test("detectSessionResumeIntent recognizes explicit --resume", () => {
   assert.equal(detectSessionResumeIntent(["--resume"]), true);
@@ -12,6 +12,30 @@ test("detectSessionResumeIntent ignores non-resume args", () => {
   assert.equal(detectSessionResumeIntent(["--dev"]), false);
   assert.equal(detectSessionResumeIntent(["resume"]), false);
   assert.equal(detectSessionResumeIntent(undefined), false);
+});
+
+test("resolvePiDevStartupState suppresses auto-resume while factory loop is paused", () => {
+  assert.deepEqual(resolvePiDevStartupState({
+    devPauseResult: "already-paused",
+    sessionResumeRequested: true,
+  }), {
+    factoryState: "paused",
+    sessionState: "resume",
+    nextAction: "pnpm run pi:loop:resume",
+    autoResumeState: "suppressed",
+  });
+});
+
+test("resolvePiDevStartupState reports unknown auto-resume state without loop state", () => {
+  assert.deepEqual(resolvePiDevStartupState({
+    devPauseResult: "state-missing",
+    sessionResumeRequested: false,
+  }), {
+    factoryState: "unknown",
+    sessionState: "new",
+    nextAction: "pnpm run pi:loop:status",
+    autoResumeState: "unknown",
+  });
 });
 
 test("resolvePiDevPressureGate treats strict pressure as advisory for new sessions", () => {

@@ -154,6 +154,21 @@ function pauseLoopForDevSession(dryRun = false) {
 	return "paused";
 }
 
+export function resolvePiDevStartupState({ devPauseResult, sessionResumeRequested = false } = {}) {
+	const factoryState = (devPauseResult === "paused" || devPauseResult === "already-paused")
+		? "paused"
+		: "unknown";
+	const sessionState = sessionResumeRequested ? "resume" : "new";
+	const nextAction = factoryState === "paused" ? "pnpm run pi:loop:resume" : "pnpm run pi:loop:status";
+	const autoResumeState = factoryState === "paused" ? "suppressed" : "unknown";
+	return {
+		factoryState,
+		sessionState,
+		nextAction,
+		autoResumeState,
+	};
+}
+
 function printHelp() {
 	console.log([
 		"pi-isolated — launcher com PI_CODING_AGENT_DIR local do workspace",
@@ -624,12 +639,8 @@ function run() {
 			"parse-error": "⚠  erro ao ler loop state — verifique .pi/long-run-loop-state.json",
 		};
 		console.log(`pi-isolated: ${devNotes[devPauseResult] ?? devPauseResult}`);
-		const factoryState = (devPauseResult === "paused" || devPauseResult === "already-paused")
-			? "paused"
-			: "unknown";
-		const sessionState = sessionResumeRequested ? "resume" : "new";
-		const nextAction = factoryState === "paused" ? "pnpm run pi:loop:resume" : "pnpm run pi:loop:status";
-		console.log(`pi-isolated: startup-hint session=${sessionState} factory=${factoryState} next=${nextAction}`);
+		const startupState = resolvePiDevStartupState({ devPauseResult, sessionResumeRequested });
+		console.log(`pi-isolated: startup-hint session=${startupState.sessionState} factory=${startupState.factoryState} autoResume=${startupState.autoResumeState} next=${startupState.nextAction}`);
 		if (devPauseResult === "paused" || devPauseResult === "already-paused") {
 			console.log("pi-isolated: para retomar a fábrica depois: pnpm run pi:loop:resume");
 		}

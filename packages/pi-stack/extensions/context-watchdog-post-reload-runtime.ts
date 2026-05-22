@@ -41,6 +41,7 @@ import {
 	writeHandoffJson,
 } from "./context-watchdog-storage";
 import type { ContextWatchTimeoutPressureState } from "./context-watchdog-runtime-state";
+import { readLongRunLoopRuntimeState } from "./guardrails-core-lane-queue-runtime";
 
 export interface ContextWatchPostReloadAutoResumeResult {
 	postReloadPendingNotifyMemory: PostReloadPendingNotifyMemory;
@@ -73,6 +74,8 @@ export function handlePostReloadAutoResume(params: {
 
 	const hasPendingMessages = ctx.hasPendingMessages();
 	const queuedLaneIntents = readDeferredLaneQueueCount(ctx.cwd);
+	const loopRuntimeState = readLongRunLoopRuntimeState(ctx.cwd);
+	const loopPaused = loopRuntimeState.mode === "paused" || loopRuntimeState.stopCondition === "manual-pause";
 	let handoffForDispatch = handoffForPostReloadResume;
 	const taskStatusById = readProjectTaskStatusById(ctx.cwd);
 	const preferredTaskIds = readProjectPreferredActiveTaskIds(ctx.cwd, 3);
@@ -116,6 +119,7 @@ export function handlePostReloadAutoResume(params: {
 		reloadRequired: false,
 		checkpointEvidenceReady,
 		handoffBoardReconciled: handoffBoardReconciliation.ok,
+		loopPaused,
 		hasPendingMessages,
 		hasRecentSteerInput: false,
 		queuedLaneIntents,

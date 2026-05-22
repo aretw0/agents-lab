@@ -245,6 +245,81 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("keeps deferred post-reload auto-resume pending while loop is paused", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-post-reload-loop-paused-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			mkdirSync(join(cwd, ".pi"), { recursive: true });
+			writeFileSync(join(cwd, ".pi", "long-run-loop-state.json"), JSON.stringify({
+				mode: "paused",
+				stopCondition: "manual-pause",
+				stopReason: "manual-pause",
+			}, null, 2), "utf8");
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({
+				tasks: [
+					{ id: "TASK-BUD-1081", status: "planned", description: "paused loop auto-resume guard" },
+				],
+			}, null, 2), "utf8");
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: new Date().toISOString(),
+				current_tasks: ["TASK-BUD-1081"],
+				context_watch: {
+					auto_resume_after_reload: {
+						pending: true,
+						createdAtIso: "2026-05-22T08:00:00.000Z",
+						reason: "reload-required-after-compact",
+						focusTasks: ["TASK-BUD-1081"],
+					},
+				},
+				context_watch_events: [
+					{
+						atIso: new Date().toISOString(),
+						reason: "manual_checkpoint",
+						level: "checkpoint",
+						percent: 53,
+						thresholds: { warnPct: 45, checkpointPct: 55, compactPct: 64 },
+						action: "checkpoint-refresh",
+						recommendation: "ready for resume",
+					},
+				],
+			}, null, 2), "utf8");
+			const handlers = new Map<string, (...args: unknown[]) => unknown>();
+			const pi = {
+				on: vi.fn((event: string, handler: (...args: unknown[]) => unknown) => {
+					handlers.set(event, handler);
+				}),
+				registerTool: vi.fn(),
+				registerCommand: vi.fn(),
+				sendUserMessage: vi.fn(),
+				appendEntry: vi.fn(),
+			} as unknown as Parameters<typeof contextWatchdogExtension>[0];
+			contextWatchdogExtension(pi);
+			const sessionStart = handlers.get("session_start");
+			expect(typeof sessionStart).toBe("function");
+			await (sessionStart as (event: unknown, ctx: unknown) => Promise<void> | void)({}, {
+				cwd,
+				ui: {
+					notify() {},
+					setStatus() {},
+				},
+				getContextUsage: () => ({ percent: 12 }),
+				model: { id: "test-model", provider: "test" },
+				isIdle: () => true,
+				hasPendingMessages: () => false,
+				compact() {},
+			} as any);
+			expect((pi.sendUserMessage as ReturnType<typeof vi.fn>).mock.calls.length).toBe(0);
+			expect((pi.appendEntry as ReturnType<typeof vi.fn>).mock.calls.some(([type, payload]) =>
+				type === "context-watchdog.auto-resume-post-reload-pending"
+				&& (payload as { reason?: string })?.reason === "loop-paused",
+			)).toBe(true);
+			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as Record<string, unknown>;
+			expect(readAutoResumeAfterReloadIntent(written)).toBeTruthy();
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("filters stale reload guidance from auto-resume prompt when reload is clear", () => {
 		const envelope = buildAutoResumePromptEnvelopeFromHandoff({
 			timestamp: new Date().toISOString(),

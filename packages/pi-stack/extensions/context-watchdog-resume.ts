@@ -18,6 +18,7 @@ export type AutoResumeDispatchReason =
 	| "reload-required"
 	| "checkpoint-evidence-missing"
 	| "board-handoff-divergence"
+	| "loop-paused"
 	| "pending-messages"
 	| "recent-steer"
 	| "lane-queue-pending"
@@ -47,6 +48,8 @@ export function describeAutoResumeDispatchReason(reason: AutoResumeDispatchReaso
 			return "suppressed: checkpoint-evidence-missing";
 		case "board-handoff-divergence":
 			return "suppressed: board-handoff-divergence";
+		case "loop-paused":
+			return "suppressed: loop-paused";
 		case "pending-messages":
 			return "suppressed: pending-messages";
 		case "recent-steer":
@@ -67,6 +70,8 @@ export function describeAutoResumeDispatchHint(reason: AutoResumeDispatchReason)
 			return "persist or refresh handoff checkpoint evidence before resume";
 		case "board-handoff-divergence":
 			return "reconcile stale/divergent handoff focus with board state before resume";
+		case "loop-paused":
+			return "loop is paused; run pnpm run pi:loop:resume before automatic resume";
 		case "pending-messages":
 			return "wait until pending messages drain before auto-resume";
 		case "recent-steer":
@@ -82,7 +87,7 @@ export function describeAutoResumeDispatchHint(reason: AutoResumeDispatchReason)
 }
 
 export function shouldNotifyAutoResumeSuppression(reason: AutoResumeDispatchReason): boolean {
-	return reason === "reload-required" || reason === "checkpoint-evidence-missing" || reason === "board-handoff-divergence";
+	return reason === "reload-required" || reason === "checkpoint-evidence-missing" || reason === "board-handoff-divergence" || reason === "loop-paused";
 }
 
 export function composeAutoResumeSuppressionHint(input: {
@@ -261,6 +266,7 @@ export function resolveAutoResumeDispatchDecision(input: {
 	reloadRequired?: boolean;
 	checkpointEvidenceReady?: boolean;
 	handoffBoardReconciled?: boolean;
+	loopPaused?: boolean;
 	hasPendingMessages: boolean;
 	hasRecentSteerInput: boolean;
 	queuedLaneIntents: number;
@@ -276,6 +282,9 @@ export function resolveAutoResumeDispatchDecision(input: {
 	}
 	if (input.handoffBoardReconciled === false) {
 		return { shouldDispatch: false, reason: "board-handoff-divergence" };
+	}
+	if (input.loopPaused === true) {
+		return { shouldDispatch: false, reason: "loop-paused" };
 	}
 	if (input.hasPendingMessages) {
 		return { shouldDispatch: false, reason: "pending-messages" };

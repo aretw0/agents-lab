@@ -16838,6 +16838,15 @@
       "method": "stale-colony-disposition",
       "evidence": "Closed stale blocked colony telemetry task via docs/research/stale-colony-board-disposition-2026-05-22.md. No colony work was resumed and no candidate files were promoted. Focal validation passed in devcontainer: pnpm exec vitest run packages/pi-stack/test/smoke/colony-pilot-delivery-recovery.test.ts packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts packages/pi-stack/test/smoke/colony-pilot-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-artifacts-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-status-retention.test.ts => 5 files, 34 tests. Docs site contract passed. Release readiness before closure showed no open P0 tasks and identified this stale colony set as the board-release-clear blocker.",
       "timestamp": "2026-05-22T19:55:20.067Z"
+    },
+    {
+      "id": "VER-BUD-1081-loop-paused-auto-resume",
+      "target": "TASK-BUD-1081",
+      "target_type": "task",
+      "status": "passed",
+      "method": "automated-test",
+      "evidence": "Loop-paused post-reload auto-resume guard implemented and validated. Focal checks: pnpm exec vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts; node --test scripts/test/pi-isolated-resume-intent.test.mjs scripts/test/pi-loop-pause-state-contract.test.mjs. Broader checks: pnpm run test:pi:isolated; pnpm run test:smoke => 166 files passed, 1339 tests passed.",
+      "timestamp": "2026-05-22T20:19:30.246Z"
     }
   ]
 }

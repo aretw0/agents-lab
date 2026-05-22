@@ -24173,7 +24173,7 @@
     {
       "id": "TASK-BUD-1081",
       "description": "Reconcile dev resume, loop pause, reload suppression, and auto-resume so a paused loop cannot unexpectedly fire a stale auto-resume after restart/reload.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "acceptance_criteria": [
         "`npm run pi:dev:resume` surfaces one coherent resume state: paused loop, suppressed auto-resume, or runnable auto-resume, not conflicting messages.",
@@ -24182,7 +24182,8 @@
         "Add a regression or replay fixture for forced compact -> reload-required suppression -> process restart -> resume."
       ],
       "milestone": "continuity-hardening",
-      "notes": "User feedback after forced context compaction: startup reported 'loop paused', but an engasgado/stale auto-resume still fired on return. Treat as coherence debt in continuity/auto-resume governance, to revisit after the remaining arena/worker work if priorities allow."
+      "notes": "User feedback after forced context compaction: startup reported 'loop paused', but an engasgado/stale auto-resume still fired on return. Treat as coherence debt in continuity/auto-resume governance, to revisit after the remaining arena/worker work if priorities allow.\n2026-05-22: Completed continuity hardening for paused-loop auto-resume. Post-reload pending intents now stay pending when .pi/long-run-loop-state.json says manual-pause, and pi:dev startup hint reports autoResume=suppressed while factory is paused.",
+      "verification": "VER-BUD-1081-loop-paused-auto-resume"
     },
     {
       "id": "TASK-BUD-1082",

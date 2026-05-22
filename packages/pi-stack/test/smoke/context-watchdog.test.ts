@@ -482,18 +482,28 @@ describe("context-watchdog", () => {
 			hasRecentSteerInput: false,
 			queuedLaneIntents: 0,
 		})).toEqual({ shouldDispatch: false, reason: "board-handoff-divergence" });
+		expect(resolveAutoResumeDispatchDecision({
+			autoResumeReady: true,
+			loopPaused: true,
+			hasPendingMessages: false,
+			hasRecentSteerInput: false,
+			queuedLaneIntents: 0,
+		})).toEqual({ shouldDispatch: false, reason: "loop-paused" });
 		expect(describeAutoResumeDispatchReason("send")).toBe("dispatched");
 		expect(describeAutoResumeDispatchReason("reload-required")).toContain("reload-required");
 		expect(describeAutoResumeDispatchReason("checkpoint-evidence-missing")).toContain("checkpoint-evidence-missing");
 		expect(describeAutoResumeDispatchReason("board-handoff-divergence")).toContain("board-handoff-divergence");
+		expect(describeAutoResumeDispatchReason("loop-paused")).toContain("loop-paused");
 		expect(describeAutoResumeDispatchHint("send")).toBeUndefined();
 		expect(describeAutoResumeDispatchHint("reload-required")).toContain("/reload");
 		expect(describeAutoResumeDispatchHint("checkpoint-evidence-missing")).toContain("checkpoint");
 		expect(describeAutoResumeDispatchHint("board-handoff-divergence")).toContain("handoff");
+		expect(describeAutoResumeDispatchHint("loop-paused")).toContain("pi:loop:resume");
 		expect(shouldNotifyAutoResumeSuppression("send")).toBe(false);
 		expect(shouldNotifyAutoResumeSuppression("checkpoint-evidence-missing")).toBe(true);
 		expect(shouldNotifyAutoResumeSuppression("board-handoff-divergence")).toBe(true);
 		expect(shouldNotifyAutoResumeSuppression("reload-required")).toBe(true);
+		expect(shouldNotifyAutoResumeSuppression("loop-paused")).toBe(true);
 		expect(resolvePreCompactReloadSignal({ assessmentLevel: "ok", reloadRequired: false })).toMatchObject({
 			active: false,
 			reason: "reload-not-required",
