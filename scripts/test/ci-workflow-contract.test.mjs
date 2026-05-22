@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const CI_WORKFLOW = ".github/workflows/ci.yml";
+const PAGES_WORKFLOW = ".github/workflows/pages.yml";
 const SECURITY_WORKFLOW = ".github/workflows/security-audit.yml";
 const SETUP_ACTION = ".github/actions/setup/action.yml";
 
@@ -62,6 +63,7 @@ test("security audit workflow stays isolated and least-privilege", () => {
 test("workflow permissions are explicit at the top level", () => {
 	for (const path of [
 		CI_WORKFLOW,
+		PAGES_WORKFLOW,
 		".github/workflows/publish.yml",
 		".github/workflows/release-draft.yml",
 		SECURITY_WORKFLOW,
@@ -69,6 +71,26 @@ test("workflow permissions are explicit at the top level", () => {
 		const workflow = read(path);
 		assert.match(workflow, /^permissions:\n/m, `${path} must define top-level permissions`);
 	}
+});
+
+test("pages workflow publishes the validated docs artifact", () => {
+	const workflow = read(PAGES_WORKFLOW);
+
+	assert.match(workflow, /name: Pages/);
+	assert.match(workflow, /push:\n\s+branches: \[main\]/);
+	assert.match(workflow, /workflow_dispatch:/);
+	assert.match(workflow, /permissions:\s*\n\s+contents: read\n\s+pages: write\n\s+id-token: write/);
+	assert.match(workflow, /environment:\n\s+name: github-pages\n\s+url: \$\{\{ steps\.deployment\.outputs\.page_url \}\}/);
+	assert.match(workflow, /uses: \.\/\.github\/actions\/setup/);
+	assert.match(workflow, /sudo apt-get install -y ruby-full build-essential zlib1g-dev/);
+	assert.match(workflow, /pnpm run docs:site:build:smoke/);
+	assert.match(workflow, /uses: actions\/configure-pages@[0-9a-f]{40}/);
+	assert.match(workflow, /uses: actions\/upload-pages-artifact@[0-9a-f]{40}/);
+	assert.match(workflow, /path: docs\/_site/);
+	assert.match(workflow, /uses: actions\/deploy-pages@[0-9a-f]{40}/);
+	assert.doesNotMatch(workflow, /pull_request:/);
+	assert.doesNotMatch(workflow, /pull_request_target:/);
+	assert.doesNotMatch(workflow, /path: docs\s*$/m);
 });
 
 test("shared setup action owns deterministic Node and pnpm install", () => {
