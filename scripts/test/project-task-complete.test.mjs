@@ -27,6 +27,13 @@ test("parseArgs accepts the pnpm run argument separator", () => {
   assert.equal(opts.useExistingVerification, true);
 });
 
+test("script entrypoint uses fileURLToPath for Windows-safe main detection", () => {
+  const source = readFileSync(path.join("scripts", "project", "task-complete.mjs"), "utf8");
+
+  assert.match(source, /fileURLToPath\(import\.meta\.url\)/);
+  assert.doesNotMatch(source, /new URL\(import\.meta\.url\)\.pathname/);
+});
+
 test("completeProjectTask appends passed verification and completes task", () => withProject((root) => {
   const result = completeProjectTask(root, {
     taskId: "TASK-1",
