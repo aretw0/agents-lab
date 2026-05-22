@@ -16928,6 +16928,15 @@
       "method": "remote-evidence-and-local-contract",
       "evidence": "gh run list/view remote evidence: latest main CI 26306758086 success, latest main Pages 26306758085 success; added internal report .project/reports/ci-cd-cohesion-2026-05.md; protected workflows left unchanged",
       "timestamp": "2026-05-22T21:34:18.004Z"
+    },
+    {
+      "id": "VER-BUD-1072-POST-RELOAD-INCIDENT-PACKET",
+      "target": "TASK-BUD-1072",
+      "target_type": "task",
+      "status": "passed",
+      "method": "automated-test",
+      "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-surfaces.test.ts",
+      "timestamp": "2026-05-22T21:37:51.547Z"
     }
   ]
 }

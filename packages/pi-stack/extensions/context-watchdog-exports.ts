@@ -100,6 +100,7 @@ export {
 	normalizeContextWatchdogConfig,
 } from "./context-watchdog-config";
 export {
+	buildPostReloadResumeIncidentPacket,
 	describeAutoResumeDispatchReason,
 	describeAutoResumeDispatchHint,
 	shouldNotifyAutoResumeSuppression,
@@ -140,6 +141,7 @@ export type {
 	AutoResumeAfterReloadIntent,
 	AutoResumeAfterReloadIntentReason,
 } from "./context-watchdog-reload-intent";
+export type { PostReloadResumeIncidentPacket } from "./context-watchdog-resume";
 export type { HandoffGrowthMaturitySnapshot } from "./context-watchdog-growth-checkpoint";
 export type {
 	ContextWatchAutoCompactDecision,

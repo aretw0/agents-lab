@@ -50,6 +50,7 @@ import {
 	shouldNotifyAutoResumeSuppression,
 	summarizeAutoResumePromptDiagnostics,
 	resolveAutoResumeDispatchDecision,
+	buildPostReloadResumeIncidentPacket,
 	resolvePreCompactReloadSignal,
 	resolveContextWatchOperatingCadence,
 	resolveContextWatchCompactStage,
@@ -167,6 +168,93 @@ describe("context-watchdog", () => {
 				} as any,
 			);
 			expect((clearedResult.details as { autoCompact?: { autoResumeAfterReloadPending?: boolean } } | undefined)?.autoCompact?.autoResumeAfterReloadPending).toBe(false);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("builds a report-only post-reload incident packet for manual nudge evidence", () => {
+		const packet = buildPostReloadResumeIncidentPacket({
+			nowMs: Date.parse("2026-05-22T21:05:00.000Z"),
+			intent: {
+				createdAtIso: "2026-05-22T21:00:00.000Z",
+				reason: "reload-required-after-compact",
+				focusTasks: ["TASK-BUD-1072"],
+			},
+			decision: {
+				atIso: "2026-05-22T21:05:00.000Z",
+				reason: "checkpoint-evidence-missing",
+				hint: "persist or refresh handoff checkpoint evidence before resume",
+				dispatched: false,
+				reloadRequired: false,
+				checkpointEvidenceReady: false,
+				handoffBoardReconciled: true,
+				handoffBoardReconciliationSummary: "ok",
+				hasPendingMessages: false,
+				hasRecentSteerInput: false,
+				queuedLaneIntents: 0,
+				timeoutPressureActive: false,
+				timeoutPressureCount: 0,
+				timeoutPressureThreshold: 3,
+			},
+			manualNudgeObserved: true,
+		});
+
+		expect(packet.mode).toBe("context-watch-post-reload-incident-packet");
+		expect(packet.dispatchAllowed).toBe(false);
+		expect(packet.mutationAllowed).toBe(false);
+		expect(packet.remoteAllowed).toBe(false);
+		expect(packet.schedulerAllowed).toBe(false);
+		expect(packet.pending).toBe(true);
+		expect(packet.manualNudgeObserved).toBe(true);
+		expect(packet.operatorActionRequired).toBe(true);
+		expect(packet.reason).toBe("checkpoint-evidence-missing");
+		expect(packet.intentAgeSec).toBe(300);
+		expect(packet.nextAction).toContain("manual nudge observed");
+		expect(packet.summary).toContain("dispatch=no");
+	});
+
+	it("context_watch_post_reload_incident_packet exposes pending intent without dispatch", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-post-reload-incident-tool-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: "2026-05-22T21:00:00.000Z",
+				context_watch: {
+					auto_resume_after_reload: {
+						pending: true,
+						createdAtIso: "2026-05-22T21:00:00.000Z",
+						reason: "reload-required-after-compact",
+						focusTasks: ["TASK-BUD-1072"],
+					},
+				},
+			}, null, 2), "utf8");
+			const pi = makeMockPi();
+			contextWatchdogSurfacesExtension(pi);
+			const tool = getTool(pi, "context_watch_post_reload_incident_packet");
+			const result = await tool.execute(
+				"tc-context-watch-post-reload-incident",
+				{ manual_nudge_observed: true },
+				undefined as unknown as AbortSignal,
+				() => {},
+				{
+					cwd,
+					getContextUsage: () => ({ percent: 14 }),
+					model: { id: "test-model", provider: "test" },
+					isIdle: () => true,
+					hasPendingMessages: () => false,
+				} as any,
+			);
+
+			expect(result.content?.[0]?.text).toContain("context-watch-post-reload-incident:");
+			expect(result.content?.[0]?.text).toContain("manualNudge=yes");
+			expect(result.details).toMatchObject({
+				mode: "context-watch-post-reload-incident-packet",
+				dispatchAllowed: false,
+				mutationAllowed: false,
+				manualNudgeObserved: true,
+				focusTasks: ["TASK-BUD-1072"],
+			});
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
@@ -370,6 +458,14 @@ describe("context-watchdog", () => {
 				type === "context-watchdog.auto-resume-post-reload-pending"
 				&& (payload as { reason?: string })?.reason === "loop-paused",
 			)).toBe(true);
+			const pendingEntry = (pi.appendEntry as ReturnType<typeof vi.fn>).mock.calls.find(([type]) =>
+				type === "context-watchdog.auto-resume-post-reload-pending",
+			)?.[1] as { incidentPacket?: { mode?: string; dispatchAllowed?: boolean; reason?: string } };
+			expect(pendingEntry.incidentPacket).toMatchObject({
+				mode: "context-watch-post-reload-incident-packet",
+				dispatchAllowed: false,
+				reason: "loop-paused",
+			});
 			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as Record<string, unknown>;
 			expect(readAutoResumeAfterReloadIntent(written)).toBeTruthy();
 		} finally {

@@ -14,6 +14,7 @@ import {
 	resolveContextWatchContinuationRecommendation,
 	TURN_BOUNDARY_DIRECTION_PROMPT,
 } from "./context-watchdog-continuation";
+import { buildPostReloadResumeIncidentPacket } from "./context-watchdog-resume";
 import {
 	runContextPreloadPack,
 	summarizeContextPreloadPack,
@@ -83,6 +84,29 @@ export function registerContextWatchdogContinuationSurface(
 	pi: ExtensionAPI,
 	runtime: ContextWatchdogContinuationSurfaceRuntime,
 ): void {
+	pi.registerTool({
+		name: "context_watch_post_reload_incident_packet",
+		label: "Context Watch Post Reload Incident Packet",
+		description:
+			"Read-only post-reload auto-resume incident packet. Captures pending reload-resume intent and optional manual-nudge evidence without dispatching resume, scheduler, remote, or mutation.",
+		parameters: Type.Object({
+			manual_nudge_observed: Type.Optional(Type.Boolean()),
+		}),
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			const p = (params ?? {}) as Record<string, unknown>;
+			const intent = readAutoResumeAfterReloadIntent(readHandoffJson(ctx.cwd));
+			const packet = buildPostReloadResumeIncidentPacket({
+				nowMs: Date.now(),
+				intent,
+				manualNudgeObserved: p.manual_nudge_observed === true,
+			});
+			return {
+				content: [{ type: "text", text: packet.summary }],
+				details: packet,
+			};
+		},
+	});
+
 	pi.registerTool({
 		name: "context_watch_reload_before_compact_packet",
 		label: "Context Watch Reload Before Compact Packet",

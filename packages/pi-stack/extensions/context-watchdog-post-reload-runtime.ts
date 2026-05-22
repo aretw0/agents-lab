@@ -22,10 +22,12 @@ import {
 } from "./context-watchdog-reload-intent";
 import {
 	buildAutoResumeDecisionSnapshot,
+	buildPostReloadResumeIncidentPacket,
 	resolveAutoResumeDispatchDecision,
 	resolvePostReloadPendingNotifyDecision,
 	shouldNotifyAutoResumeSuppression,
 	type AutoResumeDecisionSnapshot,
+	type PostReloadResumeIncidentPacket,
 	type PostReloadPendingNotifyMemory,
 } from "./context-watchdog-resume";
 import {
@@ -57,6 +59,7 @@ export interface ContextWatchPostReloadAutoResumeResult {
 	lastAutoResumeDecision?: AutoResumeDecisionSnapshot & {
 		promptDiagnostics?: AutoResumePromptDiagnostics;
 	};
+	lastPostReloadIncident?: PostReloadResumeIncidentPacket;
 	lastToolSchemaValidation?: ToolSchemaValidationPacket;
 }
 
@@ -260,6 +263,11 @@ export function handlePostReloadAutoResume(params: {
 		minCooldownMs: params.postReloadPendingNotifyMinCooldownMs,
 	});
 	if (pendingNotifyDecision.shouldEmit) {
+		const incidentPacket = buildPostReloadResumeIncidentPacket({
+			nowMs,
+			intent: pendingAutoResumeAfterReload,
+			decision: autoResumeSnapshot,
+		});
 		(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
 			"context-watchdog.auto-resume-post-reload-pending",
 			{
@@ -271,6 +279,7 @@ export function handlePostReloadAutoResume(params: {
 				checkpointEvidenceReady: autoResumeSnapshot.checkpointEvidenceReady,
 				handoffBoardReconciled: autoResumeSnapshot.handoffBoardReconciled,
 				handoffBoardReconciliationSummary: autoResumeSnapshot.handoffBoardReconciliationSummary,
+				incidentPacket,
 			},
 		);
 		if (config.notify && shouldNotifyAutoResumeSuppression(autoResumeSnapshot.reason)) {
@@ -284,5 +293,10 @@ export function handlePostReloadAutoResume(params: {
 	return {
 		postReloadPendingNotifyMemory,
 		lastAutoResumeDecision: autoResumeSnapshot,
+		lastPostReloadIncident: buildPostReloadResumeIncidentPacket({
+			nowMs,
+			intent: pendingAutoResumeAfterReload,
+			decision: autoResumeSnapshot,
+		}),
 	};
 }

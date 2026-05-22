@@ -1,4 +1,8 @@
 import type { HandoffFreshnessLabel } from "./context-watchdog-handoff";
+import {
+	GUARDRAILS_AUTHORIZATION_NONE,
+	type GuardrailsAuthorizationNone,
+} from "./guardrails-core-authorization";
 
 export type ContextWatchdogLevel = "ok" | "warn" | "checkpoint" | "compact";
 
@@ -121,6 +125,100 @@ export type AutoResumeDecisionSnapshot = {
 	timeoutPressureThreshold: number;
 	timeoutPressureHint?: string;
 };
+
+export type PostReloadResumeIncidentPacket = {
+	mode: "context-watch-post-reload-incident-packet";
+	activation: "none";
+	authorization: GuardrailsAuthorizationNone;
+	dispatchAllowed: false;
+	mutationAllowed: false;
+	remoteAllowed: false;
+	schedulerAllowed: false;
+	pending: boolean;
+	manualNudgeObserved: boolean;
+	reason: AutoResumeDispatchReason | "no-pending-intent";
+	intentReason?: string;
+	intentAgeSec: number | null;
+	focusTasks: string[];
+	operatorActionRequired: boolean;
+	nextAction: string;
+	evidence: {
+		intentCreatedAtIso?: string;
+		decisionAtIso?: string;
+		checkpointEvidenceReady?: boolean;
+		handoffBoardReconciled?: boolean;
+		hasPendingMessages?: boolean;
+		queuedLaneIntents?: number;
+	};
+	summary: string;
+};
+
+export function buildPostReloadResumeIncidentPacket(input: {
+	nowMs: number;
+	intent?: {
+		createdAtIso: string;
+		reason: string;
+		focusTasks: string[];
+	};
+	decision?: AutoResumeDecisionSnapshot;
+	manualNudgeObserved?: boolean;
+}): PostReloadResumeIncidentPacket {
+	const createdAtMs = input.intent?.createdAtIso ? Date.parse(input.intent.createdAtIso) : NaN;
+	const intentAgeSec = Number.isFinite(createdAtMs)
+		? Math.max(0, Math.floor((Math.floor(Number(input.nowMs ?? 0)) - createdAtMs) / 1000))
+		: null;
+	const reason: PostReloadResumeIncidentPacket["reason"] = input.intent
+		? input.decision?.reason ?? "auto-resume-off-or-cooldown"
+		: "no-pending-intent";
+	const pending = Boolean(input.intent) && input.decision?.dispatched !== true;
+	const operatorActionRequired = pending && reason !== "pending-messages" && reason !== "lane-queue-pending";
+	const focusTasks = input.intent?.focusTasks?.filter((entry) => entry.trim().length > 0).slice(0, 3) ?? [];
+	const nextAction = !input.intent
+		? "no post-reload auto-resume intent is pending."
+		: input.decision?.dispatched === true
+			? "auto-resume was dispatched; keep observing the follow-up boundary."
+			: input.manualNudgeObserved === true
+				? "manual nudge observed; preserve this incident packet and refresh checkpoint evidence before relying on unattended continuation."
+				: describeAutoResumeDispatchHint(reason === "no-pending-intent" ? "auto-resume-off-or-cooldown" : reason)
+					?? "inspect post-reload pending state before relying on unattended continuation.";
+	const summary = [
+		"context-watch-post-reload-incident:",
+		`pending=${pending ? "yes" : "no"}`,
+		`reason=${reason}`,
+		`manualNudge=${input.manualNudgeObserved === true ? "yes" : "no"}`,
+		`focus=${focusTasks.length > 0 ? focusTasks.join(",") : "none"}`,
+		`ageSec=${intentAgeSec ?? "unknown"}`,
+		`operatorAction=${operatorActionRequired ? "yes" : "no"}`,
+		"dispatch=no",
+		"mutation=no",
+	].join(" ");
+	return {
+		mode: "context-watch-post-reload-incident-packet",
+		activation: "none",
+		authorization: GUARDRAILS_AUTHORIZATION_NONE,
+		dispatchAllowed: false,
+		mutationAllowed: false,
+		remoteAllowed: false,
+		schedulerAllowed: false,
+		pending,
+		manualNudgeObserved: input.manualNudgeObserved === true,
+		reason,
+		intentReason: input.intent?.reason,
+		intentAgeSec,
+		focusTasks,
+		operatorActionRequired,
+		nextAction,
+		evidence: {
+			intentCreatedAtIso: input.intent?.createdAtIso,
+			decisionAtIso: input.decision?.atIso,
+			checkpointEvidenceReady: input.decision?.checkpointEvidenceReady,
+			handoffBoardReconciled: input.decision?.handoffBoardReconciled,
+			hasPendingMessages: input.decision?.hasPendingMessages,
+			queuedLaneIntents: input.decision?.queuedLaneIntents,
+		},
+		summary,
+	};
+}
 
 export function buildAutoResumeDecisionSnapshot(input: {
 	nowMs: number;
