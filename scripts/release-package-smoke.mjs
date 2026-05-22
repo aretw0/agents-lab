@@ -131,8 +131,9 @@ export function buildReleasePackageSmokeReport(options = {}) {
   if (!/git tag --points-at "\$SHA"/.test(publishWorkflow)) {
     blockers.push("publish workflow must remain tag-gated");
   }
-  if (/npm\.pkg\.github\.com|packages:\s*write/.test(publishWorkflow)) {
-    warnings.push("GitHub Packages publishing is not configured for agents-lab; keep it opt-in and separately gated");
+  const githubPackagesConfigured = /npm\.pkg\.github\.com|packages:\s*write/.test(publishWorkflow);
+  if (githubPackagesConfigured) {
+    warnings.push("GitHub Packages publishing is configured; verify it remains opt-in and separately gated");
   }
   if (!/draft:\s*true/.test(releaseDraftWorkflow)) {
     blockers.push("release draft workflow must create draft releases only");
@@ -166,8 +167,11 @@ export function buildReleasePackageSmokeReport(options = {}) {
       manualDraft: /workflow_dispatch:/.test(releaseDraftWorkflow),
     },
     githubPackages: {
-      configured: /npm\.pkg\.github\.com|packages:\s*write/.test(publishWorkflow),
-      mode: /npm\.pkg\.github\.com|packages:\s*write/.test(publishWorkflow) ? "configured" : "not-configured",
+      configured: githubPackagesConfigured,
+      mode: githubPackagesConfigured ? "configured-opt-in" : "not-configured-opt-in",
+      note: githubPackagesConfigured
+        ? "GitHub Packages publish markers exist in publish workflow; review gating before release."
+        : "GitHub Packages is intentionally absent from the current publish workflow.",
     },
     blockers,
     warnings,
