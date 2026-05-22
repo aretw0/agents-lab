@@ -16,6 +16,12 @@
 | `control-plane-continuity` | Continuidade local-safe com entrevista curta, slices bounded, checkpoint e parada por risco real |
 | `mermaid-authoring` | Escrita e revisão de diagramas Mermaid com sintaxe portável entre Markdown, GitHub, Jekyll, Astro e Obsidian |
 
+## Prompts
+
+| Prompt | Uso |
+|---|---|
+| `/hatch` | Iniciar um slice local-safe com foco, validação, escopo, rollback e stop condition explícitos |
+
 ## Uso
 
 ```bash

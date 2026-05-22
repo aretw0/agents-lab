@@ -23499,8 +23499,8 @@
     },
     {
       "id": "TASK-BUD-1054",
-      "description": "[soft-intent/prompt] Criar prompt template de hatch/queen para operador iniciar batch local-safe com seed/foco e defaults sane.",
-      "status": "planned",
+      "description": "[soft-intent/prompt] Criar prompt template de hatch/control-plane para operador iniciar batch local-safe com seed/foco e defaults sane.",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1053"
@@ -23518,7 +23518,8 @@
         "Validação por marker check/i18n lint."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Soft intent: discoverability direta para operador sem precisar lembrar o vocabulário interno.\n[provenance:human] source_task=none reason=Operador quer uma manifestação curta para liberar batch e deixar control-plane trabalhar."
+      "notes": "Soft intent: discoverability direta para operador sem precisar lembrar o vocabulário interno.\n[provenance:human] source_task=none reason=Operador quer uma manifestação curta para liberar batch e deixar control-plane trabalhar.\n2026-05-22: Added distributable /hatch prompt under @aretw0/pi-skills. The prompt starts one bounded local-safe control-plane slice from a short seed, interviews only for missing constraints, points to canonical packets, blocks protected/remote/scheduler/publish/destructive scopes, and is packaged through pi.prompts.",
+      "verification": "VER-BUD-1054-hatch-prompt"
     },
     {
       "id": "TASK-BUD-1055",
