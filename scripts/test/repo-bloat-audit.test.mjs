@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  buildRepoBloatReport,
   classifyTrackedBloat,
   normalizeRepoPath,
   summarizeLocalAdvisories,
@@ -59,4 +60,12 @@ test("summarizeLocalAdvisories reports ignored local raw log pressure", () => {
     count: 2,
     bytes: 25,
   });
+});
+
+test("buildRepoBloatReport includes structured local advisory summary", () => {
+  const report = buildRepoBloatReport(process.cwd());
+
+  assert.equal(typeof report.localAdvisorySummary.count, "number");
+  assert.equal(typeof report.localAdvisorySummary.bytes, "number");
+  assert.equal(report.localAdvisorySummary.count, report.localAdvisories.length);
 });

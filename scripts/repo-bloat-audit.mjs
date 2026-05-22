@@ -16,17 +16,11 @@ import {
   classifyTrackedBloat,
   formatBytes,
   normalizeRepoPath,
+  summarizeLocalBloatAdvisories,
 } from "../packages/pi-stack/extensions/stack-quality-audit.mjs";
 
 export { buildRepoBloatReport, classifyTrackedBloat, normalizeRepoPath };
-
-export function summarizeLocalAdvisories(localAdvisories = []) {
-  const rows = Array.isArray(localAdvisories) ? localAdvisories : [];
-  return {
-    count: rows.length,
-    bytes: rows.reduce((sum, row) => sum + Number(row?.bytes ?? 0), 0),
-  };
-}
+export { summarizeLocalBloatAdvisories as summarizeLocalAdvisories };
 
 function parseArgs(argv) {
   const out = { strict: false, json: false, help: false };
@@ -92,7 +86,7 @@ function main() {
       }
     }
     if (report.localAdvisories.length > 0) {
-      const localSummary = summarizeLocalAdvisories(report.localAdvisories);
+      const localSummary = report.localAdvisorySummary ?? summarizeLocalBloatAdvisories(report.localAdvisories);
       console.log(`local ignored raw logs: ${localSummary.count} files, ${formatBytes(localSummary.bytes)} total`);
       for (const row of report.localAdvisories.slice(0, 10)) {
         console.log(`- ${row.path} (${formatBytes(row.bytes)})`);

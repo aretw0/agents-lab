@@ -216,15 +216,25 @@ function localRawLogAdvisories(cwd, trackedSet, thresholds = DEFAULT_BLOAT_THRES
     .sort((a, b) => b.bytes - a.bytes);
 }
 
+export function summarizeLocalBloatAdvisories(localAdvisories = []) {
+  const rows = Array.isArray(localAdvisories) ? localAdvisories : [];
+  return {
+    count: rows.length,
+    bytes: rows.reduce((sum, row) => sum + Number(row?.bytes ?? 0), 0),
+  };
+}
+
 export function buildRepoBloatReport(cwd = process.cwd(), thresholds = DEFAULT_BLOAT_THRESHOLDS) {
   const rows = trackedRows(cwd);
   const trackedSet = new Set(rows.map((row) => normalizeRepoPath(row.path)));
   const classified = classifyTrackedBloat(rows, thresholds);
+  const localAdvisories = localRawLogAdvisories(cwd, trackedSet, thresholds);
   return {
     cwd,
     trackedCount: rows.length,
     ...classified,
-    localAdvisories: localRawLogAdvisories(cwd, trackedSet, thresholds),
+    localAdvisories,
+    localAdvisorySummary: summarizeLocalBloatAdvisories(localAdvisories),
   };
 }
 
