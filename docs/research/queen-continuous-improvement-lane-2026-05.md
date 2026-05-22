@@ -58,7 +58,7 @@ Skills, prompts, docs and research that make the behavior discoverable and reusa
 3. `TASK-BUD-1055` — prior-art research across pi ecosystem, Claude Code and similar tools.
 4. `TASK-BUD-1057` — document assisted/self-critical control-plane loop semantics in docs/skill form.
 
-Implemented status: `TASK-BUD-1053` added the distributable `control-plane-continuity` skill. `TASK-BUD-1054` added the distributable `/hatch` prompt for one bounded local-safe slice from a short seed. `TASK-BUD-1057` keeps the lane explicit as assisted and self-critical: it reduces micro-authorization but does not remove operator supervision.
+Implemented status: `TASK-BUD-1053` added the distributable `control-plane-continuity` skill. `TASK-BUD-1054` added the distributable `/hatch` prompt for one bounded local-safe slice from a short seed. `TASK-BUD-1055` produced the bounded prior-art synthesis in `docs/research/control-plane-prior-art-hatch-intake-2026-05.md`, extracting small patterns without adding a new executor. `TASK-BUD-1057` keeps the lane explicit as assisted and self-critical: it reduces micro-authorization but does not remove operator supervision.
 
 ## Toolkit rule
 

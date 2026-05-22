@@ -23530,7 +23530,7 @@
     {
       "id": "TASK-BUD-1055",
       "description": "[soft-intent/research] Estudar prior art de hatch/intake/autonomy profile em pi ecosystem, Claude Code e ferramentas similares para melhorar UX sem bloquear defaults atuais.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-1046"
@@ -23546,7 +23546,8 @@
         "Inclui links/evidência quando possível."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Soft intent/pesquisa: aprender com ecossistemas sem transformar prior art em pré-requisito para o básico.\n[provenance:human] source_task=none reason=Operador apontou que podemos aprender com pi ecosystem, Claude Code e similares."
+      "notes": "Soft intent/pesquisa: aprender com ecossistemas sem transformar prior art em pré-requisito para o básico.\n[provenance:human] source_task=none reason=Operador apontou que podemos aprender com pi ecosystem, Claude Code e similares.\nClosed with source-backed bounded prior-art synthesis in docs/research/control-plane-prior-art-hatch-intake-2026-05.md. Outcome is a small report-only profile packet candidate, not a new executor or autonomy default.",
+      "verification": "VER-BUD-1055-CONTROL-PLANE-PRIOR-ART"
     },
     {
       "id": "TASK-BUD-1056",

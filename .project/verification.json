@@ -17000,6 +17000,15 @@
       "method": "automated-smoke",
       "evidence": "assessEditNoopNoiseFromEditInput classifies exact no-op, trailing-whitespace-only, line-whitespace-only, semantic, and skipped-large edit payloads as report-only metrics; smoke/docs/complexity/discourse passed",
       "timestamp": "2026-05-22T22:09:48.056Z"
+    },
+    {
+      "id": "VER-BUD-1055-CONTROL-PLANE-PRIOR-ART",
+      "target": "TASK-BUD-1055",
+      "target_type": "task",
+      "status": "passed",
+      "method": "source-backed-research",
+      "evidence": "Bounded prior-art synthesis compares Claude Code subagents/skills, Codex CLI, GitHub Copilot/VS Code custom instructions; separates soft intent from hard intent and proposes only a report-only control_plane_profile_packet; docs site and discourse audit passed",
+      "timestamp": "2026-05-22T22:12:56.464Z"
     }
   ]
 }
