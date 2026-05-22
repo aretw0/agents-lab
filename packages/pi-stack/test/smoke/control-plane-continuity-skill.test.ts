@@ -15,6 +15,10 @@ describe("control-plane continuity skill", () => {
     expect(skill).toContain("context_watch_local_slice_preview");
     expect(skill).toContain("local_continuity_loop_canary_packet");
     expect(skill).toContain("agent_run_batch_dry_run");
+    expect(skill).toContain("Assisted Self-Critique");
+    expect(skill).toContain("not unattended automation");
+    expect(skill).toContain("reload/compact");
+    expect(skill).toContain("host pressure");
     expect(skill).toContain("Stop on protected scope");
     expect(skill).toContain("Do not cite bare task IDs");
     expect(skill.toLowerCase()).not.toContain("queen");

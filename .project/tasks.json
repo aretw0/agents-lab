@@ -23571,7 +23571,7 @@
     {
       "id": "TASK-BUD-1057",
       "description": "[soft-intent/control-plane] Documentar que o loop control-plane/agents-lab é assistido e auto-crítico, não desassistido: usar recursos maduros, pedir intervenção só quando necessário.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1046"
@@ -23587,7 +23587,8 @@
         "Evita prometer automação irrestrita ou sem operador."
       ],
       "milestone": "queen-continuous-improvement-lane-2026-05",
-      "notes": "Soft intent: preservar nuance do operador — melhoria contínua não significa abandonar supervisão; significa reduzir micro-autorização e pedir ajuda quando realmente precisa.\n[provenance:human] source_task=none reason=Operador quer loop de melhoramento contínuo assistido por recursos, não desassistido."
+      "notes": "Soft intent: preservar nuance do operador — melhoria contínua não significa abandonar supervisão; significa reduzir micro-autorização e pedir ajuda quando realmente precisa.\n[provenance:human] source_task=none reason=Operador quer loop de melhoramento contínuo assistido por recursos, não desassistido.\n2026-05-22: Clarified assisted/self-critical control-plane semantics in the lane doc and distributable continuity skill. The loop reduces micro-authorization through mature gates, treats reload/compact/host pressure as operational intervention, records failures as hardening evidence, and does not promise unattended automation.",
+      "verification": "VER-BUD-1057-assisted-control-plane-semantics"
     },
     {
       "id": "TASK-BUD-1058",

@@ -19,6 +19,16 @@ Use this skill when the operator asks for continued progress, a larger local-saf
 - Delegate to workers only after the lower agent-run gates are green; batch intent never bypasses per-worker start/outcome gates.
 - Stop on protected scope, unknown validation, unexpected git state, budget block, compact/reload pressure without checkpoint, repeated failure, or real operator/product ambiguity.
 
+## Assisted Self-Critique
+
+This is an assisted loop, not unattended automation.
+
+- Reduce micro-authorization by using the existing mature gates.
+- Keep the operator available for real ambiguity, protected scope, reload/compact, host pressure, budget blocks, and failed outcomes.
+- Treat failures as evidence: observe, record the smallest useful fact, harden the contract or toolkit, then continue only when the next slice is still local-safe.
+- Treat reload, compact, and host pressure as operational interventions, not as a reason to pretend the loop can continue blindly.
+- Ask for help when the evidence requires it; do not ask for help just to avoid a bounded local-safe step.
+
 ## Short Interview
 
 Ask only what is missing:

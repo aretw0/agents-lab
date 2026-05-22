@@ -37,7 +37,7 @@ This does **not** mean unassisted or blind automation. It means reducing micro-a
 Code/runtime/tooling work that should eventually be implemented with tests:
 
 1. `TASK-BUD-1047` — first-hatch intake packet/tool for new workspaces, sandbox discovery and empty-folder interview.
-2. `TASK-BUD-1048` — queen profile discovery packet, report-only and interview-backed.
+2. `TASK-BUD-1048` — control-plane profile discovery packet, report-only and interview-backed.
 3. `TASK-BUD-1049` — minimal operator manifestation packet for local-safe batches.
 4. `TASK-BUD-1050` — capability ROI/discoverability packet for tools, workers and other available resources.
 5. `TASK-BUD-1051` — dry-run bridge from batch authorization to worker dispatch gates without bypassing lower contracts.
@@ -57,6 +57,8 @@ Skills, prompts, docs and research that make the behavior discoverable and reusa
 2. `TASK-BUD-1054` — hatch/control-plane prompt template for short operator manifestation.
 3. `TASK-BUD-1055` — prior-art research across pi ecosystem, Claude Code and similar tools.
 4. `TASK-BUD-1057` — document assisted/self-critical control-plane loop semantics in docs/skill form.
+
+Implemented status: `TASK-BUD-1053` added the distributable `control-plane-continuity` skill. `TASK-BUD-1054` added the distributable `/hatch` prompt for one bounded local-safe slice from a short seed. `TASK-BUD-1057` keeps the lane explicit as assisted and self-critical: it reduces micro-authorization but does not remove operator supervision.
 
 ## Toolkit rule
 

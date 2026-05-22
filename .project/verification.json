@@ -16901,6 +16901,15 @@
       "method": "automated-test",
       "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/pi-skills-prompts.test.ts packages/pi-stack/test/smoke/installability.test.ts packages/pi-stack/test/smoke/package-list.test.ts packages/pi-stack/test/smoke/manifest-integrity.test.ts; pnpm run test:docs:site; pnpm run repo:discourse:audit; pnpm run repo:complexity:strict",
       "timestamp": "2026-05-22T21:22:34.756Z"
+    },
+    {
+      "id": "VER-BUD-1057-assisted-control-plane-semantics",
+      "target": "TASK-BUD-1057",
+      "target_type": "task",
+      "status": "passed",
+      "method": "automated-test",
+      "evidence": "pnpm exec vitest run packages/pi-stack/test/smoke/control-plane-continuity-skill.test.ts; pnpm run test:docs:site; pnpm run repo:discourse:audit; pnpm run repo:complexity:strict",
+      "timestamp": "2026-05-22T21:26:18.879Z"
     }
   ]
 }
