@@ -53,10 +53,10 @@ Hard intent implementável:
 - gates que bloqueiam mutação protegida ou dispatch sem autorização explícita;
 - regressões para payload curto, stop condition, sandbox e tool capability.
 
-## Próximo Passo
+## Resultado
 
-Promover só um contrato pequeno:
+Promovido como contrato pequeno, sem executor novo:
 
 - `control_plane_profile_packet`: read-only, curto, com `profile`, `availableCapabilities`, `missingCapabilities`, `recommendedNextAction`, `operatorDecisionNeeded`, `authorization`.
 
-Não implementar executor novo nesta pesquisa. Se virar task, validar com smoke de payload curto e sem dispatch.
+O packet continua report-only: `dispatchAllowed=false`, `mutationAllowed=false` e `authorization=none`.

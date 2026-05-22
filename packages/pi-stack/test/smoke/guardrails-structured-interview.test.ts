@@ -97,8 +97,12 @@ describe("structured interview primitive", () => {
       profile: "bounded-batch-candidate",
       autonomy: "bounded-batch-candidate",
       missingQuestions: [],
+      missingCapabilities: [],
       resources: ["first-hatch", "tool-hygiene"],
+      availableCapabilities: ["first-hatch", "tool-hygiene"],
+      operatorDecisionNeeded: true,
     });
+    expect(ready.recommendedNextAction).toBe(ready.recommendation);
     expect(ready.summary).toContain("blocked=none");
     expect(blocked).toMatchObject({
       decision: "blocked",
@@ -135,6 +139,8 @@ describe("structured interview primitive", () => {
     expect(result?.details.decision).toBe("ready-for-operator-decision");
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.mutationAllowed).toBe(false);
+    expect(result?.details.operatorDecisionNeeded).toBe(true);
+    expect(result?.details.availableCapabilities).toEqual(["first-hatch", "tool-hygiene"]);
     expect(result?.content?.[0]?.text).toContain("control-plane-profile-packet: decision=ready-for-operator-decision");
     expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(result?.content?.[0]?.text).not.toContain("\"intent\"");

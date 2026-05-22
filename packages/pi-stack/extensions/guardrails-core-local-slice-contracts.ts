@@ -179,12 +179,16 @@ export interface ControlPlaneProfilePacket {
   intent: string;
   roi: string;
   resources: string[];
+  availableCapabilities: string[];
   limits: string[];
   stopConditions: string[];
   missingQuestions: string[];
+  missingCapabilities: string[];
   blockedRequests: string[];
+  operatorDecisionNeeded: true;
   summary: string;
   recommendation: string;
+  recommendedNextAction: string;
 }
 
 function boundedProfileList(value: unknown, maxItems: number): string[] {
@@ -220,12 +224,31 @@ export function buildControlPlaneProfilePacket(input: ControlPlaneProfilePacketI
   if (input.remoteOrOffloadRequested) blockedRequests.push("remote-or-offload");
   if (input.githubActionsRequested) blockedRequests.push("github-actions");
 
-  if (!input.operatorFocusKnown) missingQuestions.push("Which single focus should the control-plane optimize for first?");
-  if (!input.validationKnown) missingQuestions.push("Which focal validation proves the first slice?");
-  if (!input.rollbackKnown) missingQuestions.push("What rollback path is acceptable for this work?");
-  if (!input.checkpointPlanned) missingQuestions.push("Where should the checkpoint/handoff be recorded?");
-  if (limits.length === 0) missingQuestions.push("What limits should constrain autonomy, cost, scope, or time?");
-  if (stopConditions.length === 0) missingQuestions.push("Which stop conditions require pausing for the operator?");
+  const missingCapabilities: string[] = [];
+  if (!input.operatorFocusKnown) {
+    missingQuestions.push("Which single focus should the control-plane optimize for first?");
+    missingCapabilities.push("operator-focus");
+  }
+  if (!input.validationKnown) {
+    missingQuestions.push("Which focal validation proves the first slice?");
+    missingCapabilities.push("validation-gate");
+  }
+  if (!input.rollbackKnown) {
+    missingQuestions.push("What rollback path is acceptable for this work?");
+    missingCapabilities.push("rollback-path");
+  }
+  if (!input.checkpointPlanned) {
+    missingQuestions.push("Where should the checkpoint/handoff be recorded?");
+    missingCapabilities.push("checkpoint-target");
+  }
+  if (limits.length === 0) {
+    missingQuestions.push("What limits should constrain autonomy, cost, scope, or time?");
+    missingCapabilities.push("autonomy-limits");
+  }
+  if (stopConditions.length === 0) {
+    missingQuestions.push("Which stop conditions require pausing for the operator?");
+    missingCapabilities.push("stop-conditions");
+  }
 
   const requested = input.autonomyRequest === "bounded-batch" || input.autonomyRequest === "worker-assisted" || input.autonomyRequest === "single-slice"
     ? input.autonomyRequest
@@ -265,12 +288,16 @@ export function buildControlPlaneProfilePacket(input: ControlPlaneProfilePacketI
     intent,
     roi,
     resources,
+    availableCapabilities: resources,
     limits,
     stopConditions,
     missingQuestions: missingQuestions.slice(0, 4),
+    missingCapabilities: missingCapabilities.slice(0, 4),
     blockedRequests,
+    operatorDecisionNeeded: true,
     summary: "control-plane-profile-packet: decision=" + decision + " profile=" + profile + " autonomy=" + autonomy + " questions=" + Math.min(missingQuestions.length, 4) + blockedSummary + " " + formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     recommendation,
+    recommendedNextAction: recommendation,
   };
 }
 

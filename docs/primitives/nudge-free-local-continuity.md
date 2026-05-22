@@ -209,6 +209,8 @@ Antes de aceitar uma manifestação de batch, o control-plane deve conseguir pro
 - quais limites e stop conditions estão explícitos;
 - quais perguntas faltam para o operador.
 
+Para consumo por outros agentes, o packet também expõe aliases estáveis: `availableCapabilities`, `missingCapabilities`, `recommendedNextAction` e `operatorDecisionNeeded`. Os campos legados `resources`, `missingQuestions` e `recommendation` continuam presentes para compatibilidade interna.
+
 Mesmo quando retorna `decision=ready-for-operator-decision`, o packet mantém `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none` e `mode=report-only`. Pedido de protected scope, GitHub Actions, scheduler ou remote/offload retorna bloqueio até autorização explícita fora do packet.
 
 ## Manifestação única do operador
