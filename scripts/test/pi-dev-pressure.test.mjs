@@ -17,6 +17,7 @@ import {
   buildDevelopmentVelocityPressure,
   buildVelocityPressureSignals,
   collectAgentRunPressureStats,
+  collectPerformanceWatchdogStats,
 } from "../pi-dev-pressure.mjs";
 import { PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES } from "../../packages/pi-stack/install.mjs";
 
@@ -52,6 +53,46 @@ test("collectSessionStats reports largest isolated session without reading jsonl
     assert.equal(stats.count, 2);
     assert.equal(stats.largest.path, ".sandbox/pi-agent/sessions/workspace/large.jsonl");
     assert.equal(stats.largest.bytes, 2048);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("collectPerformanceWatchdogStats reads config and persisted session events", () => {
+  const cwd = makeWorkspace();
+  try {
+    const configPath = join(cwd, ".pi", "agent", "extensions", "watchdog", "config.json");
+    mkdirSync(join(cwd, ".pi", "agent", "extensions", "watchdog"), { recursive: true });
+    writeJson(configPath, {
+      enabled: true,
+      thresholds: {
+        eventLoopMaxMs: 300,
+        eventLoopP99Ms: 150,
+        heapUsedMb: 512,
+        rssMb: 768,
+      },
+    });
+    const sessions = join(cwd, ".sandbox", "pi-agent", "sessions", "workspace");
+    mkdirSync(sessions, { recursive: true });
+    const sessionPath = join(sessions, "latest.jsonl");
+    writeFileSync(
+      sessionPath,
+      [
+        "normal line",
+        "Error: Performance watchdog critical: event-loop max 300ms. Run /watchdog:status",
+        "Warning: Watchdog enabled safe mode automatically: safe mode is on (watchdog: event-loop max 319ms).",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const stats = collectPerformanceWatchdogStats(cwd, { configPath, sessionPath });
+
+    assert.equal(stats.available, true);
+    assert.equal(stats.thresholdSummary.eventLoopMaxMs, 300);
+    assert.equal(stats.persistedEventCount, 2);
+    assert.deepEqual(stats.criticalEvents, ["event-loop max 300ms. Run /watchdog:status"]);
+    assert.deepEqual(stats.safeModeEvents, ["watchdog: event-loop max 319ms"]);
+    assert.equal(stats.liveEventLoopVisibleExternally, false);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
@@ -326,6 +367,40 @@ test("computeStrictFailures fails only blocking pressure signals", () => {
   });
 
   assert.deepEqual(failures, ["huge-resume-session"]);
+});
+
+test("buildPiDevPressureReport surfaces sensitive watchdog threshold externally", () => {
+  const cwd = makeWorkspace();
+  try {
+    const report = buildPiDevPressureReport(cwd, {
+      git: false,
+      performanceWatchdog: {
+        available: true,
+        criticalEvents: [],
+        safeModeEvents: [],
+        persistedEventCount: 0,
+        thresholdSummary: {
+          eventLoopMaxMs: 300,
+          eventLoopP99Ms: 150,
+        },
+        summary: "performance-watchdog: config=present eventLoopMaxMs=300 eventLoopP99Ms=150 persistedEvents=0 liveEventLoopExternal=no",
+      },
+      velocityStats: {
+        machine: {},
+        board: {},
+        handoff: {},
+        commit: { available: false },
+        runtime: {},
+        agentRuns: {},
+        ceremony: {},
+      },
+    });
+
+    assert.ok(report.signals.some((signal) => signal.code === "sensitive-performance-watchdog-max-threshold"));
+    assert.equal(report.performanceWatchdog.thresholdSummary.eventLoopMaxMs, 300);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
 });
 
 test("buildDevelopmentVelocityPressure keeps clean sessions in continue mode", () => {

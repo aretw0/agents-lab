@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync, rmSync, statfsSync, statSync } from "node:fs";
-import { freemem, totalmem } from "node:os";
+import { closeSync, existsSync, openSync, readFileSync, readSync, readdirSync, rmSync, statfsSync, statSync } from "node:fs";
+import { freemem, homedir, totalmem } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildDevelopmentVelocityPressure } from "../packages/pi-stack/extensions/environment-doctor-dev-pressure-policy.mjs";
@@ -30,6 +30,10 @@ const DEFAULT_THRESHOLDS = {
   ceremonyBoardReadWarn: 8,
 };
 
+const WATCHDOG_TAIL_BYTES = 2_000_000;
+const PERFORMANCE_WATCHDOG_CRITICAL_RE = /Performance watchdog critical:\s*([^"\n\r]+)/gi;
+const PERFORMANCE_WATCHDOG_SAFE_MODE_RE = /Watchdog enabled safe mode automatically:\s*safe mode is on\s*\(([^)"\n\r]+)\)/gi;
+
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -49,6 +53,21 @@ function readJsonIfExists(filePath) {
     return JSON.parse(readFileSync(filePath, "utf8"));
   } catch (err) {
     return { __parseError: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+function readFileTail(filePath, maxBytes = WATCHDOG_TAIL_BYTES) {
+  const stat = statSync(filePath);
+  if (stat.size <= maxBytes) return readFileSync(filePath, "utf8");
+
+  const fd = openSync(filePath, "r");
+  try {
+    const bytes = Math.max(1, Math.min(maxBytes, stat.size));
+    const buffer = Buffer.alloc(bytes);
+    readSync(fd, buffer, 0, bytes, stat.size - bytes);
+    return buffer.toString("utf8");
+  } finally {
+    closeSync(fd);
   }
 }
 
@@ -99,6 +118,72 @@ export function collectSessionStats(cwd = process.cwd()) {
     largest: files[0],
     recent: [...files].sort((a, b) => String(b.mtimeIso).localeCompare(String(a.mtimeIso))).slice(0, 5),
   };
+}
+
+function findLatestSessionJsonl(cwd = process.cwd()) {
+  const sessions = collectSessionStats(cwd);
+  const latest = sessions.recent?.[0];
+  if (!latest?.path) return undefined;
+  return path.join(cwd, latest.path);
+}
+
+function collectRegexMatches(text, regex, max = 5) {
+  const matches = [];
+  for (const match of text.matchAll(regex)) {
+    matches.push(String(match[1] ?? "").trim());
+    if (matches.length >= max) break;
+  }
+  return matches;
+}
+
+export function collectPerformanceWatchdogStats(cwd = process.cwd(), options = {}) {
+  const configPath = options.configPath
+    ?? path.join(homedir(), ".pi", "agent", "extensions", "watchdog", "config.json");
+  const config = readJsonIfExists(configPath);
+  const latestSessionPath = options.sessionPath ?? findLatestSessionJsonl(cwd);
+  const result = {
+    available: Boolean(config && !config.__parseError),
+    configPath,
+    config: config && !config.__parseError ? config : undefined,
+    configParseError: config?.__parseError,
+    latestSessionPath: latestSessionPath ? path.relative(cwd, latestSessionPath).split(path.sep).join("/") : undefined,
+    source: "session-jsonl-tail",
+    tailBytes: WATCHDOG_TAIL_BYTES,
+    criticalEvents: [],
+    safeModeEvents: [],
+    persistedEventCount: 0,
+    liveEventLoopVisibleExternally: false,
+  };
+
+  if (latestSessionPath && existsSync(latestSessionPath)) {
+    try {
+      const tail = readFileTail(latestSessionPath, WATCHDOG_TAIL_BYTES);
+      result.criticalEvents = collectRegexMatches(tail, PERFORMANCE_WATCHDOG_CRITICAL_RE);
+      result.safeModeEvents = collectRegexMatches(tail, PERFORMANCE_WATCHDOG_SAFE_MODE_RE);
+      result.persistedEventCount = result.criticalEvents.length + result.safeModeEvents.length;
+    } catch (err) {
+      result.sessionReadError = err instanceof Error ? err.message : String(err);
+    }
+  }
+
+  const thresholds = config?.thresholds;
+  const eventLoopMaxMs = Number(thresholds?.eventLoopMaxMs);
+  const eventLoopP99Ms = Number(thresholds?.eventLoopP99Ms);
+  result.thresholdSummary = {
+    eventLoopMaxMs: Number.isFinite(eventLoopMaxMs) ? eventLoopMaxMs : undefined,
+    eventLoopP99Ms: Number.isFinite(eventLoopP99Ms) ? eventLoopP99Ms : undefined,
+    heapUsedMb: Number.isFinite(Number(thresholds?.heapUsedMb)) ? Number(thresholds.heapUsedMb) : undefined,
+    rssMb: Number.isFinite(Number(thresholds?.rssMb)) ? Number(thresholds.rssMb) : undefined,
+  };
+  result.summary = [
+    "performance-watchdog:",
+    `config=${result.available ? "present" : "missing"}`,
+    `eventLoopMaxMs=${result.thresholdSummary.eventLoopMaxMs ?? "n/a"}`,
+    `eventLoopP99Ms=${result.thresholdSummary.eventLoopP99Ms ?? "n/a"}`,
+    `persistedEvents=${result.persistedEventCount}`,
+    "liveEventLoopExternal=no",
+  ].join(" ");
+  return result;
 }
 
 const STATIC_IMPORT_RE = /(?:import\s+(?!type\b)|export\s+(?!type\b))(?:[^'"]*?from\s+)?["'](\.\.?\/[^"']+)["']/g;
@@ -584,6 +669,7 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   const loop = collectLoopState(cwd, options.now ?? new Date());
   const git = options.git === false ? { available: false, skipped: true } : collectGitDirtyStats(cwd);
   const velocity = options.velocityStats ?? collectVelocityStats(cwd, { ...(options.velocity ?? {}), now: options.now });
+  const performanceWatchdog = options.performanceWatchdog ?? collectPerformanceWatchdogStats(cwd);
 
   const signals = [];
   const largestSessionMb = sessions.largest?.mb ?? 0;
@@ -619,6 +705,23 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   if (git.available && git.count >= thresholds.dirtyFileWarn) {
     signals.push({ level: "warn", code: "wide-dirty-scope", detail: `${git.count} dirty files` });
   }
+  if ((performanceWatchdog.criticalEvents?.length ?? 0) > 0 || (performanceWatchdog.safeModeEvents?.length ?? 0) > 0) {
+    signals.push({
+      level: "warn",
+      code: "recent-performance-watchdog-event",
+      detail: `persistedEvents=${performanceWatchdog.persistedEventCount}`,
+    });
+  } else if (
+    performanceWatchdog.available &&
+    Number.isFinite(performanceWatchdog.thresholdSummary?.eventLoopMaxMs) &&
+    performanceWatchdog.thresholdSummary.eventLoopMaxMs <= 300
+  ) {
+    signals.push({
+      level: "info",
+      code: "sensitive-performance-watchdog-max-threshold",
+      detail: `eventLoopMaxMs=${performanceWatchdog.thresholdSummary.eventLoopMaxMs}; p99=${performanceWatchdog.thresholdSummary.eventLoopP99Ms ?? "n/a"}`,
+    });
+  }
   signals.push(...buildVelocityPressureSignals(velocity, thresholds));
 
   let recommendation = "continue";
@@ -651,6 +754,7 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
     loop,
     git,
     velocity,
+    performanceWatchdog,
     summary: `pi-dev-pressure: recommendation=${recommendation} signals=${signals.length} largestSessionMb=${largestSessionMb} heaviestConfiguredEntrypoint=${heaviestConfiguredEntrypoint ? `${heaviestConfiguredEntrypoint.package}:${heaviestConfiguredEntrypoint.entry}` : "n/a"}`,
   };
 }
@@ -758,6 +862,18 @@ function printHuman(report) {
       `processUptimeMin=${report.velocity.runtime?.processUptimeMinutes ?? "n/a"}`,
     ];
     lines.push(`- velocity: ${velocityParts.join(" ")}`);
+  }
+  if (report.performanceWatchdog) {
+    lines.push(`- ${report.performanceWatchdog.summary}`);
+    if (report.performanceWatchdog.persistedEventCount === 0) {
+      lines.push("- performance-watchdog note: live event-loop lag is runtime-local; this preflight can see config and persisted session events only");
+    }
+    for (const event of report.performanceWatchdog.criticalEvents?.slice(0, 3) ?? []) {
+      lines.push(`  - critical: ${event}`);
+    }
+    for (const event of report.performanceWatchdog.safeModeEvents?.slice(0, 3) ?? []) {
+      lines.push(`  - safe-mode: ${event}`);
+    }
   }
   lines.push("- heaviest entrypoints:");
   for (const row of report.entrypoints.slice(0, 5)) {
