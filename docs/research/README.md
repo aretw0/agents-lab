@@ -22,6 +22,7 @@ Este diretório guarda evidência datada, investigações, scorecards e checkpoi
 | [0-8-readiness-map.md]({{ '/research/0-8-readiness-map.html' | relative_url }}) | Estado verificável e próximos passos da 0.8.0 | Promovido como evidência selecionada |
 | [0-8-local-safe-compounding-lane.md]({{ '/research/0-8-local-safe-compounding-lane.html' | relative_url }}) | Lane local-safe de estabilização 0.8 | Evidência selecionada |
 | [0-8-delegation-long-run-runway.md]({{ '/research/0-8-delegation-long-run-runway.html' | relative_url }}) | Runway de delegação e long-run | Evidência selecionada |
+| [impeccable-style-bounded-clarity-rules-2026-05.md]({{ '/research/impeccable-style-bounded-clarity-rules-2026-05.html' | relative_url }}) | Síntese curta de influência externa em regras de clareza sem lock-in | Draft |
 | [overlap-matrix.md]({{ '/research/overlap-matrix.html' | relative_url }}) | Matriz de sobreposição entre pacotes da stack e direção de consolidação first-party | Ativo |
 | [pi-extension-scorecard.md]({{ '/research/pi-extension-scorecard.html' | relative_url }}) | Avaliação das principais referências e pacotes do ecossistema Pi | Inicial |
 | [pi-extension-categories.md]({{ '/research/pi-extension-categories.html' | relative_url }}) | Taxonomia de extensões Pi por workflow do laboratório | Inicial |

@@ -11229,7 +11229,7 @@
     {
       "id": "TASK-BUD-468",
       "description": "Pesquisa: sintetizar influência bounded de impeccable.style em regras práticas de clareza/qualidade sem lock-in, com recomendações local-safe.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-467"
@@ -11243,7 +11243,8 @@
         "Sem recomendação de escopo protegido automático."
       ],
       "milestone": "protected-parked-legacy",
-      "notes": "[rationale:risk-control] pesquisa orientada a ação, evitando exploração difusa.\n2026-05-01: pesquisa passa a rodar na mesma lane de limpeza para teste de continuidade.\n2026-05-01: item envolve influência externa explícita e ficou parked como protegido; substituído por pesquisa local-safe na lane cleanup-research-longrun.\n[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito."
+      "notes": "[rationale:risk-control] pesquisa orientada a ação, evitando exploração difusa.\n2026-05-01: pesquisa passa a rodar na mesma lane de limpeza para teste de continuidade.\n2026-05-01: item envolve influência externa explícita e ficou parked como protegido; substituído por pesquisa local-safe na lane cleanup-research-longrun.\n[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\nPesquisa curta criada em docs/research/impeccable-style-bounded-clarity-rules-2026-05.md com regras, riscos e validações focais; sem promoção para escopo protegido automático.",
+      "verification": "verify-task-bud-468-bounded-clarity-research"
     },
     {
       "id": "TASK-BUD-469",
