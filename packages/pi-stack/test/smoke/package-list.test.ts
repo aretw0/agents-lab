@@ -87,15 +87,17 @@ describe("installer integrity", () => {
   });
 });
 
-describe("no bundledDependencies (oh-pi pattern)", () => {
+describe("published package dependency shape", () => {
   it("package.json has no bundledDependencies", () => {
     const pkg = JSON.parse(readFileSync(path.join(PKG, "package.json"), "utf8"));
     expect(pkg.bundledDependencies).toBeUndefined();
     expect(pkg.bundleDependencies).toBeUndefined();
   });
 
-  it("package.json has no dependencies (installer only)", () => {
+  it("package.json declares runtime dependencies needed by published extensions", () => {
     const pkg = JSON.parse(readFileSync(path.join(PKG, "package.json"), "utf8"));
-    expect(pkg.dependencies).toBeUndefined();
+    expect(pkg.dependencies).toEqual({
+      "@sinclair/typebox": "0.34.49",
+    });
   });
 });

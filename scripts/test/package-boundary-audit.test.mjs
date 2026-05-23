@@ -88,3 +88,49 @@ test("blocks manifest runtime refs not covered by files", () => withWorkspace("p
   assert.equal(report.blockerCount, 1);
   assert.equal(report.blockers[0].code, "manifest-ref-not-in-files");
 }));
+
+test("blocks published source importing undeclared runtime dependencies", () => withWorkspace("package-boundary-deps", (root) => {
+  const pkg = path.join(root, "packages", "stack");
+  mkdirSync(path.join(pkg, "extensions"), { recursive: true });
+  writeJson(path.join(pkg, "package.json"), {
+    name: "stack",
+    files: ["extensions"],
+    devDependencies: { external: "1.0.0" },
+    pi: { extensions: ["./extensions/main.ts"] },
+  });
+  writeFileSync(path.join(pkg, "extensions", "main.ts"), [
+    "import type { Shape } from 'types-only';",
+    "import { value } from 'external';",
+    "import path from 'node:path';",
+    "export default value ?? path.sep;",
+    "",
+  ].join("\n"), "utf8");
+
+  const report = buildPackageBoundaryAudit(root);
+
+  assert.equal(report.blockerCount, 1);
+  assert.equal(report.blockers[0].code, "package-source-imports-undeclared-runtime-dependency");
+  assert.equal(report.blockers[0].dependency, "external");
+}));
+
+test("allows Pi runtime-provided packages without bundling them", () => withWorkspace("package-boundary-pi-runtime", (root) => {
+  const pkg = path.join(root, "packages", "stack");
+  mkdirSync(path.join(pkg, "extensions"), { recursive: true });
+  writeJson(path.join(pkg, "package.json"), {
+    name: "stack",
+    files: ["extensions"],
+    pi: { extensions: ["./extensions/main.ts"] },
+  });
+  writeFileSync(path.join(pkg, "extensions", "main.ts"), [
+    "import { Type } from '@sinclair/typebox';",
+    "import { renderFooter } from '@earendil-works/pi-tui';",
+    "import { getSchedulerStoragePath } from '@ifi/oh-pi-extensions/extensions/scheduler.ts';",
+    "export default Type.String() ?? renderFooter ?? getSchedulerStoragePath;",
+    "",
+  ].join("\n"), "utf8");
+
+  const report = buildPackageBoundaryAudit(root);
+
+  assert.equal(report.blockerCount, 1);
+  assert.equal(report.blockers[0].dependency, "@sinclair/typebox");
+}));

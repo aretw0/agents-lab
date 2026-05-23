@@ -26,6 +26,9 @@
 		"docs",
 		"README.md"
 	],
+	"dependencies": {
+		"@sinclair/typebox": "0.34.49"
+	},
 	"pi": {
 		"extensions": [
 			"./extensions/monitor-provider-patch.ts",
@@ -65,7 +68,6 @@
 		]
 	},
 	"devDependencies": {
-		"@sinclair/typebox": "0.34.49",
 		"mitsupi": "*",
 		"pi-lens": "*",
 		"pi-web-access": "*",

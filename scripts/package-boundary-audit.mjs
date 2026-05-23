@@ -7,13 +7,23 @@
  * of the package tarball. Runtime/package source must stay inside its package.
  */
 
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { builtinModules } from "node:module";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 const SOURCE_EXTENSIONS = new Set([".cjs", ".js", ".mjs", ".ts", ".tsx"]);
 const SKIP_DIRS = new Set([".git", "node_modules", "dist", "coverage", ".turbo"]);
+const NODE_BUILTINS = new Set([
+  ...builtinModules,
+  ...builtinModules.map((name) => `node:${name}`),
+]);
+const PI_RUNTIME_PROVIDED_PACKAGES = new Set([
+  "@earendil-works/pi-coding-agent",
+  "@earendil-works/pi-tui",
+  "@ifi/oh-pi-extensions",
+]);
 
 function readJson(filePath) {
   return JSON.parse(readFileSync(filePath, "utf8"));
@@ -52,14 +62,26 @@ function listSourceFiles(packageRoot) {
 function staticImportSpecifiers(source) {
   const specs = [];
   const patterns = [
-    /\bimport\s+(?:type\s+)?(?:[\s\S]*?\s+from\s+)?["']([^"']+)["']/g,
-    /\bexport\s+(?:type\s+)?(?:[\s\S]*?\s+from\s+)["']([^"']+)["']/g,
-    /\bimport\s*\(\s*["']([^"']+)["']\s*\)/g,
-    /\brequire\s*\(\s*["']([^"']+)["']\s*\)/g,
+    {
+      pattern: /\b(import|export)\s+(type\s+)?(?:[\s\S]*?\s+from\s+)?["']([^"']+)["']/g,
+      typeOnlyGroup: 2,
+      specifierGroup: 3,
+    },
+    {
+      pattern: /\bimport\s*\(\s*["']([^"']+)["']\s*\)/g,
+      specifierGroup: 1,
+    },
+    {
+      pattern: /\brequire\s*\(\s*["']([^"']+)["']\s*\)/g,
+      specifierGroup: 1,
+    },
   ];
-  for (const pattern of patterns) {
+  for (const { pattern, specifierGroup, typeOnlyGroup } of patterns) {
     for (const match of source.matchAll(pattern)) {
-      specs.push(match[1]);
+      specs.push({
+        specifier: match[specifierGroup],
+        typeOnly: typeOnlyGroup ? Boolean(match[typeOnlyGroup]) : false,
+      });
     }
   }
   return specs;
@@ -110,10 +132,26 @@ function manifestRuntimeRefs(manifest) {
   return refs;
 }
 
+function dependencyNames(manifest) {
+  return new Set([
+    ...Object.keys(manifest.dependencies ?? {}),
+    ...Object.keys(manifest.peerDependencies ?? {}),
+    ...Object.keys(manifest.optionalDependencies ?? {}),
+  ]);
+}
+
+function packageNameFromSpecifier(specifier) {
+  if (specifier.startsWith("@")) {
+    return specifier.split("/").slice(0, 2).join("/");
+  }
+  return specifier.split("/")[0];
+}
+
 function auditPackage(packageRoot) {
   const manifestPath = path.join(packageRoot, "package.json");
   const manifest = readJson(manifestPath);
   const files = manifestFileEntries(manifest);
+  const runtimeDependencies = dependencyNames(manifest);
   const findings = [];
 
   for (const ref of manifestRuntimeRefs(manifest)) {
@@ -134,7 +172,7 @@ function auditPackage(packageRoot) {
   for (const sourceFile of publishedSourceFiles) {
     const source = readFileSync(sourceFile, "utf8");
     const relSource = normalizeRel(path.relative(packageRoot, sourceFile));
-    for (const specifier of staticImportSpecifiers(source)) {
+    for (const { specifier, typeOnly } of staticImportSpecifiers(source)) {
       if (!specifier.startsWith(".")) continue;
       const resolved = resolveRelativeImport(sourceFile, specifier);
       if (!isInside(packageRoot, resolved)) {
@@ -144,6 +182,20 @@ function auditPackage(packageRoot) {
           source: relSource,
           specifier,
           resolved: normalizeRel(path.relative(packageRoot, resolved)),
+        });
+      }
+    }
+    for (const { specifier, typeOnly } of staticImportSpecifiers(source)) {
+      if (typeOnly || specifier.startsWith(".") || NODE_BUILTINS.has(specifier)) continue;
+      const packageName = packageNameFromSpecifier(specifier);
+      if (PI_RUNTIME_PROVIDED_PACKAGES.has(packageName)) continue;
+      if (!runtimeDependencies.has(packageName)) {
+        findings.push({
+          package: manifest.name,
+          code: "package-source-imports-undeclared-runtime-dependency",
+          source: relSource,
+          specifier,
+          dependency: packageName,
         });
       }
     }

@@ -34,6 +34,10 @@ importers:
   packages/pi-skills: {}
 
   packages/pi-stack:
+    dependencies:
+      '@sinclair/typebox':
+        specifier: 0.34.49
+        version: 0.34.49
     devDependencies:
       '@davidorex/pi-project-workflows':
         specifier: '*'
@@ -62,9 +66,6 @@ importers:
       '@ifi/pi-web-remote':
         specifier: '*'
         version: 0.5.1(@mariozechner/pi-coding-agent@0.70.6(ws@8.20.1)(zod@4.4.3))(@sinclair/typebox@0.34.49)
-      '@sinclair/typebox':
-        specifier: 0.34.49
-        version: 0.34.49
       mitsupi:
         specifier: '*'
         version: 1.6.0(@mariozechner/pi-ai@0.70.6(ws@8.20.1)(zod@4.4.3))(@mariozechner/pi-coding-agent@0.70.6(ws@8.20.1)(zod@4.4.3))(@mariozechner/pi-tui@0.70.6)
