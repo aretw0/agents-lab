@@ -7,7 +7,7 @@ Este diretório é gerenciado pelo [@changesets/cli](https://github.com/changese
 Sempre que fizer uma alteração que mereça release, crie um changeset:
 
 ```bash
-npx changeset
+pnpm exec changeset
 ```
 
 Escolha os pacotes afetados, o tipo de mudança (`patch`, `minor`, `major`) e descreva o que mudou.
@@ -18,15 +18,20 @@ O arquivo gerado vai para `.changeset/*.md` e deve ser commitado junto com a mud
 
 ```bash
 # 1. Bumpa todas as versões e atualiza CHANGELOG.md
-npm run release
+pnpm run release
 
-# 2. Commit e tag
+# 2. Valide localmente antes da tag
+pnpm run ci:local:parity
+pnpm run release:readiness:v0.8.0
+
+# 3. Commit e tag
 git add .
-git commit -m "chore: release vX.X.X"
+git commit -m "chore(release): vX.X.X"
 git tag vX.X.X
 git push && git push --tags
 
-# O GitHub Actions publica automaticamente no npm.
+# O GitHub Actions só publica no npm quando a tag semver bate com as versões dos pacotes
+# e os gates do workflow passam.
 ```
 
 ## Versionamento lockstep

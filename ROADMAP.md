@@ -19,7 +19,7 @@ Pi continua sendo a primeira engine operacional. Refarm é a próxima fronteira 
 | Área | Estado |
 |---|---|
 | Monorepo | `pnpm`, packages first-party e devcontainer operando como baseline |
-| Distribuição | `@aretw0/pi-stack` e skills first-party publicados por npm/changesets |
+| Distribuição | `@aretw0/pi-stack` e skills first-party preparados por changesets, com publish npm gateado por tag semver |
 | CI | GitHub Actions com pins, permissões explícitas, paridade local e publish tag-gated |
 | Site | GitHub Pages minimalista via Jekyll Hacker, com navegação pública pequena |
 | Devcontainer | `lab pi`, Node 24, pnpm global bin, cache de assistentes e ferramentas básicas |

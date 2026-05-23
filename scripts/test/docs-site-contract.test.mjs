@@ -115,7 +115,9 @@ test("root roadmap stays current and macro-level", () => {
 	assert.match(roadmap, /engine:boundary:audit/);
 	assert.match(roadmap, /Refarm é a próxima fronteira de compatibilidade/);
 	assert.match(roadmap, /sem exceções para core acoplado/);
+	assert.match(roadmap, /publish npm gateado por tag semver/);
 	assert.doesNotMatch(roadmap, /reduzir a allowlist|acoplamentos Pi declarados/);
+	assert.doesNotMatch(roadmap, /publicados por npm\/changesets/);
 	assert.doesNotMatch(roadmap, /npm workspaces|Release `v0\.2\.0`|Fase 0|Fase 1|Fase 2|Fase 3|Fase 4/);
 	assert.doesNotMatch(roadmap, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
 });
