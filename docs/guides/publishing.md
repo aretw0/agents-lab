@@ -63,13 +63,15 @@ Revise as mudanças antes de commitar:
 
 ```bash
 git diff
+pnpm run ci:local:parity
+pnpm run release:readiness:v0.8.0
 ```
 
 ### 3. Commitar, taggear e publicar
 
 ```bash
 git add .
-git commit -m "chore: release vX.X.X"
+git commit -m "chore(release): vX.X.X"
 git tag vX.X.X
 git push && git push --tags
 ```

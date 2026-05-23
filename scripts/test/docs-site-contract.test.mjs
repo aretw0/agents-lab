@@ -295,6 +295,15 @@ test("supply-chain CI hardening guide stays operational and repo-scoped", () => 
 	assert.doesNotMatch(guide, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
 });
 
+test("publishing guide keeps release validation and commit format explicit", () => {
+	const guide = read("docs/guides/publishing.md");
+
+	assert.match(guide, /pnpm run ci:local:parity/);
+	assert.match(guide, /pnpm run release:readiness:v0\.8\.0/);
+	assert.match(guide, /git commit -m "chore\(release\): vX\.X\.X"/);
+	assert.doesNotMatch(guide, /git commit -m "chore: release vX\.X\.X"/);
+});
+
 test("package guide sync includes generic maintenance guides", () => {
 	assert.ok(PACKAGE_DOCS["@aretw0/lab-skills"].guides.includes("control-plane-glossary.md"));
 	assert.ok(PACKAGE_DOCS["@aretw0/pi-skills"].guides.includes("control-plane-glossary.md"));
