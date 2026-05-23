@@ -1,7 +1,8 @@
-import { existsSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 type BoardPressureStatus = "ok" | "pressure" | "unavailable";
+type BoardPressureApplyStatus = BoardPressureStatus | "blocked";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -21,8 +22,30 @@ function readJson(filePath: string): Record<string, unknown> | undefined {
   }
 }
 
+function writeJson(filePath: string, value: Record<string, unknown>): void {
+  mkdirSync(dirname(filePath), { recursive: true });
+  writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
 function valueBytes(value: unknown): number {
   return Buffer.byteLength(JSON.stringify(value ?? null), "utf8");
+}
+
+function recordsFrom(value: unknown, key: string): Record<string, unknown>[] {
+  const obj = isRecord(value) ? value : undefined;
+  const rows = Array.isArray(obj?.[key]) ? obj[key] : [];
+  return rows.filter(isRecord);
+}
+
+function mergeRecordsById(existing: Record<string, unknown>[], incoming: Record<string, unknown>[]): Record<string, unknown>[] {
+  const byId = new Map<string, Record<string, unknown>>();
+  const noId: Record<string, unknown>[] = [];
+  for (const row of [...existing, ...incoming]) {
+    const id = typeof row.id === "string" ? row.id.trim() : "";
+    if (!id) noId.push(row);
+    else byId.set(id, row);
+  }
+  return [...byId.values(), ...noId];
 }
 
 export interface BoardPressureReductionPlan {
@@ -47,6 +70,21 @@ export interface BoardPressureReductionPlan {
   recommendedOrder: string[];
   safety: string[];
   actions: Array<Record<string, unknown>>;
+  summary: string;
+}
+
+export interface BoardPressureReductionApplyResult extends Omit<BoardPressureReductionPlan, "mode" | "dryRun" | "mutates" | "status" | "summary"> {
+  mode: "board-pressure-reduction-apply";
+  dryRun: boolean;
+  mutates: boolean;
+  status: BoardPressureApplyStatus;
+  authorization: "none" | "explicit-operator";
+  archivedTasksPath: ".project/archive/completed-tasks.json";
+  archivedVerificationPath: ".project/archive/verification-ledger.json";
+  archivedTaskCount: number;
+  archivedVerificationCount: number;
+  retainedTaskCount: number;
+  retainedVerificationCount: number;
   summary: string;
 }
 
@@ -157,5 +195,89 @@ export function buildBoardPressureReductionPlan(cwd: string, options: { boardWar
     summary: "",
   };
   out.summary = `board-pressure-plan: status=${status} dryRun=yes tasks=${tasks.length} open=${openTaskCount} completed=${completedTaskCount} boardMb=${boardMb} verification=${verificationRows.length}/${verificationMb}MB`;
+  return out;
+}
+
+export function applyBoardPressureReduction(cwd: string, options: {
+  dryRun?: boolean;
+  authorization?: string;
+  boardWarnMb?: number;
+} = {}): BoardPressureReductionApplyResult {
+  const dryRun = options.dryRun !== false;
+  const authorization = options.authorization === "explicit-operator" ? "explicit-operator" : "none";
+  const plan = buildBoardPressureReductionPlan(cwd, { boardWarnMb: options.boardWarnMb });
+  const archivedTasksPath = ".project/archive/completed-tasks.json" as const;
+  const archivedVerificationPath = ".project/archive/verification-ledger.json" as const;
+  const base = {
+    ...plan,
+    mode: "board-pressure-reduction-apply" as const,
+    dryRun,
+    mutates: false,
+    authorization,
+    archivedTasksPath,
+    archivedVerificationPath,
+    archivedTaskCount: 0,
+    archivedVerificationCount: 0,
+    retainedTaskCount: plan.totalTaskCount,
+    retainedVerificationCount: plan.verificationCount,
+  };
+
+  if (plan.status === "unavailable") {
+    return {
+      ...base,
+      status: "unavailable",
+      summary: "board-pressure-apply: status=unavailable reason=board-missing-or-invalid",
+    };
+  }
+  if (!dryRun && authorization !== "explicit-operator") {
+    return {
+      ...base,
+      status: "blocked",
+      mutates: false,
+      summary: "board-pressure-apply: status=blocked reason=explicit-operator-authorization-required",
+    };
+  }
+
+  const boardPath = join(cwd, ".project", "tasks.json");
+  const verificationPath = join(cwd, ".project", "verification.json");
+  const archiveTasksPath = join(cwd, ".project", "archive", "completed-tasks.json");
+  const archiveVerificationPath = join(cwd, ".project", "archive", "verification-ledger.json");
+  const board = readJson(boardPath) ?? {};
+  const verification = readJson(verificationPath) ?? {};
+  const tasks = recordsFrom(board, "tasks");
+  const verifications = recordsFrom(verification, "verifications");
+  const archivedTasks = tasks.filter((task) => task.status === "completed");
+  const retainedTasks = tasks.filter((task) => task.status !== "completed");
+  const archivedTaskIds = new Set(archivedTasks.map((task) => String(task.id ?? "")).filter(Boolean));
+  const archivedVerificationIds = new Set(
+    archivedTasks.map((task) => String(task.verification ?? "")).filter(Boolean),
+  );
+  const verificationToArchive = verifications.filter((row) => {
+    const target = typeof row.target === "string" ? row.target.trim() : "";
+    const id = typeof row.id === "string" ? row.id.trim() : "";
+    return archivedTaskIds.has(target) || archivedVerificationIds.has(id);
+  });
+  const verificationToRetain = verifications.filter((row) => !verificationToArchive.includes(row));
+
+  const out = {
+    ...base,
+    status: plan.status,
+    mutates: !dryRun && authorization === "explicit-operator" && archivedTasks.length > 0,
+    archivedTaskCount: archivedTasks.length,
+    archivedVerificationCount: verificationToArchive.length,
+    retainedTaskCount: retainedTasks.length,
+    retainedVerificationCount: verificationToRetain.length,
+    summary: "",
+  };
+  out.summary = `board-pressure-apply: status=${out.status} dryRun=${dryRun ? "yes" : "no"} archivedTasks=${out.archivedTaskCount} retainedTasks=${out.retainedTaskCount} archivedVerification=${out.archivedVerificationCount} retainedVerification=${out.retainedVerificationCount}`;
+
+  if (dryRun || archivedTasks.length <= 0) return out;
+
+  const existingArchiveTasks = recordsFrom(readJson(archiveTasksPath), "tasks");
+  const existingArchiveVerification = recordsFrom(readJson(archiveVerificationPath), "verifications");
+  writeJson(boardPath, { ...board, tasks: retainedTasks });
+  writeJson(verificationPath, { ...verification, verifications: verificationToRetain });
+  writeJson(archiveTasksPath, { tasks: mergeRecordsById(existingArchiveTasks, archivedTasks) });
+  writeJson(archiveVerificationPath, { verifications: mergeRecordsById(existingArchiveVerification, verificationToArchive) });
   return out;
 }

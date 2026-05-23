@@ -132,13 +132,13 @@ import {
   compactVerificationAppendToolResult,
 } from "./project-board-tool-formatting";
 import { buildProjectVerificationBackfillPlan } from "./project-board-verification-backfill";
-import { buildBoardPressureReductionPlan } from "./project-board-pressure-plan";
+import { applyBoardPressureReduction, buildBoardPressureReductionPlan } from "./project-board-pressure-plan";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export { buildProjectVerificationBackfillPlan } from "./project-board-verification-backfill";
 export type { ProjectVerificationBackfillPlan } from "./project-board-verification-backfill";
-export { buildBoardPressureReductionPlan } from "./project-board-pressure-plan";
-export type { BoardPressureReductionPlan } from "./project-board-pressure-plan";
+export { applyBoardPressureReduction, buildBoardPressureReductionPlan } from "./project-board-pressure-plan";
+export type { BoardPressureReductionApplyResult, BoardPressureReductionPlan } from "./project-board-pressure-plan";
 
 export {
   queryProjectTasks,
@@ -576,6 +576,31 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       const details = buildBoardPressureReductionPlan(ctx.cwd, { boardWarnMb: p.board_warn_mb });
       return buildOperatorVisibleToolResponse({
         label: "board_pressure_reduction_plan",
+        summary: details.summary,
+        details,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "board_pressure_reduce",
+    label: "Board Pressure Reduce",
+    description:
+      "Dry-first board pressure reduction. Applies only with dry_run=false and authorization=explicit-operator.",
+    parameters: Type.Object({
+      dry_run: Type.Optional(Type.Boolean({ description: "Preview only by default. Set false to persist archive/ledger writes." })),
+      authorization: Type.Optional(Type.String({ description: "Must be explicit-operator when dry_run=false." })),
+      board_warn_mb: Type.Optional(Type.Number({ minimum: 0, description: "Board size threshold in MB. Default 1." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as { dry_run?: boolean; authorization?: string; board_warn_mb?: number };
+      const details = applyBoardPressureReduction(ctx.cwd, {
+        dryRun: p.dry_run !== false,
+        authorization: p.authorization,
+        boardWarnMb: p.board_warn_mb,
+      });
+      return buildOperatorVisibleToolResponse({
+        label: "board_pressure_reduce",
         summary: details.summary,
         details,
       });

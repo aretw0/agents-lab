@@ -315,6 +315,34 @@ describe("project-board tool surfaces", () => {
     }
   });
 
+  it("board_pressure_reduce blocks apply without explicit operator authorization", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const beforeTasks = readFileSync(join(cwd, ".project", "tasks.json"), "utf8");
+      const beforeVerification = readFileSync(join(cwd, ".project", "verification.json"), "utf8");
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const reduceTool = getTool(pi, "board_pressure_reduce");
+
+      const result = await reduceTool.execute(
+        "tc-board-pressure-reduce",
+        { dry_run: false },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.mode).toBe("board-pressure-reduction-apply");
+      expect((result.details as any)?.status).toBe("blocked");
+      expect((result.details as any)?.mutates).toBe(false);
+      expect(String((result as any)?.content?.[0]?.text ?? "")).toContain("explicit-operator-authorization-required");
+      expect(readFileSync(join(cwd, ".project", "tasks.json"), "utf8")).toBe(beforeTasks);
+      expect(readFileSync(join(cwd, ".project", "verification.json"), "utf8")).toBe(beforeVerification);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("board_task_complete tool appends verification and completes task", async () => {
     const cwd = seedWorkspace();
     try {
