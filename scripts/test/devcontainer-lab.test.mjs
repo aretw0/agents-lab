@@ -135,6 +135,7 @@ test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 	assert.match(postStart, /claude --version/);
 	assert.match(postCreate, /install_global_tool codex @openai\/codex/);
 	assert.match(postStart, /install_global_tool_if_missing codex @openai\/codex/);
+	assert.match(dockerfile, /apt-get install -y --no-install-recommends .* ripgrep/);
 	assert.match(dockerfile, /https:\/\/cli\.github\.com\/packages stable main/);
 	assert.match(dockerfile, /apt-get install -y --no-install-recommends gh/);
 	assert.match(postCreate, /gh auth status -h github\.com/);
