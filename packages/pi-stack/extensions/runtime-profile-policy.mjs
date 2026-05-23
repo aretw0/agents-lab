@@ -65,7 +65,12 @@ export function reconcileLocalShellPath(
 ) {
   if (!isRecord(settings)) return { settings, changed: false };
   if (typeof settings.shellPath === "string" && settings.shellPath.trim()) {
-    return { settings, changed: false };
+    if (pathExists(settings.shellPath)) return { settings, changed: false };
+    const { shellPath: _removedShellPath, ...withoutInvalidShellPath } = settings;
+    if (platform !== "win32" || !pathExists(gitBashPath)) {
+      return { settings: withoutInvalidShellPath, changed: true };
+    }
+    return { settings: { ...withoutInvalidShellPath, shellPath: gitBashPath }, changed: true };
   }
   if (platform !== "win32" || !pathExists(gitBashPath)) {
     return { settings, changed: false };

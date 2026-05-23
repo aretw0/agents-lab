@@ -79,6 +79,33 @@ test("local shell reconciliation pins Git Bash for Windows settings", () => {
   assert.equal(result.settings.shellPath, "C:\\Program Files\\Git\\bin\\bash.exe");
 });
 
+test("local shell reconciliation drops invalid Windows shellPath on Linux", () => {
+  const result = reconcileLocalShellPath(
+    { packages: [], shellPath: "C:\\Program Files\\Git\\bin\\bash.exe" },
+    {
+      platform: "linux",
+      pathExists: () => false,
+    },
+  );
+
+  assert.equal(result.changed, true);
+  assert.equal(result.settings.shellPath, undefined);
+});
+
+test("local shell reconciliation replaces invalid Windows shellPath on Windows", () => {
+  const result = reconcileLocalShellPath(
+    { packages: [], shellPath: "D:\\Missing\\bash.exe" },
+    {
+      platform: "win32",
+      gitBashPath: "C:\\Program Files\\Git\\bin\\bash.exe",
+      pathExists: (candidate) => candidate === "C:\\Program Files\\Git\\bin\\bash.exe",
+    },
+  );
+
+  assert.equal(result.changed, true);
+  assert.equal(result.settings.shellPath, "C:\\Program Files\\Git\\bin\\bash.exe");
+});
+
 test("watchdog reconciliation tightens permissive config", () => {
   const reconciled = reconcileControlPlaneWatchdogConfig({
     enabled: true,

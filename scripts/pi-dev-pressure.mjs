@@ -408,6 +408,43 @@ function listSuppressedExtensions(packages) {
   return out;
 }
 
+function isWindowsAbsolutePath(value) {
+  return /^[A-Za-z]:[\\/]/.test(String(value ?? ""));
+}
+
+function classifyShellPath(shellPath, { platform = process.platform, pathExists = existsSync } = {}) {
+  if (typeof shellPath !== "string" || !shellPath.trim()) {
+    return { configured: false };
+  }
+  const value = shellPath.trim();
+  const windowsAbsolute = isWindowsAbsolutePath(value);
+  const nativeAbsolute = path.isAbsolute(value);
+  const absolute = windowsAbsolute || nativeAbsolute;
+
+  if (windowsAbsolute && platform !== "win32") {
+    return {
+      configured: true,
+      value,
+      valid: false,
+      reason: "windows-path-on-non-windows",
+    };
+  }
+  if (absolute && !pathExists(value)) {
+    return {
+      configured: true,
+      value,
+      valid: false,
+      reason: "path-not-found",
+    };
+  }
+  return {
+    configured: true,
+    value,
+    valid: absolute ? true : undefined,
+    reason: absolute ? undefined : "path-lookup-not-validated",
+  };
+}
+
 export function collectSettingsStats(cwd = process.cwd()) {
   const settingsPaths = [
     [".pi/settings.json", path.join(cwd, ".pi", "settings.json")],
@@ -418,10 +455,12 @@ export function collectSettingsStats(cwd = process.cwd()) {
     const settings = readJsonIfExists(filePath);
     const packages = Array.isArray(settings?.packages) ? settings.packages : [];
     const sources = packages.map(packageSource).filter(Boolean);
+    const shellPath = classifyShellPath(settings?.shellPath);
     return {
       path: label,
       exists: existsSync(filePath),
       parseError: settings?.__parseError,
+      shellPath,
       packageCount: packages.length,
       localPackageCount: sources.filter((source) => source.startsWith(".") || source.startsWith("/")).length,
       npmPackageCount: sources.filter((source) => source.startsWith("npm:")).length,
@@ -696,6 +735,14 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   const suppressed = settings.reduce((sum, row) => sum + row.suppressedSurfaceCount, 0);
   if (suppressed > 0) {
     signals.push({ level: "info", code: "suppressed-package-entries", detail: `${suppressed} package entries expose no surfaces` });
+  }
+  const invalidShellPaths = settings.filter((row) => row.shellPath?.configured && row.shellPath.valid === false);
+  for (const row of invalidShellPaths) {
+    signals.push({
+      level: "block",
+      code: "invalid-runtime-shell-path",
+      detail: `${row.path} shellPath=${row.shellPath.value} reason=${row.shellPath.reason}`,
+    });
   }
 
   if (loop.exists && loop.mode === "running" && loop.leaseExpired === true && loop.stopCondition === "none") {

@@ -108,6 +108,19 @@ test("local shell reconciliation preserves explicit operator shellPath", () => {
 	assert.equal(result.settings.shellPath, "D:\\Tools\\Git\\bin\\bash.exe");
 });
 
+test("local shell reconciliation removes invalid cross-platform shellPath", () => {
+	const result = reconcileLocalShellPath(
+		{ shellPath: "C:\\Program Files\\Git\\bin\\bash.exe" },
+		{
+			platform: "linux",
+			pathExists: () => false,
+		},
+	);
+
+	assert.equal(result.changed, true);
+	assert.equal(result.settings.shellPath, undefined);
+});
+
 test("lean watchdog config preserves guard while tolerating startup transients", () => {
 	const config = leanWatchdogConfig();
 

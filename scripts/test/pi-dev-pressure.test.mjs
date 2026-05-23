@@ -312,6 +312,64 @@ test("collectSettingsStats counts suppressed package entries", () => {
   }
 });
 
+test("collectSettingsStats marks cross-platform shellPath as invalid", () => {
+  const cwd = makeWorkspace();
+  try {
+    mkdirSync(join(cwd, ".sandbox", "pi-agent"), { recursive: true });
+    writeJson(join(cwd, ".sandbox", "pi-agent", "settings.json"), {
+      shellPath: "Z:\\DefinitelyMissing\\Git\\bin\\bash.exe",
+      packages: [],
+    });
+
+    const stats = collectSettingsStats(cwd);
+    const sandbox = stats.find((row) => row.path === ".sandbox/pi-agent/settings.json");
+
+    assert.equal(sandbox.shellPath.configured, true);
+    assert.equal(sandbox.shellPath.valid, false);
+    assert.equal(sandbox.shellPath.reason, process.platform === "win32" ? "path-not-found" : "windows-path-on-non-windows");
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("buildPiDevPressureReport blocks invalid runtime shellPath", () => {
+  const cwd = makeWorkspace();
+  try {
+    mkdirSync(join(cwd, ".sandbox", "pi-agent"), { recursive: true });
+    writeJson(join(cwd, ".sandbox", "pi-agent", "settings.json"), {
+      shellPath: "Z:\\DefinitelyMissing\\Git\\bin\\bash.exe",
+      packages: [],
+    });
+
+    const report = buildPiDevPressureReport(cwd, {
+      git: false,
+      velocityStats: {
+        machine: {},
+        board: {},
+        handoff: {},
+        commit: { available: false },
+        runtime: {},
+        agentRuns: {},
+        ceremony: {},
+      },
+      performanceWatchdog: {
+        available: false,
+        criticalEvents: [],
+        safeModeEvents: [],
+        persistedEventCount: 0,
+        thresholdSummary: {},
+        summary: "performance-watchdog: config=missing",
+      },
+    });
+
+    assert.equal(report.recommendation, "block-and-clean");
+    assert.ok(report.signals.some((signal) => signal.code === "invalid-runtime-shell-path"));
+    assert.deepEqual(computeStrictFailures(report), ["invalid-runtime-shell-path"]);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("buildPiDevPressureReport recommends new-session for large resume logs", () => {
   const cwd = makeWorkspace();
   try {
