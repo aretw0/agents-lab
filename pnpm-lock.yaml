@@ -23,6 +23,9 @@ importers:
       '@marcfargas/pi-test-harness':
         specifier: ^0.5.0
         version: 0.5.0(@mariozechner/pi-agent-core@0.70.6(ws@8.20.1)(zod@4.4.3))(@mariozechner/pi-ai@0.70.6(ws@8.20.1)(zod@4.4.3))(@mariozechner/pi-coding-agent@0.70.6(ws@8.20.1)(zod@4.4.3))
+      '@sinclair/typebox':
+        specifier: 0.34.49
+        version: 0.34.49
       vitest:
         specifier: ^4.1.4
         version: 4.1.6(@types/node@25.9.1)(vite@8.0.13(@types/node@25.9.1)(jiti@2.7.0)(yaml@2.9.0))
