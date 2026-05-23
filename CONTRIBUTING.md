@@ -1,6 +1,6 @@
 # Contribuindo com o agents-lab
 
-Obrigado por querer contribuir! Este laboratório é um espaço colaborativo de pesquisa e desenvolvimento de agentes de IA.
+Este repositório é um laboratório de curadoria, runtime e distribuição para o ecossistema Pi. Contribuições devem manter a fronteira clara entre material distribuível, documentação pública e manutenção interna do laboratório.
 
 ## Como Contribuir
 
@@ -32,7 +32,7 @@ Os pacotes first-party vivem em `packages/` e são distribuídos como `@aretw0/*
 1. Crie um diretório em `packages/meu-pacote/` com `package.json` e `README.md`.
 2. Ative o modo desenvolvimento local:
    ```bash
-   npm run pi:local     # aponta pi para os workspace paths
+   pnpm run pi:local     # aponta pi para os workspace paths
    ```
 3. Faça `/reload` no pi para carregar o pacote.
 4. Quando a mudança estiver pronta, crie um changeset (ver abaixo).
@@ -43,9 +43,9 @@ Os pacotes first-party vivem em `packages/` e são distribuídos como `@aretw0/*
 O script `pi-source-switch.mjs` alterna os pacotes do pi entre local e npm:
 
 ```bash
-npm run pi:local       # aponta pi para packages/ do monorepo
-npm run pi:published   # volta para npm:@aretw0/*
-npm run pi:status      # mostra configuração atual
+pnpm run pi:local       # aponta pi para packages/ do monorepo
+pnpm run pi:published   # volta para npm:@aretw0/*
+pnpm run pi:status      # mostra configuração atual
 ```
 
 Isso reescreve o `~/.pi/agent/settings.json`. Use `--pi-local` para escrever no `.pi/settings.json` do projeto.
@@ -56,10 +56,10 @@ Use `@marcfargas/pi-test-harness` para testes automatizados:
 
 ```bash
 # Testes smoke (vitest)
-npm run test:smoke
+pnpm run test:smoke
 
 # Testes unitários (node:test)
-npm test
+pnpm test
 ```
 
 A skill `test-pi-extension` documenta como usar o test-harness. Veja exemplos em `packages/pi-stack/test/`.
@@ -82,7 +82,7 @@ Todos os pacotes `@aretw0/*` compartilham a mesma versão.
 Sempre que alterar algo em `packages/` que mereça release:
 
 ```bash
-npx changeset
+pnpm exec changeset
 # Escolha: qual pacote, tipo (patch/minor/major), descrição da mudança
 git add .changeset/
 git commit -m "..."
@@ -95,9 +95,10 @@ Mudanças em `docs/`, `experiments/` ou configurações internas não precisam d
 Ver guia completo em [`docs/guides/publishing.md`](./docs/guides/publishing.md).
 
 ```bash
-npm run release              # bumpa versões + atualiza CHANGELOG.md
+pnpm run release             # bumpa versões + atualiza CHANGELOG.md
+pnpm run release:readiness:v0.8.0
 git add .
-git commit -m "chore: release vX.X.X"
+git commit -m "chore(release): vX.X.X"
 git tag vX.X.X
 git push && git push --tags  # GitHub Actions publica no npm
 ```
