@@ -7,7 +7,7 @@ Mode: strict
 
 ## Summary
 
-- capabilities: 17
+- capabilities: 18
 - ownerMissing: 0
 - coexisting: 5
 - highRisk: 0
@@ -20,6 +20,7 @@ Mode: strict
 |---|---|---|---|---|---|---|
 | scheduler-runtime-governance | high | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | consolidate | medium |
 | monitor-provider-governance | high | @aretw0/pi-stack | owned | - | consolidate | low |
+| monitor-summary | low | @aretw0/pi-stack | owned | - | maintain | low |
 | colony-runtime-governance | medium | @aretw0/pi-stack | owned | - | consolidate | low |
 | global-runtime-doctor | high | @aretw0/pi-stack | owned | - | maintain | low |
 | context-watchdog | medium | @aretw0/pi-stack | owned | - | maintain | low |
