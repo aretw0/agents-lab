@@ -47,6 +47,8 @@
     "pi:isolated:status": "node scripts/pi-isolated.mjs status",
     "pi:isolated:adopt-latest": "node scripts/pi-isolated.mjs adopt-latest",
     "pi:isolated:adopt-latest:dry": "node scripts/pi-isolated.mjs adopt-latest --dry-run",
+    "pi:isolated:runtime-profile": "node scripts/pi-isolated.mjs runtime-profile",
+    "pi:isolated:runtime-profile:dry": "node scripts/pi-isolated.mjs runtime-profile --dry-run",
     "pi:isolated:help": "node scripts/pi-isolated.mjs help",
     "pi:isolated:reset": "node scripts/pi-isolated.mjs --reset",
     "pi:dev": "node scripts/pi-isolated.mjs --dev",

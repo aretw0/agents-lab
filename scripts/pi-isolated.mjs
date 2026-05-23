@@ -78,6 +78,7 @@ function parseArgs(argv) {
 		status: false,
 		adoptLatest: false,
 		canonicalizeSettings: false,
+		runtimeProfile: false,
 		reset: false,
 		dryRun: false,
 		noAuthImport: false,
@@ -102,6 +103,10 @@ function parseArgs(argv) {
 		}
 		if (a === "canonicalize-settings") {
 			out.canonicalizeSettings = true;
+			continue;
+		}
+		if (a === "runtime-profile") {
+			out.runtimeProfile = true;
 			continue;
 		}
 		if (a === "--reset") {
@@ -181,6 +186,8 @@ function printHelp() {
 		"  pnpm run pi:isolated:status",
 		"  pnpm run pi:isolated:adopt-latest",
 		"  node scripts/pi-isolated.mjs canonicalize-settings --dry-run",
+		"  node scripts/pi-isolated.mjs runtime-profile --dry-run",
+		"  node scripts/pi-isolated.mjs runtime-profile",
 		"  pnpm run pi:isolated:reset",
 		"  pnpm run pi:isolated:help",
 		"",
@@ -483,6 +490,7 @@ function printStatus() {
 	const localPiCli = resolveLocalPiCli();
 	const hasLocalPiCli = Boolean(localPiCli);
 	const canonicalSettings = canonicalizeLocalSettings({ dryRun: true });
+	const runtimeProfile = applyLocalRuntimeProfile({ dryRun: true });
 
 	console.log("pi isolated status");
 	console.log("");
@@ -497,6 +505,7 @@ function printStatus() {
 	console.log(`local pi cli:     ${hasLocalPiCli ? "yes" : "no"}`);
 	if (localPiCli) console.log(`local cli path:   ${localPiCli}`);
 	console.log(`canonical paths:  ${canonicalSettings.changed ? "needs-normalization" : canonicalSettings.status}`);
+	console.log(`runtime profile:  ${runtimeProfile.changed ? "needs-control-plane" : runtimeProfile.status}`);
 
 	const envValue = process.env.PI_CODING_AGENT_DIR;
 	console.log("");
@@ -542,6 +551,16 @@ function run() {
 		console.log(`pi-isolated: canonicalize-settings ${result.status}`);
 		for (const change of result.changes) {
 			console.log(`  ${change.from} -> ${change.to}`);
+		}
+		return;
+	}
+
+	if (opts.runtimeProfile) {
+		const result = applyLocalRuntimeProfile({ dryRun: opts.dryRun });
+		console.log(`pi-isolated: runtime-profile ${result.status}`);
+		console.log(`pi-isolated: changed=${result.changed ? "yes" : "no"}`);
+		for (const removed of result.removed ?? []) {
+			console.log(`  removed eager capability package: ${removed}`);
 		}
 		return;
 	}
