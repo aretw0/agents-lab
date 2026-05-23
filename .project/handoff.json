@@ -1,50 +1,64 @@
 {
-  "timestamp": "2026-05-23T01:55:00.000Z",
-  "context": "External stabilization session for agents-lab 0.8 readiness. The board is release-clear: no open P0, no in-progress tasks, no blocked tasks. The remaining v0.8.0 readiness blocker is deliberate versioning only: packages are still 0.7.0, so target-version-ready stays false until the operator explicitly chooses the bump/tag/release lane. Recent work tightened package runtime dependency boundaries, clarified stale colony readiness history, and added a docs contract that ties the public 0.8 readiness map to the canonical release-readiness report.",
+  "timestamp": "2026-05-23T02:35:00.000Z",
+  "context": "External stabilization session for agents-lab 0.8 readiness. The board is release-clear: no open P0, no in-progress tasks, and no blocked tasks. The default scheduler is now intentionally drained: only protected parked P3 external-influence tasks remain planned, and they are skipped unless the operator explicitly selects that research lane. The remaining v0.8.0 readiness blocker is deliberate versioning only: packages are still 0.7.0, so target-version-ready stays false until the operator explicitly chooses the bump/tag/release lane. Recent work tightened package runtime dependency boundaries, clarified stale colony readiness history, aligned governance docs and maintainer workflow to pnpm, closed bounded clarity research, and hardened scheduler policy so protected parked backlog cannot be pulled into normal work by accident.",
   "current_tasks": [],
   "next_actions": [
     "Do not bump/tag/publish v0.8.0 without explicit operator release decision.",
     "Before any long Pi runtime, re-run pi:dev:pressure or the equivalent runtime pressure gate in the current environment.",
-    "Keep the four remaining planned external-influence tasks parked unless the operator explicitly selects a research lane.",
-    "Prefer local-safe slices that improve packaging, docs contracts, engine boundaries, or runtime pressure observability."
+    "Keep the remaining planned external-influence tasks parked unless the operator explicitly selects a research lane with --priority p3 --include-protected or equivalent intent.",
+    "If continuing local-safe work, add or decompose a bounded task before relying on scheduler:next; the default queue currently has no eligible task.",
+    "Prefer local-safe slices that improve packaging, docs contracts, engine boundaries, runtime pressure observability, or first-party Pi stack distribution."
   ],
   "blockers": [
-    "target-version-ready: false by design until packages are intentionally bumped from 0.7.0 to 0.8.0"
+    "target-version-ready: false by design until packages are intentionally bumped from 0.7.0 to 0.8.0",
+    "scheduler-default-queue: no eligible tasks because the only planned work is protected parked P3 external research"
   ],
   "recent_validation": [
     "docker exec eb303930747d pnpm run ci:local:parity passed",
     "docker exec eb303930747d pnpm run test:docs:site passed",
     "docker exec eb303930747d pnpm run repo:discourse:audit passed",
     "docker exec eb303930747d pnpm exec node --test scripts/test/release-readiness-report.test.mjs passed",
+    "docker exec eb303930747d pnpm run test:autonomous-scheduler passed",
+    "docker exec eb303930747d pnpm run test:ci:workflow passed",
+    "docker exec eb303930747d pnpm run test:pi-stack:user-surface passed",
+    "docker exec eb303930747d pnpm run project:verification:check passed",
+    "docker exec eb303930747d pnpm run scheduler:next stopped with eligible=0 by protected/P3 policy",
     "docker exec eb303930747d pnpm run release:readiness:v0.8.0 wrote a report with board-release-clear green and releaseBlockers=none"
   ],
   "recent_commits": [
-    "a91256b2 test(docs): gate readiness map against release report",
-    "93e038af docs(release): clarify stale colony readiness history",
-    "27121b84 fix(package): enforce runtime dependency boundaries"
+    "953850df fix(scheduler): skip protected parked backlog",
+    "7006507e test(ci): require scheduler parity check",
+    "78560377 fix(scheduler): respect board priority fields",
+    "c3b2f1e2 docs(research): bound clarity influence rules",
+    "c4808186 fix(web-skills): document browser dependency boundary"
   ],
   "slice_memory": {
-    "focus": "0.8-readiness-hardening",
+    "focus": "factory-default-drained",
     "canonical_links": [
-      "commit:a91256b2",
-      "commit:93e038af",
-      "commit:27121b84",
+      "commit:953850df",
+      "commit:7006507e",
+      "commit:78560377",
+      "commit:c3b2f1e2",
+      "commit:c4808186",
+      "script:scripts/autonomous-scheduler.mjs",
+      "test:scripts/test/autonomous-scheduler.test.mjs",
+      "doc:docs/research/impeccable-style-bounded-clarity-rules-2026-05.md",
       "doc:docs/research/0-8-readiness-map.md",
       "script:scripts/release-readiness-report.mjs",
       "test:scripts/test/docs-site-contract.test.mjs"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-23T01:55:00.000Z",
+    "generatedAtIso": "2026-05-23T02:35:00.000Z",
     "level": "ok",
     "percent": 0,
-    "action": "continue-small-local-safe-slices",
-    "recommendation": "Repository readiness is stable; continue only with bounded local-safe hardening unless the operator explicitly chooses release, publish, provider routing, remote/offload, or external research."
+    "action": "choose-next-lane-explicitly",
+    "recommendation": "Repository readiness is stable and the default scheduler queue is intentionally empty. Continue only with a newly bounded local-safe task unless the operator explicitly chooses release, publish, provider routing, remote/offload, or external research."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-23T01:55:00.000Z",
-      "reason": "0.8-readiness-checkpoint-after-package-doc-hardening",
+      "atIso": "2026-05-23T02:35:00.000Z",
+      "reason": "0.8-readiness-checkpoint-after-scheduler-policy-hardening",
       "level": "ok",
       "percent": 0,
       "thresholds": {
@@ -52,8 +66,8 @@
         "checkpointPct": 55,
         "compactPct": 65
       },
-      "action": "continue-small-local-safe-slices",
-      "recommendation": "Use the canonical release-readiness report and public docs contract as the next-session anchor."
+      "action": "choose-next-lane-explicitly",
+      "recommendation": "Use the canonical release-readiness report, scheduler policy, and handoff as the next-session anchor."
     }
   ]
 }
