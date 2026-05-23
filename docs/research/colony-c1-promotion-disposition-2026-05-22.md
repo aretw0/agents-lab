@@ -37,7 +37,8 @@ No file from the stale candidate was promoted to the target branch in this revie
 
 - `pnpm exec vitest run packages/pi-stack/test/smoke/colony-pilot-delivery-recovery.test.ts packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts packages/pi-stack/test/smoke/colony-pilot-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-artifacts-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-status-retention.test.ts` — passed in the agents-lab devcontainer: 5 files, 34 tests.
 - `pnpm run ci:local:parity` — passed at the current release-readiness baseline before this disposition packet.
-- `pnpm run release:readiness:v0.8.0` — reported no open P0 tasks, but blocked release readiness on stale colony board items and target version readiness.
+- `pnpm run release:readiness:v0.8.0` — at the time of this packet, reported no open P0 tasks and identified stale colony board items plus target version readiness as the remaining blockers.
+- Current readiness reports after the stale colony dispositions show `board-release-clear` green and `releaseBlockers: none`; release remains intentionally not-ready until a version bump/release decision.
 
 ## Rollback
 

@@ -51,7 +51,8 @@ None.
 
 - `pnpm exec vitest run packages/pi-stack/test/smoke/colony-pilot-delivery-recovery.test.ts packages/pi-stack/test/smoke/colony-pilot-delivery.test.ts packages/pi-stack/test/smoke/colony-pilot-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-artifacts-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-status-retention.test.ts` — passed in the agents-lab devcontainer: 5 files, 34 tests.
 - `pnpm run test:docs:site` — passed after adding the disposition packet.
-- `pnpm run release:readiness:v0.8.0` — confirmed the remaining release blockers were the five stale colony tasks plus target version readiness.
+- `pnpm run release:readiness:v0.8.0` — before closing the stale telemetry tasks, confirmed those tasks were the only board blockers besides target version readiness.
+- Current readiness reports after the disposition show `board-release-clear` green and `releaseBlockers: none`; the remaining `not-ready` signal is deliberate versioning (`target-version-ready` is false while packages stay at `0.7.0`).
 
 ## Future rule
 
