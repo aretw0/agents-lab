@@ -3,9 +3,11 @@ import assert from "node:assert/strict";
 import {
   buildBoardSummary,
   buildGoalPrompt,
+  collectEligibleTaskEntries,
   extractPriority,
   normalizeTaskPriority,
   selectNextTask,
+  taskTouchesProtectedScope,
 } from "../autonomous-scheduler.mjs";
 
 test("scheduler uses explicit priority field before description markers", () => {
@@ -35,6 +37,52 @@ test("board summary excludes cancelled tasks from open priority counts", () => {
   assert.equal(summary.byStatus.planned, 1);
   assert.equal(summary.byStatus.cancelled, 1);
   assert.deepEqual(summary.openByPriority, { p0: 0, p1: 0, p2: 0, p3: 1, unknown: 0 });
+});
+
+test("scheduler skips planned p3 work unless explicitly filtered", () => {
+  const tasks = [
+    { id: "TASK-P3", status: "planned", priority: "p3", description: "low priority planned work" },
+    { id: "TASK-P2", status: "planned", priority: "p2", description: "local work" },
+  ];
+
+  assert.equal(selectNextTask(tasks, null)?.id, "TASK-P2");
+  assert.equal(selectNextTask([tasks[0]], null), null);
+  assert.equal(selectNextTask([tasks[0]], "p3")?.id, "TASK-P3");
+});
+
+test("scheduler uses task id as deterministic tie-breaker", () => {
+  const tasks = [
+    { id: "TASK-B", status: "planned", priority: "p2", description: "second" },
+    { id: "TASK-A", status: "planned", priority: "p2", description: "first" },
+  ];
+
+  assert.equal(selectNextTask(tasks, null)?.id, "TASK-A");
+});
+
+test("scheduler skips protected external/parked work unless explicitly included", () => {
+  const tasks = [
+    { id: "TASK-URL", status: "planned", priority: "p2", description: "pesquisa externa https://example.com" },
+    { id: "TASK-PARKED", status: "planned", priority: "p2", milestone: "protected-parked-legacy", description: "parked" },
+    { id: "TASK-LOCAL", status: "planned", priority: "p2", description: "local work" },
+  ];
+
+  assert.equal(taskTouchesProtectedScope(tasks[0]), true);
+  assert.equal(taskTouchesProtectedScope(tasks[1]), true);
+  assert.equal(taskTouchesProtectedScope(tasks[2]), false);
+  assert.equal(selectNextTask(tasks, null)?.id, "TASK-LOCAL");
+  assert.deepEqual(collectEligibleTaskEntries(tasks.slice(0, 2), { includeProtectedScopes: false }), []);
+  assert.equal(selectNextTask(tasks.slice(0, 2), null, { includeProtectedScopes: true })?.id, "TASK-PARKED");
+});
+
+test("current parked external backlog is not eligible by default", () => {
+  const tasks = [
+    { id: "TASK-BUD-480", status: "planned", priority: "p3", milestone: "protected-parked-legacy", description: "Pesquisa futura (externa) de influências: analisar https://github.com/nousresearch/hermes-agent" },
+    { id: "TASK-BUD-521", status: "planned", priority: "p3", milestone: "protected-parked-legacy", description: "Influência externa parked" },
+  ];
+
+  assert.equal(selectNextTask(tasks, null), null);
+  assert.equal(selectNextTask(tasks, "p3"), null);
+  assert.equal(selectNextTask(tasks, "p3", { includeProtectedScopes: true })?.id, "TASK-BUD-480");
 });
 
 test("goal prompt strips extended priority markers", () => {

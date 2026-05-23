@@ -15,6 +15,7 @@
  *   node scripts/autonomous-scheduler.mjs --json           # machine-readable output
  *   node scripts/autonomous-scheduler.mjs --execute        # emit ant_colony goal prompt
  *   node scripts/autonomous-scheduler.mjs --budget 2       # override maxCost (USD)
+ *   node scripts/autonomous-scheduler.mjs --include-protected --priority p3
  *
  * Stop conditions (always respected, even with --execute):
  *   - No eligible tasks found
@@ -42,6 +43,7 @@ function parseArgs(argv) {
     execute: false,
     budget: 2,             // default maxCost per run (USD)
     verbose: false,
+    includeProtectedScopes: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -51,6 +53,7 @@ function parseArgs(argv) {
     if (a === "--execute")   { out.execute = true; continue; }
     if (a === "--budget")    { out.budget = Number(argv[++i] ?? out.budget); continue; }
     if (a === "--verbose")   { out.verbose = true; continue; }
+    if (a === "--include-protected") { out.includeProtectedScopes = true; continue; }
   }
   return out;
 }
@@ -88,6 +91,25 @@ function normalizeTaskPriority(task) {
   return extractPriority(task?.description ?? "");
 }
 
+function isLowPriorityPlannedTask(task) {
+  return task?.status === "planned" && (PRIORITY_ORDER[normalizeTaskPriority(task)] ?? 9) >= PRIORITY_ORDER.p3;
+}
+
+function taskTouchesProtectedScope(task) {
+  const milestone = String(task?.milestone ?? "").toLowerCase();
+  if (/(^|[-_])protected[-_]parked/.test(milestone)) return true;
+
+  const files = Array.isArray(task?.files) ? task.files : [];
+  if (files.some((file) => /^\.pi\/settings\.json$/i.test(String(file).replace(/\\/g, "/")))) return true;
+  if (files.some((file) => /^\.github(?:\/|$)/i.test(String(file).replace(/\\/g, "/")))) return true;
+  if (files.some((file) => /^\.obsidian(?:\/|$)/i.test(String(file).replace(/\\/g, "/")))) return true;
+
+  const description = String(task?.description ?? "");
+  if (/https?:\/\//i.test(description)) return true;
+  if (/\b(?:research|pesquisa)\b.*\b(?:extern[ao]|external|web|internet|url|fonte(?:s)?|source|influ[eê]ncia|inspiration|inspira[cç][aã]o|prior\s*art)\b/i.test(description)) return true;
+  return false;
+}
+
 function isEligible(task, allTasks) {
   // Must be planned (not in-progress, blocked, completed, deleted)
   if (task.status !== "planned") return false;
@@ -110,16 +132,17 @@ function countUnblocked(taskId, allTasks) {
   return allTasks.filter((t) => (t.depends_on ?? []).includes(taskId)).length;
 }
 
-function selectNextTask(tasks, priorityFilter) {
+function collectEligibleTaskEntries(tasks, options = {}) {
   const eligible = tasks.filter((t) => isEligible(t, tasks));
-
-  if (eligible.length === 0) return null;
-
-  const prioritized = eligible
+  return eligible
     .map((t) => ({ task: t, priority: normalizeTaskPriority(t) }))
     .filter((e) => {
-      if (!priorityFilter) return true;
-      return e.priority === priorityFilter;
+      if (options.priorityFilter) return e.priority === options.priorityFilter;
+      return !isLowPriorityPlannedTask(e.task);
+    })
+    .filter((e) => {
+      if (options.includeProtectedScopes) return true;
+      return !taskTouchesProtectedScope(e.task);
     })
     .sort((a, b) => {
       // Primary: priority order
@@ -129,8 +152,16 @@ function selectNextTask(tasks, priorityFilter) {
       // Secondary: number of tasks this unblocks (higher = better)
       const ua = countUnblocked(a.task.id, tasks);
       const ub = countUnblocked(b.task.id, tasks);
-      return ub - ua;
+      if (ua !== ub) return ub - ua;
+      return String(a.task.id ?? "").localeCompare(String(b.task.id ?? ""));
     });
+}
+
+function selectNextTask(tasks, priorityFilter, options = {}) {
+  const prioritized = collectEligibleTaskEntries(tasks, {
+    priorityFilter,
+    includeProtectedScopes: options.includeProtectedScopes === true,
+  });
 
   return prioritized[0]?.task ?? null;
 }
@@ -213,8 +244,12 @@ function main() {
   const args = parseArgs(process.argv.slice(2));
   const { tasks } = readBoard(args.workspace);
   const quota = readQuotaSettings(args.workspace);
-  const next = selectNextTask(tasks, args.priorityFilter);
+  const next = selectNextTask(tasks, args.priorityFilter, { includeProtectedScopes: args.includeProtectedScopes });
   const summary = buildBoardSummary(tasks);
+  const eligibleEntries = collectEligibleTaskEntries(tasks, {
+    priorityFilter: args.priorityFilter,
+    includeProtectedScopes: args.includeProtectedScopes,
+  });
 
   const configuredProviders = Object.keys(quota.routeModelRefs);
 
@@ -222,7 +257,7 @@ function main() {
     timestamp: new Date().toISOString(),
     workspace: args.workspace,
     board: summary,
-    eligibleCount: tasks.filter((t) => isEligible(t, tasks)).length,
+    eligibleCount: eligibleEntries.length,
     selected: next
       ? {
           id: next.id,
@@ -236,6 +271,10 @@ function main() {
     budget: { maxCostUsd: args.budget },
     providers: configuredProviders,
     mode: args.execute ? "execute" : "dry-run",
+    policy: {
+      includeProtectedScopes: args.includeProtectedScopes,
+      includeLowPriorityPlanned: Boolean(args.priorityFilter),
+    },
   };
 
   if (args.json) {
@@ -249,12 +288,13 @@ function main() {
   process.stdout.write(`board: ${summary.byStatus.planned} planned | ${summary.byStatus["in-progress"]} in-progress | ${summary.byStatus.blocked} blocked | ${summary.byStatus.completed} completed\n`);
   process.stdout.write(`open P0: ${summary.openByPriority.p0} | P1: ${summary.openByPriority.p1} | P2: ${summary.openByPriority.p2} | P3: ${summary.openByPriority.p3}\n`);
   process.stdout.write(`eligible: ${result.eligibleCount} task(s)\n`);
+  process.stdout.write(`policy: protected=${args.includeProtectedScopes ? "included" : "skipped"} low-priority-planned=${args.priorityFilter ? "included-by-filter" : "skipped"}\n`);
   process.stdout.write(`providers: ${configuredProviders.join(", ") || "(none configured)"}\n`);
   process.stdout.write("\n");
 
   if (!next) {
     process.stdout.write("STOP: no eligible tasks found.\n");
-    process.stdout.write("Check: are all P0 depends_on completed? Are there blocked tasks needing operator attention?\n");
+    process.stdout.write("Check: are all dependencies completed? Use --priority p3 for low-priority planned work and --include-protected only with explicit operator intent.\n");
     process.exitCode = 0;
     return;
   }
@@ -289,7 +329,9 @@ export {
   buildBoardSummary,
   buildGoalPrompt,
   extractPriority,
+  collectEligibleTaskEntries,
   isEligible,
   normalizeTaskPriority,
   selectNextTask,
+  taskTouchesProtectedScope,
 };
