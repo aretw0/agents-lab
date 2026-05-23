@@ -31,7 +31,7 @@ export function registerGuardrailsShellRouteSurface(
 					"  /shell-route wrap <command>",
 					"",
 					"example:",
-					"  /shell-route wrap npm run test:smoke",
+					"  /shell-route wrap pnpm run test:smoke",
 				].join("\n"), "info");
 				return;
 			}

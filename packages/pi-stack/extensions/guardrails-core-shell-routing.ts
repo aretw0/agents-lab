@@ -150,7 +150,7 @@ export function buildShellRoutingStatusLines(profile: CommandRoutingProfile): st
     `reason: ${profile.reason}`,
   ];
   if (profile.preferCmdForNodeFamily) {
-    lines.push("example: cmd.exe /c npm run test:smoke");
+    lines.push("example: cmd.exe /c pnpm run test:smoke");
   }
   return lines;
 }

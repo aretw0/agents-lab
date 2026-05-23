@@ -24,9 +24,9 @@ describe("guardrails-core shell routing", () => {
 
   it("blocks bare node-family bash commands when cmd route is required", () => {
     const profile = resolveCommandRoutingProfile("win32", { MSYSTEM: "MINGW64" } as NodeJS.ProcessEnv);
-    const decision = resolveBashCommandRoutingDecision("npm run test", profile);
+    const decision = resolveBashCommandRoutingDecision("pnpm run test", profile);
     expect(decision.action).toBe("block");
-    expect(decision.reason).toContain("cmd.exe /c npm run test");
+    expect(decision.reason).toContain("cmd.exe /c pnpm run test");
   });
 
   it("allows cmd-wrapped node-family commands", () => {
@@ -48,14 +48,14 @@ describe("guardrails-core shell routing", () => {
       resolveCommandRoutingProfile("win32", { MSYSTEM: "MINGW64" } as NodeJS.ProcessEnv),
     );
     expect(status.join("\n")).toContain("profile: windows-git-bash-cmd-node");
-    expect(status.join("\n")).toContain("example: cmd.exe /c npm run test:smoke");
+    expect(status.join("\n")).toContain("example: cmd.exe /c pnpm run test:smoke");
 
     const wrapped = wrapCommandForHostShell(
-      "npm run test",
+      "pnpm run test",
       resolveCommandRoutingProfile("win32", { MSYSTEM: "MINGW64" } as NodeJS.ProcessEnv),
     );
     expect(wrapped.changed).toBe(true);
-    expect(wrapped.wrappedCommand).toBe("cmd.exe /c npm run test");
+    expect(wrapped.wrappedCommand).toBe("cmd.exe /c pnpm run test");
 
     const notChanged = wrapCommandForHostShell(
       "git status",
