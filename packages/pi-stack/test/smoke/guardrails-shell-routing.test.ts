@@ -5,6 +5,7 @@ import {
   detectShellFamily,
   isCmdWrappedCommand,
   isNodeFamilyCommand,
+  isTuiSlashCommand,
   resolveBashCommandRoutingDecision,
   resolveCommandRoutingProfile,
   wrapCommandForHostShell,
@@ -43,6 +44,17 @@ describe("guardrails-core shell routing", () => {
     expect(decision.action).toBe("allow");
   });
 
+  it("blocks Pi TUI slash commands before bash execution", () => {
+    const profile = resolveCommandRoutingProfile("linux", {} as NodeJS.ProcessEnv);
+    const decision = resolveBashCommandRoutingDecision("/watchdog:status", profile);
+
+    expect(isTuiSlashCommand("/watchdog:status")).toBe(true);
+    expect(isTuiSlashCommand("/bin/bash -lc pwd")).toBe(false);
+    expect(decision.action).toBe("block");
+    expect(decision.reason).toContain("TUI/operator commands");
+    expect(decision.reason).toContain("directly in the Pi input");
+  });
+
   it("builds system prompt lines only for active host route", () => {
     const status = buildShellRoutingStatusLines(
       resolveCommandRoutingProfile("win32", { MSYSTEM: "MINGW64" } as NodeJS.ProcessEnv),
@@ -71,7 +83,8 @@ describe("guardrails-core shell routing", () => {
     const defaultLines = buildShellRoutingSystemPrompt(
       resolveCommandRoutingProfile("linux", {} as NodeJS.ProcessEnv),
     );
-    expect(defaultLines).toEqual([]);
+    expect(defaultLines.join("\n")).toContain("Do not run Pi TUI slash commands through bash");
+    expect(defaultLines.join("\n")).not.toContain("cmd.exe /c <command>");
     expect(isNodeFamilyCommand("npx vitest run")).toBe(true);
   });
 });

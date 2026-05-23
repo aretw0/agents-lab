@@ -30,6 +30,7 @@ const NODE_FAMILY_TOKENS = new Set([
 ]);
 
 const CMD_WRAPPER_PATTERN = /^\s*cmd(?:\.exe)?\s+\/c\b/i;
+const TUI_SLASH_COMMAND_PATTERN = /^\s*\/[A-Za-z][A-Za-z0-9_-]*(?::[A-Za-z0-9_-]+)?(?:\s|$)/;
 
 export function detectShellFamily(
   platform = process.platform,
@@ -97,10 +98,25 @@ export function isNodeFamilyCommand(command: string): boolean {
   return false;
 }
 
+export function isTuiSlashCommand(command: string): boolean {
+  return TUI_SLASH_COMMAND_PATTERN.test(String(command ?? ""));
+}
+
 export function resolveBashCommandRoutingDecision(
   command: string,
   profile: CommandRoutingProfile,
 ): BashCommandRoutingDecision {
+  if (isTuiSlashCommand(command)) {
+    const firstToken = parseFirstCommandToken(command);
+    return {
+      action: "block",
+      firstToken,
+      reason: [
+        "Blocked by guardrails-core (operator-command-routing): Pi slash commands are TUI/operator commands, not shell commands.",
+        `Run ${firstToken ?? "the slash command"} directly in the Pi input, or use a registered read-only Pi tool instead.`,
+      ].join("\n"),
+    };
+  }
   if (!profile.preferCmdForNodeFamily) return { action: "allow" };
   if (isCmdWrappedCommand(command)) return { action: "allow" };
   if (!isNodeFamilyCommand(command)) return { action: "allow" };
@@ -156,8 +172,12 @@ export function buildShellRoutingStatusLines(profile: CommandRoutingProfile): st
 }
 
 export function buildShellRoutingSystemPrompt(profile: CommandRoutingProfile): string[] {
-  if (!profile.preferCmdForNodeFamily) return [];
+  const lines = [
+    "Do not run Pi TUI slash commands through bash. Commands like /watchdog:status, /models, and /safe-mode must be entered by the operator in the Pi input.",
+  ];
+  if (!profile.preferCmdForNodeFamily) return lines;
   return [
+    ...lines,
     "Host shell routing guard is active for this session.",
     "- Detected profile: windows-git-bash-cmd-node.",
     "- For node/npm/npx/pnpm/yarn/vitest in bash tool, wrap with: cmd.exe /c <command>.",
