@@ -463,7 +463,9 @@ test("docs site can be served consistently from host or devcontainer", () => {
 	assert.match(smokeScript, /<link\\s\[\^>\]\*href/);
 	assert.match(smokeScript, /<script\\s\[\^>\]\*src/);
 	assert.match(smokeScript, /<img\\s\[\^>\]\*src/);
-	assert.match(dockerfile, /ruby-full build-essential zlib1g-dev/);
+	assert.match(dockerfile, /\bruby-full\b/);
+	assert.match(dockerfile, /\bbuild-essential\b/);
+	assert.match(dockerfile, /\bzlib1g-dev\b/);
 	assert.match(dockerfile, /typescript-node:24-bookworm/);
 	assert.match(dockerfile, /gem install bundler --no-document/);
 	assert.equal(nodeVersion, "24");
