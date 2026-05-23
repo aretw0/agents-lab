@@ -58,6 +58,7 @@ describe("sovereignty-diff-gate", () => {
     });
 
     expect(result.blockers.length).toBe(0);
+    expect(result.notes.length).toBe(0);
   });
 
   it("parseCapabilityAnnotations extrai id e criticality", () => {

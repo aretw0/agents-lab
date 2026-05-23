@@ -1,5 +1,5 @@
 {
-  "version": "2026-04-30",
+  "version": "2026-05-23",
   "capabilities": [
     {
       "id": "scheduler-runtime-governance",
@@ -41,6 +41,16 @@
       ],
       "coexistencePolicy": "policy-first-party-engine-third-party",
       "defaultAction": "consolidate"
+    },
+    {
+      "id": "monitor-summary",
+      "name": "Compact monitor observability summary",
+      "criticality": "low",
+      "primaryPackage": "@aretw0/pi-stack",
+      "secondaryPackages": [],
+      "conflictsWithPackages": [],
+      "coexistencePolicy": "single-owner",
+      "defaultAction": "maintain"
     },
     {
       "id": "colony-runtime-governance",
