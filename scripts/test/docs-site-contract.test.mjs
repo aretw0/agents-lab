@@ -341,6 +341,17 @@ test("Mermaid authoring separates portable skill rules from lab editorial policy
 	assert.match(architecture, /do not impose size/);
 });
 
+test("current governance docs use pnpm for project scripts", () => {
+	for (const file of [
+		"docs/ops/stack-sovereignty-audit-prompt.md",
+		"docs/architecture/stack-sovereignty-rfc-2026-04.md",
+		"docs/architecture/control-plane-runtime-map.md",
+		"docs/research/0-8-local-safe-slice-validation-matrix.md",
+	]) {
+		assert.doesNotMatch(read(file), /\bnpm run\b/, `${file} should use pnpm run for project scripts`);
+	}
+});
+
 test("recommended stack guide stays user-first and concise", () => {
 	const guide = read("docs/guides/recommended-pi-stack.md");
 

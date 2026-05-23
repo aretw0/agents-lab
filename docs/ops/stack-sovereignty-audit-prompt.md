@@ -46,10 +46,9 @@ Critérios obrigatórios:
 A auditoria está operacionalizada no workflow de CI com duas camadas:
 
 1. **Gate estrito (bloqueia merge)**
-   - `npm run audit:sovereignty`
-   - `npm run audit:sovereignty:diff`
+   - `pnpm run audit:sovereignty`
+   - `pnpm run audit:sovereignty:diff`
 2. **Relatório para revisão**
    - job `Sovereignty Report`
    - artifact `stack-sovereignty-audit`
    - comentário de PR atualizado por marcador `<!-- stack-sovereignty-report -->`
-

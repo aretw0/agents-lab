@@ -24,7 +24,7 @@ Padronizar o menor gate confiável para fatias recorrentes da lane local-safe. A
 
 ## Regra de suficiência
 
-Use o menor gate que detecta regressão provável da fatia. Escalar para `npm run ci:smoke:gate` apenas quando a fatia alterar comportamento compartilhado ou contrato runtime.
+Use o menor gate que detecta regressão provável da fatia. Escalar para `pnpm run ci:smoke:gate` apenas quando a fatia alterar comportamento compartilhado ou contrato runtime.
 
 ## Regra de rollback
 

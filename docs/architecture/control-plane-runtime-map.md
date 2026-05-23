@@ -13,7 +13,7 @@ These diagrams are intentionally split by concern. They are reading aids, not a 
 
 ```mermaid
 graph LR
-  dev["npm run pi:dev"] --> isolated["pi-isolated"]
+  dev["pnpm run pi:dev"] --> isolated["pi-isolated"]
   isolated --> profile["control-plane profile"]
   profile --> cold["capabilities cold"]
   cold --> intent["operator intent"]

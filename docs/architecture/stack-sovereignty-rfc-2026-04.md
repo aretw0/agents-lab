@@ -153,8 +153,8 @@ No fim, gere backlog P0/P1/P2 com critérios de sucesso mensuráveis.
 
 Automação implementada (CI):
 - Gate estrito no job de smoke:
-  - `npm run audit:sovereignty`
-  - `npm run audit:sovereignty:diff`
+  - `pnpm run audit:sovereignty`
+  - `pnpm run audit:sovereignty:diff`
 - Job dedicado de visibilidade:
   - `Sovereignty Report`
   - gera `docs/architecture/stack-sovereignty-audit-latest.md`
