@@ -1,66 +1,59 @@
 {
-  "timestamp": "2026-05-19T05:25:54.753Z",
-  "context": "External stabilization session for Pi runtime pressure. TASK-BUD-1089 is now completed as a report-only development velocity pressure primitive. The primitive detects session/runtime pressure, dirty scope, board size, handoff age, useful commit age, process age, memory/disk, host VHDX pressure, stale active agent-run registry entries, and ceremony/tool-call pressure. Current machine pressure still blocks long Pi runs: C: has about 3GB free, with Docker/WSL VHDX artifacts accounting for about 214GB.",
+  "timestamp": "2026-05-23T01:55:00.000Z",
+  "context": "External stabilization session for agents-lab 0.8 readiness. The board is release-clear: no open P0, no in-progress tasks, no blocked tasks. The remaining v0.8.0 readiness blocker is deliberate versioning only: packages are still 0.7.0, so target-version-ready stays false until the operator explicitly chooses the bump/tag/release lane. Recent work tightened package runtime dependency boundaries, clarified stale colony readiness history, and added a docs contract that ties the public 0.8 readiness map to the canonical release-readiness report.",
   "current_tasks": [],
   "next_actions": [
-    "Free host disk before returning to npm run pi:dev or any long Pi runtime.",
-    "Re-run npm run ops:disk:cleanup:dry and npm run pi:dev:pressure after cleanup.",
-    "Run npm run release:readiness:v0.8.0 after disk pressure clears and choose the next P0 from the ready-to-start list.",
-    "Prefer small validated slices until machine-disk-pressure is no longer blocking."
+    "Do not bump/tag/publish v0.8.0 without explicit operator release decision.",
+    "Before any long Pi runtime, re-run pi:dev:pressure or the equivalent runtime pressure gate in the current environment.",
+    "Keep the four remaining planned external-influence tasks parked unless the operator explicitly selects a research lane.",
+    "Prefer local-safe slices that improve packaging, docs contracts, engine boundaries, or runtime pressure observability."
   ],
   "blockers": [
-    "machine-disk-pressure: pi:dev:pressure reports block-and-clean with about 3GB free",
-    "host volume pressure: Docker docker_data.vhdx about 132GB and Ubuntu ext4.vhdx about 81GB"
+    "target-version-ready: false by design until packages are intentionally bumped from 0.7.0 to 0.8.0"
   ],
   "recent_validation": [
-    "npm run test:pi:dev:pressure passed",
-    "npm run test:pi:isolated passed",
-    "npm run test:ops:disk-guard passed",
-    "npx vitest run packages/pi-stack/test/smoke/environment-doctor-dev-pressure.test.ts passed",
-    "npm run pi:dev:pressure reports machine-disk-pressure and danglingRuns=0",
-    "npm run repo:complexity:changed:strict passed",
-    "npm run repo:discourse:audit passed",
-    "npm run docs:package:check passed"
+    "docker exec eb303930747d pnpm run ci:local:parity passed",
+    "docker exec eb303930747d pnpm run test:docs:site passed",
+    "docker exec eb303930747d pnpm run repo:discourse:audit passed",
+    "docker exec eb303930747d pnpm exec node --test scripts/test/release-readiness-report.test.mjs passed",
+    "docker exec eb303930747d pnpm run release:readiness:v0.8.0 wrote a report with board-release-clear green and releaseBlockers=none"
   ],
   "recent_commits": [
-    "693c2169 feat(pressure): cover dangling run pressure",
-    "2249fded chore(project): checkpoint pressure lane",
-    "12e05819 ci(ops): run pressure guards in smoke gate",
-    "4a2f5e47 fix(pi): block dev under machine pressure",
-    "2780be8a feat(ops): inventory host volume pressure",
-    "73f669da feat(pressure): add local velocity signals"
+    "a91256b2 test(docs): gate readiness map against release report",
+    "93e038af docs(release): clarify stale colony readiness history",
+    "27121b84 fix(package): enforce runtime dependency boundaries"
   ],
   "slice_memory": {
-    "focus": "stabilize-pi-dev-runtime-pressure",
+    "focus": "0.8-readiness-hardening",
     "canonical_links": [
-      "task:TASK-BUD-1089",
-      "verification:VERIF-TASK-BUD-1089-DEV-VELOCITY-PRESSURE-20260519",
-      "commit:693c2169",
-      "commit:2249fded",
-      "commit:12e05819",
-      "commit:4a2f5e47"
+      "commit:a91256b2",
+      "commit:93e038af",
+      "commit:27121b84",
+      "doc:docs/research/0-8-readiness-map.md",
+      "script:scripts/release-readiness-report.mjs",
+      "test:scripts/test/docs-site-contract.test.mjs"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-19T05:25:54.753Z",
-    "level": "checkpoint",
+    "generatedAtIso": "2026-05-23T01:55:00.000Z",
+    "level": "ok",
     "percent": 0,
-    "action": "checkpoint-and-stop-long-runs",
-    "recommendation": "TASK-BUD-1089 is complete; do not start long Pi runtime while machine-disk-pressure is blocking."
+    "action": "continue-small-local-safe-slices",
+    "recommendation": "Repository readiness is stable; continue only with bounded local-safe hardening unless the operator explicitly chooses release, publish, provider routing, remote/offload, or external research."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-19T05:25:54.753Z",
-      "reason": "task-bud-1089-complete-machine-disk-pressure-block",
-      "level": "checkpoint",
+      "atIso": "2026-05-23T01:55:00.000Z",
+      "reason": "0.8-readiness-checkpoint-after-package-doc-hardening",
+      "level": "ok",
       "percent": 0,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 55,
         "compactPct": 65
       },
-      "action": "checkpoint-and-stop-long-runs",
-      "recommendation": "Free host disk before selecting the next P0 lane."
+      "action": "continue-small-local-safe-slices",
+      "recommendation": "Use the canonical release-readiness report and public docs contract as the next-session anchor."
     }
   ]
 }
