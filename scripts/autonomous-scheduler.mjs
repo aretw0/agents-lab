@@ -26,8 +26,9 @@
  *   into the pi session. The scheduler never invokes ant_colony directly.
  */
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 // ---------------------------------------------------------------------------
 // CLI args
@@ -36,7 +37,7 @@ import path from "node:path";
 function parseArgs(argv) {
   const out = {
     workspace: process.cwd(),
-    priorityFilter: null,  // null = all, "p0", "p1", "p2"
+    priorityFilter: null,  // null = all, "p0", "p1", "p2", "p3"
     json: false,
     execute: false,
     budget: 2,             // default maxCost per run (USD)
@@ -73,12 +74,18 @@ function readBoard(workspace) {
 // Task selection (agent-driver-charter.md algorithm)
 // ---------------------------------------------------------------------------
 
-const PRIORITY_ORDER = { p0: 0, p1: 1, p2: 2, unknown: 9 };
+const PRIORITY_ORDER = { p0: 0, p1: 1, p2: 2, p3: 3, unknown: 9 };
 
 function extractPriority(description) {
-  const m = description?.match(/\[(P[012])\]/i);
+  const m = description?.match(/\[(P[0-9])(?:[\/\]\s:,-]|$)/i);
   if (!m) return "unknown";
   return m[1].toLowerCase();
+}
+
+function normalizeTaskPriority(task) {
+  const field = String(task?.priority ?? "").trim().toLowerCase();
+  if (/^p[0-9]$/.test(field)) return field;
+  return extractPriority(task?.description ?? "");
 }
 
 function isEligible(task, allTasks) {
@@ -109,7 +116,7 @@ function selectNextTask(tasks, priorityFilter) {
   if (eligible.length === 0) return null;
 
   const prioritized = eligible
-    .map((t) => ({ task: t, priority: extractPriority(t.description ?? "") }))
+    .map((t) => ({ task: t, priority: normalizeTaskPriority(t) }))
     .filter((e) => {
       if (!priorityFilter) return true;
       return e.priority === priorityFilter;
@@ -152,7 +159,7 @@ function readQuotaSettings(workspace) {
 
 function buildGoalPrompt(task, budget) {
   const id = task.id;
-  const desc = task.description?.replace(/^\[P[012]\]\s*/i, "").trim() ?? task.id;
+  const desc = task.description?.replace(/^\[P[0-9](?:\/[^\]]+)?\]\s*/i, "").trim() ?? task.id;
   const ac = (task.acceptance_criteria ?? []).map((a) => `- ${a}`).join("\n");
   const deps = (task.depends_on ?? []).join(", ") || "none";
 
@@ -186,12 +193,12 @@ function buildGoalPrompt(task, budget) {
 
 function buildBoardSummary(tasks) {
   const byStatus = { planned: 0, "in-progress": 0, blocked: 0, completed: 0, other: 0 };
-  const byPriority = { p0: 0, p1: 0, p2: 0, unknown: 0 };
+  const byPriority = { p0: 0, p1: 0, p2: 0, p3: 0, unknown: 0 };
   for (const t of tasks) {
     const s = t.status ?? "other";
     byStatus[s] = (byStatus[s] ?? 0) + 1;
-    if (s !== "completed") {
-      const p = extractPriority(t.description ?? "");
+    if (["planned", "in-progress", "blocked"].includes(s)) {
+      const p = normalizeTaskPriority(t);
       byPriority[p] = (byPriority[p] ?? 0) + 1;
     }
   }
@@ -219,7 +226,7 @@ function main() {
     selected: next
       ? {
           id: next.id,
-          priority: extractPriority(next.description ?? ""),
+          priority: normalizeTaskPriority(next),
           unblocks: countUnblocked(next.id, tasks),
           description: next.description?.slice(0, 120),
           acceptanceCriteria: next.acceptance_criteria ?? [],
@@ -240,7 +247,7 @@ function main() {
   process.stdout.write("autonomous-scheduler\n");
   process.stdout.write(`mode: ${result.mode}\n`);
   process.stdout.write(`board: ${summary.byStatus.planned} planned | ${summary.byStatus["in-progress"]} in-progress | ${summary.byStatus.blocked} blocked | ${summary.byStatus.completed} completed\n`);
-  process.stdout.write(`open P0: ${summary.openByPriority.p0} | P1: ${summary.openByPriority.p1} | P2: ${summary.openByPriority.p2}\n`);
+  process.stdout.write(`open P0: ${summary.openByPriority.p0} | P1: ${summary.openByPriority.p1} | P2: ${summary.openByPriority.p2} | P3: ${summary.openByPriority.p3}\n`);
   process.stdout.write(`eligible: ${result.eligibleCount} task(s)\n`);
   process.stdout.write(`providers: ${configuredProviders.join(", ") || "(none configured)"}\n`);
   process.stdout.write("\n");
@@ -253,7 +260,7 @@ function main() {
   }
 
   process.stdout.write(`selected: ${next.id}\n`);
-  process.stdout.write(`priority: ${extractPriority(next.description ?? "")}\n`);
+  process.stdout.write(`priority: ${normalizeTaskPriority(next)}\n`);
   process.stdout.write(`unblocks: ${countUnblocked(next.id, tasks)} task(s)\n`);
   process.stdout.write(`description: ${next.description?.slice(0, 120)}\n`);
   if (next.depends_on?.length) {
@@ -272,4 +279,17 @@ function main() {
   }
 }
 
-main();
+const __filename = fileURLToPath(import.meta.url);
+
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main();
+}
+
+export {
+  buildBoardSummary,
+  buildGoalPrompt,
+  extractPriority,
+  isEligible,
+  normalizeTaskPriority,
+  selectNextTask,
+};
