@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 type BoardPressureStatus = "ok" | "pressure" | "unavailable";
@@ -22,11 +22,6 @@ function readJson(filePath: string): Record<string, unknown> | undefined {
   }
 }
 
-function writeJson(filePath: string, value: Record<string, unknown>): void {
-  mkdirSync(dirname(filePath), { recursive: true });
-  writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
-}
-
 function valueBytes(value: unknown): number {
   return Buffer.byteLength(JSON.stringify(value ?? null), "utf8");
 }
@@ -46,6 +41,57 @@ function mergeRecordsById(existing: Record<string, unknown>[], incoming: Record<
     else byId.set(id, row);
   }
   return [...byId.values(), ...noId];
+}
+
+function readJsonlShard(filePath: string): Record<string, unknown>[] {
+  if (!existsSync(filePath)) return [];
+  return readFileSync(filePath, "utf8")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return undefined;
+      }
+    })
+    .filter(isRecord);
+}
+
+function readArchiveShards(cwd: string, prefix: string): Record<string, unknown>[] {
+  const archiveDir = join(cwd, ".project", "archive");
+  if (!existsSync(archiveDir)) return [];
+  return readdirSync(archiveDir)
+    .filter((name) => name.startsWith(prefix) && name.endsWith(".jsonl"))
+    .sort()
+    .flatMap((name) => readJsonlShard(join(archiveDir, name)));
+}
+
+function writeArchiveShards(cwd: string, prefix: string, records: Record<string, unknown>[], chunkSize = 500): string[] {
+  const archiveDir = join(cwd, ".project", "archive");
+  mkdirSync(archiveDir, { recursive: true });
+  for (const name of readdirSync(archiveDir).filter((entry) => entry.startsWith(prefix) && entry.endsWith(".jsonl"))) {
+    rmSync(join(archiveDir, name), { force: true });
+  }
+  const paths: string[] = [];
+  for (let index = 0; index < records.length; index += chunkSize) {
+    const chunk = records.slice(index, index + chunkSize);
+    const shard = String(Math.floor(index / chunkSize) + 1).padStart(4, "0");
+    const relative = `.project/archive/${prefix}-${shard}.jsonl`;
+    writeFileSync(
+      join(cwd, relative),
+      `${chunk.map((record) => JSON.stringify(record)).join("\n")}\n`,
+      "utf8",
+    );
+    paths.push(relative);
+  }
+  return paths;
+}
+
+function writeHotJson(filePath: string, value: Record<string, unknown>): void {
+  mkdirSync(dirname(filePath), { recursive: true });
+  writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
 export interface BoardPressureReductionPlan {
@@ -79,8 +125,10 @@ export interface BoardPressureReductionApplyResult extends Omit<BoardPressureRed
   mutates: boolean;
   status: BoardPressureApplyStatus;
   authorization: "none" | "explicit-operator";
-  archivedTasksPath: ".project/archive/completed-tasks.json";
-  archivedVerificationPath: ".project/archive/verification-ledger.json";
+  archivedTasksPath: ".project/archive/completed-tasks-*.jsonl";
+  archivedVerificationPath: ".project/archive/verification-ledger-*.jsonl";
+  archivedTaskShards: string[];
+  archivedVerificationShards: string[];
   archivedTaskCount: number;
   archivedVerificationCount: number;
   retainedTaskCount: number;
@@ -206,8 +254,8 @@ export function applyBoardPressureReduction(cwd: string, options: {
   const dryRun = options.dryRun !== false;
   const authorization = options.authorization === "explicit-operator" ? "explicit-operator" : "none";
   const plan = buildBoardPressureReductionPlan(cwd, { boardWarnMb: options.boardWarnMb });
-  const archivedTasksPath = ".project/archive/completed-tasks.json" as const;
-  const archivedVerificationPath = ".project/archive/verification-ledger.json" as const;
+  const archivedTasksPath = ".project/archive/completed-tasks-*.jsonl" as const;
+  const archivedVerificationPath = ".project/archive/verification-ledger-*.jsonl" as const;
   const base = {
     ...plan,
     mode: "board-pressure-reduction-apply" as const,
@@ -216,6 +264,8 @@ export function applyBoardPressureReduction(cwd: string, options: {
     authorization,
     archivedTasksPath,
     archivedVerificationPath,
+    archivedTaskShards: [] as string[],
+    archivedVerificationShards: [] as string[],
     archivedTaskCount: 0,
     archivedVerificationCount: 0,
     retainedTaskCount: plan.totalTaskCount,
@@ -240,8 +290,6 @@ export function applyBoardPressureReduction(cwd: string, options: {
 
   const boardPath = join(cwd, ".project", "tasks.json");
   const verificationPath = join(cwd, ".project", "verification.json");
-  const archiveTasksPath = join(cwd, ".project", "archive", "completed-tasks.json");
-  const archiveVerificationPath = join(cwd, ".project", "archive", "verification-ledger.json");
   const board = readJson(boardPath) ?? {};
   const verification = readJson(verificationPath) ?? {};
   const tasks = recordsFrom(board, "tasks");
@@ -273,11 +321,11 @@ export function applyBoardPressureReduction(cwd: string, options: {
 
   if (dryRun || archivedTasks.length <= 0) return out;
 
-  const existingArchiveTasks = recordsFrom(readJson(archiveTasksPath), "tasks");
-  const existingArchiveVerification = recordsFrom(readJson(archiveVerificationPath), "verifications");
-  writeJson(boardPath, { ...board, tasks: retainedTasks });
-  writeJson(verificationPath, { ...verification, verifications: verificationToRetain });
-  writeJson(archiveTasksPath, { tasks: mergeRecordsById(existingArchiveTasks, archivedTasks) });
-  writeJson(archiveVerificationPath, { verifications: mergeRecordsById(existingArchiveVerification, verificationToArchive) });
+  const existingArchiveTasks = readArchiveShards(cwd, "completed-tasks");
+  const existingArchiveVerification = readArchiveShards(cwd, "verification-ledger");
+  writeHotJson(boardPath, { ...board, tasks: retainedTasks });
+  writeHotJson(verificationPath, { ...verification, verifications: verificationToRetain });
+  out.archivedTaskShards = writeArchiveShards(cwd, "completed-tasks", mergeRecordsById(existingArchiveTasks, archivedTasks));
+  out.archivedVerificationShards = writeArchiveShards(cwd, "verification-ledger", mergeRecordsById(existingArchiveVerification, verificationToArchive));
   return out;
 }
