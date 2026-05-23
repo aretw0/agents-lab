@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -27,7 +28,9 @@ function listWorkspacePackages() {
 }
 
 function runPackDryRun(relPath) {
-  const npmCache = path.join(ROOT, ".sandbox", "npm-pack-cache");
+  const uid = typeof process.getuid === "function" ? process.getuid() : "user";
+  const npmCache = process.env.AGENTS_LAB_NPM_PACK_CACHE
+    ?? path.join(tmpdir(), `agents-lab-npm-pack-cache-${uid}`);
   mkdirSync(npmCache, { recursive: true });
   const result = spawnSync(
     "npm",
