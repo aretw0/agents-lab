@@ -354,8 +354,8 @@ Roteamento de provider é uma superfície de continuidade, mas também é settin
 
 Snapshot read-only de 2026-05-01 para `TASK-BUD-405`:
 
-- `.pi/settings.json`: `defaultProvider=openai-codex`, `defaultModel=gpt-5.3-codex`, `routeModelRefs.openai-codex=openai-codex/gpt-5.3-codex`;
-- `.sandbox/pi-agent/settings.json`: `defaultProvider=openai-codex`, `defaultModel=gpt-5.5`;
+- `.pi/settings.json`: projeto local do laboratório, com `defaultProvider/defaultModel` protegidos por decisão explícita do operador;
+- `.sandbox/pi-agent/settings.json`: runtime isolado do laboratório, reconciliado por `pnpm run pi:dev` para o perfil `control-plane`;
 - `provider_readiness_matrix`: apenas `openai-codex/gpt-5.3-codex`, `readiness=ready`, `budgetState=ok`;
 - `quota_visibility_route(profile=balanced, execute=false)`: recomenda `openai-codex`, `state=ok`, `noAutoSwitch=true`;
 - `handoff_advisor(execute=false)`: recomenda `openai-codex`, `noAutoSwitch=true`.

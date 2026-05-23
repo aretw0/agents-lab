@@ -92,4 +92,13 @@ describe("installer-baseline — applyBaselineToSettings", () => {
     expect(INSTALLER_BASELINE.piStack?.claudeCodeAdapter).toBeDefined();
     expect(INSTALLER_BASELINE.piStack?.quotaVisibility?.routeModelRefs?.["claude-code"]).toBeDefined();
   });
+
+  it("nao força provider/model do operador", () => {
+    const result = applyBaselineToSettings({});
+
+    expect(result.defaultProvider).toBeUndefined();
+    expect(result.defaultModel).toBeUndefined();
+    expect(result.enabledModels).toBeUndefined();
+    expect(result.runtimeProfile).toBeUndefined();
+  });
 });
