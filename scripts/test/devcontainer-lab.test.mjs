@@ -97,6 +97,34 @@ test("devcontainer persists assistant homes and package caches across rebuilds",
 	assert.match(mounts, /source=agents-lab-gh-config,target=\/home\/vscode\/\.config\/gh,type=volume/);
 });
 
+test("devcontainer provides the baseline sandbox tools expected by agents", () => {
+	const dockerfile = readFileSync(".devcontainer/Dockerfile", "utf8");
+	const postStart = readFileSync(".devcontainer/postStart.sh", "utf8");
+	const config = JSON.parse(readFileSync(".devcontainer/devcontainer.json", "utf8"));
+
+	for (const packageName of [
+		"bash-completion",
+		"bubblewrap",
+		"fd-find",
+		"git-lfs",
+		"hyperfine",
+		"jq",
+		"ripgrep",
+		"shellcheck",
+		"shfmt",
+		"tree",
+		"unzip",
+	]) {
+		assert.match(dockerfile, new RegExp(`\\b${packageName}\\b`), `${packageName} must be installed in the devcontainer image`);
+	}
+
+	assert.match(dockerfile, /ln -sf \/usr\/bin\/fdfind \/usr\/local\/bin\/fd/);
+	assert.deepEqual(config.features["ghcr.io/jsburckhardt/devcontainer-features/uv:1"], {});
+	assert.match(postStart, /check_agent_sandbox_tools\(\)/);
+	assert.match(postStart, /for tool in bwrap fd gh jq rg shellcheck shfmt tree uv; do/);
+	assert.match(postStart, /Missing sandbox tools/);
+});
+
 test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 	const postCreate = readFileSync(".devcontainer/postCreate.sh", "utf8");
 	const postStart = readFileSync(".devcontainer/postStart.sh", "utf8");
@@ -135,7 +163,7 @@ test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 	assert.match(postStart, /claude --version/);
 	assert.match(postCreate, /install_global_tool codex @openai\/codex/);
 	assert.match(postStart, /install_global_tool_if_missing codex @openai\/codex/);
-	assert.match(dockerfile, /apt-get install -y --no-install-recommends .* ripgrep/);
+	assert.match(dockerfile, /\bripgrep\b/);
 	assert.match(dockerfile, /https:\/\/cli\.github\.com\/packages stable main/);
 	assert.match(dockerfile, /apt-get install -y --no-install-recommends gh/);
 	assert.match(postCreate, /gh auth status -h github\.com/);

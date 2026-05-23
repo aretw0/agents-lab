@@ -92,6 +92,28 @@ install_workspace_if_pi_missing() {
   fi
 }
 
+check_agent_sandbox_tools() {
+  local missing=()
+
+  for tool in bwrap fd gh jq rg shellcheck shfmt tree uv; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+      missing+=("$tool")
+    fi
+  done
+
+  if [ ${#missing[@]} -gt 0 ]; then
+    echo "[agents-lab-devcontainer][warn] Missing sandbox tools: ${missing[*]}"
+    echo "[agents-lab-devcontainer][warn] Rebuild the devcontainer so Dockerfile/features tool installs are applied."
+  fi
+
+  if command -v bwrap >/dev/null 2>&1; then
+    if ! bwrap --ro-bind / / true >/dev/null 2>&1; then
+      echo "[agents-lab-devcontainer][warn] bubblewrap is installed but cannot create namespaces."
+      echo "[agents-lab-devcontainer][warn] Rebuild/reopen the devcontainer, or enable unprivileged user namespaces on the host."
+    fi
+  fi
+}
+
 repair_owned_dir /home/vscode/.local
 repair_owned_dir /home/vscode/.local/state
 repair_owned_dir /home/vscode/.config
@@ -113,6 +135,7 @@ if [[ -d "$REPO_ROOT/node_modules" ]]; then
 fi
 
 ensure_pnpm
+check_agent_sandbox_tools
 
 if [[ -f package.json ]]; then
   pnpm --silent run ops:disk:check || true
