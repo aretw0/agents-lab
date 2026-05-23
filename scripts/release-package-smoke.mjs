@@ -18,10 +18,6 @@ function readText(relPath) {
   return readFileSync(path.join(ROOT, relPath), "utf8");
 }
 
-function readJson(relPath) {
-  return JSON.parse(readText(relPath));
-}
-
 function listWorkspacePackages() {
   return readdirSync(PACKAGE_DIR, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
@@ -75,16 +71,18 @@ function runPackDryRun(relPath) {
 
 export function buildReleasePackageSmokeReport(options = {}) {
   const runPack = options.runPack !== false;
+  const readTextFn = options.readText ?? readText;
+  const readJsonFn = (relPath) => JSON.parse(readTextFn(relPath));
   const packageDirs = listWorkspacePackages();
   const packages = packageDirs.map((relPath) => ({
     relPath,
-    manifest: readJson(path.join(relPath, "package.json")),
+    manifest: readJsonFn(path.join(relPath, "package.json")),
   }));
   const versions = new Map(packages.map((pkg) => [pkg.manifest.name, pkg.manifest.version]));
-  const rootPackage = readJson("package.json");
-  const changesetConfig = readJson(".changeset/config.json");
-  const publishWorkflow = readText(".github/workflows/publish.yml");
-  const releaseDraftWorkflow = readText(".github/workflows/release-draft.yml");
+  const rootPackage = readJsonFn("package.json");
+  const changesetConfig = readJsonFn(".changeset/config.json");
+  const publishWorkflow = readTextFn(".github/workflows/publish.yml");
+  const releaseDraftWorkflow = readTextFn(".github/workflows/release-draft.yml");
 
   const blockers = [];
   const warnings = [];
@@ -95,7 +93,7 @@ export function buildReleasePackageSmokeReport(options = {}) {
   }
 
   const releasePackageVersions = RELEASE_PACKAGES
-    .map((relPath) => readJson(path.join(relPath, "package.json")).version);
+    .map((relPath) => readJsonFn(path.join(relPath, "package.json")).version);
   const uniqueReleaseVersions = new Set(releasePackageVersions);
   if (uniqueReleaseVersions.size !== 1) {
     blockers.push(`release package versions are not aligned: ${[...uniqueReleaseVersions].join(", ")}`);
@@ -114,7 +112,7 @@ export function buildReleasePackageSmokeReport(options = {}) {
     blockers.push("changesets fixed package group is required for lockstep pi-stack release packages");
   }
   for (const relPath of RELEASE_PACKAGES) {
-    const manifest = readJson(path.join(relPath, "package.json"));
+    const manifest = readJsonFn(path.join(relPath, "package.json"));
     if (manifest.private === true) blockers.push(`${relPath} must not be private`);
     if (!manifest.repository?.directory) blockers.push(`${relPath} must declare repository.directory`);
     if (!manifest.files || !Array.isArray(manifest.files) || manifest.files.length === 0) {
@@ -158,8 +156,8 @@ export function buildReleasePackageSmokeReport(options = {}) {
     packageCount: packages.length,
     releasePackages: RELEASE_PACKAGES.map((relPath) => ({
       relPath,
-      name: readJson(path.join(relPath, "package.json")).name,
-      version: versions.get(readJson(path.join(relPath, "package.json")).name),
+      name: readJsonFn(path.join(relPath, "package.json")).name,
+      version: versions.get(readJsonFn(path.join(relPath, "package.json")).name),
     })),
     packResults,
     githubReleases: {
