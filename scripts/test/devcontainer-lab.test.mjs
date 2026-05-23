@@ -171,6 +171,9 @@ test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
 	assert.match(postStart, /gh auth status -h github\.com/);
 	assert.match(postStart, /gh auth setup-git/);
 	assert.match(postStart, /Run: gh auth login/);
+	assert.match(postStart, /workspace_install_needed\(\)/);
+	assert.match(postStart, /packages\/pi-stack\/node_modules\/@ifi\/oh-pi-extensions\/package\.json/);
+	assert.match(postStart, /workspace install missing or has broken package links; restoring/);
 	assert.match(postCreate, /pnpm install --frozen-lockfile --prefer-offline --config\.confirm-modules-purge=false/);
 	assert.match(postStart, /pnpm install --frozen-lockfile --prefer-offline --config\.confirm-modules-purge=false/);
 	assert.doesNotMatch(postStart, /(?<!p)npm run/);

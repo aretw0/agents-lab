@@ -77,12 +77,24 @@ install_claude_code_if_missing_or_broken() {
   }
 }
 
-install_workspace_if_pi_missing() {
-  if [[ -x "$REPO_ROOT/node_modules/.bin/pi" ]]; then
+workspace_install_needed() {
+  if [[ ! -x "$REPO_ROOT/node_modules/.bin/pi" ]]; then
     return 0
   fi
 
-  echo "[agents-lab-devcontainer] pi missing from node_modules; restoring workspace install..."
+  if [[ ! -e "$REPO_ROOT/packages/pi-stack/node_modules/@ifi/oh-pi-extensions/package.json" ]]; then
+    return 0
+  fi
+
+  return 1
+}
+
+install_workspace_if_needed() {
+  if ! workspace_install_needed; then
+    return 0
+  fi
+
+  echo "[agents-lab-devcontainer] workspace install missing or has broken package links; restoring..."
   if [[ -f pnpm-lock.yaml ]]; then
     pnpm install --frozen-lockfile --prefer-offline --config.confirm-modules-purge=false \
       || pnpm install --prefer-offline --config.confirm-modules-purge=false \
@@ -143,7 +155,7 @@ fi
 
 install_claude_code_if_missing_or_broken
 install_global_tool_if_missing codex @openai/codex
-install_workspace_if_pi_missing
+install_workspace_if_needed
 
 if ! command -v gh >/dev/null 2>&1; then
   echo "[agents-lab-devcontainer][warn] gh missing. Rebuild the devcontainer to install GitHub CLI."
