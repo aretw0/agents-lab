@@ -79,4 +79,33 @@ describe("environment-doctor surface", () => {
     expect(text).toContain("gh");
     expect(text).toContain("Nao encontrado");
   });
+
+  it("environment_doctor_status treats missing glab as optional noise", async () => {
+    const pi = {
+      ...makeMockPi(),
+      exec: vi.fn(async (command: string) => {
+        if (command === "glab") {
+          return { code: 1, stdout: "", stderr: "glab missing" };
+        }
+        return { code: 0, stdout: `${command} version\n`, stderr: "" };
+      }),
+    } as unknown as ReturnType<typeof makeMockPi>;
+    environmentDoctorExtension(pi);
+    const tool = getTool(pi, "environment_doctor_status");
+
+    const result = await tool.execute(
+      "tc-environment-doctor-optional-glab",
+      { includeAuthChecks: false },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+    const text = String(result.content?.[0]?.text ?? "");
+
+    expect(text).toContain("ok=yes");
+    expect(text).toContain("issues=0");
+    expect(text).toContain("optionalIssues=1");
+    expect(text).toContain("optionalIssueDetails=error:glab=Nao encontrado");
+    expect((result.details as any)?.optionalIssues?.[0]?.name).toBe("glab");
+  });
 });

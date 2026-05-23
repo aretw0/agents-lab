@@ -26,6 +26,7 @@ interface CheckResult {
   name: string;
   status: Severity;
   message: string;
+  optional?: boolean;
   fix?: {
     description: string;
     auto: boolean; // can be applied automatically
@@ -363,7 +364,8 @@ async function checkTool(
   name: string,
   command: string,
   versionArgs: string[],
-  authCheck?: { command: string; args: string[]; failHint: string }
+  authCheck?: { command: string; args: string[]; failHint: string },
+  options: { optional?: boolean } = {},
 ): Promise<CheckResult> {
   try {
     let result = await pi.exec(command, versionArgs, { timeout: 5000 });
@@ -375,7 +377,7 @@ async function checkTool(
     }
 
     if (result.code !== 0) {
-      return { name, status: "error", message: `Nao encontrado no PATH` };
+      return { name, status: "error", message: `Nao encontrado no PATH`, optional: options.optional };
     }
 
     if (authCheck) {
@@ -400,9 +402,9 @@ async function checkTool(
     }
 
     const version = result.stdout?.trim().split("\n")[0] ?? "";
-    return { name, status: "ok", message: version };
+    return { name, status: "ok", message: version, optional: options.optional };
   } catch {
-    return { name, status: "error", message: `Nao encontrado` };
+    return { name, status: "error", message: `Nao encontrado`, optional: options.optional };
   }
 }
 
@@ -531,7 +533,8 @@ async function runAllChecks(
             args: ["auth", "status"],
             failHint: "glab auth login",
           }
-          : undefined
+          : undefined,
+        { optional: true },
       ),
       checkTool(pi, "node", "node", ["--version"]),
       // On Windows, npm is npm.cmd -- not found via spawn without shell.
@@ -737,7 +740,7 @@ export default function (pi: ExtensionAPI) {
           shell,
           scheduler,
         ];
-        const issues = allResults.filter((r) => r.status !== "ok");
+        const issues = allResults.filter((r) => r.status !== "ok" && !r.optional);
 
         if (issues.length > 0) {
           const labels = issues.map((i) => `${icon(i.status)} ${i.name}`);
@@ -783,7 +786,8 @@ export default function (pi: ExtensionAPI) {
         scheduler,
         okCount: allResults.filter((r) => r.status === "ok").length,
         totalCount: allResults.length,
-        issues: allResults.filter((r) => r.status !== "ok"),
+        issues: allResults.filter((r) => r.status !== "ok" && !r.optional),
+        optionalIssues: allResults.filter((r) => r.status !== "ok" && r.optional),
         profile,
         hatch,
       };
@@ -794,6 +798,8 @@ export default function (pi: ExtensionAPI) {
         `checks=${payload.okCount}/${payload.totalCount}`,
         `issues=${payload.issues.length}`,
         summarizeDoctorIssues(payload.issues),
+        payload.optionalIssues.length > 0 ? `optionalIssues=${payload.optionalIssues.length}` : undefined,
+        summarizeDoctorIssues(payload.optionalIssues, 2)?.replace(/^issueDetails=/, "optionalIssueDetails="),
         `terminal=${terminalId}`,
         `shell=${shellId}`,
         hatch ? "hatch=yes" : undefined,
