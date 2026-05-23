@@ -38,6 +38,7 @@ O estado atual para 0.8.0 é:
 | Área | Por que importa | Próximo passo seguro |
 |---|---|---|
 | Publish npm | afeta usuários e provenance | release por changesets/tag semver; `Publish` só em condição de release |
+| GitHub Packages | muda registry, visibilidade e rota de consumo | manter `not-configured-opt-in` até decisão explícita e smoke dedicado |
 | GitHub Actions como executor | muda fronteira local-first | manter report-only até existir task protegida explícita |
 | Provider routing | pode gastar quota e trocar modelo real | canários bounded, rollback e decisão do operador |
 | Monitor runtime amplo | pode adicionar ruído/custo | calibrar com evidência e regressões antes de ampliar default |
@@ -60,7 +61,7 @@ O estado atual para 0.8.0 é:
 |---|---|
 | Revisar release notes/changelog | confirmar mudanças desde `v0.7.0`, riscos e rollback antes de tag |
 | Decidir bump 0.8.0 | `release:readiness:v0.8.0` deve ficar verde exceto antes do bump; depois, verde completo |
-| Revalidar instalação limpa | `release:package:smoke`, `docs:package:check`, install/smoke em ambiente limpo |
+| Revalidar instalação limpa | `release:package:smoke`, `docs:package:check`, install/smoke em ambiente limpo; GitHub Packages deve continuar opt-in se não aprovado |
 | Manter acoplamentos de engine sob controle | `engine:boundary:audit`, sem dependências Pi em core portable |
 
 ## Critério de parada

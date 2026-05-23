@@ -16,6 +16,7 @@ This guide is repository maintenance material. It documents the current `agents-
 - Root scripts: workspace install, tests, audits, docs and release preparation use `pnpm`/`pnpm exec`.
 - `npm` use is intentional only for registry semantics: `npm publish --provenance`, `npm pack` package smoke evidence and `npm deprecate` release recovery.
 - `npx` use is public installer UX for `@aretw0/pi-stack`, not a development install path.
+- GitHub Packages is not configured in the current publish workflow. Keep it `not-configured-opt-in` until there is a separate package visibility, credential and consumer-routing decision.
 - CI cache: `.github/workflows/ci.yml` disables dependency cache writes on pull requests by passing `{% raw %}`cache-mode: ${{ github.event_name == 'pull_request' && 'off' || 'auto' }}`{% endraw %}.
 - Publish cache: `.github/workflows/publish.yml` keeps dependency cache off and publishes only from an accepted release path with npm provenance.
 - Audit: `.github/workflows/security-audit.yml` is isolated from pull requests and runs with read-only repository permissions.
@@ -36,6 +37,7 @@ For a focused supply-chain or CI cache change:
 ```bash
 pnpm install --frozen-lockfile --offline
 pnpm run test:ci:workflow
+pnpm run release:package:smoke
 pnpm run ci:local:parity
 ```
 
@@ -47,6 +49,7 @@ Use the offline install first when the store is already warm. If it fails becaus
 - CI cache regression: set the affected setup call to `cache-mode: "off"` in a small commit, then re-run `pnpm run test:ci:workflow`.
 - Dependency resolution regression: restore the previous `pnpm-lock.yaml` and rerun `pnpm install --frozen-lockfile --offline`.
 - Publish regression: do not retry manually until the release tag, package versions, provenance permission and npm token scope are rechecked.
+- GitHub Packages regression: remove the package registry mutation unless the task explicitly approved GitHub Packages as a publish target and updated the smoke evidence.
 
 ## Evidence
 
