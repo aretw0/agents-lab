@@ -9,6 +9,7 @@ import projectBoardSurfaceExtension, {
   buildBoardPlanningClarityScore,
   buildBoardDependencyHealthSnapshot,
   buildBoardDependencyHygieneScore,
+  buildBoardPressureReductionPlan,
   buildProjectVerificationBackfillPlan,
   completeProjectTaskBoardWithVerification,
   createProjectTaskBoard,
@@ -278,6 +279,37 @@ describe("project-board tool surfaces", () => {
       expect((result.details as any)?.verification?.evidence).toBeUndefined();
       expect((result as any)?.content?.[0]?.text).toBe("board-verification-append: ok=yes verification=VER-TOOL target=TASK-C linked=yes");
       expect((result.details as any)?.task?.verification).toBe("VER-TOOL");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_pressure_reduction_plan previews hot board reduction without writing", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const beforeTasks = readFileSync(join(cwd, ".project", "tasks.json"), "utf8");
+      const beforeVerification = readFileSync(join(cwd, ".project", "verification.json"), "utf8");
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const planTool = getTool(pi, "board_pressure_reduction_plan");
+
+      const result = await planTool.execute(
+        "tc-board-pressure-plan",
+        { board_warn_mb: 0 },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.mode).toBe("board-pressure-reduction-plan");
+      expect((result.details as any)?.dryRun).toBe(true);
+      expect((result.details as any)?.mutates).toBe(false);
+      expect((result.details as any)?.status).toBe("pressure");
+      expect((result.details as any)?.openTaskCount).toBe(3);
+      expect((result.details as any)?.recommendedOrder).toContain("split-verification-ledger");
+      expect(String((result as any)?.content?.[0]?.text ?? "")).toContain("board-pressure-plan:");
+      expect(readFileSync(join(cwd, ".project", "tasks.json"), "utf8")).toBe(beforeTasks);
+      expect(readFileSync(join(cwd, ".project", "verification.json"), "utf8")).toBe(beforeVerification);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

@@ -7,6 +7,7 @@ import projectBoardSurfaceExtension, {
   buildProjectTaskDecisionPacket,
   buildProjectTaskQualityGate,
   buildBoardPlanningClarityScore,
+  buildBoardPressureReductionPlan,
   buildBoardDependencyHealthSnapshot,
   buildBoardDependencyHygieneScore,
   completeProjectTaskBoardWithVerification,
@@ -168,6 +169,26 @@ describe("project-board-surface", () => {
 
       const second = queryProjectTasks(cwd, { status: "in-progress", limit: 5 });
       expect(second.meta.cacheHit).toBe(true);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("buildBoardPressureReductionPlan reports completed history pressure", () => {
+    const cwd = seedWorkspace();
+    try {
+      const plan = buildBoardPressureReductionPlan(cwd, { boardWarnMb: 0 });
+
+      expect(plan.mode).toBe("board-pressure-reduction-plan");
+      expect(plan.status).toBe("pressure");
+      expect(plan.dryRun).toBe(true);
+      expect(plan.mutates).toBe(false);
+      expect(plan.totalTaskCount).toBe(3);
+      expect(plan.openTaskCount).toBe(3);
+      expect(plan.completedTaskCount).toBe(0);
+      expect(plan.verificationCount).toBe(2);
+      expect(plan.recommendedOrder).toEqual(["split-verification-ledger"]);
+      expect(plan.summary).toContain("dryRun=yes");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

@@ -132,10 +132,13 @@ import {
   compactVerificationAppendToolResult,
 } from "./project-board-tool-formatting";
 import { buildProjectVerificationBackfillPlan } from "./project-board-verification-backfill";
+import { buildBoardPressureReductionPlan } from "./project-board-pressure-plan";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export { buildProjectVerificationBackfillPlan } from "./project-board-verification-backfill";
 export type { ProjectVerificationBackfillPlan } from "./project-board-verification-backfill";
+export { buildBoardPressureReductionPlan } from "./project-board-pressure-plan";
+export type { BoardPressureReductionPlan } from "./project-board-pressure-plan";
 
 export {
   queryProjectTasks,
@@ -554,6 +557,25 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       });
       return buildOperatorVisibleToolResponse({
         label: "board_verification_backfill_plan",
+        summary: details.summary,
+        details,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "board_pressure_reduction_plan",
+    label: "Board Pressure Reduction Plan",
+    description:
+      "Read-only dry-run plan for reducing hot .project board pressure without mutating tasks or verification.",
+    parameters: Type.Object({
+      board_warn_mb: Type.Optional(Type.Number({ minimum: 0, description: "Board size threshold in MB. Default 1." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as { board_warn_mb?: number };
+      const details = buildBoardPressureReductionPlan(ctx.cwd, { boardWarnMb: p.board_warn_mb });
+      return buildOperatorVisibleToolResponse({
+        label: "board_pressure_reduction_plan",
         summary: details.summary,
         details,
       });
