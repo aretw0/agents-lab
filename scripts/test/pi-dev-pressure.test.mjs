@@ -17,6 +17,7 @@ import {
   buildDevelopmentVelocityPressure,
   buildVelocityPressureSignals,
   collectAgentRunPressureStats,
+  buildBoardPressurePlan,
   collectBoardStateStats,
   collectPerformanceWatchdogStats,
 } from "../pi-dev-pressure.mjs";
@@ -570,6 +571,36 @@ test("collectBoardStateStats reports historical board pressure without mutating 
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
+});
+
+test("buildBoardPressurePlan previews governance reduction without mutating state", () => {
+  const plan = buildBoardPressurePlan({
+    exists: true,
+    path: ".project/tasks.json",
+    mb: 2,
+    tasks: {
+      total: 5,
+      completedCount: 3,
+      completedMb: 1.7,
+      completedNotesMb: 0.8,
+      byStatus: { completed: 3, planned: 1, cancelled: 1 },
+      topCompleted: [],
+    },
+    verification: { exists: true, path: ".project/verification.json", mb: 1.2, count: 12 },
+  }, { boardWarnMb: 1 });
+
+  assert.equal(plan.mode, "dry-run");
+  assert.equal(plan.status, "pressure");
+  assert.equal(plan.mutates, false);
+  assert.equal(plan.openTaskCount, 1);
+  assert.equal(plan.nonCompletedTaskCount, 2);
+  assert.equal(plan.cancelledTaskCount, 1);
+  assert.deepEqual(plan.recommendedOrder, [
+    "archive-completed-tasks",
+    "compact-completed-task-notes",
+    "split-verification-ledger",
+  ]);
+  assert.ok(plan.safety.includes("require-explicit-operator-approval-before-any-write"));
 });
 
 test("buildVelocityPressureSignals includes actionable board bloat facts", () => {

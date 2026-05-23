@@ -99,3 +99,80 @@ export function formatBoardPressureDetail(board) {
     topPart,
   ].filter(Boolean).join("; ");
 }
+
+export function buildBoardPressurePlan(board, thresholds = {}) {
+  if (!board?.exists || !board.tasks) {
+    return {
+      mode: "dry-run",
+      status: "unavailable",
+      reason: "board-missing",
+      mutates: false,
+      actions: [],
+    };
+  }
+
+  const boardWarnMb = Number(thresholds.boardWarnMb ?? 1);
+  const tasks = board.tasks;
+  const verification = board.verification?.exists ? board.verification : undefined;
+  const completedCount = Number(tasks.completedCount ?? 0);
+  const total = Number(tasks.total ?? 0);
+  const cancelledCount = Number(tasks.byStatus?.cancelled ?? 0);
+  const nonCompletedCount = Math.max(0, total - completedCount);
+  const openCount = Math.max(0, nonCompletedCount - cancelledCount);
+  const completedMb = Number(tasks.completedMb ?? 0);
+  const completedNotesMb = Number(tasks.completedNotesMb ?? 0);
+  const actions = [];
+
+  if (completedCount > 0) {
+    actions.push({
+      id: "archive-completed-tasks",
+      intent: "Move completed task history out of the hot board after checkpoint.",
+      candidateCount: completedCount,
+      candidateMb: completedMb,
+      retainedHotTasks: nonCompletedCount,
+      guard: "explicit-operator-approval-required",
+    });
+  }
+
+  if (completedNotesMb > 0) {
+    actions.push({
+      id: "compact-completed-task-notes",
+      intent: "Replace bulky completed-task notes with verification links and archive details.",
+      candidateMb: completedNotesMb,
+      guard: "explicit-operator-approval-required",
+    });
+  }
+
+  if (verification) {
+    actions.push({
+      id: "split-verification-ledger",
+      intent: "Keep recent verification hot and move historical evidence to an archive ledger.",
+      candidateCount: Number(verification.count ?? 0),
+      candidateMb: Number(verification.mb ?? 0),
+      guard: "explicit-operator-approval-required",
+    });
+  }
+
+  return {
+    mode: "dry-run",
+    status: Number(board.mb ?? 0) >= boardWarnMb ? "pressure" : "ok",
+    mutates: false,
+    boardPath: board.path,
+    boardMb: Number(board.mb ?? 0),
+    boardWarnMb,
+    openTaskCount: openCount,
+    nonCompletedTaskCount: nonCompletedCount,
+    cancelledTaskCount: cancelledCount,
+    completedTaskCount: completedCount,
+    verificationPath: verification?.path,
+    verificationMb: verification ? Number(verification.mb ?? 0) : undefined,
+    recommendedOrder: actions.map((action) => action.id),
+    safety: [
+      "preview-only",
+      "keep-open-tasks-in-hot-board",
+      "preserve-verification-links",
+      "require-explicit-operator-approval-before-any-write",
+    ],
+    actions,
+  };
+}

@@ -11,11 +11,12 @@ import {
   computeStrictFailures,
 } from "../packages/pi-stack/extensions/session-pressure-policy.mjs";
 import {
+  buildBoardPressurePlan,
   collectBoardStateStats,
   formatBoardPressureDetail,
 } from "./pi-dev-pressure-board.mjs";
 
-export { collectBoardStateStats } from "./pi-dev-pressure-board.mjs";
+export { buildBoardPressurePlan, collectBoardStateStats } from "./pi-dev-pressure-board.mjs";
 
 const DEFAULT_THRESHOLDS = {
   largeSessionMb: 50,
@@ -700,6 +701,7 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   const git = options.git === false ? { available: false, skipped: true } : collectGitDirtyStats(cwd);
   const velocity = options.velocityStats ?? collectVelocityStats(cwd, { ...(options.velocity ?? {}), now: options.now });
   const performanceWatchdog = options.performanceWatchdog ?? collectPerformanceWatchdogStats(cwd);
+  const boardPressurePlan = buildBoardPressurePlan(velocity.board, thresholds);
 
   const signals = [];
   const largestSessionMb = sessions.largest?.mb ?? 0;
@@ -792,6 +794,7 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
     loop,
     git,
     velocity,
+    boardPressurePlan,
     performanceWatchdog,
     summary: `pi-dev-pressure: recommendation=${recommendation} signals=${signals.length} largestSessionMb=${largestSessionMb} heaviestConfiguredEntrypoint=${heaviestConfiguredEntrypoint ? `${heaviestConfiguredEntrypoint.package}:${heaviestConfiguredEntrypoint.entry}` : "n/a"}`,
   };

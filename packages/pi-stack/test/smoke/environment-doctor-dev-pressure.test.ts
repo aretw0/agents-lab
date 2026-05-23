@@ -111,6 +111,10 @@ describe("environment doctor dev pressure", () => {
       expect(report.board.exists).toBe(true);
       expect(report.board.tasks.completedCount).toBe(1);
       expect(report.board.verification.count).toBe(1);
+      expect(report.boardPressurePlan.mode).toBe("dry-run");
+      expect(report.boardPressurePlan.mutates).toBe(false);
+      expect(report.boardPressurePlan.recommendedOrder).toContain("archive-completed-tasks");
+      expect(report.boardPressurePlan.safety).toContain("require-explicit-operator-approval-before-any-write");
       expect(report.recommendation).toBe("reduce-governance-surface");
       expect(signal?.detail).toContain("tasks=2");
       expect(signal?.detail).toContain("completed=1,planned=1");

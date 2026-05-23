@@ -313,11 +313,87 @@ function formatBoardPressureDetail(board: ReturnType<typeof collectDevPressureBo
   ].filter(Boolean).join("; ");
 }
 
+function buildDevPressureBoardPlan(board: ReturnType<typeof collectDevPressureBoardState>) {
+  if (!board.exists || !isRecord(board.tasks)) {
+    return {
+      mode: "dry-run",
+      status: "unavailable",
+      reason: "board-missing",
+      mutates: false,
+      actions: [],
+    };
+  }
+
+  const tasks = board.tasks;
+  const completedCount = Number(tasks.completedCount ?? 0);
+  const total = Number(tasks.total ?? 0);
+  const byStatus = isRecord(tasks.byStatus) ? tasks.byStatus : {};
+  const cancelledTaskCount = Number(byStatus.cancelled ?? 0);
+  const nonCompletedTaskCount = Math.max(0, total - completedCount);
+  const openTaskCount = Math.max(0, nonCompletedTaskCount - cancelledTaskCount);
+  const verification = isRecord(board.verification) && board.verification.exists ? board.verification : undefined;
+  const actions: Array<Record<string, unknown>> = [];
+
+  if (completedCount > 0) {
+    actions.push({
+      id: "archive-completed-tasks",
+      intent: "Move completed task history out of the hot board after checkpoint.",
+      candidateCount: completedCount,
+      candidateMb: Number(tasks.completedMb ?? 0),
+      retainedHotTasks: nonCompletedTaskCount,
+      guard: "explicit-operator-approval-required",
+    });
+  }
+
+  if (Number(tasks.completedNotesMb ?? 0) > 0) {
+    actions.push({
+      id: "compact-completed-task-notes",
+      intent: "Replace bulky completed-task notes with verification links and archive details.",
+      candidateMb: Number(tasks.completedNotesMb ?? 0),
+      guard: "explicit-operator-approval-required",
+    });
+  }
+
+  if (verification) {
+    actions.push({
+      id: "split-verification-ledger",
+      intent: "Keep recent verification hot and move historical evidence to an archive ledger.",
+      candidateCount: Number(verification.count ?? 0),
+      candidateMb: Number(verification.mb ?? 0),
+      guard: "explicit-operator-approval-required",
+    });
+  }
+
+  return {
+    mode: "dry-run",
+    status: Number(board.mb ?? 0) >= DEV_PRESSURE_THRESHOLDS.boardWarnMb ? "pressure" : "ok",
+    mutates: false,
+    boardPath: board.path,
+    boardMb: Number(board.mb ?? 0),
+    boardWarnMb: DEV_PRESSURE_THRESHOLDS.boardWarnMb,
+    openTaskCount,
+    nonCompletedTaskCount,
+    cancelledTaskCount,
+    completedTaskCount: completedCount,
+    verificationPath: verification?.path,
+    verificationMb: verification ? Number(verification.mb ?? 0) : undefined,
+    recommendedOrder: actions.map((action) => action.id),
+    safety: [
+      "preview-only",
+      "keep-open-tasks-in-hot-board",
+      "preserve-verification-links",
+      "require-explicit-operator-approval-before-any-write",
+    ],
+    actions,
+  };
+}
+
 export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
   const sessions = collectDevPressureSessions(cwd);
   const configuredEntrypoints = collectDevPressureConfiguredEntrypoints(cwd);
   const settings = collectDevPressureSettings(cwd);
   const board = collectDevPressureBoardState(cwd);
+  const boardPressurePlan = buildDevPressureBoardPlan(board);
   const signals: DevPressureSignal[] = [];
   const largestSessionMb = sessions.largest?.mb ?? 0;
   const heaviestConfiguredEntrypoint = configuredEntrypoints[0];
@@ -365,6 +441,7 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
     signals,
     sessions,
     board,
+    boardPressurePlan,
     configuredEntrypoints: configuredEntrypoints.slice(0, 15),
     settings,
     summary: `environment-dev-pressure: recommendation=${recommendation} signals=${signals.length} largestSessionMb=${largestSessionMb} heaviestConfiguredEntrypoint=${heaviestConfiguredEntrypoint ? `${heaviestConfiguredEntrypoint.package}:${heaviestConfiguredEntrypoint.entry}` : "n/a"}`,
