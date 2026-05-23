@@ -51,4 +51,32 @@ describe("environment-doctor surface", () => {
     expect(String(result.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
     expect(String(result.content?.[0]?.text ?? "")).not.toContain('\"platform\"');
   });
+
+  it("environment_doctor_status includes issue details in compact summary", async () => {
+    const pi = {
+      ...makeMockPi(),
+      exec: vi.fn(async (command: string) => {
+        if (command === "gh") {
+          return { code: 1, stdout: "", stderr: "gh missing" };
+        }
+        return { code: 0, stdout: `${command} version\n`, stderr: "" };
+      }),
+    } as unknown as ReturnType<typeof makeMockPi>;
+    environmentDoctorExtension(pi);
+    const tool = getTool(pi, "environment_doctor_status");
+
+    const result = await tool.execute(
+      "tc-environment-doctor-issue-summary",
+      { includeAuthChecks: false },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+    const text = String(result.content?.[0]?.text ?? "");
+
+    expect(text).toContain("issues=1");
+    expect(text).toContain("issueDetails=");
+    expect(text).toContain("gh");
+    expect(text).toContain("Nao encontrado");
+  });
 });

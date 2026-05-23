@@ -703,6 +703,18 @@ function formatSection(title: string, results: CheckResult[]): string {
   return lines.join("\n");
 }
 
+function summarizeDoctorIssues(issues: CheckResult[], maxIssues = 3): string | undefined {
+  if (issues.length === 0) return undefined;
+  const rows = issues.slice(0, maxIssues).map((issue) => {
+    const status = String(issue.status ?? "unknown");
+    const name = String(issue.name ?? "unknown").replace(/\s+/g, "-");
+    const message = String(issue.message ?? "").replace(/\s+/g, " ").trim();
+    return `${status}:${name}${message ? `=${message}` : ""}`;
+  });
+  const suffix = issues.length > maxIssues ? `;+${issues.length - maxIssues}` : "";
+  return `issueDetails=${rows.join(";")}${suffix}`;
+}
+
 // --- Extension ---
 
 export default function (pi: ExtensionAPI) {
@@ -781,6 +793,7 @@ export default function (pi: ExtensionAPI) {
         `profile=${profile}`,
         `checks=${payload.okCount}/${payload.totalCount}`,
         `issues=${payload.issues.length}`,
+        summarizeDoctorIssues(payload.issues),
         `terminal=${terminalId}`,
         `shell=${shellId}`,
         hatch ? "hatch=yes" : undefined,
