@@ -16,6 +16,7 @@ import { Type } from "@sinclair/typebox";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, parse, resolve } from "node:path";
+import { buildEnvironmentRuntimeHealthPayload } from "./environment-doctor-runtime-health";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 // --- Types ---
@@ -824,6 +825,45 @@ export default function (pi: ExtensionAPI) {
       return buildOperatorVisibleToolResponse({
         label: "environment_dev_pressure_status",
         summary: payload.summary,
+        details: payload,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "environment_runtime_health_status",
+    label: "Environment Runtime Health Status",
+    description: "Read-only one-shot runtime health summary for operator go/no-go decisions; does not call Pi TUI slash commands.",
+    parameters: Type.Object({
+      includeAuthChecks: Type.Optional(Type.Boolean({ description: "Include provider/CLI auth checks. Defaults to false to keep preflight low-noise." })),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as { includeAuthChecks?: boolean };
+      const { tools, terminal, shell, scheduler, terminalId, shellId } = await runAllChecks(pi, {
+        includeAuthChecks: p.includeAuthChecks === true,
+        cwd: ctx.cwd,
+      });
+      const allResults = [...tools, ...(terminal ? [terminal] : []), shell, scheduler];
+      const { buildEnvironmentDevPressureReport } = await import("./environment-doctor-dev-pressure");
+      const devPressure = buildEnvironmentDevPressureReport(ctx.cwd);
+      const {
+        buildRuntimeArtifactAuditSummary,
+        runRuntimeArtifactAudit,
+      } = await import("./runtime-artifact-audit.mjs");
+      const runtimeArtifacts = runRuntimeArtifactAudit(ctx.cwd);
+      const runtimeArtifactSummary = buildRuntimeArtifactAuditSummary(runtimeArtifacts);
+      const { payload, summary } = buildEnvironmentRuntimeHealthPayload({
+        allResults,
+        terminalId,
+        shellId,
+        devPressure,
+        runtimeArtifacts,
+        runtimeArtifactSummary,
+      });
+
+      return buildOperatorVisibleToolResponse({
+        label: "environment_runtime_health_status",
+        summary,
         details: payload,
       });
     },

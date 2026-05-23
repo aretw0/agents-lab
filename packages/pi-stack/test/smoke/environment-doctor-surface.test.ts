@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import environmentDoctorExtension from "../../extensions/environment-doctor";
+import { resolveEnvironmentRuntimeHealthDecision } from "../../extensions/environment-doctor-runtime-health";
 
 function makeMockPi() {
   return {
@@ -107,5 +108,47 @@ describe("environment-doctor surface", () => {
     expect(text).toContain("optionalIssues=1");
     expect(text).toContain("optionalIssueDetails=error:glab=Nao encontrado");
     expect((result.details as any)?.optionalIssues?.[0]?.name).toBe("glab");
+  });
+
+  it("environment_runtime_health_status aggregates read-only go/no-go checks", async () => {
+    const pi = makeMockPi();
+    environmentDoctorExtension(pi);
+    const tool = getTool(pi, "environment_runtime_health_status");
+
+    const result = await tool.execute(
+      "tc-environment-runtime-health",
+      { includeAuthChecks: false },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+    const text = String(result.content?.[0]?.text ?? "");
+
+    expect(text).toContain("environment-runtime-health:");
+    expect(text).toContain("decision=");
+    expect(text).toContain("liveWatchdog=runtime-local");
+    expect((result.details as any)?.mode).toBe("environment-runtime-health");
+    expect((result.details as any)?.watchdog?.liveMetricsAvailable).toBe(false);
+  });
+
+  it("runtime health decision blocks hard failures and keeps optional pressure advisory", () => {
+    expect(resolveEnvironmentRuntimeHealthDecision({
+      doctorIssues: [],
+      devPressureRecommendation: "continue",
+      devPressureSeverity: "warn",
+      runtimeArtifactViolations: [],
+    })).toBe("continue");
+    expect(resolveEnvironmentRuntimeHealthDecision({
+      doctorIssues: [],
+      devPressureRecommendation: "new-session",
+      devPressureSeverity: "ok",
+      runtimeArtifactViolations: [],
+    })).toBe("safe-mode");
+    expect(resolveEnvironmentRuntimeHealthDecision({
+      doctorIssues: [{ name: "gh" }],
+      devPressureRecommendation: "continue",
+      devPressureSeverity: "ok",
+      runtimeArtifactViolations: [],
+    })).toBe("stop-and-investigate");
   });
 });
