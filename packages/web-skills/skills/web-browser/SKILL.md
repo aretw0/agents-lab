@@ -29,10 +29,7 @@ When this trigger fires:
 - Do **not** start from `curl`/`wget`/`python requests`/`r.jina.ai` or generic shell scraping.
 - Only fallback after explicit CDP failure evidence (at least 2 failed attempts), and report the fallback reason.
 
-> **Requires:** `npm install` inside `./scripts/` before first use (installs `ws` for WebSocket/CDP).
-> ```bash
-> npm install --prefix ./scripts
-> ```
+> **Dependency:** `@aretw0/web-skills` declares `ws` at the package root. Published installs should not require per-skill setup. When running from this repository source, run `pnpm install` at the repository root before using the scripts.
 
 ## Start Chrome
 

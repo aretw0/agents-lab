@@ -22,13 +22,9 @@ Ou via projeto:
 }
 ```
 
-### web-browser — setup inicial
+### web-browser — dependência
 
-A skill `web-browser` usa WebSocket (via `ws`) para comunicação CDP. Antes do primeiro uso:
-
-```bash
-npm install --prefix packages/web-skills/skills/web-browser/scripts
-```
+A skill `web-browser` usa WebSocket (via `ws`) para comunicação CDP. A dependência é declarada no `package.json` do `@aretw0/web-skills`; installs publicados não precisam de install separado. Ao rodar a partir do código-fonte deste repositório, use o install do workspace na raiz.
 
 ## Filosofia
 

@@ -106,4 +106,15 @@ describe("installability", () => {
       });
     });
   }
+
+  it("web-browser declares CDP runtime dependency at package root", () => {
+    const pkgPath = path.join(PACKAGES_DIR, "web-skills");
+    const pkgJson = JSON.parse(readFileSync(path.join(pkgPath, "package.json"), "utf8"));
+    const skill = readFileSync(path.join(pkgPath, "skills", "web-browser", "SKILL.md"), "utf8");
+    const readme = readFileSync(path.join(pkgPath, "README.md"), "utf8");
+
+    expect(pkgJson.dependencies?.ws).toBeDefined();
+    expect(`${skill}\n${readme}`).toContain("package root");
+    expect(`${skill}\n${readme}`).not.toMatch(/npm install --prefix|inside `\.\/scripts\/`|setup por subdiretório/);
+  });
 });
