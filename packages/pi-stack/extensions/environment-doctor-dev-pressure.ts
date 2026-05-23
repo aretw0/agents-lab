@@ -9,6 +9,7 @@ const DEV_PRESSURE_THRESHOLDS = {
   blockingSessionMb: 150,
   heavyEntrypointKb: 750,
   heavyEntrypointFiles: 70,
+  boardWarnMb: 1,
 };
 
 type DevPressureSignalLevel = "info" | "warn" | "block";
@@ -31,6 +32,10 @@ function safeReadJson(filePath: string): Record<string, unknown> | undefined {
   } catch (error) {
     return { __parseError: error instanceof Error ? error.message : String(error) };
   }
+}
+
+function toMb(bytes: number): number {
+  return Number((Math.max(0, Number(bytes) || 0) / 1024 / 1024).toFixed(2));
 }
 
 function toRelativeSlash(cwd: string, filePath: string): string {
@@ -222,10 +227,97 @@ function collectDevPressureSettings(cwd: string) {
   });
 }
 
+function collectDevPressureBoardState(cwd: string) {
+  const boardPath = join(cwd, ".project", "tasks.json");
+  const verificationPath = join(cwd, ".project", "verification.json");
+  if (!existsSync(boardPath)) return { exists: false, path: ".project/tasks.json" };
+
+  const stat = statSync(boardPath);
+  const board = safeReadJson(boardPath);
+  const rawTasks = Array.isArray(board?.tasks) ? board.tasks : [];
+  const tasks = rawTasks.filter(isRecord);
+  const byStatus: Record<string, number> = {};
+  let completedBytes = 0;
+  let completedNotesBytes = 0;
+  const topCompleted: Array<{ id: string; kb: number; notesKb: number }> = [];
+
+  for (const task of tasks) {
+    const status = String(task.status ?? "unknown");
+    byStatus[status] = (byStatus[status] ?? 0) + 1;
+    if (status !== "completed") continue;
+    const bytes = Buffer.byteLength(JSON.stringify(task), "utf8");
+    const notesBytes = Buffer.byteLength(JSON.stringify(task.notes ?? []), "utf8");
+    completedBytes += bytes;
+    completedNotesBytes += notesBytes;
+    topCompleted.push({
+      id: String(task.id ?? task.title ?? "unknown"),
+      kb: Number((bytes / 1024).toFixed(1)),
+      notesKb: Number((notesBytes / 1024).toFixed(1)),
+    });
+  }
+  topCompleted.sort((a, b) => b.kb - a.kb);
+
+  let verification: Record<string, unknown>;
+  if (existsSync(verificationPath)) {
+    const verificationStat = statSync(verificationPath);
+    const verificationJson = safeReadJson(verificationPath);
+    verification = {
+      exists: true,
+      path: ".project/verification.json",
+      mb: toMb(verificationStat.size),
+      count: Array.isArray(verificationJson?.verifications) ? verificationJson.verifications.length : 0,
+    };
+  } else {
+    verification = { exists: false, path: ".project/verification.json" };
+  }
+
+  return {
+    exists: true,
+    path: ".project/tasks.json",
+    mb: toMb(stat.size),
+    tasks: {
+      total: tasks.length,
+      byStatus,
+      completedCount: byStatus.completed ?? 0,
+      completedMb: toMb(completedBytes),
+      completedNotesMb: toMb(completedNotesBytes),
+      topCompleted: topCompleted.slice(0, 5),
+    },
+    verification,
+  };
+}
+
+function formatBoardPressureDetail(board: ReturnType<typeof collectDevPressureBoardState>): string {
+  const tasks = isRecord(board.tasks) ? board.tasks : undefined;
+  const byStatus = isRecord(tasks?.byStatus) ? tasks.byStatus : undefined;
+  const statusParts = byStatus
+    ? Object.entries(byStatus)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([status, count]) => `${status}=${count}`)
+    : [];
+  const topCompleted = Array.isArray(tasks?.topCompleted) && isRecord(tasks.topCompleted[0])
+    ? tasks.topCompleted[0]
+    : undefined;
+  const topPart = topCompleted ? `topCompleted=${topCompleted.id}:${topCompleted.kb}KB` : "topCompleted=n/a";
+  const verification = isRecord(board.verification) && board.verification.exists
+    ? `verification=${board.verification.count}/${board.verification.mb}MB`
+    : undefined;
+  return [
+    `${board.path} ${board.mb} MB`,
+    tasks ? `tasks=${tasks.total}` : undefined,
+    statusParts.length > 0 ? statusParts.join(",") : undefined,
+    tasks ? `completedMb=${tasks.completedMb}` : undefined,
+    tasks ? `completedNotesMb=${tasks.completedNotesMb}` : undefined,
+    verification,
+    topPart,
+  ].filter(Boolean).join("; ");
+}
+
 export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
   const sessions = collectDevPressureSessions(cwd);
   const configuredEntrypoints = collectDevPressureConfiguredEntrypoints(cwd);
   const settings = collectDevPressureSettings(cwd);
+  const board = collectDevPressureBoardState(cwd);
   const signals: DevPressureSignal[] = [];
   const largestSessionMb = sessions.largest?.mb ?? 0;
   const heaviestConfiguredEntrypoint = configuredEntrypoints[0];
@@ -253,10 +345,14 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
     signals.push({ level: "info", code: "suppressed-package-entries", detail: `${suppressed} package entries expose no surfaces` });
   }
 
+  if (board.exists && Number(board.mb) >= DEV_PRESSURE_THRESHOLDS.boardWarnMb) {
+    signals.push({ level: "warn", code: "large-board-state", detail: formatBoardPressureDetail(board) });
+  }
+
   let recommendation = "continue";
   if (signals.some((signal) => signal.level === "block")) recommendation = "block-and-clean";
   else if (signals.some((signal) => signal.code === "large-resume-session")) recommendation = "new-session";
-  else if (signals.some((signal) => signal.code === "heavy-configured-extension-entrypoint")) recommendation = "reduce-governance-surface";
+  else if (signals.some((signal) => signal.code === "heavy-configured-extension-entrypoint" || signal.code === "large-board-state")) recommendation = "reduce-governance-surface";
 
   const velocityPressure = buildDevelopmentVelocityPressure({ signals });
 
@@ -268,6 +364,7 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
     velocityPressure,
     signals,
     sessions,
+    board,
     configuredEntrypoints: configuredEntrypoints.slice(0, 15),
     settings,
     summary: `environment-dev-pressure: recommendation=${recommendation} signals=${signals.length} largestSessionMb=${largestSessionMb} heaviestConfiguredEntrypoint=${heaviestConfiguredEntrypoint ? `${heaviestConfiguredEntrypoint.package}:${heaviestConfiguredEntrypoint.entry}` : "n/a"}`,

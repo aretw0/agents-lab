@@ -85,6 +85,41 @@ describe("environment doctor dev pressure", () => {
     }
   });
 
+  it("surfaces large board state with completed-task pressure facts", () => {
+    const dir = makeWorkspace();
+    try {
+      mkdirSync(join(dir, ".project"), { recursive: true });
+      writeFileSync(
+        join(dir, ".project", "tasks.json"),
+        JSON.stringify({
+          tasks: [
+            { id: "TASK-A", status: "completed", notes: ["x".repeat(1024 * 1024)] },
+            { id: "TASK-B", status: "planned", notes: [] },
+          ],
+        }),
+        "utf8",
+      );
+      writeFileSync(
+        join(dir, ".project", "verification.json"),
+        JSON.stringify({ verifications: [{ id: "V1" }] }),
+        "utf8",
+      );
+
+      const report = buildEnvironmentDevPressureReport(dir);
+      const signal = report.signals.find((entry) => entry.code === "large-board-state");
+
+      expect(report.board.exists).toBe(true);
+      expect(report.board.tasks.completedCount).toBe(1);
+      expect(report.board.verification.count).toBe(1);
+      expect(report.recommendation).toBe("reduce-governance-surface");
+      expect(signal?.detail).toContain("tasks=2");
+      expect(signal?.detail).toContain("completed=1,planned=1");
+      expect(signal?.detail).toContain("topCompleted=TASK-A:");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("classifies accumulated development velocity pressure for operator decisions", () => {
     const pressure = buildDevelopmentVelocityPressure({
       signals: [

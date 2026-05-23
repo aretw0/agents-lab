@@ -17,6 +17,7 @@ import {
   buildDevelopmentVelocityPressure,
   buildVelocityPressureSignals,
   collectAgentRunPressureStats,
+  collectBoardStateStats,
   collectPerformanceWatchdogStats,
 } from "../pi-dev-pressure.mjs";
 import { PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES } from "../../packages/pi-stack/install.mjs";
@@ -539,6 +540,62 @@ test("buildVelocityPressureSignals classifies local-first velocity pressure inpu
     "dangling-agent-run-process",
     "excessive-control-plane-ceremony",
   ]);
+});
+
+test("collectBoardStateStats reports historical board pressure without mutating state", () => {
+  const cwd = makeWorkspace();
+  try {
+    mkdirSync(join(cwd, ".project"), { recursive: true });
+    writeJson(join(cwd, ".project", "tasks.json"), {
+      tasks: [
+        { id: "TASK-A", status: "completed", notes: ["x".repeat(4096)] },
+        { id: "TASK-B", status: "completed", notes: ["small"] },
+        { id: "TASK-C", status: "planned", notes: [] },
+      ],
+    });
+    writeJson(join(cwd, ".project", "verification.json"), {
+      verifications: [{ id: "V1" }, { id: "V2" }],
+    });
+
+    const board = collectBoardStateStats(cwd);
+
+    assert.equal(board.exists, true);
+    assert.equal(board.tasks.total, 3);
+    assert.equal(board.tasks.completedCount, 2);
+    assert.equal(board.tasks.byStatus.completed, 2);
+    assert.equal(board.tasks.byStatus.planned, 1);
+    assert.equal(board.tasks.topCompleted[0].id, "TASK-A");
+    assert.equal(board.verification.exists, true);
+    assert.equal(board.verification.count, 2);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("buildVelocityPressureSignals includes actionable board bloat facts", () => {
+  const signals = buildVelocityPressureSignals({
+    board: {
+      exists: true,
+      path: ".project/tasks.json",
+      mb: 2,
+      tasks: {
+        total: 3,
+        byStatus: { completed: 2, planned: 1 },
+        completedCount: 2,
+        completedMb: 1.7,
+        completedNotesMb: 0.9,
+        topCompleted: [{ id: "TASK-A", kb: 34.3, notesKb: 33.2 }],
+      },
+      verification: { exists: true, path: ".project/verification.json", mb: 1.5, count: 10 },
+    },
+  }, { boardWarnMb: 1 });
+
+  assert.equal(signals[0].code, "large-board-state");
+  assert.match(signals[0].detail, /tasks=3/);
+  assert.match(signals[0].detail, /completed=2,planned=1/);
+  assert.match(signals[0].detail, /completedNotesMb=0.9/);
+  assert.match(signals[0].detail, /verification=10\/1.5MB/);
+  assert.match(signals[0].detail, /topCompleted=TASK-A:34.3KB/);
 });
 
 test("collectAgentRunPressureStats reports stale active runs as dangling", () => {
