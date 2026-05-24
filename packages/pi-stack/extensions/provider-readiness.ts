@@ -71,6 +71,10 @@ function modelFromProviderModelRef(provider: string, modelRef: string | null): s
   return model || undefined;
 }
 
+function isSeparateBudgetPoolModel(providerModelKey?: string): boolean {
+  return providerModelKey === "openai-codex/gpt-5.3-codex-spark";
+}
+
 const RATE_LIMIT_RE = /(\b429\b|rate.?limit|too many requests|quota\s*exceeded|capacity\s*reached|resource\s*exhausted)/i;
 const AUTH_RE = /(\b401\b|\b403\b|unauthori[sz]ed|forbidden|auth\s*failed|invalid\s*token)/i;
 const SERVER_RE = /(\b5\d\d\b|overloaded|temporar(y|ily)\s*unavailable|internal\s*server\s*error)/i;
@@ -160,8 +164,21 @@ export async function buildProviderReadinessMatrix(cwd: string): Promise<Provide
     const model = modelFromProviderModelRef(provider, modelRef);
     const providerModelKey = model ? buildProviderModelKey(provider, model) : undefined;
     const modelBudgetState = providerModelKey ? budgetStateByProviderModel[providerModelKey] : undefined;
-    const budgetState = modelBudgetState ?? budgetStateByProvider[provider] ?? "unknown";
-    const budgetScope = modelBudgetState ? "provider-model" : budgetStateByProvider[provider] ? "provider" : undefined;
+    const providerBudgetState = budgetStateByProvider[provider];
+    const separateBudgetPool = isSeparateBudgetPoolModel(providerModelKey);
+    const inheritedProviderCapWouldConstrainSeparatePool = separateBudgetPool && !modelBudgetState && (
+      providerBudgetState === "blocked" || providerBudgetState === "warning"
+    );
+    const budgetState = modelBudgetState
+      ?? (inheritedProviderCapWouldConstrainSeparatePool ? "unknown" : providerBudgetState)
+      ?? "unknown";
+    const budgetScope = modelBudgetState
+      ? "provider-model"
+      : inheritedProviderCapWouldConstrainSeparatePool
+        ? undefined
+        : providerBudgetState
+          ? "provider"
+          : undefined;
     const runtime = runtimeSignals[provider];
     const notes: string[] = [];
     let readiness: ProviderReadinessEntry["readiness"];
@@ -177,6 +194,9 @@ export async function buildProviderReadinessMatrix(cwd: string): Promise<Provide
       readiness = "degraded";
     } else if (budgetState === "unknown") {
       notes.push("No budget config found — provider cost is untracked.");
+      if (inheritedProviderCapWouldConstrainSeparatePool) {
+        notes.push(`Separate model pool detected for ${providerModelKey}; configure provider-model budget instead of inheriting provider-level ${providerBudgetState}.`);
+      }
       readiness = "ready";
     } else {
       if (budgetScope === "provider-model") notes.push(`Model-specific budget state: ${budgetState.toUpperCase()}.`);

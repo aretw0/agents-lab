@@ -108,6 +108,40 @@ describe("provider-readiness matrix", () => {
     }
   });
 
+  it("does not block Codex Spark on aggregate OpenAI Codex provider caps without model-specific budget", async () => {
+    const dir = makeWorkspace({
+      piStack: {
+        quotaVisibility: {
+          routeModelRefs: {
+            "openai-codex": "openai-codex/gpt-5.3-codex-spark",
+          },
+          providerBudgets: {
+            "openai-codex": {
+              period: "weekly",
+              unit: "tokens-cost",
+              weeklyQuotaCostUsd: 0.001,
+              warnPct: 1,
+              hardPct: 1,
+            },
+          },
+        },
+      },
+    });
+    try {
+      const matrix = await buildProviderReadinessMatrix(dir);
+      const entry = matrix.entries.find((e) => e.provider === "openai-codex");
+      expect(entry).toBeDefined();
+      expect(entry!.modelRef).toBe("openai-codex/gpt-5.3-codex-spark");
+      expect(entry!.readiness).toBe("ready");
+      expect(entry!.budgetState).toBe("unknown");
+      expect(entry!.budgetScope).toBeUndefined();
+      expect(entry!.notes.join("\n")).toContain("Separate model pool detected");
+      expect(entry!.notes.join("\n")).toContain("provider-model budget");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("marca provider como unconfigured quando tem budget mas não tem model ref", async () => {
     const dir = makeWorkspace({
       piStack: {
