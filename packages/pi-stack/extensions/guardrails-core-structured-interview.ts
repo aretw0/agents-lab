@@ -6,6 +6,10 @@ import {
 export type StructuredInterviewQuestionKind = "text" | "single-choice" | "boolean" | "number";
 export type StructuredInterviewAnswerState = "answered" | "unknown" | "skipped";
 export type StructuredInterviewDecision = "complete" | "needs-operator-answer" | "invalid";
+export type StructuredInterviewNextAction =
+  | "answer-next-question"
+  | "fix-invalid-answers"
+  | "continue-with-complete-interview";
 
 export interface StructuredInterviewQuestion {
   id: string;
@@ -32,7 +36,9 @@ export interface StructuredInterviewResult {
   authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
   decision: StructuredInterviewDecision;
+  nextAction: StructuredInterviewNextAction;
   nextQuestionId?: string;
+  nextQuestion?: StructuredInterviewQuestion;
   reasons: string[];
   accepted: Array<{ questionId: string; state: StructuredInterviewAnswerState; value?: unknown; source: "answer" | "default" | "optional" }>;
   invalid: Array<{ questionId: string; reason: string }>;
@@ -76,6 +82,7 @@ function buildEvidence(result: Omit<StructuredInterviewResult, "evidence">): str
     `invalid=${result.invalid.length}`,
   ];
   if (result.nextQuestionId) parts.push(`next=${result.nextQuestionId}`);
+  parts.push(`nextAction=${result.nextAction}`);
   if (result.reasons.length > 0) parts.push(`reasons=${result.reasons.join("|")}`);
   return parts.join(" ");
 }
@@ -93,6 +100,7 @@ export function resolveStructuredInterview(input: {
   const accepted: StructuredInterviewResult["accepted"] = [];
   const invalid: StructuredInterviewResult["invalid"] = [];
   const missing: string[] = [];
+  const normalizedQuestions = new Map<string, StructuredInterviewQuestion>();
   const reasons: string[] = [];
   const seenQuestionIds = new Set<string>();
 
@@ -111,6 +119,7 @@ export function resolveStructuredInterview(input: {
     if (!prompt) invalid.push({ questionId, reason: "prompt-missing" });
 
     const question: StructuredInterviewQuestion = { ...rawQuestion, id: questionId, prompt };
+    normalizedQuestions.set(questionId, question);
     const answer = answersById.get(questionId);
     const state = answer?.state ?? (hasOwnValue(answer?.value) ? "answered" : undefined);
 
@@ -169,6 +178,12 @@ export function resolveStructuredInterview(input: {
     : missing.length > 0
       ? "needs-operator-answer"
       : "complete";
+  const nextAction: StructuredInterviewNextAction = decision === "invalid"
+    ? "fix-invalid-answers"
+    : decision === "needs-operator-answer"
+      ? "answer-next-question"
+      : "continue-with-complete-interview";
+  const nextQuestionId = decision === "needs-operator-answer" ? missing[0] : undefined;
 
   const base: Omit<StructuredInterviewResult, "evidence"> = {
     mode: "structured-interview",
@@ -178,7 +193,9 @@ export function resolveStructuredInterview(input: {
     authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
     decision,
-    nextQuestionId: decision === "needs-operator-answer" ? missing[0] : undefined,
+    nextAction,
+    nextQuestionId,
+    nextQuestion: nextQuestionId ? normalizedQuestions.get(nextQuestionId) : undefined,
     reasons,
     accepted,
     invalid,

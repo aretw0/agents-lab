@@ -20,9 +20,17 @@ describe("structured interview primitive", () => {
       authorization: "none",
       dispatchAllowed: false,
       decision: "needs-operator-answer",
+      nextAction: "answer-next-question",
       nextQuestionId: "validation",
+      nextQuestion: {
+        id: "validation",
+        prompt: "Qual validação?",
+        kind: "single-choice",
+        options: ["test", "inspection"],
+      },
     });
     expect(result.evidence).toContain("dispatch=no");
+    expect(result.evidence).toContain("nextAction=answer-next-question");
   });
 
   it("accepts defaults, unknown, and skip only when the schema allows them", () => {
@@ -36,6 +44,7 @@ describe("structured interview primitive", () => {
     });
 
     expect(result.decision).toBe("complete");
+    expect(result.nextAction).toBe("continue-with-complete-interview");
     expect(result.accepted.map((answer) => [answer.questionId, answer.state, answer.source])).toEqual([
       ["scope", "answered", "default"],
       ["rollback", "unknown", "answer"],
@@ -59,6 +68,7 @@ describe("structured interview primitive", () => {
       decision: "invalid",
       dispatchAllowed: false,
       authorization: "none",
+      nextAction: "fix-invalid-answers",
     });
     expect(result.invalid.map((entry) => entry.reason)).toEqual([
       "single-choice-value-not-in-options",
@@ -439,7 +449,10 @@ describe("structured interview primitive", () => {
     });
 
     expect(result?.details.decision).toBe("needs-operator-answer");
+    expect(result?.details.nextAction).toBe("answer-next-question");
+    expect(result?.details.nextQuestion).toMatchObject({ id: "validation", kind: "single-choice" });
     expect(result?.content?.[0]?.text).toContain("structured-interview: decision=needs-operator-answer");
+    expect(result?.content?.[0]?.text).toContain("nextAction=answer-next-question");
     expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(result?.content?.[0]?.text).not.toContain('\"decision\"');
   });
