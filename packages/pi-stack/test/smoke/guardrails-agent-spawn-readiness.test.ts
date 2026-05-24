@@ -933,6 +933,7 @@ describe("agent spawn readiness contract", () => {
     expect((classification.details?.nextProbeProfiles as string[])).toContain("stream-byte-split-probe");
     expect((classification.details?.nextProbeProfiles as string[])).toContain("stderr-preservation-probe");
     expect(classification.content?.[0]?.text).toContain("retryAllowed=no");
+    expect(classification.content?.[0]?.text).toContain("next=run-structured-diagnostic-before-retry");
 
     const startupDiagnostic = await getTool("agent_run_startup_diagnostic_packet").execute("tc-startup-diagnostic", {
       run_id: "run-silent",
@@ -944,6 +945,7 @@ describe("agent spawn readiness contract", () => {
     expect(startupDiagnostic.details?.decision).toBe("structured-probe-first");
     expect(startupDiagnostic.details?.canaryAllowed).toBe(false);
     expect(startupDiagnostic.details?.processStartAllowed).toBe(false);
+    expect(startupDiagnostic.content?.[0]?.text).toContain("next=run-structured-startup-probe-before-retry");
     expect(startupDiagnostic.content?.[0]?.text).toContain("dispatch=no");
 
     const followCompleted = await getTool("agent_run_follow").execute("tc-follow-completed", { run_id: "run-outcome", max_wait_ms: 0, max_lines: 2 }, undefined as unknown as AbortSignal, () => {}, { cwd });

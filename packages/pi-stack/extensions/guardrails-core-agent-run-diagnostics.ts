@@ -86,6 +86,7 @@ export interface AgentRunFailureClassificationResult {
   ruledOut: string[];
   argvDiagnostics: AgentRunArgvDiagnostics;
   nextProbeProfiles: string[];
+  nextAction: string;
   nextActions: string[];
   summary: string;
 }
@@ -124,6 +125,7 @@ export interface AgentRunStartupDiagnosticPacketResult {
   evidenceChecklist: string[];
   startupProbePlan: AgentRunStartupProbePlanStep[];
   blockers: string[];
+  nextAction: string;
   nextActions: string[];
   classification: AgentRunFailureClassificationResult;
   summary: string;
@@ -138,6 +140,18 @@ function normalizeText(value: unknown): string {
 function normalizeFiles(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((entry): entry is string => typeof entry === "string").map((entry) => entry.trim()).filter(Boolean);
+}
+
+function resolveFailureClassificationNextAction(preflightDecision: AgentRunnerPreflightDecision): string {
+  if (preflightDecision === "ready-for-canary") return "prepare-operator-approved-canary";
+  if (preflightDecision === "needs-evidence") return "run-structured-diagnostic-before-retry";
+  return "resolve-classification-blockers";
+}
+
+function resolveStartupDiagnosticNextAction(decision: AgentRunStartupDiagnosticDecision): string {
+  if (decision === "worker-canary-ready") return "prepare-operator-approved-worker-canary";
+  if (decision === "structured-probe-first") return "run-structured-startup-probe-before-retry";
+  return "resolve-startup-diagnostic-blockers";
 }
 
 function includesAny(text: string, patterns: RegExp[]): boolean {
@@ -426,13 +440,15 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
           ? ["Treat process as healthy but contract failed; inspect touched files and parent-side validation before retry."]
           : failureClass === "none"
             ? ["Runner process is not blocked by this evidence; use exact operator confirmation for any future canary."]
-            : ["Collect bounded runner/provider evidence before retry."];
+        : ["Collect bounded runner/provider evidence before retry."];
+  const nextAction = resolveFailureClassificationNextAction(preflightDecision);
 
   const summary = [
     "agent-run-failure-classification:",
     `runId=${runId || "unknown"}`,
     `class=${failureClass}`,
     `preflight=${preflightDecision}`,
+    `next=${nextAction}`,
     `retryAllowed=${retryAllowed ? "yes" : "no"}`,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     "dispatch=no",
@@ -458,6 +474,7 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
     ruledOut,
     argvDiagnostics,
     nextProbeProfiles,
+    nextAction,
     nextActions,
     summary,
   };
@@ -521,10 +538,12 @@ export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagn
         "Do not retry the worker until stderr/stdout/exit/provider evidence is captured.",
       ]
       : ["Resolve blockers before any worker canary or startup probe."];
+  const nextAction = resolveStartupDiagnosticNextAction(decision);
 
   const summary = [
     "agent-run-startup-diagnostic-packet:",
     `decision=${decision}`,
+    `next=${nextAction}`,
     `runId=${classification.runId || "unknown"}`,
     providerModelRef ? `providerModel=${providerModelRef}` : undefined,
     `failureClass=${classification.failureClass}`,
@@ -554,6 +573,7 @@ export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagn
     evidenceChecklist,
     startupProbePlan,
     blockers,
+    nextAction,
     nextActions,
     classification,
     summary,
