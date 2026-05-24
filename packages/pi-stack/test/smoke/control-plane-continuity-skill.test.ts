@@ -11,6 +11,8 @@ describe("control-plane continuity skill", () => {
 
     expect(skill).toContain("name: control-plane-continuity");
     expect(skill).toContain("environment_runtime_health_status");
+    expect(skill).toContain("explicitly authorizes read-only diagnostics");
+    expect(skill).toContain("do not ask for another confirmation");
     expect(skill).toContain("safe-mode");
     expect(skill).toContain("stop-and-investigate");
     expect(skill).toContain("operator_intent_intake_packet");
