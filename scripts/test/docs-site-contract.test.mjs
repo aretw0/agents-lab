@@ -401,6 +401,20 @@ test("recommended stack guide stays user-first and concise", () => {
 	assert.doesNotMatch(guide, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
 });
 
+test("packaged pi-stack operational guides keep lab wrappers as repository references", () => {
+	for (const file of [
+		"packages/pi-stack/docs/guides/budget-governance.md",
+		"packages/pi-stack/docs/guides/consumption-visibility-surfaces.md",
+		"packages/pi-stack/docs/guides/subagent-readiness-gate.md",
+	]) {
+		const source = read(file);
+
+		assert.doesNotMatch(source, /No `agents-lab`/);
+		assert.doesNotMatch(source, /^## Comandos de laboratório$/m);
+		assert.match(source, /wrappers de referência/);
+	}
+});
+
 test("published operational guides use strict-curated as the public baseline name", () => {
 	for (const file of listMarkdownFiles("docs/guides")) {
 		const source = read(file);

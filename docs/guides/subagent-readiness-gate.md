@@ -9,9 +9,11 @@ Objetivo: decidir **quando delegar para sub-agentes/swarms** com base em sinais 
 - Tool: `subagent_readiness_status`
 - Command: `/subagent-readiness [strict]`
 
-## Comandos de laboratório
+## Checagem fora da TUI
 
-No `agents-lab`, os wrappers de script são:
+A superfície distribuída é a tool/command acima. Para automação fora da TUI, use um script equivalente que leia as mesmas fontes de sessão e retorne o mesmo envelope de readiness.
+
+Neste repositório, os wrappers de referência são:
 
 ```bash
 pnpm run subagent:readiness
@@ -88,7 +90,7 @@ Ao rollback:
 
 ## Quando strict falhar por pacote ausente
 
-Use a experiência única do control plane e recarregue a sessão se a configuração mudou. No `agents-lab`:
+Use a experiência única do control plane e recarregue a sessão se a configuração mudou. Neste repositório:
 
 ```bash
 pnpm run pi:dev

@@ -35,7 +35,7 @@ Quando a lane for protegida (ex.: GitHub Actions/offload), exigir no envelope:
 
 Sem esses campos, a decisão padrão é `defer`.
 
-No `agents-lab`, existe um wrapper report-only para registrar pacote de evidência:
+Como referência de manutenção deste repositório, há um wrapper report-only para registrar pacote de evidência:
 
 ```bash
 pnpm run offload:evidence:template -- --task TASK-BUD-134 --decision defer
@@ -161,7 +161,9 @@ Exemplo:
 
 ## Paridade + isolamento de ambiente
 
-Antes de concluir que falta funcionalidade, valide se a stack instalada tem as mesmas capabilities esperadas para aquele perfil. No `agents-lab`, os wrappers são:
+Antes de concluir que falta funcionalidade, valide se a stack instalada tem as mesmas capabilities esperadas para aquele perfil. Em qualquer projeto, o princípio é comparar o perfil carregado com a baseline esperada e separar ausência real de feature de instalação incompleta.
+
+Neste repositório, os wrappers de referência são:
 
 ```bash
 pnpm run pi:parity

@@ -73,7 +73,7 @@ Antes de concluir "não temos ferramenta X", valide a instalação real:
 pi list
 ```
 
-No `agents-lab`, os wrappers de paridade são:
+Quando estiver fora da TUI, valide a paridade por um check equivalente ao perfil usado. Neste repositório, os wrappers de referência são:
 
 ```bash
 pnpm run pi:parity
