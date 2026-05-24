@@ -63,6 +63,10 @@ type BackgroundReadinessPacket = {
     | "background-process-readiness-packet-needs-evidence"
     | "background-process-readiness-packet-blocked";
   recommendation: string;
+  nextActionCode:
+    | "run-bounded-rehearsal-slice"
+    | "increase-readiness-evidence"
+    | "resolve-plan-rehearsal-blockers";
   nextAction: string;
   blockers: string[];
   summary: string;
@@ -93,6 +97,7 @@ function buildBackgroundProcessReadinessPacket(input: {
       decision: "blocked",
       recommendationCode: "background-process-readiness-packet-blocked",
       recommendation: "background-process runway blocked; keep report-only and close hard blockers before operational rehearsal.",
+      nextActionCode: "resolve-plan-rehearsal-blockers",
       nextAction: "resolve plan/rehearsal blockers, then rerun background_process_readiness_packet.",
       blockers,
       summary,
@@ -113,6 +118,7 @@ function buildBackgroundProcessReadinessPacket(input: {
       decision: "needs-evidence",
       recommendationCode: "background-process-readiness-packet-needs-evidence",
       recommendation: "background-process runway still needs maturity evidence; stay report-only while improving capabilities/lifecycle coverage.",
+      nextActionCode: "increase-readiness-evidence",
       nextAction: "increase readiness score and rehearsal evidence (stopSource coverage, lifecycle classification, rollback, slices).",
       blockers,
       summary,
@@ -132,6 +138,7 @@ function buildBackgroundProcessReadinessPacket(input: {
     decision: "ready-window",
     recommendationCode: "background-process-readiness-packet-ready",
     recommendation: "background-process runway is ready for bounded local rehearsal planning (still no process start from this packet).",
+    nextActionCode: "run-bounded-rehearsal-slice",
     nextAction: "run one bounded rehearsal slice with explicit rollback and lifecycle evidence capture.",
     blockers,
     summary,
@@ -141,6 +148,7 @@ function buildBackgroundProcessReadinessPacket(input: {
 type UnlockChecklist = {
   decision: "ready" | "needs-action";
   topBlockers: string[];
+  nextActionCode: BackgroundReadinessPacket["nextActionCode"];
   nextAction: string;
   items: string[];
   summary: string;
@@ -151,17 +159,20 @@ function buildUnlockChecklist(packet: BackgroundReadinessPacket): UnlockChecklis
   const decision = packet.decision === "ready-window" ? "ready" : "needs-action";
   const items = [
     ...topBlockers.map((blocker, index) => `blocker:${index + 1}:${blocker}`),
+    `nextCode:${packet.nextActionCode}`,
     `next:${packet.nextAction}`,
   ];
   const summary = [
     "unlock-checklist:",
     `decision=${decision}`,
     topBlockers.length > 0 ? `topBlockers=${topBlockers.join("|")}` : "topBlockers=none",
+    `nextCode=${packet.nextActionCode}`,
     `next=${packet.nextAction}`,
   ].join(" ");
   return {
     decision,
     topBlockers,
+    nextActionCode: packet.nextActionCode,
     nextAction: packet.nextAction,
     items,
     summary,

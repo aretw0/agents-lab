@@ -266,9 +266,11 @@ describe("background process control plan", () => {
     expect(blocked.details?.mode).toBe("background-process-readiness-packet");
     expect(blocked.details?.decision).toBe("blocked");
     expect(blocked.details?.recommendationCode).toBe("background-process-readiness-packet-blocked");
+    expect(blocked.details?.nextActionCode).toBe("resolve-plan-rehearsal-blockers");
     expect(String(blocked.details?.summary)).toContain("background-process-readiness-packet:");
     expect(String(blocked.details?.summary)).toContain("authorization=none");
     expect(blocked.details?.unlockChecklist?.decision).toBe("needs-action");
+    expect(blocked.details?.unlockChecklist?.nextActionCode).toBe("resolve-plan-rehearsal-blockers");
     expect((blocked.details?.unlockChecklist?.topBlockers as string[])?.length).toBeGreaterThan(0);
 
     const needsEvidence = await packetTool.execute(
@@ -300,7 +302,9 @@ describe("background process control plan", () => {
 
     expect(needsEvidence.details?.decision).toBe("needs-evidence");
     expect(needsEvidence.details?.recommendationCode).toBe("background-process-readiness-packet-needs-evidence");
+    expect(needsEvidence.details?.nextActionCode).toBe("increase-readiness-evidence");
     expect(needsEvidence.details?.unlockChecklist?.decision).toBe("needs-action");
+    expect(String(needsEvidence.details?.unlockChecklist?.summary)).toContain("nextCode=increase-readiness-evidence");
     expect(String(needsEvidence.details?.unlockChecklist?.summary)).toContain("next=");
 
     const ready = await packetTool.execute(
@@ -332,8 +336,10 @@ describe("background process control plan", () => {
 
     expect(ready.details?.decision).toBe("ready-window");
     expect(ready.details?.recommendationCode).toBe("background-process-readiness-packet-ready");
+    expect(ready.details?.nextActionCode).toBe("run-bounded-rehearsal-slice");
     expect(String(ready.details?.nextAction)).toContain("rehearsal slice");
     expect(ready.details?.unlockChecklist?.decision).toBe("ready");
+    expect(ready.details?.unlockChecklist?.nextActionCode).toBe("run-bounded-rehearsal-slice");
     expect(String(ready.details?.unlockChecklist?.summary)).toContain("topBlockers=none");
   });
 
