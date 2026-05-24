@@ -75,6 +75,7 @@ describe("lane brainstorm packet module", () => {
 
     expect(packet.decision).toBe("ready-for-operator-decision");
     expect(packet.recommendationCode).toBe("seed-local-safe-lane");
+    expect(packet.nextActionCode).toBe("choose-ranked-local-safe-slices");
     expect(packet.dispatchAllowed).toBe(false);
     expect(packet.mutationAllowed).toBe(false);
     expect(packet.authorization).toBe(GUARDRAILS_AUTHORIZATION_NONE);
@@ -114,6 +115,7 @@ describe("lane brainstorm packet module", () => {
 
     expect(preview.decision).toBe("needs-operator-seeding-decision");
     expect(preview.recommendationCode).toBe("brainstorm-seeding-preview");
+    expect(preview.nextActionCode).toBe("choose-proposals-for-board-materialization");
     expect(preview.nextAction).toContain("choose proposals");
     expect(preview.confirmationRequired).toBe(true);
     expect(preview.dispatchAllowed).toBe(false);
@@ -137,6 +139,8 @@ describe("lane brainstorm packet module", () => {
     const preview = buildLaneBrainstormSeedPreview({ packet });
     expect(preview.decision).toBe("blocked");
     expect(preview.recommendationCode).toBe("brainstorm-seeding-blocked");
+    expect(packet.nextActionCode).toBe("request-protected-scope-focus");
+    expect(preview.nextActionCode).toBe("resolve-brainstorm-blocker");
     expect(preview.nextAction).toBe(packet.nextAction);
     expect(preview.proposals).toHaveLength(0);
     expect(preview.confirmationRequired).toBe(true);
