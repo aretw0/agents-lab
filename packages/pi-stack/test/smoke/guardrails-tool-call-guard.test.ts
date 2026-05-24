@@ -21,15 +21,17 @@ describe("guardrails-core tool-call guard", () => {
     };
 
     registerGuardrailsCoreToolCallGuard(emitter, runtime as any);
-    const result = await handler?.(
-      { input: { command: "/watchdog:status" } },
-      { cwd: process.cwd() },
-    ) as { block?: boolean; reason?: string } | undefined;
+    for (const command of ["/watchdog:status", "/models", "/safe-mode on"]) {
+      const result = await handler?.(
+        { input: { command } },
+        { cwd: process.cwd() },
+      ) as { block?: boolean; reason?: string } | undefined;
 
-    expect(result?.block).toBe(true);
-    expect(result?.reason).toContain("TUI/operator commands");
-    expect(result?.reason).toContain("directly in the Pi input");
-    expect(result?.reason).toContain("environment_runtime_health_status");
+      expect(result?.block).toBe(true);
+      expect(result?.reason).toContain("TUI/operator commands");
+      expect(result?.reason).toContain("directly in the Pi input");
+      expect(result?.reason).toContain("environment_runtime_health_status");
+    }
   });
 
   it("blocks Pi TUI slash commands routed through shell tool aliases", async () => {
@@ -53,7 +55,7 @@ describe("guardrails-core tool-call guard", () => {
 
     for (const toolName of ["shell", "terminal"]) {
       const result = await handler?.(
-        { toolName, input: { command: "/watchdog:status" } },
+        { toolName, input: { command: "/safe-mode on" } },
         { cwd: process.cwd() },
       ) as { block?: boolean; reason?: string } | undefined;
 
