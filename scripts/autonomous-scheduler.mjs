@@ -128,6 +128,46 @@ function isEligible(task, allTasks) {
   return true;
 }
 
+function classifyTaskSkipReason(task, allTasks, options = {}) {
+  if (task.status !== "planned") return `status-${task.status ?? "unknown"}`;
+  if (/^\[COLONY:/.test(task.description ?? "")) return "colony-instance";
+  if (/^\[RECOVERY:/.test(task.description ?? "")) return "recovery-instance";
+
+  const deps = task.depends_on ?? [];
+  for (const depId of deps) {
+    const dep = allTasks.find((t) => t.id === depId);
+    if (!dep || dep.status !== "completed") return "dependency-not-completed";
+  }
+
+  const priority = normalizeTaskPriority(task);
+  if (!options.priorityFilter && isLowPriorityPlannedTask(task)) return "low-priority-planned";
+  if (options.priorityFilter && priority !== options.priorityFilter) return "priority-filter-mismatch";
+  if (options.includeProtectedScopes !== true && taskTouchesProtectedScope(task)) return "protected-scope";
+  return "eligible";
+}
+
+function buildTaskSelectionDiagnostics(tasks, options = {}) {
+  const skippedByReason = {};
+  const examples = {};
+  let eligible = 0;
+
+  for (const task of tasks) {
+    const reason = classifyTaskSkipReason(task, tasks, options);
+    if (reason === "eligible") {
+      eligible += 1;
+      continue;
+    }
+    skippedByReason[reason] = (skippedByReason[reason] ?? 0) + 1;
+    if (!examples[reason]) examples[reason] = String(task.id ?? "(unknown)");
+  }
+
+  return {
+    eligible,
+    skippedByReason,
+    examples,
+  };
+}
+
 function countUnblocked(taskId, allTasks) {
   return allTasks.filter((t) => (t.depends_on ?? []).includes(taskId)).length;
 }
@@ -250,6 +290,10 @@ function main() {
     priorityFilter: args.priorityFilter,
     includeProtectedScopes: args.includeProtectedScopes,
   });
+  const diagnostics = buildTaskSelectionDiagnostics(tasks, {
+    priorityFilter: args.priorityFilter,
+    includeProtectedScopes: args.includeProtectedScopes,
+  });
 
   const configuredProviders = Object.keys(quota.routeModelRefs);
 
@@ -258,6 +302,7 @@ function main() {
     workspace: args.workspace,
     board: summary,
     eligibleCount: eligibleEntries.length,
+    diagnostics,
     selected: next
       ? {
           id: next.id,
@@ -289,6 +334,7 @@ function main() {
   process.stdout.write(`open P0: ${summary.openByPriority.p0} | P1: ${summary.openByPriority.p1} | P2: ${summary.openByPriority.p2} | P3: ${summary.openByPriority.p3}\n`);
   process.stdout.write(`eligible: ${result.eligibleCount} task(s)\n`);
   process.stdout.write(`policy: protected=${args.includeProtectedScopes ? "included" : "skipped"} low-priority-planned=${args.priorityFilter ? "included-by-filter" : "skipped"}\n`);
+  process.stdout.write(`skipped: ${Object.entries(diagnostics.skippedByReason).map(([reason, count]) => `${reason}=${count}`).join(", ") || "none"}\n`);
   process.stdout.write(`providers: ${configuredProviders.join(", ") || "(none configured)"}\n`);
   process.stdout.write("\n");
 
@@ -330,6 +376,8 @@ export {
   buildGoalPrompt,
   extractPriority,
   collectEligibleTaskEntries,
+  buildTaskSelectionDiagnostics,
+  classifyTaskSkipReason,
   isEligible,
   normalizeTaskPriority,
   selectNextTask,

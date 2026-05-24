@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import {
   buildBoardSummary,
   buildGoalPrompt,
+  buildTaskSelectionDiagnostics,
+  classifyTaskSkipReason,
   collectEligibleTaskEntries,
   extractPriority,
   normalizeTaskPriority,
@@ -74,6 +76,30 @@ test("scheduler skips protected external/parked work unless explicitly included"
   assert.equal(selectNextTask(tasks.slice(0, 2), null, { includeProtectedScopes: true })?.id, "TASK-PARKED");
 });
 
+test("scheduler explains why local-safe selection has no eligible tasks", () => {
+  const tasks = [
+    { id: "TASK-P3", status: "planned", priority: "p3", description: "low priority planned work" },
+    { id: "TASK-URL", status: "planned", priority: "p2", description: "pesquisa externa https://example.com" },
+    { id: "TASK-DEP", status: "planned", priority: "p2", depends_on: ["TASK-MISSING"], description: "blocked by dependency" },
+    { id: "TASK-DONE", status: "completed", priority: "p1", description: "done" },
+    { id: "TASK-OK", status: "planned", priority: "p2", description: "local work" },
+  ];
+
+  assert.equal(classifyTaskSkipReason(tasks[0], tasks), "low-priority-planned");
+  assert.equal(classifyTaskSkipReason(tasks[1], tasks), "protected-scope");
+  assert.equal(classifyTaskSkipReason(tasks[2], tasks), "dependency-not-completed");
+
+  const diagnostics = buildTaskSelectionDiagnostics(tasks);
+  assert.equal(diagnostics.eligible, 1);
+  assert.deepEqual(diagnostics.skippedByReason, {
+    "low-priority-planned": 1,
+    "protected-scope": 1,
+    "dependency-not-completed": 1,
+    "status-completed": 1,
+  });
+  assert.equal(diagnostics.examples["protected-scope"], "TASK-URL");
+});
+
 test("current parked external backlog is not eligible by default", () => {
   const tasks = [
     { id: "TASK-BUD-480", status: "planned", priority: "p3", milestone: "protected-parked-legacy", description: "Pesquisa futura (externa) de influências: analisar https://github.com/nousresearch/hermes-agent" },
@@ -83,6 +109,9 @@ test("current parked external backlog is not eligible by default", () => {
   assert.equal(selectNextTask(tasks, null), null);
   assert.equal(selectNextTask(tasks, "p3"), null);
   assert.equal(selectNextTask(tasks, "p3", { includeProtectedScopes: true })?.id, "TASK-BUD-480");
+  assert.deepEqual(buildTaskSelectionDiagnostics(tasks, { priorityFilter: "p3" }).skippedByReason, {
+    "protected-scope": 2,
+  });
 });
 
 test("goal prompt strips extended priority markers", () => {
