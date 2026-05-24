@@ -35,6 +35,10 @@ export interface OperatorIntentInteraction {
   choices: OperatorIntentChoice[];
   allowCustomAnswer: true;
   allowCancel: true;
+  uiHints: {
+    preferred: "choice-list";
+    fallback: "compact-text";
+  };
 }
 
 export interface OperatorIntentIntakePacket {
@@ -120,9 +124,13 @@ function buildInteraction(decision: OperatorIntentIntakeDecision, tools: string[
         label: tool,
         description: "Use this report-only tool as the next route.",
         route: tool,
-      })),
+    })),
     allowCustomAnswer: true,
     allowCancel: true,
+    uiHints: {
+      preferred: "choice-list",
+      fallback: "compact-text",
+    },
   };
 }
 

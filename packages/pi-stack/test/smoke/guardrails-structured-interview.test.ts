@@ -134,6 +134,10 @@ describe("structured interview primitive", () => {
         kind: "operator-choice",
         allowCustomAnswer: true,
         allowCancel: true,
+        uiHints: {
+          preferred: "choice-list",
+          fallback: "compact-text",
+        },
       },
     });
     expect(packet.missingQuestions.length).toBeGreaterThan(0);
@@ -376,6 +380,10 @@ describe("structured interview primitive", () => {
       kind: "operator-choice",
       allowCustomAnswer: true,
       allowCancel: true,
+      uiHints: {
+        preferred: "choice-list",
+        fallback: "compact-text",
+      },
     });
     expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=prepare-worker-packet");
     expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
