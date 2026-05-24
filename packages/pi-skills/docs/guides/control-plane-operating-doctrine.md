@@ -381,7 +381,7 @@ Retorno ao perfil Codex também é manual: usar `/model` ou `quota_visibility_ro
 
 ## Intent Intake, Entrevistas Estruturadas e Gaps do Operador
 
-Gaps do operador devem ser preenchidos por contrato backend-first antes de qualquer UI. Para intenção livre, comece por `operator_intent_intake_packet`: ele classifica a próxima rota report-only (`structured_interview_plan`, `lane_brainstorm_packet`, `control_plane_profile_packet`, readiness de runtime/worker ou `agent_run_operator_packet` só após readiness explícita) e devolve `details.interaction` com `uiHints.preferred=choice-list`, escolhas que a TUI pode renderizar, resposta customizada e cancelamento. A intake não autoriza mutação, worker nem dispatch.
+Gaps do operador devem ser preenchidos por contrato backend-first antes de qualquer UI. Para intenção livre, comece por `operator_intent_intake_packet`: ele classifica a próxima rota report-only (`structured_interview_plan`, `lane_brainstorm_packet`, `control_plane_profile_packet`, readiness de runtime/worker ou `agent_run_operator_packet` só após readiness explícita) e devolve `details.interaction` com `uiHints.preferred=choice-list`, `recommendedChoiceId`, escolhas que a TUI pode renderizar, resposta customizada e cancelamento. A intake não autoriza mutação, worker nem dispatch.
 
 Quando a intake retornar `controlPlaneAction=run-report-only-route`, `confirmationRequired=false` e `operatorDecisionNeeded=false`, o control-plane deve executar a rota read-only recomendada e resumir a decisão. Não pedir confirmação textual para um packet que não muta estado, não despacha worker e não cria autorização.
 

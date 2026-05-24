@@ -134,6 +134,7 @@ describe("structured interview primitive", () => {
       confirmationRequired: true,
       interaction: {
         kind: "operator-choice",
+        recommendedChoiceId: "answer-next-question",
         allowCustomAnswer: true,
         allowCancel: true,
         uiHints: {
@@ -179,6 +180,7 @@ describe("structured interview primitive", () => {
       id: "seed-brainstorm",
       route: "lane_brainstorm_packet",
     });
+    expect(packet.interaction.recommendedChoiceId).toBe("seed-brainstorm");
   });
 
   it("prepares a worker packet only as a report-only candidate when readiness is known", () => {
@@ -214,6 +216,7 @@ describe("structured interview primitive", () => {
       id: "prepare-worker-packet",
       route: "agent_run_operator_packet",
     });
+    expect(packet.interaction.recommendedChoiceId).toBe("prepare-worker-packet");
   });
 
   it("checks worker readiness before preparing a worker packet when readiness is omitted", () => {
@@ -246,6 +249,7 @@ describe("structured interview primitive", () => {
       id: "check-worker-readiness",
       route: "environment_runtime_health_status+subagent_readiness_status+provider_readiness_matrix",
     });
+    expect(packet.interaction.recommendedChoiceId).toBe("check-worker-readiness");
   });
 
   it("checks worker readiness before preparing a worker packet when readiness is negative", () => {
@@ -333,6 +337,7 @@ describe("structured interview primitive", () => {
       id: "remove-blocked-request",
       route: "control_plane_profile_packet",
     });
+    expect(packet.interaction.recommendedChoiceId).toBe("remove-blocked-request");
   });
 
   it("surface exposes control_plane_profile_packet as operator-visible report-only tool", () => {
@@ -401,6 +406,7 @@ describe("structured interview primitive", () => {
     expect(result?.details.workerDispatchAllowed).toBe(false);
     expect(result?.details.interaction).toMatchObject({
       kind: "operator-choice",
+      recommendedChoiceId: "prepare-worker-packet",
       allowCustomAnswer: true,
       allowCancel: true,
       uiHints: {

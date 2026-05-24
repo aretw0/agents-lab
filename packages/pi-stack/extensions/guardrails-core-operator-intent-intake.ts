@@ -38,6 +38,7 @@ export interface OperatorIntentInteraction {
   kind: "operator-choice";
   prompt: string;
   choices: OperatorIntentChoice[];
+  recommendedChoiceId: string;
   allowCustomAnswer: true;
   allowCancel: true;
   uiHints: {
@@ -133,6 +134,7 @@ function buildInteraction(decision: OperatorIntentIntakeDecision, tools: string[
         description: "Use this report-only tool as the next route.",
         route: tool,
     })),
+    recommendedChoiceId: choices[0]?.id ?? tools[0] ?? "custom-answer",
     allowCustomAnswer: true,
     allowCancel: true,
     uiHints: {

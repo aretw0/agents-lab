@@ -46,7 +46,7 @@ Ask only what is missing:
 
 If the operator already gave enough context, do not repeat the interview. Convert it into a local-safe packet and proceed with the smallest reversible slice.
 
-When a TUI choice surface is available, prefer the choices from `operator_intent_intake_packet.details.interaction`: render `uiHints.preferred=choice-list`, select a route, accept a custom answer, or cancel. If no widget is available, summarize the same choices in one compact message.
+When a TUI choice surface is available, prefer the choices from `operator_intent_intake_packet.details.interaction`: render `uiHints.preferred=choice-list`, preselect `recommendedChoiceId`, select a route, accept a custom answer, or cancel. If no widget is available, summarize the same choices in one compact message.
 
 ## Default Slice Contract
 
