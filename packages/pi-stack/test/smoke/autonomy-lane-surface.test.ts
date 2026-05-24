@@ -738,9 +738,9 @@ describe("autonomy lane surface", () => {
     const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
     const result = statusTool?.execute("call-test", { context_level: "warn", provider_ready: 1 }, undefined, undefined, { cwd });
 
-    const chaining = (result?.details.chaining as { decision?: string; active?: boolean; blockedReasons?: string[] } | undefined);
-    expect(chaining?.decision).toBe("active");
-    expect(chaining?.active).toBe(true);
+    const chaining = (result?.details.chaining as { decision?: string; active?: boolean; nextActionCode?: string; blockedReasons?: string[] } | undefined);
+    expect([chaining?.decision, chaining?.active]).toEqual(["active", true]);
+    expect(chaining?.nextActionCode).toBe("continue-chained-local-safe-slices");
     expect(chaining?.blockedReasons ?? []).toEqual([]);
     expect(String(result?.details.nextAction)).toContain("continue chained local-safe slices");
   });
@@ -766,9 +766,9 @@ describe("autonomy lane surface", () => {
     const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
     const result = statusTool?.execute("call-test", { context_level: "ok", provider_ready: 1 }, undefined, undefined, { cwd });
 
-    const chaining = (result?.details.chaining as { decision?: string; blockedReasons?: string[]; recommendationCode?: string } | undefined);
+    const chaining = (result?.details.chaining as { decision?: string; nextActionCode?: string; blockedReasons?: string[]; recommendationCode?: string } | undefined);
     expect(chaining?.decision).toBe("blocked");
-    expect(chaining?.recommendationCode).toBe("autonomy-chaining-blocked-handoff-freshness");
+    expect([chaining?.recommendationCode, chaining?.nextActionCode]).toEqual(["autonomy-chaining-blocked-handoff-freshness", "refresh-handoff-checkpoint"]);
     expect(chaining?.blockedReasons ?? []).toContain("handoff-stale");
   });
 

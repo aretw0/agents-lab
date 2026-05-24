@@ -30,6 +30,12 @@ type LocalSafeChainingDecision = {
     | "autonomy-chaining-blocked-selection"
     | "autonomy-chaining-blocked-plan"
     | "autonomy-chaining-blocked-handoff-freshness";
+  nextActionCode:
+    | "continue-chained-local-safe-slices"
+    | "wait-for-compact-auto-resume"
+    | "refresh-handoff-checkpoint"
+    | "resolve-local-safe-selection"
+    | "resolve-runtime-lane-blockers";
   blockedReasons: string[];
   handoffFreshness: HandoffFreshnessLabel;
   nextAction: string;
@@ -199,6 +205,7 @@ export function resolveLocalSafeChainingDecision(input: {
       blockedReasons,
       handoffFreshness: input.handoffFreshness,
       nextTaskId: input.nextTaskId,
+      nextActionCode: "continue-chained-local-safe-slices",
       nextAction: `continue chained local-safe slices until compact boundary; next=${input.nextTaskId ?? "none"}.`,
     };
   }
@@ -218,6 +225,13 @@ export function resolveLocalSafeChainingDecision(input: {
       : blockedReasons.some((reason) => reason.startsWith("selection-"))
         ? "resolve local-safe task selection before continuing chain."
         : "resolve runtime lane blockers before continuing chain.";
+  const nextActionCode = blockedReasons.includes("context-compact")
+    ? "wait-for-compact-auto-resume"
+    : blockedReasons.some((reason) => reason.startsWith("handoff-"))
+      ? "refresh-handoff-checkpoint"
+      : blockedReasons.some((reason) => reason.startsWith("selection-"))
+        ? "resolve-local-safe-selection"
+        : "resolve-runtime-lane-blockers";
 
   return {
     active: false,
@@ -226,6 +240,7 @@ export function resolveLocalSafeChainingDecision(input: {
     blockedReasons,
     handoffFreshness: input.handoffFreshness,
     nextTaskId: input.nextTaskId,
+    nextActionCode,
     nextAction,
   };
 }
