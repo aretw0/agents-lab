@@ -31,4 +31,35 @@ describe("guardrails-core tool-call guard", () => {
     expect(result?.reason).toContain("directly in the Pi input");
     expect(result?.reason).toContain("environment_runtime_health_status");
   });
+
+  it("blocks Pi TUI slash commands routed through shell tool aliases", async () => {
+    let handler: ((event: unknown, ctx: { cwd: string }) => unknown | Promise<unknown>) | undefined;
+    const emitter = {
+      on: vi.fn((_eventName: "tool_call", cb: typeof handler) => {
+        handler = cb;
+      }),
+    };
+    const runtime = {
+      isToolCallEventType: (toolName: string, event: unknown): event is { input: { command: string }; toolName: string } =>
+        (event as any)?.toolName === toolName && Boolean((event as any)?.input?.command),
+      getShellRoutingProfile: () => resolveCommandRoutingProfile("linux", {} as NodeJS.ProcessEnv),
+      getStrictInteractiveMode: () => false,
+      getPortConflictConfig: () => ({ enabled: false, suggestedTestPort: 0 }),
+      getBloatSmellConfig: () => ({ enabled: false }),
+      getEventSurfaceRuntime: () => ({ enabled: false }),
+    };
+
+    registerGuardrailsCoreToolCallGuard(emitter, runtime as any);
+
+    for (const toolName of ["shell", "terminal"]) {
+      const result = await handler?.(
+        { toolName, input: { command: "/watchdog:status" } },
+        { cwd: process.cwd() },
+      ) as { block?: boolean; reason?: string } | undefined;
+
+      expect(result?.block).toBe(true);
+      expect(result?.reason).toContain("Pi slash commands are TUI/operator commands");
+      expect(result?.reason).toContain("environment_runtime_health_status");
+    }
+  });
 });

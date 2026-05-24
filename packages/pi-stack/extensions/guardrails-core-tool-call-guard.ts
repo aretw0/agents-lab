@@ -37,6 +37,18 @@ export interface GuardrailsCoreToolCallGuardRuntime {
 	getEventSurfaceRuntime(): GuardrailsCoreEventSurfaceRuntime;
 }
 
+const SHELL_TOOL_NAMES = ["bash", "shell", "terminal"] as const;
+
+function matchShellToolCall<TInput extends Record<string, unknown>>(
+	runtime: GuardrailsCoreToolCallGuardRuntime,
+	event: unknown,
+): GuardrailsCoreToolCallGuardEvent<TInput> | undefined {
+	for (const toolName of SHELL_TOOL_NAMES) {
+		if (runtime.isToolCallEventType<TInput>(toolName, event)) return event;
+	}
+	return undefined;
+}
+
 export function registerGuardrailsCoreToolCallGuard(
 	emitter: GuardrailsCoreToolCallEmitter,
 	runtime: GuardrailsCoreToolCallGuardRuntime,
@@ -46,8 +58,9 @@ export function registerGuardrailsCoreToolCallGuard(
 			return await guardReadPath(event.input.path ?? "", ctx);
 		}
 
-		if (runtime.isToolCallEventType<{ command?: string }>("bash", event)) {
-			const command = event.input.command ?? "";
+		const shellEvent = matchShellToolCall<{ command?: string }>(runtime, event);
+		if (shellEvent) {
+			const command = shellEvent.input.command ?? "";
 			const shellRoutingProfile = runtime.getShellRoutingProfile();
 
 			const shellRoutingDecision = resolveBashCommandRoutingDecision(command, shellRoutingProfile);
