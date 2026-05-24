@@ -45,6 +45,7 @@ describe("autonomy lane brainstorm surface", () => {
     expect(result?.details.recommendationCode).toBe("seed-local-safe-lane");
     expect((result?.details.selectedSlices as unknown[] | undefined)?.length).toBeGreaterThan(0);
     expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm: decision=ready-for-operator-decision");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("next=seed-preview");
     expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo");
     expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"selectedSlices\"');
   });
@@ -94,6 +95,7 @@ describe("autonomy lane brainstorm surface", () => {
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
     expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm: decision=blocked");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("next=resolve-blockers");
     expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo");
   });
 
@@ -121,6 +123,7 @@ describe("autonomy lane brainstorm surface", () => {
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
     expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm-seed-preview: decision=needs-operator-seeding-decision");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("next=operator-seeding-decision");
     expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo");
     expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"proposals\"');
   });

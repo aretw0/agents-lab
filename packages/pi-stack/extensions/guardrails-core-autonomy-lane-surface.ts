@@ -553,7 +553,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
 
       return buildOperatorVisibleToolResponse({
         label: "lane_brainstorm_packet",
-        summary: `lane-brainstorm: decision=${packet.decision} code=${packet.recommendationCode} ideas=${packet.ideas.length} slices=${packet.selectedSlices.length}`,
+        summary: `lane-brainstorm: decision=${packet.decision} code=${packet.recommendationCode} next=${packet.decision === "ready-for-operator-decision" ? "seed-preview" : "resolve-blockers"} ideas=${packet.ideas.length} slices=${packet.selectedSlices.length}`,
         details: packet,
       });
     },
@@ -580,7 +580,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       });
       return buildOperatorVisibleToolResponse({
         label: "lane_brainstorm_seed_preview",
-        summary: `lane-brainstorm-seed-preview: decision=${preview.decision} code=${preview.recommendationCode} proposals=${preview.proposals.length} source=${preview.source} confirmation=yes`,
+        summary: `lane-brainstorm-seed-preview: decision=${preview.decision} code=${preview.recommendationCode} next=${preview.decision === "needs-operator-seeding-decision" ? "operator-seeding-decision" : "resolve-blockers"} proposals=${preview.proposals.length} source=${preview.source} confirmation=yes`,
         details: preview,
       });
     },
