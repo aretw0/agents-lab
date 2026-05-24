@@ -149,6 +149,7 @@ describe("structured interview primitive", () => {
       route: "structured_interview_plan",
     });
     expect(packet.summary).toContain("dispatch=no mutation=no worker-dispatch=no");
+    expect(packet.summary).toContain("choice=answer-next-question");
   });
 
   it("routes absent local-safe material to brainstorm seed preview without dispatch", () => {
@@ -415,6 +416,7 @@ describe("structured interview primitive", () => {
       },
     });
     expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=prepare-worker-packet");
+    expect(result?.content?.[0]?.text).toContain("choice=prepare-worker-packet");
     expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(result?.content?.[0]?.text).not.toContain("\"intent\"");
   });

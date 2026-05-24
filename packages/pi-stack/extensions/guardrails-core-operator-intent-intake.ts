@@ -238,7 +238,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     blockedRequests,
     missingCapabilities: [...new Set(missingCapabilities)].slice(0, 6),
     interaction,
-    summary: "operator-intent-intake: decision=" + decision + " action=" + action.controlPlaneAction + " route=" + recommendedRoute + " profile=" + profilePacket.profile + " questions=" + missingQuestions.length + " operatorDecision=" + (action.confirmationRequired ? "yes" : "no") + " blocked=" + blockedSummary + " dispatch=no mutation=no worker-dispatch=no",
+    summary: "operator-intent-intake: decision=" + decision + " action=" + action.controlPlaneAction + " route=" + recommendedRoute + " choice=" + interaction.recommendedChoiceId + " profile=" + profilePacket.profile + " questions=" + missingQuestions.length + " operatorDecision=" + (action.confirmationRequired ? "yes" : "no") + " blocked=" + blockedSummary + " dispatch=no mutation=no worker-dispatch=no",
     recommendation,
   };
 }
