@@ -171,7 +171,7 @@ describe("environment doctor dev pressure", () => {
     }
   });
 
-  it("treats excluded or quick-start pi-lens as curated pressure instead of a warning", () => {
+  it("treats excluded or normalized quick-start pi-lens as curated pressure instead of a warning", () => {
     const dir = makeWorkspace();
     const previousMode = process.env.PI_LENS_STARTUP_MODE;
     try {
@@ -185,7 +185,7 @@ describe("environment doctor dev pressure", () => {
         }),
         "utf8",
       );
-      process.env.PI_LENS_STARTUP_MODE = "quick";
+      process.env.PI_LENS_STARTUP_MODE = " QUICK ";
 
       const report = buildEnvironmentDevPressureReport(dir);
 

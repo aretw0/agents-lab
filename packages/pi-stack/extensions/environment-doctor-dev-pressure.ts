@@ -145,6 +145,10 @@ function isPiLensSource(source: string): boolean {
   return packageNameFromSource(source) === "pi-lens";
 }
 
+function resolvePiLensStartupMode(): string {
+  return String(process.env.PI_LENS_STARTUP_MODE || "full").trim().toLowerCase() || "full";
+}
+
 function normalizeSurfacePath(value: unknown): string {
   return String(value ?? "").replace(/\\/g, "/").replace(/^\.\//, "");
 }
@@ -285,7 +289,7 @@ function collectDevPressureSettings(cwd: string) {
       .filter((row): row is { entry: unknown; source: string } => Boolean(row.source && isPiLensSource(row.source)))
       .map(({ entry, source }) => {
         const extensionActive = piLensExtensionActive(entry);
-        const startupMode = process.env.PI_LENS_STARTUP_MODE || "full";
+        const startupMode = resolvePiLensStartupMode();
         return {
           source,
           extensionActive,
@@ -506,7 +510,7 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
   const activePiLensEntries = settings.flatMap((row) => row.piLensEntries
     .filter((entry) => entry.extensionActive)
     .map((entry) => ({ settings: row.path, ...entry })));
-  const piLensStartupMode = process.env.PI_LENS_STARTUP_MODE || "full";
+  const piLensStartupMode = resolvePiLensStartupMode();
   if (activePiLensEntries.length > 0 && !["quick", "minimal"].includes(piLensStartupMode)) {
     signals.push({
       level: "warn",
