@@ -17,6 +17,8 @@ describe("pi-skills prompts", () => {
     expect(pkg.pi?.prompts).toContain("./prompts");
     expect(prompt).toContain("control-plane profile");
     expect(prompt).toContain("$ARGUMENTS");
+    expect(prompt).toContain("operator_intent_intake_packet");
+    expect(prompt.indexOf("operator_intent_intake_packet")).toBeLessThan(prompt.indexOf("project_intake_plan"));
     expect(prompt).toContain("local_batch_manifest_packet");
     expect(prompt).toContain("context_watch_local_slice_preview");
     expect(prompt).toContain("Do not cite bare task IDs");

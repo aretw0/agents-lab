@@ -20,6 +20,7 @@ First, recover the smallest useful control-plane profile. If the seed already gi
 
 Before editing, produce a compact plan using the first-party packets when available:
 
+- `operator_intent_intake_packet`
 - `project_intake_plan`
 - `structured_interview_plan`
 - `control_plane_profile_packet`

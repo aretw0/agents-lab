@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Fornecer uma triagem inicial universal, **report-only**, para classificar rapidamente o tipo de projeto e sugerir a primeira fatia local-safe com validação/rollback claros.
+Fornecer uma triagem inicial de projeto, **report-only**, para classificar rapidamente o tipo de workspace e sugerir a primeira fatia local-safe com validação/rollback claros.
 
 ## Contrato mínimo
 
