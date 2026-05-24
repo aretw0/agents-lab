@@ -40,7 +40,7 @@ pi install https://github.com/aretw0/agents-lab
 | Extension | O que faz |
 |---|---|
 | `monitor-provider-patch` | Patch provider-aware para classifiers de monitor (Copilot/Codex + mapa custom) com comando `/monitor-provider` |
-| `environment-doctor` | Health check do ambiente na startup + comando `/doctor`, `/doctor pressure`, tools `environment_doctor_status` e `environment_dev_pressure_status` |
+| `environment-doctor` | Health check do ambiente na startup + comando `/doctor`, `/doctor pressure`, tools `environment_doctor_status`, `environment_dev_pressure_status` e `environment_runtime_health_status` |
 | `claude-code-adapter` | Scaffold experimental para runtime externo Claude Code (`/claude-code status|login|auth-status`, sem persistência de credenciais) |
 | `guardrails-core` | Guardrail unificado first-party: proteção de paths sensíveis + roteamento web determinístico por escopo + bloqueio de conflito de porta reservada pelo session-web + bloqueio de scans de conteúdo em `~/.pi/agent/sessions` e scans recursivos de conteúdo na raiz `.pi` (evita explosão de saída/stack overflow no TUI) |
 | `colony-pilot` | Primitiva de orquestração/visibilidade: prepara runbooks manuais para monitors, remote e colony, mantendo snapshot de colonies em background |

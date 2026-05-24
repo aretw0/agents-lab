@@ -126,7 +126,10 @@ describe("environment-doctor surface", () => {
 
     expect(text).toContain("environment-runtime-health:");
     expect(text).toContain("decision=");
-    expect(text).toContain("liveWatchdog=runtime-local");
+    expect(text).toContain("devPressurePrimary=");
+    expect(text).toContain("devPressureAction=");
+    expect(text).toContain("liveWatchdog=unavailable");
+    expect(text).toContain("watchdogSource=external-pressure-and-persisted-evidence");
     expect((result.details as any)?.mode).toBe("environment-runtime-health");
     expect((result.details as any)?.watchdog?.liveMetricsAvailable).toBe(false);
   });

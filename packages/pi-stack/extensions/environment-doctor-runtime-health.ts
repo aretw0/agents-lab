@@ -1,5 +1,10 @@
 type RuntimeHealthDecision = "continue" | "safe-mode" | "stop-and-investigate";
 
+function extractSummaryField(summary: unknown, key: string): string | undefined {
+  const match = String(summary ?? "").match(new RegExp(`(?:^|\\s)${key}=([^\\s]+)`));
+  return match?.[1];
+}
+
 export function resolveEnvironmentRuntimeHealthDecision(input: {
   doctorIssues?: unknown[];
   devPressureRecommendation?: string;
@@ -60,16 +65,21 @@ export function buildEnvironmentRuntimeHealthPayload(input: {
       note: "Pi watchdog slash commands are TUI commands; this tool uses external pressure facts and persisted evidence only.",
     },
   };
+  const devPressurePrimary = extractSummaryField(input.devPressure.summary, "primary");
+  const devPressureAction = extractSummaryField(input.devPressure.summary, "action");
   const summary = [
     "environment-runtime-health:",
     `decision=${decision}`,
     `doctorIssues=${doctorIssues.length}`,
     optionalIssues.length > 0 ? `optionalIssues=${optionalIssues.length}` : undefined,
     `devPressure=${input.devPressure.recommendation}`,
+    devPressurePrimary ? `devPressurePrimary=${devPressurePrimary}` : undefined,
+    devPressureAction ? `devPressureAction=${devPressureAction}` : undefined,
     `velocity=${input.devPressure.velocityPressure?.severity ?? "unknown"}`,
     input.devPressure.boardPressurePlan?.status ? `boardPressure=${input.devPressure.boardPressurePlan.status}` : undefined,
     `runtimeArtifacts=${Array.isArray(input.runtimeArtifacts.violations) && input.runtimeArtifacts.violations.length === 0 ? "clean" : "violations"}`,
-    "liveWatchdog=runtime-local",
+    "liveWatchdog=unavailable",
+    "watchdogSource=external-pressure-and-persisted-evidence",
   ].filter(Boolean).join(" ");
 
   return { payload, summary };
