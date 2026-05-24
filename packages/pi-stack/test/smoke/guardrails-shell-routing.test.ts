@@ -3,6 +3,7 @@ import {
   buildShellRoutingStatusLines,
   buildShellRoutingSystemPrompt,
   detectShellFamily,
+  extractTuiSlashCommand,
   isCmdWrappedCommand,
   isNodeFamilyCommand,
   isTuiSlashCommand,
@@ -55,6 +56,8 @@ describe("guardrails-core shell routing", () => {
     expect(isTuiSlashCommand("bash -lc \"/watchdog:status\"")).toBe(true);
     expect(isTuiSlashCommand("/bin/bash -lc \"/watchdog:status\"")).toBe(true);
     expect(isTuiSlashCommand("/usr/bin/bash -lc \"/models\"")).toBe(true);
+    expect(extractTuiSlashCommand("/bin/bash -lc \"/watchdog:status\"")).toBe("/watchdog:status");
+    expect(extractTuiSlashCommand("  $ /safe-mode on")).toBe("/safe-mode");
     expect(isTuiSlashCommand("sh -c '/safe-mode on'")).toBe(true);
     expect(isTuiSlashCommand("/bin/bash -lc pwd")).toBe(false);
     expect(decision.action).toBe("block");
@@ -62,6 +65,7 @@ describe("guardrails-core shell routing", () => {
     expect(decision.reason).toContain("directly in the Pi input");
     expect(decision.reason).toContain("environment_runtime_health_status");
     expect(decision.reason).toContain("environment_dev_pressure_status");
+    expect(resolveBashCommandRoutingDecision("/bin/bash -lc \"/watchdog:status\"", profile).reason).toContain("Run /watchdog:status directly");
   });
 
   it("builds system prompt lines only for active host route", () => {

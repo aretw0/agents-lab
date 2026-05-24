@@ -12,6 +12,7 @@ export type BashCommandRoutingDecision = {
   action: "allow" | "block";
   reason?: string;
   firstToken?: string;
+  tuiCommand?: string;
 };
 
 export type ShellRoutingWrapResult = {
@@ -101,16 +102,25 @@ export function isNodeFamilyCommand(command: string): boolean {
 }
 
 export function isTuiSlashCommand(command: string): boolean {
+  return extractTuiSlashCommand(command) !== undefined;
+}
+
+export function extractTuiSlashCommand(command: string): string | undefined {
   const source = String(command ?? "");
-  if (TUI_SLASH_COMMAND_PATTERN.test(source)) return true;
+  const directMatch = source.match(TUI_SLASH_COMMAND_PATTERN);
+  if (directMatch) return directMatch[0].trim();
 
   const promptMatch = source.match(SHELL_PROMPT_PREFIX_PATTERN);
-  if (promptMatch && TUI_SLASH_COMMAND_PATTERN.test(promptMatch[1] ?? "")) return true;
+  const promptCommand = promptMatch?.[1] ?? "";
+  const promptSlashMatch = promptCommand.match(TUI_SLASH_COMMAND_PATTERN);
+  if (promptSlashMatch) return promptSlashMatch[0].trim();
 
   const shellWrapperMatch = source.match(SHELL_C_WRAPPER_PATTERN);
-  if (shellWrapperMatch && TUI_SLASH_COMMAND_PATTERN.test(shellWrapperMatch[2] ?? "")) return true;
+  const wrappedCommand = shellWrapperMatch?.[2] ?? "";
+  const wrappedSlashMatch = wrappedCommand.match(TUI_SLASH_COMMAND_PATTERN);
+  if (wrappedSlashMatch) return wrappedSlashMatch[0].trim();
 
-  return false;
+  return undefined;
 }
 
 export function resolveBashCommandRoutingDecision(
@@ -119,12 +129,14 @@ export function resolveBashCommandRoutingDecision(
 ): BashCommandRoutingDecision {
   if (isTuiSlashCommand(command)) {
     const firstToken = parseFirstCommandToken(command);
+    const tuiCommand = extractTuiSlashCommand(command);
     return {
       action: "block",
       firstToken,
+      tuiCommand,
       reason: [
         "Blocked by guardrails-core (operator-command-routing): Pi slash commands are TUI/operator commands, not shell commands.",
-        `Run ${firstToken ?? "the slash command"} directly in the Pi input when the operator needs the TUI command.`,
+        `Run ${tuiCommand ?? "the slash command"} directly in the Pi input when the operator needs the TUI command.`,
         "For agent-readable health checks, use environment_runtime_health_status or environment_dev_pressure_status instead of /watchdog:* through bash.",
       ].join("\n"),
     };
