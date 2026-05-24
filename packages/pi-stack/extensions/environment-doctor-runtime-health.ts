@@ -5,6 +5,12 @@ function extractSummaryField(summary: unknown, key: string): string | undefined 
   return match?.[1];
 }
 
+function resolveRuntimeHealthNextAction(decision: RuntimeHealthDecision): string {
+  if (decision === "continue") return "continue-with-bounded-work";
+  if (decision === "safe-mode") return "enable-safe-mode-or-reduce-governance-surface-before-long-runs";
+  return "stop-and-investigate-blocking-runtime-health";
+}
+
 export function resolveEnvironmentRuntimeHealthDecision(input: {
   doctorIssues?: unknown[];
   devPressureRecommendation?: string;
@@ -51,6 +57,7 @@ export function buildEnvironmentRuntimeHealthPayload(input: {
   const payload = {
     mode: "environment-runtime-health",
     decision,
+    nextAction: resolveRuntimeHealthNextAction(decision),
     doctor: {
       terminalId: input.terminalId,
       shellId: input.shellId,
@@ -80,6 +87,7 @@ export function buildEnvironmentRuntimeHealthPayload(input: {
   const summary = [
     "environment-runtime-health:",
     `decision=${decision}`,
+    `next=${payload.nextAction}`,
     `doctorIssues=${doctorIssues.length}`,
     optionalIssues.length > 0 ? `optionalIssues=${optionalIssues.length}` : undefined,
     `devPressure=${input.devPressure.recommendation}`,

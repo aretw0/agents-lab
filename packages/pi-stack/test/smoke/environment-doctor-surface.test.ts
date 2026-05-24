@@ -126,11 +126,13 @@ describe("environment-doctor surface", () => {
 
     expect(text).toContain("environment-runtime-health:");
     expect(text).toContain("decision=");
+    expect(text).toContain("next=continue-with-bounded-work");
     expect(text).toContain("devPressurePrimary=");
     expect(text).toContain("devPressureAction=");
     expect(text).toContain("liveWatchdog=unavailable");
     expect(text).toContain("watchdogSource=external-pressure-and-persisted-evidence");
     expect((result.details as any)?.mode).toBe("environment-runtime-health");
+    expect((result.details as any)?.nextAction).toBe("continue-with-bounded-work");
     expect((result.details as any)?.watchdog?.liveMetricsAvailable).toBe(false);
   });
 
@@ -179,7 +181,9 @@ describe("environment-doctor surface", () => {
     });
 
     expect(payload.decision).toBe("safe-mode");
+    expect(payload.nextAction).toBe("enable-safe-mode-or-reduce-governance-surface-before-long-runs");
     expect(summary).toContain("devPressureAction=set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested");
+    expect(summary).toContain("next=enable-safe-mode-or-reduce-governance-surface-before-long-runs");
     expect(summary).toContain("recoveryActions=2");
   });
 });
