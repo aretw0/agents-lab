@@ -75,7 +75,7 @@ Pacotes de terceiros curados entram quando têm uso real, valor comprovado e ove
 
 A stack favorece um control plane simples por padrão:
 
-1. escolher o próximo trabalho com escopo claro;
+1. transformar intenção livre em escopo claro com `operator_intent_intake_packet`;
 2. executar uma fatia pequena;
 3. validar;
 4. registrar evidência;
