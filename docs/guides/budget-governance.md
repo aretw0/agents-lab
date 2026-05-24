@@ -165,10 +165,12 @@ Antes de concluir que falta funcionalidade, valide se a stack instalada tem as m
 
 ```bash
 pnpm run pi:parity
+pnpm run pi:parity:full
 pnpm run pi:parity:project
 ```
 
-- `pi:parity` valida se seu **user scope** está próximo da stack completa.
+- `pi:parity` valida se seu **user scope** está próximo do baseline `strict-curated`.
+- `pi:parity:full` valida se seu **user scope** está próximo da stack completa opt-in.
 - `pi:parity:project` valida o **scope local do projeto** (first-party).
 
 Para isolamento forte em estudos sem sujar o perfil global:

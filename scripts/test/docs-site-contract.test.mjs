@@ -383,6 +383,14 @@ test("current governance docs use pnpm for project scripts", () => {
 	}
 });
 
+test("pi parity scripts keep strict-curated as the default operator check", () => {
+	const packageJson = JSON.parse(read("package.json"));
+
+	assert.equal(packageJson.scripts["pi:parity"], "node scripts/pi-parity.mjs --scope user --profile strict-curated");
+	assert.equal(packageJson.scripts["pi:parity:full"], "node scripts/pi-parity.mjs --scope user --profile stack-full");
+	assert.match(read("docs/guides/budget-governance.md"), /pi:parity` valida se seu \*\*user scope\*\* está próximo do baseline `strict-curated`/);
+});
+
 test("recommended stack guide stays user-first and concise", () => {
 	const guide = read("docs/guides/recommended-pi-stack.md");
 

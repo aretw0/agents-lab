@@ -77,6 +77,7 @@ No `agents-lab`, os wrappers de paridade são:
 
 ```bash
 pnpm run pi:parity
+pnpm run pi:parity:full
 pnpm run pi:parity:project
 pnpm run pi:parity:curated
 pnpm run pi:parity:curated:strict

@@ -10,6 +10,22 @@ import {
 
 const SCRIPT = path.resolve("scripts/pi-parity.mjs");
 
+test("pi-parity defaults to strict-curated profile", () => {
+  const run = spawnSync(process.execPath, [
+    SCRIPT,
+    "--scope",
+    "project",
+    "--json",
+  ], {
+    encoding: "utf8",
+  });
+
+  assert.equal(run.status, 0, run.stderr || run.stdout);
+  const payload = JSON.parse(run.stdout);
+  assert.equal(payload.results[0].profile, "strict-curated");
+  assert.equal(payload.results[0].expectedCount, STRICT_CURATED.length);
+});
+
 test("pi-parity supports curated-default profile", () => {
   const run = spawnSync(process.execPath, [
     SCRIPT,

@@ -16,7 +16,8 @@
  *
  * Usage:
  *   node scripts/pi-parity.mjs
- *   node scripts/pi-parity.mjs --scope user --profile stack-full --strict
+ *   node scripts/pi-parity.mjs --scope user --profile strict-curated --strict
+ *   node scripts/pi-parity.mjs --scope user --profile stack-full
  *   node scripts/pi-parity.mjs --scope project --profile first-party
  *   node scripts/pi-parity.mjs --scope both --json
  */
@@ -36,7 +37,7 @@ import {
 
 const IS_WINDOWS = process.platform === "win32";
 const DEFAULT_SCOPE = "user";
-const DEFAULT_PROFILE = "stack-full";
+const DEFAULT_PROFILE = "strict-curated";
 const PUBLIC_PROFILE_NAMES = ["stack-full", "first-party", "strict-curated", "curated-runtime"];
 
 const PROFILES = {
@@ -84,7 +85,8 @@ pi parity checker
 
 Usage:
   pnpm run pi:parity
-  node scripts/pi-parity.mjs --scope user --profile stack-full --strict
+  node scripts/pi-parity.mjs --scope user --profile strict-curated --strict
+  node scripts/pi-parity.mjs --scope user --profile stack-full
   node scripts/pi-parity.mjs --scope project --profile first-party
   node scripts/pi-parity.mjs --scope project --profile strict-curated
   node scripts/pi-parity.mjs --scope project --profile curated-runtime

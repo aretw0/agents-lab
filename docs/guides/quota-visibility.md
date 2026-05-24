@@ -24,6 +24,7 @@ Antes de analisar números, confirme paridade do ambiente:
 
 ```bash
 pnpm run pi:parity
+pnpm run pi:parity:full
 ```
 
 ---
