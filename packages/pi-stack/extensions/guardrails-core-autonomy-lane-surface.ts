@@ -190,6 +190,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
           return {
             decision: packet.decision,
             recommendationCode: packet.recommendationCode,
+            nextActionCode: packet.nextActionCode,
             suggestedSeedCount: packet.suggestedSeedCount,
             seedWhy: packet.reseedJustification.reasonCode,
             seedPriority: packet.reseedPriority.code,
@@ -207,6 +208,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         decision: influenceWindowPacket.decision,
         window: influenceWindowPacket.window,
         recommendationCode: influenceWindowPacket.recommendationCode,
+        nextActionCode: influenceWindowPacket.nextActionCode,
       };
       const protectedFocusTaskIds = tasks
         .map((task) => ({ task, id: normalizeTaskId(task.id), status: String(task.status ?? "").toLowerCase() }))

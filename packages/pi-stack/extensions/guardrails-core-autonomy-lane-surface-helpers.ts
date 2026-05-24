@@ -96,26 +96,32 @@ export function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd:
 
   let decision: "continue" | "seed-backlog" | "blocked" = "continue";
   let recommendationCode = "afk-material-readiness-continue-stock-healthy";
+  let nextActionCode = "continue-bounded-afk-batch";
   let nextAction = "continue bounded AFK batch; material stock and validation coverage are healthy.";
 
   if (blockedReasons.length > 0) {
     decision = "blocked";
     if (blockedReasons.some((reason) => reason.startsWith("focus-"))) {
       recommendationCode = "afk-material-readiness-blocked-focus";
+      nextActionCode = "restore-valid-focus";
       nextAction = "restore a valid single focus with known validation before AFK continuation.";
     } else if (blockedReasons.includes("reload-required-or-dirty")) {
       recommendationCode = "afk-material-readiness-blocked-reload-or-dirty";
+      nextActionCode = "clean-workspace-or-reload";
       nextAction = "clean workspace/reload before AFK continuation.";
     } else if (blockedReasons.includes("no-local-safe-material")) {
       recommendationCode = "afk-material-readiness-blocked-no-material";
+      nextActionCode = "seed-local-safe-backlog";
       nextAction = "seed local-safe backlog first (brainstorm packet + seed preview + operator decision).";
     } else {
       recommendationCode = "afk-material-readiness-blocked-selection";
+      nextActionCode = "resolve-selection-blockers";
       nextAction = "resolve selection blockers before AFK continuation.";
     }
   } else if (validationKnown.length < minReadySlices) {
     decision = "seed-backlog";
     recommendationCode = "afk-material-readiness-seed-backlog-low-stock";
+    nextActionCode = "run-brainstorm-seed-flow";
     nextAction = `material stock below target (${validationKnown.length}/${minReadySlices}); run brainstorm+seed flow before next AFK batch.`;
   }
 
@@ -138,6 +144,7 @@ export function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd:
     `target=${targetSlices}`,
     `stockGap=${stockGap}`,
     `recommendedSeedCount=${recommendedSeedCount}`,
+    `next=${nextActionCode}`,
     decision === "blocked" ? `blockers=${blockedReasons.join("|")}` : undefined,
     formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
@@ -146,6 +153,7 @@ export function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd:
     mode: "report-only",
     decision,
     recommendationCode,
+    nextActionCode,
     nextAction,
     focusTaskIds: focus.ids,
     focusSource: focus.source,
@@ -333,6 +341,7 @@ export function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: stri
 
   let decision: "seed-now" | "wait" | "blocked" = "wait";
   let recommendationCode = "afk-material-seed-wait-stock-healthy";
+  let nextActionCode = "wait-and-recheck-material";
   let nextAction = "defer seeding; continue bounded AFK slice and re-check material packet after checkpoint.";
   let operatorActionRequired = false;
   let seedTemplates: ReturnType<typeof buildBootstrapSeedTemplates> = [];
@@ -351,18 +360,21 @@ export function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: stri
     if (canBootstrapSeed) {
       decision = "seed-now";
       recommendationCode = "afk-material-seed-now-bootstrap";
+      nextActionCode = "run-bootstrap-seed-preview";
       nextAction = `run lane_brainstorm_packet + lane_brainstorm_seed_preview and decide bootstrap seeding for up to ${suggestedSeedCount} slices.`;
       operatorActionRequired = true;
       seedTemplates = buildBootstrapSeedTemplates({ suggestedSeedCount, maxSeedSlices });
     } else {
       decision = "blocked";
       recommendationCode = "afk-material-seed-blocked-readiness";
+      nextActionCode = "resolve-readiness-blockers";
       nextAction = "resolve readiness blockers before triggering seeding flow.";
       operatorActionRequired = true;
     }
   } else if (readiness.decision === "seed-backlog") {
     decision = "seed-now";
     recommendationCode = "afk-material-seed-now-low-stock";
+    nextActionCode = "run-low-stock-seed-preview";
     nextAction = `run lane_brainstorm_packet + lane_brainstorm_seed_preview and decide seeding for up to ${suggestedSeedCount} slices.`;
     operatorActionRequired = true;
   }
@@ -392,6 +404,7 @@ export function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: stri
     `seedWhy=${reseedJustification.reasonCode}`,
     `seedPriority=${reseedPriority.code}`,
     `operatorActionRequired=${operatorActionRequired ? "yes" : "no"}`,
+    `next=${nextActionCode}`,
     formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].join(" ");
 
@@ -399,6 +412,7 @@ export function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: stri
     mode: "report-only",
     decision,
     recommendationCode,
+    nextActionCode,
     nextAction,
     operatorActionRequired,
     suggestedSeedCount,
@@ -437,6 +451,7 @@ export function buildInfluenceAssimilationWindowPacket(p: Record<string, unknown
   let window: "open" | "hold" | "closed" = "open";
   let recommendationCode = "influence-assimilation-ready-window-open";
   let recommendation = "open-protected-focus";
+  let nextActionCode = "prepare-protected-focus-decision";
   let nextAction = "window open: prepare protected decision packet and request explicit operator focus before external influence assimilation.";
 
   if (blockedReasons.includes("reload-required-or-dirty") || blockedReasons.includes("local-safe-readiness-blocked")) {
@@ -444,12 +459,14 @@ export function buildInfluenceAssimilationWindowPacket(p: Record<string, unknown
     window = "closed";
     recommendationCode = "influence-assimilation-blocked-operational";
     recommendation = "stabilize-local-runtime";
+    nextActionCode = "stabilize-local-runtime";
     nextAction = "stabilize local runtime/readiness first (reload/dirty/focus), then re-evaluate influence window.";
   } else if (blockedReasons.length > 0) {
     decision = "defer";
     window = "hold";
     recommendationCode = "influence-assimilation-defer-local-safe-stock";
     recommendation = "continue-local-safe";
+    nextActionCode = "grow-local-safe-stock";
     nextAction = "defer influence assimilation until local-safe stock and validation maturity are healthy.";
   }
 
@@ -477,6 +494,7 @@ export function buildInfluenceAssimilationWindowPacket(p: Record<string, unknown
     `coverage=${readiness.material.validationCoveragePct}/${minValidationCoveragePct}`,
     blockedReasons.length > 0 ? `blockers=${blockedReasons.join("|")}` : undefined,
     `recommend=${recommendation}`,
+    `next=${nextActionCode}`,
     formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
 
@@ -486,6 +504,7 @@ export function buildInfluenceAssimilationWindowPacket(p: Record<string, unknown
     window,
     recommendationCode,
     recommendation,
+    nextActionCode,
     nextAction,
     options,
     blockedReasons,
@@ -609,6 +628,7 @@ export function buildAutonomyLaneBatchPreviewPacket(p: Record<string, unknown>, 
 
   let decision: "ready" | "seed-backlog" | "blocked" = "ready";
   let recommendationCode = "autonomy-lane-batch-preview-ready";
+  let nextActionCode = "execute-bounded-batch";
   let nextAction = "execute batch in listed order with commit+checkpoint per slice; refresh status after each slice.";
 
   if (blockedReasons.length > 0) {
@@ -616,12 +636,16 @@ export function buildAutonomyLaneBatchPreviewPacket(p: Record<string, unknown>, 
     recommendationCode = blockedReasons.includes("reload-required-or-dirty")
       ? "autonomy-lane-batch-preview-blocked-reload-or-dirty"
       : "autonomy-lane-batch-preview-blocked-selection";
+    nextActionCode = blockedReasons.includes("reload-required-or-dirty")
+      ? "clean-workspace-or-reload"
+      : "resolve-selection-blockers";
     nextAction = blockedReasons.includes("reload-required-or-dirty")
       ? "clean workspace/reload and re-run autonomy_lane_batch_preview."
       : "resolve local-safe selection blockers and re-run autonomy_lane_batch_preview.";
   } else if (eligibleSlices.length < 3) {
     decision = "seed-backlog";
     recommendationCode = "autonomy-lane-batch-preview-seed-backlog";
+    nextActionCode = "seed-local-safe-slices";
     nextAction = `seed ${Math.max(1, 3 - eligibleSlices.length)} additional local-safe slices before long batch execution.`;
   }
 
@@ -632,6 +656,7 @@ export function buildAutonomyLaneBatchPreviewPacket(p: Record<string, unknown>, 
     `requested=${requestedSliceCount}`,
     `available=${eligibleSlices.length}`,
     `preview=${slices.length}`,
+    `nextAction=${nextActionCode}`,
     selection.nextTaskId ? `next=${selection.nextTaskId}` : undefined,
     blockedReasons.length > 0 ? `blockers=${blockedReasons.join("|")}` : undefined,
     formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
@@ -641,6 +666,7 @@ export function buildAutonomyLaneBatchPreviewPacket(p: Record<string, unknown>, 
     mode: "report-only",
     decision,
     recommendationCode,
+    nextActionCode,
     nextAction,
     requestedSliceCount,
     minimumSliceCount: 3,
@@ -743,6 +769,7 @@ export function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, c
       mode: "report-only",
       decision: "blocked",
       recommendationCode: "auto-advance-snapshot-blocked-no-focus-complete",
+      nextActionCode: "require-focus-complete",
       nextAction: "auto-advance requires handoff focus-complete before successor evaluation.",
       focusTaskIds: focus.ids,
       focusSource: focus.source,
@@ -752,7 +779,7 @@ export function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, c
       dispatchAllowed: false,
       mutationAllowed: false,
       authorization: GUARDRAILS_AUTHORIZATION_NONE,
-      summary: "autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-no-focus-complete",
+      summary: "autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-no-focus-complete next=require-focus-complete",
     };
   }
 
@@ -761,6 +788,7 @@ export function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, c
       mode: "report-only",
       decision: "blocked",
       recommendationCode: "auto-advance-snapshot-blocked-no-successor",
+      nextActionCode: "choose-local-safe-successor",
       nextAction: "auto-advance blocked until a single local-safe successor is eligible.",
       focusTaskIds: focus.ids,
       focusSource: focus.source,
@@ -770,7 +798,7 @@ export function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, c
       dispatchAllowed: false,
       mutationAllowed: false,
       authorization: GUARDRAILS_AUTHORIZATION_NONE,
-      summary: "autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-no-successor",
+      summary: "autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-no-successor next=choose-local-safe-successor",
     };
   }
 
@@ -783,6 +811,7 @@ export function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, c
       mode: "report-only",
       decision: "blocked",
       recommendationCode: "auto-advance-snapshot-blocked-fail-closed",
+      nextActionCode: "keep-explicit-focus-selection",
       nextAction: "auto-advance fail-closed; keep explicit focus selection until blockers clear.",
       focusTaskIds: focus.ids,
       focusSource: focus.source,
@@ -792,7 +821,7 @@ export function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, c
       dispatchAllowed: false,
       mutationAllowed: false,
       authorization: GUARDRAILS_AUTHORIZATION_NONE,
-      summary: `autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-fail-closed reasons=${blockedReasons.join(",")}`,
+      summary: `autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-fail-closed next=keep-explicit-focus-selection reasons=${blockedReasons.join(",")}`,
     };
   }
 
@@ -800,6 +829,7 @@ export function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, c
     mode: "report-only",
     decision: "eligible",
     recommendationCode: "auto-advance-snapshot-eligible",
+    nextActionCode: "continue-bounded-local-safe-slice",
     nextAction: `auto-advance eligible for ${fallback.nextTaskId}; continue bounded local-safe slice.`,
     focusTaskIds: focus.ids,
     focusSource: focus.source,
@@ -809,7 +839,7 @@ export function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, c
     dispatchAllowed: false,
     mutationAllowed: false,
     authorization: GUARDRAILS_AUTHORIZATION_NONE,
-    summary: `autonomy-lane-auto-advance-snapshot: decision=eligible code=auto-advance-snapshot-eligible next=${fallback.nextTaskId}`,
+    summary: `autonomy-lane-auto-advance-snapshot: decision=eligible code=auto-advance-snapshot-eligible nextAction=continue-bounded-local-safe-slice next=${fallback.nextTaskId}`,
   };
 }
 

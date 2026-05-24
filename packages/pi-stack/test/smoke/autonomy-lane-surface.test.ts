@@ -333,7 +333,7 @@ describe("autonomy lane surface", () => {
     const result = snapshotTool?.execute("call-test", {}, undefined, undefined, { cwd });
 
     expect(result?.details.decision).toBe("eligible");
-    expect(result?.details.recommendationCode).toBe("auto-advance-snapshot-eligible");
+    expect([result?.details.recommendationCode, result?.details.nextActionCode]).toEqual(["auto-advance-snapshot-eligible", "continue-bounded-local-safe-slice"]);
     expect(result?.details.nextTaskId).toBe("TASK-NEXT");
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
@@ -366,7 +366,7 @@ describe("autonomy lane surface", () => {
     const result = snapshotTool?.execute("call-test", {}, undefined, undefined, { cwd });
 
     expect(result?.details.decision).toBe("blocked");
-    expect(result?.details.recommendationCode).toBe("auto-advance-snapshot-blocked-fail-closed");
+    expect([result?.details.recommendationCode, result?.details.nextActionCode]).toEqual(["auto-advance-snapshot-blocked-fail-closed", "keep-explicit-focus-selection"]);
     expect((result?.details.blockedReasons as string[] | undefined) ?? []).toContain("validation-gate-unknown");
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
@@ -611,10 +611,10 @@ describe("autonomy lane surface", () => {
     const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
     const result = statusTool?.execute("call-test", { context_level: "ok", provider_ready: 1 }, undefined, undefined, { cwd });
     const reminder = (result?.details.iterationReminder as { source?: string; items?: string[]; summary?: string } | undefined);
-    const seedingGuidance = (result?.details.seedingGuidance as { decision?: string; seedWhy?: string; seedPriority?: string } | undefined);
+    const seedingGuidance = (result?.details.seedingGuidance as { decision?: string; nextActionCode?: string; seedWhy?: string; seedPriority?: string } | undefined);
     const decisionCue = (result?.details.decisionCue as { operatorDecisionNeeded?: boolean; reasonCode?: string; recommendedAction?: string; nextCandidateTaskId?: string } | undefined);
 
-    expect(seedingGuidance?.decision).toBe("seed-now");
+    expect([seedingGuidance?.decision, seedingGuidance?.nextActionCode]).toEqual(["seed-now", "run-bootstrap-seed-preview"]);
     expect(reminder?.source).toBe("seed-guidance");
     expect(reminder?.summary).toContain("seedWhy=bootstrap-focus-missing");
     expect(reminder?.summary).toContain("seedPriority=continuity-bootstrap");
@@ -807,12 +807,12 @@ describe("autonomy lane surface", () => {
     expect(pauseBrief?.seedingCue?.seedCount).toBe(3);
     expect(pauseBrief?.seedingCue?.seedWhy).toBe("readiness-blocked");
     expect(pauseBrief?.seedingCue?.seedPriority).toBe("blocked-readiness");
-    const seedingGuidance = (result?.details.seedingGuidance as { decision?: string; seedWhy?: string; seedPriority?: string; operatorActionRequired?: boolean } | undefined);
-    expect(seedingGuidance?.decision).toBe("blocked");
+    const seedingGuidance = (result?.details.seedingGuidance as { decision?: string; nextActionCode?: string; seedWhy?: string; seedPriority?: string; operatorActionRequired?: boolean } | undefined);
+    expect([seedingGuidance?.decision, seedingGuidance?.nextActionCode]).toEqual(["blocked", "resolve-readiness-blockers"]);
     expect(seedingGuidance?.seedWhy).toBe("readiness-blocked");
     expect(seedingGuidance?.seedPriority).toBe("blocked-readiness");
     expect(seedingGuidance?.operatorActionRequired).toBe(true);
-    const influenceCue = (result?.details.influenceWindowCue as { decision?: string; recommendationCode?: string } | undefined);
+    const influenceCue = (result?.details.influenceWindowCue as { decision?: string; recommendationCode?: string; nextActionCode?: string } | undefined);
     const protectedReadyCue = (result?.details.protectedReadyCue as {
       decision?: string;
       recommendationCode?: string;
@@ -826,7 +826,7 @@ describe("autonomy lane surface", () => {
       nextCandidateTaskId?: string;
     } | undefined);
     expect(influenceCue?.decision).toBe("blocked");
-    expect(influenceCue?.recommendationCode).toBe("influence-assimilation-blocked-operational");
+    expect([influenceCue?.recommendationCode, influenceCue?.nextActionCode]).toEqual(["influence-assimilation-blocked-operational", "stabilize-local-runtime"]);
     expect(protectedReadyCue?.decision).toBe("hold");
     expect(protectedReadyCue?.recommendationCode).toBe("protected-ready-hold-local-safe-first");
     expect(protectedReadyCue?.eligibleProtectedCount).toBe(0);
