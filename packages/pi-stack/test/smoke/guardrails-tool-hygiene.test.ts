@@ -50,6 +50,14 @@ describe("tool hygiene scorecard", () => {
       classification: "measured",
       maturity: "safe-for-local-loop",
     });
+
+    expect(classifyToolHygiene({
+      name: "operator_intent_intake_packet",
+      description: "Report-only intake packet; dispatch=no mutation=no worker-dispatch=no",
+    })).toMatchObject({
+      classification: "measured",
+      maturity: "safe-for-local-loop",
+    });
   });
 
   it("detects JS/TS syntax hygiene findings with rationale exceptions", () => {

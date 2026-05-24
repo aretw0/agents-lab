@@ -120,6 +120,7 @@ describe("project-intake-primitive", () => {
       dominantArtifacts: ["typescript"],
       packageManagers: ["pnpm"],
       availableTools: [
+        { name: "operator_intent_intake_packet", description: "Report-only intake packet; dispatch=no mutation=no worker-dispatch=no" },
         { name: "structured_interview_plan", description: "Read-only plan; never authorizes dispatch" },
         { name: "board_task_complete", description: "mutates board evidence" },
         { name: "ant_colony", description: "Launch autonomous long run" },
@@ -134,13 +135,13 @@ describe("project-intake-primitive", () => {
     });
 
     expect(packet.capabilityInventory).toMatchObject({
-      availableTools: 3,
-      safeForLocalLoop: 1,
+      availableTools: 4,
+      safeForLocalLoop: 2,
       needsMeasuredEvidence: 1,
       requiresOperatorApproval: 1,
       hideBeforeLongLoop: 0,
       capabilitySignals: ["provider-ready", "board-present"],
-      recommendedToolNames: ["structured_interview_plan"],
+      recommendedToolNames: ["operator_intent_intake_packet", "structured_interview_plan"],
       gaps: [],
     });
     expect(packet.dispatchAllowed).toBe(false);
