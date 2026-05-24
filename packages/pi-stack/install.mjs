@@ -11,7 +11,7 @@
  * (e.g. mitsupi/uv.ts vs oh-pi-extensions/bg-process.ts both register "bash").
  *
  * Usage:
- *   npx @aretw0/pi-stack                # install all (global)
+ *   npx @aretw0/pi-stack                # install strict-curated profile (global)
  *   npx @aretw0/pi-stack --local        # install to project .pi/settings.json
  *   npx @aretw0/pi-stack --remove       # uninstall all from pi
  *   npx @aretw0/pi-stack --version 0.3.0 # pin @aretw0/* to a specific version
