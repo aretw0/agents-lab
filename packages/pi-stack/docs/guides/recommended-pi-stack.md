@@ -76,10 +76,11 @@ Pacotes de terceiros curados entram quando têm uso real, valor comprovado e ove
 A stack favorece um control plane simples por padrão:
 
 1. transformar intenção livre em escopo claro com `operator_intent_intake_packet`;
-2. executar uma fatia pequena;
-3. validar;
-4. registrar evidência;
-5. decidir se continua, delega ou para.
+2. checar `environment_runtime_health_status` antes de ampliar lote ou preparar worker;
+3. executar uma fatia pequena;
+4. validar;
+5. registrar evidência;
+6. decidir se continua, delega ou para.
 
 Use a doutrina operacional do control plane e o glossário canônico quando estiverem disponíveis no pacote/projeto. O objetivo é evitar criar termos novos quando já existe um contrato operacional.
 

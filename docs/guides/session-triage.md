@@ -37,7 +37,7 @@ Checklist de spawn rápido por modo:
 
 ## Atalho de intake universal (antes da triagem longa)
 
-Quando a intenção do operador ainda está livre ou ambígua, rode primeiro `operator_intent_intake_packet`. Ele decide, sem mutação ou dispatch, se o próximo passo é entrevista curta, brainstorm de lane, single-slice local ou readiness de worker.
+Quando a intenção do operador ainda está livre ou ambígua, rode primeiro `operator_intent_intake_packet`. Ele decide, sem mutação ou dispatch, se o próximo passo é entrevista curta, brainstorm de lane, single-slice local ou readiness de runtime/worker.
 
 Quando o formato do projeto ainda está nebuloso, rode `project_intake_plan` para escolher a primeira fatia local-safe sem abrir escopo protegido.
 
@@ -183,6 +183,7 @@ Use quando quiser avançar mais de um micro-lote sem perder governança:
    - `scheduler_governance_status`
    - `colony_pilot_preflight`
    - `context_watch_status`
+   - `environment_runtime_health_status`
    - `subagent_readiness_status(strict=true)`
 3. Classificar a rodada em `GO`, `GO condicional` ou `NO-GO`.
 4. Executar lote curto (1 objetivo), registrar evidência e atualizar `.project`.
