@@ -10,6 +10,7 @@ export type AutonomyAntiBloatCue = {
   decision: LineBudgetRecommendation;
   recommendationCode: "anti-bloat-ok" | "anti-bloat-watch" | "anti-bloat-extract";
   recommendation: string;
+  nextActionCode: "continue-local-safe-slice" | "avoid-growing-watch-surfaces" | "schedule-anti-bloat-extraction";
   nextAction: string;
   lineBudgetRecommendationCode: "line-budget-ok" | "line-budget-watch" | "line-budget-extract";
   totals: {
@@ -47,6 +48,11 @@ export function buildAutonomyAntiBloatCue(cwd: string): AutonomyAntiBloatCue {
     : snapshot.recommendation === "watch"
       ? "avoid adding to watch surfaces unless the slice extracts or contains authorized refactor growth"
       : "continue local-safe slice selection";
+  const nextActionCode = snapshot.recommendation === "extract"
+    ? "schedule-anti-bloat-extraction"
+    : snapshot.recommendation === "watch"
+      ? "avoid-growing-watch-surfaces"
+      : "continue-local-safe-slice";
   const summary = [
     "anti-bloat-cue:",
     `decision=${snapshot.recommendation}`,
@@ -54,6 +60,7 @@ export function buildAutonomyAntiBloatCue(cwd: string): AutonomyAntiBloatCue {
     `aboveWatch=${snapshot.totals.aboveWatch}`,
     `aboveExtract=${snapshot.totals.aboveExtract}`,
     `aboveCritical=${snapshot.totals.aboveCritical}`,
+    `next=${nextActionCode}`,
     snapshot.blockers.length > 0 ? `blockers=${snapshot.blockers.join("|")}` : undefined,
     formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
   ].filter(Boolean).join(" ");
@@ -62,6 +69,7 @@ export function buildAutonomyAntiBloatCue(cwd: string): AutonomyAntiBloatCue {
     decision: snapshot.recommendation,
     recommendationCode,
     recommendation,
+    nextActionCode,
     nextAction,
     lineBudgetRecommendationCode: snapshot.recommendationCode,
     totals: snapshot.totals,

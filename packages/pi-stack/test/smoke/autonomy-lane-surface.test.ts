@@ -537,7 +537,7 @@ describe("autonomy lane surface", () => {
     const result = statusTool?.execute("call-test", { context_level: "warn", provider_ready: 1 }, undefined, undefined, { cwd });
     const cue = (result?.details.antiBloatCue as {
       decision?: string;
-      recommendationCode?: string;
+      recommendationCode?: string; nextActionCode?: string;
       recommendation?: string;
       nextAction?: string;
       dispatchAllowed?: boolean;
@@ -547,7 +547,7 @@ describe("autonomy lane surface", () => {
     } | undefined);
 
     expect(cue?.decision).toBe("extract");
-    expect(cue?.recommendationCode).toBe("anti-bloat-extract");
+    expect([cue?.recommendationCode, cue?.nextActionCode]).toEqual(["anti-bloat-extract", "schedule-anti-bloat-extraction"]);
     expect(cue?.recommendation).toContain("authorized anti-bloat/refactor extraction is not a tangent");
     expect(cue?.nextAction).toContain("keep backlog/policy tangents separate");
     expect(cue?.dispatchAllowed).toBe(false);
