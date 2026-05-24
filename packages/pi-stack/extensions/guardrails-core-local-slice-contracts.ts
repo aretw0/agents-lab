@@ -147,6 +147,11 @@ export interface LocalSliceBacklogGate {
 
 export type ControlPlaneProfileDecision = "ready-for-operator-decision" | "blocked";
 export type ControlPlaneProfileKind = "local-safe-single-slice" | "bounded-batch-candidate" | "worker-assisted-candidate" | "blocked-protected-scope";
+export type ControlPlaneProfileNextAction =
+  | "prepare-single-slice-contract"
+  | "present-bounded-batch-decision"
+  | "run-worker-intake-readiness"
+  | "resolve-blocked-intent";
 
 export interface ControlPlaneProfilePacketInput {
   intent?: string;
@@ -186,6 +191,7 @@ export interface ControlPlaneProfilePacket {
   missingCapabilities: string[];
   blockedRequests: string[];
   operatorDecisionNeeded: true;
+  nextAction: ControlPlaneProfileNextAction;
   summary: string;
   recommendation: string;
   recommendedNextAction: string;
@@ -273,6 +279,13 @@ export function buildControlPlaneProfilePacket(input: ControlPlaneProfilePacketI
     : autonomy === "single-slice"
       ? "Prepare one local-safe slice with validation, rollback, checkpoint, and explicit stop conditions."
       : "Present this as an operator decision packet; batch or worker capability remains candidate-only until lower gates approve it.";
+  const nextAction: ControlPlaneProfileNextAction = decision === "blocked"
+    ? "resolve-blocked-intent"
+    : autonomy === "worker-assisted-candidate"
+      ? "run-worker-intake-readiness"
+      : autonomy === "bounded-batch-candidate"
+        ? "present-bounded-batch-decision"
+        : "prepare-single-slice-contract";
   const blockedSummary = blockedRequests.length > 0 ? " blocked=" + blockedRequests.slice(0, 4).join("|") : " blocked=none";
 
   return {
@@ -295,7 +308,8 @@ export function buildControlPlaneProfilePacket(input: ControlPlaneProfilePacketI
     missingCapabilities: missingCapabilities.slice(0, 4),
     blockedRequests,
     operatorDecisionNeeded: true,
-    summary: "control-plane-profile-packet: decision=" + decision + " profile=" + profile + " autonomy=" + autonomy + " questions=" + Math.min(missingQuestions.length, 4) + blockedSummary + " " + formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
+    nextAction,
+    summary: "control-plane-profile-packet: decision=" + decision + " profile=" + profile + " autonomy=" + autonomy + " next=" + nextAction + " questions=" + Math.min(missingQuestions.length, 4) + blockedSummary + " " + formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
     recommendation,
     recommendedNextAction: recommendation,
   };

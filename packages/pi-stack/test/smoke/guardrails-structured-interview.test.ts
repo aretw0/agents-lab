@@ -111,12 +111,15 @@ describe("structured interview primitive", () => {
       resources: ["first-hatch", "tool-hygiene"],
       availableCapabilities: ["first-hatch", "tool-hygiene"],
       operatorDecisionNeeded: true,
+      nextAction: "present-bounded-batch-decision",
     });
     expect(ready.recommendedNextAction).toBe(ready.recommendation);
+    expect(ready.summary).toContain("next=present-bounded-batch-decision");
     expect(ready.summary).toContain("blocked=none");
     expect(blocked).toMatchObject({
       decision: "blocked",
       profile: "blocked-protected-scope",
+      nextAction: "resolve-blocked-intent",
       dispatchAllowed: false,
       mutationAllowed: false,
       blockedRequests: ["protected-scope", "github-actions"],
@@ -385,8 +388,10 @@ describe("structured interview primitive", () => {
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.operatorDecisionNeeded).toBe(true);
+    expect(result?.details.nextAction).toBe("present-bounded-batch-decision");
     expect(result?.details.availableCapabilities).toEqual(["first-hatch", "tool-hygiene"]);
     expect(result?.content?.[0]?.text).toContain("control-plane-profile-packet: decision=ready-for-operator-decision");
+    expect(result?.content?.[0]?.text).toContain("next=present-bounded-batch-decision");
     expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(result?.content?.[0]?.text).not.toContain("\"intent\"");
   });
