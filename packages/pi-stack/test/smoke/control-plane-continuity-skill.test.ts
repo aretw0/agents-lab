@@ -20,7 +20,8 @@ describe("control-plane continuity skill", () => {
     expect(skill).toContain("run-report-only-route");
     expect(skill).toContain("confirmationRequired=false");
     expect(skill).toContain("non-mutating packet");
-    expect(skill).toContain("do not ask for another confirmation");
+    expect(skill).toContain("says not to ask for confirmation");
+    expect(skill).toContain("Quer que eu rode?");
     expect(skill).toContain("safe-mode");
     expect(skill).toContain("stop-and-investigate");
     expect(skill).toContain("operator_intent_intake_packet");
