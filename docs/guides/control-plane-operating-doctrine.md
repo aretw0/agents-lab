@@ -379,9 +379,11 @@ Patch preview seguro neste estado é **no-op**: Anthropic não aparece como prov
 
 Retorno ao perfil Codex também é manual: usar `/model` ou `quota_visibility_route({ "profile": "balanced", "execute": true })` somente quando o operador pedir explicitamente e quando o advisor ainda mostrar `openai-codex` em `ok`. Classificadores/monitores leves permanecem no caminho Codex enquanto houver cota; se Codex entrar em WARN/BLOCK, registrar handoff advisory e pedir decisão em vez de auto-switch.
 
-## Entrevistas Estruturadas e Gaps do Operador
+## Intent Intake, Entrevistas Estruturadas e Gaps do Operador
 
-Gaps do operador devem ser preenchidos por contrato backend-first antes de qualquer UI. A primitiva `structured_interview_plan` recebe uma lista de perguntas com ids estáveis, tipo, obrigatoriedade, opções, defaults e flags `allowUnknown`/`allowSkip`; recebe respostas parciais; valida sequencialmente; e devolve `complete`, `needs-operator-answer` ou `invalid` com `nextQuestionId` e evidência compacta.
+Gaps do operador devem ser preenchidos por contrato backend-first antes de qualquer UI. Para intenção livre, comece por `operator_intent_intake_packet`: ele classifica a próxima rota report-only (`structured_interview_plan`, `lane_brainstorm_packet`, `control_plane_profile_packet` ou `agent_run_operator_packet`) e devolve `details.interaction` com escolhas que a TUI pode renderizar, resposta customizada e cancelamento. A intake não autoriza mutação, worker nem dispatch.
+
+Quando a rota exigir perguntas, a primitiva `structured_interview_plan` recebe uma lista de perguntas com ids estáveis, tipo, obrigatoriedade, opções, defaults e flags `allowUnknown`/`allowSkip`; recebe respostas parciais; valida sequencialmente; e devolve `complete`, `needs-operator-answer` ou `invalid` com `nextQuestionId` e evidência compacta.
 
 Essa primitiva é deliberadamente UI-independent: não abre formulário, não agenda repetição, não despacha executor e mantém `authorization=none` e `dispatchAllowed=false`. TUI, web, Telegram ou forms podem ser adaptadores futuros sobre o mesmo contrato, mas não são a fonte de verdade. Defaults, `unknown` e `skip` só contam quando declarados no schema da pergunta; escolhas inválidas e skips não autorizados falham fechado.
 

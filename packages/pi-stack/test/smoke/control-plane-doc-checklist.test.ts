@@ -141,5 +141,8 @@ describe("control-plane anti-bloat docs checklist", () => {
     }
 
     expect(doctrine).toContain("docs/guides/control-plane-glossary.md");
+    expect(doctrine).toContain("operator_intent_intake_packet");
+    expect(doctrine).toContain("details.interaction");
+    expect(doctrine).toContain("a intake não autoriza mutação, worker nem dispatch");
   });
 });
