@@ -12,6 +12,7 @@ export type ProjectIntakeProfile = "light-notes" | "app-medium" | "monorepo-heav
 
 export const INTAKE_PLAN_FIRST_SLICE_CODE = "intake-plan-first-slice";
 export const INTAKE_NEEDS_OPERATOR_FOCUS_PROTECTED_CODE = "intake-needs-operator-focus-protected";
+export type ProjectIntakeNextActionCode = "choose-local-safe-first-slice" | "request-protected-scope-focus";
 
 export interface ProjectIntakeInput {
   dominantArtifacts?: string[];
@@ -26,6 +27,7 @@ export interface ProjectIntakePlan {
   decision: "ready-for-operator-decision" | "blocked";
   profile: ProjectIntakeProfile;
   recommendationCode: typeof INTAKE_PLAN_FIRST_SLICE_CODE | typeof INTAKE_NEEDS_OPERATOR_FOCUS_PROTECTED_CODE;
+  nextActionCode: ProjectIntakeNextActionCode;
   nextAction: string;
   firstSlice: {
     title: string;
@@ -65,6 +67,11 @@ export const FIRST_HATCH_READY_CODE = "first-hatch-ready-local-safe";
 export const FIRST_HATCH_EMPTY_WORKSPACE_CODE = "first-hatch-empty-workspace-interview";
 export const FIRST_HATCH_SANDBOX_BLOCKED_CODE = "first-hatch-sandbox-blocked";
 export const FIRST_HATCH_PROTECTED_SCOPE_CODE = "first-hatch-protected-scope";
+export type FirstHatchNextActionCode =
+  | "choose-local-safe-first-slice"
+  | "ask-workspace-intent-questions"
+  | "stay-read-only-or-adjust-sandbox"
+  | "request-protected-scope-focus";
 
 export interface FirstHatchIntakeInput {
   workspaceName?: string;
@@ -113,6 +120,7 @@ export interface FirstHatchIntakePacket {
     gaps: string[];
   };
   missingQuestions: string[];
+  nextActionCode: FirstHatchNextActionCode;
   nextAction: string;
   dispatchAllowed: false;
   mutationAllowed: false;
@@ -218,21 +226,25 @@ export function buildFirstHatchIntakePacket(raw: FirstHatchIntakeInput): FirstHa
 
   let recommendationCode: FirstHatchIntakePacket["recommendationCode"] = FIRST_HATCH_READY_CODE;
   let decision: FirstHatchIntakePacket["decision"] = "ready-for-operator-decision";
+  let nextActionCode: FirstHatchNextActionCode = "choose-local-safe-first-slice";
   let nextAction = "choose one local-safe first slice with focal validation and rollback clarity.";
   const missingQuestions: string[] = [];
 
   if (input.protectedScopeRequested === true) {
     decision = "blocked";
     recommendationCode = FIRST_HATCH_PROTECTED_SCOPE_CODE;
+    nextActionCode = "request-protected-scope-focus";
     nextAction = "ask explicit operator focus before touching protected scope.";
     missingQuestions.push("Which protected scope is authorized, and what exact action is allowed?");
   } else if (writeBlocked) {
     decision = "blocked";
     recommendationCode = FIRST_HATCH_SANDBOX_BLOCKED_CODE;
+    nextActionCode = "stay-read-only-or-adjust-sandbox";
     nextAction = "keep discovery read-only or ask operator to adjust sandbox before mutation.";
     missingQuestions.push("Should this session stay read-only, or may the sandbox be adjusted for local-safe edits?");
   } else if (empty) {
     recommendationCode = FIRST_HATCH_EMPTY_WORKSPACE_CODE;
+    nextActionCode = "ask-workspace-intent-questions";
     nextAction = "ask two short workspace-intent questions before creating files.";
     missingQuestions.push("What should this workspace become?", "What is the first useful artifact to create?");
   }
@@ -258,6 +270,7 @@ export function buildFirstHatchIntakePacket(raw: FirstHatchIntakeInput): FirstHa
     },
     capabilityInventory,
     missingQuestions: missingQuestions.slice(0, 3),
+    nextActionCode,
     nextAction,
     dispatchAllowed: false,
     mutationAllowed: false,
@@ -275,6 +288,7 @@ export function evaluateProjectIntakePlan(raw: ProjectIntakeInput): ProjectIntak
       decision: "blocked",
       profile,
       recommendationCode: INTAKE_NEEDS_OPERATOR_FOCUS_PROTECTED_CODE,
+      nextActionCode: "request-protected-scope-focus",
       nextAction: "protected scope requested; keep intake report-only and ask explicit operator focus before escalation.",
       firstSlice: {
         title: "collect minimal local project facts",
@@ -308,6 +322,7 @@ export function evaluateProjectIntakePlan(raw: ProjectIntakeInput): ProjectIntak
     decision: "ready-for-operator-decision",
     profile,
     recommendationCode: INTAKE_PLAN_FIRST_SLICE_CODE,
+    nextActionCode: "choose-local-safe-first-slice",
     nextAction: "choose first local-safe slice from this profile, then execute with focal validation and rollback clarity.",
     firstSlice: {
       title: firstSliceByProfile[profile].title,

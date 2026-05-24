@@ -21,6 +21,7 @@ describe("project-intake-primitive", () => {
     expect(plan.profile).toBe("light-notes");
     expect(plan.decision).toBe("ready-for-operator-decision");
     expect(plan.recommendationCode).toBe(INTAKE_PLAN_FIRST_SLICE_CODE);
+    expect(plan.nextActionCode).toBe("choose-local-safe-first-slice");
     expect(plan.dispatchAllowed).toBe(false);
     expect(plan.mutationAllowed).toBe(false);
     expect(plan.authorization).toBe(GUARDRAILS_AUTHORIZATION_NONE);
@@ -48,6 +49,7 @@ describe("project-intake-primitive", () => {
 
     expect(plan.decision).toBe("blocked");
     expect(plan.recommendationCode).toBe(INTAKE_NEEDS_OPERATOR_FOCUS_PROTECTED_CODE);
+    expect(plan.nextActionCode).toBe("request-protected-scope-focus");
     expect(plan.nextAction).toContain("operator focus");
   });
 
@@ -66,6 +68,7 @@ describe("project-intake-primitive", () => {
 
     for (const plan of [light, heavy]) {
       expect(plan.recommendationCode.length).toBeGreaterThan(8);
+      expect(plan.nextActionCode).toMatch(/^[a-z0-9-]+$/);
       expect(plan.nextAction.length).toBeLessThanOrEqual(140);
       expect(plan.firstSlice.validation.length).toBeLessThanOrEqual(80);
       expect(plan.firstSlice.rollback).toBe("git revert commit");
@@ -105,6 +108,7 @@ describe("project-intake-primitive", () => {
 
     expect(packet.decision).toBe("ready-for-operator-decision");
     expect(packet.recommendationCode).toBe(FIRST_HATCH_READY_CODE);
+    expect(packet.nextActionCode).toBe("choose-local-safe-first-slice");
     expect(packet.workspace.artifactKinds).toEqual(["typescript", "markdown"]);
     expect(packet.sandbox.localSafeMutationPossible).toBe(true);
     expect(packet.dispatchAllowed).toBe(false);
@@ -152,6 +156,7 @@ describe("project-intake-primitive", () => {
     const packet = buildFirstHatchIntakePacket({ sandboxMode: "workspace-write" });
 
     expect(packet.recommendationCode).toBe(FIRST_HATCH_EMPTY_WORKSPACE_CODE);
+    expect(packet.nextActionCode).toBe("ask-workspace-intent-questions");
     expect(packet.missingQuestions.length).toBeLessThanOrEqual(3);
     expect(packet.missingQuestions.join(" ")).toContain("workspace");
     expect(packet.nextAction.length).toBeLessThanOrEqual(100);
@@ -168,6 +173,7 @@ describe("project-intake-primitive", () => {
 
     expect(packet.decision).toBe("blocked");
     expect(packet.recommendationCode).toBe(FIRST_HATCH_SANDBOX_BLOCKED_CODE);
+    expect(packet.nextActionCode).toBe("stay-read-only-or-adjust-sandbox");
     expect(packet.sandbox.writeBlocked).toBe(true);
     expect(packet.sandbox.localSafeMutationPossible).toBe(false);
     expect(packet.mutationAllowed).toBe(false);
