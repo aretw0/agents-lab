@@ -1,3 +1,8 @@
+/**
+ * subagent-readiness — deterministic worker/subagent readiness gate.
+ * @capability-id runtime-guardrails
+ * @capability-criticality high
+ */
 import {
 	existsSync,
 	readdirSync,
@@ -48,6 +53,7 @@ type Check = {
 type SubagentReadinessResult = {
 	generatedAtIso: string;
 	ready: boolean;
+	nextAction: "prepare-bounded-worker-packet" | "resolve-subagent-readiness-blockers";
 	strict: boolean;
 	thresholds: {
 		minUserTurns: number;
@@ -483,6 +489,7 @@ export function runSubagentReadiness(
 	return {
 		generatedAtIso: new Date().toISOString(),
 		ready,
+		nextAction: ready ? "prepare-bounded-worker-packet" : "resolve-subagent-readiness-blockers",
 		strict: opts.strict,
 		thresholds: {
 			minUserTurns: opts.minUserTurns,
@@ -518,6 +525,7 @@ export function runSubagentReadiness(
 function formatResult(result: SubagentReadinessResult): string {
 	const lines: string[] = [
 		`subagent-readiness: ${result.ready ? "READY" : "BLOCKED"}`,
+		`next=${result.nextAction}`,
 		`strict=${result.strict ? "yes" : "no"}`,
 		`userTurns=${result.summary.monitor.userTurns} classifyFailures=${result.summary.monitor.classifyFailures}`,
 		`signals: COMPLETE=${result.summary.colonySignals.COMPLETE ?? 0} FAILED=${result.summary.colonySignals.FAILED ?? 0} BUDGET_EXCEEDED=${result.summary.colonySignals.BUDGET_EXCEEDED ?? 0}`,
