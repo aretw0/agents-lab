@@ -143,6 +143,11 @@ describe("environment doctor dev pressure", () => {
         code: "pi-lens-active-full-startup-risk",
       }));
       expect(report.primaryAction).toBe("set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested");
+      expect(report.primaryRecoveryActions).toEqual([
+        "set PI_LENS_STARTUP_MODE=quick or minimal before starting Pi when pi-lens must stay available",
+        "reapply the strict-curated pi-stack profile so pi-lens stays cold until explicitly requested",
+        "use stack-full only for deliberate diagnostics, not as the daily control-plane profile",
+      ]);
       expect(report.summary).toContain("primary=warn:pi-lens-active-full-startup-risk");
       expect(report.summary).toContain("action=set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested");
       expect(report.signals).toEqual(expect.arrayContaining([
@@ -189,6 +194,7 @@ describe("environment doctor dev pressure", () => {
         code: "pi-lens-active-curated-startup",
       }));
       expect(report.primaryAction).toBe("inspect-details");
+      expect(report.primaryRecoveryActions).toEqual([]);
       expect(report.summary).toContain("primary=info:pi-lens-active-curated-startup");
       expect(report.summary).toContain("action=inspect-details");
       expect(report.signals).not.toEqual(expect.arrayContaining([

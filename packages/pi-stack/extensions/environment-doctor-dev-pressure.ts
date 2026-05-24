@@ -36,6 +36,22 @@ function pressureActionForSignal(signal?: DevPressureSignal): string {
   return "inspect-details";
 }
 
+function pressureRecoveryActionsForSignal(signal?: DevPressureSignal): string[] {
+  if (!signal) return [];
+  if (signal.code === "pi-lens-active-full-startup-risk") {
+    return [
+      "set PI_LENS_STARTUP_MODE=quick or minimal before starting Pi when pi-lens must stay available",
+      "reapply the strict-curated pi-stack profile so pi-lens stays cold until explicitly requested",
+      "use stack-full only for deliberate diagnostics, not as the daily control-plane profile",
+    ];
+  }
+  if (signal.code === "large-resume-session") return ["start a new session or run session triage before resuming the large session"];
+  if (signal.code === "huge-resume-session") return ["block resume, checkpoint what matters, then clean or archive the oversized session"];
+  if (signal.code === "heavy-configured-extension-entrypoint") return ["filter or defer heavy extension entrypoints until explicit operator intent"];
+  if (signal.code === "large-board-state") return ["preview board archive or verification split before adding more hot board state"];
+  return [];
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -517,6 +533,7 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
   const velocityPressure = buildDevelopmentVelocityPressure({ signals });
   const primarySignal = pickPrimaryPressureSignal(signals);
   const primaryAction = pressureActionForSignal(primarySignal);
+  const primaryRecoveryActions = pressureRecoveryActionsForSignal(primarySignal);
 
   return {
     mode: "environment-dev-pressure",
@@ -532,6 +549,7 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
     settings,
     primarySignal,
     primaryAction,
+    primaryRecoveryActions,
     summary: [
       `environment-dev-pressure: recommendation=${recommendation}`,
       `signals=${signals.length}`,
