@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { spawnSync } from "node:child_process";
+import { resolve } from "node:path";
 
 const installModule = await import("../../install.mjs");
 const listModule = await import("../../package-list.mjs");
@@ -36,5 +38,15 @@ describe("installer profiles", () => {
 
   it("throws for unknown profile", () => {
     expect(() => resolveInstallPackageList("unknown-profile")).toThrow();
+  });
+
+  it("help hides the legacy curated-default alias", () => {
+    const run = spawnSync(process.execPath, [resolve("packages/pi-stack/install.mjs"), "--help"], {
+      encoding: "utf8",
+    });
+
+    expect(run.status).toBe(0);
+    expect(run.stdout).toContain("strict-curated");
+    expect(run.stdout).not.toContain("curated-default");
   });
 });

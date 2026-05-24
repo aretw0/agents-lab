@@ -37,6 +37,7 @@ import {
 const IS_WINDOWS = process.platform === "win32";
 const DEFAULT_SCOPE = "user";
 const DEFAULT_PROFILE = "stack-full";
+const PUBLIC_PROFILE_NAMES = ["stack-full", "first-party", "strict-curated", "curated-runtime"];
 
 const PROFILES = {
   "stack-full": PACKAGES,
@@ -71,7 +72,7 @@ function parseArgs(argv) {
   }
 
   if (!Object.prototype.hasOwnProperty.call(PROFILES, out.profile)) {
-    throw new Error(`Invalid --profile '${out.profile}'. Use: ${Object.keys(PROFILES).join(" | ")}`);
+    throw new Error(`Invalid --profile '${out.profile}'. Use: ${PUBLIC_PROFILE_NAMES.join(" | ")}`);
   }
 
   return out;
@@ -91,7 +92,7 @@ Usage:
 
 Options:
   --scope <user|project|both>
-  --profile <stack-full|first-party|strict-curated|curated-default|curated-runtime>
+  --profile <stack-full|first-party|strict-curated|curated-runtime>
   --strict              Exit 1 on parity drift (missing official or non-permitted items)
   --json                Emit machine-readable JSON
   -h, --help

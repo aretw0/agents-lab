@@ -364,7 +364,7 @@ Usage:
 
 Options:
   -v, --version <ver>   Pin @aretw0/* packages to a specific version
-  --profile <name>      Install profile: strict-curated | curated-default | curated-runtime | stack-full
+  --profile <name>      Install profile: strict-curated | curated-runtime | stack-full
   --strict-curated      Alias for --profile strict-curated (official minimal baseline)
   --runtime-extras      Alias for --profile curated-runtime (explicit extras opt-in)
   --stack-full          Alias for --profile stack-full
