@@ -117,6 +117,15 @@ test("recommended stack guide documents pi-lens pressure recovery", () => {
 	assert.match(guide, /PI_LENS_STARTUP_MODE=quick/);
 });
 
+test("recommended stack guide separates TUI watchdog commands from agent diagnostics", () => {
+	const guide = read("docs/guides/recommended-pi-stack.md");
+
+	assert.match(guide, /\/watchdog:status/);
+	assert.match(guide, /comandos interativos da TUI/);
+	assert.match(guide, /Agentes, workers e ferramentas de shell não devem executá-los via bash/);
+	assert.match(guide, /environment_runtime_health_status/);
+});
+
 test("root roadmap stays current and macro-level", () => {
 	const roadmap = read("ROADMAP.md");
 
