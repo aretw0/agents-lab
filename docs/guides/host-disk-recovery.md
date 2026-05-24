@@ -16,9 +16,13 @@ Guia curto para recuperar espaço sem perder continuidade do trabalho.
 4. Aplicar limpeza em lotes pequenos com cap de remoção.
 5. Evitar scan pesado por default (ex.: `du` amplo sem limite) — prefira checks bounded primeiro.
 
-## Comandos
+## Política operacional
 
-No `agents-lab`, use os wrappers:
+Use a mesma política em qualquer projeto: diagnóstico read-only primeiro,
+limpeza de caches/artefatos gerados em lotes pequenos e remoção de sessões
+somente com opt-in explícito.
+
+Neste repositório, os wrappers de referência são:
 
 ```bash
 # 1) Diagnóstico (sem apagar nada)
@@ -32,11 +36,7 @@ pnpm run ops:disk:cleanup
 pnpm run ops:disk:cleanup:with-sessions
 ```
 
-Em outros projetos, use a mesma política: diagnóstico read-only primeiro,
-limpeza de caches/artefatos gerados em lotes pequenos e remoção de sessões
-somente com opt-in explícito.
-
-## Script usado
+## Implementação de referência
 
 - `scripts/host-disk-guard.mjs`
 

@@ -7,7 +7,7 @@ Guia para reduzir fricção ao usar `ant_colony` com múltiplos providers (Copil
 Garantir que o uso de multi-agentes fique previsível para:
 
 - **usuários da stack** (rodar colônia sem travar por config oculta)
-- **devs do agents-lab** (evoluir para primitivas first-party sem lock-in)
+- **mantenedores da stack** (evoluir primitivas first-party sem lock-in)
 
 ---
 
@@ -23,7 +23,7 @@ Garantir que o uso de multi-agentes fique previsível para:
 
 ---
 
-## Estado atual no agents-lab
+## Estado atual da pi-stack
 
 ### 1) Monitores (davidorex)
 
@@ -150,7 +150,7 @@ Se quiser observabilidade web local:
 
 ### Diretriz atual: generic-first
 
-No estado atual do laboratório (especialmente quando só há Codex disponível), a recomendação é:
+Em ambientes com apenas um provider disponível, especialmente Codex-only, a recomendação é:
 
 - priorizar papéis genéricos (`scout`, `worker`, `soldier`)
 - manter papéis especializados (`design`, `multimodal`, `backend`, `review`) como **opt-in**
@@ -202,7 +202,7 @@ No `factory-strict-hybrid`, a mistura de provider é controlada por papel (`allo
 
 ---
 
-## Diretrizes para devs do agents-lab
+## Diretrizes para mantenedores da stack
 
 1. **Não usar chaves reservadas com shape inválido em settings**
    - `extensions` em settings é lista de paths (`string[]`), não objeto de config.
@@ -223,7 +223,7 @@ No `factory-strict-hybrid`, a mistura de provider é controlada por papel (`allo
 
 ## Relação com referências externas (ex.: tuts)
 
-As referências de padrões multi-agente (incluindo exemplos tipo “tuts”) são úteis para desenho de arquitetura, mas no `agents-lab` o critério operacional é:
+As referências de padrões multi-agente (incluindo exemplos tipo “tuts”) são úteis para desenho de arquitetura, mas o critério operacional da `pi-stack` é:
 
 - configuração mínima explícita de provider/model
 - diagnósticos reproduzíveis

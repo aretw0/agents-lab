@@ -405,6 +405,7 @@ test("packaged pi-stack operational guides keep lab wrappers as repository refer
 	for (const file of [
 		"packages/pi-stack/docs/guides/budget-governance.md",
 		"packages/pi-stack/docs/guides/consumption-visibility-surfaces.md",
+		"packages/pi-stack/docs/guides/host-disk-recovery.md",
 		"packages/pi-stack/docs/guides/subagent-readiness-gate.md",
 	]) {
 		const source = read(file);
@@ -413,6 +414,14 @@ test("packaged pi-stack operational guides keep lab wrappers as repository refer
 		assert.doesNotMatch(source, /^## Comandos de laboratório$/m);
 		assert.match(source, /wrappers de referência/);
 	}
+});
+
+test("packaged pi-stack governance guides address stack audiences instead of lab-only maintainers", () => {
+	const colonyGovernance = read("packages/pi-stack/docs/guides/colony-provider-model-governance.md");
+
+	assert.match(colonyGovernance, /usuários da stack/);
+	assert.match(colonyGovernance, /mantenedores da stack/);
+	assert.doesNotMatch(colonyGovernance, /devs do agents-lab|Estado atual no agents-lab|Diretrizes para devs do agents-lab/);
 });
 
 test("published operational guides use strict-curated as the public baseline name", () => {
