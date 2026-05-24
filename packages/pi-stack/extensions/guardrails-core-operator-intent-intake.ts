@@ -17,6 +17,7 @@ export interface OperatorIntentIntakeInput extends ControlPlaneProfilePacketInpu
   localSafeMaterialReady?: boolean;
   brainstormRequested?: boolean;
   noEligibleLocalSafeTasks?: boolean;
+  runtimeHealthReady?: boolean;
   subagentsReady?: boolean;
   providerReady?: boolean;
 }
@@ -96,8 +97,8 @@ function buildInteraction(decision: OperatorIntentIntakeDecision, tools: string[
     choices.push({
       id: "check-worker-readiness",
       label: "Check worker readiness",
-      description: "Run read-only subagent and provider readiness checks before preparing a worker packet.",
-      route: "subagent_readiness_status+provider_readiness_matrix",
+      description: "Run read-only runtime, subagent, and provider readiness checks before preparing a worker packet.",
+      route: tools.join("+"),
     });
   }
   if (decision === "blocked") {
@@ -148,17 +149,20 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     recommendedTools = ["lane_brainstorm_packet", "lane_brainstorm_seed_preview"];
     recommendation = "Prepare candidate local-safe slices, then ask the operator to choose, customize, or cancel.";
   } else if (profilePacket.profile === "worker-assisted-candidate") {
+    if (input.runtimeHealthReady !== true) missingCapabilities.push("runtime-health");
     if (input.subagentsReady !== true) missingCapabilities.push("subagent-readiness");
     if (input.providerReady !== true) missingCapabilities.push("provider-readiness");
-    decision = missingCapabilities.includes("subagent-readiness") || missingCapabilities.includes("provider-readiness")
+    decision = missingCapabilities.includes("runtime-health") ||
+      missingCapabilities.includes("subagent-readiness") ||
+      missingCapabilities.includes("provider-readiness")
       ? "check-worker-readiness"
       : "prepare-worker-packet";
     recommendedTools = decision === "prepare-worker-packet"
       ? ["agent_run_operator_packet", "agent_run_task_packet"]
-      : ["subagent_readiness_status", "provider_readiness_matrix"];
+      : ["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"];
     recommendation = decision === "prepare-worker-packet"
       ? "Prepare a worker packet for operator review; dispatch remains disabled until lower gates approve it."
-      : "Run read-only worker/provider readiness checks before preparing a worker packet.";
+      : "Run read-only runtime, worker, and provider readiness checks before preparing a worker packet.";
   } else {
     decision = "prepare-single-slice";
     recommendedTools = ["control_plane_profile_packet"];

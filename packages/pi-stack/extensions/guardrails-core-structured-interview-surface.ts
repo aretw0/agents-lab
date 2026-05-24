@@ -124,6 +124,7 @@ export function registerGuardrailsStructuredInterviewSurface(pi: ExtensionAPI): 
       local_safe_material_ready: Type.Optional(Type.Boolean()),
       brainstorm_requested: Type.Optional(Type.Boolean()),
       no_eligible_local_safe_tasks: Type.Optional(Type.Boolean()),
+      runtime_health_ready: Type.Optional(Type.Boolean()),
       subagents_ready: Type.Optional(Type.Boolean()),
       provider_ready: Type.Optional(Type.Boolean()),
     }),
@@ -148,6 +149,7 @@ export function registerGuardrailsStructuredInterviewSurface(pi: ExtensionAPI): 
         localSafeMaterialReady: typeof p.local_safe_material_ready === "boolean" ? p.local_safe_material_ready : undefined,
         brainstormRequested: p.brainstorm_requested === true,
         noEligibleLocalSafeTasks: p.no_eligible_local_safe_tasks === true,
+        runtimeHealthReady: typeof p.runtime_health_ready === "boolean" ? p.runtime_health_ready : undefined,
         subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : undefined,
         providerReady: typeof p.provider_ready === "boolean" ? p.provider_ready : undefined,
       });

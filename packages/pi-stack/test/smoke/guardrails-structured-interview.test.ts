@@ -185,6 +185,7 @@ describe("structured interview primitive", () => {
       rollbackKnown: true,
       checkpointPlanned: true,
       workerRequested: true,
+      runtimeHealthReady: true,
       subagentsReady: true,
       providerReady: true,
     });
@@ -220,15 +221,15 @@ describe("structured interview primitive", () => {
 
     expect(packet).toMatchObject({
       decision: "check-worker-readiness",
-      recommendedTools: ["subagent_readiness_status", "provider_readiness_matrix"],
+      recommendedTools: ["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"],
       dispatchAllowed: false,
       mutationAllowed: false,
       workerDispatchAllowed: false,
     });
-    expect(packet.missingCapabilities).toEqual(expect.arrayContaining(["subagent-readiness", "provider-readiness"]));
+    expect(packet.missingCapabilities).toEqual(expect.arrayContaining(["runtime-health", "subagent-readiness", "provider-readiness"]));
     expect(packet.interaction.choices[0]).toMatchObject({
       id: "check-worker-readiness",
-      route: "subagent_readiness_status+provider_readiness_matrix",
+      route: "environment_runtime_health_status+subagent_readiness_status+provider_readiness_matrix",
     });
   });
 
@@ -245,13 +246,15 @@ describe("structured interview primitive", () => {
       rollbackKnown: true,
       checkpointPlanned: true,
       workerRequested: true,
+      runtimeHealthReady: true,
       subagentsReady: false,
       providerReady: true,
     });
 
     expect(packet.decision).toBe("check-worker-readiness");
-    expect(packet.recommendedTools).toEqual(["subagent_readiness_status", "provider_readiness_matrix"]);
+    expect(packet.recommendedTools).toEqual(["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"]);
     expect(packet.missingCapabilities).toContain("subagent-readiness");
+    expect(packet.missingCapabilities).not.toContain("runtime-health");
     expect(packet.missingCapabilities).not.toContain("provider-readiness");
   });
 
@@ -279,7 +282,8 @@ describe("structured interview primitive", () => {
     });
 
     expect(result?.details.decision).toBe("check-worker-readiness");
-    expect(result?.details.recommendedTools).toEqual(["subagent_readiness_status", "provider_readiness_matrix"]);
+    expect(result?.details.recommendedTools).toEqual(["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"]);
+    expect(result?.details.missingCapabilities).toEqual(expect.arrayContaining(["runtime-health"]));
     expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=check-worker-readiness");
   });
 
@@ -360,6 +364,7 @@ describe("structured interview primitive", () => {
       rollback_known: true,
       checkpoint_planned: true,
       worker_requested: true,
+      runtime_health_ready: true,
       subagents_ready: true,
       provider_ready: true,
     });
