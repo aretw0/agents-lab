@@ -145,7 +145,7 @@ Para manter classifiers no mesmo “tier” operacional:
 - **Guard**: decisão **pré-ação** (enforce), pode bloquear (`block: true`).
 - **Monitor**: decisão **pós-ação** (observe), gera sinal/verdict.
 
-No laboratório, ambos devem compartilhar a mesma primitiva de trigger (`when`, `tool(...)`, `every(n)`) e o mesmo modelo de fatos; muda apenas o modo de execução (`enforce` vs `observe`).
+Em uma stack coesa, ambos devem compartilhar a mesma primitiva de trigger (`when`, `tool(...)`, `every(n)`) e o mesmo modelo de fatos; muda apenas o modo de execução (`enforce` vs `observe`).
 
 ## Política por modo de execução
 

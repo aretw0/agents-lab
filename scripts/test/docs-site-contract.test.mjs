@@ -424,6 +424,15 @@ test("packaged pi-stack governance guides address stack audiences instead of lab
 	assert.doesNotMatch(colonyGovernance, /devs do agents-lab|Estado atual no agents-lab|Diretrizes para devs do agents-lab/);
 });
 
+test("packaged pi-stack guides avoid lab-only operational phrasing", () => {
+	for (const file of listMarkdownFiles("packages/pi-stack/docs/guides")) {
+		const source = read(file);
+
+		assert.doesNotMatch(source, /No laboratório|No agents-lab|Comandos de laboratório/);
+		assert.doesNotMatch(source, /devs do agents-lab|Estado atual no agents-lab|Diretrizes para devs do agents-lab/);
+	}
+});
+
 test("published operational guides use strict-curated as the public baseline name", () => {
 	for (const file of listMarkdownFiles("docs/guides")) {
 		const source = read(file);
