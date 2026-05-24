@@ -11,6 +11,7 @@ describe("installer profiles", () => {
     expect(DEFAULT_INSTALL_PROFILE).toBe("strict-curated");
     const pkgs = resolveInstallPackageList();
     expect(pkgs).toEqual(STRICT_CURATED);
+    expect(pkgs).not.toContain("pi-lens");
   });
 
   it("keeps curated-default as backward-compatible alias", () => {
@@ -23,12 +24,14 @@ describe("installer profiles", () => {
     const pkgs = resolveInstallPackageList("curated-runtime");
     expect(pkgs).toEqual(CURATED_RUNTIME);
     expect(pkgs.length).toBeGreaterThan(STRICT_CURATED.length);
+    expect(pkgs).not.toContain("pi-lens");
   });
 
   it("supports explicit stack-full profile", () => {
     const pkgs = resolveInstallPackageList("stack-full");
     expect(pkgs).toEqual(PACKAGES);
     expect(pkgs.length).toBeGreaterThan(CURATED_RUNTIME.length);
+    expect(pkgs).toContain("pi-lens");
   });
 
   it("throws for unknown profile", () => {
