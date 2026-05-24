@@ -104,6 +104,7 @@ test("root README keeps user and maintainer surfaces separate", () => {
 	assert.ok(qualityStart > maintainerStart, "quality gates should stay in maintainer surface");
 	assert.match(readme, /Para usuários Pi:/);
 	assert.match(readme, /Terceiros Curados/);
+	assert.match(readme, /pi-lens` fica opt-in\/cold fora do perfil full/);
 	assert.doesNotMatch(readme, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
 });
 

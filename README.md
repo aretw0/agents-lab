@@ -64,7 +64,7 @@ A stack não tenta vender dependência externa como first-party. Ela instala, fi
 | `@ifi/oh-pi-skills`, `@ifi/oh-pi-themes`, `@ifi/oh-pi-prompts` | Skills, temas e prompts curados para perfis ampliados |
 | `@ifi/oh-pi-ant-colony`, `@ifi/pi-web-remote`, `@ifi/pi-extension-subagents` | Capacidades de colônia, remoto e subagentes, mantidas como opt-in |
 | `@ifi/pi-plan`, `@ifi/pi-spec` | Fluxos de planejamento/spec para perfis ampliados |
-| `mitsupi`, `pi-lens`, `pi-web-access` | Capacidades complementares avaliadas, com filtros quando há colisão de skill/tool |
+| `mitsupi`, `pi-lens`, `pi-web-access` | Capacidades complementares avaliadas; `pi-lens` fica opt-in/cold fora do perfil full e filtros evitam colisão de skill/tool |
 
 O contrato de instalação vive em [packages/pi-stack/package-list.mjs](./packages/pi-stack/package-list.mjs). Colisões conhecidas devem ser resolvidas por filtros do installer e cobertas por testes.
 
