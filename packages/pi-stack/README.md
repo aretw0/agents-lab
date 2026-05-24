@@ -102,7 +102,7 @@ Ativar: `/settings` → selecionar `agents-lab`
 
 | Pacote | O que traz |
 |---|---|
-| `pi-lens` | LSP, ast-grep, code analysis |
+| `pi-lens` | LSP, ast-grep, code analysis; opt-in/filtered outside the strict default |
 | `pi-web-access` | Fetch, PDF, YouTube |
 | `@davidorex/pi-project-workflows` | Project blocks, workflows YAML, monitors |
 | `@ifi/oh-pi-extensions` | git-guard e mais (`safe-guard`, `bg-process` e `watchdog` filtrados na curadoria padrão) |

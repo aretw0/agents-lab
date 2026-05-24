@@ -11,6 +11,7 @@ describe("control-plane continuity skill", () => {
 
     expect(skill).toContain("name: control-plane-continuity");
     expect(skill).toContain("operator_intent_intake_packet");
+    expect(skill.indexOf("operator_intent_intake_packet")).toBeLessThan(skill.indexOf("project_intake_plan"));
     expect(skill).toContain("details.interaction");
     expect(skill).toContain("control_plane_profile_packet");
     expect(skill).toContain("local_batch_manifest_packet");
