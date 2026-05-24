@@ -62,11 +62,10 @@ Persistência pode ser configurada depois conforme o provider escolhido.
 ## Passo 3 — Instalar a stack mínima
 
 ```bash
-npx @ifi/oh-pi
-pi install npm:pi-lens
-pi install npm:@davidorex/pi-project-workflows
-pi install npm:pi-web-access
+npx @aretw0/pi-stack
 ```
+
+O perfil padrão é `strict-curated`: mantém a superfície inicial pequena e deixa capacidades mais caras, como `pi-lens`, fora do hot path. Use `npx @aretw0/pi-stack --runtime-extras` ou `--stack-full` apenas quando a sessão pedir explicitamente essas capacidades.
 
 ## Passo 4 — Rodar em paralelo com Copilot
 
@@ -75,8 +74,8 @@ Mapeamento inicial sugerido:
 | Workflow atual | Pi equivalente inicial |
 |----------------|------------------------|
 | Planejamento | `/spec`, `@ifi/pi-plan`, `pi-project-workflows` |
-| Coding | core Pi + `oh-pi` + `pi-lens` |
-| Code review | `/review`, pacotes especializados e `pi-lens` |
+| Coding | core Pi + stack curada |
+| Code review | `/review`, pacotes especializados; `pi-lens` só quando opt-in |
 | Pesquisa | `pi-web-access` e skills de web/context |
 | Debugging | `debug-helper`, retros e avaliação |
 | Multi-agente | comparar `ant-colony`, subagentes e orquestradores |
