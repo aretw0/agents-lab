@@ -7,6 +7,7 @@ import { GUARDRAILS_AUTHORIZATION_NONE, type GuardrailsAuthorizationNone } from 
 
 export type OperatorIntentIntakeDecision =
   | "ask-operator"
+  | "check-worker-readiness"
   | "seed-brainstorm"
   | "prepare-single-slice"
   | "prepare-worker-packet"
@@ -91,6 +92,14 @@ function buildInteraction(decision: OperatorIntentIntakeDecision, tools: string[
       route: "agent_run_operator_packet",
     });
   }
+  if (decision === "check-worker-readiness") {
+    choices.push({
+      id: "check-worker-readiness",
+      label: "Check worker readiness",
+      description: "Run read-only subagent and provider readiness checks before preparing a worker packet.",
+      route: "subagent_readiness_status+provider_readiness_matrix",
+    });
+  }
   if (decision === "blocked") {
     choices.push({
       id: "remove-blocked-request",
@@ -139,17 +148,17 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     recommendedTools = ["lane_brainstorm_packet", "lane_brainstorm_seed_preview"];
     recommendation = "Prepare candidate local-safe slices, then ask the operator to choose, customize, or cancel.";
   } else if (profilePacket.profile === "worker-assisted-candidate") {
-    if (input.subagentsReady === false) missingCapabilities.push("subagent-readiness");
-    if (input.providerReady === false) missingCapabilities.push("provider-readiness");
+    if (input.subagentsReady !== true) missingCapabilities.push("subagent-readiness");
+    if (input.providerReady !== true) missingCapabilities.push("provider-readiness");
     decision = missingCapabilities.includes("subagent-readiness") || missingCapabilities.includes("provider-readiness")
-      ? "ask-operator"
+      ? "check-worker-readiness"
       : "prepare-worker-packet";
     recommendedTools = decision === "prepare-worker-packet"
       ? ["agent_run_operator_packet", "agent_run_task_packet"]
-      : ["structured_interview_plan"];
+      : ["subagent_readiness_status", "provider_readiness_matrix"];
     recommendation = decision === "prepare-worker-packet"
       ? "Prepare a worker packet for operator review; dispatch remains disabled until lower gates approve it."
-      : "Confirm worker/provider readiness before preparing a worker packet.";
+      : "Run read-only worker/provider readiness checks before preparing a worker packet.";
   } else {
     decision = "prepare-single-slice";
     recommendedTools = ["control_plane_profile_packet"];

@@ -203,6 +203,86 @@ describe("structured interview primitive", () => {
     });
   });
 
+  it("checks worker readiness before preparing a worker packet when readiness is omitted", () => {
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "fan out read-only model calibration",
+      autonomyRequest: "worker-assisted",
+      availableResources: ["codex-spark", "test-harness"],
+      expectedRoi: "compare workers before choosing a lane",
+      limits: ["read-only", "two workers"],
+      stopConditions: ["budget warning", "validation fails"],
+      operatorFocusKnown: true,
+      validationKnown: true,
+      rollbackKnown: true,
+      checkpointPlanned: true,
+      workerRequested: true,
+    });
+
+    expect(packet).toMatchObject({
+      decision: "check-worker-readiness",
+      recommendedTools: ["subagent_readiness_status", "provider_readiness_matrix"],
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      workerDispatchAllowed: false,
+    });
+    expect(packet.missingCapabilities).toEqual(expect.arrayContaining(["subagent-readiness", "provider-readiness"]));
+    expect(packet.interaction.choices[0]).toMatchObject({
+      id: "check-worker-readiness",
+      route: "subagent_readiness_status+provider_readiness_matrix",
+    });
+  });
+
+  it("checks worker readiness before preparing a worker packet when readiness is negative", () => {
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "fan out read-only model calibration",
+      autonomyRequest: "worker-assisted",
+      availableResources: ["codex-spark", "test-harness"],
+      expectedRoi: "compare workers before choosing a lane",
+      limits: ["read-only", "two workers"],
+      stopConditions: ["budget warning", "validation fails"],
+      operatorFocusKnown: true,
+      validationKnown: true,
+      rollbackKnown: true,
+      checkpointPlanned: true,
+      workerRequested: true,
+      subagentsReady: false,
+      providerReady: true,
+    });
+
+    expect(packet.decision).toBe("check-worker-readiness");
+    expect(packet.recommendedTools).toEqual(["subagent_readiness_status", "provider_readiness_matrix"]);
+    expect(packet.missingCapabilities).toContain("subagent-readiness");
+    expect(packet.missingCapabilities).not.toContain("provider-readiness");
+  });
+
+  it("surface keeps worker intake in readiness-check mode until readiness is explicit", () => {
+    const tools: Array<{ name: string; execute: (id: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> } }> = [];
+    registerGuardrailsStructuredInterviewSurface({
+      registerTool(tool: unknown) {
+        tools.push(tool as (typeof tools)[number]);
+      },
+    } as never);
+
+    const tool = tools.find((item) => item.name === "operator_intent_intake_packet");
+    const result = tool?.execute("tc-intake-readiness", {
+      intent: "prepare worker review",
+      autonomy_request: "worker-assisted",
+      available_resources: ["codex-spark"],
+      expected_roi: "parallel read-only exploration",
+      limits: ["read-only"],
+      stop_conditions: ["budget warning"],
+      operator_focus_known: true,
+      validation_known: true,
+      rollback_known: true,
+      checkpoint_planned: true,
+      worker_requested: true,
+    });
+
+    expect(result?.details.decision).toBe("check-worker-readiness");
+    expect(result?.details.recommendedTools).toEqual(["subagent_readiness_status", "provider_readiness_matrix"]);
+    expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=check-worker-readiness");
+  });
+
   it("blocks protected intent before routing to brainstorm or workers", () => {
     const packet = buildOperatorIntentIntakePacket({
       intent: "publish the release",
