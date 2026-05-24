@@ -138,6 +138,11 @@ describe("environment doctor dev pressure", () => {
       const report = buildEnvironmentDevPressureReport(dir);
 
       expect(report.recommendation).toBe("reduce-governance-surface");
+      expect(report.primarySignal).toEqual(expect.objectContaining({
+        level: "warn",
+        code: "pi-lens-active-full-startup-risk",
+      }));
+      expect(report.primaryAction).toBe("set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested");
       expect(report.summary).toContain("primary=warn:pi-lens-active-full-startup-risk");
       expect(report.summary).toContain("action=set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested");
       expect(report.signals).toEqual(expect.arrayContaining([
@@ -179,6 +184,11 @@ describe("environment doctor dev pressure", () => {
       const report = buildEnvironmentDevPressureReport(dir);
 
       expect(report.recommendation).toBe("continue");
+      expect(report.primarySignal).toEqual(expect.objectContaining({
+        level: "info",
+        code: "pi-lens-active-curated-startup",
+      }));
+      expect(report.primaryAction).toBe("inspect-details");
       expect(report.summary).toContain("primary=info:pi-lens-active-curated-startup");
       expect(report.summary).toContain("action=inspect-details");
       expect(report.signals).not.toEqual(expect.arrayContaining([

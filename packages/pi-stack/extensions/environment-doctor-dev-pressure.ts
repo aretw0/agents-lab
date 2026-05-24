@@ -530,6 +530,8 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
     boardPressurePlan,
     configuredEntrypoints: configuredEntrypoints.slice(0, 15),
     settings,
+    primarySignal,
+    primaryAction,
     summary: [
       `environment-dev-pressure: recommendation=${recommendation}`,
       `signals=${signals.length}`,

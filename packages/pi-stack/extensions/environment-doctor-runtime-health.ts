@@ -67,8 +67,13 @@ export function buildEnvironmentRuntimeHealthPayload(input: {
       note: "Pi watchdog slash commands are TUI commands; this tool uses external pressure facts and persisted evidence only.",
     },
   };
-  const devPressurePrimary = extractSummaryField(input.devPressure.summary, "primary");
-  const devPressureAction = extractSummaryField(input.devPressure.summary, "action");
+  const structuredPrimary = input.devPressure.primarySignal;
+  const devPressurePrimary = typeof structuredPrimary?.level === "string" && typeof structuredPrimary?.code === "string"
+    ? `${structuredPrimary.level}:${structuredPrimary.code}`
+    : extractSummaryField(input.devPressure.summary, "primary");
+  const devPressureAction = typeof input.devPressure.primaryAction === "string"
+    ? input.devPressure.primaryAction
+    : extractSummaryField(input.devPressure.summary, "action");
   const summary = [
     "environment-runtime-health:",
     `decision=${decision}`,
