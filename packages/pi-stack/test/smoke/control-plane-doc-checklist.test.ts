@@ -127,6 +127,7 @@ describe("control-plane anti-bloat docs checklist", () => {
   it("keeps critical guide index links for control-plane operation", () => {
     const guidesIndex = readRepoFile("docs/guides/README.md").toLowerCase();
     const doctrine = readRepoFile("docs/guides/control-plane-operating-doctrine.md").toLowerCase();
+    const sessionTriage = readRepoFile("docs/guides/session-triage.md").toLowerCase();
 
     const requiredGuideLinks = [
       "control-plane-operating-doctrine.md",
@@ -146,5 +147,11 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(doctrine).toContain("readiness de worker");
     expect(doctrine).toContain("agent_run_operator_packet` só após readiness explícita");
     expect(doctrine).toContain("a intake não autoriza mutação, worker nem dispatch");
+
+    expect(sessionTriage).toContain("operator_intent_intake_packet");
+    expect(sessionTriage).toContain("project_intake_plan");
+    expect(sessionTriage.indexOf("operator_intent_intake_packet")).toBeLessThan(
+      sessionTriage.indexOf("project_intake_plan"),
+    );
   });
 });

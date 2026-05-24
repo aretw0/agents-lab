@@ -37,9 +37,11 @@ Checklist de spawn rápido por modo:
 
 ## Atalho de intake universal (antes da triagem longa)
 
-Quando o projeto ainda está nebuloso, rode primeiro o tool report-only `project_intake_plan` para escolher a primeira fatia local-safe sem abrir escopo protegido.
+Quando a intenção do operador ainda está livre ou ambígua, rode primeiro `operator_intent_intake_packet`. Ele decide, sem mutação ou dispatch, se o próximo passo é entrevista curta, brainstorm de lane, single-slice local ou readiness de worker.
 
-Exemplo mínimo de entrada:
+Quando o formato do projeto ainda está nebuloso, rode `project_intake_plan` para escolher a primeira fatia local-safe sem abrir escopo protegido.
+
+Exemplo mínimo de entrada para `project_intake_plan`:
 
 - `dominant_artifacts`: linguagens/artefatos dominantes;
 - `has_build_files`, `has_tests`, `has_ci`;
