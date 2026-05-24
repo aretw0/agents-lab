@@ -49,6 +49,7 @@ describe("growth maturity score packet", () => {
       dispatchAllowed: false,
       decision: "go",
       recommendationCode: "growth-maturity-go-expand-bounded",
+      nextActionCode: "promote-bounded-slice",
       score: 88,
       blockers: [],
       missingSignals: [],
@@ -65,8 +66,10 @@ describe("growth maturity score packet", () => {
 
     expect(result.decision).toBe("needs-evidence");
     expect(result.recommendationCode).toBe("growth-maturity-needs-evidence");
+    expect(result.nextActionCode).toBe("collect-full-scorecard");
     expect(result.missingSignals).toContain("missing-simplicity-score");
     expect(result.summary).toContain("decision=needs-evidence");
+    expect(result.summary).toContain("next=collect-full-scorecard");
   });
 
   it("holds growth when debt budget or critical blockers are present", () => {
@@ -81,6 +84,7 @@ describe("growth maturity score packet", () => {
 
     expect(result.decision).toBe("hold");
     expect(result.recommendationCode).toBe("growth-maturity-hold-stabilize");
+    expect(result.nextActionCode).toBe("clear-blockers-and-recheck");
     expect(result.blockers).toContain("debt-budget-exceeded");
     expect(result.blockers).toContain("critical-blockers-present");
   });
@@ -106,10 +110,11 @@ describe("growth maturity score packet", () => {
     );
 
     expect(ready.details?.decision).toBe("go");
+    expect(ready.details?.nextActionCode).toBe("promote-bounded-slice");
     expect(ready.details?.dispatchAllowed).toBe(false);
     expect(ready.details?.mutationAllowed).toBe(false);
     expect(ready.details?.authorization).toBe("none");
-    expect(ready.content?.[0]?.text).toContain("growth-maturity-score: decision=go code=growth-maturity-go-expand-bounded score=88");
+    expect(ready.content?.[0]?.text).toContain("growth-maturity-score: decision=go code=growth-maturity-go-expand-bounded next=promote-bounded-slice score=88");
     expect(ready.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(ready.content?.[0]?.text).not.toContain('\"decision\"');
 

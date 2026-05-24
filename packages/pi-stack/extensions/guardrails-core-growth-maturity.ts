@@ -10,6 +10,12 @@ export type GrowthMaturityRecommendationCode =
   | "growth-maturity-hold-maintain"
   | "growth-maturity-hold-stabilize"
   | "growth-maturity-needs-evidence";
+export type GrowthMaturityNextActionCode =
+  | "promote-bounded-slice"
+  | "collect-full-scorecard"
+  | "clear-blockers-and-recheck"
+  | "run-local-safe-hardening"
+  | "raise-weak-dimensions";
 
 export interface GrowthMaturityScoreInput {
   safetyScore?: number;
@@ -32,6 +38,7 @@ export interface GrowthMaturityScorePacket {
   decision: GrowthMaturityDecision;
   recommendationCode: GrowthMaturityRecommendationCode;
   recommendation: string;
+  nextActionCode: GrowthMaturityNextActionCode;
   nextAction: string;
   score: number | null;
   thresholds: {
@@ -94,12 +101,14 @@ export function evaluateGrowthMaturityScorePacket(input: GrowthMaturityScoreInpu
   let decision: GrowthMaturityDecision = "go";
   let recommendationCode: GrowthMaturityRecommendationCode = "growth-maturity-go-expand-bounded";
   let recommendation = "maturity score is strong; you may expand one bounded experimentation level while keeping rollback and checkpoint discipline.";
+  let nextActionCode: GrowthMaturityNextActionCode = "promote-bounded-slice";
   let nextAction = "promote one bounded slice and record evidence at the next turn boundary.";
 
   if (missingSignals.length > 0) {
     decision = "needs-evidence";
     recommendationCode = "growth-maturity-needs-evidence";
     recommendation = "missing maturity signals; fail-closed and collect the full scorecard before any growth promotion.";
+    nextActionCode = "collect-full-scorecard";
     nextAction = "fill all four dimensions (safety/calibration/throughput/simplicity) and rerun this packet.";
   } else if (blockers.length > 0 || (score ?? 0) < holdThreshold) {
     decision = "hold";
@@ -107,6 +116,7 @@ export function evaluateGrowthMaturityScorePacket(input: GrowthMaturityScoreInpu
     recommendation = blockers.length > 0
       ? "stabilization required; blockers indicate governance/debt pressure and growth acceleration should pause."
       : "overall maturity is below the hold threshold; keep growth on hold and stabilize fundamentals first.";
+    nextActionCode = blockers.length > 0 ? "clear-blockers-and-recheck" : "run-local-safe-hardening";
     nextAction = blockers.length > 0
       ? "clear blockers, reduce debt pressure, and re-check score before expansion."
       : "run local-safe hardening slices until score reaches hold/go thresholds.";
@@ -114,6 +124,7 @@ export function evaluateGrowthMaturityScorePacket(input: GrowthMaturityScoreInpu
     decision = "hold";
     recommendationCode = "growth-maturity-hold-maintain";
     recommendation = "maturity is acceptable but not yet expansion-grade; maintain pace and optimize without widening scope.";
+    nextActionCode = "raise-weak-dimensions";
     nextAction = "continue bounded local-safe slices and raise weak dimensions before promoting the next level.";
   }
 
@@ -121,6 +132,7 @@ export function evaluateGrowthMaturityScorePacket(input: GrowthMaturityScoreInpu
     "growth-maturity-score:",
     `decision=${decision}`,
     `code=${recommendationCode}`,
+    `next=${nextActionCode}`,
     `score=${score ?? "na"}`,
     `safety=${safety ?? "na"}`,
     `calibration=${calibration ?? "na"}`,
@@ -143,6 +155,7 @@ export function evaluateGrowthMaturityScorePacket(input: GrowthMaturityScoreInpu
     decision,
     recommendationCode,
     recommendation,
+    nextActionCode,
     nextAction,
     score,
     thresholds: {
