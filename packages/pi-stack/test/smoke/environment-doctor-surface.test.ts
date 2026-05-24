@@ -148,6 +148,12 @@ describe("environment-doctor surface", () => {
       runtimeArtifactViolations: [],
     })).toBe("safe-mode");
     expect(resolveEnvironmentRuntimeHealthDecision({
+      doctorIssues: [],
+      devPressureRecommendation: "reduce-governance-surface",
+      devPressureSeverity: "warn",
+      runtimeArtifactViolations: [],
+    })).toBe("safe-mode");
+    expect(resolveEnvironmentRuntimeHealthDecision({
       doctorIssues: [{ name: "gh" }],
       devPressureRecommendation: "continue",
       devPressureSeverity: "ok",

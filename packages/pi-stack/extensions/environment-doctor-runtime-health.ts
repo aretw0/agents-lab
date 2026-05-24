@@ -26,7 +26,9 @@ export function resolveEnvironmentRuntimeHealthDecision(input: {
   ) {
     return "stop-and-investigate";
   }
-  if (recommendation === "new-session" || severity === "pause") return "safe-mode";
+  if (recommendation === "new-session" || recommendation === "reduce-governance-surface" || severity === "pause") {
+    return "safe-mode";
+  }
   return "continue";
 }
 
