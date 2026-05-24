@@ -20,6 +20,22 @@ interface DevPressureSignal {
   detail: string;
 }
 
+function pickPrimaryPressureSignal(signals: DevPressureSignal[]) {
+  return signals.find((signal) => signal.level === "block")
+    ?? signals.find((signal) => signal.level === "warn")
+    ?? signals[0];
+}
+
+function pressureActionForSignal(signal?: DevPressureSignal): string {
+  if (!signal) return "continue";
+  if (signal.code === "pi-lens-active-full-startup-risk") return "set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested";
+  if (signal.code === "large-resume-session") return "start-new-session-or-triage-before-resume";
+  if (signal.code === "huge-resume-session") return "block-resume-and-clean-session-pressure";
+  if (signal.code === "heavy-configured-extension-entrypoint") return "reduce-startup-surface";
+  if (signal.code === "large-board-state") return "preview-board-archive-before-more-work";
+  return "inspect-details";
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -499,6 +515,8 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
   else if (signals.some((signal) => signal.code === "heavy-configured-extension-entrypoint" || signal.code === "large-board-state" || signal.code === "pi-lens-active-full-startup-risk")) recommendation = "reduce-governance-surface";
 
   const velocityPressure = buildDevelopmentVelocityPressure({ signals });
+  const primarySignal = pickPrimaryPressureSignal(signals);
+  const primaryAction = pressureActionForSignal(primarySignal);
 
   return {
     mode: "environment-dev-pressure",
@@ -512,6 +530,13 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
     boardPressurePlan,
     configuredEntrypoints: configuredEntrypoints.slice(0, 15),
     settings,
-    summary: `environment-dev-pressure: recommendation=${recommendation} signals=${signals.length} largestSessionMb=${largestSessionMb} heaviestConfiguredEntrypoint=${heaviestConfiguredEntrypoint ? `${heaviestConfiguredEntrypoint.package}:${heaviestConfiguredEntrypoint.entry}` : "n/a"}`,
+    summary: [
+      `environment-dev-pressure: recommendation=${recommendation}`,
+      `signals=${signals.length}`,
+      `primary=${primarySignal ? `${primarySignal.level}:${primarySignal.code}` : "none"}`,
+      `action=${primaryAction}`,
+      `largestSessionMb=${largestSessionMb}`,
+      `heaviestConfiguredEntrypoint=${heaviestConfiguredEntrypoint ? `${heaviestConfiguredEntrypoint.package}:${heaviestConfiguredEntrypoint.entry}` : "n/a"}`,
+    ].join(" "),
   };
 }
