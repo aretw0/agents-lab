@@ -42,6 +42,19 @@ function createMinimalPiStack(cwd, extensions) {
   return extRoot;
 }
 
+let cachedRepoEntrypointStats;
+let cachedRepoConfiguredEntrypointStats;
+
+function repoEntrypointStats() {
+  cachedRepoEntrypointStats ??= collectEntrypointStats(process.cwd());
+  return cachedRepoEntrypointStats;
+}
+
+function repoConfiguredEntrypointStats() {
+  cachedRepoConfiguredEntrypointStats ??= collectConfiguredEntrypointStats(process.cwd());
+  return cachedRepoConfiguredEntrypointStats;
+}
+
 test("collectSessionStats reports largest isolated session without reading jsonl content", () => {
   const cwd = makeWorkspace();
   try {
@@ -227,7 +240,7 @@ test("buildEntrypointBudget classifies hot-path bloat candidates", () => {
 });
 
 test("curated custom-footer keeps optional panels out of eager graph", () => {
-  const stats = collectEntrypointStats(process.cwd());
+  const stats = repoEntrypointStats();
   const footer = stats.find((row) => row.entry === "./extensions/custom-footer.ts");
 
   assert.ok(footer, "custom-footer entrypoint should be measured");
@@ -237,7 +250,7 @@ test("curated custom-footer keeps optional panels out of eager graph", () => {
 });
 
 test("configured guardrails-core stays within hot-path budget", () => {
-  const stats = collectConfiguredEntrypointStats(process.cwd());
+  const stats = repoConfiguredEntrypointStats();
   const core = stats.find((row) =>
     row.package === "../packages/pi-stack" && row.entry === "./extensions/guardrails-core.ts"
   );
@@ -248,7 +261,7 @@ test("configured guardrails-core stays within hot-path budget", () => {
 });
 
 test("control-plane profile keeps expensive optional entrypoints cold", () => {
-  const stats = collectEntrypointStats(process.cwd());
+  const stats = repoEntrypointStats();
   const excludes = new Set(
     PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES.map((entry) =>
       entry.startsWith("!") ? `./${entry.slice(1)}` : entry,
