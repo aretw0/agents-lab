@@ -291,6 +291,9 @@ describe("agent spawn readiness contract", () => {
     expect(result.runSpec.attachmentMode).toBe("attach-declared-files");
     expect(result.runSpec.economyMode).toBe("conserve");
     expect(result.runSpec.economyInstructions.join("\n")).toContain("use only declared files");
+    expect(result.operatorApprovalPrompt).toBe("approve worker task-bud-998-ergonomic-wrapper-review");
+    expect(result.nextAction).toContain("approve worker task-bud-998-ergonomic-wrapper-review");
+    expect(result.nextActions[0]).toContain("present operator approval prompt exactly");
     expect(result.startPacket.commandPreview.args).toContain("--print");
     expect(result.startPacket.commandPreview.args).toContain("@packages/pi-stack/extensions/guardrails-core-agent-run-start.ts");
     expect(result.startPacket.commandPreview.args.join("\n")).toContain("Worker economy contract (conserve)");
@@ -683,6 +686,8 @@ describe("agent spawn readiness contract", () => {
     expect((result.details as { runSpec?: { economyMode?: string; maxOutputLines?: number } })?.runSpec?.economyMode).toBe("critical");
     expect((result.details as { runSpec?: { economyMode?: string; maxOutputLines?: number } })?.runSpec?.maxOutputLines).toBe(18);
     expect(result.content?.[0]?.text).toContain("agent-run-operator-packet: decision=ready-for-operator-decision");
+    expect(result.content?.[0]?.text).toContain("next=present-operator-approval");
+    expect((result.details as { nextAction?: string })?.nextAction).toContain("approve worker task-bud-998-operator-wrapper");
     expect(result.content?.[0]?.text).not.toContain('"commandPreview"');
   });
 

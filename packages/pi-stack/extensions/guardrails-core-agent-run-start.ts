@@ -175,6 +175,8 @@ export interface AgentRunOperatorPacketResult {
   validationChecklist: string[];
   rollbackHint: string;
   operatorApprovalPrompt: string;
+  nextAction: string;
+  nextActions: string[];
   summary: string;
 }
 
@@ -554,6 +556,19 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
     `worker economy contract must keep output <=${maxOutputLines} lines and use declared files only`,
     "parent markers should include PASS/FAIL verdict and stale-extension-error count",
   ];
+  const nextActions = startPacket.decision === "ready-for-operator-decision"
+    ? [
+        `present operator approval prompt exactly: ${startPacket.operatorApprovalPrompt}`,
+        "do not ask for another confirmation before presenting the packet; this tool is already report-only",
+        ...startPacket.nextActions,
+      ]
+    : [
+        "resolve operator packet blockers before presenting worker approval",
+        "do not dispatch or hand-assemble argv while blockers remain",
+      ];
+  const nextAction = startPacket.decision === "ready-for-operator-decision"
+    ? `present approval prompt: ${startPacket.operatorApprovalPrompt}`
+    : "resolve operator packet blockers before worker dispatch";
 
   return {
     mode: "agent-run-operator-packet",
@@ -582,9 +597,12 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
     validationChecklist,
     rollbackHint: fileContract === "read-only" ? "read-only run: rollback is registry/log cleanup only; no file mutations expected" : "mutation run: rollback only declared/touched files after parent-side review",
     operatorApprovalPrompt: startPacket.operatorApprovalPrompt,
+    nextAction,
+    nextActions,
     summary: [
       "agent-run-operator-packet:",
       `decision=${startPacket.decision}`,
+      startPacket.decision === "ready-for-operator-decision" ? "next=present-operator-approval" : "next=resolve-blockers",
       `runId=${startPacket.runSpec.runId || "unknown"}`,
       `files=${startPacket.runSpec.declaredFiles.length}`,
       `fileContract=${fileContract}`,
