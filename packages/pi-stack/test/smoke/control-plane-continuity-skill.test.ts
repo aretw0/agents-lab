@@ -11,6 +11,10 @@ describe("control-plane continuity skill", () => {
 
     expect(skill).toContain("name: control-plane-continuity");
     expect(skill).toContain("environment_runtime_health_status");
+    expect(skill).toContain("environment_dev_pressure_status");
+    expect(skill).toContain("Do not execute Pi TUI slash commands");
+    expect(skill).toContain("/watchdog:status");
+    expect(skill).toContain("through bash");
     expect(skill).toContain("explicitly authorizes read-only diagnostics");
     expect(skill).toContain("details.controlPlaneAction");
     expect(skill).toContain("run-report-only-route");

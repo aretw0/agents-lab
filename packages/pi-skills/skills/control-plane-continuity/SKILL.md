@@ -15,6 +15,7 @@ Use this skill when the operator asks for continued progress, a larger local-saf
 - Treat this as a control-plane profile, not a scheduler, executor, swarm, or unattended service.
 - Prefer one useful local-safe slice over a long plan.
 - Before a larger batch or worker discussion, use `environment_runtime_health_status` when available; if it returns `safe-mode` or `stop-and-investigate`, reduce surface or stop before adding work.
+- Do not execute Pi TUI slash commands such as `/watchdog:status` through bash or worker shell. Those are operator input commands; for agent-readable runtime health, use `environment_runtime_health_status` and `environment_dev_pressure_status`.
 - Convert free-form intent through `operator_intent_intake_packet` before asking broad follow-up questions or preparing workers.
 - After intake, follow `details.controlPlaneAction`: if it is `run-report-only-route` and `confirmationRequired=false`, run the recommended read-only/report-only route and summarize; do not ask the operator to confirm a non-mutating packet.
 - Ask a short interview only when the intake reports missing focus, validation, rollback, budget, or stop conditions.
