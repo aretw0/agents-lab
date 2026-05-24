@@ -401,6 +401,14 @@ test("published operational guides use strict-curated as the public baseline nam
 	}
 });
 
+test("published operational guides avoid legacy queen naming", () => {
+	for (const file of listMarkdownFiles("docs/guides")) {
+		const source = read(file);
+
+		assert.doesNotMatch(source, /\bqueen\b/i, `${file} should use control-plane or current session terminology`);
+	}
+});
+
 test("packaged guide markdown links resolve inside each package", () => {
 	for (const spec of Object.values(PACKAGE_DOCS)) {
 		const guideDir = join(spec.dir, "docs", "guides");

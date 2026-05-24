@@ -48,7 +48,7 @@ Comportamento importante:
 
 - capacidades carregadas (`/monitors`, `/colony`, `/colony-stop`, `/session-web`)
 - readiness de provider/model (modelo atual + `defaultProvider/defaultModel`)
-- avaliação da **model policy** por classe (queen/scout/worker/soldier/design/multimodal/backend/review)
+- avaliação da **model policy** por classe (sessão principal, scout/worker/soldier e papéis especializados)
 - avaliação da **budget policy** (`maxCost`, hard cap, mínimo) para `ant_colony`
 
 > Convenção: `/doctor` é saúde global. `/colony-pilot` e `/monitor-provider` são diagnósticos de domínio.
