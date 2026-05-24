@@ -150,6 +150,7 @@ describe("environment doctor dev pressure", () => {
       ]);
       expect(report.summary).toContain("primary=warn:pi-lens-active-full-startup-risk");
       expect(report.summary).toContain("action=set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested");
+      expect(report.summary).toContain("recoveryActions=3");
       expect(report.signals).toEqual(expect.arrayContaining([
         expect.objectContaining({
           level: "warn",

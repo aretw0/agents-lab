@@ -555,8 +555,9 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
       `signals=${signals.length}`,
       `primary=${primarySignal ? `${primarySignal.level}:${primarySignal.code}` : "none"}`,
       `action=${primaryAction}`,
+      primaryRecoveryActions.length > 0 ? `recoveryActions=${primaryRecoveryActions.length}` : undefined,
       `largestSessionMb=${largestSessionMb}`,
       `heaviestConfiguredEntrypoint=${heaviestConfiguredEntrypoint ? `${heaviestConfiguredEntrypoint.package}:${heaviestConfiguredEntrypoint.entry}` : "n/a"}`,
-    ].join(" "),
+    ].filter(Boolean).join(" "),
   };
 }

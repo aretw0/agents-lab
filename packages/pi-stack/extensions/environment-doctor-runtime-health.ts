@@ -74,6 +74,9 @@ export function buildEnvironmentRuntimeHealthPayload(input: {
   const devPressureAction = typeof input.devPressure.primaryAction === "string"
     ? input.devPressure.primaryAction
     : extractSummaryField(input.devPressure.summary, "action");
+  const recoveryActions = Array.isArray(input.devPressure.primaryRecoveryActions)
+    ? input.devPressure.primaryRecoveryActions.length
+    : Number(extractSummaryField(input.devPressure.summary, "recoveryActions") ?? 0);
   const summary = [
     "environment-runtime-health:",
     `decision=${decision}`,
@@ -82,6 +85,7 @@ export function buildEnvironmentRuntimeHealthPayload(input: {
     `devPressure=${input.devPressure.recommendation}`,
     devPressurePrimary ? `devPressurePrimary=${devPressurePrimary}` : undefined,
     devPressureAction ? `devPressureAction=${devPressureAction}` : undefined,
+    recoveryActions > 0 ? `recoveryActions=${recoveryActions}` : undefined,
     `velocity=${input.devPressure.velocityPressure?.severity ?? "unknown"}`,
     input.devPressure.boardPressurePlan?.status ? `boardPressure=${input.devPressure.boardPressurePlan.status}` : undefined,
     `runtimeArtifacts=${Array.isArray(input.runtimeArtifacts.violations) && input.runtimeArtifacts.violations.length === 0 ? "clean" : "violations"}`,

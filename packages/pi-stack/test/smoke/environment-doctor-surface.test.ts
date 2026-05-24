@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import environmentDoctorExtension from "../../extensions/environment-doctor";
-import { resolveEnvironmentRuntimeHealthDecision } from "../../extensions/environment-doctor-runtime-health";
+import { buildEnvironmentRuntimeHealthPayload, resolveEnvironmentRuntimeHealthDecision } from "../../extensions/environment-doctor-runtime-health";
 
 function makeMockPi() {
   return {
@@ -159,5 +159,27 @@ describe("environment-doctor surface", () => {
       devPressureSeverity: "ok",
       runtimeArtifactViolations: [],
     })).toBe("stop-and-investigate");
+  });
+
+  it("runtime health summary surfaces pressure recovery action count", () => {
+    const { summary, payload } = buildEnvironmentRuntimeHealthPayload({
+      allResults: [{ status: "ok" }],
+      terminalId: "vscode",
+      shellId: "native-bash",
+      devPressure: {
+        recommendation: "reduce-governance-surface",
+        primarySignal: { level: "warn", code: "pi-lens-active-full-startup-risk" },
+        primaryAction: "set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested",
+        primaryRecoveryActions: ["set quick", "reapply curated"],
+        velocityPressure: { severity: "warn" },
+        summary: "environment-dev-pressure: recommendation=reduce-governance-surface",
+      },
+      runtimeArtifacts: { violations: [] },
+      runtimeArtifactSummary: "runtime-artifact-audit: clean",
+    });
+
+    expect(payload.decision).toBe("safe-mode");
+    expect(summary).toContain("devPressureAction=set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested");
+    expect(summary).toContain("recoveryActions=2");
   });
 });
