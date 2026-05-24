@@ -13,6 +13,11 @@ export type OperatorIntentIntakeDecision =
   | "prepare-worker-packet"
   | "blocked";
 
+export type OperatorIntentControlPlaneAction =
+  | "ask-operator"
+  | "run-report-only-route"
+  | "stop-and-report";
+
 export interface OperatorIntentIntakeInput extends ControlPlaneProfilePacketInput {
   localSafeMaterialReady?: boolean;
   brainstormRequested?: boolean;
@@ -53,6 +58,9 @@ export interface OperatorIntentIntakePacket {
   recommendedRoute: string;
   recommendedTools: string[];
   operatorDecisionNeeded: true;
+  controlPlaneAction: OperatorIntentControlPlaneAction;
+  confirmationRequired: boolean;
+  confirmationReason: string;
   profilePacket: ControlPlaneProfilePacket;
   missingQuestions: string[];
   blockedRequests: string[];
@@ -134,6 +142,32 @@ function buildInteraction(decision: OperatorIntentIntakeDecision, tools: string[
   };
 }
 
+function resolveControlPlaneAction(decision: OperatorIntentIntakeDecision): {
+  controlPlaneAction: OperatorIntentControlPlaneAction;
+  confirmationRequired: boolean;
+  confirmationReason: string;
+} {
+  if (decision === "blocked") {
+    return {
+      controlPlaneAction: "stop-and-report",
+      confirmationRequired: true,
+      confirmationReason: "blocked intent needs operator correction before any next route.",
+    };
+  }
+  if (decision === "ask-operator") {
+    return {
+      controlPlaneAction: "ask-operator",
+      confirmationRequired: true,
+      confirmationReason: "required intent fields are missing.",
+    };
+  }
+  return {
+    controlPlaneAction: "run-report-only-route",
+    confirmationRequired: false,
+    confirmationReason: "recommended route is report-only/read-only and does not authorize mutation, dispatch, or worker start.",
+  };
+}
+
 export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput = {}): OperatorIntentIntakePacket {
   const profilePacket = buildControlPlaneProfilePacket(input);
   const missingQuestions = profilePacket.missingQuestions;
@@ -180,6 +214,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
   const recommendedRoute = recommendedTools.join("+");
   const interaction = buildInteraction(decision, recommendedTools, missingQuestions);
   const blockedSummary = blockedRequests.length > 0 ? blockedRequests.slice(0, 4).join("|") : "none";
+  const action = resolveControlPlaneAction(decision);
 
   return {
     effect: "none",
@@ -193,12 +228,15 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     recommendedRoute,
     recommendedTools,
     operatorDecisionNeeded: true,
+    controlPlaneAction: action.controlPlaneAction,
+    confirmationRequired: action.confirmationRequired,
+    confirmationReason: action.confirmationReason,
     profilePacket,
     missingQuestions,
     blockedRequests,
     missingCapabilities: [...new Set(missingCapabilities)].slice(0, 6),
     interaction,
-    summary: "operator-intent-intake: decision=" + decision + " route=" + recommendedRoute + " profile=" + profilePacket.profile + " questions=" + missingQuestions.length + " blocked=" + blockedSummary + " dispatch=no mutation=no worker-dispatch=no",
+    summary: "operator-intent-intake: decision=" + decision + " action=" + action.controlPlaneAction + " route=" + recommendedRoute + " profile=" + profilePacket.profile + " questions=" + missingQuestions.length + " blocked=" + blockedSummary + " dispatch=no mutation=no worker-dispatch=no",
     recommendation,
   };
 }

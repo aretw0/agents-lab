@@ -16,6 +16,7 @@ Use this skill when the operator asks for continued progress, a larger local-saf
 - Prefer one useful local-safe slice over a long plan.
 - Before a larger batch or worker discussion, use `environment_runtime_health_status` when available; if it returns `safe-mode` or `stop-and-investigate`, reduce surface or stop before adding work.
 - Convert free-form intent through `operator_intent_intake_packet` before asking broad follow-up questions or preparing workers.
+- After intake, follow `details.controlPlaneAction`: if it is `run-report-only-route` and `confirmationRequired=false`, run the recommended read-only/report-only route and summarize; do not ask the operator to confirm a non-mutating packet.
 - Ask a short interview only when the intake reports missing focus, validation, rollback, budget, or stop conditions.
 - Use first-party packets before free-form judgment: `operator_intent_intake_packet`, `project_intake_plan`, `structured_interview_plan`, `control_plane_profile_packet`, `local_batch_manifest_packet`, `context_watch_continuation_readiness`, `context_watch_local_slice_preview`, `local_continuity_loop_canary_packet`, `context_watch_checkpoint`.
 - If the operator explicitly authorizes read-only diagnostics, do not ask for another confirmation. Run the relevant first-party read-only packets and return a compact decision.
