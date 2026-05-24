@@ -141,6 +141,7 @@ describe("structured interview primitive", () => {
       recommendedRoute: "structured_interview_plan",
       operatorDecisionNeeded: true,
       controlPlaneAction: "ask-operator",
+      nextAction: "answer-next-question",
       confirmationRequired: true,
       interaction: {
         kind: "operator-choice",
@@ -159,6 +160,7 @@ describe("structured interview primitive", () => {
       route: "structured_interview_plan",
     });
     expect(packet.summary).toContain("dispatch=no mutation=no worker-dispatch=no");
+    expect(packet.summary).toContain("next=answer-next-question");
     expect(packet.summary).toContain("choice=answer-next-question");
   });
 
@@ -180,6 +182,7 @@ describe("structured interview primitive", () => {
     expect(packet).toMatchObject({
       decision: "seed-brainstorm",
       controlPlaneAction: "run-report-only-route",
+      nextAction: "run-brainstorm-seed-preview",
       confirmationRequired: false,
       operatorDecisionNeeded: false,
       recommendedTools: ["lane_brainstorm_packet", "lane_brainstorm_seed_preview"],
@@ -215,6 +218,7 @@ describe("structured interview primitive", () => {
     expect(packet).toMatchObject({
       decision: "prepare-worker-packet",
       controlPlaneAction: "run-report-only-route",
+      nextAction: "prepare-worker-packet",
       confirmationRequired: false,
       operatorDecisionNeeded: false,
       recommendedTools: ["agent_run_operator_packet", "agent_run_task_packet"],
@@ -248,6 +252,7 @@ describe("structured interview primitive", () => {
     expect(packet).toMatchObject({
       decision: "check-worker-readiness",
       controlPlaneAction: "run-report-only-route",
+      nextAction: "run-worker-readiness-checks",
       confirmationRequired: false,
       operatorDecisionNeeded: false,
       recommendedTools: ["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"],
@@ -283,6 +288,7 @@ describe("structured interview primitive", () => {
 
     expect(packet.decision).toBe("check-worker-readiness");
     expect(packet.controlPlaneAction).toBe("run-report-only-route");
+    expect(packet.nextAction).toBe("run-worker-readiness-checks");
     expect(packet.confirmationRequired).toBe(false);
     expect(packet.operatorDecisionNeeded).toBe(false);
     expect(packet.recommendedTools).toEqual(["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"]);
@@ -316,6 +322,7 @@ describe("structured interview primitive", () => {
 
     expect(result?.details.decision).toBe("check-worker-readiness");
     expect(result?.details.controlPlaneAction).toBe("run-report-only-route");
+    expect(result?.details.nextAction).toBe("run-worker-readiness-checks");
     expect(result?.details.confirmationRequired).toBe(false);
     expect(result?.details.operatorDecisionNeeded).toBe(false);
     expect(result?.details.recommendedTools).toEqual(["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"]);
@@ -336,6 +343,7 @@ describe("structured interview primitive", () => {
     expect(packet).toMatchObject({
       decision: "blocked",
       controlPlaneAction: "stop-and-report",
+      nextAction: "resolve-blocked-intent",
       confirmationRequired: true,
       operatorDecisionNeeded: true,
       recommendedTools: ["control_plane_profile_packet"],
@@ -411,6 +419,7 @@ describe("structured interview primitive", () => {
 
     expect(result?.details.decision).toBe("prepare-worker-packet");
     expect(result?.details.controlPlaneAction).toBe("run-report-only-route");
+    expect(result?.details.nextAction).toBe("prepare-worker-packet");
     expect(result?.details.confirmationRequired).toBe(false);
     expect(result?.details.operatorDecisionNeeded).toBe(false);
     expect(result?.details.dispatchAllowed).toBe(false);
@@ -426,6 +435,7 @@ describe("structured interview primitive", () => {
       },
     });
     expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=prepare-worker-packet");
+    expect(result?.content?.[0]?.text).toContain("next=prepare-worker-packet");
     expect(result?.content?.[0]?.text).toContain("choice=prepare-worker-packet");
     expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(result?.content?.[0]?.text).not.toContain("\"intent\"");

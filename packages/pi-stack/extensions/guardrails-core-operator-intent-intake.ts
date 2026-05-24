@@ -18,6 +18,14 @@ export type OperatorIntentControlPlaneAction =
   | "run-report-only-route"
   | "stop-and-report";
 
+export type OperatorIntentNextAction =
+  | "answer-next-question"
+  | "run-brainstorm-seed-preview"
+  | "prepare-single-slice-contract"
+  | "run-worker-readiness-checks"
+  | "prepare-worker-packet"
+  | "resolve-blocked-intent";
+
 export interface OperatorIntentIntakeInput extends ControlPlaneProfilePacketInput {
   localSafeMaterialReady?: boolean;
   brainstormRequested?: boolean;
@@ -60,6 +68,7 @@ export interface OperatorIntentIntakePacket {
   recommendedTools: string[];
   operatorDecisionNeeded: boolean;
   controlPlaneAction: OperatorIntentControlPlaneAction;
+  nextAction: OperatorIntentNextAction;
   confirmationRequired: boolean;
   confirmationReason: string;
   profilePacket: ControlPlaneProfilePacket;
@@ -170,6 +179,15 @@ function resolveControlPlaneAction(decision: OperatorIntentIntakeDecision): {
   };
 }
 
+function resolveNextAction(decision: OperatorIntentIntakeDecision): OperatorIntentNextAction {
+  if (decision === "ask-operator") return "answer-next-question";
+  if (decision === "seed-brainstorm") return "run-brainstorm-seed-preview";
+  if (decision === "prepare-single-slice") return "prepare-single-slice-contract";
+  if (decision === "check-worker-readiness") return "run-worker-readiness-checks";
+  if (decision === "prepare-worker-packet") return "prepare-worker-packet";
+  return "resolve-blocked-intent";
+}
+
 export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput = {}): OperatorIntentIntakePacket {
   const profilePacket = buildControlPlaneProfilePacket(input);
   const missingQuestions = profilePacket.missingQuestions;
@@ -217,6 +235,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
   const interaction = buildInteraction(decision, recommendedTools, missingQuestions);
   const blockedSummary = blockedRequests.length > 0 ? blockedRequests.slice(0, 4).join("|") : "none";
   const action = resolveControlPlaneAction(decision);
+  const nextAction = resolveNextAction(decision);
 
   return {
     effect: "none",
@@ -231,6 +250,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     recommendedTools,
     operatorDecisionNeeded: action.confirmationRequired,
     controlPlaneAction: action.controlPlaneAction,
+    nextAction,
     confirmationRequired: action.confirmationRequired,
     confirmationReason: action.confirmationReason,
     profilePacket,
@@ -238,7 +258,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     blockedRequests,
     missingCapabilities: [...new Set(missingCapabilities)].slice(0, 6),
     interaction,
-    summary: "operator-intent-intake: decision=" + decision + " action=" + action.controlPlaneAction + " route=" + recommendedRoute + " choice=" + interaction.recommendedChoiceId + " profile=" + profilePacket.profile + " questions=" + missingQuestions.length + " operatorDecision=" + (action.confirmationRequired ? "yes" : "no") + " blocked=" + blockedSummary + " dispatch=no mutation=no worker-dispatch=no",
+    summary: "operator-intent-intake: decision=" + decision + " action=" + action.controlPlaneAction + " next=" + nextAction + " route=" + recommendedRoute + " choice=" + interaction.recommendedChoiceId + " profile=" + profilePacket.profile + " questions=" + missingQuestions.length + " operatorDecision=" + (action.confirmationRequired ? "yes" : "no") + " blocked=" + blockedSummary + " dispatch=no mutation=no worker-dispatch=no",
     recommendation,
   };
 }
