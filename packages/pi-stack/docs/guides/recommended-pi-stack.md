@@ -35,7 +35,7 @@ Regra prática:
 - adicione extras só quando uma necessidade real aparecer;
 - use swarm, colônia ou delegação apenas com preflight, budget e escopo paralelo claros.
 
-Se `environment_dev_pressure_status` reportar `pi-lens-active-full-startup-risk`, volte para o perfil default ou rode novamente `npx @aretw0/pi-stack` para reaplicar os filtros curados. Use `PI_LENS_STARTUP_MODE=quick` ou `minimal` apenas quando precisar manter o `pi-lens` ativo durante diagnóstico.
+Se `environment_dev_pressure_status` reportar `pi-lens-active-full-startup-risk`, o resumo deve incluir `recoveryActions=N`. Leia essas ações primeiro: normalmente elas apontam para `PI_LENS_STARTUP_MODE=quick|minimal`, reaplicar o perfil `strict-curated`, ou reservar `stack-full` para diagnóstico deliberado.
 
 ## Instalação Via Pi
 

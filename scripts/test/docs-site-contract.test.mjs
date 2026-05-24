@@ -113,8 +113,9 @@ test("recommended stack guide documents pi-lens pressure recovery", () => {
 
 	assert.match(guide, /environment_dev_pressure_status/);
 	assert.match(guide, /pi-lens-active-full-startup-risk/);
-	assert.match(guide, /npx @aretw0\/pi-stack/);
-	assert.match(guide, /PI_LENS_STARTUP_MODE=quick/);
+	assert.match(guide, /recoveryActions=N/);
+	assert.match(guide, /strict-curated/);
+	assert.match(guide, /PI_LENS_STARTUP_MODE=quick\|minimal/);
 });
 
 test("recommended stack guide separates TUI watchdog commands from agent diagnostics", () => {
