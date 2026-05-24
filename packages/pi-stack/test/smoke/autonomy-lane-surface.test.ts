@@ -198,13 +198,13 @@ describe("autonomy lane surface", () => {
     expect(result?.details.summary).toContain("autonomy-protected-focus-packet:");
     expect(result?.details.decision).toBe("blocked");
     expect(result?.details.recommendedOption).toBe("defer");
+    expect(result?.details.nextActionCode).toBe("defer-until-evidence");
     expect((result?.details.decisionPreview as { recommendedOption?: string } | undefined)?.recommendedOption).toBe("defer");
-    expect((result?.details.decisionPreview as { options?: Array<{ option: string; suitability: string }> } | undefined)?.options?.map((option) => `${option.option}:${option.suitability}`)).toEqual([
-      "promote:blocked",
-      "skip:viable",
-      "defer:recommended",
-    ]);
+    const options = (result?.details.decisionPreview as { options?: Array<{ option: string; suitability: string; nextActionCode?: string }> } | undefined)?.options ?? [];
+    expect(options.map((option) => `${option.option}:${option.suitability}`)).toEqual(["promote:blocked", "skip:viable", "defer:recommended"]);
+    expect(options.map((option) => `${option.option}:${option.nextActionCode}`)).toEqual(["promote:add-protected-evidence", "skip:continue-local-safe", "defer:revisit-after-evidence"]);
     expect(result?.details.summary).toContain("preview=promote:blocked,skip:viable,defer:recommended");
+    expect(result?.details.summary).toContain("next=defer-until-evidence");
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");

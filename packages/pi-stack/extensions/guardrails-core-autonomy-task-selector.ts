@@ -622,6 +622,11 @@ export interface AutonomyProtectedFocusOptionPreview {
   suitability: "recommended" | "viable" | "blocked";
   recommendationCode: string;
   rationale: string;
+  nextActionCode:
+    | "run-protected-canary"
+    | "add-protected-evidence"
+    | "continue-local-safe"
+    | "revisit-after-evidence";
   nextAction: string;
   blockers: string[];
 }
@@ -643,6 +648,12 @@ export interface AutonomyProtectedFocusDecisionPacket {
     | "protected-focus-defer-missing-evidence"
     | "protected-focus-defer-high-risk"
     | "protected-focus-blocked-task-not-found";
+  nextActionCode:
+    | "choose-promote-skip-defer"
+    | "continue-local-safe"
+    | "defer-until-evidence"
+    | "defer-or-decompose"
+    | "choose-valid-task";
   nextAction: string;
   valuePotential: "high" | "medium" | "low";
   riskLevel: "high" | "medium" | "low";
@@ -709,6 +720,7 @@ function buildProtectedFocusDecisionPreview(input: {
           : promoteSuitability === "recommended"
             ? "promote fits one protected canary with rollback."
             : "promote is possible but requires extra caution/risk acceptance.",
+      nextActionCode: promoteSuitability === "blocked" ? "add-protected-evidence" : "run-protected-canary",
       nextAction:
         promoteSuitability === "blocked"
           ? "add missing declared files/validation/rollback evidence before promote."
@@ -723,6 +735,7 @@ function buildProtectedFocusDecisionPreview(input: {
         skipSuitability === "recommended"
           ? "skip keeps the lane local-safe and avoids protected promotion now."
           : "skip is valid but may delay protected value capture.",
+      nextActionCode: "continue-local-safe",
       nextAction: "continue via local-safe lane without protected execution.",
       blockers: [],
     },
@@ -734,6 +747,7 @@ function buildProtectedFocusDecisionPreview(input: {
         deferSuitability === "recommended"
           ? "defer while risk/evidence conditions remain constrained."
           : "defer is viable, but may postpone high-value protected learning.",
+      nextActionCode: "revisit-after-evidence",
       nextAction: "defer protected execution and revisit once evidence/value is clearer.",
       blockers: input.blockers,
     },
@@ -774,6 +788,7 @@ export function buildAutonomyProtectedFocusDecisionPacket(
       recommendedOption: "defer",
       options: ["promote", "skip", "defer"],
       recommendationCode: "protected-focus-blocked-task-not-found",
+      nextActionCode: "choose-valid-task",
       nextAction: "task not found; choose a valid task id before protected focus decision.",
       valuePotential: "low",
       riskLevel: "low",
@@ -817,20 +832,24 @@ export function buildAutonomyProtectedFocusDecisionPacket(
   let decision: AutonomyProtectedFocusDecisionPacket["decision"] = "ready-for-operator-decision";
   let recommendedOption: AutonomyProtectedFocusDecisionPacket["recommendedOption"] = "promote";
   let recommendationCode: AutonomyProtectedFocusDecisionPacket["recommendationCode"] = "protected-focus-promote-canary";
+  let nextActionCode: AutonomyProtectedFocusDecisionPacket["nextActionCode"] = "choose-promote-skip-defer";
   let nextAction = "ask operator to choose promote/skip/defer; if promote, run one protected canary slice with explicit rollback and focal validation.";
 
   if (!protectedClassification.protected) {
     recommendedOption = "skip";
     recommendationCode = "protected-focus-skip-local-safe";
+    nextActionCode = "continue-local-safe";
     nextAction = "task is local-safe; continue via normal local-safe lane without protected focus promotion.";
   } else if (blockers.length > 0) {
     decision = "blocked";
     recommendedOption = "defer";
     recommendationCode = "protected-focus-defer-missing-evidence";
+    nextActionCode = "defer-until-evidence";
     nextAction = "defer protected focus until declared files, validation gate, and rollback evidence are explicit.";
   } else if (riskLevel === "high" && valuePotential !== "high") {
     recommendedOption = "defer";
     recommendationCode = "protected-focus-defer-high-risk";
+    nextActionCode = "defer-or-decompose";
     nextAction = "risk is high for current value potential; defer and/or decompose before protected canary execution.";
   }
 
@@ -850,6 +869,7 @@ export function buildAutonomyProtectedFocusDecisionPacket(
     recommendedOption,
     options: ["promote", "skip", "defer"],
     recommendationCode,
+    nextActionCode,
     nextAction,
     valuePotential,
     riskLevel,
@@ -875,6 +895,7 @@ export function buildAutonomyProtectedFocusDecisionPacket(
       `decision=${decision}`,
       `option=${recommendedOption}`,
       `code=${recommendationCode}`,
+      `next=${nextActionCode}`,
       `risk=${riskLevel}`,
       `value=${valuePotential}`,
       `preview=${previewCompact}`,
