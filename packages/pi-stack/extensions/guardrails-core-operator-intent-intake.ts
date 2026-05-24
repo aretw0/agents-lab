@@ -57,7 +57,7 @@ export interface OperatorIntentIntakePacket {
   decision: OperatorIntentIntakeDecision;
   recommendedRoute: string;
   recommendedTools: string[];
-  operatorDecisionNeeded: true;
+  operatorDecisionNeeded: boolean;
   controlPlaneAction: OperatorIntentControlPlaneAction;
   confirmationRequired: boolean;
   confirmationReason: string;
@@ -227,7 +227,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     decision,
     recommendedRoute,
     recommendedTools,
-    operatorDecisionNeeded: true,
+    operatorDecisionNeeded: action.confirmationRequired,
     controlPlaneAction: action.controlPlaneAction,
     confirmationRequired: action.confirmationRequired,
     confirmationReason: action.confirmationReason,
@@ -236,7 +236,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     blockedRequests,
     missingCapabilities: [...new Set(missingCapabilities)].slice(0, 6),
     interaction,
-    summary: "operator-intent-intake: decision=" + decision + " action=" + action.controlPlaneAction + " route=" + recommendedRoute + " profile=" + profilePacket.profile + " questions=" + missingQuestions.length + " blocked=" + blockedSummary + " dispatch=no mutation=no worker-dispatch=no",
+    summary: "operator-intent-intake: decision=" + decision + " action=" + action.controlPlaneAction + " route=" + recommendedRoute + " profile=" + profilePacket.profile + " questions=" + missingQuestions.length + " operatorDecision=" + (action.confirmationRequired ? "yes" : "no") + " blocked=" + blockedSummary + " dispatch=no mutation=no worker-dispatch=no",
     recommendation,
   };
 }
