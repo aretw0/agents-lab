@@ -14,8 +14,9 @@ Use this skill when the operator asks for continued progress, a larger local-saf
 
 - Treat this as a control-plane profile, not a scheduler, executor, swarm, or unattended service.
 - Prefer one useful local-safe slice over a long plan.
-- Ask a short interview only when focus, validation, rollback, budget, or stop conditions are missing.
-- Use first-party packets before free-form judgment: `project_intake_plan`, `structured_interview_plan`, `control_plane_profile_packet`, `local_batch_manifest_packet`, `context_watch_continuation_readiness`, `context_watch_local_slice_preview`, `local_continuity_loop_canary_packet`, `context_watch_checkpoint`.
+- Convert free-form intent through `operator_intent_intake_packet` before asking broad follow-up questions or preparing workers.
+- Ask a short interview only when the intake reports missing focus, validation, rollback, budget, or stop conditions.
+- Use first-party packets before free-form judgment: `project_intake_plan`, `operator_intent_intake_packet`, `structured_interview_plan`, `control_plane_profile_packet`, `local_batch_manifest_packet`, `context_watch_continuation_readiness`, `context_watch_local_slice_preview`, `local_continuity_loop_canary_packet`, `context_watch_checkpoint`.
 - Delegate to workers only after the lower agent-run gates are green; batch intent never bypasses per-worker start/outcome gates.
 - Stop on protected scope, unknown validation, unexpected git state, budget block, compact/reload pressure without checkpoint, repeated failure, or real operator/product ambiguity.
 
@@ -40,6 +41,8 @@ Ask only what is missing:
 5. What should force a stop?
 
 If the operator already gave enough context, do not repeat the interview. Convert it into a local-safe packet and proceed with the smallest reversible slice.
+
+When a TUI choice surface is available, prefer the choices from `operator_intent_intake_packet.details.interaction`: select a route, accept a custom answer, or cancel. If no widget is available, summarize the same choices in one compact message.
 
 ## Default Slice Contract
 
@@ -66,6 +69,7 @@ Use workers when they reduce latency or isolate review, not because the control-
 
 - Prefer read-only review workers before mutation workers.
 - Keep each worker to declared files, timeout, provider/model budget, and one outcome packet.
+- Use `operator_intent_intake_packet` to decide whether the intent is ready for `agent_run_operator_packet`; intake never starts a worker.
 - Use `agent_run_batch_dry_run` for planned batch runIds; it is evidence only.
 - Do not start protected, scheduler, remote/offload, GitHub Actions, publish, settings, or credential work through this skill.
 

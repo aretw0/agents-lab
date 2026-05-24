@@ -10,6 +10,8 @@ describe("control-plane continuity skill", () => {
     const readme = readFileSync(join(REPO_ROOT, "packages/pi-skills/README.md"), "utf8");
 
     expect(skill).toContain("name: control-plane-continuity");
+    expect(skill).toContain("operator_intent_intake_packet");
+    expect(skill).toContain("details.interaction");
     expect(skill).toContain("control_plane_profile_packet");
     expect(skill).toContain("local_batch_manifest_packet");
     expect(skill).toContain("context_watch_local_slice_preview");
@@ -17,6 +19,7 @@ describe("control-plane continuity skill", () => {
     expect(skill).toContain("agent_run_batch_dry_run");
     expect(skill).toContain("Assisted Self-Critique");
     expect(skill).toContain("not unattended automation");
+    expect(skill).toContain("intake never starts a worker");
     expect(skill).toContain("reload/compact");
     expect(skill).toContain("host pressure");
     expect(skill).toContain("Stop on protected scope");
