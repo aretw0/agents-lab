@@ -69,6 +69,45 @@ describe("provider-readiness matrix", () => {
     }
   });
 
+  it("prefers model-specific budget state for configured provider/model refs", async () => {
+    const dir = makeWorkspace({
+      piStack: {
+        quotaVisibility: {
+          routeModelRefs: {
+            "openai-codex": "openai-codex/gpt-5.3-codex-spark",
+          },
+          providerBudgets: {
+            "openai-codex/gpt-5.3-codex-spark": {
+              period: "weekly",
+              unit: "tokens-cost",
+              weeklyQuotaCostUsd: 10,
+              warnPct: 70,
+              hardPct: 95,
+            },
+            "openai-codex": {
+              period: "weekly",
+              unit: "tokens-cost",
+              weeklyQuotaCostUsd: 1,
+              warnPct: 70,
+              hardPct: 95,
+            },
+          },
+        },
+      },
+    });
+    try {
+      const matrix = await buildProviderReadinessMatrix(dir);
+      const entry = matrix.entries.find((e) => e.provider === "openai-codex");
+      expect(entry).toBeDefined();
+      expect(entry!.modelRef).toBe("openai-codex/gpt-5.3-codex-spark");
+      expect(entry!.budgetState).toBe("ok");
+      expect(entry!.budgetScope).toBe("provider-model");
+      expect(entry!.notes).toContain("Model-specific budget state: OK.");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("marca provider como unconfigured quando tem budget mas não tem model ref", async () => {
     const dir = makeWorkspace({
       piStack: {

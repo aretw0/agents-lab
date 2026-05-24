@@ -21,6 +21,7 @@ import { readProjectSettings } from "./context-watchdog-storage";
 import { resolveGlobalWorkspaceSessionDir } from "./quota-visibility-session-roots";
 import {
   analyzeQuota,
+  buildProviderModelKey,
   parseProviderBudgets,
   parseRouteModelRefs,
   safeNum,
@@ -31,6 +32,7 @@ export interface ProviderReadinessEntry {
   provider: string;
   modelRef: string | null;
   budgetState: "ok" | "warning" | "blocked" | "unknown";
+  budgetScope?: "provider" | "provider-model";
   readiness: "ready" | "degraded" | "blocked" | "unconfigured";
   notes: string[];
 }
@@ -59,6 +61,14 @@ function readWorkspaceSettings(cwd: string): Record<string, unknown> {
 
 function piStackSettings(raw: Record<string, unknown>): Record<string, unknown> {
   return ((raw.piStack ?? {}) as Record<string, unknown>);
+}
+
+function modelFromProviderModelRef(provider: string, modelRef: string | null): string | undefined {
+  if (!modelRef) return undefined;
+  const prefix = `${provider}/`;
+  if (!modelRef.startsWith(prefix)) return undefined;
+  const model = modelRef.slice(prefix.length).trim();
+  return model || undefined;
 }
 
 const RATE_LIMIT_RE = /(\b429\b|rate.?limit|too many requests|quota\s*exceeded|capacity\s*reached|resource\s*exhausted)/i;
@@ -131,12 +141,14 @@ export async function buildProviderReadinessMatrix(cwd: string): Promise<Provide
 
   // Get budget state from session history
   let budgetStateByProvider: Record<string, "ok" | "warning" | "blocked"> = {};
+  let budgetStateByProviderModel: Record<string, "ok" | "warning" | "blocked"> = {};
   if (Object.keys(providerBudgets).length > 0) {
     try {
       const days = safeNum((qv.defaultDays)) || 30;
       const status = await analyzeQuota({ days, providerBudgets, providerWindowHours: {}, cwd });
       for (const b of status.providerBudgets) {
-        budgetStateByProvider[b.provider] = b.state;
+        if (b.providerModelKey) budgetStateByProviderModel[b.providerModelKey] = b.state;
+        else budgetStateByProvider[b.provider] = b.state;
       }
     } catch {
       // quota analysis failure is non-fatal
@@ -145,7 +157,11 @@ export async function buildProviderReadinessMatrix(cwd: string): Promise<Provide
 
   const entries: ProviderReadinessEntry[] = configuredProviders.map((provider) => {
     const modelRef = routeModelRefs[provider] ?? null;
-    const budgetState = budgetStateByProvider[provider] ?? "unknown";
+    const model = modelFromProviderModelRef(provider, modelRef);
+    const providerModelKey = model ? buildProviderModelKey(provider, model) : undefined;
+    const modelBudgetState = providerModelKey ? budgetStateByProviderModel[providerModelKey] : undefined;
+    const budgetState = modelBudgetState ?? budgetStateByProvider[provider] ?? "unknown";
+    const budgetScope = modelBudgetState ? "provider-model" : budgetStateByProvider[provider] ? "provider" : undefined;
     const runtime = runtimeSignals[provider];
     const notes: string[] = [];
     let readiness: ProviderReadinessEntry["readiness"];
@@ -163,6 +179,7 @@ export async function buildProviderReadinessMatrix(cwd: string): Promise<Provide
       notes.push("No budget config found — provider cost is untracked.");
       readiness = "ready";
     } else {
+      if (budgetScope === "provider-model") notes.push(`Model-specific budget state: ${budgetState.toUpperCase()}.`);
       readiness = "ready";
     }
 
@@ -178,7 +195,7 @@ export async function buildProviderReadinessMatrix(cwd: string): Promise<Provide
       if (readiness !== "blocked") readiness = "degraded";
     }
 
-    return { provider, modelRef, budgetState, readiness, notes };
+    return { provider, modelRef, budgetState, budgetScope, readiness, notes };
   });
 
   // Also include budget-tracked providers that have no model ref
