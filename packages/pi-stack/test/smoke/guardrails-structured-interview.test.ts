@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildControlPlaneProfilePacket, resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
+import { buildControlPlaneProfilePacket, buildOperatorIntentIntakePacket, resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
 import { registerGuardrailsStructuredInterviewSurface } from "../../extensions/guardrails-core-structured-interview-surface";
 
 describe("structured interview primitive", () => {
@@ -114,6 +114,119 @@ describe("structured interview primitive", () => {
     expect(blocked.summary).toContain("blocked=protected-scope|github-actions");
   });
 
+  it("routes incomplete free-form operator intent to a widget-ready interview choice", () => {
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "organize the next work lane",
+    });
+
+    expect(packet).toMatchObject({
+      effect: "none",
+      mode: "operator-intent-intake",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      workerDispatchAllowed: false,
+      decision: "ask-operator",
+      recommendedRoute: "structured_interview_plan",
+      operatorDecisionNeeded: true,
+      interaction: {
+        kind: "operator-choice",
+        allowCustomAnswer: true,
+        allowCancel: true,
+      },
+    });
+    expect(packet.missingQuestions.length).toBeGreaterThan(0);
+    expect(packet.interaction.choices[0]).toMatchObject({
+      id: "answer-next-question",
+      route: "structured_interview_plan",
+    });
+    expect(packet.summary).toContain("dispatch=no mutation=no worker-dispatch=no");
+  });
+
+  it("routes absent local-safe material to brainstorm seed preview without dispatch", () => {
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "find the next local-safe slice",
+      autonomyRequest: "bounded-batch",
+      availableResources: ["board", "tests"],
+      expectedRoi: "reduce ambiguity before implementation",
+      limits: ["local-safe only"],
+      stopConditions: ["validation fails"],
+      operatorFocusKnown: true,
+      validationKnown: true,
+      rollbackKnown: true,
+      checkpointPlanned: true,
+      localSafeMaterialReady: false,
+    });
+
+    expect(packet).toMatchObject({
+      decision: "seed-brainstorm",
+      recommendedTools: ["lane_brainstorm_packet", "lane_brainstorm_seed_preview"],
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      workerDispatchAllowed: false,
+    });
+    expect(packet.interaction.choices[0]).toMatchObject({
+      id: "seed-brainstorm",
+      route: "lane_brainstorm_packet",
+    });
+  });
+
+  it("prepares a worker packet only as a report-only candidate when readiness is known", () => {
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "fan out read-only model calibration",
+      autonomyRequest: "worker-assisted",
+      availableResources: ["codex-spark", "test-harness"],
+      expectedRoi: "compare workers before choosing a lane",
+      limits: ["read-only", "two workers"],
+      stopConditions: ["budget warning", "validation fails"],
+      operatorFocusKnown: true,
+      validationKnown: true,
+      rollbackKnown: true,
+      checkpointPlanned: true,
+      workerRequested: true,
+      subagentsReady: true,
+      providerReady: true,
+    });
+
+    expect(packet).toMatchObject({
+      decision: "prepare-worker-packet",
+      recommendedTools: ["agent_run_operator_packet", "agent_run_task_packet"],
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      workerDispatchAllowed: false,
+    });
+    expect(packet.profilePacket.profile).toBe("worker-assisted-candidate");
+    expect(packet.interaction.choices[0]).toMatchObject({
+      id: "prepare-worker-packet",
+      route: "agent_run_operator_packet",
+    });
+  });
+
+  it("blocks protected intent before routing to brainstorm or workers", () => {
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "publish the release",
+      autonomyRequest: "worker-assisted",
+      protectedScopeRequested: true,
+      githubActionsRequested: true,
+      brainstormRequested: true,
+      workerRequested: true,
+    });
+
+    expect(packet).toMatchObject({
+      decision: "blocked",
+      recommendedTools: ["control_plane_profile_packet"],
+      blockedRequests: ["protected-scope", "github-actions"],
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      workerDispatchAllowed: false,
+    });
+    expect(packet.interaction.choices[0]).toMatchObject({
+      id: "remove-blocked-request",
+      route: "control_plane_profile_packet",
+    });
+  });
+
   it("surface exposes control_plane_profile_packet as operator-visible report-only tool", () => {
     const tools: Array<{ name: string; execute: (id: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> } }> = [];
     registerGuardrailsStructuredInterviewSurface({
@@ -142,6 +255,44 @@ describe("structured interview primitive", () => {
     expect(result?.details.operatorDecisionNeeded).toBe(true);
     expect(result?.details.availableCapabilities).toEqual(["first-hatch", "tool-hygiene"]);
     expect(result?.content?.[0]?.text).toContain("control-plane-profile-packet: decision=ready-for-operator-decision");
+    expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(result?.content?.[0]?.text).not.toContain("\"intent\"");
+  });
+
+  it("surface exposes operator_intent_intake_packet with compact text and widget-ready details", () => {
+    const tools: Array<{ name: string; execute: (id: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> } }> = [];
+    registerGuardrailsStructuredInterviewSurface({
+      registerTool(tool: unknown) {
+        tools.push(tool as (typeof tools)[number]);
+      },
+    } as never);
+
+    const tool = tools.find((item) => item.name === "operator_intent_intake_packet");
+    const result = tool?.execute("tc-intake", {
+      intent: "prepare worker review",
+      autonomy_request: "worker-assisted",
+      available_resources: ["codex-spark"],
+      expected_roi: "parallel read-only exploration",
+      limits: ["read-only"],
+      stop_conditions: ["budget warning"],
+      operator_focus_known: true,
+      validation_known: true,
+      rollback_known: true,
+      checkpoint_planned: true,
+      worker_requested: true,
+      subagents_ready: true,
+      provider_ready: true,
+    });
+
+    expect(result?.details.decision).toBe("prepare-worker-packet");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.workerDispatchAllowed).toBe(false);
+    expect(result?.details.interaction).toMatchObject({
+      kind: "operator-choice",
+      allowCustomAnswer: true,
+      allowCancel: true,
+    });
+    expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=prepare-worker-packet");
     expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
     expect(result?.content?.[0]?.text).not.toContain("\"intent\"");
   });
