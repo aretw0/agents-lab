@@ -53,6 +53,8 @@ describe("guardrails-core shell routing", () => {
     expect(isTuiSlashCommand("/safe-mode on")).toBe(true);
     expect(isTuiSlashCommand("  $ /watchdog:status")).toBe(true);
     expect(isTuiSlashCommand("bash -lc \"/watchdog:status\"")).toBe(true);
+    expect(isTuiSlashCommand("/bin/bash -lc \"/watchdog:status\"")).toBe(true);
+    expect(isTuiSlashCommand("/usr/bin/bash -lc \"/models\"")).toBe(true);
     expect(isTuiSlashCommand("sh -c '/safe-mode on'")).toBe(true);
     expect(isTuiSlashCommand("/bin/bash -lc pwd")).toBe(false);
     expect(decision.action).toBe("block");
