@@ -10,6 +10,9 @@ describe("control-plane continuity skill", () => {
     const readme = readFileSync(join(REPO_ROOT, "packages/pi-skills/README.md"), "utf8");
 
     expect(skill).toContain("name: control-plane-continuity");
+    expect(skill).toContain("environment_runtime_health_status");
+    expect(skill).toContain("safe-mode");
+    expect(skill).toContain("stop-and-investigate");
     expect(skill).toContain("operator_intent_intake_packet");
     expect(skill.indexOf("operator_intent_intake_packet")).toBeLessThan(skill.indexOf("project_intake_plan"));
     expect(skill).toContain("details.interaction");

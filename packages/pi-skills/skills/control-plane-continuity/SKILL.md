@@ -14,6 +14,7 @@ Use this skill when the operator asks for continued progress, a larger local-saf
 
 - Treat this as a control-plane profile, not a scheduler, executor, swarm, or unattended service.
 - Prefer one useful local-safe slice over a long plan.
+- Before a larger batch or worker discussion, use `environment_runtime_health_status` when available; if it returns `safe-mode` or `stop-and-investigate`, reduce surface or stop before adding work.
 - Convert free-form intent through `operator_intent_intake_packet` before asking broad follow-up questions or preparing workers.
 - Ask a short interview only when the intake reports missing focus, validation, rollback, budget, or stop conditions.
 - Use first-party packets before free-form judgment: `operator_intent_intake_packet`, `project_intake_plan`, `structured_interview_plan`, `control_plane_profile_packet`, `local_batch_manifest_packet`, `context_watch_continuation_readiness`, `context_watch_local_slice_preview`, `local_continuity_loop_canary_packet`, `context_watch_checkpoint`.
