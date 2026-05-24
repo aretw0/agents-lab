@@ -12,6 +12,7 @@ export type ToolCadenceKind =
   | "autonomy-lane"
   | "quota-provider"
   | "monitor-diagnostics"
+  | "code-diagnostics"
   | "session-analytics"
   | "board-surface";
 

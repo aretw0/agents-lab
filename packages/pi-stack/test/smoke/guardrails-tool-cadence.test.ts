@@ -55,4 +55,22 @@ describe("guardrails tool cadence", () => {
       reason: "explicit-user-request",
     });
   });
+
+  it("keeps heavy code diagnostics cold until intent or error signal", () => {
+    expect(resolveToolCadenceDecision({ kind: "code-diagnostics", mode: "hot-path" })).toMatchObject({
+      allow: false,
+      cadence: "avoid",
+      reason: "hot-path-context-economy",
+    });
+    expect(resolveToolCadenceDecision({ kind: "code-diagnostics", explicitUserRequest: true })).toMatchObject({
+      allow: true,
+      cadence: "single-check",
+      reason: "explicit-user-request",
+    });
+    expect(resolveToolCadenceDecision({ kind: "code-diagnostics", hasErrorSignal: true })).toMatchObject({
+      allow: true,
+      cadence: "diagnostic-pack",
+      reason: "troubleshooting",
+    });
+  });
 });
