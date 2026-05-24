@@ -154,6 +154,9 @@ describe("control-plane anti-bloat docs checklist", () => {
 
     expect(sessionTriage).toContain("operator_intent_intake_packet");
     expect(sessionTriage).toContain("project_intake_plan");
+    expect(sessionTriage).toContain("não executar comandos slash da tui");
+    expect(sessionTriage).toContain("/watchdog:status");
+    expect(sessionTriage).toContain("environment_runtime_health_status");
     expect(sessionTriage.indexOf("operator_intent_intake_packet")).toBeLessThan(
       sessionTriage.indexOf("project_intake_plan"),
     );
