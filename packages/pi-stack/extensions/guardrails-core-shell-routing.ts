@@ -31,6 +31,8 @@ const NODE_FAMILY_TOKENS = new Set([
 
 const CMD_WRAPPER_PATTERN = /^\s*cmd(?:\.exe)?\s+\/c\b/i;
 const TUI_SLASH_COMMAND_PATTERN = /^\s*\/[A-Za-z][A-Za-z0-9_-]*(?::[A-Za-z0-9_-]+)?(?:\s|$)/;
+const SHELL_C_WRAPPER_PATTERN = /^\s*(?:bash|sh|zsh)\s+-(?:l)?c\s+(["'])([\s\S]*?)\1\s*$/;
+const SHELL_PROMPT_PREFIX_PATTERN = /^\s*\$\s+(.+)$/s;
 
 export function detectShellFamily(
   platform = process.platform,
@@ -99,7 +101,16 @@ export function isNodeFamilyCommand(command: string): boolean {
 }
 
 export function isTuiSlashCommand(command: string): boolean {
-  return TUI_SLASH_COMMAND_PATTERN.test(String(command ?? ""));
+  const source = String(command ?? "");
+  if (TUI_SLASH_COMMAND_PATTERN.test(source)) return true;
+
+  const promptMatch = source.match(SHELL_PROMPT_PREFIX_PATTERN);
+  if (promptMatch && TUI_SLASH_COMMAND_PATTERN.test(promptMatch[1] ?? "")) return true;
+
+  const shellWrapperMatch = source.match(SHELL_C_WRAPPER_PATTERN);
+  if (shellWrapperMatch && TUI_SLASH_COMMAND_PATTERN.test(shellWrapperMatch[2] ?? "")) return true;
+
+  return false;
 }
 
 export function resolveBashCommandRoutingDecision(

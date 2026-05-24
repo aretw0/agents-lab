@@ -49,6 +49,9 @@ describe("guardrails-core shell routing", () => {
     const decision = resolveBashCommandRoutingDecision("/watchdog:status", profile);
 
     expect(isTuiSlashCommand("/watchdog:status")).toBe(true);
+    expect(isTuiSlashCommand("  $ /watchdog:status")).toBe(true);
+    expect(isTuiSlashCommand("bash -lc \"/watchdog:status\"")).toBe(true);
+    expect(isTuiSlashCommand("sh -c '/safe-mode on'")).toBe(true);
     expect(isTuiSlashCommand("/bin/bash -lc pwd")).toBe(false);
     expect(decision.action).toBe("block");
     expect(decision.reason).toContain("TUI/operator commands");
