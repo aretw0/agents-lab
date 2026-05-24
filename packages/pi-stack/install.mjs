@@ -430,6 +430,27 @@ function getPackageSource(entry) {
 	return typeof entry === "string" ? entry : entry?.source;
 }
 
+function packageNameFromSource(source) {
+	const raw = String(source ?? "").trim().replace(/^npm:/, "");
+	if (!raw) return "";
+	if (raw.startsWith("@")) {
+		const slash = raw.indexOf("/");
+		if (slash === -1) return raw;
+		const versionAt = raw.indexOf("@", slash + 1);
+		return versionAt === -1 ? raw : raw.slice(0, versionAt);
+	}
+	const versionAt = raw.indexOf("@");
+	return versionAt === -1 ? raw : raw.slice(0, versionAt);
+}
+
+function findFilterPatchForSource(source, filterPatches) {
+	const sourcePackage = packageNameFromSource(source);
+	return filterPatches.find((patch) => {
+		if (source === patch.source) return true;
+		return sourcePackage && sourcePackage === packageNameFromSource(patch.source);
+	});
+}
+
 function mergeUniqueArray(base = [], extra = []) {
 	return [...new Set([...(Array.isArray(base) ? base : []), ...(Array.isArray(extra) ? extra : [])])];
 }
@@ -545,10 +566,10 @@ export function applyFilterPatchesToSettings(settings, filterPatches = FILTER_PA
 	const nextSettings = { ...settings };
 	nextSettings.packages = settings.packages.map((entry) => {
 		const source = getPackageSource(entry);
-		const patch = filterPatches.find((p) => source === p.source);
+		const patch = source ? findFilterPatchForSource(source, filterPatches) : undefined;
 		if (!patch) return entry;
 
-		const current = typeof entry === "string" ? { source: patch.source } : { ...entry, source: patch.source };
+		const current = typeof entry === "string" ? { source } : { ...entry, source };
 		const next = { ...current };
 
 		for (const key of ["extensions", "skills", "themes"]) {

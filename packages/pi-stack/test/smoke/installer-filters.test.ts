@@ -132,6 +132,25 @@ describe("installer-filters", () => {
 		}
 	});
 
+	it("aplica filtros por nome de pacote preservando versões pinadas", () => {
+		const input = {
+			packages: [
+				"npm:pi-lens@3.8.44",
+				"npm:@aretw0/pi-stack@0.3.0",
+			],
+		};
+		const { settings, changed } = applyFilterPatchesToSettings(
+			input,
+			buildFilterPatchesForProfile("strict-curated"),
+		);
+
+		expect(changed).toBe(true);
+		expect(settings.packages[0].source).toBe("npm:pi-lens@3.8.44");
+		expect(settings.packages[0].extensions).toContain("!index.ts");
+		expect(settings.packages[1].source).toBe("npm:@aretw0/pi-stack@0.3.0");
+		expect(settings.packages[1].extensions).toContain("!extensions/guardrails-agent-run.ts");
+	});
+
 	it("mantém lanes pesadas no stack-full", () => {
 		const input = { packages: ["npm:@aretw0/pi-stack", "npm:pi-lens"] };
 		const { settings, changed } = applyFilterPatchesToSettings(
