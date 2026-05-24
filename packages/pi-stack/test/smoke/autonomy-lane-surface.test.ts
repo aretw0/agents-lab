@@ -943,10 +943,9 @@ describe("autonomy lane surface", () => {
     expect(result?.details.capabilityInventory.availableTools).toBe(3);
     expect(result?.details.capabilityInventory.requiresOperatorApproval).toBe(1);
     expect(result?.details.capabilityInventory.recommendedToolNames).toEqual(["operator_intent_intake_packet", "structured_interview_plan"]);
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("first-hatch-intake: decision=ready-for-operator-decision");
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("tools=3");
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
-    expect(String(result?.content?.[0]?.text ?? "")).not.toContain('"workspace"');
+    const text = String(result?.content?.[0]?.text ?? "");
+    expect(text).toMatch(/first-hatch-intake: decision=ready-for-operator-decision.*next=start-intake-loop.*tools=3.*payload completo disponível em details/s);
+    expect(text).not.toContain('"workspace"');
   });
 
   it("emits report-only project_intake_plan for lightweight project", () => {
@@ -969,9 +968,9 @@ describe("autonomy lane surface", () => {
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
     expect(result?.details.mode).toBe("report-only");
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("project-intake: decision=ready-for-operator-decision");
-    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
-    expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"profile\"');
+    const text = String(result?.content?.[0]?.text ?? "");
+    expect(text).toMatch(/project-intake: decision=ready-for-operator-decision.*next=first-slice.*payload completo disponível em details/s);
+    expect(text).not.toContain('\"profile\"');
   });
 
   it("blocks project_intake_plan when protected scope is requested", () => {
@@ -994,6 +993,7 @@ describe("autonomy lane surface", () => {
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("next=operator-focus");
   });
 
 });

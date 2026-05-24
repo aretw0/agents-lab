@@ -627,7 +627,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       });
       return buildOperatorVisibleToolResponse({
         label: "first_hatch_intake_packet",
-        summary: "first-hatch-intake: decision=" + packet.decision + " code=" + packet.recommendationCode + " sandbox=" + packet.sandbox.mode + " tools=" + packet.capabilityInventory.availableTools + " gaps=" + packet.capabilityInventory.gaps.length + " questions=" + packet.missingQuestions.length + " authorization=" + packet.authorization,
+        summary: "first-hatch-intake: decision=" + packet.decision + " code=" + packet.recommendationCode + " next=" + (packet.decision === "ready-for-operator-decision" ? "start-intake-loop" : "resolve-blockers") + " sandbox=" + packet.sandbox.mode + " tools=" + packet.capabilityInventory.availableTools + " gaps=" + packet.capabilityInventory.gaps.length + " questions=" + packet.missingQuestions.length + " authorization=" + packet.authorization,
         details: packet,
       });
     },
@@ -657,7 +657,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       });
       return buildOperatorVisibleToolResponse({
         label: "project_intake_plan",
-        summary: `project-intake: decision=${plan.decision} profile=${plan.profile} code=${plan.recommendationCode} authorization=${plan.authorization}`,
+        summary: `project-intake: decision=${plan.decision} profile=${plan.profile} code=${plan.recommendationCode} next=${plan.decision === "ready-for-operator-decision" ? "first-slice" : "operator-focus"} authorization=${plan.authorization}`,
         details: plan,
       });
     },
