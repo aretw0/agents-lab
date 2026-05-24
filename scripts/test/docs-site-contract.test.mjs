@@ -108,6 +108,15 @@ test("root README keeps user and maintainer surfaces separate", () => {
 	assert.doesNotMatch(readme, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
 });
 
+test("recommended stack guide documents pi-lens pressure recovery", () => {
+	const guide = read("docs/guides/recommended-pi-stack.md");
+
+	assert.match(guide, /environment_dev_pressure_status/);
+	assert.match(guide, /pi-lens-active-full-startup-risk/);
+	assert.match(guide, /npx @aretw0\/pi-stack/);
+	assert.match(guide, /PI_LENS_STARTUP_MODE=quick/);
+});
+
 test("root roadmap stays current and macro-level", () => {
 	const roadmap = read("ROADMAP.md");
 
