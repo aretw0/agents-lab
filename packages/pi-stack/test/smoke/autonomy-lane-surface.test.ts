@@ -423,16 +423,16 @@ describe("autonomy lane surface", () => {
 
     const runwayCue = (result?.details.runwayReadinessCue as {
       decision?: string;
-      recommendationCode?: string;
+      recommendationCode?: string; nextActionCode?: string;
       nextAction?: string;
-      delegation?: { decision?: string };
-      background?: { decision?: string };
+      delegation?: { decision?: string; nextActionCode?: string };
+      background?: { decision?: string; nextActionCode?: string };
     } | undefined);
 
     expect(runwayCue?.decision).toBe("blocked");
-    expect(runwayCue?.recommendationCode).toBe("runway-readiness-blocked");
-    expect(runwayCue?.delegation?.decision).toBe("local-execute-first");
-    expect(runwayCue?.background?.decision).toBe("blocked");
+    expect([runwayCue?.recommendationCode, runwayCue?.nextActionCode]).toEqual(["runway-readiness-blocked", "resolve-runway-blockers"]);
+    expect([runwayCue?.delegation?.decision, runwayCue?.delegation?.nextActionCode]).toEqual(["local-execute-first", "execute-local-safe-first"]);
+    expect([runwayCue?.background?.decision, runwayCue?.background?.nextActionCode]).toEqual(["blocked", "resolve-background-blockers"]);
     expect(String(runwayCue?.nextAction ?? "")).toContain("background_process_readiness_packet");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("runway=blocked");
   });
@@ -484,15 +484,15 @@ describe("autonomy lane surface", () => {
 
     const runwayCue = (result?.details.runwayReadinessCue as {
       decision?: string;
-      recommendationCode?: string;
-      delegation?: { decision?: string; nextAction?: string };
-      background?: { decision?: string; nextAction?: string };
+      recommendationCode?: string; nextActionCode?: string;
+      delegation?: { decision?: string; nextActionCode?: string };
+      background?: { decision?: string; nextActionCode?: string };
     } | undefined);
 
     expect(runwayCue?.decision).toBe("ready-window");
-    expect(runwayCue?.recommendationCode).toBe("runway-readiness-ready-window");
-    expect(runwayCue?.delegation?.decision).toBe("ready-delegation-rehearsal");
-    expect(runwayCue?.background?.decision).toBe("ready-window");
+    expect([runwayCue?.recommendationCode, runwayCue?.nextActionCode]).toEqual(["runway-readiness-ready-window", "choose-promotion-lane"]);
+    expect([runwayCue?.delegation?.decision, runwayCue?.delegation?.nextActionCode]).toEqual(["ready-delegation-rehearsal", "run-delegation-rehearsal-start"]);
+    expect([runwayCue?.background?.decision, runwayCue?.background?.nextActionCode]).toEqual(["ready-window", "plan-bounded-background-rehearsal"]);
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("runway=ready-window");
   });
 
@@ -513,8 +513,8 @@ describe("autonomy lane surface", () => {
     }, { cwd: "\0invalid-cwd" }, { getAllTools: () => [{ name: "background_process_plan" }, { name: "background_process_lifecycle_plan" }] });
 
     expect(result.decision).toBe("ready-window");
-    expect(result.delegation.decision).toBe("ready-delegation-rehearsal");
-    expect(result.background.decision).toBe("ready-window");
+    expect([result.delegation.decision, result.delegation.nextActionCode]).toEqual(["ready-delegation-rehearsal", "run-delegation-rehearsal-start"]);
+    expect([result.background.decision, result.background.nextActionCode]).toEqual(["ready-window", "plan-bounded-background-rehearsal"]);
   });
 
   it("exposes report-only anti-bloat cue in autonomy lane status", () => {

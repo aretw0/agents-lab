@@ -60,6 +60,10 @@ export type DelegationRunwayCue = {
     | "delegation-readiness-ready-delegation-rehearsal"
     | "delegation-readiness-local-execute-first"
     | "delegation-readiness-defer-blocked";
+  nextActionCode:
+    | "run-delegation-rehearsal-start"
+    | "execute-local-safe-first"
+    | "resolve-delegation-blockers";
   nextAction: string;
   blockers: string[];
 };
@@ -70,6 +74,10 @@ export type BackgroundRunwayCue = {
     | "background-process-readiness-packet-ready"
     | "background-process-readiness-packet-needs-evidence"
     | "background-process-readiness-packet-blocked";
+  nextActionCode:
+    | "plan-bounded-background-rehearsal"
+    | "increase-background-readiness-evidence"
+    | "resolve-background-blockers";
   nextAction: string;
   blockers: string[];
 };
@@ -81,6 +89,10 @@ export type RunwayReadinessCue = {
     | "runway-readiness-needs-evidence"
     | "runway-readiness-blocked";
   recommendation: string;
+  nextActionCode:
+    | "choose-promotion-lane"
+    | "continue-local-safe-and-collect-evidence"
+    | "resolve-runway-blockers";
   nextAction: string;
   blockers: string[];
   delegation: DelegationRunwayCue;
@@ -174,6 +186,7 @@ function buildDelegationRunwayCue(p: Record<string, unknown>, cwd: string): Dele
     return {
       decision: "ready-delegation-rehearsal",
       recommendationCode: "delegation-readiness-ready-delegation-rehearsal",
+      nextActionCode: "run-delegation-rehearsal-start",
       nextAction: "run delegation_rehearsal_start_packet and require explicit operator start/defer decision.",
       blockers,
     };
@@ -183,6 +196,7 @@ function buildDelegationRunwayCue(p: Record<string, unknown>, cwd: string): Dele
     return {
       decision: "local-execute-first",
       recommendationCode: "delegation-readiness-local-execute-first",
+      nextActionCode: "execute-local-safe-first",
       nextAction: "execute one bounded local-safe slice and refresh delegation readiness packets.",
       blockers,
     };
@@ -191,6 +205,7 @@ function buildDelegationRunwayCue(p: Record<string, unknown>, cwd: string): Dele
   return {
     decision: "defer",
     recommendationCode: "delegation-readiness-defer-blocked",
+    nextActionCode: "resolve-delegation-blockers",
     nextAction: "resolve delegation blockers and rerun delegation_readiness_status_packet.",
     blockers,
   };
@@ -249,6 +264,7 @@ function buildBackgroundRunwayCue(
     return {
       decision: "blocked",
       recommendationCode: "background-process-readiness-packet-blocked",
+      nextActionCode: "resolve-background-blockers",
       nextAction: "resolve background-process blockers and rerun background_process_readiness_packet.",
       blockers,
     };
@@ -258,6 +274,7 @@ function buildBackgroundRunwayCue(
     return {
       decision: "needs-evidence",
       recommendationCode: "background-process-readiness-packet-needs-evidence",
+      nextActionCode: "increase-background-readiness-evidence",
       nextAction: "increase background-process readiness evidence (lifecycle classification, stopSource, rollback, slices).",
       blockers,
     };
@@ -266,6 +283,7 @@ function buildBackgroundRunwayCue(
   return {
     decision: "ready-window",
     recommendationCode: "background-process-readiness-packet-ready",
+    nextActionCode: "plan-bounded-background-rehearsal",
     nextAction: "plan one bounded local rehearsal slice with explicit rollback and lifecycle capture.",
     blockers,
   };
@@ -291,6 +309,7 @@ export function buildRunwayReadinessCue(
       "runway-readiness-cue:",
       "decision=blocked",
       "code=runway-readiness-blocked",
+      "next=resolve-runway-blockers",
       `delegation=${delegation.decision}`,
       `background=${background.decision}`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
@@ -300,6 +319,7 @@ export function buildRunwayReadinessCue(
       decision: "blocked",
       recommendationCode: "runway-readiness-blocked",
       recommendation: "runway blocked; keep local-safe execution and resolve blockers before scale promotion.",
+      nextActionCode: "resolve-runway-blockers",
       nextAction: `${delegation.nextAction} ${background.nextAction}`,
       blockers,
       delegation,
@@ -313,6 +333,7 @@ export function buildRunwayReadinessCue(
       "runway-readiness-cue:",
       "decision=ready-window",
       "code=runway-readiness-ready-window",
+      "next=choose-promotion-lane",
       `delegation=${delegation.decision}`,
       `background=${background.decision}`,
       formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
@@ -321,6 +342,7 @@ export function buildRunwayReadinessCue(
       decision: "ready-window",
       recommendationCode: "runway-readiness-ready-window",
       recommendation: "delegation/background runway is ready for bounded promotion planning (still explicit operator decision).",
+      nextActionCode: "choose-promotion-lane",
       nextAction: "choose one promotion lane (delegate or background rehearsal) and keep explicit operator start/defer.",
       blockers,
       delegation,
@@ -333,6 +355,7 @@ export function buildRunwayReadinessCue(
     "runway-readiness-cue:",
     "decision=needs-evidence",
     "code=runway-readiness-needs-evidence",
+    "next=continue-local-safe-and-collect-evidence",
     `delegation=${delegation.decision}`,
     `background=${background.decision}`,
     blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
@@ -342,6 +365,7 @@ export function buildRunwayReadinessCue(
     decision: "needs-evidence",
     recommendationCode: "runway-readiness-needs-evidence",
     recommendation: "runway still needs evidence; continue local-safe slices while collecting readiness signals.",
+    nextActionCode: "continue-local-safe-and-collect-evidence",
     nextAction: delegation.decision !== "ready-delegation-rehearsal" ? delegation.nextAction : background.nextAction,
     blockers,
     delegation,
