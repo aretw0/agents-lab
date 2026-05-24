@@ -5,6 +5,7 @@ export const COLD_CAPABILITY_PACKAGES = [
   "@davidorex/pi-project-workflows",
   "@ifi/pi-web-remote",
   "@ifi/oh-pi-ant-colony",
+  "pi-lens",
 ];
 
 export const CONTROL_PLANE_ENABLED_MODELS = [

@@ -70,11 +70,19 @@ export const PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES = [
   "!extensions/guardrails-background-process.ts",
 ];
 
+export const PI_LENS_COLD_EXTENSION_EXCLUDES = [
+  "!index.ts",
+];
+
 const PROFILE_FILTER_PATCHES = {
   "strict-curated": [
     {
       source: "npm:@aretw0/pi-stack",
       extensions: PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES,
+    },
+    {
+      source: "npm:pi-lens",
+      extensions: PI_LENS_COLD_EXTENSION_EXCLUDES,
     },
   ],
   "curated-default": [
@@ -82,11 +90,19 @@ const PROFILE_FILTER_PATCHES = {
       source: "npm:@aretw0/pi-stack",
       extensions: PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES,
     },
+    {
+      source: "npm:pi-lens",
+      extensions: PI_LENS_COLD_EXTENSION_EXCLUDES,
+    },
   ],
   "curated-runtime": [
     {
       source: "npm:@aretw0/pi-stack",
       extensions: PI_STACK_CONTROL_PLANE_EXTENSION_EXCLUDES,
+    },
+    {
+      source: "npm:pi-lens",
+      extensions: PI_LENS_COLD_EXTENSION_EXCLUDES,
     },
   ],
   "stack-full": [],

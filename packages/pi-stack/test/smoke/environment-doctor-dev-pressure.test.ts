@@ -124,6 +124,79 @@ describe("environment doctor dev pressure", () => {
     }
   });
 
+  it("surfaces active pi-lens full startup as runtime surface pressure", () => {
+    const dir = makeWorkspace();
+    const previousMode = process.env.PI_LENS_STARTUP_MODE;
+    try {
+      delete process.env.PI_LENS_STARTUP_MODE;
+      writeFileSync(
+        join(dir, ".pi", "settings.json"),
+        JSON.stringify({ packages: ["npm:pi-lens"] }),
+        "utf8",
+      );
+
+      const report = buildEnvironmentDevPressureReport(dir);
+
+      expect(report.recommendation).toBe("reduce-governance-surface");
+      expect(report.signals).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          level: "warn",
+          code: "pi-lens-active-full-startup-risk",
+        }),
+      ]));
+      expect(report.settings[0]?.piLensEntries).toEqual([
+        expect.objectContaining({
+          source: "npm:pi-lens",
+          extensionActive: true,
+          startupMode: "full",
+        }),
+      ]);
+    } finally {
+      if (previousMode === undefined) delete process.env.PI_LENS_STARTUP_MODE;
+      else process.env.PI_LENS_STARTUP_MODE = previousMode;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("treats excluded or quick-start pi-lens as curated pressure instead of a warning", () => {
+    const dir = makeWorkspace();
+    const previousMode = process.env.PI_LENS_STARTUP_MODE;
+    try {
+      writeFileSync(
+        join(dir, ".pi", "settings.json"),
+        JSON.stringify({
+          packages: [
+            { source: "npm:pi-lens", extensions: ["!index.ts"] },
+            { source: "npm:pi-lens@3.8.44", extensions: ["index.ts"] },
+          ],
+        }),
+        "utf8",
+      );
+      process.env.PI_LENS_STARTUP_MODE = "quick";
+
+      const report = buildEnvironmentDevPressureReport(dir);
+
+      expect(report.recommendation).toBe("continue");
+      expect(report.signals).not.toEqual(expect.arrayContaining([
+        expect.objectContaining({ code: "pi-lens-active-full-startup-risk" }),
+      ]));
+      expect(report.signals).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          level: "info",
+          code: "pi-lens-active-curated-startup",
+        }),
+      ]));
+      expect(report.settings[0]?.piLensEntries).toEqual([
+        expect.objectContaining({ extensionActive: false, startupMode: "quick" }),
+        expect.objectContaining({ extensionActive: true, startupMode: "quick" }),
+      ]);
+    } finally {
+      if (previousMode === undefined) delete process.env.PI_LENS_STARTUP_MODE;
+      else process.env.PI_LENS_STARTUP_MODE = previousMode;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("classifies accumulated development velocity pressure for operator decisions", () => {
     const pressure = buildDevelopmentVelocityPressure({
       signals: [

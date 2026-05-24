@@ -53,7 +53,9 @@ test("cold capability package detection covers npm and local node_modules source
     extractPackageNameFromSource("../../node_modules/@davidorex/pi-project-workflows"),
     "@davidorex/pi-project-workflows",
   );
+  assert.equal(extractPackageNameFromSource("npm:pi-lens@3.8.44"), "pi-lens");
   assert.equal(isColdCapabilityPackageSource("npm:@ifi/oh-pi-ant-colony"), true);
+  assert.equal(isColdCapabilityPackageSource("npm:pi-lens"), true);
   assert.equal(isColdCapabilityPackageSource("../packages/pi-stack"), false);
 });
 
@@ -130,6 +132,7 @@ test("buildControlPlaneRuntimeSettings keeps expensive capabilities cold", () =>
       packages: [
         "npm:@aretw0/pi-stack",
         "npm:@ifi/oh-pi-ant-colony",
+        "npm:pi-lens",
         { source: "../../node_modules/@davidorex/pi-project-workflows" },
       ],
       enabledModels: ["openai-codex/gpt-5.5"],
@@ -142,6 +145,7 @@ test("buildControlPlaneRuntimeSettings keeps expensive capabilities cold", () =>
   assert.equal(result.changed, true);
   assert.deepEqual(result.removed, [
     "npm:@ifi/oh-pi-ant-colony",
+    "npm:pi-lens",
     "../../node_modules/@davidorex/pi-project-workflows",
   ]);
   assert.deepEqual(result.settings.packages, ["npm:@aretw0/pi-stack"]);

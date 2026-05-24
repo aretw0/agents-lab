@@ -67,8 +67,10 @@ test("cold capability package detection covers npm and local node_modules source
 		extractPackageNameFromSource("../../node_modules/@davidorex/pi-project-workflows"),
 		"@davidorex/pi-project-workflows",
 	);
+	assert.equal(extractPackageNameFromSource("npm:pi-lens@3.8.44"), "pi-lens");
 	assert.equal(isColdCapabilityPackageSource("npm:@ifi/oh-pi-ant-colony"), true);
 	assert.equal(isColdCapabilityPackageSource("../../node_modules/@davidorex/pi-project-workflows"), true);
+	assert.equal(isColdCapabilityPackageSource("npm:pi-lens"), true);
 	assert.equal(isColdCapabilityPackageSource("../packages/pi-stack"), false);
 });
 

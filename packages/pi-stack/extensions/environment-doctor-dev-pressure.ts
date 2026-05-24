@@ -96,8 +96,41 @@ function packageSource(entry: unknown): string | undefined {
   return undefined;
 }
 
+function packageNameFromSource(source: string): string {
+  const normalized = source.replace(/\\/g, "/");
+  const raw = normalized.startsWith("npm:") ? normalized.slice("npm:".length) : normalized;
+  if (raw.startsWith("@")) {
+    const slash = raw.indexOf("/");
+    if (slash === -1) return raw;
+    const versionAt = raw.indexOf("@", slash + 1);
+    return versionAt === -1 ? raw : raw.slice(0, versionAt);
+  }
+  const versionAt = raw.indexOf("@");
+  return versionAt === -1 ? raw : raw.slice(0, versionAt);
+}
+
+function isPiLensSource(source: string): boolean {
+  return packageNameFromSource(source) === "pi-lens";
+}
+
 function normalizeSurfacePath(value: unknown): string {
   return String(value ?? "").replace(/\\/g, "/").replace(/^\.\//, "");
+}
+
+function piLensExtensionActive(configuredEntry: unknown): boolean {
+  if (!isRecord(configuredEntry) || !Array.isArray(configuredEntry.extensions)) return true;
+  if (configuredEntry.extensions.length === 0) return false;
+
+  const includes = new Set<string>();
+  const excludes = new Set<string>();
+  for (const value of configuredEntry.extensions) {
+    if (typeof value !== "string") continue;
+    if (value.startsWith("!")) excludes.add(normalizeSurfacePath(value.slice(1)));
+    else includes.add(normalizeSurfacePath(value));
+  }
+
+  const entrypoint = "index.ts";
+  return (includes.size === 0 || includes.has(entrypoint)) && !excludes.has(entrypoint);
 }
 
 function applyConfiguredExtensionFilters(extensions: string[], configuredEntry: unknown): string[] {
@@ -215,6 +248,22 @@ function collectDevPressureSettings(cwd: string) {
       if (!isRecord(entry) || !Array.isArray(entry.extensions)) return sum;
       return sum + entry.extensions.filter((value) => typeof value === "string" && value.startsWith("!")).length;
     }, 0);
+    const piLensEntries = packages
+      .map((entry) => ({ entry, source: packageSource(entry) }))
+      .filter((row): row is { entry: unknown; source: string } => Boolean(row.source && isPiLensSource(row.source)))
+      .map(({ entry, source }) => {
+        const extensionActive = piLensExtensionActive(entry);
+        const startupMode = process.env.PI_LENS_STARTUP_MODE || "full";
+        return {
+          source,
+          extensionActive,
+          startupMode,
+          guidance:
+            extensionActive && !["quick", "minimal"].includes(startupMode)
+              ? "high-friction-risk: set PI_LENS_STARTUP_MODE=quick/minimal or exclude pi-lens until diagnostics are explicitly needed"
+              : "curated-or-cold",
+        };
+      });
 
     return {
       path: label,
@@ -223,6 +272,7 @@ function collectDevPressureSettings(cwd: string) {
       packageCount: packages.length,
       suppressedSurfaceCount,
       extensionExcludeCount,
+      piLensEntries,
     };
   });
 }
@@ -421,6 +471,24 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
     signals.push({ level: "info", code: "suppressed-package-entries", detail: `${suppressed} package entries expose no surfaces` });
   }
 
+  const activePiLensEntries = settings.flatMap((row) => row.piLensEntries
+    .filter((entry) => entry.extensionActive)
+    .map((entry) => ({ settings: row.path, ...entry })));
+  const piLensStartupMode = process.env.PI_LENS_STARTUP_MODE || "full";
+  if (activePiLensEntries.length > 0 && !["quick", "minimal"].includes(piLensStartupMode)) {
+    signals.push({
+      level: "warn",
+      code: "pi-lens-active-full-startup-risk",
+      detail: `pi-lens active in ${activePiLensEntries.map((entry) => entry.settings).join(", ")} startupMode=${piLensStartupMode}`,
+    });
+  } else if (activePiLensEntries.length > 0) {
+    signals.push({
+      level: "info",
+      code: "pi-lens-active-curated-startup",
+      detail: `pi-lens active with startupMode=${piLensStartupMode}`,
+    });
+  }
+
   if (board.exists && Number(board.mb) >= DEV_PRESSURE_THRESHOLDS.boardWarnMb) {
     signals.push({ level: "warn", code: "large-board-state", detail: formatBoardPressureDetail(board) });
   }
@@ -428,7 +496,7 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
   let recommendation = "continue";
   if (signals.some((signal) => signal.level === "block")) recommendation = "block-and-clean";
   else if (signals.some((signal) => signal.code === "large-resume-session")) recommendation = "new-session";
-  else if (signals.some((signal) => signal.code === "heavy-configured-extension-entrypoint" || signal.code === "large-board-state")) recommendation = "reduce-governance-surface";
+  else if (signals.some((signal) => signal.code === "heavy-configured-extension-entrypoint" || signal.code === "large-board-state" || signal.code === "pi-lens-active-full-startup-risk")) recommendation = "reduce-governance-surface";
 
   const velocityPressure = buildDevelopmentVelocityPressure({ signals });
 
