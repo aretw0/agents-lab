@@ -300,7 +300,7 @@ export default function safeBootExtension(pi: ExtensionAPI) {
             "",
             "Diagnostic commands available:",
             "  /stack-status           — capability ownership + scheduler conflict",
-            "  /environment-doctor     — dependency + provider readiness",
+            "  /doctor                 — dependency + provider readiness",
             "  /quota-visibility       — provider budget status",
             "  /quota-alerts           — active budget/429 alerts",
             "  /handoff                — next recommended provider",

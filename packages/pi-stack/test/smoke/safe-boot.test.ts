@@ -43,6 +43,14 @@ function getTool(pi: ReturnType<typeof makeMockPi>, name: string): RegisteredToo
   return call[0] as RegisteredTool;
 }
 
+function getCommand(pi: ReturnType<typeof makeMockPi>, name: string) {
+  const call = (pi.registerCommand as ReturnType<typeof vi.fn>).mock.calls.find(
+    ([commandName]) => commandName === name,
+  );
+  if (!call) throw new Error(`command not found: ${name}`);
+  return call[1] as { handler: (args: string, ctx: { cwd: string; ui: { notify: (text: string, level?: string) => void } }) => Promise<void> };
+}
+
 // ---------------------------------------------------------------------------
 // buildSnapshotFilename
 // ---------------------------------------------------------------------------
@@ -223,6 +231,20 @@ describe("safe-boot — snapshot I/O", () => {
 });
 
 describe("safe-boot — runtime artifact audit surface", () => {
+  it("recovery text points operators to existing first-party commands", async () => {
+    const pi = makeMockPi();
+    safeBootExtension(pi);
+    const command = getCommand(pi, "safe-boot");
+    const notify = vi.fn();
+
+    await command.handler("recover", { cwd: process.cwd(), ui: { notify } });
+
+    const text = String(notify.mock.calls[0]?.[0] ?? "");
+    expect(text).toContain("/doctor");
+    expect(text).not.toContain("/environment-doctor");
+    expect(text).toContain("/safe-boot artifacts");
+  });
+
   it("registers read-only artifact audit tool with summary-first output", async () => {
     const dir = mkdtempSync(join(tmpdir(), "safe-boot-artifact-audit-"));
     try {
