@@ -85,7 +85,7 @@ Classificação atual da distribuição `@aretw0/pi-stack`:
 
 | Superfície | Classificação | Racional operacional |
 |---|---|---|
-| `STRICT_CURATED` / `curated-default` (`@aretw0/*` + `@davidorex/pi-project-workflows`) | keep | Uso recorrente, baixo custo cognitivo e contrato canônico para board/workflows/monitors. É o baseline oficial de instalação. |
+| `strict-curated` (`@aretw0/*` + `@davidorex/pi-project-workflows`) | keep | Uso recorrente, baixo custo cognitivo e contrato canônico para board/workflows/monitors. É o baseline oficial de instalação. |
 | `RUNTIME_CAPABILITY_EXTRAS` (`@ifi/oh-pi-extensions`, `@ifi/oh-pi-ant-colony`, `@ifi/pi-web-remote`) | keep opt-in | Alto valor para long-run/control-plane, mas exige intenção explícita; não entra no caminho simples por padrão. |
 | `stack-full` / demais third-party (`mitsupi`, `pi-lens`, `pi-web-access`, `@ifi/pi-*` auxiliares) | deprecate-by-default | Úteis para laboratório/compatibilidade, mas com maior custo de superfície e risco de overlap; ficam disponíveis apenas por perfil explícito. |
 | Scripts ad-hoc e diagnósticos pontuais (`.sandbox/tmp`, helpers temporários) | docs-only ou remove/archive | Promover só após 2+ ciclos operacionais com entrada/saída determinística e evidência; caso contrário arquivar/remover e deixar runbook curto. |

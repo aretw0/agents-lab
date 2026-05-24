@@ -47,7 +47,7 @@ Além disso, o `pi-stack` agora inclui a primitiva **first-party** `monitor-sove
 - Override local **não** deve ser tratado como baseline de release.
 - Regra prática: quando um ajuste provar valor, promover para superfície versionada da stack e manter `.pi/monitors/*` apenas como exceção opt-in.
 
-### Higiene de versionamento (curated-default)
+### Higiene de versionamento (strict-curated)
 
 Para a baseline oficial, artefatos efêmeros de runtime devem ficar fora do git por padrão.
 

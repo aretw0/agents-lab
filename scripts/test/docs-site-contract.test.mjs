@@ -393,6 +393,14 @@ test("recommended stack guide stays user-first and concise", () => {
 	assert.doesNotMatch(guide, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);
 });
 
+test("published operational guides use strict-curated as the public baseline name", () => {
+	for (const file of listMarkdownFiles("docs/guides")) {
+		const source = read(file);
+
+		assert.doesNotMatch(source, /curated-default/, `${file} should not teach the legacy profile alias`);
+	}
+});
+
 test("packaged guide markdown links resolve inside each package", () => {
 	for (const spec of Object.values(PACKAGE_DOCS)) {
 		const guideDir = join(spec.dir, "docs", "guides");
