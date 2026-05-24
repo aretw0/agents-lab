@@ -29,5 +29,6 @@ describe("guardrails-core tool-call guard", () => {
     expect(result?.block).toBe(true);
     expect(result?.reason).toContain("TUI/operator commands");
     expect(result?.reason).toContain("directly in the Pi input");
+    expect(result?.reason).toContain("environment_runtime_health_status");
   });
 });

@@ -113,7 +113,8 @@ export function resolveBashCommandRoutingDecision(
       firstToken,
       reason: [
         "Blocked by guardrails-core (operator-command-routing): Pi slash commands are TUI/operator commands, not shell commands.",
-        `Run ${firstToken ?? "the slash command"} directly in the Pi input, or use a registered read-only Pi tool instead.`,
+        `Run ${firstToken ?? "the slash command"} directly in the Pi input when the operator needs the TUI command.`,
+        "For agent-readable health checks, use environment_runtime_health_status or environment_dev_pressure_status instead of /watchdog:* through bash.",
       ].join("\n"),
     };
   }
@@ -174,6 +175,7 @@ export function buildShellRoutingStatusLines(profile: CommandRoutingProfile): st
 export function buildShellRoutingSystemPrompt(profile: CommandRoutingProfile): string[] {
   const lines = [
     "Do not run Pi TUI slash commands through bash. Commands like /watchdog:status, /models, and /safe-mode must be entered by the operator in the Pi input.",
+    "If the agent needs read-only runtime health evidence, use environment_runtime_health_status or environment_dev_pressure_status instead of shelling out to /watchdog:*.",
   ];
   if (!profile.preferCmdForNodeFamily) return lines;
   return [

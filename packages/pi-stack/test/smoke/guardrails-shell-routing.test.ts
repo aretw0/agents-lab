@@ -53,6 +53,8 @@ describe("guardrails-core shell routing", () => {
     expect(decision.action).toBe("block");
     expect(decision.reason).toContain("TUI/operator commands");
     expect(decision.reason).toContain("directly in the Pi input");
+    expect(decision.reason).toContain("environment_runtime_health_status");
+    expect(decision.reason).toContain("environment_dev_pressure_status");
   });
 
   it("builds system prompt lines only for active host route", () => {
@@ -84,6 +86,7 @@ describe("guardrails-core shell routing", () => {
       resolveCommandRoutingProfile("linux", {} as NodeJS.ProcessEnv),
     );
     expect(defaultLines.join("\n")).toContain("Do not run Pi TUI slash commands through bash");
+    expect(defaultLines.join("\n")).toContain("environment_runtime_health_status");
     expect(defaultLines.join("\n")).not.toContain("cmd.exe /c <command>");
     expect(isNodeFamilyCommand("npx vitest run")).toBe(true);
   });
