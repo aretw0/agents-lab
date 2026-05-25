@@ -257,6 +257,8 @@ describe("agent run executor diagnostics", () => {
 
     expect(result.failureClass).toBe("silent-runner-failure");
     expect(result.preflightDecision).toBe("needs-evidence");
+    expect(result.nextActionCode).toBe("run-structured-diagnostic-before-retry");
+    expect(result.nextAction).toBe(result.nextActionCode);
     expect(result.retryAllowed).toBe(false);
     expect(result.ruledOut).toContain("static-cli-argv-shape");
     expect(result.ruledOut).toContain("static-tool-allowlist");
@@ -284,7 +286,9 @@ describe("agent run executor diagnostics", () => {
       decision: "structured-probe-first",
       recommendationCode: "agent-run-startup-structured-probe-first",
       failureClass: "silent-runner-failure",
+      nextActionCode: "run-structured-startup-probe-before-retry",
     });
+    expect(startupProbe.nextAction).toBe(startupProbe.nextActionCode);
     expect(startupProbe.probeProfiles).toContain("stderr-preservation-probe");
     expect(startupProbe.evidenceChecklist).toContain("stdout-and-stderr-byte-counts-captured");
     expect(startupProbe.evidenceChecklist).toContain("stdout-stderr-byte-split-captured");
@@ -295,6 +299,7 @@ describe("agent run executor diagnostics", () => {
     });
     expect(invalidTools.failureClass).toBe("tool-allowlist-invalid");
     expect(invalidTools.preflightDecision).toBe("blocked");
+    expect(invalidTools.nextActionCode).toBe("resolve-classification-blockers");
 
     const sdkNestedLogLoop = classifyAgentRunFailure({
       runId: "sdk-loop-with-nested-log",
@@ -333,6 +338,7 @@ describe("agent run executor diagnostics", () => {
     expect(timeoutResult.failureClass).toBe("runner-timeout");
     expect(timeoutResult.recommendationCode).toBe("agent-runner-classification-runner-timeout");
     expect(timeoutResult.preflightDecision).toBe("needs-evidence");
+    expect(timeoutResult.nextActionCode).toBe("run-structured-diagnostic-before-retry");
     expect(timeoutResult.retryAllowed).toBe(false);
     expect(timeoutResult.evidence).toContain("timeoutMs=60000");
     expect(timeoutResult.evidence).toContain("elapsedMs=60025");
@@ -350,6 +356,7 @@ describe("agent run executor diagnostics", () => {
       liveReloadCompleted: true,
     });
     expect(timeoutStartupProbe.decision).toBe("structured-probe-first");
+    expect(timeoutStartupProbe.nextActionCode).toBe("run-structured-startup-probe-before-retry");
     expect(timeoutStartupProbe.failureClass).toBe("runner-timeout");
     expect(timeoutStartupProbe.canaryAllowed).toBe(false);
     expect(timeoutStartupProbe.probeProfiles).toContain("timeout-budget-probe");

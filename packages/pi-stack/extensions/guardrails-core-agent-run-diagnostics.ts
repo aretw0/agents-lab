@@ -20,6 +20,14 @@ export type AgentRunnerFailureClass =
 
 export type AgentRunnerPreflightDecision = "ready-for-canary" | "needs-evidence" | "blocked";
 export type AgentRunStartupDiagnosticDecision = "worker-canary-ready" | "structured-probe-first" | "blocked";
+export type AgentRunFailureClassificationNextActionCode =
+  | "prepare-operator-approved-canary"
+  | "run-structured-diagnostic-before-retry"
+  | "resolve-classification-blockers";
+export type AgentRunStartupDiagnosticNextActionCode =
+  | "prepare-operator-approved-worker-canary"
+  | "run-structured-startup-probe-before-retry"
+  | "resolve-startup-diagnostic-blockers";
 
 export interface AgentRunFailureClassificationInput {
   runId?: string;
@@ -86,6 +94,7 @@ export interface AgentRunFailureClassificationResult {
   ruledOut: string[];
   argvDiagnostics: AgentRunArgvDiagnostics;
   nextProbeProfiles: string[];
+  nextActionCode: AgentRunFailureClassificationNextActionCode;
   nextAction: string;
   nextActions: string[];
   summary: string;
@@ -125,6 +134,7 @@ export interface AgentRunStartupDiagnosticPacketResult {
   evidenceChecklist: string[];
   startupProbePlan: AgentRunStartupProbePlanStep[];
   blockers: string[];
+  nextActionCode: AgentRunStartupDiagnosticNextActionCode;
   nextAction: string;
   nextActions: string[];
   classification: AgentRunFailureClassificationResult;
@@ -142,13 +152,13 @@ function normalizeFiles(value: unknown): string[] {
   return value.filter((entry): entry is string => typeof entry === "string").map((entry) => entry.trim()).filter(Boolean);
 }
 
-function resolveFailureClassificationNextAction(preflightDecision: AgentRunnerPreflightDecision): string {
+function resolveFailureClassificationNextAction(preflightDecision: AgentRunnerPreflightDecision): AgentRunFailureClassificationNextActionCode {
   if (preflightDecision === "ready-for-canary") return "prepare-operator-approved-canary";
   if (preflightDecision === "needs-evidence") return "run-structured-diagnostic-before-retry";
   return "resolve-classification-blockers";
 }
 
-function resolveStartupDiagnosticNextAction(decision: AgentRunStartupDiagnosticDecision): string {
+function resolveStartupDiagnosticNextAction(decision: AgentRunStartupDiagnosticDecision): AgentRunStartupDiagnosticNextActionCode {
   if (decision === "worker-canary-ready") return "prepare-operator-approved-worker-canary";
   if (decision === "structured-probe-first") return "run-structured-startup-probe-before-retry";
   return "resolve-startup-diagnostic-blockers";
@@ -441,7 +451,8 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
           : failureClass === "none"
             ? ["Runner process is not blocked by this evidence; use exact operator confirmation for any future canary."]
         : ["Collect bounded runner/provider evidence before retry."];
-  const nextAction = resolveFailureClassificationNextAction(preflightDecision);
+  const nextActionCode = resolveFailureClassificationNextAction(preflightDecision);
+  const nextAction = nextActionCode;
 
   const summary = [
     "agent-run-failure-classification:",
@@ -474,6 +485,7 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
     ruledOut,
     argvDiagnostics,
     nextProbeProfiles,
+    nextActionCode,
     nextAction,
     nextActions,
     summary,
@@ -538,7 +550,8 @@ export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagn
         "Do not retry the worker until stderr/stdout/exit/provider evidence is captured.",
       ]
       : ["Resolve blockers before any worker canary or startup probe."];
-  const nextAction = resolveStartupDiagnosticNextAction(decision);
+  const nextActionCode = resolveStartupDiagnosticNextAction(decision);
+  const nextAction = nextActionCode;
 
   const summary = [
     "agent-run-startup-diagnostic-packet:",
@@ -573,6 +586,7 @@ export function buildAgentRunStartupDiagnosticPacket(input: AgentRunStartupDiagn
     evidenceChecklist,
     startupProbePlan,
     blockers,
+    nextActionCode,
     nextAction,
     nextActions,
     classification,
