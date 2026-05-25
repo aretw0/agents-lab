@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { buildAfkMaterialReadinessSnapshot } from "../../extensions/context-watchdog-afk-material";
 import {
   buildTurnBoundaryDecisionPacket,
   resolveContextWatchContinuationRecommendation,
@@ -6,6 +10,17 @@ import {
 } from "../../extensions/context-watchdog-continuation";
 
 describe("context-watchdog continuation recommendation", () => {
+  function withTasks(tasks: Array<Record<string, unknown>>, run: (cwd: string) => void) {
+    const cwd = mkdtempSync(join(tmpdir(), "afk-material-readiness-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks }), "utf8");
+      run(cwd);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  }
+
   it("returns continue-local when readiness is true", () => {
     const result = resolveContextWatchContinuationRecommendation({
       ready: true,
@@ -50,6 +65,34 @@ describe("context-watchdog continuation recommendation", () => {
     });
 
     expect(result.recommendationCode).toBe("local-audit-blocked");
+  });
+
+  it("exposes stable AFK material next action codes", () => {
+    withTasks([
+      { id: "TASK-1", status: "planned", acceptance_criteria: ["smoke test"] },
+      { id: "TASK-2", status: "planned", acceptance_criteria: ["vitest"] },
+    ], (cwd) => {
+      const healthy = buildAfkMaterialReadinessSnapshot(cwd, "TASK-1", 2, 3);
+      expect([healthy.decision, healthy.recommendationCode, healthy.nextActionCode]).toEqual([
+        "continue",
+        "afk-material-continue-stock-healthy",
+        "continue-bounded-afk-slice",
+      ]);
+
+      const lowStock = buildAfkMaterialReadinessSnapshot(cwd, "TASK-1", 3, 4);
+      expect([lowStock.decision, lowStock.recommendationCode, lowStock.nextActionCode]).toEqual([
+        "seed-backlog",
+        "afk-material-seed-backlog-low-stock",
+        "seed-backlog-material",
+      ]);
+
+      const blocked = buildAfkMaterialReadinessSnapshot(cwd, "TASK-3", 2, 3);
+      expect([blocked.decision, blocked.recommendationCode, blocked.nextActionCode]).toEqual([
+        "blocked",
+        "afk-material-blocked-focus-invalid",
+        "fix-focus-validation",
+      ]);
+    });
   });
 
   it("builds checkpoint packet when focus must be refreshed", () => {

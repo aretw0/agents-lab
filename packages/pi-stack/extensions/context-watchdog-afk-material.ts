@@ -6,6 +6,10 @@ import {
 } from "./guardrails-core-task-contracts";
 
 export type AfkMaterialReadinessDecision = "continue" | "seed-backlog" | "blocked";
+export type AfkMaterialReadinessNextActionCode =
+	| "continue-bounded-afk-slice"
+	| "seed-backlog-material"
+	| "fix-focus-validation";
 
 export interface AfkMaterialReadinessSnapshot {
 	decision: AfkMaterialReadinessDecision;
@@ -13,6 +17,7 @@ export interface AfkMaterialReadinessSnapshot {
 		| "afk-material-continue-stock-healthy"
 		| "afk-material-seed-backlog-low-stock"
 		| "afk-material-blocked-focus-invalid";
+	nextActionCode: AfkMaterialReadinessNextActionCode;
 	nextAction: string;
 	blockedReasons: string[];
 	stock: {
@@ -67,6 +72,7 @@ export function buildAfkMaterialReadinessSnapshot(cwd: string, focusTasks: strin
 		return {
 			decision: "blocked",
 			recommendationCode: "afk-material-blocked-focus-invalid",
+			nextActionCode: "fix-focus-validation",
 			nextAction: "fix focus/validation before AFK continuation.",
 			blockedReasons: [...new Set(blockedReasons)],
 			stock: {
@@ -82,6 +88,7 @@ export function buildAfkMaterialReadinessSnapshot(cwd: string, focusTasks: strin
 		return {
 			decision: "seed-backlog",
 			recommendationCode: "afk-material-seed-backlog-low-stock",
+			nextActionCode: "seed-backlog-material",
 			nextAction: "seed backlog now (brainstorm packet + seed preview + operator decision).",
 			blockedReasons: [],
 			stock: {
@@ -96,6 +103,7 @@ export function buildAfkMaterialReadinessSnapshot(cwd: string, focusTasks: strin
 	return {
 		decision: "continue",
 		recommendationCode: "afk-material-continue-stock-healthy",
+		nextActionCode: "continue-bounded-afk-slice",
 		nextAction: "continue bounded AFK slice; stock is healthy.",
 		blockedReasons: [],
 		stock: {

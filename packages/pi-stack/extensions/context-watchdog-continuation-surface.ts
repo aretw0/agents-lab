@@ -313,6 +313,7 @@ export function registerContextWatchdogContinuationSurface(
 					materialReadiness: {
 						decision: materialReadiness.decision,
 						recommendationCode: materialReadiness.recommendationCode,
+						nextActionCode: materialReadiness.nextActionCode,
 						nextAction: materialReadiness.nextAction,
 						blockedReasons: materialReadiness.blockedReasons,
 						stock: materialReadiness.stock,

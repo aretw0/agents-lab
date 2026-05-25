@@ -879,6 +879,7 @@ describe("context-watchdog tool surfaces", () => {
 				materialReadiness: {
 					decision: expect.any(String),
 					recommendationCode: expect.any(String),
+					nextActionCode: expect.any(String),
 					nextAction: expect.any(String),
 					blockedReasons: expect.any(Array),
 					stock: expect.any(Object),
