@@ -1,6 +1,13 @@
 export type AutonomyContextLevel = "ok" | "warn" | "checkpoint" | "compact";
 export type AutonomyLaneDecision = "go" | "bounded" | "checkpoint" | "wrap-up" | "blocked";
 
+export type AutonomyLaneNextActionCode =
+  | "continue-autonomous-lane"
+  | "continue-bounded-autonomous-slices"
+  | "checkpoint-then-continue"
+  | "wrap-up-for-auto-compact"
+  | "stop-and-persist-handoff";
+
 export interface AutonomyLaneReadinessInput {
   context: {
     level: AutonomyContextLevel;
@@ -43,6 +50,7 @@ export interface AutonomyLaneReadinessResult {
   allowedWork: "normal-bounded" | "bounded-only" | "checkpoint-only" | "wrap-up-only" | "none";
   stopReasons: string[];
   steering: string[];
+  nextActionCode: AutonomyLaneNextActionCode;
   nextAction: string;
 }
 
@@ -164,6 +172,7 @@ export function evaluateAutonomyLaneReadiness(input: AutonomyLaneReadinessInput)
       allowedWork: "none",
       stopReasons,
       steering,
+      nextActionCode: "stop-and-persist-handoff",
       nextAction: "stop, persist handoff, and require operator or recovery lane before autonomous continuation.",
     };
   }
@@ -175,6 +184,7 @@ export function evaluateAutonomyLaneReadiness(input: AutonomyLaneReadinessInput)
       allowedWork: "wrap-up-only",
       stopReasons: ["context-compact"],
       steering: ["wrap up current slice", "persist handoff", "allow auto-compact and auto-resume"],
+      nextActionCode: "wrap-up-for-auto-compact",
       nextAction: "wrap up and let auto-compact/auto-resume proceed.",
     };
   }
@@ -186,6 +196,7 @@ export function evaluateAutonomyLaneReadiness(input: AutonomyLaneReadinessInput)
       allowedWork: "checkpoint-only",
       stopReasons: [],
       steering: ["refresh handoff before broader continuation"],
+      nextActionCode: "checkpoint-then-continue",
       nextAction: `checkpoint then continue with next eligible task${input.board.nextTaskId ? ` (${input.board.nextTaskId})` : ""}.`,
     };
   }
@@ -201,6 +212,7 @@ export function evaluateAutonomyLaneReadiness(input: AutonomyLaneReadinessInput)
       allowedWork: "bounded-only",
       stopReasons: [],
       steering,
+      nextActionCode: "continue-bounded-autonomous-slices",
       nextAction: `continue bounded autonomous slices${input.board.nextTaskId ? `; next=${input.board.nextTaskId}` : ""}.`,
     };
   }
@@ -211,6 +223,7 @@ export function evaluateAutonomyLaneReadiness(input: AutonomyLaneReadinessInput)
     allowedWork: "normal-bounded",
     stopReasons: [],
     steering,
+    nextActionCode: "continue-autonomous-lane",
     nextAction: `continue autonomous lane${input.board.nextTaskId ? `; next=${input.board.nextTaskId}` : ""}.`,
   };
 }

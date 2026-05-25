@@ -24,6 +24,7 @@ describe("autonomy lane readiness", () => {
     expect(result.ready).toBe(true);
     expect(result.decision).toBe("go");
     expect(result.allowedWork).toBe("normal-bounded");
+    expect(result.nextActionCode).toBe("continue-autonomous-lane");
     expect(result.nextAction).toContain("TASK-NEXT");
   });
 
@@ -32,6 +33,7 @@ describe("autonomy lane readiness", () => {
     expect(result.ready).toBe(true);
     expect(result.decision).toBe("bounded");
     expect(result.allowedWork).toBe("bounded-only");
+    expect(result.nextActionCode).toBe("continue-bounded-autonomous-slices");
     expect(result.stopReasons).toEqual([]);
     expect(result.steering).toContain("context-warn: continue bounded work; do not soft-stop");
   });
@@ -41,11 +43,13 @@ describe("autonomy lane readiness", () => {
     expect(checkpoint.ready).toBe(true);
     expect(checkpoint.decision).toBe("checkpoint");
     expect(checkpoint.allowedWork).toBe("checkpoint-only");
+    expect(checkpoint.nextActionCode).toBe("checkpoint-then-continue");
 
     const compact = evaluateAutonomyLaneReadiness(baseInput({ context: { level: "compact", percent: 72 } }));
     expect(compact.ready).toBe(false);
     expect(compact.decision).toBe("wrap-up");
     expect(compact.allowedWork).toBe("wrap-up-only");
+    expect(compact.nextActionCode).toBe("wrap-up-for-auto-compact");
     expect(compact.nextAction).toContain("auto-compact");
   });
 
@@ -57,6 +61,7 @@ describe("autonomy lane readiness", () => {
     }));
     expect(result.ready).toBe(false);
     expect(result.decision).toBe("blocked");
+    expect(result.nextActionCode).toBe("stop-and-persist-handoff");
     expect(result.stopReasons).toEqual(expect.arrayContaining([
       "machine-block",
       "machine-long-run-disabled",
@@ -69,6 +74,7 @@ describe("autonomy lane readiness", () => {
     const result = evaluateAutonomyLaneReadiness(baseInput({ board: { ready: false } }));
     expect(result.ready).toBe(false);
     expect(result.decision).toBe("blocked");
+    expect(result.nextActionCode).toBe("stop-and-persist-handoff");
     expect(result.stopReasons).toContain("board-not-ready");
   });
 
