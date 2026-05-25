@@ -109,7 +109,9 @@ describe("subagent-readiness extension", () => {
 			);
 
 			expect(result.details?.ready).toBe(true);
+			expect(result.details?.nextActionCode).toBe("prepare-bounded-worker-packet");
 			expect(result.details?.nextAction).toBe("prepare-bounded-worker-packet");
+			expect(result.details?.nextAction).toBe(result.details?.nextActionCode);
 			expect(String(result.content?.[0]?.text)).toContain("subagent-readiness: READY");
 			expect(String(result.content?.[0]?.text)).toContain("next=prepare-bounded-worker-packet");
 			expect(String(result.content?.[0]?.text)).toContain("payload completo disponível em details");
@@ -161,7 +163,9 @@ describe("subagent-readiness extension", () => {
 			});
 
 			expect(result.ready).toBe(true);
+			expect(result.nextActionCode).toBe("prepare-bounded-worker-packet");
 			expect(result.nextAction).toBe("prepare-bounded-worker-packet");
+			expect(result.nextAction).toBe(result.nextActionCode);
 			expect(result.blockedReasons).toHaveLength(0);
 			expect(result.summary.colonySignals.COMPLETE).toBe(1);
 		} finally {
@@ -420,7 +424,9 @@ describe("subagent-readiness extension", () => {
 			});
 
 			expect(result.ready).toBe(false);
+			expect(result.nextActionCode).toBe("resolve-subagent-readiness-blockers");
 			expect(result.nextAction).toBe("resolve-subagent-readiness-blockers");
+			expect(result.nextAction).toBe(result.nextActionCode);
 			expect(
 				result.blockedReasons.some((r) => r.includes("capability-package:@ifi/oh-pi-ant-colony")),
 			).toBe(true);

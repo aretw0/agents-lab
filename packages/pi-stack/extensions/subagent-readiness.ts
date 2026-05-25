@@ -29,6 +29,10 @@ const RESERVED_CLASSIFY_MONITOR_NAMES = new Set(["monitor", "monitors"]);
 
 type SourceMode = "auto" | "isolated" | "global";
 
+type SubagentReadinessNextActionCode =
+	| "prepare-bounded-worker-packet"
+	| "resolve-subagent-readiness-blockers";
+
 type SubagentReadinessOptions = {
 	source?: SourceMode;
 	tailBytes?: number;
@@ -53,7 +57,8 @@ type Check = {
 type SubagentReadinessResult = {
 	generatedAtIso: string;
 	ready: boolean;
-	nextAction: "prepare-bounded-worker-packet" | "resolve-subagent-readiness-blockers";
+	nextActionCode: SubagentReadinessNextActionCode;
+	nextAction: SubagentReadinessNextActionCode;
 	strict: boolean;
 	thresholds: {
 		minUserTurns: number;
@@ -485,11 +490,15 @@ export function runSubagentReadiness(
 		const recommendation = recommendationForReadinessCheck(c.name);
 		return `${c.name} (${c.actual} vs ${c.expected}) :: ${recommendation}`;
 	});
+	const nextActionCode: SubagentReadinessNextActionCode = ready
+		? "prepare-bounded-worker-packet"
+		: "resolve-subagent-readiness-blockers";
 
 	return {
 		generatedAtIso: new Date().toISOString(),
 		ready,
-		nextAction: ready ? "prepare-bounded-worker-packet" : "resolve-subagent-readiness-blockers",
+		nextActionCode,
+		nextAction: nextActionCode,
 		strict: opts.strict,
 		thresholds: {
 			minUserTurns: opts.minUserTurns,
