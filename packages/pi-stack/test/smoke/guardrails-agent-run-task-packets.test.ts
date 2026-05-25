@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import guardrailsAgentRun from "../../extensions/guardrails-agent-run";
-import { buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildCodexSparkPromotedWorkerPacket } from "../../extensions/guardrails-core-exports";
+import { buildAgentRunOperatorPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildCodexSparkPromotedWorkerPacket } from "../../extensions/guardrails-core-exports";
 
 describe("agent run task packet surfaces", () => {
   it("derives a report-only agent invocation spec from a board task", () => {
@@ -56,7 +56,33 @@ describe("agent run task packet surfaces", () => {
     expect(result.invocationSpec.maxOutputLines).toBe(20);
     expect(result.invocationSpec.budgetEvidence).toContain("Spark budget usable");
     expect(result.invocationSpec.budgetEvidenceProvider).toBe("openai-codex/gpt-5.3-codex-spark");
+    expect(result.invocationSpecPacket.operatorPacket.nextActionCode).toBe("present-operator-approval");
     expect(result.operatorApprovalPrompt).toBe("approve worker task-bud-1010-task-packet");
+  });
+
+  it("exposes stable operator packet next action codes", () => {
+    const ready = buildAgentRunOperatorPacket({
+      taskId: "TASK-CODE-1",
+      goal: "Review the declared file only.",
+      providerModelRef: "dashscope/qwen3.6-flash",
+      cwd: process.cwd(),
+      declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+      budgetDecision: "ok",
+      budgetEvidence: "dashscope ready",
+    });
+    expect(ready.nextActionCode).toBe("present-operator-approval");
+    expect(ready.nextAction).toContain("approve worker");
+
+    const blocked = buildAgentRunOperatorPacket({
+      taskId: "TASK-CODE-2",
+      goal: "Review the declared file only.",
+      cwd: process.cwd(),
+      declaredFiles: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
+      budgetDecision: "ok",
+      budgetEvidence: "dashscope ready",
+    });
+    expect(blocked.nextActionCode).toBe("resolve-blockers");
+    expect(blocked.blockers).toContain("provider-model-ref-missing");
   });
 
   it("builds a natural-use Codex Spark packet for promoted envelopes", () => {

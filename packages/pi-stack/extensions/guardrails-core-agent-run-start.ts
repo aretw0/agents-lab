@@ -40,6 +40,7 @@ export type AgentRunBudgetDecision = ProviderExecutionBudgetDecision;
 export type AgentRunOperatorFileContract = "read-only" | "mutation";
 export type AgentInvocationProfile = "read-only-review" | "small-mutation" | "test-fix" | "research";
 export type AgentInvocationEconomyMode = "standard" | "conserve" | "critical";
+export type AgentRunOperatorNextActionCode = "present-operator-approval" | "resolve-blockers";
 
 export interface AgentRunStartPacketInput {
   runId?: string;
@@ -175,6 +176,7 @@ export interface AgentRunOperatorPacketResult {
   validationChecklist: string[];
   rollbackHint: string;
   operatorApprovalPrompt: string;
+  nextActionCode: AgentRunOperatorNextActionCode;
   nextAction: string;
   nextActions: string[];
   summary: string;
@@ -569,6 +571,9 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
   const nextAction = startPacket.decision === "ready-for-operator-decision"
     ? `present approval prompt: ${startPacket.operatorApprovalPrompt}`
     : "resolve operator packet blockers before worker dispatch";
+  const nextActionCode: AgentRunOperatorNextActionCode = startPacket.decision === "ready-for-operator-decision"
+    ? "present-operator-approval"
+    : "resolve-blockers";
 
   return {
     mode: "agent-run-operator-packet",
@@ -597,6 +602,7 @@ export function buildAgentRunOperatorPacket(input: AgentRunOperatorPacketInput =
     validationChecklist,
     rollbackHint: fileContract === "read-only" ? "read-only run: rollback is registry/log cleanup only; no file mutations expected" : "mutation run: rollback only declared/touched files after parent-side review",
     operatorApprovalPrompt: startPacket.operatorApprovalPrompt,
+    nextActionCode,
     nextAction,
     nextActions,
     summary: [
