@@ -120,11 +120,16 @@ test("recommended stack guide documents pi-lens pressure recovery", () => {
 
 test("recommended stack guide separates TUI watchdog commands from agent diagnostics", () => {
 	const guide = read("docs/guides/recommended-pi-stack.md");
+	const packageGuide = read("packages/pi-stack/docs/guides/recommended-pi-stack.md");
 
-	assert.match(guide, /\/watchdog:status/);
-	assert.match(guide, /comandos interativos da TUI/);
-	assert.match(guide, /Agentes, workers e ferramentas de shell não devem executá-los via bash/);
-	assert.match(guide, /environment_runtime_health_status/);
+	for (const content of [guide, packageGuide]) {
+		assert.match(content, /\/watchdog:status/);
+		assert.match(content, /comandos interativos da TUI/);
+		assert.match(content, /Agentes, workers e ferramentas de shell não devem executá-los via bash/);
+		assert.match(content, /environment_runtime_health_status/);
+		assert.match(content, /não substitui métricas vivas do watchdog/);
+		assert.match(content, /fonte correta continua sendo a TUI/);
+	}
 });
 
 test("root roadmap stays current and macro-level", () => {

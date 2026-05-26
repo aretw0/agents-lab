@@ -84,7 +84,7 @@ A stack favorece um control plane simples por padrão:
 5. registrar evidência;
 6. decidir se continua, delega ou para.
 
-Comandos como `/watchdog:status` são comandos interativos da TUI para o operador digitar no Pi. Agentes, workers e ferramentas de shell não devem executá-los via bash; para diagnóstico read-only programático, use `environment_runtime_health_status` e, quando necessário, `environment_dev_pressure_status`.
+Comandos como `/watchdog:status` são comandos interativos da TUI para o operador digitar no Pi. Agentes, workers e ferramentas de shell não devem executá-los via bash; para diagnóstico read-only programático, use `environment_runtime_health_status` e, quando necessário, `environment_dev_pressure_status`. Esse diagnóstico programático não substitui métricas vivas do watchdog; quando o operador precisa de `rss`, `heap` ou lag em tempo real, a fonte correta continua sendo a TUI.
 
 Use a doutrina operacional do control plane e o glossário canônico quando estiverem disponíveis no pacote/projeto. O objetivo é evitar criar termos novos quando já existe um contrato operacional.
 
