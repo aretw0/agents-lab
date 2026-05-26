@@ -72,6 +72,8 @@ export interface OperatorIntentRouteStep {
   tool: string;
   required: true;
   purpose: string;
+  inputHint: string;
+  consumesPreviousStepOutput: boolean;
 }
 
 export interface OperatorIntentExecutionPlan {
@@ -291,6 +293,34 @@ function describeRouteTool(tool: string): string {
   return "run report-only route step";
 }
 
+function describeRouteInput(tool: string): string {
+  if (tool === "environment_runtime_health_status") return "use current workspace and no mutation flags";
+  if (tool === "environment_dev_pressure_status") return "use current workspace pressure snapshot";
+  if (tool === "safe_boot_runtime_artifact_audit") return "audit current workspace runtime artifacts only";
+  if (tool === "subagent_readiness_status") return "run strict/read-only readiness when available; do not dispatch";
+  if (tool === "provider_readiness_matrix") return "read provider/model readiness; do not select a model for execution";
+  if (tool === "lane_brainstorm_packet") return "use operator intent as goal; keep scope local-safe and report-only";
+  if (tool === "lane_brainstorm_seed_preview") return "use previous lane_brainstorm_packet details; preview only, do not create tasks";
+  if (tool === "control_plane_profile_packet") return "use normalized operator intent and known constraints";
+  if (tool === "agent_run_operator_packet") return "use readiness evidence and intent; prepare packet only";
+  if (tool === "agent_run_task_packet") return "use operator packet output; do not start a worker";
+  if (tool === "structured_interview_plan") return "ask only the next missing question";
+  return "use current intake context";
+}
+
+function buildRouteStep(tool: string, index: number, tools: string[]): OperatorIntentRouteStep {
+  return {
+    tool,
+    required: true,
+    purpose: describeRouteTool(tool),
+    inputHint: describeRouteInput(tool),
+    consumesPreviousStepOutput: index > 0 && (
+      (tool === "lane_brainstorm_seed_preview" && tools[index - 1] === "lane_brainstorm_packet") ||
+      (tool === "agent_run_task_packet" && tools[index - 1] === "agent_run_operator_packet")
+    ),
+  };
+}
+
 function buildExecutionPlan(action: {
   controlPlaneAction: OperatorIntentControlPlaneAction;
   confirmationRequired: boolean;
@@ -311,7 +341,7 @@ function buildExecutionPlan(action: {
       kind: "operator-prompt",
       authorized: false,
       executeWithoutTextualConfirmation: false,
-      steps: recommendedTools.map((tool) => ({ tool, required: true, purpose: describeRouteTool(tool) })),
+      steps: recommendedTools.map(buildRouteStep),
       finalResponseContract: "ask-one-compact-question",
       forbiddenActions,
     };
@@ -320,7 +350,7 @@ function buildExecutionPlan(action: {
     kind: "report-only-route",
     authorized: true,
     executeWithoutTextualConfirmation: true,
-    steps: recommendedTools.map((tool) => ({ tool, required: true, purpose: describeRouteTool(tool) })),
+    steps: recommendedTools.map(buildRouteStep),
     finalResponseContract: "compact-decision-summary",
     forbiddenActions,
   };

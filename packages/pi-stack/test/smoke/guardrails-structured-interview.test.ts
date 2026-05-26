@@ -229,6 +229,18 @@ describe("structured interview primitive", () => {
     expect(packet.reportOnlyRouteAuthorized).toBe(true);
     expect(packet.recommendedTools).toEqual(["lane_brainstorm_packet", "lane_brainstorm_seed_preview"]);
     expect(packet.executionPlan.executeWithoutTextualConfirmation).toBe(true);
+    expect(packet.executionPlan.steps).toEqual([
+      expect.objectContaining({
+        tool: "lane_brainstorm_packet",
+        inputHint: expect.stringContaining("operator intent"),
+        consumesPreviousStepOutput: false,
+      }),
+      expect.objectContaining({
+        tool: "lane_brainstorm_seed_preview",
+        inputHint: expect.stringContaining("previous lane_brainstorm_packet details"),
+        consumesPreviousStepOutput: true,
+      }),
+    ]);
     expect(packet.dispatchAllowed).toBe(false);
     expect(packet.workerDispatchAllowed).toBe(false);
   });
@@ -264,6 +276,10 @@ describe("structured interview primitive", () => {
       "environment_dev_pressure_status",
       "safe_boot_runtime_artifact_audit",
     ]);
+    expect(packet.executionPlan.steps[0]).toMatchObject({
+      inputHint: expect.stringContaining("current workspace"),
+      consumesPreviousStepOutput: false,
+    });
     expect(packet.executionPlan.forbiddenActions).toEqual(["mutation", "dispatch", "worker-dispatch", "protected-scope"]);
     expect(packet.missingQuestions.length).toBeGreaterThan(0);
     expect(packet.interaction.choices[0]).toMatchObject({
@@ -335,6 +351,10 @@ describe("structured interview primitive", () => {
       workerDispatchAllowed: false,
     });
     expect(packet.executionPlan.steps.map((step) => step.tool)).toEqual(["agent_run_operator_packet", "agent_run_task_packet"]);
+    expect(packet.executionPlan.steps[1]).toMatchObject({
+      inputHint: expect.stringContaining("operator packet output"),
+      consumesPreviousStepOutput: true,
+    });
     expect(packet.profilePacket.profile).toBe("worker-assisted-candidate");
     expect(packet.interaction.choices[0]).toMatchObject({
       id: "prepare-worker-packet",

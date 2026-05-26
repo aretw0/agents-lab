@@ -31,7 +31,8 @@ Before editing, produce a compact plan using the first-party packets when availa
 If `operator_intent_intake_packet` returns `details.reportOnlyRouteAuthorized=true`,
 `details.confirmationRequired=false`, and
 `details.executionPlan.executeWithoutTextualConfirmation=true`, run the
-read-only `details.executionPlan.steps` in order and summarize the decision.
+read-only `details.executionPlan.steps` in order, respecting each step's
+`inputHint` and `consumesPreviousStepOutput`, then summarize the decision.
 Do not ask for textual confirmation for non-mutating diagnostics, runtime
 health checks, readiness checks, or brainstorm seed previews. If the seed asks
 for the next local-safe slice, says there are no eligible tasks, or asks to
