@@ -434,7 +434,7 @@ export function classifyAgentRunFailure(input: AgentRunFailureClassificationInpu
       "Do not retry the worker blindly.",
       "Run a report-only structured diagnostic that captures events and stderr before the next text-mode canary.",
       "Compare CLI resolution, builtin-tool filtering, stdout/stderr behavior, and prompt file handoff against known-good local runner examples.",
-      "Only after that, retry a tiny structured-approved Spark worker canary.",
+      "Only after that, retry a tiny structured-approved worker canary with the current configured provider/model.",
     ]
     : failureClass === "runner-timeout"
       ? [
