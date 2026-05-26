@@ -7,6 +7,7 @@ import { GUARDRAILS_AUTHORIZATION_NONE, type GuardrailsAuthorizationNone } from 
 
 export type OperatorIntentIntakeDecision =
   | "ask-operator"
+  | "check-runtime-health"
   | "check-worker-readiness"
   | "seed-brainstorm"
   | "prepare-single-slice"
@@ -20,6 +21,7 @@ export type OperatorIntentControlPlaneAction =
 
 export type OperatorIntentNextAction =
   | "answer-next-question"
+  | "run-runtime-health-checks"
   | "run-brainstorm-seed-preview"
   | "prepare-single-slice-contract"
   | "run-worker-readiness-checks"
@@ -28,6 +30,7 @@ export type OperatorIntentNextAction =
 
 export type OperatorIntentRecommendationCode =
   | "operator-intent-ask-operator"
+  | "operator-intent-check-runtime-health"
   | "operator-intent-seed-brainstorm"
   | "operator-intent-prepare-single-slice"
   | "operator-intent-check-worker-readiness"
@@ -36,6 +39,7 @@ export type OperatorIntentRecommendationCode =
 
 export interface OperatorIntentIntakeInput extends ControlPlaneProfilePacketInput {
   localSafeMaterialReady?: boolean;
+  runtimeHealthRequested?: boolean;
   brainstormRequested?: boolean;
   noEligibleLocalSafeTasks?: boolean;
   runtimeHealthReady?: boolean;
@@ -98,6 +102,14 @@ function buildInteraction(decision: OperatorIntentIntakeDecision, tools: string[
       label: "Answer next question",
       description: questions[0] ?? "Fill the next missing control-plane input.",
       route: "structured_interview_plan",
+    });
+  }
+  if (decision === "check-runtime-health") {
+    choices.push({
+      id: "check-runtime-health",
+      label: "Check runtime health",
+      description: "Run read-only runtime pressure and artifact checks before work starts.",
+      route: tools.join("+"),
     });
   }
   if (decision === "seed-brainstorm") {
@@ -190,6 +202,7 @@ function resolveControlPlaneAction(decision: OperatorIntentIntakeDecision): {
 
 function resolveNextAction(decision: OperatorIntentIntakeDecision): OperatorIntentNextAction {
   if (decision === "ask-operator") return "answer-next-question";
+  if (decision === "check-runtime-health") return "run-runtime-health-checks";
   if (decision === "seed-brainstorm") return "run-brainstorm-seed-preview";
   if (decision === "prepare-single-slice") return "prepare-single-slice-contract";
   if (decision === "check-worker-readiness") return "run-worker-readiness-checks";
@@ -199,6 +212,7 @@ function resolveNextAction(decision: OperatorIntentIntakeDecision): OperatorInte
 
 function resolveRecommendationCode(decision: OperatorIntentIntakeDecision): OperatorIntentRecommendationCode {
   if (decision === "ask-operator") return "operator-intent-ask-operator";
+  if (decision === "check-runtime-health") return "operator-intent-check-runtime-health";
   if (decision === "seed-brainstorm") return "operator-intent-seed-brainstorm";
   if (decision === "prepare-single-slice") return "operator-intent-prepare-single-slice";
   if (decision === "check-worker-readiness") return "operator-intent-check-worker-readiness";
@@ -220,6 +234,10 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     decision = "blocked";
     recommendedTools = ["control_plane_profile_packet"];
     recommendation = "Keep the intake report-only; remove protected, scheduler, remote, or GitHub Actions requests before preparing work.";
+  } else if (input.runtimeHealthRequested) {
+    decision = "check-runtime-health";
+    recommendedTools = ["environment_runtime_health_status", "environment_dev_pressure_status", "safe_boot_runtime_artifact_audit"];
+    recommendation = "Run read-only runtime health checks now; do not ask for confirmation and do not mutate files.";
   } else if (missingQuestions.length > 0) {
     decision = "ask-operator";
     recommendedTools = ["structured_interview_plan"];

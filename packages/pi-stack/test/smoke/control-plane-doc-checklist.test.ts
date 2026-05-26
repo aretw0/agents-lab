@@ -145,6 +145,7 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(doctrine).toContain("operator_intent_intake_packet");
     expect(doctrine).toContain("details.interaction");
     expect(doctrine).toContain("readiness de runtime/worker");
+    expect(doctrine).toContain("runtime_health_requested=true");
     expect(doctrine).toContain("agent_run_operator_packet` só após readiness explícita");
     expect(doctrine).toContain("a intake não autoriza mutação, worker nem dispatch");
     expect(doctrine).toContain("controlplaneaction=run-report-only-route");
@@ -153,6 +154,7 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(doctrine).toContain("não pedir confirmação textual");
 
     expect(sessionTriage).toContain("operator_intent_intake_packet");
+    expect(sessionTriage).toContain("runtime_health_requested=true");
     expect(sessionTriage).toContain("project_intake_plan");
     expect(sessionTriage).toContain("não executar comandos slash da tui");
     expect(sessionTriage).toContain("/watchdog:status");

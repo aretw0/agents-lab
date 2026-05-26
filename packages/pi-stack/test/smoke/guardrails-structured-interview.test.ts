@@ -203,6 +203,33 @@ describe("structured interview primitive", () => {
     expect(packet.interaction.recommendedChoiceId).toBe("seed-brainstorm");
   });
 
+  it("routes explicit runtime health intent to read-only checks without asking more questions", () => {
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "validate runtime health before work",
+      runtimeHealthRequested: true,
+    });
+
+    expect(packet).toMatchObject({
+      decision: "check-runtime-health",
+      controlPlaneAction: "run-report-only-route",
+      nextAction: "run-runtime-health-checks",
+      recommendationCode: "operator-intent-check-runtime-health",
+      confirmationRequired: false,
+      operatorDecisionNeeded: false,
+      recommendedTools: ["environment_runtime_health_status", "environment_dev_pressure_status", "safe_boot_runtime_artifact_audit"],
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      workerDispatchAllowed: false,
+    });
+    expect(packet.missingQuestions.length).toBeGreaterThan(0);
+    expect(packet.interaction.choices[0]).toMatchObject({
+      id: "check-runtime-health",
+      route: "environment_runtime_health_status+environment_dev_pressure_status+safe_boot_runtime_artifact_audit",
+    });
+    expect(packet.interaction.recommendedChoiceId).toBe("check-runtime-health");
+    expect(packet.summary).toContain("operatorDecision=no");
+  });
+
   it("prepares a worker packet only as a report-only candidate when readiness is known", () => {
     const packet = buildOperatorIntentIntakePacket({
       intent: "fan out read-only model calibration",
@@ -338,6 +365,30 @@ describe("structured interview primitive", () => {
     expect(result?.details.recommendedTools).toEqual(["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"]);
     expect(result?.details.missingCapabilities).toEqual(expect.arrayContaining(["runtime-health"]));
     expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=check-worker-readiness");
+  });
+
+  it("surface routes explicit runtime health requests without confirmation", () => {
+    const tools: Array<{ name: string; execute: (id: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> } }> = [];
+    registerGuardrailsStructuredInterviewSurface({
+      registerTool(tool: unknown) {
+        tools.push(tool as (typeof tools)[number]);
+      },
+    } as never);
+
+    const tool = tools.find((item) => item.name === "operator_intent_intake_packet");
+    const result = tool?.execute("tc-runtime-health-intake", {
+      intent: "validar saúde do runtime antes de trabalhar",
+      runtime_health_requested: true,
+    });
+
+    expect(result?.details.decision).toBe("check-runtime-health");
+    expect(result?.details.recommendationCode).toBe("operator-intent-check-runtime-health");
+    expect(result?.details.controlPlaneAction).toBe("run-report-only-route");
+    expect(result?.details.nextAction).toBe("run-runtime-health-checks");
+    expect(result?.details.confirmationRequired).toBe(false);
+    expect(result?.details.operatorDecisionNeeded).toBe(false);
+    expect(result?.details.recommendedTools).toEqual(["environment_runtime_health_status", "environment_dev_pressure_status", "safe_boot_runtime_artifact_audit"]);
+    expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=check-runtime-health");
   });
 
   it("blocks protected intent before routing to brainstorm or workers", () => {
