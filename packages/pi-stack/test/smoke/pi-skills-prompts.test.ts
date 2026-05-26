@@ -19,6 +19,8 @@ describe("pi-skills prompts", () => {
     expect(prompt).toContain("$ARGUMENTS");
     expect(prompt).toContain("operator_intent_intake_packet");
     expect(prompt.indexOf("operator_intent_intake_packet")).toBeLessThan(prompt.indexOf("project_intake_plan"));
+    expect(prompt).toContain("details.executionPlan.executeWithoutTextualConfirmation=true");
+    expect(prompt).toContain("Do not ask for textual confirmation for non-mutating diagnostics");
     expect(prompt).toContain("local_batch_manifest_packet");
     expect(prompt).toContain("context_watch_local_slice_preview");
     expect(prompt).toContain("Do not cite bare task IDs");
