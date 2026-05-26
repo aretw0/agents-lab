@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { getSchedulerLeasePath, getSchedulerStoragePath } from "@ifi/oh-pi-extensions/extensions/scheduler.ts";
@@ -181,5 +181,16 @@ describe("scheduler-governance", () => {
     expect(buildConfirmationPhrase("takeover", lease)).toBe("TAKEOVER inst-A");
     expect(buildConfirmationPhrase("disable-foreign", lease)).toBe("DISABLE FOREIGN inst-A");
     expect(buildConfirmationPhrase("clear-foreign", lease)).toBe("CLEAR FOREIGN inst-A");
+  });
+
+  it("docs delimitam confirmação textual como exceção destrutiva", () => {
+    const doc = readFileSync(join(process.cwd(), "docs/guides/scheduler-governance.md"), "utf8");
+    const packageDoc = readFileSync(join(process.cwd(), "packages/pi-stack/docs/guides/scheduler-governance.md"), "utf8");
+
+    for (const content of [doc, packageDoc]) {
+      expect(content).toContain("confirmação textual forte porque alteram ownership ou tarefas de outra instância");
+      expect(content).toContain("exceção de segurança do scheduler");
+      expect(content).toContain("aprovação estruturada ou widgets da TUI");
+    }
   });
 });

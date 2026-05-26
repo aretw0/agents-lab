@@ -66,8 +66,9 @@ Também pode usar env:
 
 ### Regras de segurança
 
-- Em **modo interativo**, `takeover/disable-foreign/clear-foreign` exigem frase exata.
+- Em **modo interativo**, `takeover/disable-foreign/clear-foreign` exigem confirmação textual forte porque alteram ownership ou tarefas de outra instância.
 - Em **modo não interativo**, ações destrutivas são sempre bloqueadas.
+- Essa confirmação textual é uma exceção de segurança do scheduler. Novas ferramentas devem preferir aprovação estruturada ou widgets da TUI quando disponíveis, em vez de exigir que o operador repita uma frase literal.
 
 ---
 
