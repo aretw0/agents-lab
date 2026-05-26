@@ -369,7 +369,7 @@ Patch preview seguro neste estado é **no-op**: Anthropic não aparece como prov
   "piStack": {
     "quotaVisibility": {
       "routeModelRefs": {
-        "openai-codex": "openai-codex/gpt-5.3-codex",
+        "provider-atual": "provider-atual/model-declarado",
         "anthropic-ou-github-copilot": "provider/model-declarado"
       }
     }

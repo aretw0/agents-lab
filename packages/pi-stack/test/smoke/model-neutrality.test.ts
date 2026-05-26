@@ -48,4 +48,28 @@ describe("distributed model neutrality", () => {
 
     expect(offenders).toEqual([]);
   });
+
+  it("keeps generic distributed guides free of concrete provider/model examples", () => {
+    const files = [
+      join(process.cwd(), "docs", "guides", "colony-provider-model-governance.md"),
+      join(process.cwd(), "docs", "guides", "monitor-overrides.md"),
+      join(process.cwd(), "docs", "guides", "quota-visibility.md"),
+      join(process.cwd(), "docs", "guides", "token-efficiency.md"),
+      join(PACKAGE_ROOT, "docs", "guides", "colony-provider-model-governance.md"),
+      join(PACKAGE_ROOT, "docs", "guides", "monitor-overrides.md"),
+      join(PACKAGE_ROOT, "docs", "guides", "quota-visibility.md"),
+      join(PACKAGE_ROOT, "docs", "guides", "token-efficiency.md"),
+    ];
+    const concreteProviderModelRef = /\b(?:openai-codex|github-copilot)\/[A-Za-z0-9._-]+/;
+
+    const offenders = files
+      .map((file) => ({
+        file: relative(process.cwd(), file).replace(/\\/g, "/"),
+        text: readFileSync(file, "utf8"),
+      }))
+      .filter(({ text }) => concreteProviderModelRef.test(text))
+      .map(({ file }) => file);
+
+    expect(offenders).toEqual([]);
+  });
 });

@@ -160,8 +160,8 @@ Para execução, configure mapeamento provider->model em `.pi/settings.json`:
   "piStack": {
     "quotaVisibility": {
       "routeModelRefs": {
-        "openai-codex": "openai-codex/gpt-5.3-codex",
-        "github-copilot": "github-copilot/claude-sonnet-4.6"
+        "provider-a": "provider-a/model-declarado",
+        "provider-b": "provider-b/model-declarado"
       }
     }
   }

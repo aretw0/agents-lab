@@ -99,8 +99,8 @@ Essa distinção evita falso positivo de diagnóstico e reduz ciclos de correç�
 
 O patch mostra recomendações no `/monitor-provider template`, mas não escolhe modelo por provider sem configuração explícita:
 
-- `github-copilot -> github-copilot/claude-haiku-4.5`
-- `openai-codex -> openai-codex/gpt-5.4-mini`
+- `provider-a -> provider-a/model-sensor-leve`
+- `provider-b -> provider-b/model-sensor-leve`
 - `classifierThinking -> off`
 
 Para aplicar, declare `classifierModel` ou `classifierModelByProvider` em settings, ou passe `provider/model` diretamente em `/monitor-provider apply <provider/model>`.
@@ -115,8 +115,8 @@ Em `.pi/settings.json` (ou `~/.pi/agent/settings.json`):
     "monitorProviderPatch": {
       "classifierThinking": "off",
       "classifierModelByProvider": {
-        "github-copilot": "github-copilot/claude-haiku-4.5",
-        "openai-codex": "openai-codex/gpt-5.4-mini"
+        "provider-a": "provider-a/model-sensor-leve",
+        "provider-b": "provider-b/model-sensor-leve"
       },
       "hedgeConversationHistory": false,
       "fragilityWhen": "has_file_writes"
@@ -127,14 +127,14 @@ Em `.pi/settings.json` (ou `~/.pi/agent/settings.json`):
 
 ---
 
-## Mapeamento prático (Claude → Codex)
+## Mapeamento prático por tier
 
-Para manter classifiers no mesmo “tier” operacional:
+Para manter classifiers no mesmo tier operacional, mapeie intenção para modelos da política local:
 
-| Perfil anterior (Copilot/Claude) | Perfil sugerido (Codex) | Intenção |
+| Perfil anterior | Perfil sugerido | Intenção |
 |---|---|---|
-| `github-copilot/claude-haiku-4.5` | `openai-codex/gpt-5.4-mini` | sensor leve e barato |
-| `github-copilot/claude-sonnet-4.6` | `openai-codex/gpt-5.2-codex` (ou `gpt-5.4`) | sensor mais estrito |
+| `provider/model-sensor-leve` | `provider/model-sensor-leve` | sensor leve e barato |
+| `provider/model-principal` | `provider/model-sensor-estrito` | sensor mais estrito |
 
 > Regra simples: classifiers de monitor tendem a performar melhor com modelo “mini/leve” + `thinking: off`.
 

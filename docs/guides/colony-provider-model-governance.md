@@ -55,19 +55,13 @@ Comportamento importante:
 
 ---
 
-## Modelos recomendados (baseline prático)
+## Perfis de papel (baseline prático)
 
-### Perfil Copilot
+Os modelos concretos pertencem à política do operador. O guia usa placeholders para manter a stack neutra; escolha modelos já autenticados e com orçamento visível.
 
-- scout: `github-copilot/claude-haiku-4.5`
-- worker: `github-copilot/claude-sonnet-4.6`
-- soldier: `github-copilot/claude-sonnet-4.6`
-
-### Perfil Codex
-
-- scout: `openai-codex/gpt-5.4-mini`
-- worker: `openai-codex/gpt-5.3-codex`
-- soldier: `openai-codex/gpt-5.2-codex`
+- scout: `provider/model-rapido`
+- worker: `provider/model-principal`
+- soldier: `provider/model-revisor`
 
 > Heurística: scout mais barato/rápido, worker/soldier mais fortes.
 
@@ -197,9 +191,9 @@ No `factory-strict-hybrid`, a mistura de provider é controlada por papel (`allo
   "goal": "Refatorar módulo X com testes",
   "maxAnts": 3,
   "maxCost": 2,
-  "scoutModel": "openai-codex/gpt-5.4-mini",
-  "workerModel": "openai-codex/gpt-5.3-codex",
-  "soldierModel": "openai-codex/gpt-5.2-codex"
+  "scoutModel": "provider/model-rapido",
+  "workerModel": "provider/model-principal",
+  "soldierModel": "provider/model-revisor"
 }
 ```
 

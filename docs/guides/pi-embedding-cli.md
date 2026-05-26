@@ -218,7 +218,7 @@ Campos úteis por evento:
   "inputTokens": 1200,
   "outputTokens": 340,
   "costUsd": 0.0042,
-  "model": "github-copilot/claude-sonnet-4.6"
+  "model": "provider/model-declarado"
 }
 ```
 

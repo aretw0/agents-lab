@@ -56,16 +56,11 @@ Bloco recomendado para adicionar logo após a diretiva de tokens:
 
 Classificadores rodam em todo turno. Para tarefas de classificação binária (flag/clean), prefira modelo leve com provider explícito.
 
-Exemplo recomendado no ecossistema atual (provider-aware):
+Exemplo neutro (provider-aware):
 
 ```yaml
-# Copilot
-model: github-copilot/claude-haiku-4.5
+model: provider/model-sensor-leve
 thinking: "off"
-
-# Codex (alternativa equivalente para sensor leve)
-# model: openai-codex/gpt-5.4-mini
-# thinking: "off"
 ```
 
 ### 2) `hedge` sem `conversation_history` por padrão
