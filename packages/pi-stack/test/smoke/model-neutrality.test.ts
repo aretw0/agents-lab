@@ -72,4 +72,20 @@ describe("distributed model neutrality", () => {
 
     expect(offenders).toEqual([]);
   });
+
+  it("keeps generic runtime schema examples model-neutral", () => {
+    const files = collectFiles(join(PACKAGE_ROOT, "extensions"));
+    const concreteExample =
+      /\be\.g\.\s*(?:openai-codex|github-copilot|dashscope|anthropic|claude-code)\/[A-Za-z0-9._-]+/i;
+
+    const offenders = files
+      .map((file) => ({
+        file: relative(process.cwd(), file).replace(/\\/g, "/"),
+        text: readFileSync(file, "utf8"),
+      }))
+      .filter(({ text }) => concreteExample.test(text))
+      .map(({ file }) => file);
+
+    expect(offenders).toEqual([]);
+  });
 });

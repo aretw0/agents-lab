@@ -51,7 +51,7 @@ export function registerAgentRunBasicTools(pi: ExtensionAPI): void {
 		description: "Report-only agent run packet with provider/model, declared files, timeout, validation, rollback, budget, abort, and log-tail gates. Never dispatches execution.",
 		parameters: Type.Object({
 			goal: Type.Optional(Type.String({ description: "Run goal for the future worker." })),
-			provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. dashscope/qwen3-coder-plus." })),
+			provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. provider/model-worker." })),
 			cwd: Type.Optional(Type.String({ description: "Explicit worker cwd." })),
 			declared_files: Type.Optional(Type.Array(Type.String(), { description: "Exact file scope for the future worker." })),
 			timeout_ms: Type.Optional(Type.Number({ description: "Short bounded timeout in milliseconds." })),
