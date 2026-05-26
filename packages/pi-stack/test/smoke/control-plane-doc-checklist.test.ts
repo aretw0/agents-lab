@@ -128,6 +128,9 @@ describe("control-plane anti-bloat docs checklist", () => {
     const guidesIndex = readRepoFile("docs/guides/README.md").toLowerCase();
     const doctrine = readRepoFile("docs/guides/control-plane-operating-doctrine.md").toLowerCase();
     const sessionTriage = readRepoFile("docs/guides/session-triage.md").toLowerCase();
+    const labDoctrine = readRepoFile("packages/lab-skills/docs/guides/control-plane-operating-doctrine.md").toLowerCase();
+    const piDoctrine = readRepoFile("packages/pi-skills/docs/guides/control-plane-operating-doctrine.md").toLowerCase();
+    const labSessionTriage = readRepoFile("packages/lab-skills/docs/guides/session-triage.md").toLowerCase();
 
     const requiredGuideLinks = [
       "control-plane-operating-doctrine.md",
@@ -162,5 +165,10 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(sessionTriage.indexOf("operator_intent_intake_packet")).toBeLessThan(
       sessionTriage.indexOf("project_intake_plan"),
     );
+
+    for (const packagedDoc of [labDoctrine, piDoctrine, labSessionTriage]) {
+      expect(packagedDoc).toContain("operator_intent_intake_packet");
+      expect(packagedDoc).toContain("runtime_health_requested=true");
+    }
   });
 });
