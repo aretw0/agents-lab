@@ -110,6 +110,35 @@ describe("environment-doctor surface", () => {
     expect((result.details as any)?.optionalIssues?.[0]?.name).toBe("glab");
   });
 
+  it("environment_doctor_status treats unauthenticated glab as optional noise", async () => {
+    const pi = {
+      ...makeMockPi(),
+      exec: vi.fn(async (command: string, args: string[]) => {
+        if (command === "glab" && args[0] === "auth") {
+          return { code: 1, stdout: "", stderr: "glab not logged in" };
+        }
+        return { code: 0, stdout: `${command} version\n`, stderr: "" };
+      }),
+    } as unknown as ReturnType<typeof makeMockPi>;
+    environmentDoctorExtension(pi);
+    const tool = getTool(pi, "environment_doctor_status");
+
+    const result = await tool.execute(
+      "tc-environment-doctor-optional-glab-auth",
+      { includeAuthChecks: true },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+    const text = String(result.content?.[0]?.text ?? "");
+
+    expect(text).toContain("ok=yes");
+    expect(text).toContain("issues=0");
+    expect(text).toContain("optionalIssues=1");
+    expect(text).toContain("optionalIssueDetails=warn:glab=Instalado mas nao autenticado");
+    expect((result.details as any)?.optionalIssues?.[0]?.name).toBe("glab");
+  });
+
   it("environment_runtime_health_status aggregates read-only go/no-go checks", async () => {
     const pi = makeMockPi();
     environmentDoctorExtension(pi);

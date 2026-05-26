@@ -389,6 +389,7 @@ async function checkTool(
             name,
             status: "warn",
             message: `Instalado mas nao autenticado`,
+            optional: options.optional,
             fix: { description: authCheck.failHint, auto: false },
           };
         }
@@ -397,6 +398,7 @@ async function checkTool(
           name,
           status: "warn",
           message: `Instalado mas autenticacao nao verificada`,
+          optional: options.optional,
           fix: { description: authCheck.failHint, auto: false },
         };
       }
