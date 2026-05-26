@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildControlPlaneProfilePacket, buildOperatorIntentIntakePacket, inferRuntimeHealthIntent, resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
+import { buildControlPlaneProfilePacket, buildOperatorIntentIntakePacket, inferRuntimeHealthIntent, inferWorkerReadinessIntent, resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
 import { registerGuardrailsStructuredInterviewSurface } from "../../extensions/guardrails-core-structured-interview-surface";
 
 describe("structured interview primitive", () => {
@@ -370,6 +370,31 @@ describe("structured interview primitive", () => {
     expect(packet.interaction.recommendedChoiceId).toBe("check-worker-readiness");
   });
 
+  it("infers worker readiness route from operator text without preparing a worker", () => {
+    expect(inferWorkerReadinessIntent("posso usar workers com segurança?")).toBe(true);
+    expect(inferWorkerReadinessIntent("check subagent readiness before delegating")).toBe(true);
+    expect(inferWorkerReadinessIntent("prepare one local slice")).toBe(false);
+
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "Como estão os workers? Posso usar subagentes com segurança?",
+    });
+
+    expect(packet.decision).toBe("check-worker-readiness");
+    expect(packet.controlPlaneAction).toBe("run-report-only-route");
+    expect(packet.nextAction).toBe("run-worker-readiness-checks");
+    expect(packet.confirmationRequired).toBe(false);
+    expect(packet.reportOnlyRouteAuthorized).toBe(true);
+    expect(packet.recommendedTools).toEqual([
+      "environment_runtime_health_status",
+      "subagent_readiness_status",
+      "provider_readiness_matrix",
+    ]);
+    expect(packet.executionPlan.executeWithoutTextualConfirmation).toBe(true);
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.workerDispatchAllowed).toBe(false);
+    expect(packet.recommendedTools).not.toContain("agent_run_operator_packet");
+  });
+
   it("checks worker readiness before preparing a worker packet when readiness is negative", () => {
     const packet = buildOperatorIntentIntakePacket({
       intent: "fan out read-only model calibration",
@@ -435,6 +460,29 @@ describe("structured interview primitive", () => {
     expect(result?.details.operatorPromptRequired).toBe(false);
     expect(result?.details.recommendedTools).toEqual(["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"]);
     expect(result?.details.missingCapabilities).toEqual(expect.arrayContaining(["runtime-health"]));
+    expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=check-worker-readiness");
+  });
+
+  it("surface routes explicit worker readiness requests without preparing workers", () => {
+    const tools: Array<{ name: string; execute: (id: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> } }> = [];
+    registerGuardrailsStructuredInterviewSurface({
+      registerTool(tool: unknown) {
+        tools.push(tool as (typeof tools)[number]);
+      },
+    } as never);
+
+    const tool = tools.find((item) => item.name === "operator_intent_intake_packet");
+    const result = tool?.execute("tc-worker-readiness-intake", {
+      intent: "posso usar workers com segurança?",
+      worker_readiness_requested: true,
+    });
+
+    expect(result?.details.decision).toBe("check-worker-readiness");
+    expect(result?.details.controlPlaneAction).toBe("run-report-only-route");
+    expect(result?.details.nextAction).toBe("run-worker-readiness-checks");
+    expect(result?.details.reportOnlyRouteAuthorized).toBe(true);
+    expect(result?.details.workerDispatchAllowed).toBe(false);
+    expect(result?.details.recommendedTools).toEqual(["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"]);
     expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=check-worker-readiness");
   });
 

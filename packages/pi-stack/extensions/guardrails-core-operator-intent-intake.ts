@@ -40,6 +40,7 @@ export type OperatorIntentRecommendationCode =
 export interface OperatorIntentIntakeInput extends ControlPlaneProfilePacketInput {
   localSafeMaterialReady?: boolean;
   runtimeHealthRequested?: boolean;
+  workerReadinessRequested?: boolean;
   brainstormRequested?: boolean;
   noEligibleLocalSafeTasks?: boolean;
   runtimeHealthReady?: boolean;
@@ -128,6 +129,24 @@ export function inferRuntimeHealthIntent(intent: string | undefined): boolean {
   const text = String(intent ?? "").trim();
   if (!text) return false;
   return RUNTIME_HEALTH_INTENT_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+const WORKER_READINESS_INTENT_PATTERNS = [
+  /\bworker\s+readiness\b/i,
+  /\bworker[s]?\s+(?:ready|safe|available|healthy)\b/i,
+  /\bsubagent\s+readiness\b/i,
+  /\bsubagent[s]?\s+(?:ready|safe|available|healthy)\b/i,
+  /\bagent[s]?\s+as\s+tools\b/i,
+  /\bposso\s+usar\s+(?:os\s+)?worker[s]?\b/i,
+  /\bworker[s]?\s+com\s+seguran[cç]a\b/i,
+  /\bsubagente[s]?\s+pront[oa]s?\b/i,
+  /\bsubagente[s]?\s+com\s+seguran[cç]a\b/i,
+];
+
+export function inferWorkerReadinessIntent(intent: string | undefined): boolean {
+  const text = String(intent ?? "").trim();
+  if (!text) return false;
+  return WORKER_READINESS_INTENT_PATTERNS.some((pattern) => pattern.test(text));
 }
 
 function buildInteraction(decision: OperatorIntentIntakeDecision, tools: string[], questions: string[]): OperatorIntentInteraction {
@@ -313,6 +332,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
   const blockedRequests = profilePacket.blockedRequests;
   const missingCapabilities = [...profilePacket.missingCapabilities];
   const runtimeHealthRequested = input.runtimeHealthRequested === true || inferRuntimeHealthIntent(input.intent);
+  const workerReadinessRequested = input.workerReadinessRequested === true || inferWorkerReadinessIntent(input.intent);
 
   let decision: OperatorIntentIntakeDecision;
   let recommendedTools: string[];
@@ -326,6 +346,13 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     decision = "check-runtime-health";
     recommendedTools = ["environment_runtime_health_status", "environment_dev_pressure_status", "safe_boot_runtime_artifact_audit"];
     recommendation = "Run read-only runtime health checks now; do not ask for confirmation and do not mutate files.";
+  } else if (workerReadinessRequested) {
+    decision = "check-worker-readiness";
+    recommendedTools = ["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"];
+    if (input.runtimeHealthReady !== true) missingCapabilities.push("runtime-health");
+    if (input.subagentsReady !== true) missingCapabilities.push("subagent-readiness");
+    if (input.providerReady !== true) missingCapabilities.push("provider-readiness");
+    recommendation = "Run read-only runtime, worker, and provider readiness checks; do not prepare or dispatch a worker yet.";
   } else if (missingQuestions.length > 0) {
     decision = "ask-operator";
     recommendedTools = ["structured_interview_plan"];
