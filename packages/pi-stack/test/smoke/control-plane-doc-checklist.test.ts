@@ -151,6 +151,8 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(doctrine).toContain("runtime_health_requested=true");
     expect(doctrine).toContain("passar o texto do operador basta");
     expect(doctrine).toContain("/watchdog:*");
+    expect(doctrine).toContain("worker_readiness_requested=true");
+    expect(doctrine).toContain("sem preparar nem despachar worker");
     expect(doctrine).toContain("agent_run_operator_packet` só após readiness explícita");
     expect(doctrine).toContain("a intake não autoriza mutação, worker nem dispatch");
     expect(doctrine).toContain("controlplaneaction=run-report-only-route");
@@ -176,6 +178,7 @@ describe("control-plane anti-bloat docs checklist", () => {
       expect(packagedDoc).toContain("operator_intent_intake_packet");
       expect(packagedDoc).toContain("runtime_health_requested=true");
       expect(packagedDoc).toContain("/watchdog:*");
+      expect(packagedDoc).toContain("worker_readiness_requested=true");
       expect(packagedDoc).toContain("reportonlyrouteauthorized=true");
     }
   });

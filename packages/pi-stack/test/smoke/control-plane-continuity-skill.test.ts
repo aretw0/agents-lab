@@ -17,6 +17,8 @@ describe("control-plane continuity skill", () => {
     expect(skill).toContain("through bash");
     expect(skill).toContain("mentions watchdog");
     expect(skill).toContain("Do not translate the pasted slash commands into shell commands");
+    expect(skill).toContain("workers/subagents are ready or safe to use");
+    expect(skill).toContain("Readiness checks do not prepare or dispatch a worker");
     expect(skill).toContain("explicitly authorizes read-only diagnostics");
     expect(skill).toContain("details.controlPlaneAction");
     expect(skill).toContain("run-report-only-route");

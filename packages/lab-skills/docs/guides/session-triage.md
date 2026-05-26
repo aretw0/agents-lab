@@ -37,7 +37,7 @@ Checklist de spawn rápido por modo:
 
 ## Atalho de intake universal (antes da triagem longa)
 
-Quando a intenção do operador ainda está livre ou ambígua, rode primeiro `operator_intent_intake_packet`. Ele decide, sem mutação ou dispatch, se o próximo passo é entrevista curta, brainstorm de lane, single-slice local ou readiness de runtime/worker. Se o operador pedir só saúde do runtime antes de trabalhar, inclusive mencionando watchdog ou colando `/watchdog:*`, passar o texto como intenção basta: o packet infere `runtime_health_requested=true`. Quando retornar `reportOnlyRouteAuthorized=true`, siga a rota read-only recomendada sem pedir confirmação textual.
+Quando a intenção do operador ainda está livre ou ambígua, rode primeiro `operator_intent_intake_packet`. Ele decide, sem mutação ou dispatch, se o próximo passo é entrevista curta, brainstorm de lane, single-slice local ou readiness de runtime/worker. Se o operador pedir só saúde do runtime antes de trabalhar, inclusive mencionando watchdog ou colando `/watchdog:*`, passar o texto como intenção basta: o packet infere `runtime_health_requested=true`. Se perguntar se workers/subagentes estão prontos ou seguros, a intake infere `worker_readiness_requested=true` e checa readiness sem preparar nem despachar worker. Quando retornar `reportOnlyRouteAuthorized=true`, siga a rota read-only recomendada sem pedir confirmação textual.
 
 Quando o formato do projeto ainda está nebuloso, rode `project_intake_plan` para escolher a primeira fatia local-safe sem abrir escopo protegido.
 
