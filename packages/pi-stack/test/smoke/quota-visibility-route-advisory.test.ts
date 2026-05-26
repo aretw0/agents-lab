@@ -220,7 +220,7 @@ describe("quota-visibility route advisory", () => {
     });
   });
 
-  it("buildRouteAdvisory diferencia escopo agregado Codex bloqueado vs pool codex-spark utilizável", () => {
+  it("buildRouteAdvisory diferencia escopo agregado bloqueado vs pool model-specific utilizável", () => {
     const advisory = buildRouteAdvisory({
       source: {
         sessionsRoot: "x",

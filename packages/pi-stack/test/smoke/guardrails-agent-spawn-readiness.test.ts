@@ -159,15 +159,15 @@ describe("agent spawn readiness contract", () => {
     });
 
     const generatedAtIso = new Date().toISOString();
-    const sparkScoped = resolveProviderExecutionBudgetEvidence({
+    const modelScoped = resolveProviderExecutionBudgetEvidence({
       budgetDecision: "ok",
-      budgetEvidence: "Spark model-specific capacity available",
+      budgetEvidence: "model-specific capacity available",
       budgetEvidenceSource: "provider-budget-snapshot",
       budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
       budgetEvidenceGeneratedAtIso: generatedAtIso,
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
     });
-    expect(sparkScoped).toMatchObject({
+    expect(modelScoped).toMatchObject({
       decision: "ok",
       provider: "openai-codex/gpt-5.3-codex-spark",
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
@@ -386,7 +386,7 @@ describe("agent spawn readiness contract", () => {
       cwd: process.cwd(),
       declaredFiles: ["docs/research/provider-canary-scorecard-2026-05.md"],
       budgetDecision: "ok",
-      budgetEvidence: "Spark model-specific budget ok",
+      budgetEvidence: "model-specific budget ok",
       budgetEvidenceSource: "manual",
       budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
       economyMode: "critical",

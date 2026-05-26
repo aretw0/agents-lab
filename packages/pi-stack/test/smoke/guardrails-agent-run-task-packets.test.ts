@@ -25,10 +25,10 @@ describe("agent run task packet surfaces", () => {
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
       cwd: process.cwd(),
       budgetDecision: "warn",
-      budgetEvidence: "model-specific Spark budget usable while aggregate Codex may be pressured",
+      budgetEvidence: "model-specific budget usable while aggregate provider may be pressured",
       budgetEvidenceSource: "manual",
       budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
-      tokenBudgetEvidence: "Spark scoped pool usable; conserve tokens",
+      tokenBudgetEvidence: "model-scoped pool usable; conserve tokens",
     });
 
     expect(result).toMatchObject({
@@ -55,7 +55,7 @@ describe("agent run task packet surfaces", () => {
     expect(result.rollback.join("\n")).toContain("git restore packages/pi-stack/extensions/guardrails-core-agent-run-start.ts");
     expect(result.invocationSpec.economyMode).toBe("critical");
     expect(result.invocationSpec.maxOutputLines).toBe(20);
-    expect(result.invocationSpec.budgetEvidence).toContain("Spark budget usable");
+    expect(result.invocationSpec.budgetEvidence).toContain("model-specific budget usable");
     expect(result.invocationSpec.budgetEvidenceProvider).toBe("openai-codex/gpt-5.3-codex-spark");
     expect(result.invocationSpecPacket.nextActionCode).toBe("present-invocation-spec-for-approval");
     expect(result.invocationSpecPacket.operatorPacket.nextActionCode).toBe("present-operator-approval");
@@ -230,7 +230,7 @@ describe("agent run task packet surfaces", () => {
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
       cwd: process.cwd(),
       budgetDecision: "warn",
-      budgetEvidence: "Spark scoped budget usable",
+      budgetEvidence: "scoped model budget usable",
       budgetEvidenceSource: "manual",
       budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
     });
@@ -275,7 +275,7 @@ describe("agent run task packet surfaces", () => {
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
       cwd: process.cwd(),
       budgetDecision: "ok",
-      budgetEvidence: "Spark scoped budget usable",
+      budgetEvidence: "scoped model budget usable",
       budgetEvidenceSource: "manual",
       budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
       extensionIsolation: "inherit",
@@ -352,7 +352,7 @@ describe("agent run task packet surfaces", () => {
         task_id: "TASK-BUD-1010",
         provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
         budget_decision: "warn",
-        budget_evidence: "Spark scoped budget usable",
+        budget_evidence: "scoped model budget usable",
         budget_evidence_source: "manual",
         budget_evidence_provider: "openai-codex/gpt-5.3-codex-spark",
       },
@@ -473,7 +473,7 @@ describe("agent run task packet surfaces", () => {
       task_id: "TASK-BUD-1014",
       provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
       budget_decision: "warn",
-      budget_evidence: "Spark scoped budget usable",
+      budget_evidence: "scoped model budget usable",
       budget_evidence_source: "manual",
       budget_evidence_provider: "openai-codex/gpt-5.3-codex-spark",
     };
@@ -571,7 +571,7 @@ describe("agent run task packet surfaces", () => {
         task_id: "TASK-BUD-1012",
         provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
         budget_decision: "warn",
-        budget_evidence: "Spark scoped budget usable",
+        budget_evidence: "scoped model budget usable",
         budget_evidence_source: "manual",
         budget_evidence_provider: "openai-codex/gpt-5.3-codex-spark",
       },
