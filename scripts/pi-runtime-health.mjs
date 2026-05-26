@@ -123,7 +123,7 @@ export function buildPiRuntimeHealthReport(cwd = process.cwd(), options = {}) {
   };
 }
 
-function formatHuman(report) {
+export function formatPiRuntimeHealthReport(report) {
   const lines = [
     report.summary,
     `- decision: ${report.decision}`,
@@ -132,7 +132,7 @@ function formatHuman(report) {
     `- dev-pressure action: ${report.devPressure.primaryAction}`,
     `- runtime-artifacts: tracked=${report.artifactAudit.trackedCount} violations=${report.artifactAudit.violations.length}`,
     `- performance-watchdog: persistedEvents=${report.devPressure.performanceWatchdog.persistedEventCount ?? 0} liveMetrics=unavailable`,
-    "- note: live rss/heap/event-loop metrics remain TUI-local; ask the operator to run /watchdog:status when live numbers are required.",
+    "- note: live rss/heap/event-loop metrics remain Pi TUI-local; /watchdog:status is a Pi TUI command, not a shell command.",
   ];
   for (const action of report.devPressure.primaryRecoveryActions.slice(0, 4)) {
     lines.push(`  - recovery: ${action}`);
@@ -170,7 +170,7 @@ function main() {
   if (args.json) {
     console.log(JSON.stringify(report, null, 2));
   } else {
-    console.log(formatHuman(report));
+    console.log(formatPiRuntimeHealthReport(report));
   }
 
   if (args.strict && report.decision !== "continue") {

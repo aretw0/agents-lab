@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildPiRuntimeHealthReport } from "../pi-runtime-health.mjs";
+import { buildPiRuntimeHealthReport, formatPiRuntimeHealthReport } from "../pi-runtime-health.mjs";
 
 function makeDevPressure(overrides = {}) {
   return {
@@ -34,6 +34,18 @@ test("runtime health continues for clean read-only preflight", () => {
   assert.equal(report.decision, "continue");
   assert.equal(report.liveWatchdogMetricsAvailable, false);
   assert.match(report.summary, /liveWatchdog=unavailable/);
+});
+
+test("runtime health human output labels watchdog slash commands as Pi TUI commands", () => {
+  const report = buildPiRuntimeHealthReport("/tmp/agents-lab", {
+    devPressure: makeDevPressure(),
+    artifactAudit: makeArtifactAudit(),
+  });
+
+  const text = formatPiRuntimeHealthReport(report);
+
+  assert.match(text, /Pi TUI-local/);
+  assert.match(text, /\/watchdog:status is a Pi TUI command, not a shell command/);
 });
 
 test("runtime health recommends safe-mode for persisted watchdog pressure", () => {
