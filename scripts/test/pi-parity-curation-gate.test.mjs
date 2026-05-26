@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { STRICT_CURATED } from "../../packages/pi-stack/package-list.mjs";
 
 const SCRIPT = resolve("scripts/pi-parity.mjs");
 
@@ -109,5 +110,79 @@ test("pi-parity --strict blocks curated-default on non-permitted items", () => {
     );
 
     assert.equal(run.status, 1, run.stderr || run.stdout);
+  });
+});
+
+test("pi-parity reports cold capability drift when pi-lens is active in curated profiles", () => {
+  withTempProject((cwd) => {
+    writeFileSync(
+      join(cwd, ".pi", "settings.json"),
+      JSON.stringify(
+        {
+          packages: [
+            ...STRICT_CURATED.map((name) => `npm:${name}`),
+            "npm:pi-lens",
+          ],
+        },
+        null,
+        2,
+      ),
+    );
+
+    const json = spawnSync(
+      process.execPath,
+      [SCRIPT, "--scope", "project", "--profile", "strict-curated", "--json"],
+      { cwd, encoding: "utf8" },
+    );
+
+    assert.equal(json.status, 0, json.stderr || json.stdout);
+    const result = JSON.parse(json.stdout).results[0];
+    assert.deepEqual(result.classification.coldCapabilities.active.map((item) => item.package), ["pi-lens"]);
+    assert.equal(result.classification.coldCapabilities.active[0].entrypoint, "index.ts");
+    assert.ok(result.remediation.some((item) => item.decision === "esfriar-capacidade-fria"));
+
+    const strict = spawnSync(
+      process.execPath,
+      [SCRIPT, "--scope", "project", "--profile", "strict-curated", "--strict"],
+      { cwd, encoding: "utf8" },
+    );
+    assert.equal(strict.status, 1, strict.stderr || strict.stdout);
+    assert.match(strict.stdout, /active cold capabilities/);
+  });
+});
+
+test("pi-parity allows cold pi-lens entries when their startup extension is excluded", () => {
+  withTempProject((cwd) => {
+    writeFileSync(
+      join(cwd, ".pi", "settings.json"),
+      JSON.stringify(
+        {
+          packages: [
+            ...STRICT_CURATED.map((name) => `npm:${name}`),
+            { source: "npm:pi-lens", extensions: ["!index.ts"] },
+          ],
+        },
+        null,
+        2,
+      ),
+    );
+
+    const json = spawnSync(
+      process.execPath,
+      [SCRIPT, "--scope", "project", "--profile", "strict-curated", "--json"],
+      { cwd, encoding: "utf8" },
+    );
+
+    assert.equal(json.status, 0, json.stderr || json.stdout);
+    const result = JSON.parse(json.stdout).results[0];
+    assert.deepEqual(result.classification.coldCapabilities.active, []);
+    assert.deepEqual(result.classification.coldCapabilities.cold.map((item) => item.package), ["pi-lens"]);
+
+    const strict = spawnSync(
+      process.execPath,
+      [SCRIPT, "--scope", "project", "--profile", "strict-curated", "--strict"],
+      { cwd, encoding: "utf8" },
+    );
+    assert.equal(strict.status, 0, strict.stderr || strict.stdout);
   });
 });

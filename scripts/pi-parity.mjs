@@ -39,6 +39,7 @@ const IS_WINDOWS = process.platform === "win32";
 const DEFAULT_SCOPE = "user";
 const DEFAULT_PROFILE = "strict-curated";
 const PUBLIC_PROFILE_NAMES = ["stack-full", "first-party", "strict-curated", "curated-runtime"];
+const COLD_CAPABILITY_PACKAGES = ["pi-lens"];
 
 const PROFILES = {
   "stack-full": PACKAGES,
@@ -95,7 +96,7 @@ Usage:
 Options:
   --scope <user|project|both>
   --profile <stack-full|first-party|strict-curated|curated-runtime>
-  --strict              Exit 1 on parity drift (missing official or non-permitted items)
+  --strict              Exit 1 on parity drift (missing official, non-permitted, or active cold capabilities)
   --json                Emit machine-readable JSON
   -h, --help
 `.trim());
@@ -118,6 +119,38 @@ function loadSettings(settingsPath) {
 
 function getSource(entry) {
   return typeof entry === "string" ? entry : entry?.source;
+}
+
+function normalizeSurfacePath(value) {
+  return String(value ?? "").replace(/\\/g, "/").replace(/^\.\//, "");
+}
+
+function configuredExtensionActive(entry, entrypoint) {
+  if (!entry || typeof entry !== "object" || Array.isArray(entry) || !Array.isArray(entry.extensions)) return true;
+  if (entry.extensions.length === 0) return false;
+
+  const includes = new Set();
+  const excludes = new Set();
+  for (const value of entry.extensions) {
+    if (typeof value !== "string") continue;
+    if (value.startsWith("!")) excludes.add(normalizeSurfacePath(value.slice(1)));
+    else includes.add(normalizeSurfacePath(value));
+  }
+
+  const normalized = normalizeSurfacePath(entrypoint);
+  return (includes.size === 0 || includes.has(normalized)) && !excludes.has(normalized);
+}
+
+function coldCapabilityState(name, entry) {
+  if (!COLD_CAPABILITY_PACKAGES.includes(name)) return undefined;
+  if (name === "pi-lens") {
+    return {
+      package: name,
+      active: configuredExtensionActive(entry, "index.ts"),
+      entrypoint: "index.ts",
+    };
+  }
+  return { package: name, active: true, entrypoint: undefined };
 }
 
 function parseNpmPackageName(spec) {
@@ -177,7 +210,7 @@ function profileHint(profile) {
   return profile === "curated-default" ? "strict-curated" : profile;
 }
 
-function buildCurationRemediation({ profile, missing, optIn, nonPermittedPackages, nonPermittedSources }) {
+function buildCurationRemediation({ profile, missing, optIn, nonPermittedPackages, nonPermittedSources, activeColdCapabilities }) {
   const actions = [];
   if (missing.length > 0) {
     actions.push({
@@ -193,6 +226,14 @@ function buildCurationRemediation({ profile, missing, optIn, nonPermittedPackage
       reason: "Pacotes managed fora da baseline oficial (opt-in explícito).",
       items: optIn,
       commandHint: "manter fora do default e habilitar só via --stack-full/--profile stack-full",
+    });
+  }
+  if (activeColdCapabilities.length > 0) {
+    actions.push({
+      decision: "esfriar-capacidade-fria",
+      reason: "Capacidades caras estão ativas em perfil curado.",
+      items: activeColdCapabilities.map((item) => `${item.package}:${item.entrypoint ?? "default"}`),
+      commandHint: `npx @aretw0/pi-stack --profile ${profileHint(profile)} --local ou excluir a extensão explicitamente`,
     });
   }
   if (nonPermittedPackages.length > 0 || nonPermittedSources.length > 0) {
@@ -214,6 +255,7 @@ function analyzeScope(scope, profile) {
   const expected = new Set(PROFILES[profile]);
   const configuredNames = new Set();
   const unresolvedSources = [];
+  const configuredEntries = [];
 
   for (const entry of entries) {
     const source = getSource(entry);
@@ -223,6 +265,7 @@ function analyzeScope(scope, profile) {
       continue;
     }
     configuredNames.add(name);
+    configuredEntries.push({ name, source, entry });
   }
 
   const missing = [...expected].filter((p) => !configuredNames.has(p)).sort();
@@ -247,12 +290,28 @@ function analyzeScope(scope, profile) {
     },
   };
 
+  const coldCapabilityRows = configuredEntries
+    .map(({ name, source, entry }) => {
+      const state = coldCapabilityState(name, entry);
+      return state ? { ...state, source } : undefined;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.package.localeCompare(b.package) || String(a.source).localeCompare(String(b.source)));
+  const activeColdCapabilities = profile === "stack-full"
+    ? []
+    : coldCapabilityRows.filter((row) => row.active);
+  classification.coldCapabilities = {
+    active: activeColdCapabilities,
+    cold: coldCapabilityRows.filter((row) => !row.active),
+  };
+
   const remediation = buildCurationRemediation({
     profile,
     missing,
     optIn: extraManaged,
     nonPermittedPackages: classification.nonPermitted.packages,
     nonPermittedSources: classification.nonPermitted.sources,
+    activeColdCapabilities,
   });
 
   const surfaces = detectSurfaces(configuredNames);
@@ -271,6 +330,7 @@ function analyzeScope(scope, profile) {
     extraOther,
     unresolvedSources,
     classification,
+    activeColdCapabilities,
     remediation,
     surfaces,
   };
@@ -313,6 +373,13 @@ function printResult(result) {
   if (result.classification.nonPermitted.sources.length > 0) {
     console.log("non-permitted unresolved sources:");
     for (const src of result.classification.nonPermitted.sources) console.log(`  - ${src}`);
+  }
+
+  if (result.classification.coldCapabilities.active.length > 0) {
+    console.log("active cold capabilities (should be opt-in only):");
+    for (const item of result.classification.coldCapabilities.active) {
+      console.log(`  - ${item.package} (${item.entrypoint ?? "default"})`);
+    }
   }
 
   console.log("visibility surfaces:");
@@ -364,7 +431,8 @@ function main() {
     const hasNonPermitted = results.some(
       (r) => r.classification.nonPermitted.packages.length > 0 || r.classification.nonPermitted.sources.length > 0,
     );
-    const shouldBlock = hasMissingOfficial || hasNonPermitted;
+    const hasActiveColdCapabilities = results.some((r) => r.activeColdCapabilities.length > 0);
+    const shouldBlock = hasMissingOfficial || hasNonPermitted || hasActiveColdCapabilities;
     process.exit(shouldBlock ? 1 : 0);
   }
 }
