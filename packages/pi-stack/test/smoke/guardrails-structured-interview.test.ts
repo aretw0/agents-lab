@@ -207,7 +207,7 @@ describe("structured interview primitive", () => {
     const packet = buildOperatorIntentIntakePacket({
       intent: "fan out read-only model calibration",
       autonomyRequest: "worker-assisted",
-      availableResources: ["codex-spark", "test-harness"],
+      availableResources: ["separate-worker-quota", "test-harness"],
       expectedRoi: "compare workers before choosing a lane",
       limits: ["read-only", "two workers"],
       stopConditions: ["budget warning", "validation fails"],
@@ -245,7 +245,7 @@ describe("structured interview primitive", () => {
     const packet = buildOperatorIntentIntakePacket({
       intent: "fan out read-only model calibration",
       autonomyRequest: "worker-assisted",
-      availableResources: ["codex-spark", "test-harness"],
+      availableResources: ["separate-worker-quota", "test-harness"],
       expectedRoi: "compare workers before choosing a lane",
       limits: ["read-only", "two workers"],
       stopConditions: ["budget warning", "validation fails"],
@@ -280,7 +280,7 @@ describe("structured interview primitive", () => {
     const packet = buildOperatorIntentIntakePacket({
       intent: "fan out read-only model calibration",
       autonomyRequest: "worker-assisted",
-      availableResources: ["codex-spark", "test-harness"],
+      availableResources: ["separate-worker-quota", "test-harness"],
       expectedRoi: "compare workers before choosing a lane",
       limits: ["read-only", "two workers"],
       stopConditions: ["budget warning", "validation fails"],
@@ -318,7 +318,7 @@ describe("structured interview primitive", () => {
     const result = tool?.execute("tc-intake-readiness", {
       intent: "prepare worker review",
       autonomy_request: "worker-assisted",
-      available_resources: ["codex-spark"],
+      available_resources: ["separate-worker-quota"],
       expected_roi: "parallel read-only exploration",
       limits: ["read-only"],
       stop_conditions: ["budget warning"],
@@ -416,7 +416,7 @@ describe("structured interview primitive", () => {
     const result = tool?.execute("tc-intake", {
       intent: "prepare worker review",
       autonomy_request: "worker-assisted",
-      available_resources: ["codex-spark"],
+      available_resources: ["separate-worker-quota"],
       expected_roi: "parallel read-only exploration",
       limits: ["read-only"],
       stop_conditions: ["budget warning"],
