@@ -281,6 +281,11 @@ describe("structured interview primitive", () => {
       consumesPreviousStepOutput: false,
     });
     expect(packet.executionPlan.forbiddenActions).toEqual(["mutation", "dispatch", "worker-dispatch", "protected-scope"]);
+    expect(packet.executionPlan.shellCommandPolicy).toEqual({
+      piTuiSlashCommandsAreShellCommands: false,
+      forbiddenShellCommandPrefixes: ["/watchdog", "/safe-mode"],
+      preferredRuntimeHealthTools: ["environment_runtime_health_status", "environment_dev_pressure_status"],
+    });
     expect(packet.missingQuestions.length).toBeGreaterThan(0);
     expect(packet.interaction.choices[0]).toMatchObject({
       id: "check-runtime-health",
@@ -310,6 +315,8 @@ describe("structured interview primitive", () => {
       "safe_boot_runtime_artifact_audit",
     ]);
     expect(packet.executionPlan.executeWithoutTextualConfirmation).toBe(true);
+    expect(packet.executionPlan.shellCommandPolicy.piTuiSlashCommandsAreShellCommands).toBe(false);
+    expect(packet.executionPlan.shellCommandPolicy.forbiddenShellCommandPrefixes).toEqual(["/watchdog", "/safe-mode"]);
   });
 
   it("prepares a worker packet only as a report-only candidate when readiness is known", () => {

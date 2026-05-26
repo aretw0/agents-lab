@@ -83,6 +83,11 @@ export interface OperatorIntentExecutionPlan {
   steps: OperatorIntentRouteStep[];
   finalResponseContract: "ask-one-compact-question" | "compact-decision-summary" | "blocked-intent-summary";
   forbiddenActions: Array<"mutation" | "dispatch" | "worker-dispatch" | "protected-scope">;
+  shellCommandPolicy: {
+    piTuiSlashCommandsAreShellCommands: false;
+    forbiddenShellCommandPrefixes: string[];
+    preferredRuntimeHealthTools: string[];
+  };
 }
 
 export interface OperatorIntentIntakePacket {
@@ -326,6 +331,11 @@ function buildExecutionPlan(action: {
   confirmationRequired: boolean;
 }, recommendedTools: string[]): OperatorIntentExecutionPlan {
   const forbiddenActions: OperatorIntentExecutionPlan["forbiddenActions"] = ["mutation", "dispatch", "worker-dispatch", "protected-scope"];
+  const shellCommandPolicy: OperatorIntentExecutionPlan["shellCommandPolicy"] = {
+    piTuiSlashCommandsAreShellCommands: false,
+    forbiddenShellCommandPrefixes: ["/watchdog", "/safe-mode"],
+    preferredRuntimeHealthTools: ["environment_runtime_health_status", "environment_dev_pressure_status"],
+  };
   if (action.controlPlaneAction === "stop-and-report") {
     return {
       kind: "stop",
@@ -334,6 +344,7 @@ function buildExecutionPlan(action: {
       steps: [],
       finalResponseContract: "blocked-intent-summary",
       forbiddenActions,
+      shellCommandPolicy,
     };
   }
   if (action.controlPlaneAction === "ask-operator") {
@@ -344,6 +355,7 @@ function buildExecutionPlan(action: {
       steps: recommendedTools.map(buildRouteStep),
       finalResponseContract: "ask-one-compact-question",
       forbiddenActions,
+      shellCommandPolicy,
     };
   }
   return {
@@ -353,6 +365,7 @@ function buildExecutionPlan(action: {
     steps: recommendedTools.map(buildRouteStep),
     finalResponseContract: "compact-decision-summary",
     forbiddenActions,
+    shellCommandPolicy,
   };
 }
 
