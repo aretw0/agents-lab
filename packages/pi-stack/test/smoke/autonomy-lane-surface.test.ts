@@ -913,7 +913,6 @@ describe("autonomy lane surface", () => {
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).not.toContain("seedCount=");
   });
 
-
   it("emits report-only first_hatch_intake_packet before local-safe work", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsAutonomyLaneSurface({
@@ -997,5 +996,4 @@ describe("autonomy lane surface", () => {
     expect(result?.details.authorization).toBe("none");
     expect(String(result?.content?.[0]?.text ?? "")).toContain("next=operator-focus");
   });
-
 });
