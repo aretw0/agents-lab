@@ -113,6 +113,7 @@ describe("control-plane recommendation contract", () => {
     });
     expect(["not-needed", "continue-local-safe-short", "checkpoint-and-request-reload"])
       .toContain(result.details?.decision);
+    expect(result.details?.nextActionCode).toBe("checkpoint-then-request-reload");
     expect(result.content?.[0]?.text).toContain("reload-before-compact:");
   });
 

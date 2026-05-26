@@ -85,6 +85,7 @@ describe("context-watchdog runtime reload surfaces", () => {
 		});
 		expect(clear).toMatchObject({
 			decision: "not-needed",
+			nextActionCode: "continue-without-reload",
 			reloadGate: "reload-not-required",
 			dispatchAllowed: false,
 			mutationAllowed: false,
@@ -100,6 +101,7 @@ describe("context-watchdog runtime reload surfaces", () => {
 		});
 		expect(deferrable).toMatchObject({
 			decision: "continue-local-safe-short",
+			nextActionCode: "continue-short-local-safe-then-reload",
 			reloadGate: "level-not-precompact",
 			operatorActionRequired: true,
 			checkpointRequired: false,
@@ -116,12 +118,14 @@ describe("context-watchdog runtime reload surfaces", () => {
 		});
 		expect(nearCompact).toMatchObject({
 			decision: "checkpoint-and-request-reload",
+			nextActionCode: "checkpoint-then-request-reload",
 			reloadGate: "reload-required-compact",
 			operatorActionRequired: true,
 			checkpointRequired: true,
 			reloadRequestRequired: true,
 			pendingSourceOrToolChanges: true,
 		});
+		expect(nearCompact.summary).toContain("nextActionCode=checkpoint-then-request-reload");
 		expect(nearCompact.summary).toContain("dispatch=no");
 	});
 });

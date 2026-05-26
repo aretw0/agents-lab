@@ -15,6 +15,11 @@ export type ReloadBeforeCompactDecision =
 	| "continue-local-safe-short"
 	| "checkpoint-and-request-reload";
 
+export type ReloadBeforeCompactNextActionCode =
+	| "continue-without-reload"
+	| "continue-short-local-safe-then-reload"
+	| "checkpoint-then-request-reload";
+
 export type ReloadBeforeCompactPacket = {
 	mode: "report-only";
 	effect: "none";
@@ -32,6 +37,7 @@ export type ReloadBeforeCompactPacket = {
 	checkpointRequired: boolean;
 	reloadRequestRequired: boolean;
 	decision: ReloadBeforeCompactDecision;
+	nextActionCode: ReloadBeforeCompactNextActionCode;
 	nextAction: string;
 	summary: string;
 };
@@ -70,16 +76,19 @@ export function buildReloadBeforeCompactPacket(input: {
 		reloadRequired,
 	});
 	let decision: ReloadBeforeCompactDecision = "not-needed";
+	let nextActionCode: ReloadBeforeCompactNextActionCode = "continue-without-reload";
 	let nextAction = "continue; runtime reload is not required.";
 	let checkpointRequired = false;
 	let reloadRequestRequired = false;
 
 	if (reloadRequired && !reloadSignal.active) {
 		decision = "continue-local-safe-short";
+		nextActionCode = "continue-short-local-safe-then-reload";
 		nextAction = "continue one short local-safe slice; request /reload before starting long-run or compact-bound work.";
 		reloadRequestRequired = true;
 	} else if (reloadSignal.active) {
 		decision = "checkpoint-and-request-reload";
+		nextActionCode = "checkpoint-then-request-reload";
 		checkpointRequired = !checkpointFresh || handoffFreshness !== "fresh";
 		reloadRequestRequired = true;
 		nextAction = checkpointRequired
@@ -91,6 +100,7 @@ export function buildReloadBeforeCompactPacket(input: {
 	const summary = [
 		"reload-before-compact:",
 		`decision=${decision}`,
+		`nextActionCode=${nextActionCode}`,
 		`reloadGate=${reloadSignal.reason}`,
 		`level=${contextLevel}`,
 		`percent=${contextPercent}`,
@@ -118,6 +128,7 @@ export function buildReloadBeforeCompactPacket(input: {
 		checkpointRequired,
 		reloadRequestRequired,
 		decision,
+		nextActionCode,
 		nextAction,
 		summary,
 	};
