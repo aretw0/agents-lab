@@ -29,6 +29,9 @@ import {
   resolveValidationKnownCollectorResult,
   resolveValidationMethodPlan,
   reviewLocalSliceOperatorApprovedContract,
+  TUI_SLASH_COMMAND_PATTERN_SOURCE,
+  TUI_SLASH_COMMAND_SHELL_POLICY_EXAMPLES,
+  TUI_SLASH_COMMAND_SHELL_POLICY_PREFIXES,
 } from "../../extensions/guardrails-core-exports";
 
 describe("guardrails-core hardening re-exports", () => {
@@ -43,6 +46,9 @@ describe("guardrails-core hardening re-exports", () => {
     expect(detectShellInlineCommandSensitiveMarkerCheck("cmd.exe /c node -e \"const markers=['line\nline'];\"")).toBe(true);
     expect(detectShellInlineCommandSensitiveMarkerCheck("cmd.exe /c node -e \"console.log('line\nline');\"")).toBe(false);
     expect(commandSensitiveShellMarkerCheckReason()).toContain("Use safe_marker_check");
+    expect(new RegExp(TUI_SLASH_COMMAND_PATTERN_SOURCE).test("/watchdog:status")).toBe(true);
+    expect([...TUI_SLASH_COMMAND_SHELL_POLICY_PREFIXES]).toEqual(["/watchdog", "/safe-mode", "/models"]);
+    expect([...TUI_SLASH_COMMAND_SHELL_POLICY_EXAMPLES]).toContain("/models");
 
     expect(evaluateGitMaintenanceSignal({
       looseObjectCount: 6089,
