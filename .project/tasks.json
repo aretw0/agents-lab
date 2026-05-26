@@ -81,7 +81,7 @@
         "Validar com testes de runtime-profile/dev-pressure e uma simulação read-only de intenção de trabalho local-safe."
       ],
       "milestone": "0.8-control-plane-dynamic-capabilities",
-      "notes": "Registrada a partir da decisão DEC-BUD-047. Evitar criar `control-plane-plus` como produto final; se algum perfil intermediário for usado na implementação, deve ser transitório e coberto por teste/roadmap de remoção."
+      "notes": "Registrada a partir da decisão DEC-BUD-047. Evitar criar `control-plane-plus` como produto final; se algum perfil intermediário for usado na implementação, deve ser transitório e coberto por teste/roadmap de remoção.\n2026-05-26: commit 5ebb9166 adicionou matriz first-party de ativação (`always-on`, `read-only-on-intent`, `expensive-on-intent`, `protected-explicit`) e expôs capabilities frias como advisory em `pi:dev:pressure`/`pi:runtime:health`, separando `pressure` de `advisories`. Próxima fatia: usar essa matriz na condução de intenção do control-plane/runtime, sem transformar em perfil durável."
     }
   ]
 }
