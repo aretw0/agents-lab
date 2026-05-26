@@ -444,7 +444,7 @@ export default function (pi: ExtensionAPI) {
 						"Exemplos:",
 						"  /monitor-provider status",
 						"  /monitor-provider apply  # usa classifierModel/classifierModelByProvider se configurado",
-						"  /monitor-provider apply openai-codex/gpt-5.4-mini",
+						"  /monitor-provider apply provider/model",
 					].join("\n"),
 					"info",
 				);

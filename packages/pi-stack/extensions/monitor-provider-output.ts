@@ -5,7 +5,6 @@ import {
 	CLASSIFIER_MODEL_BY_PROVIDER_SETTING_PATH,
 	CLASSIFIER_MODEL_SETTING_PATH,
 	HEDGE_HISTORY_SETTING_PATH,
-	RECOMMENDED_CLASSIFIER_MODEL_BY_PROVIDER,
 } from "./monitor-provider-config";
 import {
 	checkModelAvailability,
@@ -159,10 +158,8 @@ export function buildStatusReport(
 	}
 
 	lines.push("");
-	lines.push("provider map recommendations:");
-	for (const key of Object.keys(RECOMMENDED_CLASSIFIER_MODEL_BY_PROVIDER).sort()) {
-		lines.push(`  ${key} -> ${RECOMMENDED_CLASSIFIER_MODEL_BY_PROVIDER[key]}`);
-	}
+	lines.push("provider map hints:");
+	lines.push("  configure classifierModelByProvider with provider/model refs you trust");
 
 	const overrides = readOverrideModels(cwd);
 	lines.push("");
@@ -207,9 +204,7 @@ export function buildTemplateSnippet(): string {
 					hedgeWhen: "has_bash",
 					hedgeIncludeProjectContext: false,
 					hedgeConversationHistory: true,
-					classifierModelByProvider: {
-						...RECOMMENDED_CLASSIFIER_MODEL_BY_PROVIDER,
-					},
+					classifierModelByProvider: {},
 				},
 			},
 		},

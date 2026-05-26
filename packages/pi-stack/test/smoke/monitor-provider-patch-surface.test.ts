@@ -72,8 +72,8 @@ describe("monitor-provider-patch command surface", () => {
 		expect(message).toContain("resolvedClassifierModel: (não resolvido)");
 		expect(message).toContain("provider map (configured):");
 		expect(message).toContain("  (none)");
-		expect(message).toContain("provider map recommendations:");
-		expect(message).toContain("github-copilot -> github-copilot/claude-haiku-4.5");
+		expect(message).toContain("provider map hints:");
+		expect(message).toContain("configure classifierModelByProvider with provider/model refs you trust");
 		expect(message).not.toContain("resolvedModelHealth: ok");
 		expect(message).not.toContain("⚠ overrides divergentes do modelo resolvido:");
 		expect(message).toContain("hedge monitor (current): when=has_bash");
