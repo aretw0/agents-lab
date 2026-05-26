@@ -512,6 +512,13 @@ export interface BoardDependencyHygieneScoreResult {
   summary: string;
 }
 
+const DEPENDENCY_HEALTH_TERMINAL_STATUSES = new Set(["completed", "cancelled", "canceled"]);
+
+function isDependencyHealthOpenStatus(status: unknown): boolean {
+  const normalized = String(status ?? "").trim().toLowerCase();
+  return !DEPENDENCY_HEALTH_TERMINAL_STATUSES.has(normalized);
+}
+
 export function buildBoardDependencyHealthSnapshot(
   cwd: string,
   options: { milestone?: string; limit?: number } = {},
@@ -526,7 +533,7 @@ export function buildBoardDependencyHealthSnapshot(
   });
   const block = readTasksBlockCached(cwd).block;
   const tasksById = new Map(block.tasks.map((task) => [task.id, task] as const));
-  const openRows = read.rows.filter((row) => row.status !== "completed");
+  const openRows = read.rows.filter((row) => isDependencyHealthOpenStatus(row.status));
 
   let tasksWithDependencies = 0;
   let tasksWithBlockers = 0;

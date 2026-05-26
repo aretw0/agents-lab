@@ -585,6 +585,35 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("ignores dependencies on cancelled tasks in dependency health", () => {
+    const cwd = seedWorkspace();
+    try {
+      writeFileSync(
+        join(cwd, ".project", "tasks.json"),
+        `${JSON.stringify(
+          {
+            tasks: [
+              { id: "TASK-CANCELLED", description: "cancelled duplicate", status: "cancelled", depends_on: ["TASK-MISSING"] },
+              { id: "TASK-PLANNED", description: "planned work", status: "planned" },
+            ],
+          },
+          null,
+          2,
+        )}\n`,
+        "utf8",
+      );
+
+      const snapshot = buildBoardDependencyHealthSnapshot(cwd);
+
+      expect(snapshot.metrics.sampledTasks).toBe(1);
+      expect(snapshot.metrics.tasksWithDependencies).toBe(0);
+      expect(snapshot.metrics.tasksWithBlockers).toBe(0);
+      expect(snapshot.recommendationCode).toBe("board-dependency-health-strong");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("builds dependency hygiene score for healthy and coupling-critical scopes", () => {
     const cwd = seedWorkspace();
     try {
