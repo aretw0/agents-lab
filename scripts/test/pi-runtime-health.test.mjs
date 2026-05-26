@@ -49,6 +49,36 @@ test("runtime health recommends safe-mode for persisted watchdog pressure", () =
   assert.deepEqual(report.reasons, ["recent-performance-watchdog-event"]);
 });
 
+test("runtime health surfaces recovery action for active full-startup pi-lens", () => {
+  const report = buildPiRuntimeHealthReport("/tmp/agents-lab", {
+    devPressure: makeDevPressure({
+      recommendation: "reduce-governance-surface",
+      summary: "environment-dev-pressure: recommendation=reduce-governance-surface signals=1 primary=warn:pi-lens-active-full-startup-risk action=set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested recoveryActions=3",
+      signals: [
+        {
+          level: "warn",
+          code: "pi-lens-active-full-startup-risk",
+          detail: "pi-lens active in .pi/settings.json startupMode=full",
+        },
+      ],
+      primaryAction: "set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested",
+      primaryRecoveryActions: [
+        "set PI_LENS_STARTUP_MODE=quick or minimal before starting Pi when pi-lens must stay available",
+        "reapply the strict-curated pi-stack profile so pi-lens stays cold until explicitly requested",
+      ],
+    }),
+    artifactAudit: makeArtifactAudit(),
+  });
+
+  assert.equal(report.decision, "safe-mode");
+  assert.deepEqual(report.reasons, ["dev-pressure-reduce-governance-surface"]);
+  assert.equal(report.devPressure.primaryAction, "set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested");
+  assert.deepEqual(report.devPressure.primaryRecoveryActions, [
+    "set PI_LENS_STARTUP_MODE=quick or minimal before starting Pi when pi-lens must stay available",
+    "reapply the strict-curated pi-stack profile so pi-lens stays cold until explicitly requested",
+  ]);
+});
+
 test("runtime health stops for tracked runtime artifacts", () => {
   const report = buildPiRuntimeHealthReport("/tmp/agents-lab", {
     devPressure: makeDevPressure(),

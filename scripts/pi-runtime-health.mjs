@@ -109,6 +109,8 @@ export function buildPiRuntimeHealthReport(cwd = process.cwd(), options = {}) {
       recommendation: devPressure.recommendation,
       summary: devPressure.summary,
       signals: devPressure.signals ?? [],
+      primaryAction: devPressure.primaryAction ?? "continue",
+      primaryRecoveryActions: devPressure.primaryRecoveryActions ?? [],
       performanceWatchdog: watchdog,
       largestSessionMb: devPressure.sessions?.largest?.mb ?? 0,
       heaviestConfiguredEntrypoint: devPressure.configuredEntrypoints?.[0],
@@ -127,10 +129,14 @@ function formatHuman(report) {
     `- decision: ${report.decision}`,
     `- reasons: ${report.reasons.length > 0 ? report.reasons.join(", ") : "none"}`,
     `- dev-pressure: ${report.devPressure.summary}`,
+    `- dev-pressure action: ${report.devPressure.primaryAction}`,
     `- runtime-artifacts: tracked=${report.artifactAudit.trackedCount} violations=${report.artifactAudit.violations.length}`,
     `- performance-watchdog: persistedEvents=${report.devPressure.performanceWatchdog.persistedEventCount ?? 0} liveMetrics=unavailable`,
     "- note: live rss/heap/event-loop metrics remain TUI-local; ask the operator to run /watchdog:status when live numbers are required.",
   ];
+  for (const action of report.devPressure.primaryRecoveryActions.slice(0, 4)) {
+    lines.push(`  - recovery: ${action}`);
+  }
   for (const signal of report.devPressure.signals.slice(0, 6)) {
     lines.push(`  - [${signal.level}] ${signal.code}: ${signal.detail}`);
   }
