@@ -60,6 +60,28 @@
       ],
       "milestone": "ui-quota-followup",
       "notes": "2026-05-10: descoberta após separar cota OpenAI Codex agregada vs `gpt-5.3-codex-spark`; em seguida reconciliada como duplicada da task planejada TASK-BUD-1006 (`operator-visible-ui-clarity-2026-05`). Evidência e diagnóstico movidos para TASK-BUD-1006. Erro de triagem: criação ocorreu após busca estreita por `quota footer/panel`, sem checar task planejada mais ampla. Guardrail operacional: antes de `board_task_create`, fazer duplicate preflight multi-termo e preferir `board_update` em task planejada existente.\n[provenance:human] source_task=TASK-BUD-1068 reason=Usuário pediu registrar follow-up TUI sem tirar foco de workers/subagents."
+    },
+    {
+      "id": "TASK-BUD-1070",
+      "description": "Projetar e validar ativação dinâmica de capabilities no control-plane: default único leve, capabilities frias descobríveis, ativação por intenção/sinal e cleanup após uso, sem criar perfil intermediário durável.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "scripts/pi-isolated.mjs",
+        "packages/pi-stack/extensions/runtime-profile-policy.mjs",
+        "packages/pi-stack/test/runtime-profile-policy.test.mjs",
+        "packages/pi-stack/test/smoke/environment-doctor-dev-pressure.test.ts",
+        "ROADMAP.md"
+      ],
+      "acceptance_criteria": [
+        "Documentar e testar uma matriz mínima de capabilities: always-on, read-only-on-intent, expensive-on-intent e protected-explicit.",
+        "Manter `pi:dev` com boot leve e sem `stack-full` como caminho normal.",
+        "Expor ação/recomendação clara quando uma capability útil estiver fria, sem exigir que o operador conheça perfis internos.",
+        "Preservar pi-lens, web gateway, colônia e background fora do hot path até intenção/sinal explícito.",
+        "Validar com testes de runtime-profile/dev-pressure e uma simulação read-only de intenção de trabalho local-safe."
+      ],
+      "milestone": "0.8-control-plane-dynamic-capabilities",
+      "notes": "Registrada a partir da decisão DEC-BUD-047. Evitar criar `control-plane-plus` como produto final; se algum perfil intermediário for usado na implementação, deve ser transitório e coberto por teste/roadmap de remoção."
     }
   ]
 }

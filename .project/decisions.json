@@ -332,6 +332,14 @@
       "rationale": "Objetivo primário do usuário é reduzir dependência de interação manual e aumentar throughput autônomo com confiabilidade; dispersão em side quests antes desse núcleo reduz velocidade e foco.",
       "status": "decided",
       "context": "Diretriz explícita do usuário (2026-04-23): backlogar tudo, manter foco em loops/fábrica e calibrar monitores para não atrapalhar aceleração sem iteração humana."
+    },
+    {
+      "id": "DEC-BUD-047",
+      "decision": "Preservar um default único do control-plane com capabilities frias, descobríveis e ativadas por intenção/sinal, em vez de criar perfis intermediários duráveis para cada modo de trabalho.",
+      "rationale": "Perfis extras resolvem a dor de curto prazo, mas aumentam carga cognitiva e semântica para operadores e usuários. A direção de produto é sane default + activation policy por capability: core leve sempre, decisão/readiness quando necessário, e capacidades caras como workers, pi-lens, web gateway e colônia apenas sob intenção ou sinal forte.",
+      "status": "decided",
+      "context": "Discussão sobre `pi:dev`, `pi:isolated:config` e receio de capacidades úteis estarem indisponíveis enquanto o agents-lab migra o desenvolvimento diário para o próprio Pi.",
+      "task": "TASK-BUD-1070"
     }
   ]
 }

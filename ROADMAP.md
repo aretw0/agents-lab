@@ -58,6 +58,7 @@ Objetivo: publicar uma baseline madura da `pi-stack` e do laboratório sem prome
 ### 4. Control Plane
 
 - manter execução local-safe como default;
+- preservar um default único e enxuto, com capabilities descobertas/ativadas por intenção em vez de multiplicar perfis operacionais;
 - promover delegação e long-run apenas por packets report-only, canários e rollback;
 - usar milestones como unidade de continuidade;
 - preservar operador como origem de intenção, aprovação e orçamento;
