@@ -111,6 +111,25 @@ export interface OperatorIntentIntakePacket {
   recommendation: string;
 }
 
+const RUNTIME_HEALTH_INTENT_PATTERNS = [
+  /\bruntime\s+health\b/i,
+  /\bhealth\s+check\b/i,
+  /\bwatchdog\b/i,
+  /\/watchdog(?::[A-Za-z0-9_-]+)?/i,
+  /\bdev\s+pressure\b/i,
+  /\bperformance\s+watchdog\b/i,
+  /\bvalidar\s+(?:a\s+)?sa[uú]de\s+d[ao]\s+runtime\b/i,
+  /\bsa[uú]de\s+d[ao]\s+runtime\b/i,
+  /\bdiagn[oó]stico\s+(?:de\s+)?runtime\b/i,
+  /\bpress[aã]o\s+d[eo]\s+runtime\b/i,
+];
+
+export function inferRuntimeHealthIntent(intent: string | undefined): boolean {
+  const text = String(intent ?? "").trim();
+  if (!text) return false;
+  return RUNTIME_HEALTH_INTENT_PATTERNS.some((pattern) => pattern.test(text));
+}
+
 function buildInteraction(decision: OperatorIntentIntakeDecision, tools: string[], questions: string[]): OperatorIntentInteraction {
   const choices: OperatorIntentChoice[] = [];
 
@@ -293,6 +312,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
   const missingQuestions = profilePacket.missingQuestions;
   const blockedRequests = profilePacket.blockedRequests;
   const missingCapabilities = [...profilePacket.missingCapabilities];
+  const runtimeHealthRequested = input.runtimeHealthRequested === true || inferRuntimeHealthIntent(input.intent);
 
   let decision: OperatorIntentIntakeDecision;
   let recommendedTools: string[];
@@ -302,7 +322,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     decision = "blocked";
     recommendedTools = ["control_plane_profile_packet"];
     recommendation = "Keep the intake report-only; remove protected, scheduler, remote, or GitHub Actions requests before preparing work.";
-  } else if (input.runtimeHealthRequested) {
+  } else if (runtimeHealthRequested) {
     decision = "check-runtime-health";
     recommendedTools = ["environment_runtime_health_status", "environment_dev_pressure_status", "safe_boot_runtime_artifact_audit"];
     recommendation = "Run read-only runtime health checks now; do not ask for confirmation and do not mutate files.";

@@ -21,7 +21,14 @@ describe("guardrails-core tool-call guard", () => {
     };
 
     registerGuardrailsCoreToolCallGuard(emitter, runtime as any);
-    for (const command of ["/watchdog:status", "/models", "/safe-mode on"]) {
+    for (const command of [
+      "/watchdog:status",
+      "/models",
+      "/safe-mode on",
+      "bash -lc \"/watchdog:status\"",
+      "/bin/bash -lc \"/watchdog:overlay\"",
+      "$ /watchdog:startup",
+    ]) {
       const result = await handler?.(
         { input: { command } },
         { cwd: process.cwd() },

@@ -122,7 +122,7 @@ export function registerGuardrailsStructuredInterviewSurface(pi: ExtensionAPI): 
       github_actions_requested: Type.Optional(Type.Boolean()),
       worker_requested: Type.Optional(Type.Boolean()),
       local_safe_material_ready: Type.Optional(Type.Boolean()),
-      runtime_health_requested: Type.Optional(Type.Boolean({ description: "When true, route immediately to read-only runtime health checks without asking for more intake fields." })),
+      runtime_health_requested: Type.Optional(Type.Boolean({ description: "When true, route immediately to read-only runtime health checks without asking for more intake fields. The intake also infers this route from runtime health/watchdog intent text." })),
       brainstorm_requested: Type.Optional(Type.Boolean()),
       no_eligible_local_safe_tasks: Type.Optional(Type.Boolean()),
       runtime_health_ready: Type.Optional(Type.Boolean()),

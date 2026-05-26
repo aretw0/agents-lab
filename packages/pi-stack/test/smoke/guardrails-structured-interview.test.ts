@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildControlPlaneProfilePacket, buildOperatorIntentIntakePacket, resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
+import { inferRuntimeHealthIntent } from "../../extensions/guardrails-core-operator-intent-intake";
 import { registerGuardrailsStructuredInterviewSurface } from "../../extensions/guardrails-core-structured-interview-surface";
 
 describe("structured interview primitive", () => {
@@ -253,6 +254,27 @@ describe("structured interview primitive", () => {
     expect(packet.interaction.recommendedChoiceId).toBe("check-runtime-health");
     expect(packet.summary).toContain("operatorDecision=no");
     expect(packet.summary).toContain("reportOnlyAuthorized=yes");
+  });
+
+  it("infers runtime health route from operator text without requiring an exact flag", () => {
+    expect(inferRuntimeHealthIntent("Quero validar a saúde do runtime antes de trabalhar.")).toBe(true);
+    expect(inferRuntimeHealthIntent("Rode /watchdog:status e /watchdog:overlay.")).toBe(true);
+    expect(inferRuntimeHealthIntent("organize the next implementation slice")).toBe(false);
+
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "Não peça confirmação. Quero validar a saúde do runtime e revisar watchdog antes de trabalhar.",
+    });
+
+    expect(packet.decision).toBe("check-runtime-health");
+    expect(packet.controlPlaneAction).toBe("run-report-only-route");
+    expect(packet.confirmationRequired).toBe(false);
+    expect(packet.reportOnlyRouteAuthorized).toBe(true);
+    expect(packet.recommendedTools).toEqual([
+      "environment_runtime_health_status",
+      "environment_dev_pressure_status",
+      "safe_boot_runtime_artifact_audit",
+    ]);
+    expect(packet.executionPlan.executeWithoutTextualConfirmation).toBe(true);
   });
 
   it("prepares a worker packet only as a report-only candidate when readiness is known", () => {
