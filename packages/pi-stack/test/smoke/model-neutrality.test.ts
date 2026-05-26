@@ -54,6 +54,7 @@ describe("distributed model neutrality", () => {
       join(PACKAGE_ROOT, "README.md"),
       join(process.cwd(), "docs", "guides", "colony-provider-model-governance.md"),
       join(process.cwd(), "docs", "guides", "monitor-overrides.md"),
+      join(process.cwd(), "docs", "guides", "openai-context-window-playbook.md"),
       join(process.cwd(), "docs", "guides", "quota-visibility.md"),
       join(process.cwd(), "docs", "guides", "token-efficiency.md"),
       join(PACKAGE_ROOT, "docs", "guides", "colony-provider-model-governance.md"),

@@ -19,8 +19,10 @@ Use para: leitura/edição pontual, refactor pequeno, revisão curta, prompts di
 
 Comando base:
 ```bash
-pi --model openai-codex/gpt-5.3-codex --no-extensions --no-skills --no-prompt-templates --no-themes
+pi --model "$PI_PROVIDER_MODEL" --no-extensions --no-skills --no-prompt-templates --no-themes
 ```
+
+Use `PI_PROVIDER_MODEL` como o provider/model autorizado pelo operador ou pela política local.
 
 Trade-off:
 - ✅ menor custo/latência/context tax
@@ -33,8 +35,10 @@ Use para: alterações de governança, budget, monitoria, handoff canônico, wor
 
 Comando base:
 ```bash
-pi --model openai-codex/gpt-5.3-codex
+pi --model "$PI_PROVIDER_MODEL"
 ```
+
+Use o mesmo provider/model configurado para a sessão; trocar de modelo é decisão de rota/budget, não parte do playbook.
 
 Trade-off:
 - ✅ guardrails, policies, ferramentas da stack
@@ -103,8 +107,8 @@ Notas:
 
 A `custom-footer` agora usa thresholds por `provider/model` para colorir `% de contexto`:
 - baseline geral: warning `50%`, error `75%`
-- `anthropic/*`: warning `65%`, error `85%`
-- outros provider/model refs ficam no baseline, salvo override explícito do operador/projeto
+- perfis calibrados podem declarar overrides por `provider/model` ou família de provider;
+- refs sem override ficam no baseline, salvo decisão explícita do operador/projeto.
 
 Override opcional em `.pi/settings.json`:
 ```json
@@ -113,7 +117,7 @@ Override opcional em `.pi/settings.json`:
     "customFooter": {
       "contextPressure": {
         "byProviderModel": {
-          "github-copilot/claude-sonnet-4-6": { "warningPct": 60, "errorPct": 80 }
+          "provider/model-id": { "warningPct": 60, "errorPct": 80 }
         }
       }
     }
@@ -130,7 +134,7 @@ A extensão `context-watchdog` adiciona sinais operacionais para sessões long-r
 
 Defaults derivados (sem override):
 - baseline `warn=50` (footer) → `checkpoint=68`, `compact=72`
-- `anthropic/* warn=65` (footer) → `checkpoint=78`, `compact=82`
+- perfil calibrado com `warn=65` (footer) → `checkpoint=78`, `compact=82`
 
 Níveis:
 - `warn` → operar em micro-slices
@@ -138,7 +142,7 @@ Níveis:
 - `compact` → **gatilho final**: compactar e retomar do checkpoint
 
 ### Calibração graceful-stop + reload (wave 2026-05)
-Para `github-copilot/gpt-5.3-codex` com `checkpoint=60` e `compact=65`, operar com política de dois estágios:
+Para um provider/model calibrado com `checkpoint=60` e `compact=65`, operar com política de dois estágios:
 1. `checkpoint` (60): parar de abrir escopo, fechar com checkpoint curto, preparar retomada.
 2. `compact` (65): se ainda chegou no limite final, compactar automaticamente (fallback).
 
