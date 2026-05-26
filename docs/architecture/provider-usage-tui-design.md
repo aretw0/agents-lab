@@ -63,7 +63,7 @@ Antes de desenhar o painel, é preciso entender o que é e o que não é control
 │  > █                                                            │
 ├─────────────────────────────────────────────────────────────────┤
 │  BUILT-IN STATUS BAR (pi controla, não substituível)            │
-│  ◆ openai-codex/gpt-5.3-codex-spark | 0/0 $0.00 0% | ⏱44s    │
+│  ◆ provider/model | 0/0 $0.00 0% | ⏱44s                    │
 ├─────────────────────────────────────────────────────────────────┤
 │  CUSTOM FOOTER — setFooter() (nosso controle total)             │
 │  LINE 1: ◆ provider/model | tokens $cost ctx% | ⏱elapsed       │
@@ -102,11 +102,11 @@ O modo `auto` é o primeiro passo de "políticas de perfil" (REQ-BUD-022) — mo
 
 ```
 MODO off (padrão — 2 linhas):
-◆ openai-codex/gpt-5.3-codex-spark | 23k/8k $0.04 2% | ⏱12m
+◆ provider/model | 23k/8k $0.04 2% | ⏱12m
 ⌂ agents-lab | ⎇ main | ✓copilot:used=38% ✓antigrav:used=10% ✓gemini:used=2% ⚠codex:used=46%
 
 MODO on ou auto-triggered (footer expandido):
-◆ openai-codex/gpt-5.3-codex-spark | 23k/8k $0.04 2% | ⏱12m
+◆ provider/model | 23k/8k $0.04 2% | ⏱12m
 ⌂ agents-lab | ⎇ main | ✓copilot:used=38% ✓antigrav:used=10% ✓gemini:used=2% ⚠codex:used=46%
 ────── Provider Usage Panel ──────────────────────────────
   copilot   MONTHLY  requests  38%  ████░░░░░░  380/1000req  $0.00

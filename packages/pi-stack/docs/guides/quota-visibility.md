@@ -124,7 +124,7 @@ Comportamento canônico:
 Interpretação para usuários finais:
 
 - `Codex (5h)` e `Codex (7d)` representam o pool geral do Codex;
-- janelas como `GPT-5.3-Codex-Spark (5h)` e `GPT-5.3-Codex-Spark (7d)` representam pools model-specific;
+- janelas como `Modelo X (5h)` e `Modelo X (7d)` representam pools model-specific quando o provider expõe essa granularidade;
 - `percentLeft`/`usedPercent` vêm do dashboard live, enquanto budgets locais continuam sendo projeções dos logs locais;
 - se a projeção local entrar em `BLOCK`, mas a janela live model-specific ainda tiver quota, trate como **warning operacional**, não como exaustão comprovada do dashboard;
 - manter política `no-auto-switch`: usar a evidência para decidir, não para trocar provider/model silenciosamente.
@@ -132,11 +132,11 @@ Interpretação para usuários finais:
 Exemplo de leitura:
 
 ```text
-Codex (7d): 50% restante
-GPT-5.3-Codex-Spark (7d): 83% restante
+Provider geral (7d): 50% restante
+Modelo X (7d): 83% restante
 ```
 
-Nesse caso, um canary local-safe pode usar Spark com cautela se o operador escolher explicitamente esse modelo, mas a stack não deve alterar roteamento automaticamente.
+Nesse caso, um canary local-safe pode usar o modelo com pool separado se o operador escolher explicitamente esse modelo, mas a stack não deve alterar roteamento automaticamente.
 
 ### 6) Route advisory (rodízio determinístico, sem auto-switch silencioso)
 
@@ -217,7 +217,7 @@ Em `.pi/settings.json`:
           "warnPct": 75,
           "hardPct": 100
         },
-        "openai-codex/gpt-5.3-codex-spark": {
+        "provider-a/model-with-separate-pool": {
           "owner": "colega-a",
           "period": "weekly",
           "unit": "requests",
@@ -240,7 +240,7 @@ Em `.pi/settings.json`:
 }
 ```
 
-Com isso, o status também mostra `% usado` e `% projetado` da semana, monitoramento das janelas rolling e avaliação de budget por provider. Para OpenAI Codex, budgets também podem ser declarados por `provider/model` quando o dashboard expõe pool separado, como `openai-codex/gpt-5.3-codex-spark`.
+Com isso, o status também mostra `% usado` e `% projetado` da semana, monitoramento das janelas rolling e avaliação de budget por provider. Budgets também podem ser declarados por `provider/model` quando o dashboard expõe pool separado, como `provider-a/model-with-separate-pool`.
 
 Se o Codex passar a operar com peak hours de forma mais explícita, você já terá baseline histórico para reagir rápido.
 

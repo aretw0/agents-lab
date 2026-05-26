@@ -134,7 +134,7 @@ Ativar: `/settings` → selecionar `agents-lab`
 
 > Convenção: `/doctor` permanece o diagnóstico global de ambiente/runtime. Comandos verticais como `/monitor-provider`, `/colony-pilot` e `/scheduler-governance` fazem diagnóstico/controle de domínio.
 >
-> Guia de quota visibility para usuários finais: [`docs/guides/quota-visibility.md`](docs/guides/quota-visibility.md). Inclui OpenAI Codex WHAM probe read-only (`quota_visibility_openai_wham_probe`), cache fail-soft e interpretação de pools separados como `gpt-5.3-codex-spark`.
+> Guia de quota visibility para usuários finais: [`docs/guides/quota-visibility.md`](docs/guides/quota-visibility.md). Inclui OpenAI Codex WHAM probe read-only (`quota_visibility_openai_wham_probe`), cache fail-soft e interpretação de pools separados por `provider/model`.
 >
 > Guia de governança provider/model para colônia e multi-agentes: [`docs/guides/colony-provider-model-governance.md`](docs/guides/colony-provider-model-governance.md)
 >
