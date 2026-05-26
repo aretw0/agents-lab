@@ -156,6 +156,9 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(doctrine).toContain("próxima fatia local-safe");
     expect(doctrine).toContain("lane_brainstorm_seed_preview");
     expect(doctrine).toContain("sem materializar task");
+    expect(doctrine).toContain("no-eligible-tasks");
+    expect(doctrine).toContain("intake/brainstorm/seed-preview report-only");
+    expect(doctrine).toContain("antes de materializar qualquer task");
     expect(doctrine).toContain("intenção genérica ainda passa por entrevista curta");
     expect(doctrine).toContain("agent_run_operator_packet` só após readiness explícita");
     expect(doctrine).toContain("a intake não autoriza mutação, worker nem dispatch");
@@ -178,13 +181,22 @@ describe("control-plane anti-bloat docs checklist", () => {
       sessionTriage.indexOf("project_intake_plan"),
     );
 
-    for (const packagedDoc of [labDoctrine, piDoctrine, labSessionTriage]) {
+    for (const packagedDoc of [labDoctrine, piDoctrine]) {
       expect(packagedDoc).toContain("operator_intent_intake_packet");
       expect(packagedDoc).toContain("runtime_health_requested=true");
       expect(packagedDoc).toContain("/watchdog:*");
       expect(packagedDoc).toContain("worker_readiness_requested=true");
       expect(packagedDoc).toContain("lane_brainstorm_seed_preview");
+      expect(packagedDoc).toContain("intake/brainstorm/seed-preview report-only");
+      expect(packagedDoc).toContain("antes de materializar qualquer task");
       expect(packagedDoc).toContain("reportonlyrouteauthorized=true");
     }
+
+    expect(labSessionTriage).toContain("operator_intent_intake_packet");
+    expect(labSessionTriage).toContain("runtime_health_requested=true");
+    expect(labSessionTriage).toContain("/watchdog:*");
+    expect(labSessionTriage).toContain("worker_readiness_requested=true");
+    expect(labSessionTriage).toContain("lane_brainstorm_seed_preview");
+    expect(labSessionTriage).toContain("reportonlyrouteauthorized=true");
   });
 });

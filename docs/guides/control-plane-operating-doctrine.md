@@ -573,7 +573,7 @@ Após fechar uma macro-task de calibração, não puxe backlog protegido só par
 
 Regra de continuidade: `no-eligible-tasks` é um stop condition local, não convite para invadir protected scope. O agente deve escolher uma destas saídas auditáveis:
 
-1. criar/decompor uma nova fatia local-safe explícita, com arquivos, validação e rollback claros;
+1. rodar `operator_intent_intake_packet` com a intenção do operador e, quando for seed de próxima fatia, seguir `lane_brainstorm_packet` + `lane_brainstorm_seed_preview` em modo report-only antes de materializar qualquer task;
 2. pedir decisão do operador para promover backlog protegido/ambíguo;
 3. deferir e registrar checkpoint quando não houver próxima fatia local-safe útil.
 
@@ -880,7 +880,7 @@ Migração segura (sem quebra de continuidade local-safe):
 
 Regra anti-confusão: evitar usar `lane-queue` para micro-direção conversacional; usar apenas quando houver necessidade explícita de fila/deferimento.
 
-Quando a lane local retornar `no-eligible-tasks`, não forçar continuidade no foco antigo. Faça checkpoint curto, selecione uma nova fatia local-safe explícita e retome a partir desse foco.
+Quando a lane local retornar `no-eligible-tasks`, não forçar continuidade no foco antigo. Faça checkpoint curto, rode intake/brainstorm/seed-preview report-only para escolher uma nova fatia local-safe explícita e só então retome a partir desse foco.
 
 ## Lane de delegação (wave 2026-05)
 
