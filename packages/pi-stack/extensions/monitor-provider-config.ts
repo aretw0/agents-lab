@@ -12,8 +12,8 @@ export const CLASSIFIERS = [
 	"work-quality-classifier",
 ] as const;
 
-/** Known safe defaults for provider-aware classifier model routing */
-export const DEFAULT_MODEL_BY_PROVIDER: Record<string, string> = {
+/** Suggested classifier models for template output; never applied implicitly. */
+export const RECOMMENDED_CLASSIFIER_MODEL_BY_PROVIDER: Record<string, string> = {
 	"github-copilot": "github-copilot/claude-haiku-4.5",
 	"openai-codex": "openai-codex/gpt-5.4-mini",
 };

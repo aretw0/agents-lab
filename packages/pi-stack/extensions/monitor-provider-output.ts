@@ -4,8 +4,8 @@ import {
 	CLASSIFIERS,
 	CLASSIFIER_MODEL_BY_PROVIDER_SETTING_PATH,
 	CLASSIFIER_MODEL_SETTING_PATH,
-	DEFAULT_MODEL_BY_PROVIDER,
 	HEDGE_HISTORY_SETTING_PATH,
+	RECOMMENDED_CLASSIFIER_MODEL_BY_PROVIDER,
 } from "./monitor-provider-config";
 import {
 	checkModelAvailability,
@@ -128,11 +128,6 @@ export function buildStatusReport(
 		detectStringMapSetting(cwd, CLASSIFIER_MODEL_BY_PROVIDER_SETTING_PATH) ??
 		{};
 
-	const effectiveMap = {
-		...DEFAULT_MODEL_BY_PROVIDER,
-		...customMap,
-	};
-
 	const lines: string[] = [];
 	lines.push("monitor-provider status");
 	lines.push("");
@@ -154,9 +149,19 @@ export function buildStatusReport(
 	}
 
 	lines.push("");
-	lines.push("provider map (effective):");
-	for (const key of Object.keys(effectiveMap).sort()) {
-		lines.push(`  ${key} -> ${effectiveMap[key]}`);
+	lines.push("provider map (configured):");
+	if (Object.keys(customMap).length === 0) {
+		lines.push("  (none)");
+	} else {
+		for (const key of Object.keys(customMap).sort()) {
+			lines.push(`  ${key} -> ${customMap[key]}`);
+		}
+	}
+
+	lines.push("");
+	lines.push("provider map recommendations:");
+	for (const key of Object.keys(RECOMMENDED_CLASSIFIER_MODEL_BY_PROVIDER).sort()) {
+		lines.push(`  ${key} -> ${RECOMMENDED_CLASSIFIER_MODEL_BY_PROVIDER[key]}`);
 	}
 
 	const overrides = readOverrideModels(cwd);
@@ -203,8 +208,7 @@ export function buildTemplateSnippet(): string {
 					hedgeIncludeProjectContext: false,
 					hedgeConversationHistory: true,
 					classifierModelByProvider: {
-						"github-copilot": "github-copilot/claude-haiku-4.5",
-						"openai-codex": "openai-codex/gpt-5.4-mini",
+						...RECOMMENDED_CLASSIFIER_MODEL_BY_PROVIDER,
 					},
 				},
 			},

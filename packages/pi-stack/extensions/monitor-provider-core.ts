@@ -14,7 +14,6 @@ import {
 	CLASSIFIER_THINKING_SETTING_PATH,
 	DEFAULT_FRAGILITY_WHEN,
 	DEFAULT_HEDGE_WHEN,
-	DEFAULT_MODEL_BY_PROVIDER,
 	DEFAULT_THINKING,
 	FRAGILITY_WHEN_PATTERNS,
 	FRAGILITY_WHEN_SETTING_PATH,
@@ -70,13 +69,13 @@ export function detectDefaultProvider(cwd: string): string | undefined {
 	return provider;
 }
 
-/** Resolves the classifier model for a provider from settings/default map. */
+/** Resolves the classifier model from explicit settings only. */
 export function resolveClassifierModel(
 	cwd: string,
 	provider?: string,
 ): {
 	model?: string;
-	source: "explicit" | "provider-map" | "defaults" | "none";
+	source: "explicit" | "provider-map" | "none";
 } {
 	const explicit = detectStringSetting(cwd, CLASSIFIER_MODEL_SETTING_PATH);
 	if (explicit) return { model: explicit, source: "explicit" };
@@ -88,9 +87,6 @@ export function resolveClassifierModel(
 		);
 		const fromMap = customMap?.[provider];
 		if (fromMap) return { model: fromMap, source: "provider-map" };
-
-		const fallback = DEFAULT_MODEL_BY_PROVIDER[provider];
-		if (fallback) return { model: fallback, source: "defaults" };
 	}
 
 	return { source: "none" };
