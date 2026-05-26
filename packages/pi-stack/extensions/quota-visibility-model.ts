@@ -85,6 +85,17 @@ export function shortProviderLabel(p: string): string {
 		.replace("google-antigravity", "antigrav");
 }
 
+export function shortBudgetScopeLabel(input: {
+	provider: string;
+	account?: string;
+	model?: string;
+}): string {
+	const provider = shortProviderLabel(input.provider);
+	if (input.model) return `${provider}/${input.model}`;
+	if (input.account) return `${provider}@${input.account}`;
+	return provider;
+}
+
 /**
  * Format per-provider budget state into compact footer tokens.
  * Each entry: "✓codex:used=12%", "✗copilot:used=100%", "⚠gemini:used=78%".
@@ -104,11 +115,7 @@ export function formatBudgetStatusParts(
 		);
 		const icon =
 			b.state === "blocked" ? "✗" : b.state === "warning" ? "⚠" : "✓";
-		const scope = b.model
-			? `${shortProviderLabel(b.provider)}/${b.model}`
-			: b.account
-				? `${shortProviderLabel(b.provider)}@${b.account}`
-				: shortProviderLabel(b.provider);
+		const scope = shortBudgetScopeLabel(b);
 		return `${icon}${scope}:used=${pct}%`;
 	});
 }

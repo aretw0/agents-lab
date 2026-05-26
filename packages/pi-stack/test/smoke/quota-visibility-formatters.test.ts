@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatBudgetStatusLegend,
   formatBudgetStatusParts,
+  shortBudgetScopeLabel,
   shortProviderLabel,
   type ProviderBudgetStatus,
 } from "../../extensions/quota-visibility";
@@ -50,6 +51,10 @@ describe("quota-visibility TUI footer formatters", () => {
     it("mantém providers desconhecidos intactos", () => {
       expect(shortProviderLabel("anthropic")).toBe("anthropic");
     });
+    it("preserva escopo model-specific e account-specific no label curto", () => {
+      expect(shortBudgetScopeLabel({ provider: "openai-codex", model: "gpt-worker" })).toBe("codex/gpt-worker");
+      expect(shortBudgetScopeLabel({ provider: "github-copilot", account: "team-a" })).toBe("copilot@team-a");
+    });
   });
 
   describe("formatBudgetStatusParts", () => {
@@ -95,6 +100,20 @@ describe("quota-visibility TUI footer formatters", () => {
         makeBudgetStatus("google-gemini-cli", "ok", 8),
       ]);
       expect(parts).toEqual(["✓codex:used=0%", "✗copilot:used=100%", "✓gemini:used=8%"]);
+    });
+
+    it("diferencia provider agregado de budget model-specific no footer compacto", () => {
+      const parts = formatBudgetStatusParts([
+        makeBudgetStatus("openai-codex", "blocked", 100),
+        {
+          ...makeBudgetStatus("openai-codex", "ok", 2),
+          model: "gpt-worker",
+          providerModelKey: "openai-codex/gpt-worker",
+          unit: "requests",
+          usedPctRequests: 2,
+        },
+      ]);
+      expect(parts).toEqual(["✗codex:used=100%", "✓codex/gpt-worker:used=2%"]);
     });
 
     it("trata undefined como 0 (safeNum)", () => {

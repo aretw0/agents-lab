@@ -25,6 +25,7 @@ import {
 	parseRouteModelRefs,
 	type QuotaStatus,
 	safeNum,
+	shortBudgetScopeLabel,
 	shortProviderLabel,
 	formatBudgetStatusLegend,
 } from "./quota-visibility";
@@ -134,7 +135,7 @@ function budgetRow(b: ProviderBudgetStatus): string {
 				? `/${fmtMoney(b.periodCostUsdCap)}`
 				: "";
 	}
-	const label = shortProviderLabel(b.provider).padEnd(10);
+	const label = shortBudgetScopeLabel(b).padEnd(18);
 	const period = b.period.padEnd(7);
 	const unitLabel = (b.unit === "requests" ? "req" : "cost").padEnd(5);
 	const pctStr = `${Math.round(pct)}%`.padStart(4);
@@ -195,7 +196,7 @@ export function buildPanelLines(
 			.map((c) => {
 				const icon =
 					c.state === "blocked" ? "✗" : c.state === "warning" ? "⚠" : "✓";
-				return `${icon}${shortProviderLabel(c.provider)} ${Math.round(c.projectedPressurePct)}%`;
+				return `${icon}${shortBudgetScopeLabel(c)} ${Math.round(c.projectedPressurePct)}%`;
 			})
 			.join("  ");
 		const rec = advisory.recommendedProvider

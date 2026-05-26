@@ -178,6 +178,30 @@ describe("quota-panel — buildPanelLines", () => {
     expect(lines.some((l) => l.includes("⚠"))).toBe(true);
   });
 
+  it("mantém escopo model-specific visível no painel e no route advisory", () => {
+    const status = makeMinimalQuotaStatus([
+      makeMinimalBudgetStatus("openai-codex", "blocked", { usedPctCost: 100, projectedPctCost: 100 }),
+      makeMinimalBudgetStatus("openai-codex", "ok", {
+        model: "gpt-worker",
+        providerModelKey: "openai-codex/gpt-worker",
+        unit: "requests",
+        observedRequests: 2,
+        projectedRequestsEndOfPeriod: 4,
+        periodRequestsCap: 100,
+        usedPctCost: 0,
+        usedPctRequests: 2,
+        projectedPctRequests: 4,
+      }),
+    ]);
+    const lines = buildPanelLines(status, 120, {
+      preferredScopeKeys: ["openai-codex/gpt-worker"],
+    }).join("\n");
+
+    expect(lines).toContain("codex/gpt-worker");
+    expect(lines).toContain("balanced → codex");
+    expect(lines).toContain("✓codex/gpt-worker");
+  });
+
   it("mostra ✗ para provider blocked", () => {
     const status = makeMinimalQuotaStatus([
       makeMinimalBudgetStatus("openai-codex", "blocked", { usedPctCost: 100 }),
