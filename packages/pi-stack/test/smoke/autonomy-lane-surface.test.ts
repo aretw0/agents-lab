@@ -623,6 +623,8 @@ describe("autonomy lane surface", () => {
     expect(decisionCue?.recommendedAction).toBe("seed-local-safe");
     expect(decisionCue?.nextCandidateTaskId).toBeUndefined();
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("decisionCue=seed-local-safe-required");
+    expect(String(result?.details.nextAction ?? "")).toContain("operator_intent_intake_packet");
+    expect(String(result?.details.nextAction ?? "")).toContain("lane_brainstorm_seed_preview");
     expect(String(result?.details.nextAction ?? "")).toContain("seed 3 local-safe tasks");
     expect(String(result?.details.nextAction ?? "")).toContain("seedWhy=bootstrap-focus-missing");
     expect(String(result?.details.nextAction ?? "")).toContain("seedPriority=continuity-bootstrap");

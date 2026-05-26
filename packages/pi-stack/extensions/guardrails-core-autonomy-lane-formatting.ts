@@ -54,6 +54,8 @@ export function buildAutonomyLaneSeededNextAction(input: {
 }): string | undefined {
   if (input.selectionReady || input.seedingDecision !== "seed-now") return undefined;
   return [
+    "run operator_intent_intake_packet for next local-safe seed intent",
+    "then lane_brainstorm_packet + lane_brainstorm_seed_preview in report-only mode",
     `seed ${Math.max(1, Math.floor(Number(input.suggestedSeedCount ?? 1)))} local-safe tasks`,
     `seedWhy=${input.seedWhy ?? "unknown"}`,
     `seedPriority=${input.seedPriority ?? "unknown"}`,

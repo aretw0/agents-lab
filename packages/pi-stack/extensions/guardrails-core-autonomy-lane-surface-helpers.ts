@@ -361,7 +361,7 @@ export function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: stri
       decision = "seed-now";
       recommendationCode = "afk-material-seed-now-bootstrap";
       nextActionCode = "run-bootstrap-seed-preview";
-      nextAction = `run lane_brainstorm_packet + lane_brainstorm_seed_preview and decide bootstrap seeding for up to ${suggestedSeedCount} slices.`;
+      nextAction = `run operator_intent_intake_packet, then lane_brainstorm_packet + lane_brainstorm_seed_preview in report-only mode, and decide bootstrap seeding for up to ${suggestedSeedCount} slices.`;
       operatorActionRequired = true;
       seedTemplates = buildBootstrapSeedTemplates({ suggestedSeedCount, maxSeedSlices });
     } else {
@@ -375,7 +375,7 @@ export function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: stri
     decision = "seed-now";
     recommendationCode = "afk-material-seed-now-low-stock";
     nextActionCode = "run-low-stock-seed-preview";
-    nextAction = `run lane_brainstorm_packet + lane_brainstorm_seed_preview and decide seeding for up to ${suggestedSeedCount} slices.`;
+    nextAction = `run operator_intent_intake_packet, then lane_brainstorm_packet + lane_brainstorm_seed_preview in report-only mode, and decide seeding for up to ${suggestedSeedCount} slices.`;
     operatorActionRequired = true;
   }
 
