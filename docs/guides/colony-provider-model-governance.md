@@ -165,7 +165,7 @@ Isso evita crescimento acidental de complexidade e melhora coesão da arquitetur
 - `/colony-pilot models apply factory-strict-copilot`
 - `/colony-pilot models apply factory-strict-hybrid`
 
-Esses perfis escrevem `piStack.colonyPilot.modelPolicy` no `.pi/settings.json` e ativam hard-gate no `tool_call` de `ant_colony`. O perfil `default` não injeta `roleModels`; `codex`, `copilot`, `hybrid` e `factory-*` são presets explícitos para ambientes que já escolheram esses providers.
+Esses perfis escrevem `piStack.colonyPilot.modelPolicy` no `.pi/settings.json` e ativam hard-gate no `tool_call` de `ant_colony`. O perfil `default` não injeta `roleModels`; `codex`, `copilot`, `hybrid` e `factory-*` restringem provider e rigor, mas não escolhem modelos concretos. Declare `roleModels` ou envie overrides no `ant_colony` quando quiser fixar modelos.
 
 A baseline também pode configurar `piStack.colonyPilot.budgetPolicy` para exigir/injetar `maxCost` e bloquear caps acima do limite definido.
 

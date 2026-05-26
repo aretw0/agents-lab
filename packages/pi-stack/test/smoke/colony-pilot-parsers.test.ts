@@ -590,9 +590,9 @@ describe("colony-pilot parsers", () => {
 	it("model gate enforces scout-only when trigger is scout burst", () => {
 		const policy = resolveColonyPilotModelPolicy({
 			allowMixedProviders: false,
-			allowedProviders: ["openai-codex"],
+			allowedProviders: ["provider-a"],
 			modelGateEnabled: true,
-			gatedModelRefs: ["openai-codex/gpt-5.3-codex-spark"],
+			gatedModelRefs: ["provider-a/gated-model"],
 			gatedModelGoalTriggers: ["planning recovery", "scout burst"],
 			gatedModelScoutOnlyTrigger: "scout burst",
 		});
@@ -604,11 +604,11 @@ describe("colony-pilot parsers", () => {
 
 		const scoutOnlyInput: any = {
 			goal: "ativar scout burst para triagem inicial",
-			scoutModel: "openai-codex/gpt-5.3-codex-spark",
+			scoutModel: "provider-a/gated-model",
 		};
 		const scoutOnlyResult = evaluateAntColonyModelPolicy(
 			scoutOnlyInput,
-			"openai-codex/gpt-5.3-codex",
+			"provider-a/control-model",
 			registry,
 			policy,
 			scoutOnlyInput.goal,
@@ -617,11 +617,11 @@ describe("colony-pilot parsers", () => {
 
 		const invalidInput: any = {
 			goal: "ativar scout burst para triagem inicial",
-			workerModel: "openai-codex/gpt-5.3-codex-spark",
+			workerModel: "provider-a/gated-model",
 		};
 		const invalidResult = evaluateAntColonyModelPolicy(
 			invalidInput,
-			"openai-codex/gpt-5.3-codex",
+			"provider-a/control-model",
 			registry,
 			policy,
 			invalidInput.goal,
@@ -645,14 +645,28 @@ describe("colony-pilot parsers", () => {
 		expect(policy.roleModels).toEqual({});
 	});
 
-	it("model policy profile codex keeps explicit OpenAI preset", () => {
+	it("model policy profile codex gates provider without choosing role models", () => {
 		expect(resolveModelPolicyProfile("codex")).toBe("codex");
 
 		const policy = buildModelPolicyProfile("codex");
 		expect(policy.specializedRolesEnabled).toBe(false);
 		expect(policy.allowedProviders).toEqual(["openai-codex"]);
-		expect(policy.roleModels.worker).toBe("openai-codex/gpt-5.3-codex");
-		expect(policy.roleModels.review).toBeUndefined();
+		expect(policy.roleModels).toEqual({});
+	});
+
+	it("provider-specific profiles do not hardcode model choices", () => {
+		const profiles = [
+			"copilot",
+			"codex",
+			"hybrid",
+			"factory-strict",
+			"factory-strict-copilot",
+			"factory-strict-hybrid",
+		] as const;
+
+		for (const profile of profiles) {
+			expect(buildModelPolicyProfile(profile).roleModels).toEqual({});
+		}
 	});
 
 	it("model policy profile factory-strict endurece regras", () => {
@@ -684,7 +698,7 @@ describe("colony-pilot parsers", () => {
 		expect(policy.requireExplicitRoleModels).toBe(true);
 		expect(policy.allowMixedProviders).toBe(false);
 		expect(policy.allowedProviders).toEqual(["github-copilot"]);
-		expect(policy.roleModels.worker).toBe("github-copilot/claude-sonnet-4.6");
+		expect(policy.roleModels).toEqual({});
 	});
 
 	it("factory-strict-hybrid aplica allowlist por role", () => {

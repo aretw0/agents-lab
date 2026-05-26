@@ -465,11 +465,7 @@ export function buildModelPolicyProfile(
 			specializedRolesEnabled: false,
 			allowMixedProviders: false,
 			allowedProviders: ["github-copilot"],
-			roleModels: {
-				scout: "github-copilot/claude-haiku-4.5",
-				worker: "github-copilot/claude-sonnet-4.6",
-				soldier: "github-copilot/claude-sonnet-4.6",
-			},
+			roleModels: {},
 		});
 	}
 
@@ -478,11 +474,7 @@ export function buildModelPolicyProfile(
 			specializedRolesEnabled: false,
 			allowMixedProviders: true,
 			allowedProviders: ["github-copilot", "openai-codex"],
-			roleModels: {
-				scout: "openai-codex/gpt-5.4-mini",
-				worker: "github-copilot/claude-sonnet-4.6",
-				soldier: "openai-codex/gpt-5.2-codex",
-			},
+			roleModels: {},
 		});
 	}
 
@@ -503,15 +495,7 @@ export function buildModelPolicyProfile(
 			enforceFullModelRef: true,
 			allowMixedProviders: false,
 			allowedProviders: ["github-copilot"],
-			roleModels: {
-				scout: "github-copilot/claude-haiku-4.5",
-				worker: "github-copilot/claude-sonnet-4.6",
-				soldier: "github-copilot/claude-sonnet-4.6",
-				design: "github-copilot/claude-sonnet-4.6",
-				multimodal: "github-copilot/claude-haiku-4.5",
-				backend: "github-copilot/claude-sonnet-4.6",
-				review: "github-copilot/claude-sonnet-4.6",
-			},
+			roleModels: {},
 		});
 	}
 
@@ -542,15 +526,7 @@ export function buildModelPolicyProfile(
 				backend: ["openai-codex"],
 				review: ["github-copilot"],
 			},
-			roleModels: {
-				scout: "openai-codex/gpt-5.4-mini",
-				worker: "github-copilot/claude-sonnet-4.6",
-				soldier: "openai-codex/gpt-5.2-codex",
-				design: "github-copilot/claude-sonnet-4.6",
-				multimodal: "openai-codex/gpt-5.4-mini",
-				backend: "openai-codex/gpt-5.3-codex",
-				review: "github-copilot/claude-sonnet-4.6",
-			},
+			roleModels: {},
 		});
 	}
 
@@ -571,15 +547,7 @@ export function buildModelPolicyProfile(
 			enforceFullModelRef: true,
 			allowMixedProviders: false,
 			allowedProviders: ["openai-codex"],
-			roleModels: {
-				scout: "openai-codex/gpt-5.4-mini",
-				worker: "openai-codex/gpt-5.3-codex",
-				soldier: "openai-codex/gpt-5.2-codex",
-				design: "openai-codex/gpt-5.3-codex",
-				multimodal: "openai-codex/gpt-5.4-mini",
-				backend: "openai-codex/gpt-5.3-codex",
-				review: "openai-codex/gpt-5.2-codex",
-			},
+			roleModels: {},
 		});
 	}
 
@@ -587,10 +555,6 @@ export function buildModelPolicyProfile(
 		specializedRolesEnabled: false,
 		allowMixedProviders: false,
 		allowedProviders: ["openai-codex"],
-		roleModels: {
-			scout: "openai-codex/gpt-5.4-mini",
-			worker: "openai-codex/gpt-5.3-codex",
-			soldier: "openai-codex/gpt-5.2-codex",
-		},
+		roleModels: {},
 	});
 }
