@@ -314,8 +314,10 @@ describe("operator confirmation audit plan", () => {
       destructiveOrProtectedAction: true,
     });
     expect(textOnly.decision).toBe("needs-upstream-signal");
+    expect(textOnly.nextActionCode).toBe("add-upstream-or-wrapper-confirmation-signal");
     expect(textOnly.textOnlyEvidenceAccepted).toBe(false);
     expect(textOnly.reasons).toContain("custom-messages-text-only-spoofable");
+    expect(textOnly.summary).toContain("nextActionCode=add-upstream-or-wrapper-confirmation-signal");
 
     const guardOwned = resolveOperatorConfirmationRuntimeConsumptionPlan({
       guardOwnsConfirmationDialog: true,
@@ -323,6 +325,7 @@ describe("operator confirmation audit plan", () => {
       destructiveOrProtectedAction: true,
     });
     expect(guardOwned.decision).toBe("ready-for-guard-consumption");
+    expect(guardOwned.nextActionCode).toBe("consume-structured-confirmation-evidence");
     expect(guardOwned.nextActions).toEqual(["consume-envelope-with-exact-match-ttl-single-use"]);
     expect(guardOwned.dispatchAllowed).toBe(false);
     expect(guardOwned.canOverrideMonitorBlock).toBe(false);
@@ -337,6 +340,7 @@ describe("operator confirmation audit plan", () => {
       upstreamMutationAllowed: false,
     });
     expect(currentPiShape.decision).toBe("blocked");
+    expect(currentPiShape.nextActionCode).toBe("keep-fail-closed-no-signal");
     expect(currentPiShape.reasons).toContain("tool-call-confirmation-signal-missing");
     expect(currentPiShape.recommendedPath).toContain("keep fail-closed");
 
@@ -345,6 +349,7 @@ describe("operator confirmation audit plan", () => {
       auditEntryAppendAvailable: true,
     });
     expect(guardOwned.decision).toBe("use-guard-owned-audit-entry");
+    expect(guardOwned.nextActionCode).toBe("record-guard-owned-audit-entry");
     expect(guardOwned.implementationAllowed).toBe(false);
     expect(guardOwned.dispatchAllowed).toBe(false);
     expect(guardOwned.canOverrideMonitorBlock).toBe(false);
@@ -353,18 +358,21 @@ describe("operator confirmation audit plan", () => {
       upstreamMutationAllowed: true,
     });
     expect(upstream.decision).toBe("propose-upstream-tool-call-signal");
+    expect(upstream.nextActionCode).toBe("propose-upstream-confirmation-signal");
     expect(upstream.recommendedPath).toContain("do not patch node_modules directly");
   });
 
   it("chooses an implementation channel without enabling destructive runtime", () => {
     const guardOwned = resolveOperatorConfirmationImplementationChannelPlan({ guardCanOwnDialog: true });
     expect(guardOwned.channel).toBe("guard-owned-report-only");
+    expect(guardOwned.nextActionCode).toBe("design-guard-owned-report-only-channel");
     expect(guardOwned.runtimeDestructiveDialogEnabled).toBe(false);
     expect(guardOwned.implementationAllowed).toBe(false);
     expect(guardOwned.dispatchAllowed).toBe(false);
 
     const wrapper = resolveOperatorConfirmationImplementationChannelPlan({ preferredChannel: "wrapper" });
     expect(wrapper.channel).toBe("wrapper-design");
+    expect(wrapper.nextActionCode).toBe("design-wrapper-structured-envelope");
     expect(wrapper.directNodeModulesPatchAllowed).toBe(false);
 
     const blocked = resolveOperatorConfirmationImplementationChannelPlan({
@@ -372,6 +380,7 @@ describe("operator confirmation audit plan", () => {
       destructiveRuntimeEnableRequested: true,
     });
     expect(blocked.channel).toBe("blocked");
+    expect(blocked.nextActionCode).toBe("remove-prohibited-confirmation-request");
     expect(blocked.reasons).toContain("direct-node-modules-patch-prohibited");
     expect(blocked.reasons).toContain("destructive-runtime-enable-requires-separate-authorization");
   });

@@ -16,12 +16,14 @@ describe("operator confirmation implementation channel surface", () => {
     expect(result.content[0].text).toContain("channel=guard-owned-report-only");
     expect(result.details).toMatchObject({
       channel: "guard-owned-report-only",
+      nextActionCode: "design-guard-owned-report-only-channel",
       dispatchAllowed: false,
       implementationAllowed: false,
       runtimeDestructiveDialogEnabled: false,
       directNodeModulesPatchAllowed: false,
       authorization: "none",
     });
+    expect(result.content[0].text).toContain("nextActionCode=design-guard-owned-report-only-channel");
   });
 
   it("blocks prohibited runtime enablement and direct node_modules patches", () => {

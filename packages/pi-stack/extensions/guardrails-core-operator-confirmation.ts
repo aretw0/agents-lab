@@ -120,6 +120,11 @@ export type TrustedOperatorConfirmationEnvelopeConsumption = {
 };
 
 export type OperatorConfirmationRuntimeConsumptionDecision = "ready-for-guard-consumption" | "needs-runtime-bridge" | "needs-upstream-signal" | "blocked";
+export type OperatorConfirmationRuntimeConsumptionNextActionCode =
+  | "consume-structured-confirmation-evidence"
+  | "wire-runtime-structured-evidence-bridge"
+  | "add-upstream-or-wrapper-confirmation-signal"
+  | "do-not-consume-confirmation-evidence";
 
 export type OperatorConfirmationRuntimeConsumptionPlanInput = {
   guardOwnsConfirmationDialog?: boolean;
@@ -137,11 +142,17 @@ export type OperatorConfirmationRuntimeConsumptionPlan = {
   canOverrideMonitorBlock: false;
   textOnlyEvidenceAccepted: false;
   reasons: string[];
+  nextActionCode: OperatorConfirmationRuntimeConsumptionNextActionCode;
   nextActions: string[];
   summary: string;
 };
 
 export type OperatorConfirmationSignalSourceDecision = "use-guard-owned-audit-entry" | "propose-upstream-tool-call-signal" | "build-wrapper-signal" | "blocked";
+export type OperatorConfirmationSignalSourceNextActionCode =
+  | "record-guard-owned-audit-entry"
+  | "wrap-structured-confirmation-signal"
+  | "propose-upstream-confirmation-signal"
+  | "keep-fail-closed-no-signal";
 
 export type OperatorConfirmationSignalSourcePlanInput = {
   guardOwnsConfirmationDialog?: boolean;
@@ -160,11 +171,18 @@ export type OperatorConfirmationSignalSourcePlan = {
   canOverrideMonitorBlock: false;
   reasons: string[];
   recommendedPath: string;
+  nextActionCode: OperatorConfirmationSignalSourceNextActionCode;
   nextActions: string[];
   summary: string;
 };
 
 export type OperatorConfirmationImplementationChannel = "guard-owned-report-only" | "wrapper-design" | "upstream-pr-design" | "blocked";
+export type OperatorConfirmationImplementationChannelNextActionCode =
+  | "design-guard-owned-report-only-channel"
+  | "design-wrapper-structured-envelope"
+  | "draft-upstream-confirmation-interface"
+  | "choose-safe-confirmation-channel"
+  | "remove-prohibited-confirmation-request";
 
 export type OperatorConfirmationImplementationChannelInput = {
   preferredChannel?: "guard-owned" | "wrapper" | "upstream-pr";
@@ -183,6 +201,7 @@ export type OperatorConfirmationImplementationChannelPlan = {
   runtimeDestructiveDialogEnabled: false;
   directNodeModulesPatchAllowed: false;
   reasons: string[];
+  nextActionCode: OperatorConfirmationImplementationChannelNextActionCode;
   nextActions: string[];
   summary: string;
 };
@@ -205,8 +224,9 @@ export function resolveOperatorConfirmationImplementationChannelPlan(
       runtimeDestructiveDialogEnabled: false,
       directNodeModulesPatchAllowed: false,
       reasons,
+      nextActionCode: "remove-prohibited-confirmation-request",
       nextActions: ["remove-prohibited-request", "continue-with-design-or-report-only-channel"],
-      summary: `operator-confirmation-implementation-channel: channel=blocked dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+      summary: `operator-confirmation-implementation-channel: channel=blocked nextActionCode=remove-prohibited-confirmation-request dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -221,8 +241,9 @@ export function resolveOperatorConfirmationImplementationChannelPlan(
       runtimeDestructiveDialogEnabled: false,
       directNodeModulesPatchAllowed: false,
       reasons,
+      nextActionCode: "design-guard-owned-report-only-channel",
       nextActions: ["record-evidence-from-guard-owned-confirm-only", "keep-operational-destructive-dialog-disabled", "validate-envelope-consumption-before-enable"],
-      summary: `operator-confirmation-implementation-channel: channel=guard-owned-report-only dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+      summary: `operator-confirmation-implementation-channel: channel=guard-owned-report-only nextActionCode=design-guard-owned-report-only-channel dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -237,8 +258,9 @@ export function resolveOperatorConfirmationImplementationChannelPlan(
       runtimeDestructiveDialogEnabled: false,
       directNodeModulesPatchAllowed: false,
       reasons,
+      nextActionCode: "design-wrapper-structured-envelope",
       nextActions: ["design-wrapper-structured-envelope", "prove-consumer-receives-details", "keep-fail-closed"],
-      summary: `operator-confirmation-implementation-channel: channel=wrapper-design dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+      summary: `operator-confirmation-implementation-channel: channel=wrapper-design nextActionCode=design-wrapper-structured-envelope dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -253,8 +275,9 @@ export function resolveOperatorConfirmationImplementationChannelPlan(
       runtimeDestructiveDialogEnabled: false,
       directNodeModulesPatchAllowed: false,
       reasons,
+      nextActionCode: "draft-upstream-confirmation-interface",
       nextActions: ["draft-upstream-interface", "preserve-local-fail-closed-until-release"],
-      summary: `operator-confirmation-implementation-channel: channel=upstream-pr-design dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+      summary: `operator-confirmation-implementation-channel: channel=upstream-pr-design nextActionCode=draft-upstream-confirmation-interface dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -267,8 +290,9 @@ export function resolveOperatorConfirmationImplementationChannelPlan(
     runtimeDestructiveDialogEnabled: false,
     directNodeModulesPatchAllowed: false,
     reasons,
+    nextActionCode: "choose-safe-confirmation-channel",
     nextActions: ["choose-guard-owned-wrapper-or-upstream-pr-channel"],
-    summary: `operator-confirmation-implementation-channel: channel=blocked dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=no-safe-channel-selected ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+    summary: `operator-confirmation-implementation-channel: channel=blocked nextActionCode=choose-safe-confirmation-channel dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=no-safe-channel-selected ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
   };
 }
 
@@ -288,8 +312,9 @@ export function resolveOperatorConfirmationSignalSourcePlan(
       canOverrideMonitorBlock: false,
       reasons,
       recommendedPath: "record trusted evidence from the guard-owned dialog via audit entry; consume only structured envelope details",
+      nextActionCode: "record-guard-owned-audit-entry",
       nextActions: ["wire-guard-owned-dialog-to-recordTrustedOperatorConfirmationUiDecision", "consume-structured-envelope-details-only"],
-      summary: `operator-confirmation-signal-source: decision=use-guard-owned-audit-entry dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+      summary: `operator-confirmation-signal-source: decision=use-guard-owned-audit-entry nextActionCode=record-guard-owned-audit-entry dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -303,8 +328,9 @@ export function resolveOperatorConfirmationSignalSourcePlan(
       canOverrideMonitorBlock: false,
       reasons,
       recommendedPath: "wrap the exposed confirmation signal into operator-confirmation-evidence details before monitor/guard consumption",
+      nextActionCode: "wrap-structured-confirmation-signal",
       nextActions: ["map-upstream-signal-to-exact-action-fingerprint", "consume-envelope-with-ttl-single-use"],
-      summary: `operator-confirmation-signal-source: decision=build-wrapper-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+      summary: `operator-confirmation-signal-source: decision=build-wrapper-signal nextActionCode=wrap-structured-confirmation-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -318,8 +344,9 @@ export function resolveOperatorConfirmationSignalSourcePlan(
       canOverrideMonitorBlock: false,
       reasons,
       recommendedPath: "emit hidden structured operator-confirmation-evidence custom messages and consume details, not content text",
+      nextActionCode: "wrap-structured-confirmation-signal",
       nextActions: ["emit-display-false-structured-envelope", "verify-consumer-receives-details"],
-      summary: `operator-confirmation-signal-source: decision=build-wrapper-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+      summary: `operator-confirmation-signal-source: decision=build-wrapper-signal nextActionCode=wrap-structured-confirmation-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -333,8 +360,9 @@ export function resolveOperatorConfirmationSignalSourcePlan(
       canOverrideMonitorBlock: false,
       reasons,
       recommendedPath: "propose an upstream ToolCallEvent confirmation field or structured pre-tool confirmation event; do not patch node_modules directly",
+      nextActionCode: "propose-upstream-confirmation-signal",
       nextActions: ["draft-upstream-pr-or-wrapper-design", "keep-local-fail-closed-until-signal-exists"],
-      summary: `operator-confirmation-signal-source: decision=propose-upstream-tool-call-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+      summary: `operator-confirmation-signal-source: decision=propose-upstream-tool-call-signal nextActionCode=propose-upstream-confirmation-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -349,8 +377,9 @@ export function resolveOperatorConfirmationSignalSourcePlan(
     canOverrideMonitorBlock: false,
     reasons,
     recommendedPath: "keep fail-closed; do not consume text-only confirmation evidence",
+    nextActionCode: "keep-fail-closed-no-signal",
     nextActions: ["use-guard-owned-dialog-or-upstream-wrapper-before-consuming-confirmation"],
-    summary: `operator-confirmation-signal-source: decision=blocked dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+    summary: `operator-confirmation-signal-source: decision=blocked nextActionCode=keep-fail-closed-no-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
   };
 }
 
@@ -370,8 +399,9 @@ export function resolveOperatorConfirmationRuntimeConsumptionPlan(
       canOverrideMonitorBlock: false,
       textOnlyEvidenceAccepted: false,
       reasons,
+      nextActionCode: "do-not-consume-confirmation-evidence",
       nextActions: ["do-not-use-confirmation-evidence-for-local-safe-action"],
-      summary: `operator-confirmation-runtime-consumption: decision=blocked dispatch=no override=no textOnly=no reasons=confirmation-not-required-for-local-safe-action ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+      summary: `operator-confirmation-runtime-consumption: decision=blocked nextActionCode=do-not-consume-confirmation-evidence dispatch=no override=no textOnly=no reasons=confirmation-not-required-for-local-safe-action ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -389,8 +419,9 @@ export function resolveOperatorConfirmationRuntimeConsumptionPlan(
       canOverrideMonitorBlock: false,
       textOnlyEvidenceAccepted: false,
       reasons,
+      nextActionCode: "consume-structured-confirmation-evidence",
       nextActions: ["consume-envelope-with-exact-match-ttl-single-use"],
-      summary: `operator-confirmation-runtime-consumption: decision=ready-for-guard-consumption dispatch=no override=no textOnly=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+      summary: `operator-confirmation-runtime-consumption: decision=ready-for-guard-consumption nextActionCode=consume-structured-confirmation-evidence dispatch=no override=no textOnly=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -403,8 +434,9 @@ export function resolveOperatorConfirmationRuntimeConsumptionPlan(
       canOverrideMonitorBlock: false,
       textOnlyEvidenceAccepted: false,
       reasons,
+      nextActionCode: "consume-structured-confirmation-evidence",
       nextActions: ["consume-envelope-with-exact-match-ttl-single-use"],
-      summary: `operator-confirmation-runtime-consumption: decision=ready-for-guard-consumption dispatch=no override=no textOnly=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+      summary: `operator-confirmation-runtime-consumption: decision=ready-for-guard-consumption nextActionCode=consume-structured-confirmation-evidence dispatch=no override=no textOnly=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -418,8 +450,9 @@ export function resolveOperatorConfirmationRuntimeConsumptionPlan(
       canOverrideMonitorBlock: false,
       textOnlyEvidenceAccepted: false,
       reasons,
+      nextActionCode: "add-upstream-or-wrapper-confirmation-signal",
       nextActions,
-      summary: `operator-confirmation-runtime-consumption: decision=needs-upstream-signal dispatch=no override=no textOnly=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+      summary: `operator-confirmation-runtime-consumption: decision=needs-upstream-signal nextActionCode=add-upstream-or-wrapper-confirmation-signal dispatch=no override=no textOnly=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
     };
   }
 
@@ -432,8 +465,9 @@ export function resolveOperatorConfirmationRuntimeConsumptionPlan(
     canOverrideMonitorBlock: false,
     textOnlyEvidenceAccepted: false,
     reasons,
+    nextActionCode: "wire-runtime-structured-evidence-bridge",
     nextActions,
-    summary: `operator-confirmation-runtime-consumption: decision=needs-runtime-bridge dispatch=no override=no textOnly=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
+    summary: `operator-confirmation-runtime-consumption: decision=needs-runtime-bridge nextActionCode=wire-runtime-structured-evidence-bridge dispatch=no override=no textOnly=no reasons=${reasons.join("|")} ${formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE)}`,
   };
 }
 
