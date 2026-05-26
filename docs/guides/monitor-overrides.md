@@ -258,7 +258,7 @@ Antes de qualquer publish RC/final:
 
 Critério de saída: runtime de monitor estável no provider alvo, sem novos classify failures durante o smoke.
 
-> Nota prática: `pnpm run verify` agora tenta auto-repair do contrato crítico de classify (`systemPrompt: compiled.systemPrompt`) em cópias divergentes de `@davidorex/pi-behavior-monitors/dist/index.js` antes de falhar. Além disso, no `session_start`, `monitor-provider-patch` aplica o mesmo reparo de runtime (best-effort) para reduzir drift após reinstalações.
+> Nota prática: `pnpm run verify` valida o perfil `strict-curated` por padrão. Se o runtime externo de `@davidorex/pi-behavior-monitors` estiver instalado, o verificador tenta auto-repair do contrato crítico de classify (`systemPrompt: compiled.systemPrompt`) antes de falhar; se esse runtime não estiver presente no perfil atual, a checagem é reportada como opcional ausente. No `session_start`, `monitor-provider-patch` continua aplicando o mesmo reparo best-effort quando encontra o runtime.
 
 ## Diagnóstico rápido de drift
 
