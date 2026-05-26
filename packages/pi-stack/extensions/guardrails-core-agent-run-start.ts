@@ -36,6 +36,7 @@ import { buildToolkitContract, type ToolkitCapability, type ToolkitContractProfi
 
 export type AgentRunExecutorKind = "pi-print-subprocess";
 export type AgentRunStartDecision = "ready-for-operator-decision" | "blocked";
+export type AgentRunStartNextActionCode = "present-structured-operator-approval" | "resolve-start-packet-blockers";
 export type AgentRunBudgetDecision = ProviderExecutionBudgetDecision;
 export type AgentRunOperatorFileContract = "read-only" | "mutation";
 export type AgentInvocationProfile = "read-only-review" | "small-mutation" | "test-fix" | "research";
@@ -123,6 +124,7 @@ export interface AgentRunStartPacketResult {
     shellInterpolationAllowed: false;
   };
   operatorApprovalPrompt: string;
+  nextActionCode: AgentRunStartNextActionCode;
   nextActions: string[];
   summary: string;
 }
@@ -440,6 +442,9 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   ];
   const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   const operatorApprovalPrompt = runId ? `approve worker ${runId}` : "approve worker <run-id>";
+  const nextActionCode: AgentRunStartNextActionCode = decision === "ready-for-operator-decision"
+    ? "present-structured-operator-approval"
+    : "resolve-start-packet-blockers";
 
   return {
     mode: "agent-run-start-packet",
@@ -482,6 +487,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       shellInterpolationAllowed: false,
     },
     operatorApprovalPrompt,
+    nextActionCode,
     nextActions: decision === "ready-for-operator-decision"
       ? [
           "present the structured operator approval packet before starting any worker",
@@ -500,6 +506,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
       "agent-run-start-packet:",
       `decision=${decision}`,
       `code=${recommendationCode}`,
+      `nextActionCode=${nextActionCode}`,
       runId ? `runId=${runId}` : undefined,
       providerModelRef ? `model=${providerModelRef}` : undefined,
       `executor=${executorKind}`,

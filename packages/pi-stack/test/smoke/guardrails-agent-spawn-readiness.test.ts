@@ -217,6 +217,7 @@ describe("agent spawn readiness contract", () => {
       singleRunOnly: true,
       decision: "ready-for-operator-decision",
       recommendationCode: "agent-run-start-ready-for-operator-decision",
+      nextActionCode: "present-structured-operator-approval",
       blockers: [],
       commandPreview: {
         command: "pi",
@@ -225,6 +226,7 @@ describe("agent spawn readiness contract", () => {
       operatorApprovalPrompt: "approve worker task-bud-990-stale-resume-review",
     });
     expect(result.runSpec.budgetDecision).toBe("ok");
+    expect(result.summary).toContain("nextActionCode=present-structured-operator-approval");
     expect(result.runSpec.extensionIsolation).toBe("minimal-no-extensions");
     expect(result.commandPreview.args).toContain("--no-extensions");
     expect(result.commandPreview.args).toContain("--no-skills");
@@ -253,6 +255,7 @@ describe("agent spawn readiness contract", () => {
     });
     expect(researchWithoutWeb.decision).toBe("blocked");
     expect(researchWithoutWeb.recommendationCode).toBe("agent-run-start-blocked-toolkit");
+    expect(researchWithoutWeb.nextActionCode).toBe("resolve-start-packet-blockers");
     expect(researchWithoutWeb.blockers).toContain("toolkit-contract:missing-required-capability:web-research");
     expect(researchWithoutWeb.runSpec.toolkitContract?.satisfied).toBe(false);
   });
