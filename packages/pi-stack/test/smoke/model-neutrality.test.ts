@@ -75,6 +75,26 @@ describe("distributed model neutrality", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("keeps operating doctrine provider-neutral across distributed copies", () => {
+    const files = [
+      join(process.cwd(), "docs", "guides", "control-plane-operating-doctrine.md"),
+      join(process.cwd(), "packages", "lab-skills", "docs", "guides", "control-plane-operating-doctrine.md"),
+      join(process.cwd(), "packages", "pi-skills", "docs", "guides", "control-plane-operating-doctrine.md"),
+    ];
+    const concreteProviderOrModel =
+      /\b(?:openai-codex|dashscope|gpt-5(?:\.[0-9])?|qwen[A-Za-z0-9._-]*|Codex\s+Spark|codex-spark)\b/i;
+
+    const offenders = files
+      .map((file) => ({
+        file: relative(process.cwd(), file).replace(/\\/g, "/"),
+        text: readFileSync(file, "utf8"),
+      }))
+      .filter(({ text }) => concreteProviderOrModel.test(text))
+      .map(({ file }) => file);
+
+    expect(offenders).toEqual([]);
+  });
+
   it("keeps generic runtime schema examples model-neutral", () => {
     const files = collectFiles(join(PACKAGE_ROOT, "extensions"));
     const concreteExample =

@@ -354,15 +354,15 @@ Snapshot local de 2026-05-01 antes do rehearsal: `tool_hygiene_scorecard` listou
 
 Roteamento de provider é uma superfície de continuidade, mas também é settings/provedor protegido. A regra local-first é: inventariar primeiro, gerar patch preview, e só aplicar mudança de provider/model com intenção explícita. `quota_visibility_route` e `handoff_advisor` ficam `noAutoSwitch=true` salvo `execute=true` pedido pelo operador.
 
-Snapshot read-only de 2026-05-01 para `TASK-BUD-405`:
+Inventário read-only recomendado antes de qualquer mudança de rota:
 
-- `.pi/settings.json`: projeto local do laboratório, com `defaultProvider/defaultModel` protegidos por decisão explícita do operador;
-- `.sandbox/pi-agent/settings.json`: runtime isolado do laboratório, reconciliado por `pnpm run pi:dev` para o perfil `control-plane`;
-- `provider_readiness_matrix`: provider/model ativo com `readiness=ready`; quando houver budget `provider/model`, `budgetScope=provider-model` deve prevalecer sobre o orçamento genérico do provider;
-- `quota_visibility_route(profile=balanced, execute=false)`: recomenda `openai-codex`, `state=ok`, `noAutoSwitch=true`;
-- `handoff_advisor(execute=false)`: recomenda `openai-codex`, `noAutoSwitch=true`.
+- `.pi/settings.json`: baseline canônico do projeto, com `defaultProvider/defaultModel` protegidos por decisão explícita do operador;
+- settings derivados ou sandbox do agente: confirmar de onde a sessão live lê provider/model antes de atribuir comportamento;
+- `provider_readiness_matrix`: provider/model ativo com readiness e budget scope; quando houver budget `provider/model`, esse escopo deve prevalecer sobre o orçamento genérico do provider;
+- `quota_visibility_route(profile=balanced, execute=false)`: deve produzir recomendação e `noAutoSwitch=true`;
+- `handoff_advisor(execute=false)`: deve produzir recomendação e `noAutoSwitch=true`.
 
-Patch preview seguro neste estado é **no-op**: Anthropic não aparece como provider configurado nem em `routeModelRefs`, e o operador confirmou que a conta Anthropic logada pede extra usage; portanto não há rota Anthropic local viável para promover agora. Um preview futuro só pode ser produzido após o operador declarar provider/model exatos e confirmar que a conta/provedor está disponível sem custo/uso extra inesperado, por exemplo em forma auditável:
+Patch preview seguro pode ser **no-op** quando a rota atual já está saudável ou quando o provider alternativo não tem readiness/budget/login claro. Um preview futuro só pode ser produzido após o operador declarar provider/model exatos e confirmar que a conta/provedor está disponível sem custo/uso extra inesperado, por exemplo em forma auditável:
 
 ```json
 {
@@ -379,7 +379,7 @@ Patch preview seguro neste estado é **no-op**: Anthropic não aparece como prov
 }
 ```
 
-Retorno ao perfil Codex também é manual: usar `/model` ou `quota_visibility_route({ "profile": "balanced", "execute": true })` somente quando o operador pedir explicitamente e quando o advisor ainda mostrar `openai-codex` em `ok`. Classificadores/monitores leves permanecem no caminho Codex enquanto houver cota; se Codex entrar em WARN/BLOCK, registrar handoff advisory e pedir decisão em vez de auto-switch.
+Retorno a qualquer perfil anterior também é manual: usar `/model` ou `quota_visibility_route({ "profile": "balanced", "execute": true })` somente quando o operador pedir explicitamente e quando o advisor ainda mostrar a rota alvo em estado aceitável. Classificadores/monitores leves permanecem na rota configurada enquanto houver cota; se ela entrar em WARN/BLOCK, registrar handoff advisory e pedir decisão em vez de auto-switch.
 
 ## Intent Intake, Entrevistas Estruturadas e Gaps do Operador
 
