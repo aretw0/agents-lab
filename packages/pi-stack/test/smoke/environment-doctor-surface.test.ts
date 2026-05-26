@@ -242,6 +242,19 @@ shortcut. Skipping.
     expect(report.summary).toContain("warn=1");
   });
 
+  it("classifies empty runtime output as missing evidence, not a stop condition", async () => {
+    const report = analyzeRuntimeOutputAdvisories("");
+
+    expect(report.decision).toBe("needs-evidence");
+    expect(report.advisories).toEqual([
+      expect.objectContaining({
+        code: "missing-runtime-output",
+        level: "info",
+      }),
+    ]);
+    expect(report.summary).toContain("decision=needs-evidence");
+  });
+
   it("environment_runtime_output_advisory exposes compact operator output", async () => {
     const pi = makeMockPi();
     environmentDoctorExtension(pi);

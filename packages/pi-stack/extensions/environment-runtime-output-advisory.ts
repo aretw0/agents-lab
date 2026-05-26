@@ -8,7 +8,7 @@ export interface RuntimeOutputAdvisory {
 }
 
 export interface RuntimeOutputAdvisoryReport {
-  decision: "continue" | "safe-mode" | "stop-and-investigate";
+  decision: "continue" | "safe-mode" | "stop-and-investigate" | "needs-evidence";
   advisories: RuntimeOutputAdvisory[];
   summary: string;
 }
@@ -37,6 +37,21 @@ function parseWatchdogLevel(detail: string): RuntimeOutputAdvisoryLevel {
 export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutputAdvisoryReport {
   const text = String(rawOutput ?? "");
   const advisories: RuntimeOutputAdvisory[] = [];
+
+  if (!text.trim()) {
+    return {
+      decision: "needs-evidence",
+      advisories: [
+        {
+          code: "missing-runtime-output",
+          level: "info",
+          detail: "raw_output is empty",
+          action: "paste the exact Pi startup/reload output before classifying runtime health",
+        },
+      ],
+      summary: "runtime-output-advisory: decision=needs-evidence advisories=1 info=1 warn=0 block=0",
+    };
+  }
 
   for (const match of text.matchAll(EXTENSION_SHORTCUT_CONFLICT_RE)) {
     uniquePush(advisories, {
