@@ -232,6 +232,8 @@ A evidência mínima para classificar o incidente é curta: keybinding efetivo, 
 
 Em sessões deste repositório, considere ainda o launcher. O fluxo comum de desenvolvimento é `pnpm run pi:dev`, que chama `scripts/pi-isolated.mjs --dev`, define `PI_CODING_AGENT_DIR=.sandbox/pi-agent`, usa o CLI local oficial em `node_modules/@earendil-works/pi-coding-agent/dist/cli.js`, com fallback temporário para `node_modules/@mariozechner/pi-coding-agent/dist/cli.js` durante a transição, e pausa o loop autônomo antes de iniciar. Portanto, uma investigação não deve assumir que `~/.pi/agent` ou um pacote publicado representam a sessão live; confira launcher, `PI_CODING_AGENT_DIR`, sourceInfo de recursos e caminhos carregados antes de atribuir comportamento a upstream ou às extensões locais.
 
+O perfil dev tem sane defaults do laboratório, mas pode ser trocado sem editar settings: `PI_DEV_MODEL_REF=provider/model pnpm run pi:dev` troca `defaultProvider`, `defaultModel` e `enabledModels` para uma sessão. Para escopos maiores, use `PI_DEV_ENABLED_MODELS=provider/a,provider/b pnpm run pi:dev`.
+
 Checklist source-aware para `pi:dev`:
 
 - confirmar `pnpm run pi:isolated:status` e registrar se o modo ativo é `isolated`;
@@ -381,9 +383,9 @@ Retorno ao perfil Codex também é manual: usar `/model` ou `quota_visibility_ro
 
 ## Intent Intake, Entrevistas Estruturadas e Gaps do Operador
 
-Gaps do operador devem ser preenchidos por contrato backend-first antes de qualquer UI. Para intenção livre, comece por `operator_intent_intake_packet`: ele classifica a próxima rota report-only (`structured_interview_plan`, `lane_brainstorm_packet`, `control_plane_profile_packet`, readiness de runtime/worker ou `agent_run_operator_packet` só após readiness explícita) e devolve `details.interaction` com `uiHints.preferred=choice-list`, `recommendedChoiceId`, escolhas que a TUI pode renderizar, resposta customizada e cancelamento. Quando a intenção for apenas validar saúde do runtime antes do trabalho, passe `runtime_health_requested=true`; a rota deve ir direto para checks read-only e não para confirmação. A intake não autoriza mutação, worker nem dispatch.
+Gaps do operador devem ser preenchidos por contrato backend-first antes de qualquer UI. Para intenção livre, comece por `operator_intent_intake_packet`: ele classifica a próxima rota report-only (`structured_interview_plan`, `lane_brainstorm_packet`, `control_plane_profile_packet`, readiness de runtime/worker ou `agent_run_operator_packet` só após readiness explícita) e devolve `details.interaction` com `uiHints.preferred=choice-list`, `recommendedChoiceId`, escolhas que a TUI pode renderizar, resposta customizada e cancelamento. Quando `details.operatorPromptRequired=true`, deve perguntar ao operador ou parar. Quando a intenção for apenas validar saúde do runtime antes do trabalho, passe `runtime_health_requested=true`; a rota deve ir direto para checks read-only e não para confirmação. A intake não autoriza mutação, worker nem dispatch.
 
-Quando a intake retornar `controlPlaneAction=run-report-only-route`, `confirmationRequired=false` e `operatorDecisionNeeded=false`, o control-plane deve executar a rota read-only recomendada e resumir a decisão. Não pedir confirmação textual para um packet que não muta estado, não despacha worker e não cria autorização.
+Quando a intake retornar `reportOnlyRouteAuthorized=true` (`controlPlaneAction=run-report-only-route`, `confirmationRequired=false` e `operatorDecisionNeeded=false`), o control-plane deve executar a rota read-only recomendada e resumir a decisão. Não pedir confirmação textual para um packet que não muta estado, não despacha worker e não cria autorização.
 
 Quando a rota exigir perguntas, a primitiva `structured_interview_plan` recebe uma lista de perguntas com ids estáveis, tipo, obrigatoriedade, opções, defaults e flags `allowUnknown`/`allowSkip`; recebe respostas parciais; valida sequencialmente; e devolve `complete`, `needs-operator-answer` ou `invalid` com `nextQuestionId` e evidência compacta.
 

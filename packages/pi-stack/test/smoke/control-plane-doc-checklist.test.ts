@@ -154,10 +154,12 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(doctrine).toContain("controlplaneaction=run-report-only-route");
     expect(doctrine).toContain("confirmationrequired=false");
     expect(doctrine).toContain("operatordecisionneeded=false");
+    expect(doctrine).toContain("reportonlyrouteauthorized=true");
     expect(doctrine).toContain("não pedir confirmação textual");
 
     expect(sessionTriage).toContain("operator_intent_intake_packet");
     expect(sessionTriage).toContain("runtime_health_requested=true");
+    expect(sessionTriage).toContain("reportonlyrouteauthorized=true");
     expect(sessionTriage).toContain("project_intake_plan");
     expect(sessionTriage).toContain("não executar comandos slash da tui");
     expect(sessionTriage).toContain("/watchdog:status");
@@ -169,6 +171,7 @@ describe("control-plane anti-bloat docs checklist", () => {
     for (const packagedDoc of [labDoctrine, piDoctrine, labSessionTriage]) {
       expect(packagedDoc).toContain("operator_intent_intake_packet");
       expect(packagedDoc).toContain("runtime_health_requested=true");
+      expect(packagedDoc).toContain("reportonlyrouteauthorized=true");
     }
   });
 });
