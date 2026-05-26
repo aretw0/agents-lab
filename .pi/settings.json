@@ -79,13 +79,9 @@
       "modelPolicy": {
         "enabled": true,
         "allowMixedProviders": false,
-        "allowedProviders": [
-          "openai-codex"
-        ],
-        "modelGateEnabled": true,
-        "gatedModelRefs": [
-          "openai-codex/gpt-5.3-codex-spark"
-        ],
+        "allowedProviders": [],
+        "modelGateEnabled": false,
+        "gatedModelRefs": [],
         "gatedModelGoalTriggers": [
           "planning recovery",
           "scout burst"

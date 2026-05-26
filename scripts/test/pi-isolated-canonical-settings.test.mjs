@@ -128,10 +128,12 @@ test("canonical project settings use model-agnostic gated model policy", () => {
 	const modelPolicy = settings.piStack?.colonyPilot?.modelPolicy ?? {};
 	const routeModelRefs = settings.piStack?.quotaVisibility?.routeModelRefs ?? {};
 
-	assert.equal(modelPolicy.modelGateEnabled, true);
+	assert.equal(modelPolicy.modelGateEnabled, false);
 	assert.deepEqual(modelPolicy.gatedModelGoalTriggers, ["planning recovery", "scout burst"]);
 	assert.equal(modelPolicy.gatedModelScoutOnlyTrigger, "scout burst");
+	assert.deepEqual(modelPolicy.allowedProviders, []);
 	assert.ok(Array.isArray(modelPolicy.gatedModelRefs));
+	assert.deepEqual(modelPolicy.gatedModelRefs, []);
 	assert.ok(!("sparkGateEnabled" in modelPolicy));
 	assert.ok(!("sparkAllowedGoalTriggers" in modelPolicy));
 	assert.ok(!("sparkScoutOnlyTrigger" in modelPolicy));
