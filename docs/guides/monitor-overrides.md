@@ -9,7 +9,7 @@ Este guia cobre como manter os classifiers dos monitors funcionando ao alternar 
 O `@davidorex/pi-behavior-monitors` publica classifiers com modelo bare:
 
 ```yaml
-model: claude-sonnet-4-6
+model: provider/model-sensor
 ```
 
 Sem prefixo de provider, o runtime pode resolver para backend errado e os monitors podem ficar inativos sem erro visível.

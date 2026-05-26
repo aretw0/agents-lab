@@ -4,7 +4,7 @@
  *
  * Why this exists:
  * - @davidorex/pi-behavior-monitors ships bare classifier models
- *   (`model: claude-sonnet-4-6`), without provider prefix.
+ *   (`model: provider/model-sensor`).
  * - In mixed-provider environments (Copilot, Codex, etc.), this can make
  *   monitors silently fail or drift from the active provider.
  *

@@ -290,11 +290,12 @@ describe("claude-code adapter — execute signature", () => {
 });
 
 describe("claude-code adapter — buildProviderHint", () => {
-  it("retorna routeModelRef correto", () => {
+  it("retorna routeModelRef agnóstico por padrão", () => {
     const hint = buildProviderHint("/usr/bin/claude");
-    expect(hint.suggestedRouteModelRef).toBe("claude-code/claude-sonnet-4-6");
+    expect(hint.suggestedRouteModelRef).toBe("claude-code/default");
     expect(hint.budgetUnit).toBe("requests");
     expect(hint.notes.some((n) => n.includes("subscription"))).toBe(true);
+    expect(hint.notes.some((n) => n.includes("model-specific"))).toBe(true);
   });
 
   it("inclui nota de binary não encontrado quando path ausente", () => {

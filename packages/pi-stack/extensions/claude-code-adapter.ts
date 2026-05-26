@@ -92,13 +92,14 @@ export function buildProviderHint(binaryPath: string | undefined): ClaudeCodePro
   const notes: string[] = [
     "Claude Code uses a subscription model: cost = $0/token, but requests are rate-limited.",
     "Configure request budget in .pi/settings.json under piStack.quotaVisibility.providerBudgets['claude-code'].",
+    "Use claude-code/default unless you intentionally maintain model-specific Claude Code routing.",
     "Use unit: 'requests' and weeklyQuotaRequests to match subscription rate limits.",
   ];
   if (!binaryPath) {
     notes.unshift("Binary not found. Install Claude Code and ensure 'claude' is in PATH.");
   }
   return {
-    suggestedRouteModelRef: "claude-code/claude-sonnet-4-6",
+    suggestedRouteModelRef: "claude-code/default",
     budgetUnit: "requests",
     notes,
   };
@@ -439,7 +440,7 @@ export default function claudeCodeAdapterExtension(pi: ExtensionAPI) {
             "provider integration hint:",
             `  suggestedRouteModelRef: ${hint.suggestedRouteModelRef}`,
             "  add to .pi/settings.json:",
-            '  piStack.quotaVisibility.routeModelRefs["claude-code"] = "claude-code/claude-sonnet-4-6"',
+            `  piStack.quotaVisibility.routeModelRefs["claude-code"] = "${hint.suggestedRouteModelRef}"`,
             '  piStack.quotaVisibility.providerBudgets["claude-code"].unit = "requests"',
             ...budgetState.notes,
           ].join("\n"),
