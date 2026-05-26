@@ -37,6 +37,16 @@ Regra prática:
 
 Se `environment_dev_pressure_status` reportar `pi-lens-active-full-startup-risk`, o resumo deve incluir `recoveryActions=N`. Leia essas ações primeiro: normalmente elas apontam para `PI_LENS_STARTUP_MODE=quick|minimal`, reaplicar o perfil `strict-curated`, ou reservar `stack-full` para diagnóstico deliberado.
 
+<!-- package:omit:start -->
+No repositório agents-lab, antes de abrir uma sessão longa de desenvolvimento com Pi, rode:
+
+```bash
+pnpm run pi:runtime:health
+```
+
+Esse preflight é read-only e roda fora da TUI. Ele agrega pressão local, eventos persistidos do watchdog e auditoria de artefatos efêmeros rastreados. Ele não substitui `/watchdog:status`: métricas vivas de `rss`, `heap` e event-loop continuam disponíveis apenas na TUI.
+<!-- package:omit:end -->
+
 ## Instalação Via Pi
 
 ```bash

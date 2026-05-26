@@ -30,6 +30,14 @@ test("classifyRootScript marks promoted dev pressure as distributed wrapper", ()
 	assert.equal(row.recommendedAction, "fold-wrapper-into-extension-or-doc-as-lab-shortcut");
 });
 
+test("classifyRootScript marks runtime health preflight as distributed wrapper", () => {
+	const row = classifyRootScript("pi:runtime:health", "node scripts/pi-runtime-health.mjs", shipped);
+
+	assert.equal(row.category, "distributed-wrapper");
+	assert.equal(row.targetSurface, "environment-doctor");
+	assert.equal(row.recommendedAction, "fold-wrapper-into-extension-or-doc-as-lab-shortcut");
+});
+
 test("classifyRootScript marks runtime artifact audit as safe-boot wrapper", () => {
 	const row = classifyRootScript("pi:artifact:audit:strict", "node scripts/pi-runtime-artifact-audit.mjs --strict", shipped);
 

@@ -73,6 +73,11 @@ const DISTRIBUTED_WRAPPERS = [
 		reason: "dev pressure diagnostics are distributed through environment-doctor; root script remains a local startup wrapper",
 	},
 	{
+		match: /^pi:runtime:health/,
+		surface: "environment-doctor",
+		reason: "runtime health preflight composes distributed environment-doctor and safe-boot diagnostics; root script remains a local startup wrapper",
+	},
+	{
 		match: /^pi:artifact:audit/,
 		surface: "safe-boot",
 		reason: "runtime artifact hygiene is distributed through safe_boot_runtime_artifact_audit; root script remains a CI/lab wrapper",

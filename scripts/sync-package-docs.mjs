@@ -178,9 +178,11 @@ function resolvePublishedDocsUrls(config = readDocsConfig()) {
   };
 }
 
-function renderPackageGuideContent(content, spec, urls = resolvePublishedDocsUrls()) {
+export function renderPackageGuideContent(content, spec, urls = resolvePublishedDocsUrls()) {
   const packagedGuides = new Set([...spec.guides, "README.md"]);
   return content
+    .replace(/\r?\n?<!-- package:omit:start -->[\s\S]*?<!-- package:omit:end -->\r?\n?/g, "\n")
+    .replace(/\n{3,}(## )/g, "\n\n$1")
     .replace(/\{\{\s*'\/([^']+\/)'\s*\|\s*relative_url\s*\}\}/g, (_match, route) => {
       return `${urls.siteBaseUrl}/${route}`;
     })

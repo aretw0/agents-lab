@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
 import { buildReport, gather } from "../release-readiness-report.mjs";
-import { PACKAGE_DOCS } from "../sync-package-docs.mjs";
+import { PACKAGE_DOCS, renderPackageGuideContent } from "../sync-package-docs.mjs";
 
 function read(path) {
 	return readFileSync(path, "utf8");
@@ -130,6 +130,10 @@ test("recommended stack guide separates TUI watchdog commands from agent diagnos
 		assert.match(content, /não substitui métricas vivas do watchdog/);
 		assert.match(content, /fonte correta continua sendo a TUI/);
 	}
+
+	assert.match(guide, /pnpm run pi:runtime:health/);
+	assert.match(guide, /preflight é read-only/);
+	assert.doesNotMatch(packageGuide, /pnpm run pi:runtime:health/);
 });
 
 test("root roadmap stays current and macro-level", () => {
@@ -293,6 +297,21 @@ test("package guide sync keeps lab-only maintenance out of distributed docs", ()
 	for (const guide of labOnlyGuides) {
 		assert.equal(packagedGuides.has(guide), false, `${guide} should stay repository-only`);
 	}
+});
+
+test("package guide sync strips package omit blocks", () => {
+	const rendered = renderPackageGuideContent([
+		"Before",
+		"<!-- package:omit:start -->",
+		"pnpm run pi:runtime:health",
+		"<!-- package:omit:end -->",
+		"After",
+	].join("\n"), { guides: [] }, { siteBaseUrl: "https://example.test", repoUrl: "https://github.test/repo" });
+
+	assert.match(rendered, /Before/);
+	assert.match(rendered, /After/);
+	assert.doesNotMatch(rendered, /pi:runtime:health/);
+	assert.doesNotMatch(rendered, /package:omit/);
 });
 
 test("supply-chain CI hardening guide stays operational and repo-scoped", () => {
