@@ -149,6 +149,8 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(doctrine).toContain("details.interaction");
     expect(doctrine).toContain("readiness de runtime/worker");
     expect(doctrine).toContain("runtime_health_requested=true");
+    expect(doctrine).toContain("passar o texto do operador basta");
+    expect(doctrine).toContain("/watchdog:*");
     expect(doctrine).toContain("agent_run_operator_packet` só após readiness explícita");
     expect(doctrine).toContain("a intake não autoriza mutação, worker nem dispatch");
     expect(doctrine).toContain("controlplaneaction=run-report-only-route");
@@ -159,6 +161,8 @@ describe("control-plane anti-bloat docs checklist", () => {
 
     expect(sessionTriage).toContain("operator_intent_intake_packet");
     expect(sessionTriage).toContain("runtime_health_requested=true");
+    expect(sessionTriage).toContain("passar o texto como intenção basta");
+    expect(sessionTriage).toContain("/watchdog:*");
     expect(sessionTriage).toContain("reportonlyrouteauthorized=true");
     expect(sessionTriage).toContain("project_intake_plan");
     expect(sessionTriage).toContain("não executar comandos slash da tui");
@@ -171,6 +175,7 @@ describe("control-plane anti-bloat docs checklist", () => {
     for (const packagedDoc of [labDoctrine, piDoctrine, labSessionTriage]) {
       expect(packagedDoc).toContain("operator_intent_intake_packet");
       expect(packagedDoc).toContain("runtime_health_requested=true");
+      expect(packagedDoc).toContain("/watchdog:*");
       expect(packagedDoc).toContain("reportonlyrouteauthorized=true");
     }
   });
