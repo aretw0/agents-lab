@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import environmentDoctorExtension from "../../extensions/environment-doctor";
 import { buildEnvironmentRuntimeHealthPayload, resolveEnvironmentRuntimeHealthDecision } from "../../extensions/environment-doctor-runtime-health";
+import { analyzeRuntimeOutputAdvisories } from "../../extensions/environment-runtime-output-advisory";
 
 function makeMockPi() {
   return {
@@ -216,5 +217,47 @@ describe("environment-doctor surface", () => {
     expect(summary).toContain("devPressureAction=set-pi-lens-startup-mode-quick-or-minimal-or-exclude-until-requested");
     expect(summary).toContain("next=enable-safe-mode-or-reduce-governance-surface-before-long-runs");
     expect(summary).toContain("recoveryActions=2");
+  });
+
+  it("classifies pasted Pi startup output as runtime advisories", async () => {
+    const report = analyzeRuntimeOutputAdvisories(`
+[Extension issues]
+  npm:@ifi/pi-extension-subagents (user) index.ts
+    Extension shortcut 'ctrl+shift+a' from
+C:\\Users\\aretw\\.pi\\agent\\npm\\node_modules\\@ifi\\pi-extension-subagents\\index.ts conflicts with built-in
+shortcut. Skipping.
+
+ Warning: Dirty repo: 1 uncommitted change(s)
+ Update available: @davidorex/pi-project-workflows 0.14.6 -> 0.26.0
+ Error: Performance watchdog critical: event-loop max 310ms. Run /watchdog:status or /safe-mode on if input feels laggy.
+`);
+
+    expect(report.decision).toBe("safe-mode");
+    expect(report.advisories.map((row) => row.code)).toEqual([
+      "extension-shortcut-conflict",
+      "third-party-package-update-available",
+      "runtime-dirty-repo",
+      "performance-watchdog-critical",
+    ]);
+    expect(report.summary).toContain("warn=1");
+  });
+
+  it("environment_runtime_output_advisory exposes compact operator output", async () => {
+    const pi = makeMockPi();
+    environmentDoctorExtension(pi);
+    const tool = getTool(pi, "environment_runtime_output_advisory");
+
+    const result = await tool.execute(
+      "tc-runtime-output-advisory",
+      { raw_output: "Warning: Dirty repo: 1 uncommitted change(s)" },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+    const text = String(result.content?.[0]?.text ?? "");
+
+    expect(text).toContain("runtime-output-advisory:");
+    expect(text).toContain("decision=continue");
+    expect((result.details as any)?.advisories?.[0]?.code).toBe("runtime-dirty-repo");
   });
 });

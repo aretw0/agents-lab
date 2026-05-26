@@ -17,6 +17,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, parse, resolve } from "node:path";
 import { buildEnvironmentRuntimeHealthPayload } from "./environment-doctor-runtime-health";
+import { analyzeRuntimeOutputAdvisories } from "./environment-runtime-output-advisory";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 // --- Types ---
@@ -866,6 +867,24 @@ export default function (pi: ExtensionAPI) {
       return buildOperatorVisibleToolResponse({
         label: "environment_runtime_health_status",
         summary,
+        details: payload,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "environment_runtime_output_advisory",
+    label: "Environment Runtime Output Advisory",
+    description: "Classify pasted Pi startup/reload output into read-only runtime advisories.",
+    parameters: Type.Object({
+      raw_output: Type.String({ description: "Pi startup/reload output copied from the runtime." }),
+    }),
+    async execute(_toolCallId, params) {
+      const p = (params ?? {}) as { raw_output?: string };
+      const payload = analyzeRuntimeOutputAdvisories(String(p.raw_output ?? ""));
+      return buildOperatorVisibleToolResponse({
+        label: "environment_runtime_output_advisory",
+        summary: payload.summary,
         details: payload,
       });
     },
