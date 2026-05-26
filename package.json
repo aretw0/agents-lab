@@ -164,9 +164,9 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
-    "@earendil-works/pi-ai": "^0.75.0",
-    "@earendil-works/pi-coding-agent": "^0.75.0",
-    "@earendil-works/pi-tui": "^0.75.0",
+    "@earendil-works/pi-ai": "^0.75.5",
+    "@earendil-works/pi-coding-agent": "^0.75.5",
+    "@earendil-works/pi-tui": "^0.75.5",
     "@marcfargas/pi-test-harness": "^0.5.0",
     "@sinclair/typebox": "0.34.49",
     "vitest": "^4.1.4"
