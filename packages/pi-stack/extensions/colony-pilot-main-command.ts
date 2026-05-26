@@ -329,7 +329,7 @@ export function registerColonyPilotMainCommand(pi: ExtensionAPI, runtime: Colony
 				const parsed = parseCommandInput(body);
 				const action = parsed.cmd || "status";
 				const profile = resolveModelPolicyProfile(
-					parseCommandInput(parsed.body).cmd || parsed.body || "codex",
+					parseCommandInput(parsed.body).cmd || parsed.body || "default",
 				);
 
 				if (action === "status") {
@@ -411,7 +411,7 @@ export function registerColonyPilotMainCommand(pi: ExtensionAPI, runtime: Colony
 				}
 
 				ctx.ui.notify(
-					"Usage: /colony-pilot models <status|template|apply> [copilot|codex|hybrid|factory-strict|factory-strict-copilot|factory-strict-hybrid]",
+					"Usage: /colony-pilot models <status|template|apply> [default|copilot|codex|hybrid|factory-strict|factory-strict-copilot|factory-strict-hybrid]",
 					"warning",
 				);
 				return;

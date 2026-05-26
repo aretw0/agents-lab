@@ -137,7 +137,7 @@ Notas operacionais:
 1. `/doctor` (saúde global)
 2. `/monitor-provider status`
 3. `/monitor-provider apply` (se houver drift)
-4. `/colony-pilot models apply codex` (perfil generic-first para ambiente Codex-only)
+4. `/colony-pilot models apply default` (perfil provider/model agnóstico)
 5. `/colony-pilot models status`
 6. `/colony-pilot check`
 7. `/colony-pilot preflight`
@@ -149,9 +149,9 @@ Se quiser observabilidade web local:
 - `/session-web start`
 - `/colony-pilot status`
 
-### Diretriz atual: generic-first
+### Diretriz atual: default agnóstico
 
-Em ambientes com apenas um provider disponível, especialmente Codex-only, a recomendação é:
+Por padrão, a stack não escolhe provider/model por você. Ela usa o modelo atual do Pi e deixa presets específicos como opt-in explícito:
 
 - priorizar papéis genéricos (`scout`, `worker`, `soldier`)
 - manter papéis especializados (`design`, `multimodal`, `backend`, `review`) como **opt-in**
@@ -161,6 +161,8 @@ Isso evita crescimento acidental de complexidade e melhora coesão da arquitetur
 
 ### Perfis rápidos de model policy
 
+- `/colony-pilot models template default`
+- `/colony-pilot models apply default`
 - `/colony-pilot models template codex`
 - `/colony-pilot models apply codex`
 - `/colony-pilot models apply copilot`
@@ -169,7 +171,7 @@ Isso evita crescimento acidental de complexidade e melhora coesão da arquitetur
 - `/colony-pilot models apply factory-strict-copilot`
 - `/colony-pilot models apply factory-strict-hybrid`
 
-Esses perfis escrevem `piStack.colonyPilot.modelPolicy` no `.pi/settings.json` e ativam hard-gate no `tool_call` de `ant_colony`.
+Esses perfis escrevem `piStack.colonyPilot.modelPolicy` no `.pi/settings.json` e ativam hard-gate no `tool_call` de `ant_colony`. O perfil `default` não injeta `roleModels`; `codex`, `copilot`, `hybrid` e `factory-*` são presets explícitos para ambientes que já escolheram esses providers.
 
 A baseline também pode configurar `piStack.colonyPilot.budgetPolicy` para exigir/injetar `maxCost` e bloquear caps acima do limite definido.
 

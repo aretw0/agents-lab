@@ -634,7 +634,20 @@ describe("colony-pilot parsers", () => {
 		).toBe(true);
 	});
 
-	it("model policy profile codex mantém generic-first", () => {
+	it("model policy profile default stays provider/model agnostic", () => {
+		expect(resolveModelPolicyProfile(undefined)).toBe("default");
+		expect(resolveModelPolicyProfile("unknown")).toBe("default");
+
+		const policy = buildModelPolicyProfile("default");
+		expect(policy.specializedRolesEnabled).toBe(false);
+		expect(policy.allowMixedProviders).toBe(true);
+		expect(policy.allowedProviders).toEqual([]);
+		expect(policy.roleModels).toEqual({});
+	});
+
+	it("model policy profile codex keeps explicit OpenAI preset", () => {
+		expect(resolveModelPolicyProfile("codex")).toBe("codex");
+
 		const policy = buildModelPolicyProfile("codex");
 		expect(policy.specializedRolesEnabled).toBe(false);
 		expect(policy.allowedProviders).toEqual(["openai-codex"]);

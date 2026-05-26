@@ -48,6 +48,7 @@ export interface ColonyModelPolicyEvaluation {
 }
 
 export type ModelPolicyProfile =
+	| "default"
 	| "copilot"
 	| "codex"
 	| "hybrid"
@@ -435,18 +436,30 @@ export function formatPolicyEvaluation(
 }
 
 export function resolveModelPolicyProfile(input?: string): ModelPolicyProfile {
-	return input === "copilot" ||
+	return input === "default" ||
+		input === "copilot" ||
 		input === "hybrid" ||
 		input === "factory-strict" ||
 		input === "factory-strict-copilot" ||
 		input === "factory-strict-hybrid"
 		? input
-		: "codex";
+		: input === "codex"
+			? "codex"
+			: "default";
 }
 
 export function buildModelPolicyProfile(
 	profile: ModelPolicyProfile,
 ): ColonyPilotModelPolicyConfig {
+	if (profile === "default") {
+		return resolveColonyPilotModelPolicy({
+			specializedRolesEnabled: false,
+			allowMixedProviders: true,
+			allowedProviders: [],
+			roleModels: {},
+		});
+	}
+
 	if (profile === "copilot") {
 		return resolveColonyPilotModelPolicy({
 			specializedRolesEnabled: false,
