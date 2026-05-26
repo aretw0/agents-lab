@@ -5,6 +5,7 @@ import {
 
 export type ToolkitContractProfile = "read-only-review" | "research" | "small-mutation" | "test-fix";
 export type ToolkitCapability = "filesystem-read" | "filesystem-write" | "web-research" | "provider-ready" | "focal-validation" | "custom-tools";
+export type ToolkitContractNextActionCode = "include-toolkit-contract-in-worker-packet" | "resolve-toolkit-capability-gaps";
 
 export interface ToolkitRequirement {
   capability: ToolkitCapability;
@@ -32,10 +33,13 @@ export interface ToolkitContractResult {
   requiresOperatorDecision: true;
   decision: "ready-for-operator-decision" | "blocked";
   recommendationCode: "toolkit-contract-ready" | "toolkit-contract-blocked-missing-capabilities";
+  nextActionCode: ToolkitContractNextActionCode;
   blockers: string[];
   contract: {
     profile: ToolkitContractProfile;
     purpose: string;
+    recommendationCode: "toolkit-contract-ready" | "toolkit-contract-blocked-missing-capabilities";
+    nextActionCode: ToolkitContractNextActionCode;
     requiredCapabilities: ToolkitRequirement[];
     availableTools: string[];
     availableCapabilities: ToolkitCapability[];
@@ -162,6 +166,10 @@ export function buildToolkitContract(input: ToolkitContractInput = {}): ToolkitC
   const missingTools = Array.from(new Set(missingCapabilities.flatMap(missingToolsFor)));
   const blockers = missingCapabilities.map((capability) => `missing-required-capability:${capability}`);
   const decision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
+  const recommendationCode = decision === "ready-for-operator-decision" ? "toolkit-contract-ready" : "toolkit-contract-blocked-missing-capabilities";
+  const nextActionCode: ToolkitContractNextActionCode = decision === "ready-for-operator-decision"
+    ? "include-toolkit-contract-in-worker-packet"
+    : "resolve-toolkit-capability-gaps";
 
   return {
     mode: "toolkit-contract",
@@ -171,11 +179,14 @@ export function buildToolkitContract(input: ToolkitContractInput = {}): ToolkitC
     processStartAllowed: false,
     requiresOperatorDecision: true,
     decision,
-    recommendationCode: decision === "ready-for-operator-decision" ? "toolkit-contract-ready" : "toolkit-contract-blocked-missing-capabilities",
+    recommendationCode,
+    nextActionCode,
     blockers,
     contract: {
       profile,
       purpose,
+      recommendationCode,
+      nextActionCode,
       requiredCapabilities: requirements,
       availableTools,
       availableCapabilities,
@@ -202,6 +213,7 @@ export function buildToolkitContract(input: ToolkitContractInput = {}): ToolkitC
       `profile=${profile}`,
       `required=${requirements.map((requirement) => requirement.capability).join(",")}`,
       `available=${availableCapabilities.join(",") || "none"}`,
+      `nextActionCode=${nextActionCode}`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
       "dispatch=no",
     ].filter(Boolean).join(" "),

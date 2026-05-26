@@ -394,6 +394,7 @@ describe("agent spawn readiness contract", () => {
     expect(researchBlocked.blockers).toContain("toolkit-contract:missing-required-capability:web-research");
     expect(researchBlocked.invocationSpec.toolkitContract.satisfied).toBe(false);
     expect(researchBlocked.invocationSpec.toolkitContract.gapAnalysis.missingTools).toContain("web_search|browse_url|web-browser");
+    expect(researchBlocked.invocationSpec.toolkitContract.nextActionCode).toBe("resolve-toolkit-capability-gaps");
 
     const testFixBlocked = buildAgentInvocationSpecPacket({
       ...researchBlocked.invocationSpec,
@@ -424,10 +425,13 @@ describe("agent spawn readiness contract", () => {
       processStartAllowed: false,
       requiresOperatorDecision: true,
       decision: "ready-for-operator-decision",
+      recommendationCode: "toolkit-contract-ready",
+      nextActionCode: "include-toolkit-contract-in-worker-packet",
       blockers: [],
     });
     expect(contract.contract.availableCapabilities).toContain("filesystem-read");
     expect(contract.contract.availableCapabilities).toContain("filesystem-write");
+    expect(contract.summary).toContain("nextActionCode=include-toolkit-contract-in-worker-packet");
   });
 
   it("accepts fresh structured budget evidence and blocks stale or mismatched route evidence", () => {
