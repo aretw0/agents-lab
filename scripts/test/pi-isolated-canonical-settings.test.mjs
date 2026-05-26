@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import {
@@ -80,6 +81,21 @@ test("lean model scope stays intentionally small", () => {
 		"openai-codex/gpt-5.4-mini",
 		"dashscope/qwen3.6-flash",
 	]);
+});
+
+test("canonical project settings use model-agnostic gated model policy", () => {
+	const settings = JSON.parse(readFileSync(path.resolve(".pi", "settings.json"), "utf8"));
+	const modelPolicy = settings.piStack?.colonyPilot?.modelPolicy ?? {};
+	const routeModelRefs = settings.piStack?.quotaVisibility?.routeModelRefs ?? {};
+
+	assert.equal(modelPolicy.modelGateEnabled, true);
+	assert.deepEqual(modelPolicy.gatedModelGoalTriggers, ["planning recovery", "scout burst"]);
+	assert.equal(modelPolicy.gatedModelScoutOnlyTrigger, "scout burst");
+	assert.ok(Array.isArray(modelPolicy.gatedModelRefs));
+	assert.ok(!("sparkGateEnabled" in modelPolicy));
+	assert.ok(!("sparkAllowedGoalTriggers" in modelPolicy));
+	assert.ok(!("sparkScoutOnlyTrigger" in modelPolicy));
+	assert.notEqual(routeModelRefs["openai-codex"], "openai-codex/gpt-5.3-codex-spark");
 });
 
 test("local shell reconciliation pins Git Bash for Windows sandbox settings", () => {

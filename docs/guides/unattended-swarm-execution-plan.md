@@ -8,7 +8,7 @@ Escopo: execução por lotes dos P0 `TASK-BUD-010`, `TASK-BUD-020`, `TASK-BUD-02
 - `maxCost` explícito em toda colônia.
 - Sem auto-close de P0.
 - Sempre atualizar `.project/tasks.json` + mini-handoff de lote.
-- Spark-aware: default em cota normal; `gpt-5.3-codex-spark` só com gatilho explícito (`planning recovery` ou `scout burst`).
+- Modelo restrito só com política explícita: declare `gatedModelRefs` e exija gatilho no goal (`planning recovery` ou `scout burst`).
 - **Interim policy (DEC-BUD-042): subagent-first por padrão** até estabilizar materialização de colônia (TASK-BUD-107).
 
 ## Ordem recomendada (com dependências reais)
@@ -34,7 +34,7 @@ Escopo: execução por lotes dos P0 `TASK-BUD-010`, `TASK-BUD-020`, `TASK-BUD-02
    - `quota-visibility status 30`
    - `quota-visibility route balanced`
    - `colony-pilot preflight`
-   - confirmar goal semântico do lote (se houver Spark): incluir trigger explícito e justificativa auditável.
+   - confirmar goal semântico do lote (se houver modelo restrito): incluir trigger explícito e justificativa auditável.
 2. Execução:
    - `ant_colony` com goal estrito + `maxCost` (3 a 10 USD conforme lote).
 3. Pós-run:

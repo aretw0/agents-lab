@@ -82,12 +82,15 @@
         "allowedProviders": [
           "openai-codex"
         ],
-        "sparkGateEnabled": true,
-        "sparkAllowedGoalTriggers": [
+        "modelGateEnabled": true,
+        "gatedModelRefs": [
+          "openai-codex/gpt-5.3-codex-spark"
+        ],
+        "gatedModelGoalTriggers": [
           "planning recovery",
           "scout burst"
         ],
-        "sparkScoutOnlyTrigger": "scout burst"
+        "gatedModelScoutOnlyTrigger": "scout burst"
       },
       "budgetPolicy": {
         "enabled": true,
@@ -232,7 +235,7 @@
         }
       },
       "routeModelRefs": {
-        "openai-codex": "openai-codex/gpt-5.3-codex-spark",
+        "openai-codex": "openai-codex/gpt-5.3-codex",
         "dashscope": "dashscope/qwen3.6-flash"
       }
     },
