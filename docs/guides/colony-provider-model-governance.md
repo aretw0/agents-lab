@@ -71,17 +71,17 @@ Comportamento importante:
 
 > Heurística: scout mais barato/rápido, worker/soldier mais fortes.
 
-### Spark gating policy (OpenAI Codex)
+### Gated model policy
 
-Para preservar a cota PRO separada de `gpt-5.3-codex-spark`, a política operacional é:
+Para modelos que o operador quer reservar para usos específicos, declare a lista em `gatedModelRefs` e exija gatilhos explícitos no goal:
 
-- **padrão**: usar cota normal (`gpt-5.3-codex` / `gpt-5.4-mini` / `gpt-5.2-codex`)
-- **Spark só com gatilho explícito no goal**:
+- **padrão**: usar modelos livres pela política local
+- **modelo restrito só com gatilho explícito no goal**:
   - `planning recovery`
   - `scout burst`
-- Sem gatilho explícito, uso de modelo `*-spark` deve ser bloqueado por policy.
-- Com gatilho `scout burst`, uso de Spark fica restrito ao papel `scout`.
-- Para uso amplo de Spark (múltiplos papéis), o goal deve conter `planning recovery`.
+- Sem gatilho explícito, uso de modelo listado em `gatedModelRefs` deve ser bloqueado por policy.
+- Com gatilho `scout burst`, uso do modelo restrito fica limitado ao papel `scout`.
+- Para uso amplo do modelo restrito (múltiplos papéis), o goal deve conter `planning recovery`.
 
 Config recomendada em `.pi/settings.json`:
 
@@ -90,9 +90,10 @@ Config recomendada em `.pi/settings.json`:
   "piStack": {
     "colonyPilot": {
       "modelPolicy": {
-        "sparkGateEnabled": true,
-        "sparkAllowedGoalTriggers": ["planning recovery", "scout burst"],
-        "sparkScoutOnlyTrigger": "scout burst"
+        "modelGateEnabled": true,
+        "gatedModelRefs": ["provider/model"],
+        "gatedModelGoalTriggers": ["planning recovery", "scout burst"],
+        "gatedModelScoutOnlyTrigger": "scout burst"
       }
     }
   }

@@ -238,8 +238,8 @@ Defaults sane para `agents-lab` quando o operador não disser o contrário:
 - falta de explicitude deve acionar discoverability e entrevista curta de perfil/limites, não passividade: explicar o potencial de aproveitamento, sugerir o perfil provável e pedir só o alinhamento que falta;
 - quando a escala exigir consentimento do operador, usar entrevista curta com a autorização provável em vez de despejar detalhes de implementação; ferramentas, workers e outras capacidades são meios para entregar trabalho;
 - DashScope deve ter rota/fallback por modelo quando uma cota específica saturar;
-- OpenAI Codex Spark é bom candidato para workers enquanto houver cota específica disponível;
-- OpenAI normal deve ser preservado para o control-plane quando fizer sentido, com fallback governado para Qwen/DashScope quando houver pressão;
+- modelos com cota específica podem ser bons candidatos para workers quando a política do operador e a evidência de budget permitirem;
+- modelos principais do control-plane devem ser preservados quando fizer sentido, com fallback governado quando houver pressão;
 - pressão de disco/RAM/CPU/contexto deve virar parada graciosa com checkpoint, não quebra do ambiente;
 - compact/reload são stop conditions operacionais: registrar handoff, parar e deixar o runtime/operador retomar.
 

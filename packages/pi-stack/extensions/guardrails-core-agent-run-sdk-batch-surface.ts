@@ -96,7 +96,7 @@ export function registerAgentRunSdkReadOnlyBatchTools(pi: ExtensionAPI): void {
     description: "Report-only board-task packetizer that derives a narrow read-only SDK batch from one .project task. Never dispatches workers; protected scopes block unless explicitly opted in.",
     parameters: Type.Object({
       task_id: Type.String({ description: "Board task id to derive a read-only batch packet from." }),
-      provider_model_ref: Type.Optional(Type.String({ description: "Provider/model ref for derived workers. Defaults to Codex Spark pilot model." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Provider/model ref for derived workers, selected by operator policy." })),
       max_workers: Type.Optional(Type.Number({ description: "Maximum derived workers, clamped to 2..5." })),
       timeout_ms: Type.Optional(Type.Number({ description: "Per-worker bounded timeout in milliseconds." })),
       budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision for the derived worker specs." })),

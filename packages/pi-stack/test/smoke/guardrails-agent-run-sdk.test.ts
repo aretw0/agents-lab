@@ -459,6 +459,7 @@ describe("agent run SDK packet surfaces", () => {
         verification: "VERIF-TASK-BUD-9999-SEED",
       },
       cwd: process.cwd(),
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
       budgetDecision: "ok",
     });
     expect(taskBatchPacket).toMatchObject({

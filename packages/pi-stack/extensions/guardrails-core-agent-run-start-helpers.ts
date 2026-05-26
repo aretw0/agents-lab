@@ -1,7 +1,7 @@
 import type {
   AgentInvocationProfile,
   AgentRunOperatorFileContract,
-  CodexSparkPromotedEnvelope,
+  PromotedWorkerEnvelope,
 } from "./guardrails-core-agent-run-start";
 
 export const AGENT_RUN_START_TIMEOUT_MIN_MS = 5_000;
@@ -9,8 +9,7 @@ export const AGENT_RUN_START_TIMEOUT_MAX_MS = 180_000;
 export const READ_ONLY_TOOL_ALLOWLIST = ["read", "grep", "find", "ls"];
 export const MUTATION_TOOL_ALLOWLIST = [...READ_ONLY_TOOL_ALLOWLIST, "edit", "write"];
 export const SUPPORTED_AGENT_RUN_TOOL_ALLOWLIST = [...MUTATION_TOOL_ALLOWLIST];
-export const CODEX_SPARK_PROVIDER_MODEL_REF = "openai-codex/gpt-5.3-codex-spark" as const;
-export const CODEX_SPARK_PROMOTED_ENVELOPES: CodexSparkPromotedEnvelope[] = [
+export const PROMOTED_WORKER_ENVELOPES: PromotedWorkerEnvelope[] = [
   "readonly-one-file",
   "readonly-two-file-synthesis",
   "readonly-one-symbol-review",
@@ -62,9 +61,9 @@ export function sanitizeRunIdPart(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
 }
 
-export function normalizeCodexSparkPromotedEnvelope(value: unknown): CodexSparkPromotedEnvelope | "unknown" {
+export function normalizePromotedWorkerEnvelope(value: unknown): PromotedWorkerEnvelope | "unknown" {
   const text = normalizeText(value) || "readonly-one-file";
-  return CODEX_SPARK_PROMOTED_ENVELOPES.includes(text as CodexSparkPromotedEnvelope) ? text as CodexSparkPromotedEnvelope : "unknown";
+  return PROMOTED_WORKER_ENVELOPES.includes(text as PromotedWorkerEnvelope) ? text as PromotedWorkerEnvelope : "unknown";
 }
 
 export function inferPromotedEnvelopeProfile(envelope: string): AgentInvocationProfile {

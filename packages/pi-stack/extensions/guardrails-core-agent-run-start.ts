@@ -8,24 +8,20 @@ import {
 } from "./guardrails-core-agent-run-task-packet-helpers";
 import { buildEconomyGoalPrefix, buildEconomyInstructions, normalizeEconomyMode, normalizeMaxOutputLines } from "./guardrails-core-agent-run-worker-economy";
 import { resolveProviderExecutionBudgetEvidence, type ProviderExecutionBudgetDecision } from "./guardrails-core-provider-budget-evidence";
-import {
-  GUARDRAILS_AUTHORIZATION_NONE,
-  type GuardrailsAuthorizationNone,
-} from "./guardrails-core-authorization";
+import { GUARDRAILS_AUTHORIZATION_NONE, type GuardrailsAuthorizationNone } from "./guardrails-core-authorization";
 import {
   AGENT_RUN_START_TIMEOUT_MAX_MS,
   AGENT_RUN_START_TIMEOUT_MIN_MS,
-  CODEX_SPARK_PROMOTED_ENVELOPES,
-  CODEX_SPARK_PROVIDER_MODEL_REF,
   MUTATION_TOOL_ALLOWLIST,
+  PROMOTED_WORKER_ENVELOPES,
   READ_ONLY_TOOL_ALLOWLIST,
   SUPPORTED_AGENT_RUN_TOOL_ALLOWLIST,
   inferPromotedEnvelopeProfile,
-  normalizeCodexSparkPromotedEnvelope,
   normalizeExtensionIsolation,
   normalizeFileContract,
   normalizeInvocationProfile,
   normalizePositiveInt,
+  normalizePromotedWorkerEnvelope,
   normalizeSessionIsolation,
   normalizeStringArray,
   normalizeText,
@@ -37,6 +33,10 @@ import { buildToolkitContract, type ToolkitCapability, type ToolkitContractProfi
 export type AgentRunExecutorKind = "pi-print-subprocess";
 export type AgentRunStartDecision = "ready-for-operator-decision" | "blocked";
 export type AgentRunStartNextActionCode = "present-structured-operator-approval" | "resolve-start-packet-blockers";
+export type AgentInvocationSpecNextActionCode = "present-invocation-spec-for-approval" | "resolve-invocation-spec-blockers";
+export type AgentRunTaskPacketNextActionCode = "present-task-packet-for-approval" | "resolve-task-packet-blockers";
+export type AgentRunTaskStartNextActionCode = "present-task-start-previews-for-approval" | "resolve-task-start-blockers";
+export type PromotedWorkerNextActionCode = "use-promoted-worker-packet" | "resolve-promoted-worker-blockers";
 export type AgentRunBudgetDecision = ProviderExecutionBudgetDecision;
 export type AgentRunOperatorFileContract = "read-only" | "mutation";
 export type AgentInvocationProfile = "read-only-review" | "small-mutation" | "test-fix" | "research";
@@ -212,6 +212,7 @@ export interface AgentInvocationSpecPacketResult {
     executionPreview: AgentRunStartPacketResult["commandPreview"];
   };
   operatorPacket: AgentRunOperatorPacketResult;
+  nextActionCode: AgentInvocationSpecNextActionCode;
   nextActions: string[];
   operatorApprovalPrompt: string;
   summary: string;
@@ -281,6 +282,7 @@ export interface AgentRunTaskPacketResult {
   validationChecklist: string[];
   rollback: string[];
   operatorApprovalPrompt: string;
+  nextActionCode: AgentRunTaskPacketNextActionCode;
   nextActions: string[];
   summary: string;
 }
@@ -316,11 +318,12 @@ export interface AgentRunTaskStartPacketResult {
   abortPreview: ReturnType<typeof buildAgentRunAbortPlan>;
   outcomeChecklist: string[];
   operatorApprovalPrompt: string;
+  nextActionCode: AgentRunTaskStartNextActionCode;
   nextActions: string[];
   summary: string;
 }
 
-export type CodexSparkPromotedEnvelope =
+export type PromotedWorkerEnvelope =
   | "readonly-one-file"
   | "readonly-two-file-synthesis"
   | "readonly-one-symbol-review"
@@ -332,12 +335,12 @@ export type CodexSparkPromotedEnvelope =
   | "readonly-source-backed-evidence-synthesis"
   | "mutation-one-file-marker";
 
-export interface CodexSparkPromotedWorkerPacketInput extends AgentRunTaskStartPacketInput {
-  envelope?: CodexSparkPromotedEnvelope | string;
+export interface PromotedWorkerPacketInput extends AgentRunTaskStartPacketInput {
+  envelope?: PromotedWorkerEnvelope | string;
 }
 
-export interface CodexSparkPromotedWorkerPacketResult {
-  mode: "codex-spark-promoted-worker-packet";
+export interface PromotedWorkerPacketResult {
+  mode: "promoted-worker-packet";
   activation: "none";
   authorization: GuardrailsAuthorizationNone;
   dispatchAllowed: false;
@@ -345,17 +348,18 @@ export interface CodexSparkPromotedWorkerPacketResult {
   processStopAllowed: false;
   requiresOperatorDecision: true;
   singleRunOnly: true;
-  providerModelRef: "openai-codex/gpt-5.3-codex-spark";
+  providerModelRef: string;
   envelope: string;
   promotion: "promoted" | "blocked";
   decision: AgentRunStartDecision;
-  recommendationCode: AgentRunTaskStartPacketResult["recommendationCode"] | "codex-spark-promoted-worker-blocked-envelope";
+  recommendationCode: AgentRunTaskStartPacketResult["recommendationCode"] | "promoted-worker-blocked-envelope";
   blockers: string[];
-  promotedEnvelopes: CodexSparkPromotedEnvelope[];
+  promotedEnvelopes: PromotedWorkerEnvelope[];
   taskStartPacket: AgentRunTaskStartPacketResult;
   naturalUseContract: string[];
   stillBlocked: string[];
   operatorApprovalPrompt: string;
+  nextActionCode: PromotedWorkerNextActionCode;
   nextActions: string[];
   summary: string;
 }
@@ -442,9 +446,7 @@ export function buildAgentRunStartPacket(input: AgentRunStartPacketInput = {}): 
   ];
   const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   const operatorApprovalPrompt = runId ? `approve worker ${runId}` : "approve worker <run-id>";
-  const nextActionCode: AgentRunStartNextActionCode = decision === "ready-for-operator-decision"
-    ? "present-structured-operator-approval"
-    : "resolve-start-packet-blockers";
+  const nextActionCode: AgentRunStartNextActionCode = decision === "ready-for-operator-decision" ? "present-structured-operator-approval" : "resolve-start-packet-blockers";
 
   return {
     mode: "agent-run-start-packet",
@@ -664,6 +666,7 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
 
   const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   if (decision === "ready-for-operator-decision") recommendationCode = "agent-run-start-ready-for-operator-decision";
+  const nextActionCode: AgentInvocationSpecNextActionCode = decision === "ready-for-operator-decision" ? "present-invocation-spec-for-approval" : "resolve-invocation-spec-blockers";
 
   return {
     mode: "agent-invocation-spec-packet",
@@ -687,6 +690,7 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
       executionPreview: operatorPacket.startPacket.commandPreview,
     },
     operatorPacket,
+    nextActionCode,
     nextActions: decision === "ready-for-operator-decision"
       ? [
           "present the structured operator approval packet before execution",
@@ -707,6 +711,7 @@ export function buildAgentInvocationSpecPacket(input: AgentInvocationSpecPacketI
       `budget=${operatorPacket.runSpec.budgetDecision}`,
       `economy=${operatorPacket.runSpec.economyMode}`,
       `toolkit=${toolkitContract.decision}`,
+      `nextActionCode=${nextActionCode}`,
       "dispatch=no",
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),
@@ -768,6 +773,7 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
 
   const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   if (decision === "ready-for-operator-decision") recommendationCode = "agent-run-start-ready-for-operator-decision";
+  const nextActionCode: AgentRunTaskPacketNextActionCode = decision === "ready-for-operator-decision" ? "present-task-packet-for-approval" : "resolve-task-packet-blockers";
 
   return {
     mode: "agent-run-task-packet",
@@ -796,6 +802,7 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
     validationChecklist,
     rollback,
     operatorApprovalPrompt: invocationSpecPacket.operatorApprovalPrompt,
+    nextActionCode,
     nextActions: decision === "ready-for-operator-decision"
       ? [
           "show the typed invocation spec to the operator",
@@ -814,6 +821,7 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
       `criteria=${acceptanceCriteria.length}`,
       `budget=${invocationSpecPacket.invocationSpec.budgetDecision}`,
       `economy=${invocationSpecPacket.invocationSpec.economyMode}`,
+      `nextActionCode=${nextActionCode}`,
       "dispatch=no",
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),
@@ -851,6 +859,7 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
   }
   const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   if (decision === "ready-for-operator-decision") recommendationCode = "agent-run-start-ready-for-operator-decision";
+  const nextActionCode: AgentRunTaskStartNextActionCode = decision === "ready-for-operator-decision" ? "present-task-start-previews-for-approval" : "resolve-task-start-blockers";
 
   return {
     mode: "agent-run-task-start-packet",
@@ -883,6 +892,7 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
       `dry outcome preview: ${dryOutcomePreview.summary}`,
     ],
     operatorApprovalPrompt: taskPacket.operatorApprovalPrompt,
+    nextActionCode,
     nextActions: decision === "ready-for-operator-decision"
       ? [
           "show registry/start/status/log/abort/outcome previews to the operator",
@@ -899,40 +909,44 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
       `registry=${registryPreview.decision}`,
       `statusFound=${statusPreview.found ? "yes" : "no"}`,
       `budget=${spec.budgetDecision}`,
+      `nextActionCode=${nextActionCode}`,
       "dispatch=no",
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),
   };
 }
 
-export function buildCodexSparkPromotedWorkerPacket(input: CodexSparkPromotedWorkerPacketInput = {}): CodexSparkPromotedWorkerPacketResult {
+export function buildPromotedWorkerPacket(input: PromotedWorkerPacketInput = {}): PromotedWorkerPacketResult {
   const requestedEnvelope = normalizeText(input.envelope) || "readonly-one-file";
-  const promotedEnvelope = normalizeCodexSparkPromotedEnvelope(requestedEnvelope);
+  const promotedEnvelope = normalizePromotedWorkerEnvelope(requestedEnvelope);
   const envelope = promotedEnvelope === "unknown" ? requestedEnvelope : promotedEnvelope;
+  const providerModelRef = normalizeText(input.providerModelRef);
+  const budgetEvidence = input.budgetEvidence || `Promoted worker lane: envelope ${envelope} has policy/arena evidence for bounded use; structured operator approval is still required before dispatch.`;
   const taskStartPacket = buildAgentRunTaskStartPacket({
     ...input,
-    purpose: input.purpose || `codex-spark-${envelope}`,
+    purpose: input.purpose || `promoted-worker-${envelope}`,
     profile: input.profile || inferPromotedEnvelopeProfile(envelope),
-    providerModelRef: CODEX_SPARK_PROVIDER_MODEL_REF,
+    providerModelRef,
     budgetDecision: input.budgetDecision || "warn",
-    budgetEvidence: input.budgetEvidence || `Codex Spark promoted worker lane: envelope ${envelope} has arena evidence for bounded use; structured operator approval is still required before dispatch.`,
+    budgetEvidence,
     budgetEvidenceSource: input.budgetEvidenceSource || "manual",
-    budgetEvidenceProvider: CODEX_SPARK_PROVIDER_MODEL_REF,
+    budgetEvidenceProvider: input.budgetEvidenceProvider || providerModelRef,
     economyMode: input.economyMode || "critical",
-    tokenBudgetEvidence: input.tokenBudgetEvidence || input.budgetEvidence || "Codex Spark promoted lane; conserve output and stay within declared files.",
+    tokenBudgetEvidence: input.tokenBudgetEvidence || budgetEvidence,
     maxOutputLines: input.maxOutputLines ?? 20,
   });
   const blockers = [...taskStartPacket.blockers];
-  let recommendationCode: CodexSparkPromotedWorkerPacketResult["recommendationCode"] = taskStartPacket.recommendationCode;
+  let recommendationCode: PromotedWorkerPacketResult["recommendationCode"] = taskStartPacket.recommendationCode;
   if (promotedEnvelope === "unknown") {
-    blockers.push("codex-spark-envelope-not-promoted");
-    recommendationCode = "codex-spark-promoted-worker-blocked-envelope";
+    blockers.push("promoted-worker-envelope-not-promoted");
+    recommendationCode = "promoted-worker-blocked-envelope";
   }
   const decision: AgentRunStartDecision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   const promotion = promotedEnvelope === "unknown" ? "blocked" : "promoted";
+  const nextActionCode: PromotedWorkerNextActionCode = decision === "ready-for-operator-decision" ? "use-promoted-worker-packet" : "resolve-promoted-worker-blockers";
 
   return {
-    mode: "codex-spark-promoted-worker-packet",
+    mode: "promoted-worker-packet",
     activation: "none",
     authorization: GUARDRAILS_AUTHORIZATION_NONE,
     dispatchAllowed: false,
@@ -940,16 +954,16 @@ export function buildCodexSparkPromotedWorkerPacket(input: CodexSparkPromotedWor
     processStopAllowed: false,
     requiresOperatorDecision: true,
     singleRunOnly: true,
-    providerModelRef: CODEX_SPARK_PROVIDER_MODEL_REF,
+    providerModelRef,
     envelope,
     promotion,
     decision,
     recommendationCode,
     blockers,
-    promotedEnvelopes: [...CODEX_SPARK_PROMOTED_ENVELOPES],
+    promotedEnvelopes: [...PROMOTED_WORKER_ENVELOPES],
     taskStartPacket,
     naturalUseContract: [
-      "use Codex Spark by default for promoted local-safe envelopes instead of rebuilding arena packets manually",
+      "use the explicit provider/model selected by operator policy for promoted local-safe envelopes",
       "keep dispatch structured-approved and single-run only",
       "keep declared files, bounded timeout, rollback, and parent-side outcome validation",
       "record outcome evidence before expanding the envelope or closing the task",
@@ -962,19 +976,22 @@ export function buildCodexSparkPromotedWorkerPacket(input: CodexSparkPromotedWor
       "settings/routing/default-provider changes",
     ],
     operatorApprovalPrompt: taskStartPacket.operatorApprovalPrompt,
+    nextActionCode,
     nextActions: decision === "ready-for-operator-decision"
       ? [
-          "use this promoted packet instead of an arena canary for the next bounded Codex Spark worker",
+          "use this promoted packet instead of rebuilding a canary for the next bounded worker",
           "require structured operator approval before dispatch",
           "after execution, evaluate the outcome packet and append board evidence",
         ]
       : ["resolve promoted-worker blockers before any dispatch"],
     summary: [
-      "codex-spark-promoted-worker-packet:",
+      "promoted-worker-packet:",
       `decision=${decision}`,
       `envelope=${envelope || "unknown"}`,
+      `providerModelRef=${providerModelRef || "missing"}`,
       `promotion=${promotion}`,
       `task=${taskStartPacket.taskPacket.task.id || "unknown"}`,
+      `nextActionCode=${nextActionCode}`,
       "dispatch=no",
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),

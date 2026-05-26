@@ -47,9 +47,10 @@ export function buildProjectBaselineSettings(
 					allowedProviders: [],
 					allowedProvidersByRole: {},
 					roleModels: {},
-					sparkGateEnabled: false,
-					sparkAllowedGoalTriggers: ["planning recovery", "scout burst"],
-					sparkScoutOnlyTrigger: "scout burst",
+					modelGateEnabled: false,
+					gatedModelRefs: [],
+					gatedModelGoalTriggers: ["planning recovery", "scout burst"],
+					gatedModelScoutOnlyTrigger: "scout burst",
 				},
 				budgetPolicy: {
 					enabled: true,

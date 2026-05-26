@@ -777,7 +777,7 @@ export function buildAgentRunSdkReadOnlyBatchTaskPacket(input: AgentRunSdkReadOn
   const requestedMaxWorkers = normalizePositiveInt(input.maxWorkers, 3);
   const maxWorkers = Math.max(2, Math.min(5, requestedMaxWorkers || 3));
   const timeoutMs = normalizePositiveInt(input.timeoutMs, 90_000) || 90_000;
-  const providerModelRef = normalizeText(input.providerModelRef) || "openai-codex/gpt-5.3-codex-spark";
+  const providerModelRef = normalizeText(input.providerModelRef);
   const cwd = normalizeText(input.cwd);
   const includeProtectedScopes = input.includeProtectedScopes === true;
   const protectedFiles = declaredFiles.filter(isProtectedBatchTaskFile);

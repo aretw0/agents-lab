@@ -35,9 +35,10 @@ export interface ColonyPilotModelPolicyConfig {
 	allowedProviders: string[];
 	allowedProvidersByRole: Partial<Record<ColonyAgentRole, string[]>>;
 	roleModels: ColonyRoleModelMap;
-	sparkGateEnabled: boolean;
-	sparkAllowedGoalTriggers: string[];
-	sparkScoutOnlyTrigger: string;
+	modelGateEnabled: boolean;
+	gatedModelRefs: string[];
+	gatedModelGoalTriggers: string[];
+	gatedModelScoutOnlyTrigger: string;
 }
 
 export interface ColonyModelPolicyEvaluation {
@@ -114,9 +115,10 @@ const DEFAULT_MODEL_POLICY: ColonyPilotModelPolicyConfig = {
 	allowedProviders: [],
 	allowedProvidersByRole: {},
 	roleModels: {},
-	sparkGateEnabled: false,
-	sparkAllowedGoalTriggers: ["planning recovery", "scout burst"],
-	sparkScoutOnlyTrigger: "scout burst",
+	modelGateEnabled: false,
+	gatedModelRefs: [],
+	gatedModelGoalTriggers: ["planning recovery", "scout burst"],
+	gatedModelScoutOnlyTrigger: "scout burst",
 };
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -172,14 +174,17 @@ export function resolveColonyPilotModelPolicy(
 ): ColonyPilotModelPolicyConfig {
 	const specializedRolesEnabled = raw?.specializedRolesEnabled === true;
 	const requestedRequiredRoles = normalizeRoleList(raw?.requiredRoles);
-	const sparkAllowedGoalTriggers = normalizeStringList(
-		raw?.sparkAllowedGoalTriggers,
+	const gatedModelGoalTriggers = normalizeStringList(
+		raw?.gatedModelGoalTriggers,
 	)
 		.map((v) => v.toLowerCase())
 		.filter((v, idx, arr) => arr.indexOf(v) === idx);
-	const sparkScoutOnlyTriggerRaw =
-		typeof raw?.sparkScoutOnlyTrigger === "string"
-			? raw.sparkScoutOnlyTrigger.trim().toLowerCase()
+	const gatedModelRefs = normalizeStringList(raw?.gatedModelRefs)
+		.map((v) => v.toLowerCase())
+		.filter((v, idx, arr) => arr.indexOf(v) === idx);
+	const gatedModelScoutOnlyTriggerRaw =
+		typeof raw?.gatedModelScoutOnlyTrigger === "string"
+			? raw.gatedModelScoutOnlyTrigger.trim().toLowerCase()
 			: "";
 	const requiredRoles = specializedRolesEnabled
 		? requestedRequiredRoles
@@ -203,13 +208,14 @@ export function resolveColonyPilotModelPolicy(
 			raw?.allowedProvidersByRole,
 		),
 		roleModels: normalizeRoleModels(raw?.roleModels),
-		sparkGateEnabled: raw?.sparkGateEnabled === true,
-		sparkAllowedGoalTriggers:
-			sparkAllowedGoalTriggers.length > 0
-				? sparkAllowedGoalTriggers
-				: [...DEFAULT_MODEL_POLICY.sparkAllowedGoalTriggers],
-		sparkScoutOnlyTrigger:
-			sparkScoutOnlyTriggerRaw || DEFAULT_MODEL_POLICY.sparkScoutOnlyTrigger,
+		modelGateEnabled: raw?.modelGateEnabled === true,
+		gatedModelRefs,
+		gatedModelGoalTriggers:
+			gatedModelGoalTriggers.length > 0
+				? gatedModelGoalTriggers
+				: [...DEFAULT_MODEL_POLICY.gatedModelGoalTriggers],
+		gatedModelScoutOnlyTrigger:
+			gatedModelScoutOnlyTriggerRaw || DEFAULT_MODEL_POLICY.gatedModelScoutOnlyTrigger,
 	};
 }
 
@@ -340,39 +346,39 @@ export function evaluateAntColonyModelPolicy(
 		}
 	}
 
-	if (policy.sparkGateEnabled) {
-		const sparkRoles = (["queen", ...ROLE_ORDER] as ColonyAgentRole[]).filter(
+	if (policy.modelGateEnabled && policy.gatedModelRefs.length > 0) {
+		const gatedRoles = (["queen", ...ROLE_ORDER] as ColonyAgentRole[]).filter(
 			(role) => {
 				const modelRef = effectiveModels[role];
 				return (
 					typeof modelRef === "string" &&
-					modelRef.toLowerCase().includes("codex-spark")
+					policy.gatedModelRefs.includes(modelRef.toLowerCase())
 				);
 			},
 		);
 
-		if (sparkRoles.length > 0) {
+		if (gatedRoles.length > 0) {
 			const normalizedGoal = (goal ?? "").toLowerCase();
-			const matchedSparkTriggers = policy.sparkAllowedGoalTriggers.filter(
+			const matchedGateTriggers = policy.gatedModelGoalTriggers.filter(
 				(trigger) => normalizedGoal.includes(trigger),
 			);
 
-			if (matchedSparkTriggers.length === 0) {
+			if (matchedGateTriggers.length === 0) {
 				issues.push(
-					`spark model usage requires explicit goal trigger: ${policy.sparkAllowedGoalTriggers.join(", ")}`,
+					`gated model usage requires explicit goal trigger: ${policy.gatedModelGoalTriggers.join(", ")}`,
 				);
 			} else {
 				const hasPlanningRecoveryTrigger =
-					matchedSparkTriggers.includes("planning recovery");
-				const hasScoutOnlyTrigger = matchedSparkTriggers.includes(
-					policy.sparkScoutOnlyTrigger,
+					matchedGateTriggers.includes("planning recovery");
+				const hasScoutOnlyTrigger = matchedGateTriggers.includes(
+					policy.gatedModelScoutOnlyTrigger,
 				);
 
 				if (!hasPlanningRecoveryTrigger && hasScoutOnlyTrigger) {
-					const nonScoutRoles = sparkRoles.filter((role) => role !== "scout");
+					const nonScoutRoles = gatedRoles.filter((role) => role !== "scout");
 					if (nonScoutRoles.length > 0) {
 						issues.push(
-							`spark with trigger '${policy.sparkScoutOnlyTrigger}' is scout-only; found roles: ${nonScoutRoles.join(", ")}`,
+							`gated model trigger '${policy.gatedModelScoutOnlyTrigger}' is scout-only; found roles: ${nonScoutRoles.join(", ")}`,
 						);
 					}
 				}
@@ -414,9 +420,10 @@ export function formatPolicyEvaluation(
 		`  requiredRoles: ${policy.requiredRoles.join(", ") || "(none)"}`,
 		`  allowMixedProviders: ${policy.allowMixedProviders ? "yes" : "no"}`,
 		`  allowedProviders: ${policy.allowedProviders.join(", ") || "(any)"}`,
-		`  sparkGateEnabled: ${policy.sparkGateEnabled ? "yes" : "no"}`,
-		`  sparkAllowedGoalTriggers: ${policy.sparkAllowedGoalTriggers.join(", ") || "(none)"}`,
-		`  sparkScoutOnlyTrigger: ${policy.sparkScoutOnlyTrigger || "(none)"}`,
+		`  modelGateEnabled: ${policy.modelGateEnabled ? "yes" : "no"}`,
+		`  gatedModelRefs: ${policy.gatedModelRefs.join(", ") || "(none)"}`,
+		`  gatedModelGoalTriggers: ${policy.gatedModelGoalTriggers.join(", ") || "(none)"}`,
+		`  gatedModelScoutOnlyTrigger: ${policy.gatedModelScoutOnlyTrigger || "(none)"}`,
 		`  allowedProvidersByRole: ${roleAllowRows.length > 0 ? "(configured)" : "(none)"}`,
 		...(roleAllowRows.length > 0 ? roleAllowRows : []),
 		"  effectiveModels:",

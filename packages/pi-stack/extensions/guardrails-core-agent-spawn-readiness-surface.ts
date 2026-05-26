@@ -15,7 +15,7 @@ import { registerAgentRunSdkProviderModelArenaTool } from "./guardrails-core-age
 import { registerAgentRunSdkReadOnlyBatchTools } from "./guardrails-core-agent-run-sdk-batch-surface";
 import { registerAgentRunLifecycleTools } from "./guardrails-core-agent-run-lifecycle-surface";
 import { buildAgentRunSdkCachePackPacket, buildAgentRunSdkInProcessPacket } from "./guardrails-core-agent-run-sdk-preview";
-import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildCodexSparkPromotedWorkerPacket } from "./guardrails-core-agent-run-start";
+import { buildAgentInvocationSpecPacket, buildAgentRunOperatorPacket, buildAgentRunStartPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildPromotedWorkerPacket } from "./guardrails-core-agent-run-start";
 import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
@@ -119,7 +119,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       extension_isolation: Type.Optional(Type.String({ description: "Extension isolation mode: minimal-no-extensions or inherit. Defaults to minimal-no-extensions for nested provider-native workers." })),
       log_path: Type.Optional(Type.String({ description: "Bounded log path for stdout/stderr metadata." })),
       budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision for this run: ok, warn, blocked, or unknown. Missing/blocked keeps packet blocked." })),
-      budget_evidence: Type.Optional(Type.String({ description: "Short provider/model budget evidence, e.g. dashscope ok or openai-codex spark pool evidence." })),
+      budget_evidence: Type.Optional(Type.String({ description: "Short provider/model budget evidence, e.g. provider route says ok for this worker lane." })),
       budget_evidence_source: Type.Optional(Type.String({ description: "Budget evidence source: route-advisory, provider-budget-snapshot, manual, or unknown." })),
       budget_evidence_provider: Type.Optional(Type.String({ description: "Provider named by the budget evidence, used to detect route/start mismatches." })),
       budget_evidence_generated_at_iso: Type.Optional(Type.String({ description: "ISO timestamp for structured budget evidence freshness checks." })),
@@ -288,7 +288,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       task_id: Type.String({ description: "Board task id to packetize." }),
       purpose: Type.Optional(Type.String({ description: "Short purpose slug/label for the run id. Defaults to task-packet." })),
       profile: Type.Optional(Type.String({ description: "Invocation profile: small-mutation, test-fix, read-only-review, or research. Defaults to small-mutation." })),
-      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. openai-codex/gpt-5.3-codex-spark." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. dashscope/qwen3-coder-plus." })),
       cwd: Type.Optional(Type.String({ description: "Worker cwd. Defaults to current cwd." })),
       timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds; defaults to 90000." })),
       budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision: ok, warn, blocked, or unknown." })),
@@ -345,7 +345,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       task_id: Type.String({ description: "Board task id to packetize for a future start." }),
       purpose: Type.Optional(Type.String({ description: "Short purpose slug/label for the run id. Defaults to task-packet." })),
       profile: Type.Optional(Type.String({ description: "Invocation profile: small-mutation, test-fix, read-only-review, or research." })),
-      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. openai-codex/gpt-5.3-codex-spark." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. dashscope/qwen3-coder-plus." })),
       cwd: Type.Optional(Type.String({ description: "Worker cwd. Defaults to current cwd." })),
       timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds; defaults to 90000." })),
       budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision: ok, warn, blocked, or unknown." })),
@@ -397,18 +397,20 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
   });
 
   pi.registerTool({
-    name: "agent_run_codex_spark_promoted_worker_packet",
-    label: "Codex Spark Promoted Worker Packet",
-    description: "Report-only natural-use packet for Codex Spark envelopes already promoted by arena evidence. Defaults provider/model, budget posture, economy, registry/start/status/log/abort/outcome previews, and operator approval prompt. Never dispatches execution.",
+    name: "agent_run_promoted_worker_packet",
+    label: "Promoted Worker Packet",
+    description: "Report-only natural-use packet for envelopes already promoted by policy or arena evidence. Requires an explicit provider/model, adds budget posture, economy, registry/start/status/log/abort/outcome previews, and never dispatches execution.",
     parameters: Type.Object({
-      task_id: Type.String({ description: "Board task id to packetize for a promoted Codex Spark worker." }),
+      task_id: Type.String({ description: "Board task id to packetize for a promoted worker." }),
       envelope: Type.Optional(Type.String({ description: "Arena-promoted envelope, e.g. readonly-one-file, readonly-three-file-inventory, readonly-source-backed-evidence-synthesis, mutation-one-file-marker." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference selected by operator policy." })),
       purpose: Type.Optional(Type.String({ description: "Short purpose slug/label for the run id. Defaults from the envelope." })),
       cwd: Type.Optional(Type.String({ description: "Worker cwd. Defaults to current workspace cwd." })),
       timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds; defaults to existing task packet defaults." })),
       budget_decision: Type.Optional(Type.String({ description: "Optional provider/model budget decision override. Defaults to warn for manual promoted-lane use." })),
       budget_evidence: Type.Optional(Type.String({ description: "Optional scoped provider/model budget evidence override." })),
       budget_evidence_source: Type.Optional(Type.String({ description: "Budget evidence source. Defaults to manual." })),
+      budget_evidence_provider: Type.Optional(Type.String({ description: "Provider/model named by the budget evidence." })),
       budget_evidence_generated_at_iso: Type.Optional(Type.String({ description: "ISO timestamp for structured budget evidence freshness checks." })),
       budget_evidence_max_age_ms: Type.Optional(Type.Number({ description: "Optional max age for structured budget evidence freshness." })),
       token_budget_evidence: Type.Optional(Type.String({ description: "Short quota/economy evidence for the worker prompt." })),
@@ -422,16 +424,18 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       const cwd = resolveExecutionCwdParam(p.cwd, ctx.cwd);
       const { block } = readTasksBlockCached(cwd);
       const task = block.tasks.find((row) => row.id === taskId);
-      const basePacket = buildCodexSparkPromotedWorkerPacket({
+      const basePacket = buildPromotedWorkerPacket({
         taskId,
         task,
         envelope: typeof p.envelope === "string" ? p.envelope : undefined,
+        providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
         purpose: typeof p.purpose === "string" ? p.purpose : undefined,
         cwd,
         timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
         budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
         budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
         budgetEvidenceSource: typeof p.budget_evidence_source === "string" ? p.budget_evidence_source : undefined,
+        budgetEvidenceProvider: typeof p.budget_evidence_provider === "string" ? p.budget_evidence_provider : undefined,
         budgetEvidenceGeneratedAtIso: typeof p.budget_evidence_generated_at_iso === "string" ? p.budget_evidence_generated_at_iso : undefined,
         budgetEvidenceMaxAgeMs: typeof p.budget_evidence_max_age_ms === "number" ? p.budget_evidence_max_age_ms : undefined,
         tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
@@ -440,17 +444,19 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       const existingEntry = readRegistryEntry(ctx.cwd, basePacket.taskStartPacket.taskPacket.invocationSpec.runId);
-      const result = buildCodexSparkPromotedWorkerPacket({
+      const result = buildPromotedWorkerPacket({
         taskId,
         task,
         existingEntry,
         envelope: typeof p.envelope === "string" ? p.envelope : undefined,
+        providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
         purpose: typeof p.purpose === "string" ? p.purpose : undefined,
         cwd,
         timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
         budgetDecision: typeof p.budget_decision === "string" ? p.budget_decision : undefined,
         budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
         budgetEvidenceSource: typeof p.budget_evidence_source === "string" ? p.budget_evidence_source : undefined,
+        budgetEvidenceProvider: typeof p.budget_evidence_provider === "string" ? p.budget_evidence_provider : undefined,
         budgetEvidenceGeneratedAtIso: typeof p.budget_evidence_generated_at_iso === "string" ? p.budget_evidence_generated_at_iso : undefined,
         budgetEvidenceMaxAgeMs: typeof p.budget_evidence_max_age_ms === "number" ? p.budget_evidence_max_age_ms : undefined,
         tokenBudgetEvidence: typeof p.token_budget_evidence === "string" ? p.token_budget_evidence : undefined,
@@ -459,7 +465,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       return buildOperatorVisibleToolResponse({
-        label: "agent_run_codex_spark_promoted_worker_packet",
+        label: "agent_run_promoted_worker_packet",
         summary: result.summary,
         details: result,
       });
@@ -474,7 +480,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       task_id: Type.String({ description: "Board task id to packetize and optionally dispatch." }),
       purpose: Type.Optional(Type.String({ description: "Short purpose slug/label for the run id. Defaults to task-packet." })),
       profile: Type.Optional(Type.String({ description: "Invocation profile: small-mutation, test-fix, read-only-review, or research." })),
-      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. openai-codex/gpt-5.3-codex-spark." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. dashscope/qwen3-coder-plus." })),
       cwd: Type.Optional(Type.String({ description: "Worker cwd. For execute=true must match the current workspace cwd." })),
       timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds; defaults to 90000." })),
       budget_decision: Type.Optional(Type.String({ description: "Provider/model budget decision: ok, warn, blocked, or unknown." })),
@@ -766,7 +772,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
     parameters: Type.Object({
       run_id: Type.Optional(Type.String({ description: "Future SDK worker run id." })),
       goal: Type.Optional(Type.String({ description: "Run goal/prompt for the future SDK worker." })),
-      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. openai-codex/gpt-5.3-codex-spark." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Full provider/model reference, e.g. dashscope/qwen3-coder-plus." })),
       cwd: Type.Optional(Type.String({ description: "Worker cwd. Defaults to current cwd." })),
       declared_files: Type.Optional(Type.Array(Type.String(), { description: "Exact declared file scope for parent validation." })),
       shared_evidence: Type.Optional(Type.Array(Type.String(), { description: "Bounded shared evidence/cache hints attached to the worker prompt." })),

@@ -108,7 +108,7 @@ describe("provider-readiness matrix", () => {
     }
   });
 
-  it("does not block Codex Spark on aggregate OpenAI Codex provider caps without model-specific budget", async () => {
+  it("uses provider-level caps unless a provider-model budget is configured", async () => {
     const dir = makeWorkspace({
       piStack: {
         quotaVisibility: {
@@ -132,11 +132,10 @@ describe("provider-readiness matrix", () => {
       const entry = matrix.entries.find((e) => e.provider === "openai-codex");
       expect(entry).toBeDefined();
       expect(entry!.modelRef).toBe("openai-codex/gpt-5.3-codex-spark");
-      expect(entry!.readiness).toBe("ready");
-      expect(entry!.budgetState).toBe("unknown");
-      expect(entry!.budgetScope).toBeUndefined();
-      expect(entry!.notes.join("\n")).toContain("Separate model pool detected");
-      expect(entry!.notes.join("\n")).toContain("provider-model budget");
+      expect(entry!.readiness).toBe("blocked");
+      expect(entry!.budgetState).toBe("blocked");
+      expect(entry!.budgetScope).toBe("provider");
+      expect(entry!.notes.join("\n")).toContain("Budget state: BLOCKED");
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

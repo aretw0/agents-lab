@@ -522,13 +522,14 @@ describe("colony-pilot parsers", () => {
 		expect(input.soldierModel).toBe("openai-codex/gpt-5.2-codex");
 	});
 
-	it("spark gate bloqueia uso spark sem trigger explícito no goal", () => {
+	it("model gate blocks gated model refs without explicit goal trigger", () => {
 		const policy = resolveColonyPilotModelPolicy({
 			allowMixedProviders: false,
 			allowedProviders: ["openai-codex"],
-			sparkGateEnabled: true,
-			sparkAllowedGoalTriggers: ["planning recovery", "scout burst"],
-			sparkScoutOnlyTrigger: "scout burst",
+			modelGateEnabled: true,
+			gatedModelRefs: ["openai-codex/gpt-5.3-codex-spark"],
+			gatedModelGoalTriggers: ["planning recovery", "scout burst"],
+			gatedModelScoutOnlyTrigger: "scout burst",
 		});
 
 		const input: any = {
@@ -551,18 +552,19 @@ describe("colony-pilot parsers", () => {
 		expect(evalResult.ok).toBe(false);
 		expect(
 			evalResult.issues.some((i) =>
-				i.includes("spark model usage requires explicit goal trigger"),
+				i.includes("gated model usage requires explicit goal trigger"),
 			),
 		).toBe(true);
 	});
 
-	it("spark gate permite spark fora do scout quando goal inclui planning recovery", () => {
+	it("model gate allows gated model refs outside scout when goal includes planning recovery", () => {
 		const policy = resolveColonyPilotModelPolicy({
 			allowMixedProviders: false,
 			allowedProviders: ["openai-codex"],
-			sparkGateEnabled: true,
-			sparkAllowedGoalTriggers: ["planning recovery", "scout burst"],
-			sparkScoutOnlyTrigger: "scout burst",
+			modelGateEnabled: true,
+			gatedModelRefs: ["openai-codex/gpt-5.3-codex-spark"],
+			gatedModelGoalTriggers: ["planning recovery", "scout burst"],
+			gatedModelScoutOnlyTrigger: "scout burst",
 		});
 
 		const input: any = {
@@ -585,13 +587,14 @@ describe("colony-pilot parsers", () => {
 		expect(evalResult.ok).toBe(true);
 	});
 
-	it("spark gate enforce scout-only quando trigger é scout burst", () => {
+	it("model gate enforces scout-only when trigger is scout burst", () => {
 		const policy = resolveColonyPilotModelPolicy({
 			allowMixedProviders: false,
 			allowedProviders: ["openai-codex"],
-			sparkGateEnabled: true,
-			sparkAllowedGoalTriggers: ["planning recovery", "scout burst"],
-			sparkScoutOnlyTrigger: "scout burst",
+			modelGateEnabled: true,
+			gatedModelRefs: ["openai-codex/gpt-5.3-codex-spark"],
+			gatedModelGoalTriggers: ["planning recovery", "scout burst"],
+			gatedModelScoutOnlyTrigger: "scout burst",
 		});
 
 		const registry = {

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import guardrailsAgentRun from "../../extensions/guardrails-agent-run";
-import { buildAgentRunOperatorPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildCodexSparkPromotedWorkerPacket } from "../../extensions/guardrails-core-exports";
+import { buildAgentRunOperatorPacket, buildAgentRunTaskPacket, buildAgentRunTaskStartPacket, buildPromotedWorkerPacket } from "../../extensions/guardrails-core-exports";
 
 describe("agent run task packet surfaces", () => {
   it("derives a report-only agent invocation spec from a board task", () => {
@@ -41,6 +41,7 @@ describe("agent run task packet surfaces", () => {
       requiresOperatorDecision: true,
       singleRunOnly: true,
       decision: "ready-for-operator-decision",
+      nextActionCode: "present-task-packet-for-approval",
       blockers: [],
     });
     expect(result.invocationSpec.runId).toBe("task-bud-1010-task-packet");
@@ -56,8 +57,10 @@ describe("agent run task packet surfaces", () => {
     expect(result.invocationSpec.maxOutputLines).toBe(20);
     expect(result.invocationSpec.budgetEvidence).toContain("Spark budget usable");
     expect(result.invocationSpec.budgetEvidenceProvider).toBe("openai-codex/gpt-5.3-codex-spark");
+    expect(result.invocationSpecPacket.nextActionCode).toBe("present-invocation-spec-for-approval");
     expect(result.invocationSpecPacket.operatorPacket.nextActionCode).toBe("present-operator-approval");
     expect(result.operatorApprovalPrompt).toBe("approve worker task-bud-1010-task-packet");
+    expect(result.summary).toContain("nextActionCode=present-task-packet-for-approval");
   });
 
   it("exposes stable operator packet next action codes", () => {
@@ -85,22 +88,23 @@ describe("agent run task packet surfaces", () => {
     expect(blocked.blockers).toContain("provider-model-ref-missing");
   });
 
-  it("builds a natural-use Codex Spark packet for promoted envelopes", () => {
-    const result = buildCodexSparkPromotedWorkerPacket({
+  it("builds a natural-use promoted worker packet for promoted envelopes", () => {
+    const result = buildPromotedWorkerPacket({
       taskId: "TASK-BUD-1086",
       task: {
         id: "TASK-BUD-1086",
-        description: "Use Codex Spark naturally for a bounded local-safe worker slice.",
+        description: "Use an operator-selected provider naturally for a bounded local-safe worker slice.",
         status: "planned",
         files: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
         acceptance_criteria: ["returns promoted worker packet", "keeps structured operator approval"],
       },
       cwd: process.cwd(),
       envelope: "readonly-source-backed-evidence-synthesis",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
     });
 
     expect(result).toMatchObject({
-      mode: "codex-spark-promoted-worker-packet",
+      mode: "promoted-worker-packet",
       activation: "none",
       authorization: "none",
       dispatchAllowed: false,
@@ -109,6 +113,7 @@ describe("agent run task packet surfaces", () => {
       requiresOperatorDecision: true,
       decision: "ready-for-operator-decision",
       promotion: "promoted",
+      nextActionCode: "use-promoted-worker-packet",
       blockers: [],
       providerModelRef: "openai-codex/gpt-5.3-codex-spark",
       envelope: "readonly-source-backed-evidence-synthesis",
@@ -119,11 +124,13 @@ describe("agent run task packet surfaces", () => {
     expect(result.taskStartPacket.taskPacket.invocationSpec.economyMode).toBe("critical");
     expect(result.promotedEnvelopes).toContain("mutation-one-file-marker");
     expect(result.stillBlocked.join("\n")).toContain("protected-scope mutation");
+    expect(result.taskStartPacket.nextActionCode).toBe("present-task-start-previews-for-approval");
     expect(result.summary).toContain("dispatch=no");
+    expect(result.summary).toContain("nextActionCode=use-promoted-worker-packet");
   });
 
-  it("fails closed for unpromoted Codex Spark envelopes", () => {
-    const result = buildCodexSparkPromotedWorkerPacket({
+  it("fails closed for unpromoted worker envelopes", () => {
+    const result = buildPromotedWorkerPacket({
       taskId: "TASK-BUD-1086",
       task: {
         id: "TASK-BUD-1086",
@@ -134,11 +141,13 @@ describe("agent run task packet surfaces", () => {
       },
       cwd: process.cwd(),
       envelope: "swarm-mutation-many-files",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
     });
 
     expect(result.decision).toBe("blocked");
     expect(result.promotion).toBe("blocked");
-    expect(result.blockers).toContain("codex-spark-envelope-not-promoted");
+    expect(result.nextActionCode).toBe("resolve-promoted-worker-blockers");
+    expect(result.blockers).toContain("promoted-worker-envelope-not-promoted");
     expect(result.processStartAllowed).toBe(false);
   });
 
@@ -159,6 +168,7 @@ describe("agent run task packet surfaces", () => {
       budgetEvidence: "dashscope ok",
     });
     expect(missingTask.decision).toBe("blocked");
+    expect(missingTask.nextActionCode).toBe("resolve-task-packet-blockers");
     expect(missingTask.blockers).toContain("task-not-found");
 
     const missingFiles = buildAgentRunTaskPacket({
@@ -234,6 +244,7 @@ describe("agent run task packet surfaces", () => {
       processStopAllowed: false,
       requiresOperatorDecision: true,
       decision: "ready-for-operator-decision",
+      nextActionCode: "present-task-start-previews-for-approval",
       blockers: [],
     });
     expect(result.taskPacket.mode).toBe("agent-run-task-packet");
@@ -358,14 +369,14 @@ describe("agent run task packet surfaces", () => {
     expect(result.content?.[0]?.text).toContain("dispatch=no");
   });
 
-  it("exposes agent_run_codex_spark_promoted_worker_packet as a natural-use board surface", async () => {
-    const tmp = mkdtempSync(path.join(tmpdir(), "codex-spark-promoted-worker-"));
+  it("exposes agent_run_promoted_worker_packet as a natural-use board surface", async () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "promoted-worker-"));
     mkdirSync(path.join(tmp, ".project"), { recursive: true });
     writeFileSync(path.join(tmp, ".project", "tasks.json"), JSON.stringify({
       tasks: [
         {
           id: "TASK-BUD-1086",
-          description: "Promote Codex Spark for bounded local-safe worker use.",
+          description: "Promote an operator-selected provider for bounded local-safe worker use.",
           status: "planned",
           files: ["packages/pi-stack/extensions/guardrails-core-agent-run-start.ts"],
           acceptance_criteria: ["returns promoted packet"],
@@ -383,7 +394,7 @@ describe("agent run task packet surfaces", () => {
     const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
     guardrailsAgentRun(pi);
 
-    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_codex_spark_promoted_worker_packet");
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_promoted_worker_packet");
     expect(toolCall?.[0]?.parameters?.type).toBe("object");
     const tool = toolCall?.[0] as {
       execute: (
@@ -396,21 +407,22 @@ describe("agent run task packet surfaces", () => {
     };
 
     const result = await tool.execute(
-      "tc-codex-spark-promoted-worker",
+      "tc-promoted-worker",
       {
         task_id: "TASK-BUD-1086",
         envelope: "readonly-one-file",
+        provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
       },
       undefined as unknown as AbortSignal,
       () => {},
       { cwd: tmp },
     );
 
-    expect(result.details?.mode).toBe("codex-spark-promoted-worker-packet");
+    expect(result.details?.mode).toBe("promoted-worker-packet");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.processStartAllowed).toBe(false);
     expect(result.details?.decision).toBe("ready-for-operator-decision");
-    expect(result.content?.[0]?.text).toContain("codex-spark-promoted-worker-packet: decision=ready-for-operator-decision");
+    expect(result.content?.[0]?.text).toContain("promoted-worker-packet: decision=ready-for-operator-decision");
     expect(result.content?.[0]?.text).toContain("dispatch=no");
   });
 

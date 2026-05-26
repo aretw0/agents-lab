@@ -207,7 +207,7 @@ describe("tool hygiene scorecard", () => {
     const packet = buildCapabilityRoiPacket({
       capabilities: [
         { name: "structured_interview_plan", description: "Read-only plan; never authorizes dispatch", capabilityKind: "local-tool", value: "medium", effort: "low" },
-        { name: "codex_spark_worker", description: "worker candidate for bounded implementation", capabilityKind: "worker", value: "high", effort: "medium" },
+        { name: "promoted_worker", description: "worker candidate for bounded implementation", capabilityKind: "worker", value: "high", effort: "medium" },
         { name: "github_actions_publish", description: "protected GitHub Actions publish", capabilityKind: "protected", value: "high", effort: "high" },
         { name: "web_research", description: "external web research", capabilityKind: "local-tool", available: false },
       ],
