@@ -88,4 +88,13 @@ describe("distributed model neutrality", () => {
 
     expect(offenders).toEqual([]);
   });
+
+  it("does not bake provider/model-specific threshold defaults into distributed runtime", () => {
+    const text = readFileSync(join(PACKAGE_ROOT, "extensions", "custom-footer-context-thresholds.ts"), "utf8");
+
+    expect(text).not.toMatch(/\b(?:openai-codex|github-copilot|dashscope|claude-code)\/[A-Za-z0-9._-]+/);
+    expect(text).not.toMatch(/gpt-5\./);
+    expect(text).not.toMatch(/claude-[A-Za-z0-9._-]+/);
+    expect(text).not.toMatch(/qwen[A-Za-z0-9._-]*/i);
+  });
 });

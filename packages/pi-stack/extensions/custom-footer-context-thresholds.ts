@@ -7,7 +7,6 @@ export type ContextThresholdOverrides = {
 
 const DEFAULT_CONTEXT_THRESHOLDS: ContextThresholds = { warningPct: 50, errorPct: 75 };
 const ANTHROPIC_CONTEXT_THRESHOLDS: ContextThresholds = { warningPct: 65, errorPct: 85 };
-const GITHUB_COPILOT_GPT53_CODEX_CONTEXT_THRESHOLDS: ContextThresholds = { warningPct: 45, errorPct: 65 };
 
 function normalizeThresholds(
 	input: Partial<ContextThresholds> | undefined,
@@ -25,10 +24,6 @@ function normalizeThresholds(
 	};
 }
 
-function isGithubCopilotGpt53Codex(provider: string, modelId: string): boolean {
-	return provider === "github-copilot" && modelId.trim().toLowerCase() === "gpt-5.3-codex";
-}
-
 export function resolveContextThresholds(
 	modelProvider: string | null,
 	modelId: string,
@@ -38,9 +33,7 @@ export function resolveContextThresholds(
 	const normalizedModelId = String(modelId ?? "").trim().toLowerCase();
 	const base = provider === "anthropic"
 		? ANTHROPIC_CONTEXT_THRESHOLDS
-		: isGithubCopilotGpt53Codex(provider, normalizedModelId)
-			? GITHUB_COPILOT_GPT53_CODEX_CONTEXT_THRESHOLDS
-			: DEFAULT_CONTEXT_THRESHOLDS;
+		: DEFAULT_CONTEXT_THRESHOLDS;
 
 	let resolved = normalizeThresholds(overrides?.default, base);
 	if (provider && overrides?.byProvider?.[provider]) {

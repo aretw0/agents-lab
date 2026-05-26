@@ -126,23 +126,23 @@ describe("custom-footer — context thresholds", () => {
 		expect(copilotClaude.warningPct).toBe(50);
 		expect(copilotClaude.errorPct).toBe(75);
 
-		const copilotCodex = resolveContextThresholds(
+		const copilotOtherModel = resolveContextThresholds(
 			"github-copilot",
-			"gpt-5.3-codex",
+			"provider-specific-model",
 		);
-		expect(copilotCodex.warningPct).toBe(45);
-		expect(copilotCodex.errorPct).toBe(65);
+		expect(copilotOtherModel.warningPct).toBe(50);
+		expect(copilotOtherModel.errorPct).toBe(75);
 	});
 
 	it("applies explicit overrides by provider/model", () => {
 		const overrides: ContextThresholdOverrides = {
 			byProviderModel: {
-				"anthropic/claude-sonnet-4-6": { warningPct: 72, errorPct: 91 },
+				"provider/model": { warningPct: 72, errorPct: 91 },
 			},
 		};
 		const resolved = resolveContextThresholds(
-			"anthropic",
-			"claude-sonnet-4-6",
+			"provider",
+			"model",
 			overrides,
 		);
 		expect(resolved.warningPct).toBe(72);

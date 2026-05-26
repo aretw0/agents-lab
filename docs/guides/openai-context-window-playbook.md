@@ -104,7 +104,7 @@ Notas:
 A `custom-footer` agora usa thresholds por `provider/model` para colorir `% de contexto`:
 - baseline geral: warning `50%`, error `75%`
 - `anthropic/*`: warning `65%`, error `85%`
-- `github-copilot/claude-*` **não** herda automaticamente perfil Anthropic (fica no baseline, salvo override)
+- outros provider/model refs ficam no baseline, salvo override explícito do operador/projeto
 
 Override opcional em `.pi/settings.json`:
 ```json
@@ -241,7 +241,7 @@ Config opcional em `.pi/settings.json` (conservador para evitar 400 em provedore
 ```
 
 Observação: `warnPct`/`errorPct` são herdados do threshold model-aware do `custom-footer` (`contextPressure`).
-Para `github-copilot/gpt-5.3-codex`, o baseline recomendado é mais conservador (`errorPct=65`) para reduzir risco de `400 input exceeds context window`.
+Para rotas com histórico de `400 input exceeds context window`, configure um override conservador em `contextPressure.byProviderModel`; isso não é default embutido da stack.
 
 ## Blueprint — Fresh Context Pack (pós-compact e spawn)
 
