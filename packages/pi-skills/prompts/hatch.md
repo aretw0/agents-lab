@@ -33,9 +33,12 @@ If `operator_intent_intake_packet` returns `details.reportOnlyRouteAuthorized=tr
 `details.executionPlan.executeWithoutTextualConfirmation=true`, run the
 read-only `details.executionPlan.steps` in order and summarize the decision.
 Do not ask for textual confirmation for non-mutating diagnostics, runtime
-health checks, or readiness checks. This does not authorize mutation, worker
-dispatch, protected scope, scheduler, remote/offload, publish, credentials, or
-destructive maintenance.
+health checks, readiness checks, or brainstorm seed previews. If the seed asks
+for the next local-safe slice, says there are no eligible tasks, or asks to
+seed/brainstorm the board, let intake route to the report-only brainstorm
+preview before asking broad follow-up questions. This does not authorize
+mutation, worker dispatch, protected scope, scheduler, remote/offload, publish,
+credentials, or destructive maintenance.
 
 Defaults:
 
