@@ -90,6 +90,27 @@ describe("distributed model neutrality", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("keeps worker budget/advisory fixture prose model-neutral", () => {
+    const files = [
+      join(PACKAGE_ROOT, "test", "smoke", "guardrails-agent-run-task-packets.test.ts"),
+      join(PACKAGE_ROOT, "test", "smoke", "guardrails-agent-run-sdk.test.ts"),
+      join(PACKAGE_ROOT, "test", "smoke", "guardrails-agent-spawn-readiness.test.ts"),
+      join(PACKAGE_ROOT, "test", "smoke", "guardrails-agent-run-executor-diagnostics.test.ts"),
+      join(PACKAGE_ROOT, "test", "smoke", "quota-visibility-route-advisory.test.ts"),
+    ];
+    const modelAsConcept = /\b(?:Spark|Codex\s+Spark)\b|codex-spark utiliz|sparkCandidate|makeStatusWithDashscopeAndSpark/;
+
+    const offenders = files
+      .map((file) => ({
+        file: relative(process.cwd(), file).replace(/\\/g, "/"),
+        text: readFileSync(file, "utf8"),
+      }))
+      .filter(({ text }) => modelAsConcept.test(text))
+      .map(({ file }) => file);
+
+    expect(offenders).toEqual([]);
+  });
+
   it("does not bake provider/model-specific threshold defaults into distributed runtime", () => {
     const text = readFileSync(join(PACKAGE_ROOT, "extensions", "custom-footer-context-thresholds.ts"), "utf8");
 

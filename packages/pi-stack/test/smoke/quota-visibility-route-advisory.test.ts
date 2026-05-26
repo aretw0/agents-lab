@@ -6,7 +6,7 @@ import {
 } from "../../extensions/quota-visibility";
 import { formatRouteAdvisory } from "../../extensions/quota-visibility-formatting";
 
-function makeStatusWithDashscopeAndSpark() {
+function makeStatusWithDashscopeAndModelPool() {
   return {
     source: {
       sessionsRoot: "x",
@@ -98,7 +98,7 @@ function makeStatusWithDashscopeAndSpark() {
         warnPct: 80,
         hardPct: 100,
         state: "warning",
-        notes: ["separate Spark weekly request pool"],
+        notes: ["separate model weekly request pool"],
       },
     ],
     daily: [],
@@ -110,8 +110,8 @@ function makeStatusWithDashscopeAndSpark() {
 }
 
 describe("quota-visibility route advisory", () => {
-  it("respeita routeModelRefs para Spark antes de fallback DashScope", () => {
-    const status = makeStatusWithDashscopeAndSpark();
+  it("respeita routeModelRefs model-specific antes de fallback DashScope", () => {
+    const status = makeStatusWithDashscopeAndModelPool();
 
     expect(buildRouteAdvisory(status, "balanced").recommendedProvider).toBe("dashscope");
 
@@ -303,14 +303,14 @@ describe("quota-visibility route advisory", () => {
     const aggregateCandidate = advisory.consideredProviders.find(
       (p) => p.provider === "openai-codex" && !p.providerModelKey,
     );
-    const sparkCandidate = advisory.consideredProviders.find(
+    const modelPoolCandidate = advisory.consideredProviders.find(
       (p) => p.providerModelKey === "openai-codex/gpt-5.3-codex-spark",
     );
 
     expect(advisory.recommendedProvider).toBe("openai-codex");
     expect(advisory.state).toBe("warning");
     expect(aggregateCandidate).toMatchObject({ state: "blocked", provider: "openai-codex", providerModelKey: undefined });
-    expect(sparkCandidate).toMatchObject({
+    expect(modelPoolCandidate).toMatchObject({
       provider: "openai-codex",
       providerModelKey: "openai-codex/gpt-5.3-codex-spark",
       state: "warning",

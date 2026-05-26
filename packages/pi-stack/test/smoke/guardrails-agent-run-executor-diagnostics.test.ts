@@ -271,7 +271,7 @@ describe("agent run executor diagnostics", () => {
     expect(result.nextProbeProfiles).toContain("stderr-preservation-probe");
     expect(result.nextActions.join("\n")).toContain("known-good local runner examples");
     expect(result.nextActions.join("\n")).toContain("current configured provider/model");
-    expect(result.nextActions.join("\n")).not.toContain("Spark worker canary");
+    expect(result.nextActions.join("\n")).not.toContain("model-specific worker canary");
 
     const startupProbe = buildAgentRunStartupDiagnosticPacket({
       runId: "silent",
