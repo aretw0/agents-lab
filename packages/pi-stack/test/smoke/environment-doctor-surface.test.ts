@@ -130,10 +130,12 @@ describe("environment-doctor surface", () => {
     expect(text).toContain("devPressurePrimary=");
     expect(text).toContain("devPressureAction=");
     expect(text).toContain("liveWatchdog=unavailable");
+    expect(text).toContain("operatorWatchdog=required-for-live-metrics");
     expect(text).toContain("watchdogSource=external-pressure-and-persisted-evidence");
     expect((result.details as any)?.mode).toBe("environment-runtime-health");
     expect((result.details as any)?.nextAction).toBe("continue-with-bounded-work");
     expect((result.details as any)?.watchdog?.liveMetricsAvailable).toBe(false);
+    expect((result.details as any)?.watchdog?.operatorTuiCheckRequiredForLiveMetrics).toBe(true);
   });
 
   it("runtime health decision blocks hard failures and keeps optional pressure advisory", () => {

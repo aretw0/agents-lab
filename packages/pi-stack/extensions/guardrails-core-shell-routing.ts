@@ -33,7 +33,7 @@ const NODE_FAMILY_TOKENS = new Set([
 const CMD_WRAPPER_PATTERN = /^\s*cmd(?:\.exe)?\s+\/c\b/i;
 const TUI_SLASH_COMMAND_PATTERN = /^\s*\/[A-Za-z][A-Za-z0-9_-]*(?::[A-Za-z0-9_-]+)?(?:\s|$)/;
 const SHELL_C_WRAPPER_PATTERN = /^\s*(?:\/?(?:[\w.-]+\/)*(?:bash|sh|zsh)|(?:bash|sh|zsh))\s+-(?:l)?c\s+(["'])([\s\S]*?)\1\s*$/;
-const SHELL_PROMPT_PREFIX_PATTERN = /^\s*\$\s+(.+)$/s;
+const SHELL_PROMPT_PREFIX_PATTERN = /^\s*(?:\$|!)\s+(.+)$/s;
 
 export function detectShellFamily(
   platform = process.platform,

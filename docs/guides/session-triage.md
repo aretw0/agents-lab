@@ -185,7 +185,7 @@ Use quando quiser avançar mais de um micro-lote sem perder governança:
    - `context_watch_status`
    - `environment_runtime_health_status`
    - `subagent_readiness_status(strict=true)`
-   - Não executar comandos slash da TUI, como `/watchdog:status`, via bash; quando o agente precisar de saúde de runtime, usar tools read-only como `environment_runtime_health_status`.
+   - Não executar comandos slash da TUI, como `/watchdog:status`, via bash; quando o agente precisar de saúde de runtime, usar tools read-only como `environment_runtime_health_status`. Para métricas vivas de watchdog, pedir que o operador consulte a TUI.
 3. Classificar a rodada em `GO`, `GO condicional` ou `NO-GO`.
 4. Executar lote curto (1 objetivo), registrar evidência e atualizar `.project`.
 5. Repetir o gate antes do próximo lote.

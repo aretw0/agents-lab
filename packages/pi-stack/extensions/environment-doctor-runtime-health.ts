@@ -71,6 +71,7 @@ export function buildEnvironmentRuntimeHealthPayload(input: {
     runtimeArtifactSummary: input.runtimeArtifactSummary,
     watchdog: {
       liveMetricsAvailable: false,
+      operatorTuiCheckRequiredForLiveMetrics: true,
       note: "Pi watchdog slash commands are TUI commands; this tool uses external pressure facts and persisted evidence only.",
     },
   };
@@ -98,6 +99,7 @@ export function buildEnvironmentRuntimeHealthPayload(input: {
     input.devPressure.boardPressurePlan?.status ? `boardPressure=${input.devPressure.boardPressurePlan.status}` : undefined,
     `runtimeArtifacts=${Array.isArray(input.runtimeArtifacts.violations) && input.runtimeArtifacts.violations.length === 0 ? "clean" : "violations"}`,
     "liveWatchdog=unavailable",
+    "operatorWatchdog=required-for-live-metrics",
     "watchdogSource=external-pressure-and-persisted-evidence",
   ].filter(Boolean).join(" ");
 
