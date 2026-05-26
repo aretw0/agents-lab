@@ -101,7 +101,21 @@ export {
 export { buildBoardExecuteTaskIntentText, buildBoardExecuteNextIntentText, buildBoardReadinessStatusLabel, evaluateBoardLongRunReadiness } from "./guardrails-core-board-readiness";
 export { buildBoardExecuteTaskIntent, buildBoardExecuteNextIntent, buildGuardrailsIntentSystemPrompt, encodeGuardrailsIntent, parseGuardrailsIntent, summarizeGuardrailsIntent } from "./guardrails-core-intent-bus";
 export { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent-runtime";
-export { buildShellRoutingStatusLabel, buildShellRoutingStatusLines, buildShellRoutingSystemPrompt, detectShellFamily, isCmdWrappedCommand, isNodeFamilyCommand, parseFirstCommandToken, resolveBashCommandRoutingDecision, resolveCommandRoutingProfile, wrapCommandForHostShell } from "./guardrails-core-shell-routing";
+export {
+  buildShellRoutingStatusLabel,
+  buildShellRoutingStatusLines,
+  buildShellRoutingSystemPrompt,
+  detectShellFamily,
+  isCmdWrappedCommand,
+  isNodeFamilyCommand,
+  parseFirstCommandToken,
+  resolveBashCommandRoutingDecision,
+  resolveCommandRoutingProfile,
+  TUI_SLASH_COMMAND_PATTERN_SOURCE,
+  TUI_SLASH_COMMAND_SHELL_POLICY_EXAMPLES,
+  TUI_SLASH_COMMAND_SHELL_POLICY_PREFIXES,
+  wrapCommandForHostShell,
+} from "./guardrails-core-shell-routing";
 export { evaluateAutonomyLaneReadiness } from "./guardrails-core-autonomy-lane";
 export { evaluateAutonomyLaneTaskSelection, selectAutonomyLaneTask } from "./guardrails-core-autonomy-task-selector";
 export { buildI18nIntentSystemPrompt, DEFAULT_I18N_INTENT_CONFIG, normalizeI18nIntentConfig, resolveI18nArtifactIntent, resolveI18nIntentConfig, summarizeI18nIntentConfig } from "./guardrails-core-i18n-intents";

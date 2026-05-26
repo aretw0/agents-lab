@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { buildControlPlaneProfilePacket, buildOperatorIntentIntakePacket, inferBrainstormSeedIntent, inferRuntimeHealthIntent, inferWorkerReadinessIntent, resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
+import {
+  buildControlPlaneProfilePacket,
+  buildOperatorIntentIntakePacket,
+  inferBrainstormSeedIntent,
+  inferRuntimeHealthIntent,
+  inferWorkerReadinessIntent,
+  resolveStructuredInterview,
+  TUI_SLASH_COMMAND_PATTERN_SOURCE,
+  TUI_SLASH_COMMAND_SHELL_POLICY_EXAMPLES,
+  TUI_SLASH_COMMAND_SHELL_POLICY_PREFIXES,
+} from "../../extensions/guardrails-core-exports";
 import { registerGuardrailsStructuredInterviewSurface } from "../../extensions/guardrails-core-structured-interview-surface";
 
 describe("structured interview primitive", () => {
@@ -283,9 +293,9 @@ describe("structured interview primitive", () => {
     expect(packet.executionPlan.forbiddenActions).toEqual(["mutation", "dispatch", "worker-dispatch", "protected-scope"]);
     expect(packet.executionPlan.shellCommandPolicy).toEqual({
       piTuiSlashCommandsAreShellCommands: false,
-      forbiddenShellCommandPattern: "^\\s*/[A-Za-z][A-Za-z0-9_-]*(?::[A-Za-z0-9_-]+)?(?:\\s|$)",
-      forbiddenShellCommandPrefixes: ["/watchdog", "/safe-mode", "/models"],
-      examples: ["/watchdog:status", "/safe-mode on", "/models"],
+      forbiddenShellCommandPattern: TUI_SLASH_COMMAND_PATTERN_SOURCE,
+      forbiddenShellCommandPrefixes: [...TUI_SLASH_COMMAND_SHELL_POLICY_PREFIXES],
+      examples: [...TUI_SLASH_COMMAND_SHELL_POLICY_EXAMPLES],
       preferredRuntimeHealthTools: ["environment_runtime_health_status", "environment_dev_pressure_status"],
     });
     expect(packet.missingQuestions.length).toBeGreaterThan(0);
@@ -318,7 +328,7 @@ describe("structured interview primitive", () => {
     ]);
     expect(packet.executionPlan.executeWithoutTextualConfirmation).toBe(true);
     expect(packet.executionPlan.shellCommandPolicy.piTuiSlashCommandsAreShellCommands).toBe(false);
-    expect(packet.executionPlan.shellCommandPolicy.forbiddenShellCommandPrefixes).toEqual(["/watchdog", "/safe-mode", "/models"]);
+    expect(packet.executionPlan.shellCommandPolicy.forbiddenShellCommandPrefixes).toEqual([...TUI_SLASH_COMMAND_SHELL_POLICY_PREFIXES]);
     expect(packet.executionPlan.shellCommandPolicy.examples).toContain("/models");
   });
 

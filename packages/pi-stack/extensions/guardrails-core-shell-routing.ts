@@ -31,7 +31,11 @@ const NODE_FAMILY_TOKENS = new Set([
 ]);
 
 const CMD_WRAPPER_PATTERN = /^\s*cmd(?:\.exe)?\s+\/c\b/i;
-const TUI_SLASH_COMMAND_PATTERN = /^\s*\/[A-Za-z][A-Za-z0-9_-]*(?::[A-Za-z0-9_-]+)?(?:\s|$)/;
+export const TUI_SLASH_COMMAND_PATTERN_SOURCE = "^\\s*/[A-Za-z][A-Za-z0-9_-]*(?::[A-Za-z0-9_-]+)?(?:\\s|$)";
+export const TUI_SLASH_COMMAND_SHELL_POLICY_PREFIXES = ["/watchdog", "/safe-mode", "/models"] as const;
+export const TUI_SLASH_COMMAND_SHELL_POLICY_EXAMPLES = ["/watchdog:status", "/safe-mode on", "/models"] as const;
+
+const TUI_SLASH_COMMAND_PATTERN = new RegExp(TUI_SLASH_COMMAND_PATTERN_SOURCE);
 const SHELL_C_WRAPPER_PATTERN = /^\s*(?:\/?(?:[\w.-]+\/)*(?:bash|sh|zsh)|(?:bash|sh|zsh))\s+-(?:l)?c\s+(["'])([\s\S]*?)\1\s*$/;
 const SHELL_PROMPT_PREFIX_PATTERN = /^\s*(?:\$|!)\s+(.+)$/s;
 

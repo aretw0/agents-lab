@@ -9,6 +9,9 @@ import {
   isTuiSlashCommand,
   resolveBashCommandRoutingDecision,
   resolveCommandRoutingProfile,
+  TUI_SLASH_COMMAND_PATTERN_SOURCE,
+  TUI_SLASH_COMMAND_SHELL_POLICY_EXAMPLES,
+  TUI_SLASH_COMMAND_SHELL_POLICY_PREFIXES,
   wrapCommandForHostShell,
 } from "../../extensions/guardrails-core-shell-routing";
 
@@ -49,6 +52,9 @@ describe("guardrails-core shell routing", () => {
     const profile = resolveCommandRoutingProfile("linux", {} as NodeJS.ProcessEnv);
     const decision = resolveBashCommandRoutingDecision("/watchdog:status", profile);
 
+    expect(new RegExp(TUI_SLASH_COMMAND_PATTERN_SOURCE).test("/models")).toBe(true);
+    expect([...TUI_SLASH_COMMAND_SHELL_POLICY_PREFIXES]).toEqual(["/watchdog", "/safe-mode", "/models"]);
+    expect([...TUI_SLASH_COMMAND_SHELL_POLICY_EXAMPLES]).toEqual(["/watchdog:status", "/safe-mode on", "/models"]);
     expect(isTuiSlashCommand("/watchdog:status")).toBe(true);
     expect(isTuiSlashCommand("/models")).toBe(true);
     expect(isTuiSlashCommand("/safe-mode on")).toBe(true);

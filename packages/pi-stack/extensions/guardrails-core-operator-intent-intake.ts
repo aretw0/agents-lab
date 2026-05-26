@@ -4,6 +4,11 @@ import {
   type ControlPlaneProfilePacketInput,
 } from "./guardrails-core-local-slice-contracts";
 import { GUARDRAILS_AUTHORIZATION_NONE, type GuardrailsAuthorizationNone } from "./guardrails-core-authorization";
+import {
+  TUI_SLASH_COMMAND_PATTERN_SOURCE,
+  TUI_SLASH_COMMAND_SHELL_POLICY_EXAMPLES,
+  TUI_SLASH_COMMAND_SHELL_POLICY_PREFIXES,
+} from "./guardrails-core-shell-routing";
 
 export type OperatorIntentIntakeDecision =
   | "ask-operator"
@@ -335,9 +340,9 @@ function buildExecutionPlan(action: {
   const forbiddenActions: OperatorIntentExecutionPlan["forbiddenActions"] = ["mutation", "dispatch", "worker-dispatch", "protected-scope"];
   const shellCommandPolicy: OperatorIntentExecutionPlan["shellCommandPolicy"] = {
     piTuiSlashCommandsAreShellCommands: false,
-    forbiddenShellCommandPattern: "^\\s*/[A-Za-z][A-Za-z0-9_-]*(?::[A-Za-z0-9_-]+)?(?:\\s|$)",
-    forbiddenShellCommandPrefixes: ["/watchdog", "/safe-mode", "/models"],
-    examples: ["/watchdog:status", "/safe-mode on", "/models"],
+    forbiddenShellCommandPattern: TUI_SLASH_COMMAND_PATTERN_SOURCE,
+    forbiddenShellCommandPrefixes: [...TUI_SLASH_COMMAND_SHELL_POLICY_PREFIXES],
+    examples: [...TUI_SLASH_COMMAND_SHELL_POLICY_EXAMPLES],
     preferredRuntimeHealthTools: ["environment_runtime_health_status", "environment_dev_pressure_status"],
   };
   if (action.controlPlaneAction === "stop-and-report") {
