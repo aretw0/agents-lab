@@ -2,9 +2,12 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import test from "node:test";
 
 import { checksForProfile, resolveCheck } from "../verify-pi-stack.mjs";
+
+const SCRIPT = path.resolve("scripts/verify-pi-stack.mjs");
 
 test("resolveCheck accepts alternate dependency paths", () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "verify-pi-stack-"));
@@ -56,4 +59,21 @@ test("verify stack-full profile includes diagnostic extras", () => {
   assert.ok(labels.some((label) => label.includes("pi-lens")));
   assert.ok(labels.some((label) => label.includes("pi-web-access")));
   assert.ok(labels.some((label) => label.includes("multi-edit")));
+});
+
+test("verify failure hint points to explicit full-surface diagnostics", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "verify-pi-stack-failure-"));
+
+  try {
+    const run = spawnSync(process.execPath, [SCRIPT], {
+      cwd,
+      encoding: "utf8",
+    });
+
+    assert.notEqual(run.status, 0);
+    assert.match(run.stderr, /pnpm run verify -- --profile stack-full/);
+    assert.doesNotMatch(run.stderr, /auto-repair tenta corrigir/);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
 });

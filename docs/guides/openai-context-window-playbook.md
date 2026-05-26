@@ -1,4 +1,4 @@
-# OpenAI Context Window Playbook (lean → governed → swarm)
+# OpenAI Context Window Playbook (small → governed → delegated)
 
 Objetivo: maximizar qualidade por token e evitar saturação de contexto usando a lane certa para cada tipo de trabalho.
 
@@ -10,11 +10,11 @@ Objetivo: maximizar qualidade por token e evitar saturação de contexto usando 
   - **E stack-no-extensions**: `6909` total tokens
   - **B stack-default**: `13931` total tokens
 
-Leitura prática: stack completo é útil para governança, mas custa muito mais contexto. Para trabalho simples, usar lane lean.
+Leitura prática: stack completo é útil para governança, mas custa muito mais contexto. Para trabalho simples, use a rota mais enxuta que ainda preserve a evidência necessária.
 
 ---
 
-## Lane 1 — Lean (default para trabalho simples)
+## Lane 1 — Small (default para trabalho simples)
 Use para: leitura/edição pontual, refactor pequeno, revisão curta, prompts diretos.
 
 Comando base:
@@ -46,7 +46,7 @@ Trade-off:
 
 ---
 
-## Lane 3 — Swarm/Heavy (execução paralela e tarefas grandes)
+## Lane 3 — Delegated/Heavy (execução paralela e tarefas grandes)
 Use para: lotes multi-arquivo, mudanças com validação cruzada, execução candidate/recovery.
 
 Pré-condição:

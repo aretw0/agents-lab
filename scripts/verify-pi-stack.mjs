@@ -227,7 +227,7 @@ for (const check of contractChecks) {
 
 if (failed > 0) {
   console.error(`\n${failed} verificação(ões) falharam.`);
-  console.error("Tente: pnpm run verify (auto-repair tenta corrigir o contrato quando possível)");
+  console.error("Tente: pnpm run verify -- --profile stack-full para diagnosticar superfícies opt-in completas");
   console.error("Ou:    pnpm install (workspace root)");
   console.error("Ou:    pnpm --filter @aretw0/pi-stack install");
   process.exit(1);
