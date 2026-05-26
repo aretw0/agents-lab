@@ -260,11 +260,6 @@ export const INSTALLER_BASELINE = {
       sessionRequestCap: 20,
       warnFraction: 0.75,
     },
-    quotaVisibility: {
-      routeModelRefs: {
-        "claude-code": "claude-code/claude-sonnet-4-6",
-      },
-    },
   },
 };
 
@@ -721,7 +716,6 @@ if (IS_MAIN) {
     console.log("  • theme: agents-lab");
     console.log("  • piStack.colonyPilot: preflight, modelPolicy, budgetPolicy, deliveryPolicy");
     console.log("  • piStack.claudeCodeAdapter: sessionRequestCap, warnFraction");
-    console.log("  • piStack.quotaVisibility.routeModelRefs: claude-code");
     console.log("\n  Keybinding recommendation (apply in terminal settings):");
     console.log("  • Ctrl+Enter → submit message");
     console.log("  • Escape → cancel / interrupt");

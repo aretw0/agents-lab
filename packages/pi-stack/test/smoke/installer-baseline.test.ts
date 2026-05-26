@@ -61,7 +61,7 @@ describe("installer-baseline — applyBaselineToSettings", () => {
     expect(result.piStack?.colonyPilot?.preflight?.enabled).toBe(true);
     expect(result.piStack?.colonyPilot?.budgetPolicy?.defaultMaxCostUsd).toBe(2);
     expect(result.piStack?.claudeCodeAdapter?.sessionRequestCap).toBe(20);
-    expect(result.piStack?.quotaVisibility?.routeModelRefs?.["claude-code"]).toBe("claude-code/claude-sonnet-4-6");
+    expect(result.piStack?.quotaVisibility?.routeModelRefs).toBeUndefined();
   });
 
   it("settings com tema existente preserva tema do usuario", () => {
@@ -90,7 +90,7 @@ describe("installer-baseline — applyBaselineToSettings", () => {
     expect(INSTALLER_BASELINE.theme).toBe("agents-lab");
     expect(INSTALLER_BASELINE.piStack?.colonyPilot).toBeDefined();
     expect(INSTALLER_BASELINE.piStack?.claudeCodeAdapter).toBeDefined();
-    expect(INSTALLER_BASELINE.piStack?.quotaVisibility?.routeModelRefs?.["claude-code"]).toBeDefined();
+    expect(INSTALLER_BASELINE.piStack?.quotaVisibility?.routeModelRefs).toBeUndefined();
   });
 
   it("nao força provider/model do operador", () => {
@@ -100,5 +100,7 @@ describe("installer-baseline — applyBaselineToSettings", () => {
     expect(result.defaultModel).toBeUndefined();
     expect(result.enabledModels).toBeUndefined();
     expect(result.runtimeProfile).toBeUndefined();
+    expect(result.piStack?.quotaVisibility?.routeModelRefs).toBeUndefined();
+    expect(result.piStack?.colonyPilot?.modelPolicy?.roleModels).toEqual({});
   });
 });
