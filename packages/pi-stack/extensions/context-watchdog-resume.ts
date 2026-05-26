@@ -141,6 +141,7 @@ export type PostReloadResumeIncidentPacket = {
 	intentAgeSec: number | null;
 	focusTasks: string[];
 	operatorActionRequired: boolean;
+	nextActionCode: PostReloadResumeIncidentNextActionCode;
 	nextAction: string;
 	evidence: {
 		intentCreatedAtIso?: string;
@@ -152,6 +153,13 @@ export type PostReloadResumeIncidentPacket = {
 	};
 	summary: string;
 };
+
+export type PostReloadResumeIncidentNextActionCode =
+	| "no-pending-intent"
+	| "observe-dispatched-resume"
+	| "preserve-incident-refresh-checkpoint"
+	| "follow-dispatch-blocker-hint"
+	| "inspect-post-reload-state";
 
 export function buildPostReloadResumeIncidentPacket(input: {
 	nowMs: number;
@@ -173,6 +181,15 @@ export function buildPostReloadResumeIncidentPacket(input: {
 	const pending = Boolean(input.intent) && input.decision?.dispatched !== true;
 	const operatorActionRequired = pending && reason !== "pending-messages" && reason !== "lane-queue-pending";
 	const focusTasks = input.intent?.focusTasks?.filter((entry) => entry.trim().length > 0).slice(0, 3) ?? [];
+	const nextActionCode: PostReloadResumeIncidentNextActionCode = !input.intent
+		? "no-pending-intent"
+		: input.decision?.dispatched === true
+			? "observe-dispatched-resume"
+			: input.manualNudgeObserved === true
+				? "preserve-incident-refresh-checkpoint"
+				: describeAutoResumeDispatchHint(reason === "no-pending-intent" ? "auto-resume-off-or-cooldown" : reason)
+					? "follow-dispatch-blocker-hint"
+					: "inspect-post-reload-state";
 	const nextAction = !input.intent
 		? "no post-reload auto-resume intent is pending."
 		: input.decision?.dispatched === true
@@ -185,6 +202,7 @@ export function buildPostReloadResumeIncidentPacket(input: {
 		"context-watch-post-reload-incident:",
 		`pending=${pending ? "yes" : "no"}`,
 		`reason=${reason}`,
+		`nextActionCode=${nextActionCode}`,
 		`manualNudge=${input.manualNudgeObserved === true ? "yes" : "no"}`,
 		`focus=${focusTasks.length > 0 ? focusTasks.join(",") : "none"}`,
 		`ageSec=${intentAgeSec ?? "unknown"}`,
@@ -207,6 +225,7 @@ export function buildPostReloadResumeIncidentPacket(input: {
 		intentAgeSec,
 		focusTasks,
 		operatorActionRequired,
+		nextActionCode,
 		nextAction,
 		evidence: {
 			intentCreatedAtIso: input.intent?.createdAtIso,

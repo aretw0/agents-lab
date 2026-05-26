@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildPostReloadResumeIncidentPacket,
   resolvePostReloadPendingNotifyDecision,
   type AutoResumeDispatchReason,
 } from "../../extensions/context-watchdog-resume";
@@ -70,5 +71,45 @@ describe("context-watchdog-resume", () => {
     expect(second.shouldEmit).toBe(true);
     expect(second.next.reason).toBe("board-handoff-divergence");
     expect(second.next.lastNotifyAtMs).toBe(15_000);
+  });
+
+  it("exposes stable next action codes for post-reload incident packets", () => {
+    const noPending = buildPostReloadResumeIncidentPacket({ nowMs: 1_000 });
+    expect(noPending).toMatchObject({
+      pending: false,
+      nextActionCode: "no-pending-intent",
+    });
+
+    const manualNudge = buildPostReloadResumeIncidentPacket({
+      nowMs: Date.parse("2026-05-04T12:05:00.000Z"),
+      intent: {
+        createdAtIso: "2026-05-04T12:00:00.000Z",
+        reason: "reload-required",
+        focusTasks: ["task-1"],
+      },
+      decision: {
+        atIso: "2026-05-04T12:01:00.000Z",
+        reason: "checkpoint-evidence-missing",
+        dispatched: false,
+        reloadRequired: false,
+        checkpointEvidenceReady: false,
+        handoffBoardReconciled: true,
+        handoffBoardReconciliationSummary: "ok",
+        hasPendingMessages: false,
+        hasRecentSteerInput: false,
+        queuedLaneIntents: 0,
+        timeoutPressureActive: false,
+        timeoutPressureCount: 0,
+        timeoutPressureThreshold: 2,
+      },
+      manualNudgeObserved: true,
+    });
+
+    expect(manualNudge).toMatchObject({
+      pending: true,
+      operatorActionRequired: true,
+      nextActionCode: "preserve-incident-refresh-checkpoint",
+    });
+    expect(manualNudge.summary).toContain("nextActionCode=preserve-incident-refresh-checkpoint");
   });
 });
