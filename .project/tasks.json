@@ -66,6 +66,11 @@
       "description": "Projetar e validar ativação dinâmica de capabilities no control-plane: default único leve, capabilities frias descobríveis, ativação por intenção/sinal e cleanup após uso, sem criar perfil intermediário durável.",
       "status": "planned",
       "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1093",
+        "TASK-BUD-1094",
+        "TASK-BUD-1095"
+      ],
       "files": [
         "scripts/pi-isolated.mjs",
         "packages/pi-stack/extensions/runtime-profile-policy.mjs",
@@ -81,7 +86,73 @@
         "Validar com testes de runtime-profile/dev-pressure e uma simulação read-only de intenção de trabalho local-safe."
       ],
       "milestone": "0.8-control-plane-dynamic-capabilities",
-      "notes": "Registrada a partir da decisão DEC-BUD-047. Evitar criar `control-plane-plus` como produto final; se algum perfil intermediário for usado na implementação, deve ser transitório e coberto por teste/roadmap de remoção.\n2026-05-26: commit 5ebb9166 adicionou matriz first-party de ativação (`always-on`, `read-only-on-intent`, `expensive-on-intent`, `protected-explicit`) e expôs capabilities frias como advisory em `pi:dev:pressure`/`pi:runtime:health`, separando `pressure` de `advisories`. Próxima fatia: usar essa matriz na condução de intenção do control-plane/runtime, sem transformar em perfil durável."
+      "notes": "Registrada a partir da decisão DEC-BUD-047. Evitar criar `control-plane-plus` como produto final; se algum perfil intermediário for usado na implementação, deve ser transitório e coberto por teste/roadmap de remoção.\n2026-05-26: commit 5ebb9166 adicionou matriz first-party de ativação (`always-on`, `read-only-on-intent`, `expensive-on-intent`, `protected-explicit`) e expôs capabilities frias como advisory em `pi:dev:pressure`/`pi:runtime:health`, separando `pressure` de `advisories`. Próxima fatia: usar essa matriz na condução de intenção do control-plane/runtime, sem transformar em perfil durável.\n2026-05-26: macro desdobrada em TASK-BUD-1093..1095 após dogfooding do Pi selecionar a própria macro como próxima fatia. Objetivo: fazer o scheduler escolher trabalho executável, não planejamento genérico."
+    },
+    {
+      "id": "TASK-BUD-1093",
+      "description": "[P1] Conectar a matriz de capabilities do control-plane ao intake/recomendação de intenção para que o Pi proponha próxima fatia com capability state explícito.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/runtime-profile-policy.mjs",
+        "packages/pi-stack/extensions/guardrails-core-operator-intent-intake.ts",
+        "packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts",
+        "packages/pi-stack/test/runtime-profile-policy.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "Intake/recomendação read-only consegue anexar capability guidance (`active|cold`, activation class e operatorAction) sem ativar packages.",
+        "Uma intenção local-safe simples retorna capability necessária e não recomenda worker quando always-on/read-only basta.",
+        "Capability `expensive-on-intent` ou `protected-explicit` vira recomendação de pedir orçamento/aprovação, não execução automática.",
+        "Smoke cobre pelo menos um caso local-safe e um caso protected/expensive fail-closed."
+      ],
+      "milestone": "0.8-control-plane-dynamic-capabilities",
+      "notes": "[provenance:system] source_task=TASK-BUD-1070 reason=macro decomposition after dogfooding. Primeiro corte executável após commit 5ebb9166: usar a matriz já criada na condução de intenção, sem mudar o runtime hot path."
+    },
+    {
+      "id": "TASK-BUD-1094",
+      "description": "[P1] Criar pacote/preview de ativação dinâmica de capability com cleanup esperado, mantendo ativação real fora do caminho automático.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1093"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/runtime-profile-policy.mjs",
+        "packages/pi-stack/extensions/environment-doctor-dev-pressure.ts",
+        "packages/pi-stack/test/smoke/environment-doctor-dev-pressure.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Preview report-only descreve capability alvo, estado atual, activation class, custo esperado, risco e cleanup.",
+        "Preview nunca instala, habilita package, inicia worker, abre gateway ou altera settings.",
+        "Pi-lens, web gateway, colony e background permanecem cold no `pi:dev` default.",
+        "Dev-pressure distingue capability cold-by-design de pressão real."
+      ],
+      "milestone": "0.8-control-plane-dynamic-capabilities",
+      "notes": "[provenance:system] source_task=TASK-BUD-1070 reason=macro decomposition. Depende do intake carregar guidance antes de criar preview de ativação."
+    },
+    {
+      "id": "TASK-BUD-1095",
+      "description": "[P2] Validar dogfooding read-only pós-reload para intenção local-safe, safe-mode watchdog e escolha de capability sem depender de perfil intermediário.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-1093",
+        "TASK-BUD-1094"
+      ],
+      "files": [
+        "scripts/pi-runtime-health.mjs",
+        "scripts/pi-dev-pressure.mjs",
+        "docs/guides/control-plane-operating-doctrine.md",
+        "ROADMAP.md"
+      ],
+      "acceptance_criteria": [
+        "Runbook/prompt de dogfooding separa diagnóstico de startup/reload, watchdog e escolha de fatia de trabalho.",
+        "Evidência registra que `needs-evidence` não vira `stop-and-investigate` sem dado operacional.",
+        "Evidência registra que safe-mode watchdog mantém trabalho read-only/pequeno e bloqueia escalation de capabilities caras.",
+        "Scheduler aponta para task executável em vez de macro genérica."
+      ],
+      "milestone": "0.8-control-plane-dynamic-capabilities",
+      "notes": "[provenance:system] source_task=TASK-BUD-1070 reason=macro decomposition. Fecha o ciclo de dogfooding observado nesta sessão antes de completar a macro."
     }
   ]
 }
