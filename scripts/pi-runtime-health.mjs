@@ -89,6 +89,10 @@ export function buildPiRuntimeHealthReport(cwd = process.cwd(), options = {}) {
   }
 
   const watchdog = devPressure.performanceWatchdog ?? {};
+  const pressureSignalCount = devPressure.pressureSignalCount
+    ?? (devPressure.signals ?? []).filter((signal) => signal.level !== "info").length;
+  const advisoryCount = devPressure.advisoryCount
+    ?? Math.max(0, (devPressure.signals?.length ?? 0) - pressureSignalCount);
   return {
     mode: "pi-runtime-health",
     cwd: devPressure.cwd ?? cwd,
@@ -100,6 +104,8 @@ export function buildPiRuntimeHealthReport(cwd = process.cwd(), options = {}) {
       "pi-runtime-health:",
       `decision=${classified.decision}`,
       `devPressure=${devPressure.recommendation}`,
+      `pressure=${pressureSignalCount}`,
+      `advisories=${advisoryCount}`,
       `signals=${devPressure.signals?.length ?? 0}`,
       `artifacts=${artifactAudit.violations?.length ?? 0}`,
       `watchdogPersistedEvents=${watchdog.persistedEventCount ?? 0}`,
@@ -109,6 +115,8 @@ export function buildPiRuntimeHealthReport(cwd = process.cwd(), options = {}) {
       recommendation: devPressure.recommendation,
       summary: devPressure.summary,
       signals: devPressure.signals ?? [],
+      pressureSignalCount,
+      advisoryCount,
       primaryAction: devPressure.primaryAction ?? "continue",
       primaryRecoveryActions: devPressure.primaryRecoveryActions ?? [],
       performanceWatchdog: watchdog,

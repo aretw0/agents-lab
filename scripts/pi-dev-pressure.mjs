@@ -15,6 +15,9 @@ import {
   collectBoardStateStats,
   formatBoardPressureDetail,
 } from "./pi-dev-pressure-board.mjs";
+import {
+  buildControlPlaneCapabilityGuidance,
+} from "../packages/pi-stack/extensions/runtime-profile-policy.mjs";
 
 export { buildBoardPressurePlan, collectBoardStateStats } from "./pi-dev-pressure-board.mjs";
 
@@ -697,6 +700,11 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   const configuredEntrypoints = collectConfiguredEntrypointStats(cwd);
   const configuredEntrypointBudget = buildEntrypointBudget(configuredEntrypoints, thresholds);
   const settings = collectSettingsStats(cwd);
+  const sandboxSettingsPath = path.join(cwd, ".sandbox", "pi-agent", "settings.json");
+  const projectSettingsPath = path.join(cwd, ".pi", "settings.json");
+  const capabilityGuidance = buildControlPlaneCapabilityGuidance(
+    readJsonIfExists(sandboxSettingsPath) ?? readJsonIfExists(projectSettingsPath) ?? {},
+  );
   const loop = collectLoopState(cwd, options.now ?? new Date());
   const git = options.git === false ? { available: false, skipped: true } : collectGitDirtyStats(cwd);
   const velocity = options.velocityStats ?? collectVelocityStats(cwd, { ...(options.velocity ?? {}), now: options.now });
@@ -728,6 +736,16 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   const suppressed = settings.reduce((sum, row) => sum + row.suppressedSurfaceCount, 0);
   if (suppressed > 0) {
     signals.push({ level: "info", code: "suppressed-package-entries", detail: `${suppressed} package entries expose no surfaces` });
+  }
+  const coldIntentCapabilities = capabilityGuidance.filter((row) =>
+    row.state === "cold" && row.activation !== "always-on"
+  );
+  if (coldIntentCapabilities.length > 0) {
+    signals.push({
+      level: "info",
+      code: "cold-capabilities-available-on-intent",
+      detail: coldIntentCapabilities.map((row) => `${row.id}:${row.activation}`).join(", "),
+    });
   }
   const invalidShellPaths = settings.filter((row) => row.shellPath?.configured && row.shellPath.valid === false);
   for (const row of invalidShellPaths) {
@@ -776,12 +794,16 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   else if (signals.some((signal) => signal.code === "long-dev-process")) recommendation = "new-session";
 
   const velocityPressure = buildDevelopmentVelocityPressure({ signals });
+  const pressureSignalCount = signals.filter((signal) => signal.level !== "info").length;
+  const advisoryCount = signals.length - pressureSignalCount;
 
   return {
     mode: "pi-dev-pressure",
     cwd: path.resolve(cwd),
     thresholds,
     recommendation,
+    pressureSignalCount,
+    advisoryCount,
     velocityPressure,
     signals,
     sessions,
@@ -796,7 +818,8 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
     velocity,
     boardPressurePlan,
     performanceWatchdog,
-    summary: `pi-dev-pressure: recommendation=${recommendation} signals=${signals.length} largestSessionMb=${largestSessionMb} heaviestConfiguredEntrypoint=${heaviestConfiguredEntrypoint ? `${heaviestConfiguredEntrypoint.package}:${heaviestConfiguredEntrypoint.entry}` : "n/a"}`,
+    capabilityGuidance,
+    summary: `pi-dev-pressure: recommendation=${recommendation} pressure=${pressureSignalCount} advisories=${advisoryCount} signals=${signals.length} largestSessionMb=${largestSessionMb} heaviestConfiguredEntrypoint=${heaviestConfiguredEntrypoint ? `${heaviestConfiguredEntrypoint.package}:${heaviestConfiguredEntrypoint.entry}` : "n/a"}`,
   };
 }
 
@@ -915,6 +938,13 @@ function printHuman(report) {
     for (const event of report.performanceWatchdog.safeModeEvents?.slice(0, 3) ?? []) {
       lines.push(`  - safe-mode: ${event}`);
     }
+  }
+  if (report.capabilityGuidance?.length > 0) {
+    const cold = report.capabilityGuidance
+      .filter((row) => row.state === "cold")
+      .map((row) => `${row.id}:${row.activation}`)
+      .join(", ");
+    lines.push(`- capabilities: cold=${cold || "none"} activation=by-intent`);
   }
   lines.push("- heaviest entrypoints:");
   for (const row of report.entrypoints.slice(0, 5)) {

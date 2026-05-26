@@ -36,6 +36,22 @@ test("runtime health continues for clean read-only preflight", () => {
   assert.match(report.summary, /liveWatchdog=unavailable/);
 });
 
+test("runtime health separates advisory signals from pressure", () => {
+  const report = buildPiRuntimeHealthReport("/tmp/agents-lab", {
+    devPressure: makeDevPressure({
+      signals: [
+        { level: "info", code: "cold-capabilities-available-on-intent", detail: "pi-lens:expensive-on-intent" },
+      ],
+    }),
+    artifactAudit: makeArtifactAudit(),
+  });
+
+  assert.equal(report.decision, "continue");
+  assert.equal(report.devPressure.pressureSignalCount, 0);
+  assert.equal(report.devPressure.advisoryCount, 1);
+  assert.match(report.summary, /pressure=0 advisories=1 signals=1/);
+});
+
 test("runtime health human output labels watchdog slash commands as Pi TUI commands", () => {
   const report = buildPiRuntimeHealthReport("/tmp/agents-lab", {
     devPressure: makeDevPressure(),

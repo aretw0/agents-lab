@@ -8,6 +8,62 @@ export const COLD_CAPABILITY_PACKAGES = [
   "pi-lens",
 ];
 
+export const CONTROL_PLANE_CAPABILITY_ACTIVATION_MATRIX = [
+  {
+    id: "core-guardrails",
+    label: "Core guardrails",
+    activation: "always-on",
+    resources: ["@aretw0/pi-stack:guardrails-core", "@aretw0/pi-stack:project-board-surface"],
+    operatorAction: "available by default in pi:dev",
+  },
+  {
+    id: "read-only-diagnostics",
+    label: "Read-only diagnostics",
+    activation: "read-only-on-intent",
+    resources: ["environment-doctor", "session-analytics", "provider-readiness", "stack-sovereignty"],
+    operatorAction: "ask for runtime health, provider readiness, session triage, or sovereignty checks",
+  },
+  {
+    id: "worker-dispatch",
+    label: "Worker dispatch",
+    activation: "expensive-on-intent",
+    resources: ["guardrails-agent-run", "guardrails-background-process", "guardrails-ops-calibration"],
+    operatorAction: "state the work goal and allowed worker budget before dispatch",
+  },
+  {
+    id: "pi-lens",
+    label: "Pi Lens",
+    activation: "expensive-on-intent",
+    packageName: "pi-lens",
+    resources: ["pi-lens"],
+    operatorAction: "request lens diagnostics explicitly when TUI insight is worth the latency",
+  },
+  {
+    id: "web-gateway",
+    label: "Web/session gateway",
+    activation: "protected-explicit",
+    packageName: "@ifi/pi-web-remote",
+    resources: ["@ifi/pi-web-remote", "web-session-gateway"],
+    operatorAction: "enable only for an explicit browser or remote-session workflow",
+  },
+  {
+    id: "colony",
+    label: "Colony orchestration",
+    activation: "protected-explicit",
+    packageName: "@ifi/oh-pi-ant-colony",
+    resources: ["@ifi/oh-pi-ant-colony", "colony-pilot", "colony-panel"],
+    operatorAction: "enable only after a bounded long-run/colony intent and budget are clear",
+  },
+  {
+    id: "project-workflows",
+    label: "Project workflows",
+    activation: "protected-explicit",
+    packageName: "@davidorex/pi-project-workflows",
+    resources: ["@davidorex/pi-project-workflows"],
+    operatorAction: "enable only when that third-party workflow surface is intentionally being evaluated",
+  },
+];
+
 export const CONTROL_PLANE_RUNTIME_PROFILE = {
   runtimeProfile: "control-plane",
 };
@@ -135,6 +191,34 @@ export function canonicalizeSettingsPackageSourcesForAgentDir(
 
 export function controlPlaneEnabledModels() {
   return [];
+}
+
+export function controlPlaneCapabilityActivationMatrix() {
+  return CONTROL_PLANE_CAPABILITY_ACTIVATION_MATRIX.map((row) => ({
+    ...row,
+    resources: [...row.resources],
+  }));
+}
+
+function collectPackageSourcesFromSettings(settings) {
+  if (!isRecord(settings) || !Array.isArray(settings.packages)) return [];
+  return settings.packages.map(getPackageSource).filter(Boolean);
+}
+
+function hasPackageSourceFor(packageName, sources) {
+  if (typeof packageName !== "string") return false;
+  return sources.some((source) => extractPackageNameFromSource(source) === packageName);
+}
+
+export function buildControlPlaneCapabilityGuidance(settings = {}) {
+  const sources = collectPackageSourcesFromSettings(settings);
+  return controlPlaneCapabilityActivationMatrix().map((row) => {
+    const active = row.activation === "always-on" || hasPackageSourceFor(row.packageName, sources);
+    return {
+      ...row,
+      state: active ? "active" : "cold",
+    };
+  });
 }
 
 export function controlPlaneWatchdogConfig() {

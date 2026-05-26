@@ -385,6 +385,50 @@ test("buildPiDevPressureReport blocks invalid runtime shellPath", () => {
   }
 });
 
+test("buildPiDevPressureReport explains cold capabilities as intent-activated", () => {
+  const cwd = makeWorkspace();
+  try {
+    mkdirSync(join(cwd, ".sandbox", "pi-agent"), { recursive: true });
+    writeJson(join(cwd, ".sandbox", "pi-agent", "settings.json"), {
+      packages: [
+        "npm:@aretw0/pi-stack",
+      ],
+      runtimeProfile: "control-plane",
+    });
+
+    const report = buildPiDevPressureReport(cwd, {
+      git: false,
+      velocityStats: {
+        machine: {},
+        board: {},
+        handoff: {},
+        commit: { available: false },
+        runtime: {},
+        agentRuns: {},
+        ceremony: {},
+      },
+      performanceWatchdog: {
+        available: false,
+        criticalEvents: [],
+        safeModeEvents: [],
+        persistedEventCount: 0,
+        thresholdSummary: {},
+        summary: "performance-watchdog: config=missing",
+      },
+    });
+
+    assert.equal(report.recommendation, "continue");
+    assert.equal(report.pressureSignalCount, 0);
+    assert.ok(report.advisoryCount >= 1);
+    assert.ok(report.signals.some((signal) => signal.code === "cold-capabilities-available-on-intent"));
+    assert.equal(report.capabilityGuidance.find((row) => row.id === "pi-lens")?.state, "cold");
+    assert.equal(report.capabilityGuidance.find((row) => row.id === "colony")?.activation, "protected-explicit");
+    assert.deepEqual(computeStrictFailures(report), []);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("buildPiDevPressureReport recommends new-session for large resume logs", () => {
   const cwd = makeWorkspace();
   try {

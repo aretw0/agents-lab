@@ -3,8 +3,10 @@ import test from "node:test";
 
 import {
   buildControlPlaneRuntimeSettings,
+  buildControlPlaneCapabilityGuidance,
   canonicalizePackageSourceForAgentDir,
   canonicalizeSettingsPackageSourcesForAgentDir,
+  controlPlaneCapabilityActivationMatrix,
   controlPlaneEnabledModels,
   controlPlaneWatchdogConfig,
   extractPackageNameFromSource,
@@ -61,6 +63,37 @@ test("cold capability package detection covers npm and local node_modules source
 
 test("control plane model scope stays intentionally small", () => {
   assert.deepEqual(controlPlaneEnabledModels(), []);
+});
+
+test("control plane capability matrix keeps one default with cold intent surfaces", () => {
+  const matrix = controlPlaneCapabilityActivationMatrix();
+  const activations = new Set(matrix.map((row) => row.activation));
+
+  assert.deepEqual([...activations].sort(), [
+    "always-on",
+    "expensive-on-intent",
+    "protected-explicit",
+    "read-only-on-intent",
+  ]);
+  assert.ok(matrix.some((row) => row.id === "pi-lens" && row.activation === "expensive-on-intent"));
+  assert.ok(matrix.some((row) => row.id === "colony" && row.activation === "protected-explicit"));
+  assert.ok(matrix.every((row) => typeof row.operatorAction === "string" && row.operatorAction.length > 0));
+});
+
+test("control plane capability guidance marks optional packages cold until intent activates them", () => {
+  const guidance = buildControlPlaneCapabilityGuidance({
+    packages: [
+      "npm:@aretw0/pi-stack",
+      "npm:pi-lens",
+    ],
+  });
+  const byId = new Map(guidance.map((row) => [row.id, row]));
+
+  assert.equal(byId.get("core-guardrails")?.state, "active");
+  assert.equal(byId.get("pi-lens")?.state, "active");
+  assert.equal(byId.get("colony")?.state, "cold");
+  assert.equal(byId.get("web-gateway")?.state, "cold");
+  assert.equal(byId.get("worker-dispatch")?.activation, "expensive-on-intent");
 });
 
 test("local shell reconciliation pins Git Bash for Windows settings", () => {
