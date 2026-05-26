@@ -393,11 +393,11 @@ function isRecord(value) {
 	return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-export function leanEnabledModels() {
+export function piDevDefaultEnabledModels() {
 	return [...LAB_PI_DEV_ENABLED_MODELS];
 }
 
-export function leanWatchdogConfig() {
+export function piDevWatchdogConfig() {
 	return controlPlaneWatchdogConfig();
 }
 
@@ -409,8 +409,19 @@ function splitCsv(value) {
 		.filter(Boolean);
 }
 
+function splitProviderModelRef(modelRef) {
+	if (typeof modelRef !== "string") return undefined;
+	const trimmed = modelRef.trim();
+	if (!trimmed.includes("/")) return undefined;
+	const slash = trimmed.indexOf("/");
+	const provider = trimmed.slice(0, slash).trim();
+	const model = trimmed.slice(slash + 1).trim();
+	if (!provider || !model) return undefined;
+	return { provider, model, modelRef: `${provider}/${model}` };
+}
+
 export function resolvePiDevRuntimeProfileFromEnv(env = process.env) {
-	const modelRef = typeof env.PI_DEV_MODEL_REF === "string" ? env.PI_DEV_MODEL_REF.trim() : "";
+	const modelRef = splitProviderModelRef(env.PI_DEV_MODEL_REF);
 	const enabledModels = splitCsv(env.PI_DEV_ENABLED_MODELS);
 	const profile = {};
 
@@ -418,11 +429,10 @@ export function resolvePiDevRuntimeProfileFromEnv(env = process.env) {
 		profile.runtimeProfile = env.PI_DEV_RUNTIME_PROFILE.trim();
 	}
 
-	if (modelRef.includes("/")) {
-		const slash = modelRef.indexOf("/");
-		profile.defaultProvider = modelRef.slice(0, slash);
-		profile.defaultModel = modelRef.slice(slash + 1);
-		if (enabledModels.length === 0) profile.enabledModels = [modelRef];
+	if (modelRef) {
+		profile.defaultProvider = modelRef.provider;
+		profile.defaultModel = modelRef.model;
+		if (enabledModels.length === 0) profile.enabledModels = [modelRef.modelRef];
 	}
 
 	if (typeof env.PI_DEV_DEFAULT_PROVIDER === "string" && env.PI_DEV_DEFAULT_PROVIDER.trim()) {
@@ -433,12 +443,17 @@ export function resolvePiDevRuntimeProfileFromEnv(env = process.env) {
 	}
 	if (enabledModels.length > 0) {
 		profile.enabledModels = enabledModels;
+		const firstEnabledModel = splitProviderModelRef(enabledModels[0]);
+		if (firstEnabledModel && !profile.defaultProvider && !profile.defaultModel) {
+			profile.defaultProvider = firstEnabledModel.provider;
+			profile.defaultModel = firstEnabledModel.model;
+		}
 	}
 
 	return Object.keys(profile).length > 0 ? profile : undefined;
 }
 
-export function reconcileLeanWatchdogConfig(input) {
+export function reconcilePiDevWatchdogConfig(input) {
 	return reconcileControlPlaneWatchdogConfig(input);
 }
 
@@ -500,7 +515,7 @@ function applyLocalRuntimeProfile({ dryRun = false } = {}) {
 	return { status: dryRun ? "dry-run" : "control-plane", changed: true, removed };
 }
 
-function ensureLeanWatchdogConfig({ dryRun = false } = {}) {
+function ensurePiDevWatchdogConfig({ dryRun = false } = {}) {
 	if (existsSync(GLOBAL_WATCHDOG_CONFIG)) {
 		let current;
 		try {
@@ -508,7 +523,7 @@ function ensureLeanWatchdogConfig({ dryRun = false } = {}) {
 		} catch {
 			current = undefined;
 		}
-		const reconciled = reconcileLeanWatchdogConfig(current);
+		const reconciled = reconcilePiDevWatchdogConfig(current);
 		if (!reconciled.changed) {
 			return { status: "present", path: GLOBAL_WATCHDOG_CONFIG, changed: false };
 		}
@@ -523,7 +538,7 @@ function ensureLeanWatchdogConfig({ dryRun = false } = {}) {
 	}
 
 	mkdirSync(path.dirname(GLOBAL_WATCHDOG_CONFIG), { recursive: true });
-	writeFileSync(GLOBAL_WATCHDOG_CONFIG, JSON.stringify(leanWatchdogConfig(), null, 2) + "\n", "utf8");
+	writeFileSync(GLOBAL_WATCHDOG_CONFIG, JSON.stringify(piDevWatchdogConfig(), null, 2) + "\n", "utf8");
 	return { status: "created", path: GLOBAL_WATCHDOG_CONFIG, changed: true };
 }
 
@@ -630,7 +645,7 @@ function run() {
 		? applyLocalRuntimeProfile({ dryRun: opts.dryRun })
 		: { status: "not-dev", changed: false, removed: [] };
 	const watchdogConfig = opts.dev
-		? ensureLeanWatchdogConfig({ dryRun: opts.dryRun })
+		? ensurePiDevWatchdogConfig({ dryRun: opts.dryRun })
 		: { status: "not-dev", path: GLOBAL_WATCHDOG_CONFIG, changed: false };
 
 	const env = {
@@ -725,7 +740,7 @@ function run() {
 			console.log("pi-isolated: runtime-profile=control-plane (capabilities cold; activate expensive work by explicit intent)");
 		}
 		if (watchdogConfig.status === "created") {
-			console.log("pi-isolated: watchdog-config=lean (event-loop/RSS/heap guard calibrated for local dev)");
+			console.log("pi-isolated: watchdog-config=pi-dev (event-loop/RSS/heap guard calibrated for local dev)");
 		}
 		if (pressureReport?.signals?.length && pressureGate.reason === "new-session-advisory") {
 			console.log(`pi-isolated: pressure-advisory ${pressureReport.summary}`);

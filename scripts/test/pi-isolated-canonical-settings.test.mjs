@@ -8,10 +8,10 @@ import {
 	canonicalizeSettingsObjectForLocalAgent,
 	extractPackageNameFromSource,
 	isColdCapabilityPackageSource,
-	leanEnabledModels,
+	piDevDefaultEnabledModels,
 	reconcileLocalShellPath,
-	reconcileLeanWatchdogConfig,
-	leanWatchdogConfig,
+	reconcilePiDevWatchdogConfig,
+	piDevWatchdogConfig,
 	resolvePiDevRuntimeProfileFromEnv,
 } from "../pi-isolated.mjs";
 
@@ -76,8 +76,8 @@ test("cold capability package detection covers npm and local node_modules source
 	assert.equal(isColdCapabilityPackageSource("../packages/pi-stack"), false);
 });
 
-test("lean model scope stays intentionally small", () => {
-	assert.deepEqual(leanEnabledModels(), [
+test("pi dev model scope stays intentionally small", () => {
+	assert.deepEqual(piDevDefaultEnabledModels(), [
 		"openai-codex/gpt-5.3-codex",
 		"openai-codex/gpt-5.4-mini",
 		"dashscope/qwen3.6-flash",
@@ -101,6 +101,17 @@ test("pi dev runtime profile can be overridden from env without editing settings
 			PI_DEV_DEFAULT_PROVIDER: "local",
 			PI_DEV_DEFAULT_MODEL: "model-a",
 			PI_DEV_ENABLED_MODELS: "local/model-a, local/model-b ",
+		}),
+		{
+			defaultProvider: "local",
+			defaultModel: "model-a",
+			enabledModels: ["local/model-a", "local/model-b"],
+		},
+	);
+
+	assert.deepEqual(
+		resolvePiDevRuntimeProfileFromEnv({
+			PI_DEV_ENABLED_MODELS: "local/model-a, local/model-b",
 		}),
 		{
 			defaultProvider: "local",
@@ -168,8 +179,8 @@ test("local shell reconciliation removes invalid cross-platform shellPath", () =
 	assert.equal(result.settings.shellPath, undefined);
 });
 
-test("lean watchdog config preserves guard while tolerating startup transients", () => {
-	const config = leanWatchdogConfig();
+test("pi dev watchdog config preserves guard while tolerating startup transients", () => {
+	const config = piDevWatchdogConfig();
 
 	assert.equal(config.enabled, true);
 	assert.equal(config.sampleIntervalMs, 10000);
@@ -181,13 +192,13 @@ test("lean watchdog config preserves guard while tolerating startup transients",
 		rssMb: 768,
 	});
 
-	const mutated = leanWatchdogConfig();
+	const mutated = piDevWatchdogConfig();
 	mutated.thresholds.eventLoopP99Ms = 999;
-	assert.equal(leanWatchdogConfig().thresholds.eventLoopP99Ms, 150);
+	assert.equal(piDevWatchdogConfig().thresholds.eventLoopP99Ms, 150);
 });
 
-test("lean watchdog reconciliation tightens only permissive config", () => {
-	const reconciled = reconcileLeanWatchdogConfig({
+test("pi dev watchdog reconciliation tightens only permissive config", () => {
+	const reconciled = reconcilePiDevWatchdogConfig({
 		enabled: true,
 		sampleIntervalMs: 20000,
 		thresholds: {
@@ -200,12 +211,12 @@ test("lean watchdog reconciliation tightens only permissive config", () => {
 	});
 
 	assert.equal(reconciled.changed, true);
-	assert.deepEqual(reconciled.config.thresholds, leanWatchdogConfig().thresholds);
+	assert.deepEqual(reconciled.config.thresholds, piDevWatchdogConfig().thresholds);
 	assert.equal(reconciled.config.sampleIntervalMs, 10000);
 });
 
-test("lean watchdog reconciliation preserves stricter operator thresholds", () => {
-	const reconciled = reconcileLeanWatchdogConfig({
+test("pi dev watchdog reconciliation preserves stricter operator thresholds", () => {
+	const reconciled = reconcilePiDevWatchdogConfig({
 		enabled: true,
 		sampleIntervalMs: 5000,
 		thresholds: {
