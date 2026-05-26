@@ -475,7 +475,7 @@ describe("structured interview primitive", () => {
   });
 
   it("surface exposes operator_intent_intake_packet with compact text and widget-ready details", () => {
-    const tools: Array<{ name: string; execute: (id: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> } }> = [];
+    const tools: Array<{ name: string; description?: string; execute: (id: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> } }> = [];
     registerGuardrailsStructuredInterviewSurface({
       registerTool(tool: unknown) {
         tools.push(tool as (typeof tools)[number]);
@@ -483,6 +483,9 @@ describe("structured interview primitive", () => {
     } as never);
 
     const tool = tools.find((item) => item.name === "operator_intent_intake_packet");
+    expect(tool?.description).toContain("details.reportOnlyRouteAuthorized=true");
+    expect(tool?.description).toContain("without textual confirmation");
+    expect(tool?.description).toContain("never authorizes mutation, dispatch, or workers");
     const result = tool?.execute("tc-intake", {
       intent: "prepare worker review",
       autonomy_request: "worker-assisted",

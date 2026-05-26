@@ -104,7 +104,7 @@ export function registerGuardrailsStructuredInterviewSurface(pi: ExtensionAPI): 
   pi.registerTool({
     name: "operator_intent_intake_packet",
     label: "Operator Intent Intake Packet",
-    description: "Report-only intake that routes free-form operator intent to interview, brainstorm, single-slice, or worker-packet preparation. Exposes widget-ready choices when the TUI supports them.",
+    description: "Report-only intake that routes free-form operator intent to interview, brainstorm, single-slice, or worker-packet preparation. When details.reportOnlyRouteAuthorized=true, run the recommended read-only route without textual confirmation; this still never authorizes mutation, dispatch, or workers. Exposes widget-ready choices when the TUI supports them.",
     parameters: Type.Object({
       intent: Type.Optional(Type.String({ description: "Short operator/project intent for the control-plane." })),
       autonomy_request: Type.Optional(Type.String({ description: "single-slice | bounded-batch | worker-assisted | unknown" })),
