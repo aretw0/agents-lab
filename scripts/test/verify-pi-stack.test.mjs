@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { resolveCheck } from "../verify-pi-stack.mjs";
+import { checksForProfile, resolveCheck } from "../verify-pi-stack.mjs";
 
 test("resolveCheck accepts alternate dependency paths", () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "verify-pi-stack-"));
@@ -39,4 +39,21 @@ test("resolveCheck treats curated optional surfaces as non-blocking", () => {
   assert.equal(result.ok, true);
   assert.equal(result.optionalMissing, true);
   assert.match(result.missingOk, /curated installs/);
+});
+
+test("verify profile defaults to strict-curated without full diagnostic extras", () => {
+  const labels = checksForProfile("strict-curated").map((check) => check.label);
+
+  assert.ok(labels.includes("monitors (hedge, fragility, etc.)"));
+  assert.ok(!labels.some((label) => label.includes("pi-lens")));
+  assert.ok(!labels.some((label) => label.includes("pi-web-access")));
+  assert.ok(!labels.some((label) => label.includes("multi-edit")));
+});
+
+test("verify stack-full profile includes diagnostic extras", () => {
+  const labels = checksForProfile("stack-full").map((check) => check.label);
+
+  assert.ok(labels.some((label) => label.includes("pi-lens")));
+  assert.ok(labels.some((label) => label.includes("pi-web-access")));
+  assert.ok(labels.some((label) => label.includes("multi-edit")));
 });

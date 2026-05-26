@@ -5,6 +5,7 @@
  * instalação hoisted em node_modules (workspace root).
  *
  * Uso: node scripts/verify-pi-stack.mjs
+ *      node scripts/verify-pi-stack.mjs --profile stack-full
  */
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -16,12 +17,19 @@ const roots = [
   "node_modules",
 ];
 
-const checks = [
+const PROFILE_NAMES = ["strict-curated", "curated-runtime", "stack-full"];
+const DEFAULT_PROFILE = "strict-curated";
+
+const baselineChecks = [
   // Monitors — essencial, causa falha silenciosa se ausente
   { paths: ["@davidorex/pi-project-workflows/monitors-extension.ts"], label: "monitors (hedge, fragility, etc.)", required: true },
   { paths: ["@davidorex/pi-project-workflows/project-extension.ts"], label: "project blocks (.project/)", required: true },
   { paths: ["@davidorex/pi-project-workflows/workflows-extension.ts"], label: "workflows YAML", required: true },
-  // Core extensions
+];
+
+const fullSurfaceChecks = [
+  // Full/diagnostic extensions. These are intentionally not required by the
+  // strict-curated daily baseline.
   { paths: ["pi-lens/index.ts"], label: "pi-lens (LSP, ast-grep)", required: true },
   { paths: ["pi-web-access/index.ts"], label: "pi-web-access (fetch, PDF)", required: true },
   {
@@ -37,6 +45,22 @@ const checks = [
   { paths: ["mitsupi/skills/web-browser/SKILL.md"], label: "web-browser skill", required: true },
 ];
 
+function parseProfileArg(argv = process.argv.slice(2)) {
+  const profileFlag = argv.find((arg) => arg.startsWith("--profile="));
+  const profile = profileFlag
+    ? profileFlag.slice("--profile=".length).trim()
+    : DEFAULT_PROFILE;
+  if (!PROFILE_NAMES.includes(profile)) {
+    throw new Error(`Unknown verify profile: ${profile}. Expected one of: ${PROFILE_NAMES.join(", ")}`);
+  }
+  return profile;
+}
+
+export function checksForProfile(profile = DEFAULT_PROFILE) {
+  if (profile === "stack-full") return [...baselineChecks, ...fullSurfaceChecks];
+  return [...baselineChecks];
+}
+
 const ROBUST_SYSTEM_PROMPT_RE = /systemPrompt:\s*\(typeof compiled\.systemPrompt === "string"/;
 const ANY_SYSTEM_PROMPT_CONTRACT_RE = /systemPrompt:\s*.*compiled\.systemPrompt/;
 const FALLBACK_SYSTEM_PROMPT_LINE =
@@ -46,6 +70,8 @@ const contractChecks = [
   {
     relPath: "@davidorex/pi-behavior-monitors/dist/index.js",
     label: "monitor classify contract (systemPrompt -> complete payload)",
+    required: false,
+    missingOk: "behavior monitor runtime not installed in this profile; bundled project-workflows monitors remain verified separately",
     predicate: (content) => ROBUST_SYSTEM_PROMPT_RE.test(content),
     remediation:
       "Atualize para runtime corrigido/fork first-party dos monitors; sem isso o classify pode falhar com 'Instructions are required'.",
@@ -118,6 +144,16 @@ function findAllExistingPaths(relPath) {
 
 function main() {
 let failed = 0;
+let profile = DEFAULT_PROFILE;
+try {
+  profile = parseProfileArg();
+} catch (err) {
+  console.error(String(err instanceof Error ? err.message : err));
+  process.exit(1);
+}
+const checks = checksForProfile(profile);
+
+console.log(`pi-stack verify profile: ${profile}`);
 
 for (const check of checks) {
   const result = resolveCheck(check);
@@ -136,6 +172,10 @@ for (const check of checks) {
 for (const check of contractChecks) {
   const foundAll = findAllExistingPaths(check.relPath);
   if (foundAll.length === 0) {
+    if (check.required === false) {
+      console.log(`  ⚪ ${check.label} — opcional ausente (${check.missingOk})`);
+      continue;
+    }
     console.error(
       `  ❌ ${check.label} — arquivo não encontrado: ${roots
         .map((r) => join(r, check.relPath))
