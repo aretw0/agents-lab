@@ -125,6 +125,8 @@ describe("project-intake-primitive", () => {
       packageManagers: ["pnpm"],
       availableTools: [
         { name: "operator_intent_intake_packet", description: "Report-only intake packet; dispatch=no mutation=no worker-dispatch=no" },
+        { name: "lane_brainstorm_packet", description: "Report-only packet; prepares candidate local-safe slices without writing files" },
+        { name: "lane_brainstorm_seed_preview", description: "Read-only preview; never creates tasks or mutates the board" },
         { name: "structured_interview_plan", description: "Read-only plan; never authorizes dispatch" },
         { name: "board_task_complete", description: "mutates board evidence" },
         { name: "ant_colony", description: "Launch autonomous long run" },
@@ -139,13 +141,18 @@ describe("project-intake-primitive", () => {
     });
 
     expect(packet.capabilityInventory).toMatchObject({
-      availableTools: 4,
-      safeForLocalLoop: 2,
+      availableTools: 6,
+      safeForLocalLoop: 4,
       needsMeasuredEvidence: 1,
       requiresOperatorApproval: 1,
       hideBeforeLongLoop: 0,
       capabilitySignals: ["provider-ready", "board-present"],
-      recommendedToolNames: ["operator_intent_intake_packet", "structured_interview_plan"],
+      recommendedToolNames: [
+        "lane_brainstorm_packet",
+        "lane_brainstorm_seed_preview",
+        "operator_intent_intake_packet",
+        "structured_interview_plan",
+      ],
       gaps: [],
     });
     expect(packet.dispatchAllowed).toBe(false);
