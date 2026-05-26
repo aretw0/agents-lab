@@ -476,11 +476,69 @@ test("buildPiDevPressureReport surfaces sensitive watchdog threshold externally"
   }
 });
 
+test("buildPiDevPressureReport keeps stale handoff advisory when it is the only pressure", () => {
+  const cwd = makeWorkspace();
+  try {
+    const report = buildPiDevPressureReport(cwd, {
+      git: false,
+      thresholds: {
+        handoffWarnMinutes: 60,
+        usefulCommitWarnMinutes: 999_999,
+        memoryWarnUsedPct: 101,
+        diskWarnFreeMb: 0,
+        boardWarnMb: 999,
+        processAgeWarnMinutes: 999_999,
+        danglingProcessWarn: 1,
+        ceremonyToolCallWarn: 999_999,
+        ceremonyBoardReadWarn: 999_999,
+      },
+      performanceWatchdog: {
+        available: false,
+        criticalEvents: [],
+        safeModeEvents: [],
+        persistedEventCount: 0,
+        thresholdSummary: {},
+        summary: "performance-watchdog: config=missing",
+      },
+      velocityStats: {
+        machine: { memory: { usedPct: 0, freeMb: 999 }, disk: { available: true, freeMb: 999_999, usedPct: 0 } },
+        board: { exists: false },
+        handoff: { exists: true, ageMinutes: 120 },
+        commit: { available: false },
+        runtime: { processUptimeMinutes: 0 },
+        agentRuns: { available: true, activeCount: 0, danglingProcessCount: 0 },
+        ceremony: { available: false },
+      },
+    });
+
+    assert.equal(report.recommendation, "continue");
+    assert.deepEqual(report.signals.filter((signal) => signal.code === "stale-handoff"), [
+      { level: "info", code: "stale-handoff", detail: "handoffAge=120 minutes" },
+    ]);
+    assert.equal(report.velocityPressure.recommendation, "continue");
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("buildDevelopmentVelocityPressure keeps clean sessions in continue mode", () => {
   const pressure = buildDevelopmentVelocityPressure({ signals: [] });
 
   assert.equal(pressure.severity, "ok");
   assert.equal(pressure.score, 0);
+  assert.equal(pressure.recommendation, "continue");
+  assert.deepEqual(pressure.stopConditions, []);
+});
+
+test("buildDevelopmentVelocityPressure keeps stale handoff below checkpoint pressure", () => {
+  const pressure = buildDevelopmentVelocityPressure({
+    signals: [
+      { level: "info", code: "stale-handoff" },
+    ],
+  });
+
+  assert.equal(pressure.severity, "ok");
+  assert.equal(pressure.score, 5);
   assert.equal(pressure.recommendation, "continue");
   assert.deepEqual(pressure.stopConditions, []);
 });

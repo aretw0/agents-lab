@@ -655,7 +655,7 @@ export function buildVelocityPressureSignals(velocity, thresholds = DEFAULT_THRE
 
   const handoff = velocity?.handoff;
   if (handoff?.ageMinutes >= thresholds.handoffWarnMinutes) {
-    signals.push({ level: "warn", code: "stale-handoff", detail: `handoffAge=${handoff.ageMinutes} minutes` });
+    signals.push({ level: "info", code: "stale-handoff", detail: `handoffAge=${handoff.ageMinutes} minutes` });
   }
 
   const commit = velocity?.commit;
@@ -770,7 +770,7 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   else if (signals.some((signal) => signal.code === "heavy-configured-extension-entrypoint")) recommendation = "reduce-governance-surface";
   else if (signals.some((signal) => signal.code === "large-board-state")) recommendation = "reduce-governance-surface";
   else if (signals.some((signal) => signal.code === "wide-dirty-scope")) recommendation = "checkpoint-and-commit";
-  else if (signals.some((signal) => signal.code === "stale-handoff" || signal.code === "stale-useful-commit")) recommendation = "checkpoint-and-commit";
+  else if (signals.some((signal) => signal.code === "stale-useful-commit")) recommendation = "checkpoint-and-commit";
   else if (signals.some((signal) => signal.code === "dangling-agent-run-process")) recommendation = "checkpoint-and-commit";
   else if (signals.some((signal) => signal.code === "excessive-control-plane-ceremony")) recommendation = "reduce-governance-surface";
   else if (signals.some((signal) => signal.code === "long-dev-process")) recommendation = "new-session";
