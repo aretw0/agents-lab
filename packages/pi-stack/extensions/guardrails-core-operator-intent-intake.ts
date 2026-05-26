@@ -26,6 +26,14 @@ export type OperatorIntentNextAction =
   | "prepare-worker-packet"
   | "resolve-blocked-intent";
 
+export type OperatorIntentRecommendationCode =
+  | "operator-intent-ask-operator"
+  | "operator-intent-seed-brainstorm"
+  | "operator-intent-prepare-single-slice"
+  | "operator-intent-check-worker-readiness"
+  | "operator-intent-prepare-worker-packet"
+  | "operator-intent-blocked";
+
 export interface OperatorIntentIntakeInput extends ControlPlaneProfilePacketInput {
   localSafeMaterialReady?: boolean;
   brainstormRequested?: boolean;
@@ -77,6 +85,7 @@ export interface OperatorIntentIntakePacket {
   missingCapabilities: string[];
   interaction: OperatorIntentInteraction;
   summary: string;
+  recommendationCode: OperatorIntentRecommendationCode;
   recommendation: string;
 }
 
@@ -188,6 +197,15 @@ function resolveNextAction(decision: OperatorIntentIntakeDecision): OperatorInte
   return "resolve-blocked-intent";
 }
 
+function resolveRecommendationCode(decision: OperatorIntentIntakeDecision): OperatorIntentRecommendationCode {
+  if (decision === "ask-operator") return "operator-intent-ask-operator";
+  if (decision === "seed-brainstorm") return "operator-intent-seed-brainstorm";
+  if (decision === "prepare-single-slice") return "operator-intent-prepare-single-slice";
+  if (decision === "check-worker-readiness") return "operator-intent-check-worker-readiness";
+  if (decision === "prepare-worker-packet") return "operator-intent-prepare-worker-packet";
+  return "operator-intent-blocked";
+}
+
 export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput = {}): OperatorIntentIntakePacket {
   const profilePacket = buildControlPlaneProfilePacket(input);
   const missingQuestions = profilePacket.missingQuestions;
@@ -236,6 +254,23 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
   const blockedSummary = blockedRequests.length > 0 ? blockedRequests.slice(0, 4).join("|") : "none";
   const action = resolveControlPlaneAction(decision);
   const nextAction = resolveNextAction(decision);
+  const recommendationCode = resolveRecommendationCode(decision);
+  const summary = [
+    "operator-intent-intake:",
+    `decision=${decision}`,
+    `code=${recommendationCode}`,
+    `action=${action.controlPlaneAction}`,
+    `next=${nextAction}`,
+    `route=${recommendedRoute}`,
+    `choice=${interaction.recommendedChoiceId}`,
+    `profile=${profilePacket.profile}`,
+    `questions=${missingQuestions.length}`,
+    `operatorDecision=${action.confirmationRequired ? "yes" : "no"}`,
+    `blocked=${blockedSummary}`,
+    "dispatch=no",
+    "mutation=no",
+    "worker-dispatch=no",
+  ].join(" ");
 
   return {
     effect: "none",
@@ -258,7 +293,8 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     blockedRequests,
     missingCapabilities: [...new Set(missingCapabilities)].slice(0, 6),
     interaction,
-    summary: "operator-intent-intake: decision=" + decision + " action=" + action.controlPlaneAction + " next=" + nextAction + " route=" + recommendedRoute + " choice=" + interaction.recommendedChoiceId + " profile=" + profilePacket.profile + " questions=" + missingQuestions.length + " operatorDecision=" + (action.confirmationRequired ? "yes" : "no") + " blocked=" + blockedSummary + " dispatch=no mutation=no worker-dispatch=no",
+    summary,
+    recommendationCode,
     recommendation,
   };
 }

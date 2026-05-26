@@ -145,6 +145,7 @@ describe("structured interview primitive", () => {
       operatorDecisionNeeded: true,
       controlPlaneAction: "ask-operator",
       nextAction: "answer-next-question",
+      recommendationCode: "operator-intent-ask-operator",
       confirmationRequired: true,
       interaction: {
         kind: "operator-choice",
@@ -163,6 +164,7 @@ describe("structured interview primitive", () => {
       route: "structured_interview_plan",
     });
     expect(packet.summary).toContain("dispatch=no mutation=no worker-dispatch=no");
+    expect(packet.summary).toContain("code=operator-intent-ask-operator");
     expect(packet.summary).toContain("next=answer-next-question");
     expect(packet.summary).toContain("choice=answer-next-question");
   });
@@ -186,6 +188,7 @@ describe("structured interview primitive", () => {
       decision: "seed-brainstorm",
       controlPlaneAction: "run-report-only-route",
       nextAction: "run-brainstorm-seed-preview",
+      recommendationCode: "operator-intent-seed-brainstorm",
       confirmationRequired: false,
       operatorDecisionNeeded: false,
       recommendedTools: ["lane_brainstorm_packet", "lane_brainstorm_seed_preview"],
@@ -222,6 +225,7 @@ describe("structured interview primitive", () => {
       decision: "prepare-worker-packet",
       controlPlaneAction: "run-report-only-route",
       nextAction: "prepare-worker-packet",
+      recommendationCode: "operator-intent-prepare-worker-packet",
       confirmationRequired: false,
       operatorDecisionNeeded: false,
       recommendedTools: ["agent_run_operator_packet", "agent_run_task_packet"],
@@ -256,6 +260,7 @@ describe("structured interview primitive", () => {
       decision: "check-worker-readiness",
       controlPlaneAction: "run-report-only-route",
       nextAction: "run-worker-readiness-checks",
+      recommendationCode: "operator-intent-check-worker-readiness",
       confirmationRequired: false,
       operatorDecisionNeeded: false,
       recommendedTools: ["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"],
@@ -290,6 +295,7 @@ describe("structured interview primitive", () => {
     });
 
     expect(packet.decision).toBe("check-worker-readiness");
+    expect(packet.recommendationCode).toBe("operator-intent-check-worker-readiness");
     expect(packet.controlPlaneAction).toBe("run-report-only-route");
     expect(packet.nextAction).toBe("run-worker-readiness-checks");
     expect(packet.confirmationRequired).toBe(false);
@@ -324,6 +330,7 @@ describe("structured interview primitive", () => {
     });
 
     expect(result?.details.decision).toBe("check-worker-readiness");
+    expect(result?.details.recommendationCode).toBe("operator-intent-check-worker-readiness");
     expect(result?.details.controlPlaneAction).toBe("run-report-only-route");
     expect(result?.details.nextAction).toBe("run-worker-readiness-checks");
     expect(result?.details.confirmationRequired).toBe(false);
@@ -347,6 +354,7 @@ describe("structured interview primitive", () => {
       decision: "blocked",
       controlPlaneAction: "stop-and-report",
       nextAction: "resolve-blocked-intent",
+      recommendationCode: "operator-intent-blocked",
       confirmationRequired: true,
       operatorDecisionNeeded: true,
       recommendedTools: ["control_plane_profile_packet"],
@@ -423,6 +431,7 @@ describe("structured interview primitive", () => {
     });
 
     expect(result?.details.decision).toBe("prepare-worker-packet");
+    expect(result?.details.recommendationCode).toBe("operator-intent-prepare-worker-packet");
     expect(result?.details.controlPlaneAction).toBe("run-report-only-route");
     expect(result?.details.nextAction).toBe("prepare-worker-packet");
     expect(result?.details.confirmationRequired).toBe(false);
@@ -440,6 +449,7 @@ describe("structured interview primitive", () => {
       },
     });
     expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=prepare-worker-packet");
+    expect(result?.content?.[0]?.text).toContain("code=operator-intent-prepare-worker-packet");
     expect(result?.content?.[0]?.text).toContain("next=prepare-worker-packet");
     expect(result?.content?.[0]?.text).toContain("choice=prepare-worker-packet");
     expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
