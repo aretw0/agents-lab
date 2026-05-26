@@ -25,6 +25,12 @@ export type ContextWatchContinuationRecommendationCode =
   | typeof REFRESH_FOCUS_CHECKPOINT_CODE
   | typeof LOCAL_AUDIT_BLOCKED_CODE;
 
+export type ContextWatchContinuationNextActionCode =
+  | "continue-bounded-local-safe-slice"
+  | "resolve-local-stop-condition"
+  | "refresh-focus-checkpoint"
+  | "resolve-local-audit-blockers";
+
 export type TurnBoundaryDecision = "continue" | "checkpoint" | "pause" | "ask-operator";
 
 export type TurnBoundaryReasonCode =
@@ -32,6 +38,12 @@ export type TurnBoundaryReasonCode =
   | "turn-boundary-checkpoint-refresh-focus"
   | "turn-boundary-pause-local-stop"
   | "turn-boundary-ask-operator-decision-required";
+
+export type TurnBoundaryNextAutoStepCode =
+  | "continue-bounded-local-safe-slice"
+  | "write-focus-checkpoint"
+  | "resolve-local-stop-condition"
+  | "request-operator-decision";
 
 export const TURN_BOUNDARY_DIRECTION_PROMPT = "continue in a similar lane to consolidate, or switch to the next lane with higher long-term value?";
 
@@ -186,6 +198,7 @@ export interface TurnBoundaryDecisionPacket {
   decision: TurnBoundaryDecision;
   reasonCode: TurnBoundaryReasonCode;
   operatorActionRequired: boolean;
+  nextAutoStepCode: TurnBoundaryNextAutoStepCode;
   nextAutoStep: string;
   directionPrompt: string;
   directionPreview: TurnBoundaryDirectionPreview;
@@ -206,10 +219,15 @@ export function resolveContextWatchContinuationRecommendation(input: {
   focusTasks: string;
   staleFocusCount: number;
   localAuditReasons?: string[];
-}): { recommendationCode: ContextWatchContinuationRecommendationCode; nextAction: string } {
+}): {
+  recommendationCode: ContextWatchContinuationRecommendationCode;
+  nextActionCode: ContextWatchContinuationNextActionCode;
+  nextAction: string;
+} {
   if (input.ready) {
     return {
       recommendationCode: CONTINUE_LOCAL_CODE,
+      nextActionCode: "continue-bounded-local-safe-slice",
       nextAction: "continue bounded local-safe slice and keep checkpoint cadence.",
     };
   }
@@ -217,17 +235,20 @@ export function resolveContextWatchContinuationRecommendation(input: {
   if (reasons.includes("no-local-safe-next-step")) {
     return {
       recommendationCode: LOCAL_STOP_NO_LOCAL_SAFE_NEXT_STEP_CODE,
+      nextActionCode: "resolve-local-stop-condition",
       nextAction: localStopProtectedFocusNextAction(),
     };
   }
   if (input.focusTasks === "none-listed" || reasons.includes("candidate:invalid") || input.staleFocusCount > 0) {
     return {
       recommendationCode: REFRESH_FOCUS_CHECKPOINT_CODE,
+      nextActionCode: "refresh-focus-checkpoint",
       nextAction: "refresh handoff focus/checkpoint with one bounded local-safe candidate before continuing.",
     };
   }
   return {
     recommendationCode: LOCAL_AUDIT_BLOCKED_CODE,
+    nextActionCode: "resolve-local-audit-blockers",
     nextAction: "continuation blocked by local audit; resolve blocking reasons then refresh checkpoint.",
   };
 }
@@ -463,31 +484,37 @@ export function buildTurnBoundaryDecisionPacket(input: {
   let decision: TurnBoundaryDecision = "pause";
   let reasonCode: TurnBoundaryReasonCode = "turn-boundary-pause-local-stop";
   let operatorActionRequired = false;
+  let nextAutoStepCode: TurnBoundaryNextAutoStepCode = "resolve-local-stop-condition";
   let nextAutoStep = recommendation.nextAction;
 
   if (input.ready) {
     decision = "continue";
     reasonCode = "turn-boundary-continue-local";
     operatorActionRequired = false;
+    nextAutoStepCode = "continue-bounded-local-safe-slice";
   } else if (reasons.includes("protected-scopes:invalid") || reasons.includes("stop-conditions:invalid") || reasons.includes("validation:invalid")) {
     decision = "ask-operator";
     reasonCode = "turn-boundary-ask-operator-decision-required";
     operatorActionRequired = true;
+    nextAutoStepCode = "request-operator-decision";
     nextAutoStep = "request explicit operator decision before continuing this lane.";
   } else if (reasons.includes("no-local-safe-next-step")) {
     decision = "pause";
     reasonCode = "turn-boundary-pause-local-stop";
     operatorActionRequired = false;
+    nextAutoStepCode = "resolve-local-stop-condition";
     nextAutoStep = localStopProtectedFocusNextAction();
   } else if (input.focusTasks === "none-listed" || input.staleFocusCount > 0 || reasons.includes("candidate:invalid")) {
     decision = "checkpoint";
     reasonCode = "turn-boundary-checkpoint-refresh-focus";
     operatorActionRequired = false;
+    nextAutoStepCode = "write-focus-checkpoint";
     nextAutoStep = "write checkpoint with explicit focus and resume bounded local-safe slice.";
   } else {
     decision = "ask-operator";
     reasonCode = "turn-boundary-ask-operator-decision-required";
     operatorActionRequired = true;
+    nextAutoStepCode = "request-operator-decision";
     nextAutoStep = "request explicit operator decision for blocked local audit reasons.";
   }
 
@@ -543,6 +570,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     decision,
     reasonCode,
     operatorActionRequired,
+    nextAutoStepCode,
     nextAutoStep,
     recommendationCode: recommendation.recommendationCode,
     directionPrompt: TURN_BOUNDARY_DIRECTION_PROMPT,
@@ -561,6 +589,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
       `reasonCode=${reasonCode}`,
       `operatorActionRequired=${operatorActionRequired ? "yes" : "no"}`,
       `recommendationCode=${recommendation.recommendationCode}`,
+      `nextAutoStepCode=${nextAutoStepCode}`,
       "directionPrompt=similar-lane-or-next-value",
       `directionRecommended=${directionPreview.recommendedOptionId}`,
       `directionOptions=${directionOptionsCompact}`,

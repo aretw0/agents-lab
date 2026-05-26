@@ -868,6 +868,7 @@ describe("context-watchdog tool surfaces", () => {
 				focusTasks: "TASK-BUD-321",
 				staleFocus: "TASK-BUD-320=completed",
 				recommendationCode: "refresh-focus-checkpoint",
+				nextActionCode: "refresh-focus-checkpoint",
 				nextAction: expect.stringContaining("refresh handoff focus/checkpoint"),
 				decisionCue: {
 					operatorDecisionNeeded: true,

@@ -309,6 +309,7 @@ export function registerContextWatchdogContinuationSurface(
 					localContinuityReasons: localAuditReasons,
 					protectedPaths,
 					recommendationCode: recommendation.recommendationCode,
+					nextActionCode: recommendation.nextActionCode,
 					nextAction: recommendation.nextAction,
 					materialReadiness: {
 						decision: materialReadiness.decision,
