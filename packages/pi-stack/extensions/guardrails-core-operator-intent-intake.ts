@@ -149,6 +149,26 @@ export function inferWorkerReadinessIntent(intent: string | undefined): boolean 
   return WORKER_READINESS_INTENT_PATTERNS.some((pattern) => pattern.test(text));
 }
 
+const BRAINSTORM_SEED_INTENT_PATTERNS = [
+  /\bbrainstorm\b/i,
+  /\bseed\s+(?:the\s+)?(?:backlog|board|lane|work)\b/i,
+  /\bnext\s+(?:local-safe\s+)(?:slice|lane|task|work)\b/i,
+  /\bwhat\s+(?:should\s+we\s+)?(?:work\s+on|do)\s+next\b/i,
+  /\bno\s+eligible\s+(?:local-safe\s+)?tasks?\b/i,
+  /\bfind\s+(?:the\s+)?next\s+(?:local-safe\s+)?(?:slice|lane|task)\b/i,
+  /\bpr[oó]xima\s+(?:fatia|lane|frente|tarefa)\b/i,
+  /\bqual\s+(?:a\s+)?pr[oó]xima\s+(?:fatia|lane|frente|tarefa)\b/i,
+  /\bsem\s+tarefas?\s+eleg[ií]ve(?:is|l)\b/i,
+  /\bseme(?:ar|ie)\s+(?:o\s+)?(?:backlog|board|quadro|trabalho)\b/i,
+  /\bencontrar\s+(?:a\s+)?pr[oó]xima\s+(?:fatia|lane|frente|tarefa)\b/i,
+];
+
+export function inferBrainstormSeedIntent(intent: string | undefined): boolean {
+  const text = String(intent ?? "").trim();
+  if (!text) return false;
+  return BRAINSTORM_SEED_INTENT_PATTERNS.some((pattern) => pattern.test(text));
+}
+
 function buildInteraction(decision: OperatorIntentIntakeDecision, tools: string[], questions: string[]): OperatorIntentInteraction {
   const choices: OperatorIntentChoice[] = [];
 
@@ -333,6 +353,10 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
   const missingCapabilities = [...profilePacket.missingCapabilities];
   const runtimeHealthRequested = input.runtimeHealthRequested === true || inferRuntimeHealthIntent(input.intent);
   const workerReadinessRequested = input.workerReadinessRequested === true || inferWorkerReadinessIntent(input.intent);
+  const brainstormRequested = input.brainstormRequested === true ||
+    input.noEligibleLocalSafeTasks === true ||
+    input.localSafeMaterialReady === false ||
+    inferBrainstormSeedIntent(input.intent);
 
   let decision: OperatorIntentIntakeDecision;
   let recommendedTools: string[];
@@ -353,14 +377,14 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     if (input.subagentsReady !== true) missingCapabilities.push("subagent-readiness");
     if (input.providerReady !== true) missingCapabilities.push("provider-readiness");
     recommendation = "Run read-only runtime, worker, and provider readiness checks; do not prepare or dispatch a worker yet.";
+  } else if (brainstormRequested) {
+    decision = "seed-brainstorm";
+    recommendedTools = ["lane_brainstorm_packet", "lane_brainstorm_seed_preview"];
+    recommendation = "Prepare candidate local-safe slices, then ask the operator to choose, customize, or cancel.";
   } else if (missingQuestions.length > 0) {
     decision = "ask-operator";
     recommendedTools = ["structured_interview_plan"];
     recommendation = "Ask only the missing questions needed to turn free-form intent into a bounded work contract.";
-  } else if (input.brainstormRequested || input.noEligibleLocalSafeTasks || input.localSafeMaterialReady === false) {
-    decision = "seed-brainstorm";
-    recommendedTools = ["lane_brainstorm_packet", "lane_brainstorm_seed_preview"];
-    recommendation = "Prepare candidate local-safe slices, then ask the operator to choose, customize, or cancel.";
   } else if (profilePacket.profile === "worker-assisted-candidate") {
     if (input.runtimeHealthReady !== true) missingCapabilities.push("runtime-health");
     if (input.subagentsReady !== true) missingCapabilities.push("subagent-readiness");

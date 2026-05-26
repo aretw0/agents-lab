@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildControlPlaneProfilePacket, buildOperatorIntentIntakePacket, inferRuntimeHealthIntent, inferWorkerReadinessIntent, resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
+import { buildControlPlaneProfilePacket, buildOperatorIntentIntakePacket, inferBrainstormSeedIntent, inferRuntimeHealthIntent, inferWorkerReadinessIntent, resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
 import { registerGuardrailsStructuredInterviewSurface } from "../../extensions/guardrails-core-structured-interview-surface";
 
 describe("structured interview primitive", () => {
@@ -211,6 +211,26 @@ describe("structured interview primitive", () => {
       route: "lane_brainstorm_packet",
     });
     expect(packet.interaction.recommendedChoiceId).toBe("seed-brainstorm");
+  });
+
+  it("infers brainstorm seed route from next-slice or no-eligible operator text", () => {
+    expect(inferBrainstormSeedIntent("qual a próxima fatia local-safe?")).toBe(true);
+    expect(inferBrainstormSeedIntent("no eligible local-safe tasks, seed the board")).toBe(true);
+    expect(inferBrainstormSeedIntent("validar saúde do runtime")).toBe(false);
+
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "Não vejo tarefa elegível; encontre a próxima fatia local-safe.",
+    });
+
+    expect(packet.decision).toBe("seed-brainstorm");
+    expect(packet.controlPlaneAction).toBe("run-report-only-route");
+    expect(packet.nextAction).toBe("run-brainstorm-seed-preview");
+    expect(packet.confirmationRequired).toBe(false);
+    expect(packet.reportOnlyRouteAuthorized).toBe(true);
+    expect(packet.recommendedTools).toEqual(["lane_brainstorm_packet", "lane_brainstorm_seed_preview"]);
+    expect(packet.executionPlan.executeWithoutTextualConfirmation).toBe(true);
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.workerDispatchAllowed).toBe(false);
   });
 
   it("routes explicit runtime health intent to read-only checks without asking more questions", () => {
