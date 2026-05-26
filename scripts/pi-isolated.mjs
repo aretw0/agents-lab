@@ -38,7 +38,6 @@ import {
 	buildControlPlaneRuntimeSettings,
 	canonicalizePackageSourceForAgentDir,
 	canonicalizeSettingsPackageSourcesForAgentDir,
-	controlPlaneEnabledModels,
 	controlPlaneWatchdogConfig,
 	extractPackageNameFromSource,
 	isColdCapabilityPackageSource,
@@ -62,6 +61,17 @@ const LOCAL_SETTINGS = path.join(LOCAL_AGENT_DIR, "settings.json");
 const LOCAL_AUTH = path.join(LOCAL_AGENT_DIR, "auth.json");
 const GLOBAL_AUTH = path.join(GLOBAL_AGENT_DIR, "auth.json");
 const GLOBAL_WATCHDOG_CONFIG = path.join(GLOBAL_AGENT_DIR, "extensions", "watchdog", "config.json");
+const LAB_PI_DEV_ENABLED_MODELS = [
+	"openai-codex/gpt-5.3-codex",
+	"openai-codex/gpt-5.4-mini",
+	"dashscope/qwen3.6-flash",
+];
+const LAB_PI_DEV_RUNTIME_PROFILE = {
+	runtimeProfile: "control-plane",
+	defaultProvider: "openai-codex",
+	defaultModel: "gpt-5.3-codex",
+	enabledModels: LAB_PI_DEV_ENABLED_MODELS,
+};
 const LOCAL_PI_CLI_CANDIDATES = [
 	path.join(REPO_ROOT, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js"),
 	path.join(REPO_ROOT, "node_modules", "@mariozechner", "pi-coding-agent", "dist", "cli.js"),
@@ -384,7 +394,7 @@ function isRecord(value) {
 }
 
 export function leanEnabledModels() {
-	return controlPlaneEnabledModels();
+	return [...LAB_PI_DEV_ENABLED_MODELS];
 }
 
 export function leanWatchdogConfig() {
@@ -475,9 +485,10 @@ function applyLocalRuntimeProfile({ dryRun = false } = {}) {
 		return { status: "no-packages", changed: false, removed: [] };
 	}
 
+	const envProfile = resolvePiDevRuntimeProfileFromEnv();
 	const nextProfile = buildControlPlaneRuntimeSettings(settings, {
 		pathExists: existsSync,
-		profile: resolvePiDevRuntimeProfileFromEnv(),
+		profile: envProfile ? { ...LAB_PI_DEV_RUNTIME_PROFILE, ...envProfile } : LAB_PI_DEV_RUNTIME_PROFILE,
 	});
 	const nextWithShellPath = nextProfile.settings;
 	const removed = nextProfile.removed;

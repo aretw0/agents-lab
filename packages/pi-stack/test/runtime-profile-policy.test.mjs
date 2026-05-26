@@ -60,11 +60,7 @@ test("cold capability package detection covers npm and local node_modules source
 });
 
 test("control plane model scope stays intentionally small", () => {
-  assert.deepEqual(controlPlaneEnabledModels(), [
-    "openai-codex/gpt-5.3-codex",
-    "openai-codex/gpt-5.4-mini",
-    "dashscope/qwen3.6-flash",
-  ]);
+  assert.deepEqual(controlPlaneEnabledModels(), []);
 });
 
 test("local shell reconciliation pins Git Bash for Windows settings", () => {
@@ -126,7 +122,7 @@ test("watchdog reconciliation tightens permissive config", () => {
   assert.equal(reconciled.config.sampleIntervalMs, 10000);
 });
 
-test("buildControlPlaneRuntimeSettings keeps expensive capabilities cold", () => {
+test("buildControlPlaneRuntimeSettings keeps expensive capabilities cold without forcing models", () => {
   const result = buildControlPlaneRuntimeSettings(
     {
       packages: [
@@ -150,7 +146,9 @@ test("buildControlPlaneRuntimeSettings keeps expensive capabilities cold", () =>
   ]);
   assert.deepEqual(result.settings.packages, ["npm:@aretw0/pi-stack"]);
   assert.equal(result.settings.runtimeProfile, "control-plane");
-  assert.deepEqual(result.settings.enabledModels, controlPlaneEnabledModels());
+  assert.deepEqual(result.settings.enabledModels, ["openai-codex/gpt-5.5"]);
+  assert.equal(result.settings.defaultProvider, undefined);
+  assert.equal(result.settings.defaultModel, undefined);
 });
 
 test("buildControlPlaneRuntimeSettings accepts an explicit runtime profile", () => {

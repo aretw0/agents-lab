@@ -20,6 +20,15 @@ function collectFiles(root: string): string[] {
 }
 
 describe("distributed model neutrality", () => {
+  it("keeps the distributed runtime profile free of lab model defaults", () => {
+    const text = readFileSync(join(PACKAGE_ROOT, "extensions", "runtime-profile-policy.mjs"), "utf8");
+
+    expect(text).not.toMatch(/openai-codex\/gpt-/);
+    expect(text).not.toMatch(/dashscope\/qwen/);
+    expect(text).not.toMatch(/defaultProvider:\s*["']/);
+    expect(text).not.toMatch(/defaultModel:\s*["']/);
+  });
+
   it("keeps Spark references out of distributed runtime and user docs", () => {
     const files = [
       join(PACKAGE_ROOT, "install.mjs"),

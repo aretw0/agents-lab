@@ -8,17 +8,8 @@ export const COLD_CAPABILITY_PACKAGES = [
   "pi-lens",
 ];
 
-export const CONTROL_PLANE_ENABLED_MODELS = [
-  "openai-codex/gpt-5.3-codex",
-  "openai-codex/gpt-5.4-mini",
-  "dashscope/qwen3.6-flash",
-];
-
 export const CONTROL_PLANE_RUNTIME_PROFILE = {
   runtimeProfile: "control-plane",
-  defaultProvider: "openai-codex",
-  defaultModel: "gpt-5.3-codex",
-  enabledModels: CONTROL_PLANE_ENABLED_MODELS,
 };
 
 export const CONTROL_PLANE_WATCHDOG_CONFIG = {
@@ -143,7 +134,7 @@ export function canonicalizeSettingsPackageSourcesForAgentDir(
 }
 
 export function controlPlaneEnabledModels() {
-  return [...CONTROL_PLANE_ENABLED_MODELS];
+  return [];
 }
 
 export function controlPlaneWatchdogConfig() {
@@ -192,15 +183,12 @@ export function buildControlPlaneRuntimeSettings(settings, options = {}) {
   const runtimeProfile = typeof profile.runtimeProfile === "string"
     ? profile.runtimeProfile
     : CONTROL_PLANE_RUNTIME_PROFILE.runtimeProfile;
-  const defaultProvider = typeof profile.defaultProvider === "string"
-    ? profile.defaultProvider
-    : CONTROL_PLANE_RUNTIME_PROFILE.defaultProvider;
-  const defaultModel = typeof profile.defaultModel === "string"
-    ? profile.defaultModel
-    : CONTROL_PLANE_RUNTIME_PROFILE.defaultModel;
-  const enabledModels = Array.isArray(profile.enabledModels) && profile.enabledModels.length > 0
-    ? [...profile.enabledModels]
-    : [...CONTROL_PLANE_RUNTIME_PROFILE.enabledModels];
+  const hasDefaultProvider = typeof profile.defaultProvider === "string";
+  const hasDefaultModel = typeof profile.defaultModel === "string";
+  const hasEnabledModels = Array.isArray(profile.enabledModels);
+  const defaultProvider = hasDefaultProvider ? profile.defaultProvider : undefined;
+  const defaultModel = hasDefaultModel ? profile.defaultModel : undefined;
+  const enabledModels = hasEnabledModels ? [...profile.enabledModels] : undefined;
   const coldCapabilityPackages = Array.isArray(options.coldCapabilityPackages)
     ? options.coldCapabilityPackages
     : COLD_CAPABILITY_PACKAGES;
@@ -216,20 +204,23 @@ export function buildControlPlaneRuntimeSettings(settings, options = {}) {
     ...settings,
     packages,
     runtimeProfile,
-    defaultProvider,
-    defaultModel,
-    enabledModels,
   };
+  if (hasDefaultProvider) next.defaultProvider = defaultProvider;
+  if (hasDefaultModel) next.defaultModel = defaultModel;
+  if (hasEnabledModels) next.enabledModels = enabledModels;
   const shellPath = reconcileLocalShellPath(next, options);
-  const currentEnabledModels = Array.isArray(settings.enabledModels) ? settings.enabledModels : [];
+  const currentEnabledModels = Array.isArray(settings.enabledModels) ? settings.enabledModels : undefined;
   const modelsChanged =
-    currentEnabledModels.length !== enabledModels.length ||
-    currentEnabledModels.some((value, index) => value !== enabledModels[index]);
+    hasEnabledModels && (
+      !Array.isArray(currentEnabledModels) ||
+      currentEnabledModels.length !== enabledModels.length ||
+      currentEnabledModels.some((value, index) => value !== enabledModels[index])
+    );
   const changed =
     removed.length > 0 ||
     settings.runtimeProfile !== runtimeProfile ||
-    settings.defaultProvider !== defaultProvider ||
-    settings.defaultModel !== defaultModel ||
+    (hasDefaultProvider && settings.defaultProvider !== defaultProvider) ||
+    (hasDefaultModel && settings.defaultModel !== defaultModel) ||
     modelsChanged ||
     shellPath.changed;
 
