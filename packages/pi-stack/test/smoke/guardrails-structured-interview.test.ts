@@ -147,6 +147,8 @@ describe("structured interview primitive", () => {
       nextAction: "answer-next-question",
       recommendationCode: "operator-intent-ask-operator",
       confirmationRequired: true,
+      reportOnlyRouteAuthorized: false,
+      operatorPromptRequired: true,
       interaction: {
         kind: "operator-choice",
         recommendedChoiceId: "answer-next-question",
@@ -191,6 +193,8 @@ describe("structured interview primitive", () => {
       recommendationCode: "operator-intent-seed-brainstorm",
       confirmationRequired: false,
       operatorDecisionNeeded: false,
+      reportOnlyRouteAuthorized: true,
+      operatorPromptRequired: false,
       recommendedTools: ["lane_brainstorm_packet", "lane_brainstorm_seed_preview"],
       dispatchAllowed: false,
       mutationAllowed: false,
@@ -216,6 +220,8 @@ describe("structured interview primitive", () => {
       recommendationCode: "operator-intent-check-runtime-health",
       confirmationRequired: false,
       operatorDecisionNeeded: false,
+      reportOnlyRouteAuthorized: true,
+      operatorPromptRequired: false,
       recommendedTools: ["environment_runtime_health_status", "environment_dev_pressure_status", "safe_boot_runtime_artifact_audit"],
       dispatchAllowed: false,
       mutationAllowed: false,
@@ -228,6 +234,7 @@ describe("structured interview primitive", () => {
     });
     expect(packet.interaction.recommendedChoiceId).toBe("check-runtime-health");
     expect(packet.summary).toContain("operatorDecision=no");
+    expect(packet.summary).toContain("reportOnlyAuthorized=yes");
   });
 
   it("prepares a worker packet only as a report-only candidate when readiness is known", () => {
@@ -255,6 +262,8 @@ describe("structured interview primitive", () => {
       recommendationCode: "operator-intent-prepare-worker-packet",
       confirmationRequired: false,
       operatorDecisionNeeded: false,
+      reportOnlyRouteAuthorized: true,
+      operatorPromptRequired: false,
       recommendedTools: ["agent_run_operator_packet", "agent_run_task_packet"],
       dispatchAllowed: false,
       mutationAllowed: false,
@@ -290,6 +299,8 @@ describe("structured interview primitive", () => {
       recommendationCode: "operator-intent-check-worker-readiness",
       confirmationRequired: false,
       operatorDecisionNeeded: false,
+      reportOnlyRouteAuthorized: true,
+      operatorPromptRequired: false,
       recommendedTools: ["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"],
       dispatchAllowed: false,
       mutationAllowed: false,
@@ -327,6 +338,8 @@ describe("structured interview primitive", () => {
     expect(packet.nextAction).toBe("run-worker-readiness-checks");
     expect(packet.confirmationRequired).toBe(false);
     expect(packet.operatorDecisionNeeded).toBe(false);
+    expect(packet.reportOnlyRouteAuthorized).toBe(true);
+    expect(packet.operatorPromptRequired).toBe(false);
     expect(packet.recommendedTools).toEqual(["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"]);
     expect(packet.missingCapabilities).toContain("subagent-readiness");
     expect(packet.missingCapabilities).not.toContain("runtime-health");
@@ -362,6 +375,8 @@ describe("structured interview primitive", () => {
     expect(result?.details.nextAction).toBe("run-worker-readiness-checks");
     expect(result?.details.confirmationRequired).toBe(false);
     expect(result?.details.operatorDecisionNeeded).toBe(false);
+    expect(result?.details.reportOnlyRouteAuthorized).toBe(true);
+    expect(result?.details.operatorPromptRequired).toBe(false);
     expect(result?.details.recommendedTools).toEqual(["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"]);
     expect(result?.details.missingCapabilities).toEqual(expect.arrayContaining(["runtime-health"]));
     expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=check-worker-readiness");
@@ -387,6 +402,8 @@ describe("structured interview primitive", () => {
     expect(result?.details.nextAction).toBe("run-runtime-health-checks");
     expect(result?.details.confirmationRequired).toBe(false);
     expect(result?.details.operatorDecisionNeeded).toBe(false);
+    expect(result?.details.reportOnlyRouteAuthorized).toBe(true);
+    expect(result?.details.operatorPromptRequired).toBe(false);
     expect(result?.details.recommendedTools).toEqual(["environment_runtime_health_status", "environment_dev_pressure_status", "safe_boot_runtime_artifact_audit"]);
     expect(result?.content?.[0]?.text).toContain("operator-intent-intake: decision=check-runtime-health");
   });
@@ -408,6 +425,8 @@ describe("structured interview primitive", () => {
       recommendationCode: "operator-intent-blocked",
       confirmationRequired: true,
       operatorDecisionNeeded: true,
+      reportOnlyRouteAuthorized: false,
+      operatorPromptRequired: true,
       recommendedTools: ["control_plane_profile_packet"],
       blockedRequests: ["protected-scope", "github-actions"],
       dispatchAllowed: false,
@@ -487,6 +506,8 @@ describe("structured interview primitive", () => {
     expect(result?.details.nextAction).toBe("prepare-worker-packet");
     expect(result?.details.confirmationRequired).toBe(false);
     expect(result?.details.operatorDecisionNeeded).toBe(false);
+    expect(result?.details.reportOnlyRouteAuthorized).toBe(true);
+    expect(result?.details.operatorPromptRequired).toBe(false);
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.workerDispatchAllowed).toBe(false);
     expect(result?.details.interaction).toMatchObject({

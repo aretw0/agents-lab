@@ -79,6 +79,8 @@ export interface OperatorIntentIntakePacket {
   recommendedRoute: string;
   recommendedTools: string[];
   operatorDecisionNeeded: boolean;
+  reportOnlyRouteAuthorized: boolean;
+  operatorPromptRequired: boolean;
   controlPlaneAction: OperatorIntentControlPlaneAction;
   nextAction: OperatorIntentNextAction;
   confirmationRequired: boolean;
@@ -273,6 +275,8 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
   const action = resolveControlPlaneAction(decision);
   const nextAction = resolveNextAction(decision);
   const recommendationCode = resolveRecommendationCode(decision);
+  const reportOnlyRouteAuthorized = action.controlPlaneAction === "run-report-only-route";
+  const operatorPromptRequired = action.confirmationRequired;
   const summary = [
     "operator-intent-intake:",
     `decision=${decision}`,
@@ -284,6 +288,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     `profile=${profilePacket.profile}`,
     `questions=${missingQuestions.length}`,
     `operatorDecision=${action.confirmationRequired ? "yes" : "no"}`,
+    `reportOnlyAuthorized=${reportOnlyRouteAuthorized ? "yes" : "no"}`,
     `blocked=${blockedSummary}`,
     "dispatch=no",
     "mutation=no",
@@ -302,6 +307,8 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     recommendedRoute,
     recommendedTools,
     operatorDecisionNeeded: action.confirmationRequired,
+    reportOnlyRouteAuthorized,
+    operatorPromptRequired,
     controlPlaneAction: action.controlPlaneAction,
     nextAction,
     confirmationRequired: action.confirmationRequired,
