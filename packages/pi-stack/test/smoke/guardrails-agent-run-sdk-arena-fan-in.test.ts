@@ -14,10 +14,13 @@ type RegisteredTool = {
   ) => { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
 };
 
+const PRIMARY_PROVIDER_MODEL_REF = "provider-a/model-alpha";
+const SECONDARY_PROVIDER_MODEL_REF = "provider-b/model-beta";
+
 function arenaPacket() {
   return buildAgentRunSdkProviderModelArenaPacket({
     arenaId: "arena-fan-in-smoke",
-    providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+    providerModelRef: PRIMARY_PROVIDER_MODEL_REF,
     envelopes: ["readonly-one-file", "mutation-one-file-marker"],
     maxCalls: 2,
     timeoutMs: 90_000,
@@ -142,16 +145,16 @@ describe("agent run SDK arena fan-in", () => {
 
     const result = tool?.execute("tc-arena-calibration", {
       arena_id: "arena-calibration-surface",
-      provider_model_ref: "dashscope/qwen3.6-flash",
+      provider_model_ref: SECONDARY_PROVIDER_MODEL_REF,
       readiness_decision: "ready",
       readiness_evidence: "provider_readiness=ready budget=ok source=operator-check",
-      baseline_provider_model_refs: ["openai-codex/gpt-5.3-codex-spark"],
+      baseline_provider_model_refs: [PRIMARY_PROVIDER_MODEL_REF],
       envelopes: ["readonly-one-file"],
       max_calls: 1,
       timeout_ms: 45_000,
       max_estimated_cost_usd: 0.25,
       budget_decision: "ok",
-      budget_evidence: "manual budget evidence for dashscope/qwen3.6-flash",
+      budget_evidence: `manual budget evidence for ${SECONDARY_PROVIDER_MODEL_REF}`,
     }, undefined as unknown as AbortSignal, vi.fn(), { cwd: process.cwd() });
 
     expect(result?.details?.mode).toBe("agent-run-sdk-provider-model-arena-calibration-packet");

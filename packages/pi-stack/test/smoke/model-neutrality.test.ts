@@ -115,6 +115,8 @@ describe("distributed model neutrality", () => {
     const files = [
       join(PACKAGE_ROOT, "test", "smoke", "guardrails-agent-run-task-packets.test.ts"),
       join(PACKAGE_ROOT, "test", "smoke", "guardrails-agent-run-sdk.test.ts"),
+      join(PACKAGE_ROOT, "test", "smoke", "guardrails-agent-run-sdk-arena.test.ts"),
+      join(PACKAGE_ROOT, "test", "smoke", "guardrails-agent-run-sdk-arena-fan-in.test.ts"),
       join(PACKAGE_ROOT, "test", "smoke", "guardrails-agent-spawn-readiness.test.ts"),
       join(PACKAGE_ROOT, "test", "smoke", "guardrails-agent-run-executor-diagnostics.test.ts"),
       join(PACKAGE_ROOT, "test", "smoke", "quota-visibility-route-advisory.test.ts"),

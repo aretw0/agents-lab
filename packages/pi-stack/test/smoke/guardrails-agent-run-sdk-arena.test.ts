@@ -5,11 +5,18 @@ import {
   buildAgentRunSdkProviderModelArenaPacket,
 } from "../../extensions/guardrails-core-exports";
 
+const PRIMARY_PROVIDER_MODEL_REF = "provider-a/model-alpha";
+const SECONDARY_PROVIDER_MODEL_REF = "provider-b/model-beta";
+const ARENA_SMOKE_ID = "arena-primary-model-smoke";
+const ARENA_EXPANDED_ID = "arena-expanded-primary-model-smoke";
+const ARENA_MUTATION_ID = "arena-mutation-primary-model-smoke";
+const ARENA_CALIBRATION_ID = "arena-secondary-model-calibration";
+
 describe("agent run SDK arena packets", () => {
   it("builds provider model arena packets without dispatch", () => {
     const arenaPacket = buildAgentRunSdkProviderModelArenaPacket({
-      arenaId: "arena-openai-spark-smoke",
-      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      arenaId: ARENA_SMOKE_ID,
+      providerModelRef: PRIMARY_PROVIDER_MODEL_REF,
       envelopes: ["readonly-one-file", "mutation-one-file-marker"],
       maxCalls: 2,
       timeoutMs: 90_000,
@@ -35,8 +42,8 @@ describe("agent run SDK arena packets", () => {
     expect(arenaPacket.summary).toContain("paidCalls=no");
 
     const expandedArenaPacket = buildAgentRunSdkProviderModelArenaPacket({
-      arenaId: "arena-expanded-openai-spark-smoke",
-      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      arenaId: ARENA_EXPANDED_ID,
+      providerModelRef: PRIMARY_PROVIDER_MODEL_REF,
       envelopes: [
         "readonly-three-file-risk-table",
         "readonly-source-backed-evidence-synthesis",
@@ -61,12 +68,12 @@ describe("agent run SDK arena packets", () => {
     expect(expandedArenaPacket.canaries[2]?.packet.runSpec.goal).toContain("do not use web");
     expect(expandedArenaPacket.suiteManifest).toMatchObject({
       mode: "report-only-suite",
-      suiteId: "arena-expanded-openai-spark-smoke",
+      suiteId: ARENA_EXPANDED_ID,
       parallelism: 1,
       runIds: [
-        "arena-expanded-openai-spark-smoke-readonly-three-file-risk-table",
-        "arena-expanded-openai-spark-smoke-readonly-source-backed-evidence-synthesis",
-        "arena-expanded-openai-spark-smoke-readonly-web-research-tool-contract-review",
+        `${ARENA_EXPANDED_ID}-readonly-three-file-risk-table`,
+        `${ARENA_EXPANDED_ID}-readonly-source-backed-evidence-synthesis`,
+        `${ARENA_EXPANDED_ID}-readonly-web-research-tool-contract-review`,
       ],
     });
     expect(expandedArenaPacket.suiteManifest.envelopes[1]?.maturityNotes).toContain("parent-curated source-backed synthesis");
@@ -77,8 +84,8 @@ describe("agent run SDK arena packets", () => {
     expect(expandedArenaPacket.summary).toContain("envelopes=3");
 
     const mutationArenaPacket = buildAgentRunSdkProviderModelArenaPacket({
-      arenaId: "arena-mutation-openai-spark-smoke",
-      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      arenaId: ARENA_MUTATION_ID,
+      providerModelRef: PRIMARY_PROVIDER_MODEL_REF,
       envelopes: ["mutation-one-file-doc-marker", "mutation-one-file-test-fixture", "mutation-one-file-code-constant"],
       maxCalls: 3,
       timeoutMs: 45_000,
@@ -92,21 +99,21 @@ describe("agent run SDK arena packets", () => {
     expect(mutationArenaPacket.canaries[1]?.declaredFiles).toEqual(["packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts"]);
     expect(mutationArenaPacket.canaries[2]?.maturityNotes).toContain("generic one-file code/config mutation");
     expect(mutationArenaPacket.suiteManifest.envelopes[0]?.validation).toContain("touched files must stay within declared files");
-    expect(mutationArenaPacket.scorecardTemplate.artifactPath).toBe(".pi/reports/arena-mutation-openai-spark-smoke.scorecard.json");
+    expect(mutationArenaPacket.scorecardTemplate.artifactPath).toBe(`.pi/reports/${ARENA_MUTATION_ID}.scorecard.json`);
     expect(mutationArenaPacket.scorecardTemplate.rows).toHaveLength(3);
     expect(mutationArenaPacket.scorecardTemplate.rows[0]).toMatchObject({
-      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      providerModelRef: PRIMARY_PROVIDER_MODEL_REF,
       envelope: "mutation-one-file-doc-marker",
       processState: "pending",
       contractDecision: "pending",
     });
     expect(mutationArenaPacket.scorecardTemplate.requiredFields).toContain("contractDecision");
     expect(mutationArenaPacket.fanInPlan).toMatchObject({
-      artifactPath: ".pi/reports/arena-mutation-openai-spark-smoke.fanin.json",
+      artifactPath: `.pi/reports/${ARENA_MUTATION_ID}.fanin.json`,
       expectedRunIds: [
-        "arena-mutation-openai-spark-smoke-mutation-one-file-doc-marker",
-        "arena-mutation-openai-spark-smoke-mutation-one-file-test-fixture",
-        "arena-mutation-openai-spark-smoke-mutation-one-file-code-constant",
+        `${ARENA_MUTATION_ID}-mutation-one-file-doc-marker`,
+        `${ARENA_MUTATION_ID}-mutation-one-file-test-fixture`,
+        `${ARENA_MUTATION_ID}-mutation-one-file-code-constant`,
       ],
     });
     expect(mutationArenaPacket.fanInPlan.requiredOutcomePackets[0]).toContain("agent_run_outcome_packet");
@@ -115,11 +122,11 @@ describe("agent run SDK arena packets", () => {
       mode: "structured-approval-serial-suite-preview",
       dispatchAllowed: false,
       executeSupported: false,
-      operatorApprovalPrompt: "approve arena serial suite arena-mutation-openai-spark-smoke",
+      operatorApprovalPrompt: `approve arena serial suite ${ARENA_MUTATION_ID}`,
       runOrder: [
-        "arena-mutation-openai-spark-smoke-mutation-one-file-doc-marker",
-        "arena-mutation-openai-spark-smoke-mutation-one-file-test-fixture",
-        "arena-mutation-openai-spark-smoke-mutation-one-file-code-constant",
+        `${ARENA_MUTATION_ID}-mutation-one-file-doc-marker`,
+        `${ARENA_MUTATION_ID}-mutation-one-file-test-fixture`,
+        `${ARENA_MUTATION_ID}-mutation-one-file-code-constant`,
       ],
     });
     expect(mutationArenaPacket.serialSuiteDispatchPlan.preflightChecks.join("\n")).toContain("structured operator approval");
@@ -131,19 +138,19 @@ describe("agent run SDK arena packets", () => {
       artifacts: [
         {
           kind: "suite-manifest",
-          path: ".pi/reports/arena-mutation-openai-spark-smoke.manifest.json",
+          path: `.pi/reports/${ARENA_MUTATION_ID}.manifest.json`,
           sourceField: "suiteManifest",
           requiredBeforePromotion: true,
         },
         {
           kind: "scorecard-template",
-          path: ".pi/reports/arena-mutation-openai-spark-smoke.scorecard.json",
+          path: `.pi/reports/${ARENA_MUTATION_ID}.scorecard.json`,
           sourceField: "scorecardTemplate",
           requiredBeforePromotion: true,
         },
         {
           kind: "fanin-plan",
-          path: ".pi/reports/arena-mutation-openai-spark-smoke.fanin.json",
+          path: `.pi/reports/${ARENA_MUTATION_ID}.fanin.json`,
           sourceField: "fanInPlan",
           requiredBeforePromotion: true,
         },
@@ -153,8 +160,8 @@ describe("agent run SDK arena packets", () => {
     expect(mutationArenaPacket.suiteArtifactPlan.operatorSteps.join("\n")).toContain("future models prove capabilities independently");
 
     const artifactPacket = buildAgentRunSdkProviderModelArenaArtifactPacket({
-      arenaId: "arena-mutation-openai-spark-smoke",
-      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      arenaId: ARENA_MUTATION_ID,
+      providerModelRef: PRIMARY_PROVIDER_MODEL_REF,
       envelopes: ["mutation-one-file-doc-marker", "mutation-one-file-test-fixture", "mutation-one-file-code-constant"],
       maxCalls: 3,
       timeoutMs: 45_000,
@@ -171,13 +178,13 @@ describe("agent run SDK arena packets", () => {
       structuredOperatorApproval: false,
     });
     expect(artifactPacket.artifactPreviews.map((artifact) => artifact.kind)).toEqual(["suite-manifest", "scorecard-template", "fanin-plan"]);
-    expect(artifactPacket.artifactPreviews[0]?.path).toBe(".pi/reports/arena-mutation-openai-spark-smoke.manifest.json");
+    expect(artifactPacket.artifactPreviews[0]?.path).toBe(`.pi/reports/${ARENA_MUTATION_ID}.manifest.json`);
     expect(artifactPacket.artifactPreviews.every((artifact) => artifact.bytes > 0)).toBe(true);
     expect(artifactPacket.nextActions.join("\n")).toContain("do not start workers");
 
     const blockedArtifactApply = buildAgentRunSdkProviderModelArenaArtifactPacket({
-      arenaId: "arena-mutation-openai-spark-smoke",
-      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      arenaId: ARENA_MUTATION_ID,
+      providerModelRef: PRIMARY_PROVIDER_MODEL_REF,
       envelopes: ["mutation-one-file-doc-marker"],
       maxCalls: 1,
       timeoutMs: 45_000,
@@ -191,8 +198,8 @@ describe("agent run SDK arena packets", () => {
     expect(blockedArtifactApply.blockers).toContain("structured-operator-approval-missing");
 
     const confirmedArtifactApply = buildAgentRunSdkProviderModelArenaArtifactPacket({
-      arenaId: "arena-mutation-openai-spark-smoke",
-      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      arenaId: ARENA_MUTATION_ID,
+      providerModelRef: PRIMARY_PROVIDER_MODEL_REF,
       envelopes: ["mutation-one-file-doc-marker"],
       maxCalls: 1,
       timeoutMs: 45_000,
@@ -217,7 +224,7 @@ describe("agent run SDK arena packets", () => {
 
     const arenaBlocked = buildAgentRunSdkProviderModelArenaPacket({
       arenaId: "arena-blocked",
-      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      providerModelRef: PRIMARY_PROVIDER_MODEL_REF,
       envelopes: ["readonly-one-file", "unknown-envelope"],
       maxCalls: 1,
       timeoutMs: 90_000,
@@ -232,17 +239,17 @@ describe("agent run SDK arena packets", () => {
 
   it("prepares provider/model calibration without inheriting baseline evidence or dispatching calls", () => {
     const calibration = buildAgentRunSdkProviderModelArenaCalibrationPacket({
-      arenaId: "arena-dashscope-qwen-calibration",
-      providerModelRef: "dashscope/qwen3.6-flash",
+      arenaId: ARENA_CALIBRATION_ID,
+      providerModelRef: SECONDARY_PROVIDER_MODEL_REF,
       readinessDecision: "ready",
       readinessEvidence: "provider_readiness=ready budget=ok source=operator-check",
-      baselineProviderModelRefs: ["openai-codex/gpt-5.3-codex-spark"],
+      baselineProviderModelRefs: [PRIMARY_PROVIDER_MODEL_REF],
       envelopes: ["readonly-one-file", "readonly-source-backed-evidence-synthesis"],
       maxCalls: 2,
       timeoutMs: 45_000,
       maxEstimatedCostUsd: 0.25,
       budgetDecision: "ok",
-      budgetEvidence: "manual budget evidence for dashscope/qwen3.6-flash",
+      budgetEvidence: `manual budget evidence for ${SECONDARY_PROVIDER_MODEL_REF}`,
     });
 
     expect(calibration).toMatchObject({
@@ -255,11 +262,11 @@ describe("agent run SDK arena packets", () => {
         decision: "ready",
       },
       calibrationPlan: {
-        providerModelRef: "dashscope/qwen3.6-flash",
+        providerModelRef: SECONDARY_PROVIDER_MODEL_REF,
         noInheritedEvidence: true,
       },
       comparisonPlan: {
-        baselineProviderModelRefs: ["openai-codex/gpt-5.3-codex-spark"],
+        baselineProviderModelRefs: [PRIMARY_PROVIDER_MODEL_REF],
         promotionScope: "provider-model-envelope",
       },
     });
@@ -269,7 +276,7 @@ describe("agent run SDK arena packets", () => {
 
     const blocked = buildAgentRunSdkProviderModelArenaCalibrationPacket({
       arenaId: "arena-missing-readiness",
-      providerModelRef: "dashscope/qwen3.6-flash",
+      providerModelRef: SECONDARY_PROVIDER_MODEL_REF,
       readinessDecision: "unknown",
       envelopes: ["readonly-one-file"],
       maxCalls: 1,
