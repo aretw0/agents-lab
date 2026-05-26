@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildControlPlaneProfilePacket, buildOperatorIntentIntakePacket, resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
-import { inferRuntimeHealthIntent } from "../../extensions/guardrails-core-operator-intent-intake";
+import { buildControlPlaneProfilePacket, buildOperatorIntentIntakePacket, inferRuntimeHealthIntent, resolveStructuredInterview } from "../../extensions/guardrails-core-exports";
 import { registerGuardrailsStructuredInterviewSurface } from "../../extensions/guardrails-core-structured-interview-surface";
 
 describe("structured interview primitive", () => {
