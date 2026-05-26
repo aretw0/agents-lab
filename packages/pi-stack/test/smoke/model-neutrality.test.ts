@@ -51,6 +51,7 @@ describe("distributed model neutrality", () => {
 
   it("keeps generic distributed guides free of concrete provider/model examples", () => {
     const files = [
+      join(PACKAGE_ROOT, "README.md"),
       join(process.cwd(), "docs", "guides", "colony-provider-model-governance.md"),
       join(process.cwd(), "docs", "guides", "monitor-overrides.md"),
       join(process.cwd(), "docs", "guides", "quota-visibility.md"),

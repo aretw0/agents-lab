@@ -52,7 +52,7 @@ pi install https://github.com/aretw0/agents-lab
 
 | Default | Valor | Configurável? |
 |---|---|---|
-| Modelo dos classificadores (provider-aware) | `github-copilot -> github-copilot/claude-haiku-4.5`<br>`openai-codex -> openai-codex/gpt-5.4-mini` | Sim (`classifierModel` / `classifierModelByProvider`) |
+| Modelo dos classificadores (provider-aware) | sem default por provider/model concreto | Sim (`classifierModel` / `classifierModelByProvider`) |
 | Thinking | `off` | Sim (`classifierThinking`) |
 | Trigger do hedge (lean-by-default) | `has_bash` | Sim (`hedgeWhen`) |
 | Contexto de projeto no hedge | desabilitado | Sim (`hedgeIncludeProjectContext`) |
@@ -70,8 +70,8 @@ Exemplo em `.pi/settings.json`:
       "hedgeIncludeProjectContext": false,
       "hedgeConversationHistory": false,
       "classifierModelByProvider": {
-        "github-copilot": "github-copilot/claude-haiku-4.5",
-        "openai-codex": "openai-codex/gpt-5.4-mini"
+        "provider-a": "provider-a/model-classifier",
+        "provider-b": "provider-b/model-classifier"
       }
     }
   }
