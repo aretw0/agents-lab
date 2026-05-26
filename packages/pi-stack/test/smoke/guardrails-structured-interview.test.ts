@@ -149,6 +149,12 @@ describe("structured interview primitive", () => {
       confirmationRequired: true,
       reportOnlyRouteAuthorized: false,
       operatorPromptRequired: true,
+      executionPlan: {
+        kind: "operator-prompt",
+        authorized: false,
+        executeWithoutTextualConfirmation: false,
+        finalResponseContract: "ask-one-compact-question",
+      },
       interaction: {
         kind: "operator-choice",
         recommendedChoiceId: "answer-next-question",
@@ -223,10 +229,22 @@ describe("structured interview primitive", () => {
       reportOnlyRouteAuthorized: true,
       operatorPromptRequired: false,
       recommendedTools: ["environment_runtime_health_status", "environment_dev_pressure_status", "safe_boot_runtime_artifact_audit"],
+      executionPlan: {
+        kind: "report-only-route",
+        authorized: true,
+        executeWithoutTextualConfirmation: true,
+        finalResponseContract: "compact-decision-summary",
+      },
       dispatchAllowed: false,
       mutationAllowed: false,
       workerDispatchAllowed: false,
     });
+    expect(packet.executionPlan.steps.map((step) => step.tool)).toEqual([
+      "environment_runtime_health_status",
+      "environment_dev_pressure_status",
+      "safe_boot_runtime_artifact_audit",
+    ]);
+    expect(packet.executionPlan.forbiddenActions).toEqual(["mutation", "dispatch", "worker-dispatch", "protected-scope"]);
     expect(packet.missingQuestions.length).toBeGreaterThan(0);
     expect(packet.interaction.choices[0]).toMatchObject({
       id: "check-runtime-health",
@@ -265,10 +283,17 @@ describe("structured interview primitive", () => {
       reportOnlyRouteAuthorized: true,
       operatorPromptRequired: false,
       recommendedTools: ["agent_run_operator_packet", "agent_run_task_packet"],
+      executionPlan: {
+        kind: "report-only-route",
+        authorized: true,
+        executeWithoutTextualConfirmation: true,
+        finalResponseContract: "compact-decision-summary",
+      },
       dispatchAllowed: false,
       mutationAllowed: false,
       workerDispatchAllowed: false,
     });
+    expect(packet.executionPlan.steps.map((step) => step.tool)).toEqual(["agent_run_operator_packet", "agent_run_task_packet"]);
     expect(packet.profilePacket.profile).toBe("worker-assisted-candidate");
     expect(packet.interaction.choices[0]).toMatchObject({
       id: "prepare-worker-packet",
@@ -302,10 +327,20 @@ describe("structured interview primitive", () => {
       reportOnlyRouteAuthorized: true,
       operatorPromptRequired: false,
       recommendedTools: ["environment_runtime_health_status", "subagent_readiness_status", "provider_readiness_matrix"],
+      executionPlan: {
+        kind: "report-only-route",
+        authorized: true,
+        executeWithoutTextualConfirmation: true,
+      },
       dispatchAllowed: false,
       mutationAllowed: false,
       workerDispatchAllowed: false,
     });
+    expect(packet.executionPlan.steps.map((step) => step.tool)).toEqual([
+      "environment_runtime_health_status",
+      "subagent_readiness_status",
+      "provider_readiness_matrix",
+    ]);
     expect(packet.missingCapabilities).toEqual(expect.arrayContaining(["runtime-health", "subagent-readiness", "provider-readiness"]));
     expect(packet.interaction.choices[0]).toMatchObject({
       id: "check-worker-readiness",
@@ -428,11 +463,18 @@ describe("structured interview primitive", () => {
       reportOnlyRouteAuthorized: false,
       operatorPromptRequired: true,
       recommendedTools: ["control_plane_profile_packet"],
+      executionPlan: {
+        kind: "stop",
+        authorized: false,
+        executeWithoutTextualConfirmation: false,
+        finalResponseContract: "blocked-intent-summary",
+      },
       blockedRequests: ["protected-scope", "github-actions"],
       dispatchAllowed: false,
       mutationAllowed: false,
       workerDispatchAllowed: false,
     });
+    expect(packet.executionPlan.steps).toEqual([]);
     expect(packet.interaction.choices[0]).toMatchObject({
       id: "remove-blocked-request",
       route: "control_plane_profile_packet",
@@ -513,6 +555,12 @@ describe("structured interview primitive", () => {
     expect(result?.details.operatorPromptRequired).toBe(false);
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.workerDispatchAllowed).toBe(false);
+    expect(result?.details.executionPlan).toMatchObject({
+      kind: "report-only-route",
+      authorized: true,
+      executeWithoutTextualConfirmation: true,
+      finalResponseContract: "compact-decision-summary",
+    });
     expect(result?.details.interaction).toMatchObject({
       kind: "operator-choice",
       recommendedChoiceId: "prepare-worker-packet",

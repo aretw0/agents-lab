@@ -67,6 +67,21 @@ export interface OperatorIntentInteraction {
   };
 }
 
+export interface OperatorIntentRouteStep {
+  tool: string;
+  required: true;
+  purpose: string;
+}
+
+export interface OperatorIntentExecutionPlan {
+  kind: "operator-prompt" | "report-only-route" | "stop";
+  authorized: boolean;
+  executeWithoutTextualConfirmation: boolean;
+  steps: OperatorIntentRouteStep[];
+  finalResponseContract: "ask-one-compact-question" | "compact-decision-summary" | "blocked-intent-summary";
+  forbiddenActions: Array<"mutation" | "dispatch" | "worker-dispatch" | "protected-scope">;
+}
+
 export interface OperatorIntentIntakePacket {
   effect: "none";
   mode: "operator-intent-intake";
@@ -90,6 +105,7 @@ export interface OperatorIntentIntakePacket {
   blockedRequests: string[];
   missingCapabilities: string[];
   interaction: OperatorIntentInteraction;
+  executionPlan: OperatorIntentExecutionPlan;
   summary: string;
   recommendationCode: OperatorIntentRecommendationCode;
   recommendation: string;
@@ -202,6 +218,56 @@ function resolveControlPlaneAction(decision: OperatorIntentIntakeDecision): {
   };
 }
 
+function describeRouteTool(tool: string): string {
+  if (tool === "environment_runtime_health_status") return "aggregate read-only runtime health decision";
+  if (tool === "environment_dev_pressure_status") return "inspect local development pressure without mutating files";
+  if (tool === "safe_boot_runtime_artifact_audit") return "audit tracked runtime artifacts without cleanup";
+  if (tool === "subagent_readiness_status") return "check worker/subagent readiness without dispatch";
+  if (tool === "provider_readiness_matrix") return "check provider/model readiness without selecting a model";
+  if (tool === "lane_brainstorm_packet") return "prepare candidate local-safe slices without writing files";
+  if (tool === "lane_brainstorm_seed_preview") return "preview local-safe seed material without queue mutation";
+  if (tool === "control_plane_profile_packet") return "summarize the bounded control-plane work contract";
+  if (tool === "agent_run_operator_packet") return "prepare worker packet for operator review only";
+  if (tool === "agent_run_task_packet") return "derive worker task packet without dispatch";
+  if (tool === "structured_interview_plan") return "ask only the next missing operator question";
+  return "run report-only route step";
+}
+
+function buildExecutionPlan(action: {
+  controlPlaneAction: OperatorIntentControlPlaneAction;
+  confirmationRequired: boolean;
+}, recommendedTools: string[]): OperatorIntentExecutionPlan {
+  const forbiddenActions: OperatorIntentExecutionPlan["forbiddenActions"] = ["mutation", "dispatch", "worker-dispatch", "protected-scope"];
+  if (action.controlPlaneAction === "stop-and-report") {
+    return {
+      kind: "stop",
+      authorized: false,
+      executeWithoutTextualConfirmation: false,
+      steps: [],
+      finalResponseContract: "blocked-intent-summary",
+      forbiddenActions,
+    };
+  }
+  if (action.controlPlaneAction === "ask-operator") {
+    return {
+      kind: "operator-prompt",
+      authorized: false,
+      executeWithoutTextualConfirmation: false,
+      steps: recommendedTools.map((tool) => ({ tool, required: true, purpose: describeRouteTool(tool) })),
+      finalResponseContract: "ask-one-compact-question",
+      forbiddenActions,
+    };
+  }
+  return {
+    kind: "report-only-route",
+    authorized: true,
+    executeWithoutTextualConfirmation: true,
+    steps: recommendedTools.map((tool) => ({ tool, required: true, purpose: describeRouteTool(tool) })),
+    finalResponseContract: "compact-decision-summary",
+    forbiddenActions,
+  };
+}
+
 function resolveNextAction(decision: OperatorIntentIntakeDecision): OperatorIntentNextAction {
   if (decision === "ask-operator") return "answer-next-question";
   if (decision === "check-runtime-health") return "run-runtime-health-checks";
@@ -277,6 +343,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
   const recommendationCode = resolveRecommendationCode(decision);
   const reportOnlyRouteAuthorized = action.controlPlaneAction === "run-report-only-route";
   const operatorPromptRequired = action.confirmationRequired;
+  const executionPlan = buildExecutionPlan(action, recommendedTools);
   const summary = [
     "operator-intent-intake:",
     `decision=${decision}`,
@@ -318,6 +385,7 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     blockedRequests,
     missingCapabilities: [...new Set(missingCapabilities)].slice(0, 6),
     interaction,
+    executionPlan,
     summary,
     recommendationCode,
     recommendation,
