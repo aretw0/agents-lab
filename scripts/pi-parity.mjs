@@ -117,6 +117,21 @@ function loadSettings(settingsPath) {
   }
 }
 
+function isRecord(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function isIsolatedAgentSettings(settings) {
+  return isRecord(settings?.isolation)
+    && typeof settings.notes === "string"
+    && settings.notes.includes("workspace-local isolated PI_CODING_AGENT_DIR");
+}
+
+function localPackagePins(settings) {
+  if (!isRecord(settings?.isolation) || !Array.isArray(settings.isolation.localPackagePins)) return [];
+  return settings.isolation.localPackagePins.filter((item) => typeof item === "string" && item.trim());
+}
+
 function getSource(entry) {
   return typeof entry === "string" ? entry : entry?.source;
 }
@@ -251,11 +266,18 @@ function analyzeScope(scope, profile) {
   const settingsPath = getSettingsPath(scope);
   const settings = loadSettings(settingsPath);
   const entries = Array.isArray(settings.packages) ? settings.packages : [];
+  const isolatedAgentSettings = scope === "user" && isIsolatedAgentSettings(settings);
+  const localPins = localPackagePins(settings);
 
-  const expected = new Set(PROFILES[profile]);
+  const expected = new Set(isolatedAgentSettings ? localPins : PROFILES[profile]);
   const configuredNames = new Set();
   const unresolvedSources = [];
   const configuredEntries = [];
+
+  for (const name of localPins) {
+    configuredNames.add(name);
+    configuredEntries.push({ name, source: `local-pin:${name}`, entry: { source: `local-pin:${name}` } });
+  }
 
   for (const entry of entries) {
     const source = getSource(entry);
@@ -320,6 +342,8 @@ function analyzeScope(scope, profile) {
     scope,
     profile,
     settingsPath,
+    isolationMode: isolatedAgentSettings ? "workspace-local-agent-dir" : "none",
+    isolationLocalPackagePins: localPins,
     expectedCount: expected.size,
     presentCount: present.length,
     missingCount: missing.length,
@@ -347,6 +371,51 @@ function surfaceSummary(surfaces) {
   ];
 }
 
+function buildEffectiveParity(results, profile) {
+  const expected = new Set(PROFILES[profile]);
+  const configured = new Set();
+  for (const result of results) {
+    for (const name of result.present) configured.add(name);
+    for (const name of result.extraManaged) configured.add(name);
+    for (const name of result.extraOther) configured.add(name);
+  }
+  const present = [...expected].filter((name) => configured.has(name)).sort();
+  const missing = [...expected].filter((name) => !configured.has(name)).sort();
+  return {
+    profile,
+    expectedCount: expected.size,
+    presentCount: present.length,
+    missingCount: missing.length,
+    coveragePct: expected.size > 0 ? (present.length / expected.size) * 100 : 100,
+    present,
+    missing,
+  };
+}
+
+function applyEffectiveCoverage(results, effectiveParity) {
+  if (!effectiveParity) return results;
+  const effectivelyPresent = new Set(effectiveParity.present);
+  return results.map((result) => {
+    const satisfiedByOtherScope = result.classification.official.missing
+      .filter((name) => effectivelyPresent.has(name));
+    if (satisfiedByOtherScope.length === 0) {
+      return { ...result, effectiveSatisfiedOfficial: [] };
+    }
+    const satisfied = new Set(satisfiedByOtherScope);
+    const remediation = result.remediation
+      .map((action) => {
+        if (action.decision !== "curar" || !Array.isArray(action.items)) return action;
+        return { ...action, items: action.items.filter((item) => !satisfied.has(item)) };
+      })
+      .filter((action) => !Array.isArray(action.items) || action.items.length > 0);
+    return {
+      ...result,
+      effectiveSatisfiedOfficial: satisfiedByOtherScope,
+      remediation,
+    };
+  });
+}
+
 function printResult(result) {
   console.log(`\n[${result.scope}] ${result.profile}`);
   console.log(`settings: ${result.settingsPath}`);
@@ -358,6 +427,11 @@ function printResult(result) {
   if (result.classification.official.missing.length > 0) {
     console.log("official (missing):");
     for (const name of result.classification.official.missing) console.log(`  - ${name}`);
+  }
+
+  if (result.effectiveSatisfiedOfficial?.length > 0) {
+    console.log("official satisfied by another scope:");
+    for (const name of result.effectiveSatisfiedOfficial) console.log(`  - ${name}`);
   }
 
   if (result.classification.optIn.managed.length > 0) {
@@ -416,18 +490,33 @@ function main() {
   }
 
   const scopes = opts.scope === "both" ? ["user", "project"] : [opts.scope];
-  const results = scopes.map((scope) => analyzeScope(scope, opts.profile));
+  let results = scopes.map((scope) => analyzeScope(scope, opts.profile));
+  const effectiveParity = opts.scope === "both" ? buildEffectiveParity(results, opts.profile) : undefined;
+  results = applyEffectiveCoverage(results, effectiveParity);
 
   if (opts.json) {
-    console.log(JSON.stringify({ results }, null, 2));
+    console.log(JSON.stringify({ results, effectiveParity }, null, 2));
   } else {
     console.log("pi parity report");
     for (const r of results) printResult(r);
+    if (effectiveParity) {
+      console.log(`\n[effective] ${effectiveParity.profile}`);
+      console.log(
+        `parity: ${effectiveParity.presentCount}/${effectiveParity.expectedCount} (${effectiveParity.coveragePct.toFixed(1)}%)` +
+          (effectiveParity.missingCount > 0 ? `  ⚠ missing=${effectiveParity.missingCount}` : "  ✓")
+      );
+      if (effectiveParity.missing.length > 0) {
+        console.log("effective official missing:");
+        for (const name of effectiveParity.missing) console.log(`  - ${name}`);
+      }
+    }
   }
 
   const strictEnabled = opts.strict || process.argv.includes("--strict");
   if (strictEnabled) {
-    const hasMissingOfficial = results.some((r) => r.classification.official.missing.length > 0);
+    const hasMissingOfficial = effectiveParity
+      ? effectiveParity.missing.length > 0
+      : results.some((r) => r.classification.official.missing.length > 0);
     const hasNonPermitted = results.some(
       (r) => r.classification.nonPermitted.packages.length > 0 || r.classification.nonPermitted.sources.length > 0,
     );
