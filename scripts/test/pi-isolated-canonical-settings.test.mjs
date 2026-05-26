@@ -12,6 +12,7 @@ import {
 	reconcileLocalShellPath,
 	reconcileLeanWatchdogConfig,
 	leanWatchdogConfig,
+	resolvePiDevRuntimeProfileFromEnv,
 } from "../pi-isolated.mjs";
 
 test("canonicalizePackageSourceForLocalAgent rewrites repo-local absolute paths", () => {
@@ -81,6 +82,34 @@ test("lean model scope stays intentionally small", () => {
 		"openai-codex/gpt-5.4-mini",
 		"dashscope/qwen3.6-flash",
 	]);
+});
+
+test("pi dev runtime profile can be overridden from env without editing settings", () => {
+	assert.deepEqual(
+		resolvePiDevRuntimeProfileFromEnv({
+			PI_DEV_MODEL_REF: "dashscope/qwen3.6-flash",
+		}),
+		{
+			defaultProvider: "dashscope",
+			defaultModel: "qwen3.6-flash",
+			enabledModels: ["dashscope/qwen3.6-flash"],
+		},
+	);
+
+	assert.deepEqual(
+		resolvePiDevRuntimeProfileFromEnv({
+			PI_DEV_DEFAULT_PROVIDER: "local",
+			PI_DEV_DEFAULT_MODEL: "model-a",
+			PI_DEV_ENABLED_MODELS: "local/model-a, local/model-b ",
+		}),
+		{
+			defaultProvider: "local",
+			defaultModel: "model-a",
+			enabledModels: ["local/model-a", "local/model-b"],
+		},
+	);
+
+	assert.equal(resolvePiDevRuntimeProfileFromEnv({}), undefined);
 });
 
 test("canonical project settings use model-agnostic gated model policy", () => {

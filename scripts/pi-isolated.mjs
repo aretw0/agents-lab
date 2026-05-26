@@ -191,6 +191,10 @@ function printHelp() {
 		"  pnpm run pi:isolated:reset",
 		"  pnpm run pi:isolated:help",
 		"",
+		"Overrides opcionais do perfil dev:",
+		"  PI_DEV_MODEL_REF=provider/model pnpm run pi:dev",
+		"  PI_DEV_ENABLED_MODELS=provider/a,provider/b pnpm run pi:dev",
+		"",
 		"Execução direta:",
 		"  node scripts/pi-isolated.mjs [status|help|adopt-latest|canonicalize-settings] [--reset] [--dev] [--dry-run] [--no-auth-import] [-- <args do pi>]",
 		"",
@@ -387,6 +391,43 @@ export function leanWatchdogConfig() {
 	return controlPlaneWatchdogConfig();
 }
 
+function splitCsv(value) {
+	if (typeof value !== "string") return [];
+	return value
+		.split(",")
+		.map((item) => item.trim())
+		.filter(Boolean);
+}
+
+export function resolvePiDevRuntimeProfileFromEnv(env = process.env) {
+	const modelRef = typeof env.PI_DEV_MODEL_REF === "string" ? env.PI_DEV_MODEL_REF.trim() : "";
+	const enabledModels = splitCsv(env.PI_DEV_ENABLED_MODELS);
+	const profile = {};
+
+	if (typeof env.PI_DEV_RUNTIME_PROFILE === "string" && env.PI_DEV_RUNTIME_PROFILE.trim()) {
+		profile.runtimeProfile = env.PI_DEV_RUNTIME_PROFILE.trim();
+	}
+
+	if (modelRef.includes("/")) {
+		const slash = modelRef.indexOf("/");
+		profile.defaultProvider = modelRef.slice(0, slash);
+		profile.defaultModel = modelRef.slice(slash + 1);
+		if (enabledModels.length === 0) profile.enabledModels = [modelRef];
+	}
+
+	if (typeof env.PI_DEV_DEFAULT_PROVIDER === "string" && env.PI_DEV_DEFAULT_PROVIDER.trim()) {
+		profile.defaultProvider = env.PI_DEV_DEFAULT_PROVIDER.trim();
+	}
+	if (typeof env.PI_DEV_DEFAULT_MODEL === "string" && env.PI_DEV_DEFAULT_MODEL.trim()) {
+		profile.defaultModel = env.PI_DEV_DEFAULT_MODEL.trim();
+	}
+	if (enabledModels.length > 0) {
+		profile.enabledModels = enabledModels;
+	}
+
+	return Object.keys(profile).length > 0 ? profile : undefined;
+}
+
 export function reconcileLeanWatchdogConfig(input) {
 	return reconcileControlPlaneWatchdogConfig(input);
 }
@@ -434,7 +475,10 @@ function applyLocalRuntimeProfile({ dryRun = false } = {}) {
 		return { status: "no-packages", changed: false, removed: [] };
 	}
 
-	const nextProfile = buildControlPlaneRuntimeSettings(settings, { pathExists: existsSync });
+	const nextProfile = buildControlPlaneRuntimeSettings(settings, {
+		pathExists: existsSync,
+		profile: resolvePiDevRuntimeProfileFromEnv(),
+	});
 	const nextWithShellPath = nextProfile.settings;
 	const removed = nextProfile.removed;
 	const changed = nextProfile.changed;

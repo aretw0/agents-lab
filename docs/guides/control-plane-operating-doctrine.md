@@ -232,6 +232,8 @@ A evidência mínima para classificar o incidente é curta: keybinding efetivo, 
 
 Em sessões deste repositório, considere ainda o launcher. O fluxo comum de desenvolvimento é `pnpm run pi:dev`, que chama `scripts/pi-isolated.mjs --dev`, define `PI_CODING_AGENT_DIR=.sandbox/pi-agent`, usa o CLI local oficial em `node_modules/@earendil-works/pi-coding-agent/dist/cli.js`, com fallback temporário para `node_modules/@mariozechner/pi-coding-agent/dist/cli.js` durante a transição, e pausa o loop autônomo antes de iniciar. Portanto, uma investigação não deve assumir que `~/.pi/agent` ou um pacote publicado representam a sessão live; confira launcher, `PI_CODING_AGENT_DIR`, sourceInfo de recursos e caminhos carregados antes de atribuir comportamento a upstream ou às extensões locais.
 
+O perfil dev tem sane defaults do laboratório, mas pode ser trocado sem editar settings: `PI_DEV_MODEL_REF=provider/model pnpm run pi:dev` troca `defaultProvider`, `defaultModel` e `enabledModels` para uma sessão. Para escopos maiores, use `PI_DEV_ENABLED_MODELS=provider/a,provider/b pnpm run pi:dev`.
+
 Checklist source-aware para `pi:dev`:
 
 - confirmar `pnpm run pi:isolated:status` e registrar se o modo ativo é `isolated`;
