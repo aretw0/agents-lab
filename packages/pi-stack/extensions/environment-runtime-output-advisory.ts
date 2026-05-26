@@ -18,6 +18,7 @@ const EXTENSION_SHORTCUT_CONFLICT_RE =
 const UPDATE_AVAILABLE_RE = /Update available:\s+([^\s]+)\s+([^\s]+)\s+(?:->|→)\s+([^\s]+)/gi;
 const DIRTY_REPO_RE = /Warning:\s+Dirty repo:\s+([^\r\n]+)/gi;
 const WATCHDOG_CRITICAL_RE = /Performance watchdog critical:\s*([^\r\n]+)/gi;
+const WATCHDOG_AUTO_SAFE_MODE_RE = /Watchdog enabled safe mode automatically:\s*safe mode is on\s*\(([^)\r\n]+)\)/gi;
 const EVENT_LOOP_MAX_RE = /event-loop max\s+(\d+)ms/i;
 const EVENT_LOOP_P99_RE = /event-loop p99\s+(\d+)ms/i;
 
@@ -28,9 +29,9 @@ function uniquePush(advisories: RuntimeOutputAdvisory[], advisory: RuntimeOutput
 
 function parseWatchdogLevel(detail: string): RuntimeOutputAdvisoryLevel {
   const max = EVENT_LOOP_MAX_RE.exec(detail)?.[1];
-  if (max && Number(max) >= 600) return "warn";
+  if (max && Number(max) >= 300) return "warn";
   const p99 = EVENT_LOOP_P99_RE.exec(detail)?.[1];
-  if (p99 && Number(p99) >= 300) return "warn";
+  if (p99 && Number(p99) >= 150) return "warn";
   return "info";
 }
 
@@ -86,7 +87,16 @@ export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutput
       code: "performance-watchdog-critical",
       level: parseWatchdogLevel(detail),
       detail,
-      action: "if it repeats or exceeds 600ms, switch to safe-mode and investigate live /watchdog:status in the Pi TUI",
+      action: "treat as safe-mode evidence when above the configured threshold; inspect live /watchdog:status in the Pi TUI",
+    });
+  }
+
+  for (const match of text.matchAll(WATCHDOG_AUTO_SAFE_MODE_RE)) {
+    uniquePush(advisories, {
+      code: "performance-watchdog-auto-safe-mode",
+      level: "warn",
+      detail: match[1].trim(),
+      action: "stay in safe-mode for the current slice and avoid enabling extra runtime capabilities until the status is stable",
     });
   }
 

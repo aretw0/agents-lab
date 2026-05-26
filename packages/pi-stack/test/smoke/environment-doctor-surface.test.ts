@@ -239,7 +239,7 @@ shortcut. Skipping.
       "runtime-dirty-repo",
       "performance-watchdog-critical",
     ]);
-    expect(report.summary).toContain("warn=1");
+    expect(report.summary).toContain("warn=2");
   });
 
   it("classifies empty runtime output as missing evidence, not a stop condition", async () => {
@@ -253,6 +253,20 @@ shortcut. Skipping.
       }),
     ]);
     expect(report.summary).toContain("decision=needs-evidence");
+  });
+
+  it("classifies watchdog threshold crossings and auto safe-mode as safe-mode advisories", async () => {
+    const report = analyzeRuntimeOutputAdvisories(`
+ Error: Performance watchdog critical: event-loop max 416ms. Run /watchdog:status or /safe-mode on if input feels laggy.
+ Warning: Watchdog enabled safe mode automatically: safe mode is on (watchdog: event-loop max 368ms).
+`);
+
+    expect(report.decision).toBe("safe-mode");
+    expect(report.advisories.map((row) => row.code)).toEqual([
+      "performance-watchdog-critical",
+      "performance-watchdog-auto-safe-mode",
+    ]);
+    expect(report.advisories.every((row) => row.level === "warn")).toBe(true);
   });
 
   it("environment_runtime_output_advisory exposes compact operator output", async () => {
