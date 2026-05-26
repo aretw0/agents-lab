@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   buildBoardSummary,
   buildGoalPrompt,
+  buildNoEligibleGuidance,
   buildTaskSelectionDiagnostics,
   classifyTaskSkipReason,
   collectEligibleTaskEntries,
@@ -112,6 +113,24 @@ test("current parked external backlog is not eligible by default", () => {
   assert.deepEqual(buildTaskSelectionDiagnostics(tasks, { priorityFilter: "p3" }).skippedByReason, {
     "protected-scope": 2,
   });
+});
+
+test("scheduler no-eligible guidance routes through read-only intent intake before board mutation", () => {
+  const tasks = [
+    { id: "TASK-P3", status: "planned", priority: "p3", description: "parked low priority work" },
+    { id: "TASK-URL", status: "planned", priority: "p2", description: "pesquisa externa https://example.com" },
+  ];
+
+  const diagnostics = buildTaskSelectionDiagnostics(tasks);
+  const guidance = buildNoEligibleGuidance(diagnostics);
+
+  assert.equal(guidance.recommendationCode, "seed-local-safe-lane");
+  assert.equal(guidance.nextActionCode, "operator-intent-intake-then-brainstorm");
+  assert.match(guidance.nextAction, /operator_intent_intake_packet/);
+  assert.match(guidance.nextAction, /lane_brainstorm_packet/);
+  assert.match(guidance.nextAction, /lane_brainstorm_seed_preview/);
+  assert.match(guidance.nextAction, /before mutating the board/);
+  assert.ok(guidance.hints.some((hint) => hint.includes("--include-protected")));
 });
 
 test("goal prompt strips extended priority markers", () => {

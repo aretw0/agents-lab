@@ -168,6 +168,31 @@ function buildTaskSelectionDiagnostics(tasks, options = {}) {
   };
 }
 
+function buildNoEligibleGuidance(diagnostics, options = {}) {
+  const skipped = diagnostics?.skippedByReason ?? {};
+  const hasLowPriority = (skipped["low-priority-planned"] ?? 0) > 0;
+  const hasProtected = (skipped["protected-scope"] ?? 0) > 0;
+
+  const hints = [];
+  if (hasLowPriority && !options.priorityFilter) {
+    hints.push("Use --priority p3 only when the operator explicitly wants parked low-priority work.");
+  }
+  if (hasProtected && options.includeProtectedScopes !== true) {
+    hints.push("Use --include-protected only with explicit operator intent and protected-scope readiness.");
+  }
+  if ((skipped["dependency-not-completed"] ?? 0) > 0) {
+    hints.push("Resolve incomplete dependencies before expecting an eligible successor.");
+  }
+
+  return {
+    recommendationCode: "seed-local-safe-lane",
+    nextActionCode: "operator-intent-intake-then-brainstorm",
+    nextAction:
+      "Ask Pi for operator_intent_intake_packet with intent 'find the next local-safe slice', then run lane_brainstorm_packet and lane_brainstorm_seed_preview before mutating the board.",
+    hints,
+  };
+}
+
 function countUnblocked(taskId, allTasks) {
   return allTasks.filter((t) => (t.depends_on ?? []).includes(taskId)).length;
 }
@@ -320,6 +345,10 @@ function main() {
       includeProtectedScopes: args.includeProtectedScopes,
       includeLowPriorityPlanned: Boolean(args.priorityFilter),
     },
+    noEligibleGuidance: next ? null : buildNoEligibleGuidance(diagnostics, {
+      priorityFilter: args.priorityFilter,
+      includeProtectedScopes: args.includeProtectedScopes,
+    }),
   };
 
   if (args.json) {
@@ -341,6 +370,10 @@ function main() {
   if (!next) {
     process.stdout.write("STOP: no eligible tasks found.\n");
     process.stdout.write("Check: are all dependencies completed? Use --priority p3 for low-priority planned work and --include-protected only with explicit operator intent.\n");
+    process.stdout.write(`Next: ${result.noEligibleGuidance.nextAction}\n`);
+    if (result.noEligibleGuidance.hints.length > 0) {
+      process.stdout.write(`Hints: ${result.noEligibleGuidance.hints.join(" ")}\n`);
+    }
     process.exitCode = 0;
     return;
   }
@@ -373,6 +406,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 
 export {
   buildBoardSummary,
+  buildNoEligibleGuidance,
   buildGoalPrompt,
   extractPriority,
   collectEligibleTaskEntries,
