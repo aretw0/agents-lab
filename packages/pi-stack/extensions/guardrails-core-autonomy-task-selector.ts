@@ -355,7 +355,7 @@ function resolveNoEligibleTaskRecommendation(input: {
   }
   return {
     recommendationCode: LOCAL_STOP_DECOMPOSE_BOUNDED_CODE,
-    recommendation: "local stop condition: no eligible tasks remain; decompose or add the next bounded local-safe task before autonomous continuation.",
+    recommendation: "local stop condition: no eligible tasks remain; run report-only intake/brainstorm/seed-preview before materializing the next bounded local-safe task for autonomous continuation.",
   };
 }
 
@@ -366,7 +366,7 @@ function resolveSelectionRecommendation(
   if (reason === "no-candidate-tasks") {
     return {
       recommendationCode: ADD_OR_SELECT_TASK_CODE,
-      recommendation: "add or select a planned/in-progress task before autonomous continuation.",
+      recommendation: "run report-only intake/brainstorm/seed-preview before adding or selecting a planned/in-progress task for autonomous continuation.",
     };
   }
   if (reason === "focus-complete") {

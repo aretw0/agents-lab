@@ -20,7 +20,7 @@ export const NEEDS_OPERATOR_FOCUS_PROTECTED_CODE = "needs-operator-focus-protect
 export const STOP_NO_LOCAL_SAFE_CODE = "stop-no-local-safe" as const;
 
 export const LOCAL_STOP_PROTECTED_FOCUS_NEXT_ACTION =
-  "local stop condition: no eligible local-safe next step; request explicit focus for protected lane or create a new local-safe task.";
+  "local stop condition: no eligible local-safe next step; request explicit focus for protected lane or run report-only intake/brainstorm/seed-preview before materializing a local-safe task.";
 
 export function localStopProtectedFocusNextAction(): string {
   return LOCAL_STOP_PROTECTED_FOCUS_NEXT_ACTION;

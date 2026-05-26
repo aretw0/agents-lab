@@ -167,6 +167,7 @@ describe("autonomy task selector", () => {
     expect(result.reason).toBe("no-eligible-tasks");
     expect(result.recommendationCode).toBe("local-stop-protected-focus-required");
     expect(result.recommendation).toContain("local stop condition");
+    expect(result.recommendation).toContain("report-only intake/brainstorm/seed-preview");
   });
 
   it("allows protected lane selection when focus is explicit", () => {
@@ -267,6 +268,17 @@ describe("autonomy task selector", () => {
     expect(result.ready).toBe(false);
     expect(result.reason).toBe("no-candidate-tasks");
     expect(result.recommendationCode).toBe("add-or-select-task");
+    expect(result.recommendation).toContain("report-only intake/brainstorm/seed-preview");
+  });
+
+  it("routes empty local-safe fallback through report-only seed preview before materializing tasks", () => {
+    const result = selectAutonomyLaneTask([]);
+
+    expect(result.ready).toBe(false);
+    expect(result.reason).toBe("no-candidate-tasks");
+    expect(result.recommendationCode).toBe("add-or-select-task");
+    expect(result.recommendation).toContain("report-only intake/brainstorm/seed-preview");
+    expect(result.recommendation).toContain("before adding or selecting");
   });
 
   it("builds protected-scope reason report with canonical codes and evidence", () => {
