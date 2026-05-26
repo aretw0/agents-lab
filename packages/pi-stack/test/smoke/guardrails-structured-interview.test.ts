@@ -283,7 +283,9 @@ describe("structured interview primitive", () => {
     expect(packet.executionPlan.forbiddenActions).toEqual(["mutation", "dispatch", "worker-dispatch", "protected-scope"]);
     expect(packet.executionPlan.shellCommandPolicy).toEqual({
       piTuiSlashCommandsAreShellCommands: false,
-      forbiddenShellCommandPrefixes: ["/watchdog", "/safe-mode"],
+      forbiddenShellCommandPattern: "^\\s*/[A-Za-z][A-Za-z0-9_-]*(?::[A-Za-z0-9_-]+)?(?:\\s|$)",
+      forbiddenShellCommandPrefixes: ["/watchdog", "/safe-mode", "/models"],
+      examples: ["/watchdog:status", "/safe-mode on", "/models"],
       preferredRuntimeHealthTools: ["environment_runtime_health_status", "environment_dev_pressure_status"],
     });
     expect(packet.missingQuestions.length).toBeGreaterThan(0);
@@ -316,7 +318,8 @@ describe("structured interview primitive", () => {
     ]);
     expect(packet.executionPlan.executeWithoutTextualConfirmation).toBe(true);
     expect(packet.executionPlan.shellCommandPolicy.piTuiSlashCommandsAreShellCommands).toBe(false);
-    expect(packet.executionPlan.shellCommandPolicy.forbiddenShellCommandPrefixes).toEqual(["/watchdog", "/safe-mode"]);
+    expect(packet.executionPlan.shellCommandPolicy.forbiddenShellCommandPrefixes).toEqual(["/watchdog", "/safe-mode", "/models"]);
+    expect(packet.executionPlan.shellCommandPolicy.examples).toContain("/models");
   });
 
   it("prepares a worker packet only as a report-only candidate when readiness is known", () => {

@@ -85,7 +85,9 @@ export interface OperatorIntentExecutionPlan {
   forbiddenActions: Array<"mutation" | "dispatch" | "worker-dispatch" | "protected-scope">;
   shellCommandPolicy: {
     piTuiSlashCommandsAreShellCommands: false;
+    forbiddenShellCommandPattern: string;
     forbiddenShellCommandPrefixes: string[];
+    examples: string[];
     preferredRuntimeHealthTools: string[];
   };
 }
@@ -333,7 +335,9 @@ function buildExecutionPlan(action: {
   const forbiddenActions: OperatorIntentExecutionPlan["forbiddenActions"] = ["mutation", "dispatch", "worker-dispatch", "protected-scope"];
   const shellCommandPolicy: OperatorIntentExecutionPlan["shellCommandPolicy"] = {
     piTuiSlashCommandsAreShellCommands: false,
-    forbiddenShellCommandPrefixes: ["/watchdog", "/safe-mode"],
+    forbiddenShellCommandPattern: "^\\s*/[A-Za-z][A-Za-z0-9_-]*(?::[A-Za-z0-9_-]+)?(?:\\s|$)",
+    forbiddenShellCommandPrefixes: ["/watchdog", "/safe-mode", "/models"],
+    examples: ["/watchdog:status", "/safe-mode on", "/models"],
     preferredRuntimeHealthTools: ["environment_runtime_health_status", "environment_dev_pressure_status"],
   };
   if (action.controlPlaneAction === "stop-and-report") {
