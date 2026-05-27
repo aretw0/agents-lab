@@ -198,6 +198,8 @@ const WORKER_DELEGATION_INTENT_PATTERNS = [
   /\bparallel\s+(?:exploration|workers?|work|scan|review)\b/i,
   /\bworker[s]?\s+(?:para|to)\s+(?:explorar|explore|calibrar|calibrate|comparar|compare)\b/i,
   /\bquero\s+usar\s+(?:os\s+)?worker[s]?\b/i,
+  /\bpodemos\s+usar\s+(?:os\s+)?worker[s]?\s+para\b/i,
+  /\bavaliar\s+se\s+podemos\s+usar\s+(?:os\s+)?worker[s]?\b/i,
   /\busar\s+(?:os\s+)?worker[s]?\s+para\b/i,
   /\bexplorar\s+em\s+paralelo\b/i,
   /\bdelegar\s+para\s+(?:worker[s]?|subagente[s]?)\b/i,

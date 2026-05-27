@@ -289,11 +289,12 @@ describe("structured interview primitive", () => {
 
   it("infers natural worker delegation as a budget-gated readiness path", () => {
     expect(inferWorkerDelegationIntent("quero usar workers para explorar em paralelo, com orçamento ainda não definido")).toBe(true);
+    expect(inferWorkerDelegationIntent("Quero preparar uma fatia local-safe pequena, mas também quero avaliar se podemos usar workers para explorar em paralelo. O orçamento ainda não está definido.")).toBe(true);
     expect(inferWorkerDelegationIntent("fan out read-only model calibration")).toBe(true);
     expect(inferWorkerDelegationIntent("posso usar workers com segurança?")).toBe(false);
 
     const packet = buildOperatorIntentIntakePacket({
-      intent: "quero usar workers para explorar em paralelo, com orçamento ainda não definido",
+      intent: "Quero preparar uma fatia local-safe pequena, mas também quero avaliar se podemos usar workers para explorar em paralelo. O orçamento ainda não está definido.",
     });
 
     expect(packet.decision).toBe("check-worker-readiness");
