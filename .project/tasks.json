@@ -64,7 +64,7 @@
     {
       "id": "TASK-BUD-1070",
       "description": "Projetar e validar ativação dinâmica de capabilities no control-plane: default único leve, capabilities frias descobríveis, ativação por intenção/sinal e cleanup após uso, sem criar perfil intermediário durável.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1093",
@@ -86,7 +86,8 @@
         "Validar com testes de runtime-profile/dev-pressure e uma simulação read-only de intenção de trabalho local-safe."
       ],
       "milestone": "0.8-control-plane-dynamic-capabilities",
-      "notes": "Registrada a partir da decisão DEC-BUD-047. Evitar criar `control-plane-plus` como produto final; se algum perfil intermediário for usado na implementação, deve ser transitório e coberto por teste/roadmap de remoção.\n2026-05-26: commit 5ebb9166 adicionou matriz first-party de ativação (`always-on`, `read-only-on-intent`, `expensive-on-intent`, `protected-explicit`) e expôs capabilities frias como advisory em `pi:dev:pressure`/`pi:runtime:health`, separando `pressure` de `advisories`. Próxima fatia: usar essa matriz na condução de intenção do control-plane/runtime, sem transformar em perfil durável.\n2026-05-26: macro desdobrada em TASK-BUD-1093..1095 após dogfooding do Pi selecionar a própria macro como próxima fatia. Objetivo: fazer o scheduler escolher trabalho executável, não planejamento genérico."
+      "notes": "Registrada a partir da decisão DEC-BUD-047. Evitar criar `control-plane-plus` como produto final; se algum perfil intermediário for usado na implementação, deve ser transitório e coberto por teste/roadmap de remoção.\n2026-05-26: commit 5ebb9166 adicionou matriz first-party de ativação (`always-on`, `read-only-on-intent`, `expensive-on-intent`, `protected-explicit`) e expôs capabilities frias como advisory em `pi:dev:pressure`/`pi:runtime:health`, separando `pressure` de `advisories`. Próxima fatia: usar essa matriz na condução de intenção do control-plane/runtime, sem transformar em perfil durável.\n2026-05-26: macro desdobrada em TASK-BUD-1093..1095 após dogfooding do Pi selecionar a própria macro como próxima fatia. Objetivo: fazer o scheduler escolher trabalho executável, não planejamento genérico.",
+      "verification": "verify-task-bud-1070-dynamic-capabilities"
     },
     {
       "id": "TASK-BUD-1093",

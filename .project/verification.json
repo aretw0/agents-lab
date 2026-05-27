@@ -8,6 +8,15 @@
       "method": "smoke",
       "evidence": "vitest control-plane-continuity-skill + control-plane-doc-checklist passed; docs:package:check passed; scheduler selected TASK-BUD-1095 as executable p2 after TASK-BUD-1093/1094.",
       "timestamp": "2026-05-27T15:32:51.351Z"
+    },
+    {
+      "id": "verify-task-bud-1070-dynamic-capabilities",
+      "target": "TASK-BUD-1070",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke",
+      "evidence": "Dynamic capability macro closed after subtasks TASK-BUD-1093/1094/1095 completed; validated guardrails-structured-interview + environment-doctor-dev-pressure vitest, test:pi:dev:pressure, test:pi:isolated, pi:dev:dry, and scheduler selection.",
+      "timestamp": "2026-05-27T19:27:28.929Z"
     }
   ]
 }
