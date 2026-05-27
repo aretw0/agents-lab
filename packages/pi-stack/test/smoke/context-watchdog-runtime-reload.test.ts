@@ -11,7 +11,7 @@ import {
 import { buildReloadBeforeCompactPacket } from "../../extensions/context-watchdog-exports";
 
 describe("context-watchdog runtime reload surfaces", () => {
-	it("tracks model catalog, sandbox settings, project settings, and agent overrides", () => {
+	it("tracks project settings and agent overrides without treating sandbox runtime files as reload gates", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-runtime-reload-"));
 		mkdirSync(join(cwd, ".pi", "agents"), { recursive: true });
 		mkdirSync(join(cwd, ".sandbox", "pi-agent"), { recursive: true });
@@ -41,9 +41,13 @@ describe("context-watchdog runtime reload surfaces", () => {
 		writeFileSync(sandboxSettingsPath, JSON.stringify({
 			enabledModels: ["dashscope/qwen3.6-flash"],
 		}, null, 2));
-		setMtimeMs(sandboxSettingsPath, 6_000);
+		setMtimeMs(sandboxSettingsPath, 8_000);
+		writeFileSync(modelCatalogPath, JSON.stringify({
+			models: ["openai-codex/gpt-5.3-codex-spark"],
+		}, null, 2));
+		setMtimeMs(modelCatalogPath, 9_000);
 		const afterSandboxSettings = readContextWatchdogRuntimeReloadMtimeMs(cwd, () => sourceMtime);
-		expect(afterSandboxSettings).toBeCloseTo(6_000, -1);
+		expect(afterSandboxSettings).toBeCloseTo(5_000, -1);
 
 		writeFileSync(agentOverridePath, "model: dashscope/qwen3.6-flash\n");
 		setMtimeMs(agentOverridePath, 7_000);
@@ -67,8 +71,6 @@ describe("context-watchdog runtime reload surfaces", () => {
 	it("keeps the runtime reload surface explicit and bounded", () => {
 		expect(CONTEXT_WATCHDOG_RUNTIME_RELOAD_RELATIVE_PATHS).toEqual([
 			".pi/settings.json",
-			".sandbox/pi-agent/settings.json",
-			".sandbox/pi-agent/models.json",
 		]);
 		expect(CONTEXT_WATCHDOG_RUNTIME_RELOAD_SOURCE_DIRS).toEqual([
 			"packages/pi-stack/extensions",

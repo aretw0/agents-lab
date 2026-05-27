@@ -15,8 +15,6 @@ export function makeContextWatchdogSourceMtimeReader(sourceUrl: string): () => n
 
 export const CONTEXT_WATCHDOG_RUNTIME_RELOAD_RELATIVE_PATHS = [
 	".pi/settings.json",
-	".sandbox/pi-agent/settings.json",
-	".sandbox/pi-agent/models.json",
 ] as const;
 
 export const CONTEXT_WATCHDOG_RUNTIME_RELOAD_SOURCE_DIRS = [
