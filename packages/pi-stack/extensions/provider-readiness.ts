@@ -15,7 +15,7 @@
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { closeSync, existsSync, openSync, readSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { readProjectSettings } from "./context-watchdog-storage";
 import { resolveGlobalWorkspaceSessionDir } from "./quota-visibility-session-roots";
@@ -75,6 +75,29 @@ const RATE_LIMIT_RE = /(\b429\b|rate.?limit|too many requests|quota\s*exceeded|c
 const AUTH_RE = /(\b401\b|\b403\b|unauthori[sz]ed|forbidden|auth\s*failed|invalid\s*token)/i;
 const SERVER_RE = /(\b5\d\d\b|overloaded|temporar(y|ily)\s*unavailable|internal\s*server\s*error)/i;
 
+export const PROVIDER_READINESS_SESSION_TAIL_BYTES = 600_000;
+export const PROVIDER_READINESS_SESSION_FILE_LIMIT = 12;
+
+export function readProviderReadinessTailLines(filePath: string, maxBytes = PROVIDER_READINESS_SESSION_TAIL_BYTES): string[] {
+  const safeMaxBytes = Math.max(1_000, Math.floor(Number(maxBytes) || PROVIDER_READINESS_SESSION_TAIL_BYTES));
+  let fd: number | undefined;
+  try {
+    const stat = statSync(filePath);
+    const bytesToRead = Math.min(safeMaxBytes, Math.max(0, stat.size));
+    if (bytesToRead <= 0) return [];
+    const buffer = Buffer.allocUnsafe(bytesToRead);
+    fd = openSync(filePath, "r");
+    readSync(fd, buffer, 0, bytesToRead, Math.max(0, stat.size - bytesToRead));
+    return buffer.toString("utf8").split(/\r?\n/).filter(Boolean);
+  } catch {
+    return [];
+  } finally {
+    if (fd !== undefined) {
+      try { closeSync(fd); } catch {}
+    }
+  }
+}
+
 function collectRuntimeSignals(cwd: string, lookbackMinutes = 45): Record<string, RuntimeSignal> {
   const dir = resolveGlobalWorkspaceSessionDir(cwd);
   if (!existsSync(dir)) return {};
@@ -83,23 +106,22 @@ function collectRuntimeSignals(cwd: string, lookbackMinutes = 45): Record<string
   const files = readdirSync(dir)
     .filter((f) => f.endsWith(".jsonl"))
     .map((f) => path.join(dir, f))
-    .filter((p) => {
+    .flatMap((p) => {
       try {
-        return statSync(p).mtimeMs >= cutoffMs;
+        const stat = statSync(p);
+        return stat.mtimeMs >= cutoffMs ? [{ path: p, mtimeMs: stat.mtimeMs }] : [];
       } catch {
-        return false;
+        return [];
       }
-    });
+    })
+    .sort((a, b) => b.mtimeMs - a.mtimeMs)
+    .slice(0, PROVIDER_READINESS_SESSION_FILE_LIMIT)
+    .map((entry) => entry.path);
 
   const out: Record<string, RuntimeSignal> = {};
 
   for (const file of files) {
-    let lines: string[] = [];
-    try {
-      lines = readFileSync(file, "utf8").split(/\r?\n/).filter(Boolean);
-    } catch {
-      continue;
-    }
+    const lines = readProviderReadinessTailLines(file);
 
     for (const line of lines) {
       let rec: any;

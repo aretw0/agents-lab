@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import providerReadinessExtension, { buildProviderReadinessMatrix } from "../../extensions/provider-readiness";
+import providerReadinessExtension, { buildProviderReadinessMatrix, readProviderReadinessTailLines } from "../../extensions/provider-readiness";
 
 function makeWorkspace(settings: Record<string, unknown>): string {
   const dir = mkdtempSync(join(tmpdir(), "pi-provider-readiness-"));
@@ -36,6 +36,27 @@ function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
 }
 
 describe("provider-readiness matrix", () => {
+  it("reads only a bounded session tail for runtime signals", () => {
+    const dir = mkdtempSync(join(tmpdir(), "pi-provider-readiness-tail-"));
+    try {
+      const file = join(dir, "session.jsonl");
+      writeFileSync(
+        file,
+        [
+          JSON.stringify({ message: { provider: "openai-codex", errorMessage: "401 unauthorized" } }),
+          "x".repeat(5_000),
+          JSON.stringify({ message: { provider: "dashscope", errorMessage: "429 rate limit" } }),
+        ].join("\n"),
+      );
+
+      const lines = readProviderReadinessTailLines(file, 1_000);
+      expect(lines.join("\n")).not.toContain("unauthorized");
+      expect(lines.join("\n")).toContain("rate limit");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("retorna unconfigured quando nenhum routeModelRef está presente", async () => {
     const dir = makeWorkspace({});
     try {
