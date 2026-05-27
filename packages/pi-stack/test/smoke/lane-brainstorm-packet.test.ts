@@ -99,6 +99,30 @@ describe("lane brainstorm packet module", () => {
     expect(packet.selectedSlices[0]?.sourceTaskId).toBe("TASK-1");
   });
 
+  it("seeds deterministic bootstrap proposals when no local-safe task is eligible", () => {
+    const packet = buildLaneBrainstormPacket({
+      selection: {
+        ready: false,
+        recommendationCode: "stop-no-local-safe",
+        recommendation: "no eligible local-safe task",
+        eligibleTaskIds: [],
+      },
+    });
+
+    expect(packet.decision).toBe("ready-for-operator-decision");
+    expect(packet.recommendationCode).toBe("seed-local-safe-lane");
+    expect(packet.nextActionCode).toBe("choose-ranked-local-safe-slices");
+    expect(packet.ideas.map((idea) => idea.id)).toEqual([
+      "bootstrap-board-hygiene",
+      "bootstrap-runtime-readiness",
+      "bootstrap-doc-contract",
+    ]);
+    expect(packet.selectedSlices).toHaveLength(3);
+    expect(packet.selectedSlices[0]?.sourceIdeaId).toBe("bootstrap-board-hygiene");
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.mutationAllowed).toBe(false);
+  });
+
   it("builds visible seeding preview that always requires operator confirmation", () => {
     const packet = buildLaneBrainstormPacket({
       ideas: [{ id: "idea-a", theme: "dedupe outputs", value: "high", risk: "low", effort: "low" }],

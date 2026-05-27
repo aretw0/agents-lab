@@ -1,4 +1,5 @@
 import {
+  ADD_OR_SELECT_TASK_CODE,
   LOCAL_STOP_PROTECTED_FOCUS_REQUIRED_CODE,
   NEEDS_OPERATOR_FOCUS_PROTECTED_CODE,
   SEED_LOCAL_SAFE_LANE_CODE,
@@ -30,6 +31,30 @@ export interface RankedBrainstormIdea extends BrainstormIdeaInput {
   effort: BrainstormLevel;
   score: number;
 }
+
+const BOOTSTRAP_BRAINSTORM_IDEAS: BrainstormIdeaInput[] = [
+  {
+    id: "bootstrap-board-hygiene",
+    theme: "seed a local-safe board hygiene slice with explicit acceptance and rollback",
+    value: "high",
+    risk: "low",
+    effort: "low",
+  },
+  {
+    id: "bootstrap-runtime-readiness",
+    theme: "seed a runtime readiness slice that validates the current Pi/devcontainer path",
+    value: "high",
+    risk: "low",
+    effort: "low",
+  },
+  {
+    id: "bootstrap-doc-contract",
+    theme: "seed a concise docs or contract slice backed by one smoke check",
+    value: "medium",
+    risk: "low",
+    effort: "low",
+  },
+];
 
 export interface LaneBrainstormSelectionInput {
   ready: boolean;
@@ -175,6 +200,14 @@ export function resolveLaneBrainstormRecommendation(selection: LaneBrainstormSel
       nextAction: selection.recommendation,
     };
   }
+  if (selection.recommendationCode === STOP_NO_LOCAL_SAFE_CODE || selection.recommendationCode === ADD_OR_SELECT_TASK_CODE) {
+    return {
+      decision: "ready-for-operator-decision",
+      recommendationCode: SEED_LOCAL_SAFE_LANE_CODE,
+      nextActionCode: "choose-ranked-local-safe-slices",
+      nextAction: "choose bootstrap local-safe seed proposals before materializing a board task.",
+    };
+  }
   return {
     decision: "blocked",
     recommendationCode: STOP_NO_LOCAL_SAFE_CODE,
@@ -214,7 +247,14 @@ export function buildLaneBrainstormPacket(input: {
   selection: LaneBrainstormSelectionInput;
 }): LaneBrainstormPacket {
   const recommendation = resolveLaneBrainstormRecommendation(input.selection);
-  const rankedIdeas = rankBrainstormIdeas(parseBrainstormIdeas(input.ideas), normalizeCount(input.maxIdeas, 12, 1, 50));
+  const parsedIdeas = parseBrainstormIdeas(input.ideas);
+  const shouldUseBootstrapIdeas = parsedIdeas.length === 0
+    && input.selection.eligibleTaskIds.length === 0
+    && (input.selection.recommendationCode === STOP_NO_LOCAL_SAFE_CODE || input.selection.recommendationCode === ADD_OR_SELECT_TASK_CODE);
+  const rankedIdeas = rankBrainstormIdeas(
+    shouldUseBootstrapIdeas ? BOOTSTRAP_BRAINSTORM_IDEAS : parsedIdeas,
+    normalizeCount(input.maxIdeas, 12, 1, 50),
+  );
   const maxSlices = normalizeCount(input.maxSlices, 5, 1, 10);
   const selectedSlices = buildSelectedSlices({
     rankedIdeas,

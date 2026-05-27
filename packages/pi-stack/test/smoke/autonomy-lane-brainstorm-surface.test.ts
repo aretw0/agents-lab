@@ -99,6 +99,30 @@ describe("autonomy lane brainstorm surface", () => {
     expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo");
   });
 
+  it("emits bootstrap seed proposals when the board has no local-safe eligible task", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-packet-bootstrap-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-DONE", description: "[P1] already done", status: "completed" },
+      ],
+    }), "utf8");
+
+    const brainstormTool = registerTools().find((tool) => tool.name === "lane_brainstorm_packet");
+    const result = brainstormTool?.execute("call-test", { goal: "encontrar próxima fatia local-safe" }, undefined, undefined, { cwd });
+
+    const selected = (result?.details.selectedSlices as Array<{ sourceIdeaId?: string }> | undefined) ?? [];
+    expect(result?.details.decision).toBe("ready-for-operator-decision");
+    expect(result?.details.recommendationCode).toBe("seed-local-safe-lane");
+    expect(selected.map((slice) => slice.sourceIdeaId)).toEqual([
+      "bootstrap-board-hygiene",
+      "bootstrap-runtime-readiness",
+      "bootstrap-doc-contract",
+    ]);
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm: decision=ready-for-operator-decision");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("slices=3");
+  });
+
   it("emits visible brainstorm seed preview that requires operator confirmation", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-seed-preview-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });
