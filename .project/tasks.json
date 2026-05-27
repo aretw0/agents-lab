@@ -91,11 +91,12 @@
     {
       "id": "TASK-BUD-1093",
       "description": "[P1] Conectar a matriz de capabilities do control-plane ao intake/recomendação de intenção para que o Pi proponha próxima fatia com capability state explícito.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/runtime-profile-policy.mjs",
         "packages/pi-stack/extensions/guardrails-core-operator-intent-intake.ts",
+        "packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts",
         "packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts",
         "packages/pi-stack/test/runtime-profile-policy.test.mjs"
       ],
@@ -106,7 +107,7 @@
         "Smoke cobre pelo menos um caso local-safe e um caso protected/expensive fail-closed."
       ],
       "milestone": "0.8-control-plane-dynamic-capabilities",
-      "notes": "[provenance:system] source_task=TASK-BUD-1070 reason=macro decomposition after dogfooding. Primeiro corte executável após commit 5ebb9166: usar a matriz já criada na condução de intenção, sem mudar o runtime hot path."
+      "notes": "[provenance:system] source_task=TASK-BUD-1070 reason=macro decomposition after dogfooding. Primeiro corte executável após commit 5ebb9166: usar a matriz já criada na condução de intenção, sem mudar o runtime hot path.\n2026-05-27: Concluída a conexão do operator_intent_intake_packet com a matriz canônica de capability guidance. O pacote agora expõe capabilityGuidance, requiredCapabilities e capabilityDecision; local-safe/read-only permanece report-only, worker-dispatch frio pede orçamento e protected-explicit frio pede aprovação explícita. Validação: vitest guardrails-structured-interview; test:verify-pi-stack; vitest installability+manifest-integrity+control-plane-recommendation-contract."
     },
     {
       "id": "TASK-BUD-1094",

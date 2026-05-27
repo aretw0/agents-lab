@@ -9,6 +9,7 @@ import {
   TUI_SLASH_COMMAND_SHELL_POLICY_EXAMPLES,
   TUI_SLASH_COMMAND_SHELL_POLICY_PREFIXES,
 } from "./guardrails-core-shell-routing";
+import { buildControlPlaneCapabilityGuidance } from "./runtime-profile-policy.mjs";
 
 export type OperatorIntentIntakeDecision =
   | "ask-operator"
@@ -51,7 +52,32 @@ export interface OperatorIntentIntakeInput extends ControlPlaneProfilePacketInpu
   runtimeHealthReady?: boolean;
   subagentsReady?: boolean;
   providerReady?: boolean;
+  capabilitySettings?: unknown;
 }
+
+export type OperatorIntentCapabilityActivation =
+  | "always-on"
+  | "read-only-on-intent"
+  | "expensive-on-intent"
+  | "protected-explicit";
+
+export type OperatorIntentCapabilityState = "active" | "cold";
+
+export interface OperatorIntentCapabilityGuidance {
+  id: string;
+  label: string;
+  activation: OperatorIntentCapabilityActivation;
+  state: OperatorIntentCapabilityState;
+  resources: string[];
+  operatorAction: string;
+  packageName?: string;
+}
+
+export type OperatorIntentCapabilityDecision =
+  | "ready"
+  | "needs-read-only-intent"
+  | "needs-budget"
+  | "needs-protected-approval";
 
 export interface OperatorIntentChoice {
   id: string;
@@ -116,6 +142,9 @@ export interface OperatorIntentIntakePacket {
   confirmationRequired: boolean;
   confirmationReason: string;
   profilePacket: ControlPlaneProfilePacket;
+  capabilityGuidance: OperatorIntentCapabilityGuidance[];
+  requiredCapabilities: OperatorIntentCapabilityGuidance[];
+  capabilityDecision: OperatorIntentCapabilityDecision;
   missingQuestions: string[];
   blockedRequests: string[];
   missingCapabilities: string[];
@@ -181,6 +210,131 @@ export function inferBrainstormSeedIntent(intent: string | undefined): boolean {
   const text = String(intent ?? "").trim();
   if (!text) return false;
   return BRAINSTORM_SEED_INTENT_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+const PROTECTED_CAPABILITY_INTENT_PATTERNS: Array<{ capabilityId: string; pattern: RegExp }> = [
+  { capabilityId: "pi-lens", pattern: /\bpi[-\s]?lens\b|\blens\b/i },
+  { capabilityId: "web-gateway", pattern: /\bweb(?:\s+session)?\s+gateway\b|\bremote\s+session\b|\bbrowser\s+workflow\b/i },
+  { capabilityId: "colony", pattern: /\bcolony\b|\bcol[oô]nia\b|\bant\s+colony\b|\bswarm\b|\benxame\b/i },
+  { capabilityId: "project-workflows", pattern: /\bproject\s+workflows\b|\bthird[-\s]?party\s+workflow\b|\bworkflow\s+surface\b/i },
+];
+
+function asCapabilityGuidance(value: unknown): OperatorIntentCapabilityGuidance[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const record = item as Record<string, unknown>;
+    const id = typeof record.id === "string" ? record.id : "";
+    const label = typeof record.label === "string" ? record.label : id;
+    const activation = typeof record.activation === "string" ? record.activation : "";
+    const state = typeof record.state === "string" ? record.state : "";
+    const operatorAction = typeof record.operatorAction === "string" ? record.operatorAction : "";
+    const resources = Array.isArray(record.resources)
+      ? record.resources.filter((resource): resource is string => typeof resource === "string")
+      : [];
+    if (!id || !label || !operatorAction || resources.length === 0) return [];
+    if (!["always-on", "read-only-on-intent", "expensive-on-intent", "protected-explicit"].includes(activation)) return [];
+    if (!["active", "cold"].includes(state)) return [];
+    return [{
+      id,
+      label,
+      activation: activation as OperatorIntentCapabilityActivation,
+      state: state as OperatorIntentCapabilityState,
+      resources,
+      operatorAction,
+      packageName: typeof record.packageName === "string" ? record.packageName : undefined,
+    }];
+  });
+}
+
+function capabilitySettingsFromInput(input: OperatorIntentIntakeInput): Record<string, unknown> {
+  return input.capabilitySettings && typeof input.capabilitySettings === "object"
+    ? input.capabilitySettings as Record<string, unknown>
+    : {};
+}
+
+function findCapability(guidance: OperatorIntentCapabilityGuidance[], capabilityId: string): OperatorIntentCapabilityGuidance | undefined {
+  return guidance.find((row) => row.id === capabilityId);
+}
+
+function addRequiredCapability(
+  out: OperatorIntentCapabilityGuidance[],
+  guidance: OperatorIntentCapabilityGuidance[],
+  capabilityId: string,
+): void {
+  if (out.some((row) => row.id === capabilityId)) return;
+  const row = findCapability(guidance, capabilityId);
+  if (row) out.push(row);
+}
+
+function inferProtectedOrExpensiveCapabilities(intent: string | undefined): string[] {
+  const text = String(intent ?? "").trim();
+  if (!text) return [];
+  return PROTECTED_CAPABILITY_INTENT_PATTERNS
+    .filter((entry) => entry.pattern.test(text))
+    .map((entry) => entry.capabilityId);
+}
+
+function resolveRequiredCapabilities(
+  decision: OperatorIntentIntakeDecision,
+  input: OperatorIntentIntakeInput,
+  guidance: OperatorIntentCapabilityGuidance[],
+): OperatorIntentCapabilityGuidance[] {
+  const required: OperatorIntentCapabilityGuidance[] = [];
+  addRequiredCapability(required, guidance, "core-guardrails");
+  if (decision === "check-runtime-health" || decision === "check-worker-readiness") {
+    addRequiredCapability(required, guidance, "read-only-diagnostics");
+  }
+  if (decision === "seed-brainstorm" || decision === "prepare-single-slice") {
+    addRequiredCapability(required, guidance, "read-only-diagnostics");
+  }
+  if (decision === "prepare-worker-packet") {
+    addRequiredCapability(required, guidance, "worker-dispatch");
+  }
+  for (const capabilityId of inferProtectedOrExpensiveCapabilities(input.intent)) {
+    addRequiredCapability(required, guidance, capabilityId);
+  }
+  return required;
+}
+
+function resolveCapabilityDecision(required: OperatorIntentCapabilityGuidance[]): OperatorIntentCapabilityDecision {
+  if (required.some((row) => row.activation === "protected-explicit" && row.state !== "active")) {
+    return "needs-protected-approval";
+  }
+  if (required.some((row) => row.activation === "expensive-on-intent" && row.state !== "active")) {
+    return "needs-budget";
+  }
+  if (required.some((row) => row.activation === "read-only-on-intent" && row.state !== "active")) {
+    return "needs-read-only-intent";
+  }
+  return "ready";
+}
+
+function applyCapabilityGate(action: {
+  controlPlaneAction: OperatorIntentControlPlaneAction;
+  confirmationRequired: boolean;
+  confirmationReason: string;
+}, capabilityDecision: OperatorIntentCapabilityDecision): {
+  controlPlaneAction: OperatorIntentControlPlaneAction;
+  confirmationRequired: boolean;
+  confirmationReason: string;
+} {
+  if (action.controlPlaneAction === "stop-and-report") return action;
+  if (capabilityDecision === "needs-protected-approval") {
+    return {
+      controlPlaneAction: "ask-operator",
+      confirmationRequired: true,
+      confirmationReason: "protected capability is cold; ask for explicit operator approval before enabling or routing through it.",
+    };
+  }
+  if (capabilityDecision === "needs-budget") {
+    return {
+      controlPlaneAction: "ask-operator",
+      confirmationRequired: true,
+      confirmationReason: "expensive capability is cold; ask for explicit worker/runtime budget before preparing or dispatching it.",
+    };
+  }
+  return action;
 }
 
 function buildInteraction(decision: OperatorIntentIntakeDecision, tools: string[], questions: string[]): OperatorIntentInteraction {
@@ -458,15 +612,21 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     recommendation = "Prepare one local-safe slice with validation, rollback, checkpoint, and explicit stop conditions.";
   }
 
+  const capabilityGuidance = asCapabilityGuidance(buildControlPlaneCapabilityGuidance(capabilitySettingsFromInput(input)));
+  const requiredCapabilities = resolveRequiredCapabilities(decision, input, capabilityGuidance);
+  const capabilityDecision = resolveCapabilityDecision(requiredCapabilities);
   const recommendedRoute = recommendedTools.join("+");
   const interaction = buildInteraction(decision, recommendedTools, missingQuestions);
   const blockedSummary = blockedRequests.length > 0 ? blockedRequests.slice(0, 4).join("|") : "none";
-  const action = resolveControlPlaneAction(decision);
+  const action = applyCapabilityGate(resolveControlPlaneAction(decision), capabilityDecision);
   const nextAction = resolveNextAction(decision);
   const recommendationCode = resolveRecommendationCode(decision);
   const reportOnlyRouteAuthorized = action.controlPlaneAction === "run-report-only-route";
   const operatorPromptRequired = action.confirmationRequired;
   const executionPlan = buildExecutionPlan(action, recommendedTools);
+  const capabilitySummary = requiredCapabilities.length > 0
+    ? requiredCapabilities.map((row) => `${row.id}:${row.activation}:${row.state}`).join("|")
+    : "none";
   const summary = [
     "operator-intent-intake:",
     `decision=${decision}`,
@@ -474,6 +634,8 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     `action=${action.controlPlaneAction}`,
     `next=${nextAction}`,
     `route=${recommendedRoute}`,
+    `capabilityDecision=${capabilityDecision}`,
+    `capabilities=${capabilitySummary}`,
     `choice=${interaction.recommendedChoiceId}`,
     `profile=${profilePacket.profile}`,
     `questions=${missingQuestions.length}`,
@@ -504,6 +666,9 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     confirmationRequired: action.confirmationRequired,
     confirmationReason: action.confirmationReason,
     profilePacket,
+    capabilityGuidance,
+    requiredCapabilities,
+    capabilityDecision,
     missingQuestions,
     blockedRequests,
     missingCapabilities: [...new Set(missingCapabilities)].slice(0, 6),

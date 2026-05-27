@@ -223,6 +223,97 @@ describe("structured interview primitive", () => {
     expect(packet.interaction.recommendedChoiceId).toBe("seed-brainstorm");
   });
 
+  it("attaches capability guidance to local-safe intent without recommending workers", () => {
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "prepare one local-safe slice with tests",
+      autonomyRequest: "single-slice",
+      availableResources: ["board", "tests"],
+      expectedRoi: "small validated improvement",
+      limits: ["local-safe only"],
+      stopConditions: ["validation fails"],
+      operatorFocusKnown: true,
+      validationKnown: true,
+      rollbackKnown: true,
+      checkpointPlanned: true,
+    });
+
+    expect(packet.decision).toBe("prepare-single-slice");
+    expect(packet.capabilityDecision).toBe("needs-read-only-intent");
+    expect(packet.confirmationRequired).toBe(false);
+    expect(packet.reportOnlyRouteAuthorized).toBe(true);
+    expect(packet.workerDispatchAllowed).toBe(false);
+    expect(packet.recommendedTools).toEqual(["control_plane_profile_packet"]);
+    expect(packet.requiredCapabilities).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "core-guardrails", activation: "always-on", state: "active" }),
+      expect.objectContaining({ id: "read-only-diagnostics", activation: "read-only-on-intent", state: "cold" }),
+    ]));
+    expect(packet.requiredCapabilities.some((capability) => capability.id === "worker-dispatch")).toBe(false);
+    expect(packet.capabilityGuidance).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "worker-dispatch", activation: "expensive-on-intent", state: "cold" }),
+      expect.objectContaining({ id: "colony", activation: "protected-explicit", state: "cold" }),
+    ]));
+    expect(packet.summary).toContain("capabilityDecision=needs-read-only-intent");
+  });
+
+  it("fails closed to budget approval when worker dispatch is the required cold capability", () => {
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "fan out read-only model calibration",
+      autonomyRequest: "worker-assisted",
+      availableResources: ["separate-worker-quota", "test-harness"],
+      expectedRoi: "compare workers before choosing a lane",
+      limits: ["read-only", "two workers"],
+      stopConditions: ["budget warning", "validation fails"],
+      operatorFocusKnown: true,
+      validationKnown: true,
+      rollbackKnown: true,
+      checkpointPlanned: true,
+      workerRequested: true,
+      runtimeHealthReady: true,
+      subagentsReady: true,
+      providerReady: true,
+    });
+
+    expect(packet.decision).toBe("prepare-worker-packet");
+    expect(packet.capabilityDecision).toBe("needs-budget");
+    expect(packet.requiredCapabilities).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "worker-dispatch", activation: "expensive-on-intent", state: "cold" }),
+    ]));
+    expect(packet.confirmationRequired).toBe(true);
+    expect(packet.operatorDecisionNeeded).toBe(true);
+    expect(packet.reportOnlyRouteAuthorized).toBe(false);
+    expect(packet.executionPlan.executeWithoutTextualConfirmation).toBe(false);
+    expect(packet.workerDispatchAllowed).toBe(false);
+    expect(packet.confirmationReason).toContain("budget");
+  });
+
+  it("fails closed to explicit approval when protected capability intent is present", () => {
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "prepare local-safe work but enable web gateway if needed",
+      autonomyRequest: "single-slice",
+      availableResources: ["board", "tests"],
+      expectedRoi: "small validated improvement",
+      limits: ["local-safe only"],
+      stopConditions: ["validation fails"],
+      operatorFocusKnown: true,
+      validationKnown: true,
+      rollbackKnown: true,
+      checkpointPlanned: true,
+    });
+
+    expect(packet.decision).toBe("prepare-single-slice");
+    expect(packet.capabilityDecision).toBe("needs-protected-approval");
+    expect(packet.requiredCapabilities).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "web-gateway", activation: "protected-explicit", state: "cold" }),
+    ]));
+    expect(packet.confirmationRequired).toBe(true);
+    expect(packet.operatorDecisionNeeded).toBe(true);
+    expect(packet.reportOnlyRouteAuthorized).toBe(false);
+    expect(packet.executionPlan.executeWithoutTextualConfirmation).toBe(false);
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.workerDispatchAllowed).toBe(false);
+    expect(packet.confirmationReason).toContain("protected capability");
+  });
+
   it("infers brainstorm seed route from next-slice or no-eligible operator text", () => {
     expect(inferBrainstormSeedIntent("qual a próxima fatia local-safe?")).toBe(true);
     expect(inferBrainstormSeedIntent("no eligible local-safe tasks, seed the board")).toBe(true);
@@ -352,24 +443,26 @@ describe("structured interview primitive", () => {
 
     expect(packet).toMatchObject({
       decision: "prepare-worker-packet",
-      controlPlaneAction: "run-report-only-route",
+      controlPlaneAction: "ask-operator",
       nextAction: "prepare-worker-packet",
       recommendationCode: "operator-intent-prepare-worker-packet",
-      confirmationRequired: false,
-      operatorDecisionNeeded: false,
-      reportOnlyRouteAuthorized: true,
-      operatorPromptRequired: false,
+      confirmationRequired: true,
+      operatorDecisionNeeded: true,
+      reportOnlyRouteAuthorized: false,
+      operatorPromptRequired: true,
       recommendedTools: ["agent_run_operator_packet", "agent_run_task_packet"],
       executionPlan: {
-        kind: "report-only-route",
-        authorized: true,
-        executeWithoutTextualConfirmation: true,
-        finalResponseContract: "compact-decision-summary",
+        kind: "operator-prompt",
+        authorized: false,
+        executeWithoutTextualConfirmation: false,
+        finalResponseContract: "ask-one-compact-question",
       },
       dispatchAllowed: false,
       mutationAllowed: false,
       workerDispatchAllowed: false,
     });
+    expect(packet.capabilityDecision).toBe("needs-budget");
+    expect(packet.confirmationReason).toContain("budget");
     expect(packet.executionPlan.steps.map((step) => step.tool)).toEqual(["agent_run_operator_packet", "agent_run_task_packet"]);
     expect(packet.executionPlan.steps[1]).toMatchObject({
       inputHint: expect.stringContaining("operator packet output"),
@@ -676,19 +769,20 @@ describe("structured interview primitive", () => {
 
     expect(result?.details.decision).toBe("prepare-worker-packet");
     expect(result?.details.recommendationCode).toBe("operator-intent-prepare-worker-packet");
-    expect(result?.details.controlPlaneAction).toBe("run-report-only-route");
+    expect(result?.details.controlPlaneAction).toBe("ask-operator");
     expect(result?.details.nextAction).toBe("prepare-worker-packet");
-    expect(result?.details.confirmationRequired).toBe(false);
-    expect(result?.details.operatorDecisionNeeded).toBe(false);
-    expect(result?.details.reportOnlyRouteAuthorized).toBe(true);
-    expect(result?.details.operatorPromptRequired).toBe(false);
+    expect(result?.details.confirmationRequired).toBe(true);
+    expect(result?.details.operatorDecisionNeeded).toBe(true);
+    expect(result?.details.reportOnlyRouteAuthorized).toBe(false);
+    expect(result?.details.operatorPromptRequired).toBe(true);
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.workerDispatchAllowed).toBe(false);
+    expect(result?.details.capabilityDecision).toBe("needs-budget");
     expect(result?.details.executionPlan).toMatchObject({
-      kind: "report-only-route",
-      authorized: true,
-      executeWithoutTextualConfirmation: true,
-      finalResponseContract: "compact-decision-summary",
+      kind: "operator-prompt",
+      authorized: false,
+      executeWithoutTextualConfirmation: false,
+      finalResponseContract: "ask-one-compact-question",
     });
     expect(result?.details.interaction).toMatchObject({
       kind: "operator-choice",
