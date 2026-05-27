@@ -164,6 +164,7 @@ const RUNTIME_HEALTH_INTENT_PATTERNS = [
   /\bperformance\s+watchdog\b/i,
   /\bvalidar\s+(?:a\s+)?sa[uú]de\s+d[ao]\s+runtime\b/i,
   /\bsa[uú]de\s+d[ao]\s+runtime\b/i,
+  /\bruntime\s+(?:est[aá]\s+)?saud[aá]vel\b/i,
   /\bdiagn[oó]stico\s+(?:de\s+)?runtime\b/i,
   /\bpress[aã]o\s+d[eo]\s+runtime\b/i,
 ];
@@ -238,6 +239,8 @@ const PROTECTED_CAPABILITY_INTENT_PATTERNS: Array<{ capabilityId: string; patter
   { capabilityId: "project-workflows", pattern: /\bproject\s+workflows\b|\bthird[-\s]?party\s+workflow\b|\bworkflow\s+surface\b/i },
 ];
 
+const NEGATED_CAPABILITY_CONTEXT_PATTERN = /\b(?:sem|without|no|não|nao|nunca|never|do\s+not|don't)\s+(?:ativar|habilitar|usar|abrir|rodar|executar|enable|activate|use|open|run|start|dispatch|escalate|escalar)\b/i;
+
 function asCapabilityGuidance(value: unknown): OperatorIntentCapabilityGuidance[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((item) => {
@@ -289,9 +292,13 @@ function addRequiredCapability(
 function inferProtectedOrExpensiveCapabilities(intent: string | undefined): string[] {
   const text = String(intent ?? "").trim();
   if (!text) return [];
-  return PROTECTED_CAPABILITY_INTENT_PATTERNS
-    .filter((entry) => entry.pattern.test(text))
-    .map((entry) => entry.capabilityId);
+  return PROTECTED_CAPABILITY_INTENT_PATTERNS.flatMap((entry) => {
+    const match = entry.pattern.exec(text);
+    if (!match || typeof match.index !== "number") return [];
+    const previousContext = text.slice(Math.max(0, match.index - 80), match.index);
+    if (NEGATED_CAPABILITY_CONTEXT_PATTERN.test(previousContext)) return [];
+    return [entry.capabilityId];
+  });
 }
 
 function resolveRequiredCapabilities(

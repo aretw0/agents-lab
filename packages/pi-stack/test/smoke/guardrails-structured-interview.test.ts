@@ -453,6 +453,30 @@ describe("structured interview primitive", () => {
     expect(packet.executionPlan.shellCommandPolicy.examples).toContain("/models");
   });
 
+  it("keeps runtime health report-only when expensive capabilities are explicitly negated", () => {
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "continuar a partir da próxima fatia local-safe, validando se o runtime está saudável, sem ativar workers, pi-lens, web gateway, remote/offload ou qualquer capability cara sem decisão explícita.",
+    });
+
+    expect(packet.decision).toBe("check-runtime-health");
+    expect(packet.capabilityDecision).toBe("needs-read-only-intent");
+    expect(packet.controlPlaneAction).toBe("run-report-only-route");
+    expect(packet.confirmationRequired).toBe(false);
+    expect(packet.reportOnlyRouteAuthorized).toBe(true);
+    expect(packet.recommendedTools).toEqual([
+      "environment_runtime_health_status",
+      "environment_dev_pressure_status",
+      "safe_boot_runtime_artifact_audit",
+    ]);
+    expect(packet.requiredCapabilities).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "core-guardrails", activation: "always-on" }),
+      expect.objectContaining({ id: "read-only-diagnostics", activation: "read-only-on-intent" }),
+    ]));
+    expect(packet.requiredCapabilities.some((capability) => capability.id === "pi-lens")).toBe(false);
+    expect(packet.requiredCapabilities.some((capability) => capability.id === "web-gateway")).toBe(false);
+    expect(packet.requiredCapabilities.some((capability) => capability.id === "worker-dispatch")).toBe(false);
+  });
+
   it("prepares a worker packet only as a report-only candidate when readiness is known", () => {
     const packet = buildOperatorIntentIntakePacket({
       intent: "fan out read-only model calibration",
