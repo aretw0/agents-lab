@@ -62,6 +62,8 @@ const LOCAL_AUTH = path.join(LOCAL_AGENT_DIR, "auth.json");
 const GLOBAL_AUTH = path.join(GLOBAL_AGENT_DIR, "auth.json");
 const GLOBAL_WATCHDOG_CONFIG = path.join(GLOBAL_AGENT_DIR, "extensions", "watchdog", "config.json");
 const LAB_PI_DEV_ENABLED_MODELS = [
+	"openai-codex/gpt-5.3-codex-spark",
+	"github-copilot/gpt-5.5",
 	"openai-codex/gpt-5.3-codex",
 	"openai-codex/gpt-5.4-mini",
 	"dashscope/qwen3.6-flash",
@@ -69,7 +71,7 @@ const LAB_PI_DEV_ENABLED_MODELS = [
 const LAB_PI_DEV_RUNTIME_PROFILE = {
 	runtimeProfile: "control-plane",
 	defaultProvider: "openai-codex",
-	defaultModel: "gpt-5.3-codex",
+	defaultModel: "gpt-5.3-codex-spark",
 	enabledModels: LAB_PI_DEV_ENABLED_MODELS,
 };
 const LOCAL_PI_CLI_CANDIDATES = [

@@ -78,6 +78,8 @@ test("cold capability package detection covers npm and local node_modules source
 
 test("pi dev model scope stays intentionally small", () => {
 	assert.deepEqual(piDevDefaultEnabledModels(), [
+		"openai-codex/gpt-5.3-codex-spark",
+		"github-copilot/gpt-5.5",
 		"openai-codex/gpt-5.3-codex",
 		"openai-codex/gpt-5.4-mini",
 		"dashscope/qwen3.6-flash",
