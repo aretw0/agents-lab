@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -169,5 +169,76 @@ describe("autonomy lane brainstorm surface", () => {
     expect(String(result?.details.nextAction).length).toBeGreaterThan(5);
     expect(result?.details.confirmationRequired).toBe(true);
     expect(result?.details.dispatchAllowed).toBe(false);
+  });
+
+  it("previews seed materialization without mutating the board", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-seed-decision-preview-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [] }), "utf8");
+
+    const seedDecisionTool = registerTools().find((tool) => tool.name === "lane_brainstorm_seed_decision");
+    const result = seedDecisionTool?.execute("call-test", {
+      ideas: [{ id: "idea-a", theme: "seed deterministic local-safe slice", value: "high", risk: "low", effort: "low" }],
+      task_ids: ["TASK-SEED-1"],
+    }, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("needs-operator-seeding-decision");
+    expect(result?.details.mutationAllowed).toBe(false);
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.plannedTasks).toHaveLength(1);
+    expect(result?.details.plannedTasks[0]).toMatchObject({
+      id: "TASK-SEED-1",
+      status: "planned",
+      priority: "p1",
+    });
+    const tasks = JSON.parse(readFileSync(path.join(cwd, ".project", "tasks.json"), "utf8"));
+    expect(tasks.tasks).toEqual([]);
+  });
+
+  it("blocks seed materialization apply without structured approval", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-seed-decision-blocked-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [] }), "utf8");
+
+    const seedDecisionTool = registerTools().find((tool) => tool.name === "lane_brainstorm_seed_decision");
+    const result = seedDecisionTool?.execute("call-test", {
+      ideas: [{ id: "idea-a", theme: "seed deterministic local-safe slice", value: "high", risk: "low", effort: "low" }],
+      task_ids: ["TASK-SEED-1"],
+      apply: true,
+    }, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("blocked");
+    expect(result?.details.blockers).toContain("structured-operator-approval-required");
+    expect(result?.details.mutationAllowed).toBe(false);
+    const tasks = JSON.parse(readFileSync(path.join(cwd, ".project", "tasks.json"), "utf8"));
+    expect(tasks.tasks).toEqual([]);
+  });
+
+  it("applies selected seed proposals with structured approval and explicit ids", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-seed-decision-apply-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [] }), "utf8");
+
+    const seedDecisionTool = registerTools().find((tool) => tool.name === "lane_brainstorm_seed_decision");
+    const result = seedDecisionTool?.execute("call-test", {
+      ideas: [{ id: "idea-a", theme: "seed deterministic local-safe slice", value: "high", risk: "low", effort: "low" }],
+      task_ids: ["TASK-SEED-1"],
+      apply: true,
+      operator_approval: { packet_mode: "operator-approval-packet", approved: true, approval_state: "approved" },
+      source: "operator",
+    }, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("applied");
+    expect(result?.details.mutationAllowed).toBe(true);
+    expect(result?.details.dispatchAllowed).toBe(false);
+    const tasks = JSON.parse(readFileSync(path.join(cwd, ".project", "tasks.json"), "utf8"));
+    expect(tasks.tasks).toHaveLength(1);
+    expect(tasks.tasks[0]).toMatchObject({
+      id: "TASK-SEED-1",
+      description: "seed deterministic local-safe slice",
+      status: "planned",
+      priority: "p1",
+    });
+    expect(String(tasks.tasks[0].notes)).toContain("[provenance:operator]");
   });
 });
