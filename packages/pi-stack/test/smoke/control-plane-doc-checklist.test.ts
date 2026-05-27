@@ -172,6 +172,9 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(doctrine).toContain("confirmationrequired=false");
     expect(doctrine).toContain("operatordecisionneeded=false");
     expect(doctrine).toContain("reportonlyrouteauthorized=true");
+    expect(doctrine).toContain("ferramentas reais nomeadas em `details.executionplan.steps`");
+    expect(doctrine).toContain("não responder por memória, inferência livre");
+    expect(doctrine).toContain("blocked_missing_tool");
     expect(doctrine).toContain("não pedir confirmação textual");
 
     expect(sessionTriage).toContain("operator_intent_intake_packet");
@@ -181,6 +184,8 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(sessionTriage).toContain("needs-evidence");
     expect(sessionTriage).toContain("não promover automaticamente para `stop-and-investigate`");
     expect(sessionTriage).toContain("reportonlyrouteauthorized=true");
+    expect(sessionTriage).toContain("execute as ferramentas reais");
+    expect(sessionTriage).toContain("não sintetize o packet por inferência");
     expect(sessionTriage).toContain("project_intake_plan");
     expect(sessionTriage).toContain("não executar comandos slash da tui");
     expect(sessionTriage).toContain("/watchdog:status");
@@ -203,6 +208,9 @@ describe("control-plane anti-bloat docs checklist", () => {
       expect(packagedDoc).toContain("intake/brainstorm/seed-preview report-only");
       expect(packagedDoc).toContain("antes de materializar qualquer task");
       expect(packagedDoc).toContain("reportonlyrouteauthorized=true");
+      expect(packagedDoc).toContain("ferramentas reais nomeadas em `details.executionplan.steps`");
+      expect(packagedDoc).toContain("não responder por memória, inferência livre");
+      expect(packagedDoc).toContain("blocked_missing_tool");
       expect(packagedDoc).toContain("safe-mode do watchdog");
     }
 
@@ -214,6 +222,8 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(labSessionTriage).toContain("worker_readiness_requested=true");
     expect(labSessionTriage).toContain("lane_brainstorm_seed_preview");
     expect(labSessionTriage).toContain("reportonlyrouteauthorized=true");
+    expect(labSessionTriage).toContain("execute as ferramentas reais");
+    expect(labSessionTriage).toContain("não sintetize o packet por inferência");
     expect(labSessionTriage).toContain("safe-mode do watchdog");
   });
 });

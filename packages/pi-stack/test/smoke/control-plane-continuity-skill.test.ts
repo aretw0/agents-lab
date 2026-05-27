@@ -27,6 +27,9 @@ describe("control-plane continuity skill", () => {
     expect(skill).toContain("details.controlPlaneAction");
     expect(skill).toContain("run-report-only-route");
     expect(skill).toContain("confirmationRequired=false");
+    expect(skill).toContain("run the actual tools named in `executionPlan.steps`");
+    expect(skill).toContain("do not answer from memory or free-form inference");
+    expect(skill).toContain("blocked_missing_tool");
     expect(skill).toContain("non-mutating packet");
     expect(skill).toContain("says not to ask for confirmation");
     expect(skill).toContain("Quer que eu rode?");
