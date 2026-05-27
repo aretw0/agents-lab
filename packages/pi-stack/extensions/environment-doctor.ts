@@ -834,6 +834,25 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.registerTool({
+    name: "environment_capability_activation_preview",
+    label: "Environment Capability Activation Preview",
+    description: "Report-only preview for dynamic capability activation; never installs packages, starts workers, opens gateways, or edits settings.",
+    parameters: Type.Object({
+      capability_id: Type.String({ description: "Capability id from the control-plane activation matrix, e.g. pi-lens, worker-dispatch, web-gateway, colony." }),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as { capability_id?: string };
+      const { buildCapabilityActivationPreview } = await import("./environment-doctor-dev-pressure");
+      const payload = buildCapabilityActivationPreview(ctx.cwd, p.capability_id);
+      return buildOperatorVisibleToolResponse({
+        label: "environment_capability_activation_preview",
+        summary: payload.summary,
+        details: payload,
+      });
+    },
+  });
+
+  pi.registerTool({
     name: "environment_runtime_health_status",
     label: "Environment Runtime Health Status",
     description: "Read-only one-shot runtime health summary for operator go/no-go decisions; does not call Pi TUI slash commands.",

@@ -112,7 +112,7 @@
     {
       "id": "TASK-BUD-1094",
       "description": "[P1] Criar pacote/preview de ativação dinâmica de capability com cleanup esperado, mantendo ativação real fora do caminho automático.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1093"
@@ -129,7 +129,7 @@
         "Dev-pressure distingue capability cold-by-design de pressão real."
       ],
       "milestone": "0.8-control-plane-dynamic-capabilities",
-      "notes": "[provenance:system] source_task=TASK-BUD-1070 reason=macro decomposition. Depende do intake carregar guidance antes de criar preview de ativação."
+      "notes": "[provenance:system] source_task=TASK-BUD-1070 reason=macro decomposition. Depende do intake carregar guidance antes de criar preview de ativação.\n2026-05-27: Adicionado environment_capability_activation_preview como pacote report-only para capability dinâmica. O preview expõe target, state, activation class, custo esperado, risco, cleanup e confirmação necessária, mantendo mutates=no, installs=no, dispatch=no e opensGateway=false. Dev-pressure agora inclui capabilityGuidance e registra capabilities frias como cold-by-design informativo, sem converter isso em pressão real. Validação: vitest environment-doctor-dev-pressure; test:verify-pi-stack; vitest installability+manifest-integrity+environment-doctor-surface; git diff --check."
     },
     {
       "id": "TASK-BUD-1095",

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync, type Dirent } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { buildDevelopmentVelocityPressure } from "./environment-doctor-dev-pressure-policy.mjs";
+import { buildControlPlaneCapabilityGuidance } from "./runtime-profile-policy.mjs";
 
 export { buildDevelopmentVelocityPressure };
 
@@ -13,6 +14,8 @@ const DEV_PRESSURE_THRESHOLDS = {
 };
 
 type DevPressureSignalLevel = "info" | "warn" | "block";
+type CapabilityActivationClass = "always-on" | "read-only-on-intent" | "expensive-on-intent" | "protected-explicit";
+type CapabilityState = "active" | "cold";
 
 interface DevPressureSignal {
   level: DevPressureSignalLevel;
@@ -20,9 +23,20 @@ interface DevPressureSignal {
   detail: string;
 }
 
+interface CapabilityGuidanceRow {
+  id: string;
+  label: string;
+  activation: CapabilityActivationClass;
+  state: CapabilityState;
+  resources: string[];
+  operatorAction: string;
+  packageName?: string;
+}
+
 function pickPrimaryPressureSignal(signals: DevPressureSignal[]) {
   return signals.find((signal) => signal.level === "block")
     ?? signals.find((signal) => signal.level === "warn")
+    ?? signals.find((signal) => signal.code !== "cold-capabilities-available-on-intent")
     ?? signals[0];
 }
 
@@ -64,6 +78,40 @@ function safeReadJson(filePath: string): Record<string, unknown> | undefined {
   } catch (error) {
     return { __parseError: error instanceof Error ? error.message : String(error) };
   }
+}
+
+function asCapabilityGuidance(value: unknown): CapabilityGuidanceRow[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!isRecord(item)) return [];
+    const id = typeof item.id === "string" ? item.id : "";
+    const label = typeof item.label === "string" ? item.label : id;
+    const activation = typeof item.activation === "string" ? item.activation : "";
+    const state = typeof item.state === "string" ? item.state : "";
+    const operatorAction = typeof item.operatorAction === "string" ? item.operatorAction : "";
+    const resources = Array.isArray(item.resources)
+      ? item.resources.filter((resource): resource is string => typeof resource === "string")
+      : [];
+    if (!id || !label || !operatorAction || resources.length === 0) return [];
+    if (!["always-on", "read-only-on-intent", "expensive-on-intent", "protected-explicit"].includes(activation)) return [];
+    if (!["active", "cold"].includes(state)) return [];
+    return [{
+      id,
+      label,
+      activation: activation as CapabilityActivationClass,
+      state: state as CapabilityState,
+      resources,
+      operatorAction,
+      packageName: typeof item.packageName === "string" ? item.packageName : undefined,
+    }];
+  });
+}
+
+function readCapabilityGuidance(cwd: string): CapabilityGuidanceRow[] {
+  const sandboxSettingsPath = join(cwd, ".sandbox", "pi-agent", "settings.json");
+  const projectSettingsPath = join(cwd, ".pi", "settings.json");
+  const settings = safeReadJson(sandboxSettingsPath) ?? safeReadJson(projectSettingsPath) ?? {};
+  return asCapabilityGuidance(buildControlPlaneCapabilityGuidance(settings));
 }
 
 function toMb(bytes: number): number {
@@ -474,10 +522,135 @@ function buildDevPressureBoardPlan(board: ReturnType<typeof collectDevPressureBo
   };
 }
 
+function expectedCapabilityCost(row: CapabilityGuidanceRow): string {
+  if (row.id === "pi-lens") return "runtime-latency-and-tui-rendering";
+  if (row.id === "worker-dispatch") return "provider-tokens-processes-and-runtime-supervision";
+  if (row.id === "web-gateway") return "local-port-browser-session-and-remote-surface";
+  if (row.id === "colony") return "long-run-workers-provider-budget-and-artifact-retention";
+  if (row.activation === "read-only-on-intent") return "low-read-only-runtime-inspection";
+  if (row.activation === "protected-explicit") return "protected-surface-requires-explicit-operator-scope";
+  if (row.activation === "expensive-on-intent") return "runtime-or-provider-budget-required";
+  return "none";
+}
+
+function capabilityRisk(row: CapabilityGuidanceRow): string {
+  if (row.id === "pi-lens") return "can add startup/render latency; keep quick/minimal or cold unless diagnostics are worth it";
+  if (row.id === "worker-dispatch") return "can spend provider budget or create dangling worker state if dispatched without gates";
+  if (row.id === "web-gateway") return "opens a session/browser surface; avoid unless the workflow needs it now";
+  if (row.id === "colony") return "expands long-run orchestration; require bounded goal, budget, and stop conditions";
+  if (row.activation === "read-only-on-intent") return "low risk when kept report-only";
+  if (row.activation === "protected-explicit") return "protected scope; explicit approval required";
+  return "low";
+}
+
+function capabilityCleanup(row: CapabilityGuidanceRow): string[] {
+  if (row.id === "pi-lens") return [
+    "set PI_LENS_STARTUP_MODE=quick or minimal for future sessions",
+    "exclude pi-lens from daily profile when diagnostics are done",
+    "reload Pi after changing the capability surface",
+  ];
+  if (row.id === "worker-dispatch") return [
+    "record worker run ids and declared files",
+    "stop or inspect dangling worker processes",
+    "checkpoint outcome evidence before starting another worker batch",
+  ];
+  if (row.id === "web-gateway") return [
+    "close the gateway/browser session",
+    "release forwarded ports",
+    "remove temporary session tokens",
+  ];
+  if (row.id === "colony") return [
+    "stop the long-run loop",
+    "collect artifacts and outcome packets",
+    "return colony surfaces to cold/default profile",
+  ];
+  if (row.activation === "read-only-on-intent") return ["no cleanup expected beyond keeping the route report-only"];
+  return ["return capability to cold profile after use"];
+}
+
+function capabilityConfirmationReason(row: CapabilityGuidanceRow): string {
+  if (row.activation === "protected-explicit") return "protected capability requires explicit operator approval before activation";
+  if (row.activation === "expensive-on-intent") return "expensive capability requires explicit budget before activation";
+  if (row.activation === "read-only-on-intent" && row.state === "cold") return "read-only capability activates only after explicit operator intent";
+  return "capability is already available or always-on";
+}
+
+export function buildCapabilityActivationPreview(cwd = process.cwd(), capabilityId = "pi-lens") {
+  const capabilityGuidance = readCapabilityGuidance(cwd);
+  const target = capabilityGuidance.find((row) => row.id === String(capabilityId || "").trim());
+  if (!target) {
+    return {
+      mode: "capability-activation-preview",
+      effect: "none",
+      mutates: false,
+      activationAllowed: false,
+      dispatchAllowed: false,
+      opensGateway: false,
+      installsPackage: false,
+      decision: "blocked",
+      capabilityId,
+      capabilityGuidance,
+      confirmationRequired: true,
+      recommendationCode: "capability-preview-unknown-capability",
+      recommendation: "Choose a known capability id from capabilityGuidance before planning activation.",
+      summary: `capability-activation-preview: decision=blocked capability=${capabilityId || "unknown"} reason=unknown-capability mutates=no`,
+    };
+  }
+
+  const confirmationRequired = target.activation === "expensive-on-intent" || target.activation === "protected-explicit";
+  const decision = target.state === "active"
+    ? "already-active"
+    : confirmationRequired
+      ? "needs-operator-approval"
+      : "preview-ready";
+  const recommendationCode = target.state === "active"
+    ? "capability-preview-already-active"
+    : target.activation === "protected-explicit"
+      ? "capability-preview-needs-protected-approval"
+      : target.activation === "expensive-on-intent"
+        ? "capability-preview-needs-budget"
+        : "capability-preview-report-only";
+
+  return {
+    mode: "capability-activation-preview",
+    effect: "none",
+    mutates: false,
+    activationAllowed: false,
+    dispatchAllowed: false,
+    opensGateway: false,
+    installsPackage: false,
+    startsWorker: false,
+    target,
+    capabilityGuidance,
+    decision,
+    confirmationRequired,
+    confirmationReason: capabilityConfirmationReason(target),
+    expectedCost: expectedCapabilityCost(target),
+    risk: capabilityRisk(target),
+    cleanup: capabilityCleanup(target),
+    recommendationCode,
+    recommendation: target.state === "active"
+      ? "Capability is already active; inspect current pressure before using it further."
+      : `${target.operatorAction}; this preview does not activate packages, start workers, open gateways, or edit settings.`,
+    summary: [
+      "capability-activation-preview:",
+      `decision=${decision}`,
+      `capability=${target.id}`,
+      `state=${target.state}`,
+      `activation=${target.activation}`,
+      `confirmation=${confirmationRequired ? "yes" : "no"}`,
+      "mutates=no",
+      "dispatch=no",
+      "installs=no",
+    ].join(" "),
+  };
+}
+
 export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
   const sessions = collectDevPressureSessions(cwd);
   const configuredEntrypoints = collectDevPressureConfiguredEntrypoints(cwd);
   const settings = collectDevPressureSettings(cwd);
+  const capabilityGuidance = readCapabilityGuidance(cwd);
   const board = collectDevPressureBoardState(cwd);
   const boardPressurePlan = buildDevPressureBoardPlan(board);
   const signals: DevPressureSignal[] = [];
@@ -505,6 +678,14 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
   const suppressed = settings.reduce((sum, row) => sum + row.suppressedSurfaceCount, 0);
   if (suppressed > 0) {
     signals.push({ level: "info", code: "suppressed-package-entries", detail: `${suppressed} package entries expose no surfaces` });
+  }
+  const coldIntentCapabilities = capabilityGuidance.filter((row) => row.state === "cold" && row.activation !== "always-on");
+  if (coldIntentCapabilities.length > 0) {
+    signals.push({
+      level: "info",
+      code: "cold-capabilities-available-on-intent",
+      detail: coldIntentCapabilities.map((row) => `${row.id}:${row.activation}`).join(", "),
+    });
   }
 
   const activePiLensEntries = settings.flatMap((row) => row.piLensEntries
@@ -551,6 +732,7 @@ export function buildEnvironmentDevPressureReport(cwd = process.cwd()) {
     boardPressurePlan,
     configuredEntrypoints: configuredEntrypoints.slice(0, 15),
     settings,
+    capabilityGuidance,
     primarySignal,
     primaryAction,
     primaryRecoveryActions,

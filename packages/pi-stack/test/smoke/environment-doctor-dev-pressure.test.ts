@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import environmentDoctorExtension from "../../extensions/environment-doctor";
 import {
+  buildCapabilityActivationPreview,
   buildDevelopmentVelocityPressure,
   buildEnvironmentDevPressureReport,
 } from "../../extensions/environment-doctor-dev-pressure";
@@ -80,6 +81,75 @@ describe("environment doctor dev pressure", () => {
       expect(report.configuredEntrypoints.map((row) => row.entry)).toEqual(["./extensions/light.ts"]);
       expect(report.recommendation).toBe("continue");
       expect(report.velocityPressure.severity).toBe("ok");
+      expect(report.capabilityGuidance).toEqual(expect.arrayContaining([
+        expect.objectContaining({ id: "pi-lens", state: "cold", activation: "expensive-on-intent" }),
+      ]));
+      expect(report.signals).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          level: "info",
+          code: "cold-capabilities-available-on-intent",
+        }),
+      ]));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("builds a report-only capability activation preview without activating packages", () => {
+    const dir = makeWorkspace();
+    try {
+      writeFileSync(join(dir, ".pi", "settings.json"), JSON.stringify({ packages: [] }), "utf8");
+
+      const preview = buildCapabilityActivationPreview(dir, "pi-lens");
+
+      expect(preview).toMatchObject({
+        mode: "capability-activation-preview",
+        effect: "none",
+        mutates: false,
+        activationAllowed: false,
+        dispatchAllowed: false,
+        opensGateway: false,
+        installsPackage: false,
+        startsWorker: false,
+        decision: "needs-operator-approval",
+        confirmationRequired: true,
+        recommendationCode: "capability-preview-needs-budget",
+        target: {
+          id: "pi-lens",
+          state: "cold",
+          activation: "expensive-on-intent",
+        },
+      });
+      expect(preview.expectedCost).toContain("latency");
+      expect(preview.risk).toContain("startup");
+      expect(preview.cleanup).toEqual(expect.arrayContaining([
+        expect.stringContaining("PI_LENS_STARTUP_MODE"),
+      ]));
+      expect(preview.summary).toContain("mutates=no");
+      expect(preview.summary).toContain("installs=no");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("requires explicit approval for protected capability previews", () => {
+    const dir = makeWorkspace();
+    try {
+      writeFileSync(join(dir, ".pi", "settings.json"), JSON.stringify({ packages: [] }), "utf8");
+
+      const preview = buildCapabilityActivationPreview(dir, "web-gateway");
+
+      expect(preview.decision).toBe("needs-operator-approval");
+      expect(preview.confirmationRequired).toBe(true);
+      expect(preview.recommendationCode).toBe("capability-preview-needs-protected-approval");
+      expect(preview.confirmationReason).toContain("protected capability");
+      expect(preview.target).toEqual(expect.objectContaining({
+        id: "web-gateway",
+        activation: "protected-explicit",
+        state: "cold",
+      }));
+      expect(preview.opensGateway).toBe(false);
+      expect(preview.mutates).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -255,6 +325,36 @@ describe("environment doctor dev pressure", () => {
       expect(String(result.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
       expect((result.details as any)?.mode).toBe("environment-dev-pressure");
       expect((result.details as any)?.velocityPressure?.severity).toBe("ok");
+      expect((result.details as any)?.capabilityGuidance).toEqual(expect.arrayContaining([
+        expect.objectContaining({ id: "worker-dispatch", activation: "expensive-on-intent" }),
+      ]));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("registers environment_capability_activation_preview as a report-only Pi tool", async () => {
+    const dir = makeWorkspace();
+    try {
+      writeFileSync(join(dir, ".pi", "settings.json"), JSON.stringify({ packages: [] }), "utf8");
+      const pi = makeMockPi();
+      environmentDoctorExtension(pi);
+      const tool = getTool(pi, "environment_capability_activation_preview");
+
+      const result = await tool.execute(
+        "tc-capability-preview",
+        { capability_id: "colony" },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd: dir },
+      );
+
+      expect(String(result.content?.[0]?.text ?? "")).toContain("capability-activation-preview:");
+      expect(String(result.content?.[0]?.text ?? "")).toContain("mutates=no");
+      expect((result.details as any)?.mode).toBe("capability-activation-preview");
+      expect((result.details as any)?.dispatchAllowed).toBe(false);
+      expect((result.details as any)?.installsPackage).toBe(false);
+      expect((result.details as any)?.target?.id).toBe("colony");
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
