@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { registerGuardrailsAutonomyLaneSurface } from "../../extensions/guardrails-core-autonomy-lane-surface";
+import { registerGuardrailsLaneBrainstormSurface } from "../../extensions/guardrails-core-lane-brainstorm-surface";
 
 type RegisteredTool = {
   name: string;
@@ -11,7 +11,7 @@ type RegisteredTool = {
 
 function registerTools(): RegisteredTool[] {
   const tools: RegisteredTool[] = [];
-  registerGuardrailsAutonomyLaneSurface({
+  registerGuardrailsLaneBrainstormSurface({
     registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
   } as never);
   return tools;
