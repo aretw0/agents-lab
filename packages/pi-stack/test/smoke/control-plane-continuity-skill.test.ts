@@ -18,7 +18,8 @@ describe("control-plane continuity skill", () => {
     expect(skill).toContain("mentions watchdog");
     expect(skill).toContain("Do not translate the pasted slash commands into shell commands");
     expect(skill).toContain("workers/subagents are ready or safe to use");
-    expect(skill).toContain("Readiness checks do not prepare or dispatch a worker");
+    expect(skill).toContain("Readiness checks do not prepare a worker, dispatch a worker, or require budget");
+    expect(skill).toContain("budget is required only when preparing a worker packet or dispatching");
     expect(skill).toContain("next local-safe slice");
     expect(skill).toContain("report-only brainstorm seed route");
     expect(skill).toContain("choose, customize, or cancel");
@@ -31,6 +32,10 @@ describe("control-plane continuity skill", () => {
     expect(skill).toContain("Quer que eu rode?");
     expect(skill).toContain("safe-mode");
     expect(skill).toContain("stop-and-investigate");
+    expect(skill).toContain("Treat `needs-evidence` as an evidence request, not as `stop-and-investigate`");
+    expect(skill).toContain("watchdog safe-mode is on");
+    expect(skill).toContain("Do not escalate to expensive/protected capabilities");
+    expect(skill).toContain("worker dispatch, pi-lens, web gateway, remote/offload, or publish");
     expect(skill).toContain("operator_intent_intake_packet");
     expect(skill.indexOf("operator_intent_intake_packet")).toBeLessThan(skill.indexOf("project_intake_plan"));
     expect(skill).toContain("details.interaction");

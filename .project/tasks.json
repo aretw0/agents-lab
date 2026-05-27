@@ -134,7 +134,7 @@
     {
       "id": "TASK-BUD-1095",
       "description": "[P2] Validar dogfooding read-only pós-reload para intenção local-safe, safe-mode watchdog e escolha de capability sem depender de perfil intermediário.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-1093",
@@ -153,7 +153,8 @@
         "Scheduler aponta para task executável em vez de macro genérica."
       ],
       "milestone": "0.8-control-plane-dynamic-capabilities",
-      "notes": "[provenance:system] source_task=TASK-BUD-1070 reason=macro decomposition. Fecha o ciclo de dogfooding observado nesta sessão antes de completar a macro."
+      "notes": "[provenance:system] source_task=TASK-BUD-1070 reason=macro decomposition. Fecha o ciclo de dogfooding observado nesta sessão antes de completar a macro.\n2026-05-27: Dogfooding read-only guidance hardened in control-plane continuity skill and distributed docs. needs-evidence is evidence collection, not automatic stop-and-investigate; watchdog safe-mode keeps the route small/read-only and blocks expensive/protected capability escalation. Validation: targeted vitest + docs:package:check.",
+      "verification": "verify-task-bud-1095-dogfooding-readonly"
     }
   ]
 }

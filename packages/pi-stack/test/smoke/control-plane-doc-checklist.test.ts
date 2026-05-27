@@ -151,8 +151,14 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(doctrine).toContain("runtime_health_requested=true");
     expect(doctrine).toContain("passar o texto do operador basta");
     expect(doctrine).toContain("/watchdog:*");
+    expect(doctrine).toContain("needs-evidence");
+    expect(doctrine).toContain("não `stop-and-investigate`");
+    expect(doctrine).toContain("degradação ativa");
     expect(doctrine).toContain("worker_readiness_requested=true");
     expect(doctrine).toContain("sem preparar nem despachar worker");
+    expect(doctrine).toContain("orçamento só entra ao preparar pacote de worker ou dispatch");
+    expect(doctrine).toContain("safe-mode do watchdog");
+    expect(doctrine).toContain("bloquear escalation para worker dispatch, pi-lens, web gateway, remote/offload ou publish");
     expect(doctrine).toContain("próxima fatia local-safe");
     expect(doctrine).toContain("lane_brainstorm_seed_preview");
     expect(doctrine).toContain("sem materializar task");
@@ -172,11 +178,15 @@ describe("control-plane anti-bloat docs checklist", () => {
     expect(sessionTriage).toContain("runtime_health_requested=true");
     expect(sessionTriage).toContain("passar o texto como intenção basta");
     expect(sessionTriage).toContain("/watchdog:*");
+    expect(sessionTriage).toContain("needs-evidence");
+    expect(sessionTriage).toContain("não promover automaticamente para `stop-and-investigate`");
     expect(sessionTriage).toContain("reportonlyrouteauthorized=true");
     expect(sessionTriage).toContain("project_intake_plan");
     expect(sessionTriage).toContain("não executar comandos slash da tui");
     expect(sessionTriage).toContain("/watchdog:status");
     expect(sessionTriage).toContain("environment_runtime_health_status");
+    expect(sessionTriage).toContain("safe-mode do watchdog");
+    expect(sessionTriage).toContain("bloqueia escalation para worker dispatch, pi-lens, web gateway, remote/offload ou publish");
     expect(sessionTriage.indexOf("operator_intent_intake_packet")).toBeLessThan(
       sessionTriage.indexOf("project_intake_plan"),
     );
@@ -185,18 +195,25 @@ describe("control-plane anti-bloat docs checklist", () => {
       expect(packagedDoc).toContain("operator_intent_intake_packet");
       expect(packagedDoc).toContain("runtime_health_requested=true");
       expect(packagedDoc).toContain("/watchdog:*");
+      expect(packagedDoc).toContain("needs-evidence");
+      expect(packagedDoc).toContain("não `stop-and-investigate`");
       expect(packagedDoc).toContain("worker_readiness_requested=true");
+      expect(packagedDoc).toContain("orçamento só entra ao preparar pacote de worker ou dispatch");
       expect(packagedDoc).toContain("lane_brainstorm_seed_preview");
       expect(packagedDoc).toContain("intake/brainstorm/seed-preview report-only");
       expect(packagedDoc).toContain("antes de materializar qualquer task");
       expect(packagedDoc).toContain("reportonlyrouteauthorized=true");
+      expect(packagedDoc).toContain("safe-mode do watchdog");
     }
 
     expect(labSessionTriage).toContain("operator_intent_intake_packet");
     expect(labSessionTriage).toContain("runtime_health_requested=true");
     expect(labSessionTriage).toContain("/watchdog:*");
+    expect(labSessionTriage).toContain("needs-evidence");
+    expect(labSessionTriage).toContain("não promover automaticamente para `stop-and-investigate`");
     expect(labSessionTriage).toContain("worker_readiness_requested=true");
     expect(labSessionTriage).toContain("lane_brainstorm_seed_preview");
     expect(labSessionTriage).toContain("reportonlyrouteauthorized=true");
+    expect(labSessionTriage).toContain("safe-mode do watchdog");
   });
 });

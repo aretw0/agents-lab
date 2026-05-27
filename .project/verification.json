@@ -1,3 +1,13 @@
 {
-  "verifications": []
+  "verifications": [
+    {
+      "id": "verify-task-bud-1095-dogfooding-readonly",
+      "target": "TASK-BUD-1095",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke",
+      "evidence": "vitest control-plane-continuity-skill + control-plane-doc-checklist passed; docs:package:check passed; scheduler selected TASK-BUD-1095 as executable p2 after TASK-BUD-1093/1094.",
+      "timestamp": "2026-05-27T15:32:51.351Z"
+    }
+  ]
 }
