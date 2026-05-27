@@ -192,6 +192,23 @@ export function inferWorkerReadinessIntent(intent: string | undefined): boolean 
   return WORKER_READINESS_INTENT_PATTERNS.some((pattern) => pattern.test(text));
 }
 
+const WORKER_DELEGATION_INTENT_PATTERNS = [
+  /\b(?:want|use|run|prepare|delegate|dispatch)\s+(?:with\s+)?worker[s]?\b/i,
+  /\bfan\s+out\b/i,
+  /\bparallel\s+(?:exploration|workers?|work|scan|review)\b/i,
+  /\bworker[s]?\s+(?:para|to)\s+(?:explorar|explore|calibrar|calibrate|comparar|compare)\b/i,
+  /\bquero\s+usar\s+(?:os\s+)?worker[s]?\b/i,
+  /\busar\s+(?:os\s+)?worker[s]?\s+para\b/i,
+  /\bexplorar\s+em\s+paralelo\b/i,
+  /\bdelegar\s+para\s+(?:worker[s]?|subagente[s]?)\b/i,
+];
+
+export function inferWorkerDelegationIntent(intent: string | undefined): boolean {
+  const text = String(intent ?? "").trim();
+  if (!text) return false;
+  return WORKER_DELEGATION_INTENT_PATTERNS.some((pattern) => pattern.test(text));
+}
+
 const BRAINSTORM_SEED_INTENT_PATTERNS = [
   /\bbrainstorm\b/i,
   /\bseed\s+(?:the\s+)?(?:backlog|board|lane|work)\b/i,
@@ -288,7 +305,8 @@ function resolveRequiredCapabilities(
   if (decision === "seed-brainstorm" || decision === "prepare-single-slice") {
     addRequiredCapability(required, guidance, "read-only-diagnostics");
   }
-  if (decision === "prepare-worker-packet") {
+  const naturalWorkerDelegationRequested = input.workerRequested !== true && inferWorkerDelegationIntent(input.intent);
+  if (decision === "prepare-worker-packet" || naturalWorkerDelegationRequested) {
     addRequiredCapability(required, guidance, "worker-dispatch");
   }
   for (const capabilityId of inferProtectedOrExpensiveCapabilities(input.intent)) {
@@ -558,7 +576,11 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
   const blockedRequests = profilePacket.blockedRequests;
   const missingCapabilities = [...profilePacket.missingCapabilities];
   const runtimeHealthRequested = input.runtimeHealthRequested === true || inferRuntimeHealthIntent(input.intent);
-  const workerReadinessRequested = input.workerReadinessRequested === true || inferWorkerReadinessIntent(input.intent);
+  const workerDelegationRequested = input.workerRequested === true || inferWorkerDelegationIntent(input.intent);
+  const workerReadinessIsKnown = input.runtimeHealthReady === true && input.subagentsReady === true && input.providerReady === true;
+  const workerReadinessRequested = input.workerReadinessRequested === true ||
+    inferWorkerReadinessIntent(input.intent) ||
+    (workerDelegationRequested && !workerReadinessIsKnown);
   const brainstormRequested = input.brainstormRequested === true ||
     input.noEligibleLocalSafeTasks === true ||
     input.localSafeMaterialReady === false ||

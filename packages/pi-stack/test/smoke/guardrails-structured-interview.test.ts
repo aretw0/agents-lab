@@ -4,6 +4,7 @@ import {
   buildOperatorIntentIntakePacket,
   inferBrainstormSeedIntent,
   inferRuntimeHealthIntent,
+  inferWorkerDelegationIntent,
   inferWorkerReadinessIntent,
   resolveStructuredInterview,
   TUI_SLASH_COMMAND_PATTERN_SOURCE,
@@ -284,6 +285,34 @@ describe("structured interview primitive", () => {
     expect(packet.executionPlan.executeWithoutTextualConfirmation).toBe(false);
     expect(packet.workerDispatchAllowed).toBe(false);
     expect(packet.confirmationReason).toContain("budget");
+  });
+
+  it("infers natural worker delegation as a budget-gated readiness path", () => {
+    expect(inferWorkerDelegationIntent("quero usar workers para explorar em paralelo, com orçamento ainda não definido")).toBe(true);
+    expect(inferWorkerDelegationIntent("fan out read-only model calibration")).toBe(true);
+    expect(inferWorkerDelegationIntent("posso usar workers com segurança?")).toBe(false);
+
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "quero usar workers para explorar em paralelo, com orçamento ainda não definido",
+    });
+
+    expect(packet.decision).toBe("check-worker-readiness");
+    expect(packet.capabilityDecision).toBe("needs-budget");
+    expect(packet.controlPlaneAction).toBe("ask-operator");
+    expect(packet.confirmationRequired).toBe(true);
+    expect(packet.reportOnlyRouteAuthorized).toBe(false);
+    expect(packet.recommendedTools).toEqual([
+      "environment_runtime_health_status",
+      "subagent_readiness_status",
+      "provider_readiness_matrix",
+    ]);
+    expect(packet.requiredCapabilities).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "read-only-diagnostics", activation: "read-only-on-intent" }),
+      expect.objectContaining({ id: "worker-dispatch", activation: "expensive-on-intent", state: "cold" }),
+    ]));
+    expect(packet.workerDispatchAllowed).toBe(false);
+    expect(packet.confirmationReason).toContain("budget");
+    expect(packet.summary).toContain("capabilityDecision=needs-budget");
   });
 
   it("fails closed to explicit approval when protected capability intent is present", () => {
