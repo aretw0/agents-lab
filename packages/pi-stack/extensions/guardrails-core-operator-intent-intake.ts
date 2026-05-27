@@ -307,8 +307,7 @@ function resolveRequiredCapabilities(
   if (decision === "seed-brainstorm" || decision === "prepare-single-slice") {
     addRequiredCapability(required, guidance, "read-only-diagnostics");
   }
-  const naturalWorkerDelegationRequested = input.workerRequested !== true && inferWorkerDelegationIntent(input.intent);
-  if (decision === "prepare-worker-packet" || naturalWorkerDelegationRequested) {
+  if (decision === "prepare-worker-packet") {
     addRequiredCapability(required, guidance, "worker-dispatch");
   }
   for (const capabilityId of inferProtectedOrExpensiveCapabilities(input.intent)) {

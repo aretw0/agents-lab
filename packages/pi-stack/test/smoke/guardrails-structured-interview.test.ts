@@ -287,7 +287,7 @@ describe("structured interview primitive", () => {
     expect(packet.confirmationReason).toContain("budget");
   });
 
-  it("infers natural worker delegation as a budget-gated readiness path", () => {
+  it("infers natural worker delegation as a read-only readiness path", () => {
     expect(inferWorkerDelegationIntent("quero usar workers para explorar em paralelo, com orçamento ainda não definido")).toBe(true);
     expect(inferWorkerDelegationIntent("Quero preparar uma fatia local-safe pequena, mas também quero avaliar se podemos usar workers para explorar em paralelo. O orçamento ainda não está definido.")).toBe(true);
     expect(inferWorkerDelegationIntent("fan out read-only model calibration")).toBe(true);
@@ -298,10 +298,10 @@ describe("structured interview primitive", () => {
     });
 
     expect(packet.decision).toBe("check-worker-readiness");
-    expect(packet.capabilityDecision).toBe("needs-budget");
-    expect(packet.controlPlaneAction).toBe("ask-operator");
-    expect(packet.confirmationRequired).toBe(true);
-    expect(packet.reportOnlyRouteAuthorized).toBe(false);
+    expect(packet.capabilityDecision).toBe("needs-read-only-intent");
+    expect(packet.controlPlaneAction).toBe("run-report-only-route");
+    expect(packet.confirmationRequired).toBe(false);
+    expect(packet.reportOnlyRouteAuthorized).toBe(true);
     expect(packet.recommendedTools).toEqual([
       "environment_runtime_health_status",
       "subagent_readiness_status",
@@ -309,11 +309,11 @@ describe("structured interview primitive", () => {
     ]);
     expect(packet.requiredCapabilities).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "read-only-diagnostics", activation: "read-only-on-intent" }),
-      expect.objectContaining({ id: "worker-dispatch", activation: "expensive-on-intent", state: "cold" }),
     ]));
+    expect(packet.requiredCapabilities.some((capability) => capability.id === "worker-dispatch")).toBe(false);
     expect(packet.workerDispatchAllowed).toBe(false);
-    expect(packet.confirmationReason).toContain("budget");
-    expect(packet.summary).toContain("capabilityDecision=needs-budget");
+    expect(packet.confirmationReason).toContain("report-only/read-only");
+    expect(packet.summary).toContain("capabilityDecision=needs-read-only-intent");
   });
 
   it("fails closed to explicit approval when protected capability intent is present", () => {
