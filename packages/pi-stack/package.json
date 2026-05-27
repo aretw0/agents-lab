@@ -35,6 +35,7 @@
 			"./extensions/environment-doctor.ts",
 			"./extensions/claude-code-adapter.ts",
 			"./extensions/guardrails-core.ts",
+			"./extensions/guardrails-core-tool-backed-route-canary.ts",
 			"./extensions/guardrails-core-structured-interview-surface.ts",
 			"./extensions/guardrails-core-lane-brainstorm-surface.ts",
 			"./extensions/guardrails-core-extended-surfaces.ts",
