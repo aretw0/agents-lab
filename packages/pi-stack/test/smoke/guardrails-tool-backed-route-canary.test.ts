@@ -66,6 +66,21 @@ describe("guardrails tool-backed route canary", () => {
 		});
 	});
 
+	it("flags seed-decision-shaped output without the seed decision tool", () => {
+		const result = evaluateToolBackedRouteCanary([
+			"decision: needs-operator-seeding-decision",
+			"plannedTasks: 3 propostas (dry-run)",
+			"authorization: none",
+			"autoriza mutação/worker/protected scope: não / não / não",
+		].join("\n"), []);
+
+		expect(result).toMatchObject({
+			decision: "flag",
+			reasonCode: "missing-lane-brainstorm-tool",
+			requiredTools: ["lane_brainstorm_seed_decision"],
+		});
+	});
+
 	it("keeps conceptual explanations clean", () => {
 		const result = evaluateToolBackedRouteCanary(
 			"Podemos usar operator_intent_intake_packet como pr\u00f3xima ferramenta, mas ainda n\u00e3o rodei nada.",
@@ -82,6 +97,7 @@ describe("guardrails tool-backed route canary", () => {
 		expect(extractToolBackedRouteToolName({ toolName: "operator-intent-intake-packet" })).toBe("operator_intent_intake_packet");
 		expect(extractToolBackedRouteToolName({ name: "lane_brainstorm_packet" })).toBe("lane_brainstorm_packet");
 		expect(extractToolBackedRouteToolName({ tool: { name: "lane-brainstorm-seed-preview" } })).toBe("lane_brainstorm_seed_preview");
+		expect(extractToolBackedRouteToolName({ tool: { name: "lane-brainstorm-seed-decision" } })).toBe("lane_brainstorm_seed_decision");
 	});
 
 	it("injects a narrow system guard only for tool-backed route turns", () => {
@@ -118,6 +134,10 @@ describe("guardrails tool-backed route canary", () => {
 		expect(resolveToolBackedRouteIntent("Chame operator_intent_intake_packet em preview.")).toMatchObject({
 			reasonCode: "operator-intent",
 			requiredTools: ["operator_intent_intake_packet"],
+		});
+		expect(resolveToolBackedRouteIntent("Use lane_brainstorm_seed_decision em dry-run.")).toMatchObject({
+			reasonCode: "lane-brainstorm",
+			requiredTools: ["lane_brainstorm_seed_decision"],
 		});
 		expect(resolveToolBackedRouteIntent("Use operator_intent_intake_packet e depois lane_brainstorm_packet em report-only.")).toMatchObject({
 			reasonCode: "operator-intent",

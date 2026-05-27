@@ -23,18 +23,20 @@ export type ToolBackedRouteCanaryDecision =
 	};
 
 const OPERATOR_INTENT_TOOL = "operator_intent_intake_packet";
-const LANE_BRAINSTORM_TOOLS = ["lane_brainstorm_packet", "lane_brainstorm_seed_preview"];
+const LANE_BRAINSTORM_PREVIEW_TOOLS = ["lane_brainstorm_packet", "lane_brainstorm_seed_preview"];
+const LANE_BRAINSTORM_DECISION_TOOL = "lane_brainstorm_seed_decision";
+const LANE_BRAINSTORM_TOOLS = [...LANE_BRAINSTORM_PREVIEW_TOOLS, LANE_BRAINSTORM_DECISION_TOOL];
 
 export function buildToolBackedRouteSystemPrompt(userText: string): string | undefined {
 	const text = userText.trim();
 	if (!text) return undefined;
-	const mentionsToolBackedRoute = /operator[_-]intent[_-]intake[_-]packet|lane[_-]brainstorm[_-]packet|lane[_-]brainstorm[_-]seed[_-]preview/i.test(text)
+	const mentionsToolBackedRoute = /operator[_-]intent[_-]intake[_-]packet|lane[_-]brainstorm[_-]packet|lane[_-]brainstorm[_-]seed[_-]preview|lane[_-]brainstorm[_-]seed[_-]decision/i.test(text)
 		|| (/report-?only|packet|pacote/i.test(text) && /tool|brainstorm|intent|intake|capability|capacidade/i.test(text));
 	if (!mentionsToolBackedRoute) return undefined;
 	return [
 		"Tool-backed route guard is active for this turn.",
 		"- If you present an operator_intent_intake_packet result or packet-shaped capability decision, call operator_intent_intake_packet in this turn first.",
-		"- If you present lane brainstorm or seed-preview candidates, call lane_brainstorm_packet and/or lane_brainstorm_seed_preview in this turn first.",
+		"- If you present lane brainstorm, seed-preview, or seed-decision candidates, call the matching lane_brainstorm_* tool in this turn first.",
 		"- If the matching tool is unavailable, report blocked_missing_tool instead of synthesizing the packet from memory.",
 		"- Ordinary conceptual explanations may mention these tools without calling them, but must not look like completed tool output.",
 	].join("\n");
@@ -47,11 +49,16 @@ export function resolveToolBackedRouteIntent(userText: string): { requiredTools:
 	const explicitAction = /\b(call|run|use|execute|rode|rodar|chame|chamar|use|usar|execute|executar)\b/i.test(text);
 	const wantsReportOnly = /report-?only|preview|tool-backed|read-?only/i.test(text);
 	const hasOperatorIntent = /operator[_-]intent[_-]intake[_-]packet/i.test(normalized);
-	const hasLaneBrainstorm = /lane[_-]brainstorm[_-]packet|lane[_-]brainstorm[_-]seed[_-]preview/i.test(normalized);
+	const hasLaneBrainstorm = /lane[_-]brainstorm[_-]packet|lane[_-]brainstorm[_-]seed[_-]preview|lane[_-]brainstorm[_-]seed[_-]decision/i.test(normalized);
+	const hasLaneSeedDecision = /lane[_-]brainstorm[_-]seed[_-]decision/i.test(normalized);
 	if (!(explicitAction || wantsReportOnly)) return undefined;
 	const requiredTools: string[] = [];
 	if (hasOperatorIntent) requiredTools.push(OPERATOR_INTENT_TOOL);
-	if (hasLaneBrainstorm) requiredTools.push(...LANE_BRAINSTORM_TOOLS);
+	if (hasLaneSeedDecision) {
+		requiredTools.push(LANE_BRAINSTORM_DECISION_TOOL);
+	} else if (hasLaneBrainstorm) {
+		requiredTools.push(...LANE_BRAINSTORM_PREVIEW_TOOLS);
+	}
 	if (requiredTools.length > 0) {
 		return {
 			requiredTools,
@@ -126,10 +133,20 @@ function brainstormShapeEvidence(text: string): string[] {
 	const evidence: string[] = [];
 	if (/lane[_-]brainstorm[_-]packet/i.test(text)) evidence.push("lane-brainstorm-packet-name");
 	if (/lane[_-]brainstorm[_-]seed[_-]preview/i.test(text)) evidence.push("lane-brainstorm-seed-preview-name");
+	if (/lane[_-]brainstorm[_-]seed[_-]decision/i.test(text)) evidence.push("lane-brainstorm-seed-decision-name");
+	if (/needs-operator-seeding-decision|brainstorm-seeding/i.test(text)) evidence.push("seed-decision-result");
+	if (/plannedTasks\s*:/i.test(text)) evidence.push("planned-tasks");
 	if (/candidatos? de pr(?:o|\u00f3)xima fatia/i.test(text)) evidence.push("next-slice-candidates");
 	if (/precisa worker\s*\?/i.test(text)) evidence.push("worker-need-field");
 	if (/autoriza(?:c|\u00e7)(?:a|\u00e3)o.*muta(?:c|\u00e7)(?:a|\u00e3)o.*worker.*protected scope/i.test(text)) evidence.push("authorization-summary");
 	return evidence;
+}
+
+function requiredLaneBrainstormToolsForEvidence(evidence: string[]): string[] {
+	if (evidence.includes("lane-brainstorm-seed-decision-name") || evidence.includes("seed-decision-result") || evidence.includes("planned-tasks")) {
+		return [LANE_BRAINSTORM_DECISION_TOOL];
+	}
+	return LANE_BRAINSTORM_PREVIEW_TOOLS;
 }
 
 export function evaluateToolBackedRouteCanary(
@@ -165,19 +182,26 @@ export function evaluateToolBackedRouteCanary(
 	const brainstormEvidence = brainstormShapeEvidence(text);
 	const brainstormLooksBacked = brainstormEvidence.includes("lane-brainstorm-packet-name")
 		|| brainstormEvidence.includes("lane-brainstorm-seed-preview-name")
+		|| brainstormEvidence.includes("lane-brainstorm-seed-decision-name")
+		|| brainstormEvidence.includes("seed-decision-result")
 		|| (
 			brainstormEvidence.includes("next-slice-candidates")
 			&& brainstormEvidence.includes("worker-need-field")
+		)
+		|| (
+			brainstormEvidence.includes("planned-tasks")
+			&& brainstormEvidence.includes("authorization-summary")
 		);
 	if (brainstormLooksBacked) {
-		if (hasAnyToolCall(recentToolNames, LANE_BRAINSTORM_TOOLS)) {
+		const requiredTools = requiredLaneBrainstormToolsForEvidence(brainstormEvidence);
+		if (hasAnyToolCall(recentToolNames, requiredTools)) {
 			return { decision: "clean", reasonCode: "tool-call-present" };
 		}
 		return {
 			decision: "flag",
 			reasonCode: "missing-lane-brainstorm-tool",
-			requiredTools: LANE_BRAINSTORM_TOOLS,
-			summary: "tool-backed-route: brainstorm-shaped answer without lane_brainstorm_packet or lane_brainstorm_seed_preview in this turn",
+			requiredTools,
+			summary: "tool-backed-route: brainstorm-shaped answer without matching lane_brainstorm tool in this turn",
 			evidence: brainstormEvidence,
 		};
 	}

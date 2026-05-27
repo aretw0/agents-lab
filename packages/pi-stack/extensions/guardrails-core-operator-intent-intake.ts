@@ -29,6 +29,7 @@ export type OperatorIntentNextAction =
   | "answer-next-question"
   | "run-runtime-health-checks"
   | "run-brainstorm-seed-preview"
+  | "run-brainstorm-seed-decision"
   | "prepare-single-slice-contract"
   | "run-worker-readiness-checks"
   | "prepare-worker-packet"
@@ -230,6 +231,22 @@ export function inferBrainstormSeedIntent(intent: string | undefined): boolean {
   const text = String(intent ?? "").trim();
   if (!text) return false;
   return BRAINSTORM_SEED_INTENT_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+const BRAINSTORM_SEED_DECISION_INTENT_PATTERNS = [
+  /\bseed[-\s]?preview\b/i,
+  /\bseed(?:ing)?\s+decision\b/i,
+  /\bdecision\s+(?:dry-run|preview)\s+(?:de\s+)?seeding\b/i,
+  /\btransform(?:ar)?\s+(?:o\s+)?(?:brainstorm\s+)?seed[-\s]?preview\b/i,
+  /\bmateriali[sz]ar\s+(?:o\s+)?(?:seed|preview)\b/i,
+  /\bdecis(?:a|\u00e3)o\s+(?:dry-run\s+)?(?:de\s+)?seeding\b/i,
+  /\bconverter\s+(?:o\s+)?(?:seed|preview)\s+em\s+(?:decis(?:a|\u00e3)o|tarefas?)\b/i,
+];
+
+export function inferBrainstormSeedDecisionIntent(intent: string | undefined): boolean {
+  const text = String(intent ?? "").trim();
+  if (!text) return false;
+  return BRAINSTORM_SEED_DECISION_INTENT_PATTERNS.some((pattern) => pattern.test(text));
 }
 
 const PROTECTED_CAPABILITY_INTENT_PATTERNS: Array<{ capabilityId: string; pattern: RegExp }> = [
@@ -478,6 +495,7 @@ function describeRouteTool(tool: string): string {
   if (tool === "provider_readiness_matrix") return "check provider/model readiness without selecting a model";
   if (tool === "lane_brainstorm_packet") return "prepare candidate local-safe slices without writing files";
   if (tool === "lane_brainstorm_seed_preview") return "preview local-safe seed material without queue mutation";
+  if (tool === "lane_brainstorm_seed_decision") return "decide seed materialization in dry-run unless explicit apply approval is present";
   if (tool === "control_plane_profile_packet") return "summarize the bounded control-plane work contract";
   if (tool === "agent_run_operator_packet") return "prepare worker packet for operator review only";
   if (tool === "agent_run_task_packet") return "derive worker task packet without dispatch";
@@ -493,6 +511,7 @@ function describeRouteInput(tool: string): string {
   if (tool === "provider_readiness_matrix") return "read provider/model readiness; do not select a model for execution";
   if (tool === "lane_brainstorm_packet") return "use operator intent as goal; keep scope local-safe and report-only";
   if (tool === "lane_brainstorm_seed_preview") return "use previous lane_brainstorm_packet details; preview only, do not create tasks";
+  if (tool === "lane_brainstorm_seed_decision") return "use operator intent as goal; keep apply=false unless structured approval and explicit task_ids are present";
   if (tool === "control_plane_profile_packet") return "use normalized operator intent and known constraints";
   if (tool === "agent_run_operator_packet") return "use readiness evidence and intent; prepare packet only";
   if (tool === "agent_run_task_packet") return "use operator packet output; do not start a worker";
@@ -508,6 +527,7 @@ function buildRouteStep(tool: string, index: number, tools: string[]): OperatorI
     inputHint: describeRouteInput(tool),
     consumesPreviousStepOutput: index > 0 && (
       (tool === "lane_brainstorm_seed_preview" && tools[index - 1] === "lane_brainstorm_packet") ||
+      (tool === "lane_brainstorm_seed_decision" && tools[index - 1] === "lane_brainstorm_seed_preview") ||
       (tool === "agent_run_task_packet" && tools[index - 1] === "agent_run_operator_packet")
     ),
   };
@@ -589,10 +609,12 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
   const workerReadinessRequested = input.workerReadinessRequested === true ||
     inferWorkerReadinessIntent(input.intent) ||
     (workerDelegationRequested && !workerReadinessIsKnown);
+  const brainstormSeedDecisionRequested = inferBrainstormSeedDecisionIntent(input.intent);
   const brainstormRequested = input.brainstormRequested === true ||
     input.noEligibleLocalSafeTasks === true ||
     input.localSafeMaterialReady === false ||
-    inferBrainstormSeedIntent(input.intent);
+    inferBrainstormSeedIntent(input.intent) ||
+    brainstormSeedDecisionRequested;
 
   let decision: OperatorIntentIntakeDecision;
   let recommendedTools: string[];
@@ -615,8 +637,12 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
     recommendation = "Run read-only runtime, worker, and provider readiness checks; do not prepare or dispatch a worker yet.";
   } else if (brainstormRequested) {
     decision = "seed-brainstorm";
-    recommendedTools = ["lane_brainstorm_packet", "lane_brainstorm_seed_preview"];
-    recommendation = "Prepare candidate local-safe slices, then ask the operator to choose, customize, or cancel.";
+    recommendedTools = brainstormSeedDecisionRequested
+      ? ["lane_brainstorm_seed_decision"]
+      : ["lane_brainstorm_packet", "lane_brainstorm_seed_preview"];
+    recommendation = brainstormSeedDecisionRequested
+      ? "Convert seed-preview intent into a dry-run seeding decision; do not mutate unless apply=true has structured approval and explicit task ids."
+      : "Prepare candidate local-safe slices, then ask the operator to choose, customize, or cancel.";
   } else if (missingQuestions.length > 0) {
     decision = "ask-operator";
     recommendedTools = ["structured_interview_plan"];
@@ -649,7 +675,9 @@ export function buildOperatorIntentIntakePacket(input: OperatorIntentIntakeInput
   const interaction = buildInteraction(decision, recommendedTools, missingQuestions);
   const blockedSummary = blockedRequests.length > 0 ? blockedRequests.slice(0, 4).join("|") : "none";
   const action = applyCapabilityGate(resolveControlPlaneAction(decision), capabilityDecision);
-  const nextAction = resolveNextAction(decision);
+  const nextAction = decision === "seed-brainstorm" && recommendedTools.includes("lane_brainstorm_seed_decision")
+    ? "run-brainstorm-seed-decision"
+    : resolveNextAction(decision);
   const recommendationCode = resolveRecommendationCode(decision);
   const reportOnlyRouteAuthorized = action.controlPlaneAction === "run-report-only-route";
   const operatorPromptRequired = action.confirmationRequired;

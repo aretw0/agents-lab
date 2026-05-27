@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildControlPlaneProfilePacket,
   buildOperatorIntentIntakePacket,
+  inferBrainstormSeedDecisionIntent,
   inferBrainstormSeedIntent,
   inferRuntimeHealthIntent,
   inferWorkerDelegationIntent,
@@ -373,6 +374,50 @@ describe("structured interview primitive", () => {
       }),
     ]);
     expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.workerDispatchAllowed).toBe(false);
+
+    const plainPreviewPacket = buildOperatorIntentIntakePacket({
+      intent: "Converter o preview em tarefas dry-run, sem apply=true.",
+    });
+    expect(plainPreviewPacket.decision).toBe("seed-brainstorm");
+    expect(plainPreviewPacket.recommendedTools).toEqual(["lane_brainstorm_seed_decision"]);
+  });
+
+  it("routes seed-preview materialization intent to dry-run seed decision", () => {
+    expect(inferBrainstormSeedDecisionIntent("transformar o brainstorm seed-preview em decisão dry-run de seeding")).toBe(true);
+    expect(inferBrainstormSeedDecisionIntent("converter o preview em tarefas sem apply")).toBe(true);
+    expect(inferBrainstormSeedDecisionIntent("qual a próxima fatia local-safe?")).toBe(false);
+
+    const packet = buildOperatorIntentIntakePacket({
+      intent: "Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.",
+      autonomyRequest: "single-slice",
+      availableResources: ["board", "tests"],
+      expectedRoi: "materialize a reviewed local-safe seed without mutation",
+      limits: ["apply=false", "no workers"],
+      stopConditions: ["approval missing"],
+      operatorFocusKnown: true,
+      validationKnown: true,
+      rollbackKnown: true,
+      checkpointPlanned: true,
+    });
+
+    expect(packet.decision).toBe("seed-brainstorm");
+    expect(packet.controlPlaneAction).toBe("run-report-only-route");
+    expect(packet.nextAction).toBe("run-brainstorm-seed-decision");
+    expect(packet.confirmationRequired).toBe(false);
+    expect(packet.reportOnlyRouteAuthorized).toBe(true);
+    expect(packet.recommendedTools).toEqual(["lane_brainstorm_seed_decision"]);
+    expect(packet.executionPlan.executeWithoutTextualConfirmation).toBe(true);
+    expect(packet.executionPlan.steps).toEqual([
+      expect.objectContaining({
+        tool: "lane_brainstorm_seed_decision",
+        inputHint: expect.stringContaining("apply=false"),
+        consumesPreviousStepOutput: false,
+      }),
+    ]);
+    expect(packet.recommendation).toContain("dry-run seeding decision");
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.mutationAllowed).toBe(false);
     expect(packet.workerDispatchAllowed).toBe(false);
   });
 

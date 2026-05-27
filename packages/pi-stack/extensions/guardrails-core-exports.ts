@@ -127,7 +127,7 @@ export { buildRefactorFormatTargetResult, buildRefactorOrganizeImportsResult, bu
 export { parseStructuredJsonSelector, resolveStructuredIoKind, structuredJsonRead, structuredJsonWrite, structuredRead, structuredWrite } from "./guardrails-core-structured-io";
 export { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
 export { resolveStructuredInterview } from "./guardrails-core-structured-interview";
-export { buildOperatorIntentIntakePacket, inferBrainstormSeedIntent, inferRuntimeHealthIntent, inferWorkerDelegationIntent, inferWorkerReadinessIntent } from "./guardrails-core-operator-intent-intake";
+export { buildOperatorIntentIntakePacket, inferBrainstormSeedDecisionIntent, inferBrainstormSeedIntent, inferRuntimeHealthIntent, inferWorkerDelegationIntent, inferWorkerReadinessIntent } from "./guardrails-core-operator-intent-intake";
 export { resolveSkillAccessRoot, resolveSkillReadAccess, resolveTrustedGlobalSkillReadAccess } from "./guardrails-core-skill-access-policy";
 export { resolveToolCadenceDecision } from "./guardrails-core-tool-cadence";
 export { buildAgentsAsToolsCalibrationScore, buildLineBudgetSnapshot, buildSyntaxHygieneSummary, buildToolHygieneScorecard, classifyToolHygiene, detectSyntaxHygieneFindings } from "./guardrails-core-tool-hygiene";
