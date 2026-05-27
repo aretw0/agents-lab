@@ -165,3 +165,7 @@ export function registerGuardrailsStructuredInterviewSurface(pi: ExtensionAPI): 
     },
   });
 }
+
+export default function (pi: ExtensionAPI): void {
+  registerGuardrailsStructuredInterviewSurface(pi);
+}

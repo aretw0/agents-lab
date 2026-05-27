@@ -24,6 +24,10 @@ function checkPaths(section: string, paths: string[]) {
 }
 
 describe("manifest integrity", () => {
+  it("ships operator intent intake as a lean first-party surface", () => {
+    expect(manifest.extensions).toContain("./extensions/guardrails-core-structured-interview-surface.ts");
+  });
+
   checkPaths("extensions", manifest.extensions);
   if (manifest.themes) checkPaths("themes", manifest.themes);
   if (manifest.skills) checkPaths("skills", manifest.skills);
