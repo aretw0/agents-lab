@@ -9,6 +9,7 @@ import {
 	extractPackageNameFromSource,
 	isColdCapabilityPackageSource,
 	piDevDefaultEnabledModels,
+	resolveLocalPiCli,
 	reconcileLocalShellPath,
 	reconcilePiDevWatchdogConfig,
 	piDevWatchdogConfig,
@@ -84,6 +85,14 @@ test("pi dev model scope stays intentionally small", () => {
 		"openai-codex/gpt-5.4-mini",
 		"dashscope/qwen3.6-flash",
 	]);
+});
+
+test("pi isolated launcher resolves only the current Earendil CLI", () => {
+	const source = readFileSync(path.resolve("scripts", "pi-isolated.mjs"), "utf8");
+
+	assert.match(source, /node_modules.*@earendil-works.*pi-coding-agent.*dist.*cli\.js/s);
+	assert.doesNotMatch(source, /node_modules.*@mariozechner.*pi-coding-agent.*dist.*cli\.js/s);
+	assert.ok(resolveLocalPiCli()?.endsWith(path.join("@earendil-works", "pi-coding-agent", "dist", "cli.js")));
 });
 
 test("pi dev runtime profile can be overridden from env without editing settings", () => {

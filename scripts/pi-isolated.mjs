@@ -74,13 +74,10 @@ const LAB_PI_DEV_RUNTIME_PROFILE = {
 	defaultModel: "gpt-5.3-codex-spark",
 	enabledModels: LAB_PI_DEV_ENABLED_MODELS,
 };
-const LOCAL_PI_CLI_CANDIDATES = [
-	path.join(REPO_ROOT, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js"),
-	path.join(REPO_ROOT, "node_modules", "@mariozechner", "pi-coding-agent", "dist", "cli.js"),
-];
+const LOCAL_PI_CLI = path.join(REPO_ROOT, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
 
-function resolveLocalPiCli() {
-	return LOCAL_PI_CLI_CANDIDATES.find((candidate) => existsSync(candidate));
+export function resolveLocalPiCli() {
+	return existsSync(LOCAL_PI_CLI) ? LOCAL_PI_CLI : undefined;
 }
 
 function parseArgs(argv) {
@@ -658,7 +655,7 @@ function run() {
 	const localPiCli = resolveLocalPiCli();
 	if (!localPiCli) {
 		console.error("pi-isolated: local cli ausente");
-		for (const candidate of LOCAL_PI_CLI_CANDIDATES) console.error(`  tried: ${candidate}`);
+		console.error(`  tried: ${LOCAL_PI_CLI}`);
 		console.error("Dica: pnpm install (workspace root) para garantir resolução local determinística.");
 		process.exit(1);
 	}
