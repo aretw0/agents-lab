@@ -35,8 +35,13 @@ export function buildToolBackedRouteSystemPrompt(userText: string): string | und
 		|| (/report-?only|packet|pacote|dry-?run/i.test(text) && /tool|brainstorm|intent|intake|capability|capacidade|seed|seeding|preview/i.test(text))
 		|| inferBrainstormSeedDecisionIntent(text);
 	if (!mentionsToolBackedRoute) return undefined;
+	const routeIntent = resolveToolBackedRouteIntent(text);
+	const requiredToolsLine = routeIntent
+		? `- Required tool(s) for this operator request: ${routeIntent.requiredTools.join(", ")}.`
+		: "- Resolve the matching tool from the operator request before presenting packet-shaped output.";
 	return [
 		"Tool-backed route guard is active for this turn.",
+		requiredToolsLine,
 		"- If you present an operator_intent_intake_packet result or packet-shaped capability decision, call operator_intent_intake_packet in this turn first.",
 		"- If you present lane brainstorm, seed-preview, or seed-decision candidates, call the matching lane_brainstorm_* tool in this turn first.",
 		"- If the matching tool is unavailable, report blocked_missing_tool instead of synthesizing the packet from memory.",
@@ -226,7 +231,7 @@ export function registerToolBackedRouteCanary(pi: ExtensionAPI): void {
 		const ev = event as { text?: unknown; source?: unknown };
 		if (ev.source !== "interactive") return undefined;
 		const text = typeof ev.text === "string" ? ev.text : "";
-		if (inferBrainstormSeedDecisionIntent(text)) return { action: "continue" as const };
+		if (inferBrainstormSeedDecisionIntent(text)) return undefined;
 		const routeIntent = resolveToolBackedRouteIntent(text);
 		if (!routeIntent) return undefined;
 		pi.sendUserMessage?.(buildToolBackedRouteCanonicalPrompt(text, routeIntent.requiredTools), { deliverAs: "followUp" });

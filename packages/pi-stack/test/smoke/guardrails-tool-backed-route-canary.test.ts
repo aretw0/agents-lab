@@ -106,7 +106,7 @@ describe("guardrails tool-backed route canary", () => {
 		expect(prompt).toContain("Tool-backed route guard is active");
 		expect(prompt).toContain("call operator_intent_intake_packet");
 		expect(prompt).toContain("blocked_missing_tool");
-		expect(buildToolBackedRouteSystemPrompt("Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.")).toContain("matching lane_brainstorm_* tool");
+		expect(buildToolBackedRouteSystemPrompt("Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.")).toContain("Required tool(s) for this operator request: lane_brainstorm_seed_decision");
 		expect(buildToolBackedRouteSystemPrompt("Explique o roadmap de forma geral.")).toBeUndefined();
 	});
 
@@ -238,7 +238,7 @@ describe("guardrails tool-backed route canary", () => {
 			text: "Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.",
 		});
 
-		expect(result).toEqual({ action: "continue" });
+		expect(result).toBeUndefined();
 		expect(pi.sendUserMessage).not.toHaveBeenCalled();
 
 		const beforeAgent = handlers.get("before_agent_start")?.[0]?.({
@@ -246,6 +246,6 @@ describe("guardrails tool-backed route canary", () => {
 			systemPrompt: "base",
 		});
 		expect(beforeAgent.systemPrompt).toContain("base");
-		expect(beforeAgent.systemPrompt).toContain("call the matching lane_brainstorm_* tool");
+		expect(beforeAgent.systemPrompt).toContain("Required tool(s) for this operator request: lane_brainstorm_seed_decision");
 	});
 });
