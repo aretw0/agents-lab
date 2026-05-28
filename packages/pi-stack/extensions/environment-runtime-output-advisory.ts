@@ -24,6 +24,9 @@ const EVENT_LOOP_P99_RE = /event-loop p99\s+(\d+)ms/i;
 const WATCHDOG_RECURRING_EVENT_THRESHOLD = 3;
 const WATCHDOG_SEVERE_EVENT_LOOP_MAX_MS = 1000;
 const PLACEHOLDER_OUTPUT_RE = /^\s*\[?(?:cole|paste)\s+(?:aqui|here)\b/i;
+const WATCHDOG_SEVERITY_NONE = "none";
+const WATCHDOG_SEVERITY_THRESHOLD = "threshold-crossing";
+const WATCHDOG_SEVERITY_RECURRING_OR_SEVERE = "recurring-or-severe";
 
 function uniquePush(advisories: RuntimeOutputAdvisory[], advisory: RuntimeOutputAdvisory) {
   if (advisories.some((row) => row.code === advisory.code && row.detail === advisory.detail)) return;
@@ -60,7 +63,7 @@ export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutput
           action: "paste the exact Pi startup/reload output before classifying runtime health",
         },
       ],
-      summary: "runtime-output-advisory: decision=needs-evidence advisories=1 info=1 warn=0 block=0 codes=missing-runtime-output recurringOrSevere=no",
+      summary: "runtime-output-advisory: decision=needs-evidence advisories=1 info=1 warn=0 block=0 codes=missing-runtime-output recurringOrSevere=no watchdogSeverity=none",
     };
   }
 
@@ -100,7 +103,7 @@ export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutput
       code: "performance-watchdog-critical",
       level: parseWatchdogLevel(detail),
       detail,
-      action: "treat as safe-mode evidence when above the configured threshold; inspect live /watchdog:status in the Pi TUI",
+      action: "treat as safe-mode threshold-crossing evidence; ask the operator to inspect live /watchdog:status in the Pi TUI, do not execute slash commands via bash",
     });
   }
 
@@ -129,6 +132,11 @@ export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutput
   const hasBlock = advisories.some((row) => row.level === "block");
   const hasWarn = advisories.some((row) => row.level === "warn");
   const hasRecurringOrSevere = advisories.some((row) => row.code === "performance-watchdog-recurring-or-severe");
+  const watchdogSeverity = hasRecurringOrSevere
+    ? WATCHDOG_SEVERITY_RECURRING_OR_SEVERE
+    : watchdogCriticalDetails.length > 0
+      ? WATCHDOG_SEVERITY_THRESHOLD
+      : WATCHDOG_SEVERITY_NONE;
   const decision = hasBlock ? "stop-and-investigate" : hasWarn ? "safe-mode" : "continue";
   const counts = advisories.reduce<Record<RuntimeOutputAdvisoryLevel, number>>(
     (acc, row) => {
@@ -150,6 +158,7 @@ export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutput
       `block=${counts.block}`,
       `codes=${formatAdvisoryCodes(advisories)}`,
       `recurringOrSevere=${hasRecurringOrSevere ? "yes" : "no"}`,
+      `watchdogSeverity=${watchdogSeverity}`,
     ].join(" "),
   };
 }
