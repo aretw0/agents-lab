@@ -240,6 +240,8 @@ shortcut. Skipping.
       "performance-watchdog-critical",
     ]);
     expect(report.summary).toContain("warn=2");
+    expect(report.summary).toContain("codes=extension-shortcut-conflict,performance-watchdog-critical,runtime-dirty-repo,third-party-package-update-available");
+    expect(report.summary).toContain("recurringOrSevere=no");
   });
 
   it("classifies empty runtime output as missing evidence, not a stop condition", async () => {
@@ -253,6 +255,7 @@ shortcut. Skipping.
       }),
     ]);
     expect(report.summary).toContain("decision=needs-evidence");
+    expect(report.summary).toContain("codes=missing-runtime-output");
   });
 
   it("classifies placeholder runtime output as missing evidence", async () => {
@@ -279,6 +282,8 @@ shortcut. Skipping.
       "performance-watchdog-auto-safe-mode",
     ]);
     expect(report.advisories.every((row) => row.level === "warn")).toBe(true);
+    expect(report.summary).toContain("codes=performance-watchdog-auto-safe-mode,performance-watchdog-critical");
+    expect(report.summary).toContain("recurringOrSevere=no");
   });
 
   it("highlights recurring or severe watchdog spikes without converting them to stop", async () => {
@@ -297,6 +302,8 @@ shortcut. Skipping.
       }),
     ]));
     expect(report.summary).toContain("decision=safe-mode");
+    expect(report.summary).toContain("codes=performance-watchdog-auto-safe-mode,performance-watchdog-critical,performance-watchdog-recurring-or-severe");
+    expect(report.summary).toContain("recurringOrSevere=yes");
   });
 
   it("environment_runtime_output_advisory exposes compact operator output", async () => {

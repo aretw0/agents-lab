@@ -38,6 +38,11 @@ function parseWatchdogLevel(detail: string): RuntimeOutputAdvisoryLevel {
   return "info";
 }
 
+function formatAdvisoryCodes(advisories: RuntimeOutputAdvisory[]): string {
+  const codes = Array.from(new Set(advisories.map((row) => row.code))).sort();
+  return codes.length > 0 ? codes.join(",") : "none";
+}
+
 export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutputAdvisoryReport {
   const text = String(rawOutput ?? "");
   const advisories: RuntimeOutputAdvisory[] = [];
@@ -55,7 +60,7 @@ export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutput
           action: "paste the exact Pi startup/reload output before classifying runtime health",
         },
       ],
-      summary: "runtime-output-advisory: decision=needs-evidence advisories=1 info=1 warn=0 block=0",
+      summary: "runtime-output-advisory: decision=needs-evidence advisories=1 info=1 warn=0 block=0 codes=missing-runtime-output recurringOrSevere=no",
     };
   }
 
@@ -123,6 +128,7 @@ export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutput
 
   const hasBlock = advisories.some((row) => row.level === "block");
   const hasWarn = advisories.some((row) => row.level === "warn");
+  const hasRecurringOrSevere = advisories.some((row) => row.code === "performance-watchdog-recurring-or-severe");
   const decision = hasBlock ? "stop-and-investigate" : hasWarn ? "safe-mode" : "continue";
   const counts = advisories.reduce<Record<RuntimeOutputAdvisoryLevel, number>>(
     (acc, row) => {
@@ -142,6 +148,8 @@ export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutput
       `info=${counts.info}`,
       `warn=${counts.warn}`,
       `block=${counts.block}`,
+      `codes=${formatAdvisoryCodes(advisories)}`,
+      `recurringOrSevere=${hasRecurringOrSevere ? "yes" : "no"}`,
     ].join(" "),
   };
 }
