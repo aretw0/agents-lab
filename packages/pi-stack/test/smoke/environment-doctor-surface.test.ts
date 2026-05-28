@@ -246,6 +246,8 @@ shortcut. Skipping.
     expect(report.summary).toContain("severe=no");
     expect(report.summary).toContain("thresholdCrossing=yes");
     expect(report.summary).toContain("watchdogSeverity=threshold-crossing");
+    expect(report.summary).toContain("watchdogClass=warning-threshold-crossing");
+    expect(report.summary).toContain("operatorAction=operator-tui-watchdog-status-if-laggy");
   });
 
   it("classifies empty runtime output as missing evidence, not a stop condition", async () => {
@@ -263,6 +265,8 @@ shortcut. Skipping.
     expect(report.summary).toContain("severe=no");
     expect(report.summary).toContain("thresholdCrossing=no");
     expect(report.summary).toContain("watchdogSeverity=none");
+    expect(report.summary).toContain("watchdogClass=none");
+    expect(report.summary).toContain("operatorAction=continue");
   });
 
   it("classifies placeholder runtime output as missing evidence", async () => {
@@ -295,6 +299,8 @@ shortcut. Skipping.
     expect(report.summary).toContain("severe=no");
     expect(report.summary).toContain("thresholdCrossing=yes");
     expect(report.summary).toContain("watchdogSeverity=threshold-crossing");
+    expect(report.summary).toContain("watchdogClass=warning-threshold-crossing");
+    expect(report.summary).toContain("operatorAction=operator-tui-watchdog-status-if-laggy");
   });
 
   it("highlights recurring or severe watchdog spikes without converting them to stop", async () => {
@@ -319,6 +325,8 @@ shortcut. Skipping.
     expect(report.summary).toContain("severe=yes");
     expect(report.summary).toContain("thresholdCrossing=yes");
     expect(report.summary).toContain("watchdogSeverity=recurring-or-severe");
+    expect(report.summary).toContain("watchdogClass=recurring-or-severe");
+    expect(report.summary).toContain("operatorAction=operator-tui-watchdog-status-if-laggy");
   });
 
   it("environment_runtime_output_advisory exposes compact operator output", async () => {
