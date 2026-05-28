@@ -23,6 +23,7 @@ const EVENT_LOOP_MAX_RE = /event-loop max\s+(\d+)ms/i;
 const EVENT_LOOP_P99_RE = /event-loop p99\s+(\d+)ms/i;
 const WATCHDOG_RECURRING_EVENT_THRESHOLD = 3;
 const WATCHDOG_SEVERE_EVENT_LOOP_MAX_MS = 1000;
+const PLACEHOLDER_OUTPUT_RE = /^\s*\[?(?:cole|paste)\s+(?:aqui|here)\b/i;
 
 function uniquePush(advisories: RuntimeOutputAdvisory[], advisory: RuntimeOutputAdvisory) {
   if (advisories.some((row) => row.code === advisory.code && row.detail === advisory.detail)) return;
@@ -43,14 +44,14 @@ export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutput
   const watchdogCriticalDetails: string[] = [];
   const watchdogCriticalMaxValues: number[] = [];
 
-  if (!text.trim()) {
+  if (!text.trim() || PLACEHOLDER_OUTPUT_RE.test(text.trim())) {
     return {
       decision: "needs-evidence",
       advisories: [
         {
           code: "missing-runtime-output",
           level: "info",
-          detail: "raw_output is empty",
+          detail: text.trim() ? "raw_output is a placeholder" : "raw_output is empty",
           action: "paste the exact Pi startup/reload output before classifying runtime health",
         },
       ],

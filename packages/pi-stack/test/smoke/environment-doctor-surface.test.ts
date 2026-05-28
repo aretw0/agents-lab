@@ -255,6 +255,18 @@ shortcut. Skipping.
     expect(report.summary).toContain("decision=needs-evidence");
   });
 
+  it("classifies placeholder runtime output as missing evidence", async () => {
+    const report = analyzeRuntimeOutputAdvisories("[cole aqui os últimos erros Performance watchdog critical e Warning safe mode]");
+
+    expect(report.decision).toBe("needs-evidence");
+    expect(report.advisories).toEqual([
+      expect.objectContaining({
+        code: "missing-runtime-output",
+        detail: "raw_output is a placeholder",
+      }),
+    ]);
+  });
+
   it("classifies watchdog threshold crossings and auto safe-mode as safe-mode advisories", async () => {
     const report = analyzeRuntimeOutputAdvisories(`
  Error: Performance watchdog critical: event-loop max 416ms. Run /watchdog:status or /safe-mode on if input feels laggy.
