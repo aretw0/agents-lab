@@ -107,7 +107,58 @@ test("collectPerformanceWatchdogStats reads config and persisted session events"
     assert.equal(stats.persistedEventCount, 2);
     assert.deepEqual(stats.criticalEvents, ["event-loop max 300ms. Run /watchdog:status"]);
     assert.deepEqual(stats.safeModeEvents, ["watchdog: event-loop max 319ms"]);
+    assert.deepEqual(stats.eventLoopMaxValues, [300, 319]);
+    assert.equal(stats.eventLoopObservedMaxMs, 319);
+    assert.equal(stats.recurring, false);
+    assert.equal(stats.severe, false);
+    assert.equal(stats.thresholdCrossing, true);
+    assert.equal(stats.watchdogClass, "warning-threshold-crossing");
+    assert.equal(stats.operatorAction, "operator-tui-watchdog-status-if-laggy");
+    assert.match(stats.summary, /eventLoopObservedMaxMs=319/);
+    assert.match(stats.summary, /watchdogClass=warning-threshold-crossing/);
     assert.equal(stats.liveEventLoopVisibleExternally, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("collectPerformanceWatchdogStats classifies recurring or severe persisted events", () => {
+  const cwd = makeWorkspace();
+  try {
+    const configPath = join(cwd, ".pi", "agent", "extensions", "watchdog", "config.json");
+    mkdirSync(join(cwd, ".pi", "agent", "extensions", "watchdog"), { recursive: true });
+    writeJson(configPath, {
+      enabled: true,
+      thresholds: {
+        eventLoopMaxMs: 300,
+        eventLoopP99Ms: 150,
+      },
+    });
+    const sessions = join(cwd, ".sandbox", "pi-agent", "sessions", "workspace");
+    mkdirSync(sessions, { recursive: true });
+    const sessionPath = join(sessions, "latest.jsonl");
+    writeFileSync(
+      sessionPath,
+      [
+        "Error: Performance watchdog critical: event-loop max 719ms. Run /watchdog:status",
+        "Warning: Watchdog enabled safe mode automatically: safe mode is on (watchdog: event-loop max 668ms).",
+        "Error: Performance watchdog critical: event-loop max 1213ms. Run /watchdog:status",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const stats = collectPerformanceWatchdogStats(cwd, { configPath, sessionPath });
+
+    assert.equal(stats.persistedEventCount, 3);
+    assert.deepEqual(stats.eventLoopMaxValues, [719, 1213, 668]);
+    assert.equal(stats.eventLoopObservedMaxMs, 1213);
+    assert.equal(stats.recurring, true);
+    assert.equal(stats.severe, true);
+    assert.equal(stats.thresholdCrossing, true);
+    assert.equal(stats.watchdogClass, "recurring-or-severe");
+    assert.match(stats.summary, /recurring=yes/);
+    assert.match(stats.summary, /severe=yes/);
+    assert.match(stats.summary, /operatorAction=operator-tui-watchdog-status-if-laggy/);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

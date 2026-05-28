@@ -109,6 +109,12 @@ export function buildPiRuntimeHealthReport(cwd = process.cwd(), options = {}) {
       `signals=${devPressure.signals?.length ?? 0}`,
       `artifacts=${artifactAudit.violations?.length ?? 0}`,
       `watchdogPersistedEvents=${watchdog.persistedEventCount ?? 0}`,
+      `eventLoopObservedMaxMs=${watchdog.eventLoopObservedMaxMs ?? "n/a"}`,
+      `recurring=${watchdog.recurring ? "yes" : "no"}`,
+      `severe=${watchdog.severe ? "yes" : "no"}`,
+      `thresholdCrossing=${watchdog.thresholdCrossing ? "yes" : "no"}`,
+      `watchdogClass=${watchdog.watchdogClass ?? "none"}`,
+      `operatorAction=${watchdog.operatorAction ?? "continue"}`,
       "liveWatchdog=unavailable",
     ].join(" "),
     devPressure: {
@@ -139,7 +145,16 @@ export function formatPiRuntimeHealthReport(report) {
     `- dev-pressure: ${report.devPressure.summary}`,
     `- dev-pressure action: ${report.devPressure.primaryAction}`,
     `- runtime-artifacts: tracked=${report.artifactAudit.trackedCount} violations=${report.artifactAudit.violations.length}`,
-    `- performance-watchdog: persistedEvents=${report.devPressure.performanceWatchdog.persistedEventCount ?? 0} liveMetrics=unavailable`,
+    [
+      `- performance-watchdog: persistedEvents=${report.devPressure.performanceWatchdog.persistedEventCount ?? 0}`,
+      `eventLoopObservedMaxMs=${report.devPressure.performanceWatchdog.eventLoopObservedMaxMs ?? "n/a"}`,
+      `recurring=${report.devPressure.performanceWatchdog.recurring ? "yes" : "no"}`,
+      `severe=${report.devPressure.performanceWatchdog.severe ? "yes" : "no"}`,
+      `thresholdCrossing=${report.devPressure.performanceWatchdog.thresholdCrossing ? "yes" : "no"}`,
+      `watchdogClass=${report.devPressure.performanceWatchdog.watchdogClass ?? "none"}`,
+      `operatorAction=${report.devPressure.performanceWatchdog.operatorAction ?? "continue"}`,
+      "liveMetrics=unavailable",
+    ].join(" "),
     "- note: live rss/heap/event-loop metrics remain Pi TUI-local; /watchdog:status is a Pi TUI command, not a shell command.",
   ];
   for (const action of report.devPressure.primaryRecoveryActions.slice(0, 4)) {

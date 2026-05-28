@@ -43,6 +43,9 @@ const DEFAULT_THRESHOLDS = {
 const WATCHDOG_TAIL_BYTES = 2_000_000;
 const PERFORMANCE_WATCHDOG_CRITICAL_RE = /Performance watchdog critical:\s*([^"\n\r]+)/gi;
 const PERFORMANCE_WATCHDOG_SAFE_MODE_RE = /Watchdog enabled safe mode automatically:\s*safe mode is on\s*\(([^)"\n\r]+)\)/gi;
+const PERFORMANCE_WATCHDOG_EVENT_LOOP_MAX_RE = /event-loop\s+max\s+(\d+(?:\.\d+)?)ms/i;
+const PERFORMANCE_WATCHDOG_RECURRING_EVENT_COUNT = 3;
+const PERFORMANCE_WATCHDOG_SEVERE_EVENT_LOOP_MAX_MS = 1000;
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -146,6 +149,16 @@ function collectRegexMatches(text, regex, max = 5) {
   return matches;
 }
 
+function extractEventLoopMaxValues(events) {
+  return events
+    .map((event) => {
+      const match = PERFORMANCE_WATCHDOG_EVENT_LOOP_MAX_RE.exec(String(event ?? ""));
+      const value = Number(match?.[1]);
+      return Number.isFinite(value) ? value : undefined;
+    })
+    .filter((value) => value !== undefined);
+}
+
 export function collectPerformanceWatchdogStats(cwd = process.cwd(), options = {}) {
   const configPath = options.configPath
     ?? path.join(homedir(), ".pi", "agent", "extensions", "watchdog", "config.json");
@@ -176,6 +189,25 @@ export function collectPerformanceWatchdogStats(cwd = process.cwd(), options = {
     }
   }
 
+  const eventLoopMaxValues = extractEventLoopMaxValues([
+    ...result.criticalEvents,
+    ...result.safeModeEvents,
+  ]);
+  result.eventLoopMaxValues = eventLoopMaxValues;
+  result.eventLoopObservedMaxMs = eventLoopMaxValues.length > 0 ? Math.max(...eventLoopMaxValues) : undefined;
+  result.recurring = result.persistedEventCount >= PERFORMANCE_WATCHDOG_RECURRING_EVENT_COUNT;
+  result.severe = Number.isFinite(result.eventLoopObservedMaxMs)
+    && result.eventLoopObservedMaxMs >= PERFORMANCE_WATCHDOG_SEVERE_EVENT_LOOP_MAX_MS;
+  result.thresholdCrossing = result.persistedEventCount > 0;
+  result.watchdogClass = result.recurring || result.severe
+    ? "recurring-or-severe"
+    : result.thresholdCrossing
+      ? "warning-threshold-crossing"
+      : "none";
+  result.operatorAction = result.thresholdCrossing
+    ? "operator-tui-watchdog-status-if-laggy"
+    : "continue";
+
   const thresholds = config?.thresholds;
   const eventLoopMaxMs = Number(thresholds?.eventLoopMaxMs);
   const eventLoopP99Ms = Number(thresholds?.eventLoopP99Ms);
@@ -191,6 +223,12 @@ export function collectPerformanceWatchdogStats(cwd = process.cwd(), options = {
     `eventLoopMaxMs=${result.thresholdSummary.eventLoopMaxMs ?? "n/a"}`,
     `eventLoopP99Ms=${result.thresholdSummary.eventLoopP99Ms ?? "n/a"}`,
     `persistedEvents=${result.persistedEventCount}`,
+    `eventLoopObservedMaxMs=${result.eventLoopObservedMaxMs ?? "n/a"}`,
+    `recurring=${result.recurring ? "yes" : "no"}`,
+    `severe=${result.severe ? "yes" : "no"}`,
+    `thresholdCrossing=${result.thresholdCrossing ? "yes" : "no"}`,
+    `watchdogClass=${result.watchdogClass}`,
+    `operatorAction=${result.operatorAction}`,
     "liveEventLoopExternal=no",
   ].join(" ");
   return result;
@@ -766,8 +804,16 @@ export function buildPiDevPressureReport(cwd = process.cwd(), options = {}) {
   if ((performanceWatchdog.criticalEvents?.length ?? 0) > 0 || (performanceWatchdog.safeModeEvents?.length ?? 0) > 0) {
     signals.push({
       level: "warn",
-      code: "recent-performance-watchdog-event",
-      detail: `persistedEvents=${performanceWatchdog.persistedEventCount}`,
+      code: performanceWatchdog.watchdogClass === "recurring-or-severe"
+        ? "recurring-or-severe-performance-watchdog-event"
+        : "recent-performance-watchdog-event",
+      detail: [
+        `persistedEvents=${performanceWatchdog.persistedEventCount}`,
+        `eventLoopObservedMaxMs=${performanceWatchdog.eventLoopObservedMaxMs ?? "n/a"}`,
+        `recurring=${performanceWatchdog.recurring ? "yes" : "no"}`,
+        `severe=${performanceWatchdog.severe ? "yes" : "no"}`,
+        `watchdogClass=${performanceWatchdog.watchdogClass ?? "n/a"}`,
+      ].join(" "),
     });
   } else if (
     performanceWatchdog.available &&

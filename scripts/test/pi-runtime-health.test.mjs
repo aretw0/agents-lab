@@ -67,14 +67,29 @@ test("runtime health human output labels watchdog slash commands as Pi TUI comma
 test("runtime health recommends safe-mode for persisted watchdog pressure", () => {
   const report = buildPiRuntimeHealthReport("/tmp/agents-lab", {
     devPressure: makeDevPressure({
-      signals: [{ level: "warn", code: "recent-performance-watchdog-event", detail: "persistedEvents=2" }],
-      performanceWatchdog: { persistedEventCount: 2 },
+      signals: [{
+        level: "warn",
+        code: "recurring-or-severe-performance-watchdog-event",
+        detail: "persistedEvents=3 eventLoopObservedMaxMs=1213 recurring=yes severe=yes watchdogClass=recurring-or-severe",
+      }],
+      performanceWatchdog: {
+        persistedEventCount: 3,
+        eventLoopObservedMaxMs: 1213,
+        recurring: true,
+        severe: true,
+        thresholdCrossing: true,
+        watchdogClass: "recurring-or-severe",
+        operatorAction: "operator-tui-watchdog-status-if-laggy",
+      },
     }),
     artifactAudit: makeArtifactAudit(),
   });
 
   assert.equal(report.decision, "safe-mode");
   assert.deepEqual(report.reasons, ["recent-performance-watchdog-event"]);
+  assert.match(report.summary, /eventLoopObservedMaxMs=1213/);
+  assert.match(report.summary, /watchdogClass=recurring-or-severe/);
+  assert.match(formatPiRuntimeHealthReport(report), /operatorAction=operator-tui-watchdog-status-if-laggy/);
 });
 
 test("runtime health surfaces recovery action for active full-startup pi-lens", () => {
