@@ -8,6 +8,7 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { appendAuditEntry } from "./guardrails-core-confirmation-audit";
 import { extractAssistantTextFromTurnMessage } from "./guardrails-core-bloat";
+import { inferBrainstormSeedDecisionIntent } from "./guardrails-core-operator-intent-intake";
 
 export type ToolBackedRouteCanaryDecision =
 	| {
@@ -97,6 +98,16 @@ export function buildToolBackedRouteCorrectionPrompt(decision: Extract<ToolBacke
 		`Required tool(s): ${decision.requiredTools.join(", ")}`,
 		"Do not infer or restate the packet from memory.",
 		"Call the matching tool now, or answer exactly: blocked_missing_tool, with the missing tool name.",
+	].join("\n");
+}
+
+export function buildToolBackedRouteEmptyAnswerPrompt(requiredTools: string[]): string {
+	return [
+		"[tool-backed-route empty-answer correction]",
+		"You produced an empty answer for a tool-backed route.",
+		`Required tool(s): ${requiredTools.join(", ")}`,
+		"Do not answer from memory or return an empty response.",
+		"Call the required tool now, or answer exactly: blocked_missing_tool, with the missing tool name.",
 	].join("\n");
 }
 
@@ -216,25 +227,31 @@ export function evaluateToolBackedRouteCanary(
 
 export function registerToolBackedRouteCanary(pi: ExtensionAPI): void {
 	const recentToolNames = new Set<string>();
+	let pendingRouteIntent: { requiredTools: string[]; reasonCode: "operator-intent" | "lane-brainstorm" } | undefined;
 	let lastSignalKey: string | undefined;
 
-	function reset() {
+	function resetToolCallState() {
 		recentToolNames.clear();
 		lastSignalKey = undefined;
 	}
 
 	pi.on("input", (event) => {
-		reset();
+		resetToolCallState();
+		pendingRouteIntent = undefined;
 		const ev = event as { text?: unknown; source?: unknown };
 		if (ev.source !== "interactive") return undefined;
 		const text = typeof ev.text === "string" ? ev.text : "";
 		const routeIntent = resolveToolBackedRouteIntent(text);
+		const naturalSeedDecisionIntent = inferBrainstormSeedDecisionIntent(text)
+			? { requiredTools: [LANE_BRAINSTORM_DECISION_TOOL], reasonCode: "lane-brainstorm" as const }
+			: undefined;
+		pendingRouteIntent = routeIntent ?? naturalSeedDecisionIntent;
 		if (!routeIntent) return undefined;
 		pi.sendUserMessage?.(buildToolBackedRouteCanonicalPrompt(text, routeIntent.requiredTools), { deliverAs: "followUp" });
 		return { action: "handled" as const };
 	});
 	pi.on("before_agent_start", (event) => {
-		reset();
+		resetToolCallState();
 		const ev = event as { prompt?: unknown; systemPrompt?: unknown };
 		const systemPrompt = buildToolBackedRouteSystemPrompt(typeof ev.prompt === "string" ? ev.prompt : "");
 		if (!systemPrompt) return undefined;
@@ -247,6 +264,26 @@ export function registerToolBackedRouteCanary(pi: ExtensionAPI): void {
 	});
 	pi.on("turn_end", (event, ctx: ExtensionContext) => {
 		const assistantText = extractAssistantTextFromTurnMessage((event as { message?: unknown })?.message);
+		if (!assistantText.trim() && pendingRouteIntent) {
+			const signalKey = `empty:${pendingRouteIntent.requiredTools.join("|")}`;
+			ctx.ui?.setStatus?.("guardrails-tool-backed-route", "[tool-backed] empty-answer");
+			appendAuditEntry(ctx, "guardrails-core.tool-backed-route-canary", {
+				atIso: new Date().toISOString(),
+				reasonCode: "empty-tool-backed-answer",
+				requiredTools: pendingRouteIntent.requiredTools,
+				evidence: ["empty-answer"],
+				recentToolNames: Array.from(recentToolNames).sort(),
+			});
+			if (signalKey !== lastSignalKey) {
+				lastSignalKey = signalKey;
+				ctx.ui?.notify?.([
+					"tool-backed-route: empty answer for tool-backed route",
+					"Call the matching packet tool, or report blocked_missing_tool if the tool is unavailable.",
+				].join("\n"), "warning");
+				pi.sendUserMessage?.(buildToolBackedRouteEmptyAnswerPrompt(pendingRouteIntent.requiredTools), { deliverAs: "followUp" });
+			}
+			return;
+		}
 		const decision = evaluateToolBackedRouteCanary(assistantText, recentToolNames);
 		if (decision.decision !== "flag") return;
 

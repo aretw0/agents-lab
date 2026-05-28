@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	buildToolBackedRouteCanonicalPrompt,
 	buildToolBackedRouteCorrectionPrompt,
+	buildToolBackedRouteEmptyAnswerPrompt,
 	buildToolBackedRouteSystemPrompt,
 	evaluateToolBackedRouteCanary,
 	extractToolBackedRouteToolName,
@@ -127,6 +128,14 @@ describe("guardrails tool-backed route canary", () => {
 		expect(prompt).toContain("blocked_missing_tool");
 	});
 
+	it("builds an empty-answer correction for tool-backed routes", () => {
+		const prompt = buildToolBackedRouteEmptyAnswerPrompt(["lane_brainstorm_seed_decision"]);
+
+		expect(prompt).toContain("empty-answer correction");
+		expect(prompt).toContain("Required tool(s): lane_brainstorm_seed_decision");
+		expect(prompt).toContain("Call the required tool now");
+	});
+
 	it("resolves explicit interactive tool-backed route intent", () => {
 		expect(resolveToolBackedRouteIntent("Rode lane_brainstorm_packet e lane_brainstorm_seed_preview em report-only.")).toMatchObject({
 			reasonCode: "lane-brainstorm",
@@ -241,5 +250,37 @@ describe("guardrails tool-backed route canary", () => {
 			prompt: "Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.",
 			systemPrompt: "base",
 		})).toBeUndefined();
+	});
+
+	it("queues a correction when a natural seed decision route returns an empty answer", () => {
+		const handlers = new Map<string, Function[]>();
+		const pi = {
+			on(eventName: string, handler: Function) {
+				handlers.set(eventName, [...(handlers.get(eventName) ?? []), handler]);
+			},
+			sendUserMessage: vi.fn(),
+		};
+		const ctx = {
+			cwd: process.cwd(),
+			ui: { setStatus: vi.fn(), notify: vi.fn() },
+		};
+		registerToolBackedRouteCanary(pi as any);
+
+		handlers.get("input")?.[0]?.({
+			source: "interactive",
+			text: "Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.",
+		});
+		handlers.get("before_agent_start")?.[0]?.({
+			prompt: "Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.",
+			systemPrompt: "base",
+		});
+		handlers.get("turn_end")?.[0]?.({
+			message: { role: "assistant", content: [{ type: "text", text: "" }] },
+		}, ctx);
+
+		expect(pi.sendUserMessage).toHaveBeenCalledTimes(1);
+		expect(pi.sendUserMessage.mock.calls[0]?.[0]).toContain("Required tool(s): lane_brainstorm_seed_decision");
+		expect(pi.sendUserMessage.mock.calls[0]?.[1]).toEqual({ deliverAs: "followUp" });
+		expect(ctx.ui.notify).toHaveBeenCalledOnce();
 	});
 });
