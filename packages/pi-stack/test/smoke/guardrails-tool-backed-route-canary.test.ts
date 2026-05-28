@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+	buildNaturalSeedDecisionRoutePrompt,
 	buildToolBackedRouteCanonicalPrompt,
 	buildToolBackedRouteCorrectionPrompt,
 	buildToolBackedRouteEmptyAnswerPrompt,
@@ -170,6 +171,15 @@ describe("guardrails tool-backed route canary", () => {
 		])).toContain("If it authorizes a report-only route");
 	});
 
+	it("builds a narrow natural seed decision route prompt", () => {
+		const prompt = buildNaturalSeedDecisionRoutePrompt("Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding.");
+
+		expect(prompt).toContain("Use lane_brainstorm_seed_decision now in dry-run mode.");
+		expect(prompt).toContain("Do not infer");
+		expect(prompt).toContain("blocked_missing_tool, lane_brainstorm_seed_decision");
+		expect(prompt).toContain("Operator request:");
+	});
+
 	it("queues a follow-up when a packet-shaped answer lacks tool evidence", () => {
 		const handlers = new Map<string, Function[]>();
 		const pi = {
@@ -229,7 +239,7 @@ describe("guardrails tool-backed route canary", () => {
 		expect(pi.sendUserMessage.mock.calls[0]?.[1]).toEqual({ deliverAs: "followUp" });
 	});
 
-	it("does not intercept natural seed decision prompts before the agent turn", () => {
+	it("routes natural seed decision prompts through the seed decision tool before the agent turn", () => {
 		const handlers = new Map<string, Function[]>();
 		const pi = {
 			on(eventName: string, handler: Function) {
@@ -244,8 +254,11 @@ describe("guardrails tool-backed route canary", () => {
 			text: "Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.",
 		});
 
-		expect(result).toBeUndefined();
-		expect(pi.sendUserMessage).not.toHaveBeenCalled();
+		expect(result).toEqual({ action: "handled" });
+		expect(pi.sendUserMessage).toHaveBeenCalledTimes(1);
+		expect(pi.sendUserMessage.mock.calls[0]?.[0]).toContain("Use lane_brainstorm_seed_decision now in dry-run mode.");
+		expect(pi.sendUserMessage.mock.calls[0]?.[0]).toContain("Operator request:");
+		expect(pi.sendUserMessage.mock.calls[0]?.[1]).toEqual({ deliverAs: "followUp" });
 		expect(handlers.get("before_agent_start")?.[0]?.({
 			prompt: "Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.",
 			systemPrompt: "base",
@@ -278,9 +291,11 @@ describe("guardrails tool-backed route canary", () => {
 			message: { role: "assistant", content: [{ type: "text", text: "" }] },
 		}, ctx);
 
-		expect(pi.sendUserMessage).toHaveBeenCalledTimes(1);
-		expect(pi.sendUserMessage.mock.calls[0]?.[0]).toContain("Required tool(s): lane_brainstorm_seed_decision");
+		expect(pi.sendUserMessage).toHaveBeenCalledTimes(2);
+		expect(pi.sendUserMessage.mock.calls[0]?.[0]).toContain("Use lane_brainstorm_seed_decision now in dry-run mode.");
 		expect(pi.sendUserMessage.mock.calls[0]?.[1]).toEqual({ deliverAs: "followUp" });
+		expect(pi.sendUserMessage.mock.calls[1]?.[0]).toContain("Required tool(s): lane_brainstorm_seed_decision");
+		expect(pi.sendUserMessage.mock.calls[1]?.[1]).toEqual({ deliverAs: "followUp" });
 		expect(ctx.ui.notify).toHaveBeenCalledOnce();
 	});
 });

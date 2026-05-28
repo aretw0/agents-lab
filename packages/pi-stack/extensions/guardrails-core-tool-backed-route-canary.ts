@@ -91,6 +91,17 @@ export function buildToolBackedRouteCanonicalPrompt(userText: string, requiredTo
 	].join("\n");
 }
 
+export function buildNaturalSeedDecisionRoutePrompt(userText: string): string {
+	return [
+		"Use lane_brainstorm_seed_decision now in dry-run mode.",
+		"Do not infer the seed decision from memory.",
+		"If lane_brainstorm_seed_decision is unavailable, answer exactly: blocked_missing_tool, lane_brainstorm_seed_decision.",
+		"",
+		"Operator request:",
+		userText.trim(),
+	].join("\n");
+}
+
 export function buildToolBackedRouteCorrectionPrompt(decision: Extract<ToolBackedRouteCanaryDecision, { decision: "flag" }>): string {
 	return [
 		"[tool-backed-route correction]",
@@ -246,6 +257,10 @@ export function registerToolBackedRouteCanary(pi: ExtensionAPI): void {
 			? { requiredTools: [LANE_BRAINSTORM_DECISION_TOOL], reasonCode: "lane-brainstorm" as const }
 			: undefined;
 		pendingRouteIntent = routeIntent ?? naturalSeedDecisionIntent;
+		if (!routeIntent && naturalSeedDecisionIntent) {
+			pi.sendUserMessage?.(buildNaturalSeedDecisionRoutePrompt(text), { deliverAs: "followUp" });
+			return { action: "handled" as const };
+		}
 		if (!routeIntent) return undefined;
 		pi.sendUserMessage?.(buildToolBackedRouteCanonicalPrompt(text, routeIntent.requiredTools), { deliverAs: "followUp" });
 		return { action: "handled" as const };
