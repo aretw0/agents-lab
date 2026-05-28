@@ -242,6 +242,9 @@ shortcut. Skipping.
     expect(report.summary).toContain("warn=2");
     expect(report.summary).toContain("codes=extension-shortcut-conflict,performance-watchdog-critical,runtime-dirty-repo,third-party-package-update-available");
     expect(report.summary).toContain("recurringOrSevere=no");
+    expect(report.summary).toContain("recurring=no");
+    expect(report.summary).toContain("severe=no");
+    expect(report.summary).toContain("thresholdCrossing=yes");
     expect(report.summary).toContain("watchdogSeverity=threshold-crossing");
   });
 
@@ -257,6 +260,8 @@ shortcut. Skipping.
     ]);
     expect(report.summary).toContain("decision=needs-evidence");
     expect(report.summary).toContain("codes=missing-runtime-output");
+    expect(report.summary).toContain("severe=no");
+    expect(report.summary).toContain("thresholdCrossing=no");
     expect(report.summary).toContain("watchdogSeverity=none");
   });
 
@@ -286,6 +291,9 @@ shortcut. Skipping.
     expect(report.advisories.every((row) => row.level === "warn")).toBe(true);
     expect(report.summary).toContain("codes=performance-watchdog-auto-safe-mode,performance-watchdog-critical");
     expect(report.summary).toContain("recurringOrSevere=no");
+    expect(report.summary).toContain("recurring=no");
+    expect(report.summary).toContain("severe=no");
+    expect(report.summary).toContain("thresholdCrossing=yes");
     expect(report.summary).toContain("watchdogSeverity=threshold-crossing");
   });
 
@@ -307,6 +315,9 @@ shortcut. Skipping.
     expect(report.summary).toContain("decision=safe-mode");
     expect(report.summary).toContain("codes=performance-watchdog-auto-safe-mode,performance-watchdog-critical,performance-watchdog-recurring-or-severe");
     expect(report.summary).toContain("recurringOrSevere=yes");
+    expect(report.summary).toContain("recurring=no");
+    expect(report.summary).toContain("severe=yes");
+    expect(report.summary).toContain("thresholdCrossing=yes");
     expect(report.summary).toContain("watchdogSeverity=recurring-or-severe");
   });
 
