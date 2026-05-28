@@ -156,6 +156,28 @@
       "milestone": "0.8-control-plane-dynamic-capabilities",
       "notes": "[provenance:system] source_task=TASK-BUD-1070 reason=macro decomposition. Fecha o ciclo de dogfooding observado nesta sessão antes de completar a macro.\n2026-05-27: Dogfooding read-only guidance hardened in control-plane continuity skill and distributed docs. needs-evidence is evidence collection, not automatic stop-and-investigate; watchdog safe-mode keeps the route small/read-only and blocks expensive/protected capability escalation. Validation: targeted vitest + docs:package:check.",
       "verification": "verify-task-bud-1095-dogfooding-readonly"
+    },
+    {
+      "id": "TASK-BUD-1096",
+      "description": "[P1] Fazer intenções naturais tool-backed chamarem a tool first-party antes da resposta final, mantendo a correção de resposta vazia apenas como fail-safe.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-tool-backed-route-canary.ts",
+        "packages/pi-stack/extensions/guardrails-core-operator-intent-intake.ts",
+        "packages/pi-stack/extensions/guardrails-core-lane-brainstorm-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-tool-backed-route-canary.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Uma intenção natural de seeding dry-run chama `lane_brainstorm_seed_decision` antes da resposta final, sem depender de prompt manual `tool-backed-route canonical`.",
+        "Respostas packet-shaped sem tool continuam bloqueadas/corrigidas pelo canary.",
+        "Resposta vazia em rota tool-backed continua gerando follow-up de recuperação, mas é tratada como fallback observado e não como caminho primário.",
+        "O contrato diferencia explicação conceitual sobre tools de uma intenção operacional que precisa chamar tool.",
+        "Validação cobre o fluxo natural, o fallback de resposta vazia e o caso `blocked_missing_tool`."
+      ],
+      "milestone": "0.8-control-plane-dogfooding",
+      "notes": "Criada a partir do dogfooding em `pnpm run pi:dev`: prompts naturais como 'transformar o brainstorm seed-preview em uma decisão dry-run de seeding' podem produzir resposta inferida ou vazia antes de o canary forçar a tool por follow-up. O comportamento atual está protegido por recuperação, mas a UX desejada para v0.8 é tool-first no mesmo turno quando a intenção operacional é clara. Escalações caras/protegidas seguem bloqueadas sem decisão explícita."
     }
   ]
 }
