@@ -139,6 +139,10 @@ describe("guardrails tool-backed route canary", () => {
 			reasonCode: "lane-brainstorm",
 			requiredTools: ["lane_brainstorm_seed_decision"],
 		});
+		expect(resolveToolBackedRouteIntent("Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.")).toMatchObject({
+			reasonCode: "lane-brainstorm",
+			requiredTools: ["lane_brainstorm_seed_decision"],
+		});
 		expect(resolveToolBackedRouteIntent("Use operator_intent_intake_packet e depois lane_brainstorm_packet em report-only.")).toMatchObject({
 			reasonCode: "operator-intent",
 			requiredTools: ["operator_intent_intake_packet", "lane_brainstorm_packet", "lane_brainstorm_seed_preview"],
@@ -215,6 +219,28 @@ describe("guardrails tool-backed route canary", () => {
 		expect(pi.sendUserMessage).toHaveBeenCalledTimes(1);
 		expect(pi.sendUserMessage.mock.calls[0]?.[0]).toContain("[tool-backed-route canonical]");
 		expect(pi.sendUserMessage.mock.calls[0]?.[0]).toContain("Required tool(s): lane_brainstorm_packet, lane_brainstorm_seed_preview");
+		expect(pi.sendUserMessage.mock.calls[0]?.[1]).toEqual({ deliverAs: "followUp" });
+	});
+
+	it("intercepts natural seed decision prompts before the agent can infer", () => {
+		const handlers = new Map<string, Function[]>();
+		const pi = {
+			on(eventName: string, handler: Function) {
+				handlers.set(eventName, [...(handlers.get(eventName) ?? []), handler]);
+			},
+			sendUserMessage: vi.fn(),
+		};
+		registerToolBackedRouteCanary(pi as any);
+
+		const result = handlers.get("input")?.[0]?.({
+			source: "interactive",
+			text: "Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.",
+		});
+
+		expect(result).toEqual({ action: "handled" });
+		expect(pi.sendUserMessage).toHaveBeenCalledTimes(1);
+		expect(pi.sendUserMessage.mock.calls[0]?.[0]).toContain("[tool-backed-route canonical]");
+		expect(pi.sendUserMessage.mock.calls[0]?.[0]).toContain("Required tool(s): lane_brainstorm_seed_decision");
 		expect(pi.sendUserMessage.mock.calls[0]?.[1]).toEqual({ deliverAs: "followUp" });
 	});
 });

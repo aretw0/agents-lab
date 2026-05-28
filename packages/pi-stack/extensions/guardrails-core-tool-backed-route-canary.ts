@@ -8,6 +8,7 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { appendAuditEntry } from "./guardrails-core-confirmation-audit";
 import { extractAssistantTextFromTurnMessage } from "./guardrails-core-bloat";
+import { inferBrainstormSeedDecisionIntent } from "./guardrails-core-operator-intent-intake";
 
 export type ToolBackedRouteCanaryDecision =
 	| {
@@ -47,14 +48,15 @@ export function resolveToolBackedRouteIntent(userText: string): { requiredTools:
 	if (!text || text.startsWith("[tool-backed-route")) return undefined;
 	const normalized = text.toLowerCase();
 	const explicitAction = /\b(call|run|use|execute|rode|rodar|chame|chamar|use|usar|execute|executar)\b/i.test(text);
-	const wantsReportOnly = /report-?only|preview|tool-backed|read-?only/i.test(text);
+	const wantsReportOnly = /report-?only|preview|dry-?run|tool-backed|read-?only/i.test(text);
 	const hasOperatorIntent = /operator[_-]intent[_-]intake[_-]packet/i.test(normalized);
 	const hasLaneBrainstorm = /lane[_-]brainstorm[_-]packet|lane[_-]brainstorm[_-]seed[_-]preview|lane[_-]brainstorm[_-]seed[_-]decision/i.test(normalized);
 	const hasLaneSeedDecision = /lane[_-]brainstorm[_-]seed[_-]decision/i.test(normalized);
-	if (!(explicitAction || wantsReportOnly)) return undefined;
+	const hasNaturalSeedDecision = inferBrainstormSeedDecisionIntent(text);
+	if (!(explicitAction || wantsReportOnly || hasNaturalSeedDecision)) return undefined;
 	const requiredTools: string[] = [];
 	if (hasOperatorIntent) requiredTools.push(OPERATOR_INTENT_TOOL);
-	if (hasLaneSeedDecision) {
+	if (hasLaneSeedDecision || hasNaturalSeedDecision) {
 		requiredTools.push(LANE_BRAINSTORM_DECISION_TOOL);
 	} else if (hasLaneBrainstorm) {
 		requiredTools.push(...LANE_BRAINSTORM_PREVIEW_TOOLS);
