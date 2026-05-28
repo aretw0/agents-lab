@@ -106,7 +106,7 @@ describe("guardrails tool-backed route canary", () => {
 		expect(prompt).toContain("Tool-backed route guard is active");
 		expect(prompt).toContain("call operator_intent_intake_packet");
 		expect(prompt).toContain("blocked_missing_tool");
-		expect(buildToolBackedRouteSystemPrompt("Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.")).toContain("Required tool(s) for this operator request: lane_brainstorm_seed_decision");
+		expect(buildToolBackedRouteSystemPrompt("Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.")).toBeUndefined();
 		expect(buildToolBackedRouteSystemPrompt("Explique o roadmap de forma geral.")).toBeUndefined();
 	});
 
@@ -140,10 +140,7 @@ describe("guardrails tool-backed route canary", () => {
 			reasonCode: "lane-brainstorm",
 			requiredTools: ["lane_brainstorm_seed_decision"],
 		});
-		expect(resolveToolBackedRouteIntent("Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.")).toMatchObject({
-			reasonCode: "lane-brainstorm",
-			requiredTools: ["lane_brainstorm_seed_decision"],
-		});
+		expect(resolveToolBackedRouteIntent("Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.")).toBeUndefined();
 		expect(resolveToolBackedRouteIntent("Use operator_intent_intake_packet e depois lane_brainstorm_packet em report-only.")).toMatchObject({
 			reasonCode: "operator-intent",
 			requiredTools: ["operator_intent_intake_packet", "lane_brainstorm_packet", "lane_brainstorm_seed_preview"],
@@ -223,7 +220,7 @@ describe("guardrails tool-backed route canary", () => {
 		expect(pi.sendUserMessage.mock.calls[0]?.[1]).toEqual({ deliverAs: "followUp" });
 	});
 
-	it("lets natural seed decision prompts continue with a system guard instead of dead-ending", () => {
+	it("does not intercept natural seed decision prompts before the agent turn", () => {
 		const handlers = new Map<string, Function[]>();
 		const pi = {
 			on(eventName: string, handler: Function) {
@@ -240,12 +237,9 @@ describe("guardrails tool-backed route canary", () => {
 
 		expect(result).toBeUndefined();
 		expect(pi.sendUserMessage).not.toHaveBeenCalled();
-
-		const beforeAgent = handlers.get("before_agent_start")?.[0]?.({
+		expect(handlers.get("before_agent_start")?.[0]?.({
 			prompt: "Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.",
 			systemPrompt: "base",
-		});
-		expect(beforeAgent.systemPrompt).toContain("base");
-		expect(beforeAgent.systemPrompt).toContain("Required tool(s) for this operator request: lane_brainstorm_seed_decision");
+		})).toBeUndefined();
 	});
 });

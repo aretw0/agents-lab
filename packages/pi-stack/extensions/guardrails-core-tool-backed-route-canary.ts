@@ -8,7 +8,6 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { appendAuditEntry } from "./guardrails-core-confirmation-audit";
 import { extractAssistantTextFromTurnMessage } from "./guardrails-core-bloat";
-import { inferBrainstormSeedDecisionIntent } from "./guardrails-core-operator-intent-intake";
 
 export type ToolBackedRouteCanaryDecision =
 	| {
@@ -32,8 +31,7 @@ export function buildToolBackedRouteSystemPrompt(userText: string): string | und
 	const text = userText.trim();
 	if (!text) return undefined;
 	const mentionsToolBackedRoute = /operator[_-]intent[_-]intake[_-]packet|lane[_-]brainstorm[_-]packet|lane[_-]brainstorm[_-]seed[_-]preview|lane[_-]brainstorm[_-]seed[_-]decision/i.test(text)
-		|| (/report-?only|packet|pacote|dry-?run/i.test(text) && /tool|brainstorm|intent|intake|capability|capacidade|seed|seeding|preview/i.test(text))
-		|| inferBrainstormSeedDecisionIntent(text);
+		|| (/report-?only|packet|pacote|dry-?run/i.test(text) && /tool|intent|intake|capability|capacidade/i.test(text));
 	if (!mentionsToolBackedRoute) return undefined;
 	const routeIntent = resolveToolBackedRouteIntent(text);
 	const requiredToolsLine = routeIntent
@@ -58,11 +56,10 @@ export function resolveToolBackedRouteIntent(userText: string): { requiredTools:
 	const hasOperatorIntent = /operator[_-]intent[_-]intake[_-]packet/i.test(normalized);
 	const hasLaneBrainstorm = /lane[_-]brainstorm[_-]packet|lane[_-]brainstorm[_-]seed[_-]preview|lane[_-]brainstorm[_-]seed[_-]decision/i.test(normalized);
 	const hasLaneSeedDecision = /lane[_-]brainstorm[_-]seed[_-]decision/i.test(normalized);
-	const hasNaturalSeedDecision = inferBrainstormSeedDecisionIntent(text);
-	if (!(explicitAction || wantsReportOnly || hasNaturalSeedDecision)) return undefined;
+	if (!(explicitAction || wantsReportOnly)) return undefined;
 	const requiredTools: string[] = [];
 	if (hasOperatorIntent) requiredTools.push(OPERATOR_INTENT_TOOL);
-	if (hasLaneSeedDecision || hasNaturalSeedDecision) {
+	if (hasLaneSeedDecision) {
 		requiredTools.push(LANE_BRAINSTORM_DECISION_TOOL);
 	} else if (hasLaneBrainstorm) {
 		requiredTools.push(...LANE_BRAINSTORM_PREVIEW_TOOLS);
@@ -231,7 +228,6 @@ export function registerToolBackedRouteCanary(pi: ExtensionAPI): void {
 		const ev = event as { text?: unknown; source?: unknown };
 		if (ev.source !== "interactive") return undefined;
 		const text = typeof ev.text === "string" ? ev.text : "";
-		if (inferBrainstormSeedDecisionIntent(text)) return undefined;
 		const routeIntent = resolveToolBackedRouteIntent(text);
 		if (!routeIntent) return undefined;
 		pi.sendUserMessage?.(buildToolBackedRouteCanonicalPrompt(text, routeIntent.requiredTools), { deliverAs: "followUp" });
