@@ -179,6 +179,31 @@
       "milestone": "0.8-control-plane-dogfooding",
       "notes": "Criada a partir do dogfooding em `pnpm run pi:dev`: prompts naturais como 'transformar o brainstorm seed-preview em uma decisão dry-run de seeding' podem produzir resposta inferida ou vazia antes de o canary forçar a tool por follow-up. O comportamento atual está protegido por recuperação, mas a UX desejada para v0.8 é tool-first no mesmo turno quando a intenção operacional é clara. Escalações caras/protegidas seguem bloqueadas sem decisão explícita.\n2026-05-27: Concluída a rota estreita para intenção natural de seed-decision: o canary agora transforma esse pedido em uma chamada direta a `lane_brainstorm_seed_decision` em dry-run, mantendo empty-answer correction como fallback. Dogfooding pós-reload confirmou chamada direta da tool antes da resposta final; a decisão retornou `blocked` por ausência de propostas materializáveis, que é uma fricção distinta do contrato tool-backed.",
       "verification": "verify-task-bud-1096-natural-tool-route"
+    },
+    {
+      "id": "TASK-BUD-1097",
+      "description": "[P1] Resolver a fricção stateless do fluxo brainstorm seed-preview -> seed-decision para que a decisão dry-run consiga produzir propostas ou explicar inputs faltantes sem beco sem saída.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1096"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-lane-brainstorm-surface.ts",
+        "packages/pi-stack/extensions/lane-brainstorm-packet.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-brainstorm-surface.test.ts",
+        "packages/pi-stack/extensions/guardrails-core-tool-backed-route-canary.ts",
+        "packages/pi-stack/test/smoke/guardrails-tool-backed-route-canary.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Quando `lane_brainstorm_seed_decision` bloquear por falta de propostas, o payload indica exatamente quais inputs faltam e qual rota read-only deve preceder a decisão.",
+        "O fluxo natural pós-reload não sugere `apply=true` nem worker/protected scope para resolver falta de propostas.",
+        "A rota pode preparar ou reconstruir propostas em dry-run a partir de goal/ideas/preview explícitos sem mutar o board.",
+        "Smoke cobre decisão bloqueada por preview ausente e decisão dry-run com propostas materializáveis.",
+        "Dogfooding consegue distinguir `tool chamada corretamente mas sem propostas` de falha tool-backed."
+      ],
+      "milestone": "0.8-control-plane-dogfooding",
+      "notes": "Criada após validar TASK-BUD-1096 no Pi: a intenção natural passou a chamar `lane_brainstorm_seed_decision` diretamente, mas a tool retornou `decision=blocked proposals=0 blockers=2` porque não havia propostas materializáveis no call atual. Esta task trata a continuidade do fluxo seed-preview/decision, não a chamada da tool em si."
     }
   ]
 }
