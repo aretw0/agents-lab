@@ -160,7 +160,7 @@
     {
       "id": "TASK-BUD-1096",
       "description": "[P1] Fazer intenções naturais tool-backed chamarem a tool first-party antes da resposta final, mantendo a correção de resposta vazia apenas como fail-safe.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-tool-backed-route-canary.ts",
@@ -177,7 +177,8 @@
         "Validação cobre o fluxo natural, o fallback de resposta vazia e o caso `blocked_missing_tool`."
       ],
       "milestone": "0.8-control-plane-dogfooding",
-      "notes": "Criada a partir do dogfooding em `pnpm run pi:dev`: prompts naturais como 'transformar o brainstorm seed-preview em uma decisão dry-run de seeding' podem produzir resposta inferida ou vazia antes de o canary forçar a tool por follow-up. O comportamento atual está protegido por recuperação, mas a UX desejada para v0.8 é tool-first no mesmo turno quando a intenção operacional é clara. Escalações caras/protegidas seguem bloqueadas sem decisão explícita."
+      "notes": "Criada a partir do dogfooding em `pnpm run pi:dev`: prompts naturais como 'transformar o brainstorm seed-preview em uma decisão dry-run de seeding' podem produzir resposta inferida ou vazia antes de o canary forçar a tool por follow-up. O comportamento atual está protegido por recuperação, mas a UX desejada para v0.8 é tool-first no mesmo turno quando a intenção operacional é clara. Escalações caras/protegidas seguem bloqueadas sem decisão explícita.\n2026-05-27: Concluída a rota estreita para intenção natural de seed-decision: o canary agora transforma esse pedido em uma chamada direta a `lane_brainstorm_seed_decision` em dry-run, mantendo empty-answer correction como fallback. Dogfooding pós-reload confirmou chamada direta da tool antes da resposta final; a decisão retornou `blocked` por ausência de propostas materializáveis, que é uma fricção distinta do contrato tool-backed.",
+      "verification": "verify-task-bud-1096-natural-tool-route"
     }
   ]
 }
