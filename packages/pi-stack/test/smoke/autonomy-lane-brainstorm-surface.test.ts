@@ -195,6 +195,38 @@ describe("autonomy lane brainstorm surface", () => {
     expect(tasks.tasks).toEqual([]);
   });
 
+  it("explains missing seed-preview proposals without mutating the board", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-seed-decision-missing-preview-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-COLONY-PROMOTION", description: "[P0] revisar colony promotion candidate", status: "planned" },
+      ],
+    }), "utf8");
+
+    const seedDecisionTool = registerTools().find((tool) => tool.name === "lane_brainstorm_seed_decision");
+    const result = seedDecisionTool?.execute("call-test", {
+      goal: "transform seed preview into dry-run decision",
+    }, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("blocked");
+    expect(result?.details.blockers).toEqual(expect.arrayContaining([
+      "preview-blocked",
+      "no-selected-proposals",
+      "missing-seed-preview-proposals",
+    ]));
+    expect(result?.details.recoveryRoute).toEqual([
+      "lane_brainstorm_packet",
+      "lane_brainstorm_seed_preview",
+      "lane_brainstorm_seed_decision",
+    ]);
+    expect(String(result?.details.nextAction)).toContain("lane_brainstorm_seed_preview");
+    expect(result?.details.mutationAllowed).toBe(false);
+    expect(result?.details.dispatchAllowed).toBe(false);
+    const tasks = JSON.parse(readFileSync(path.join(cwd, ".project", "tasks.json"), "utf8"));
+    expect(tasks.tasks).toHaveLength(1);
+  });
+
   it("blocks seed materialization apply without structured approval", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-seed-decision-blocked-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });

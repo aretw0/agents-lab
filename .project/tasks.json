@@ -183,7 +183,7 @@
     {
       "id": "TASK-BUD-1097",
       "description": "[P1] Resolver a fricção stateless do fluxo brainstorm seed-preview -> seed-decision para que a decisão dry-run consiga produzir propostas ou explicar inputs faltantes sem beco sem saída.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1096"
@@ -203,7 +203,8 @@
         "Dogfooding consegue distinguir `tool chamada corretamente mas sem propostas` de falha tool-backed."
       ],
       "milestone": "0.8-control-plane-dogfooding",
-      "notes": "Criada após validar TASK-BUD-1096 no Pi: a intenção natural passou a chamar `lane_brainstorm_seed_decision` diretamente, mas a tool retornou `decision=blocked proposals=0 blockers=2` porque não havia propostas materializáveis no call atual. Esta task trata a continuidade do fluxo seed-preview/decision, não a chamada da tool em si."
+      "notes": "Criada após validar TASK-BUD-1096 no Pi: a intenção natural passou a chamar `lane_brainstorm_seed_decision` diretamente, mas a tool retornou `decision=blocked proposals=0 blockers=2` porque não havia propostas materializáveis no call atual. Esta task trata a continuidade do fluxo seed-preview/decision, não a chamada da tool em si.\n2026-05-27: `lane_brainstorm_seed_decision` agora distingue falta de propostas de falha tool-backed e retorna `missing-seed-preview-proposals` com `recoveryRoute=[lane_brainstorm_packet,lane_brainstorm_seed_preview,lane_brainstorm_seed_decision]`. O fluxo com ideias explícitas segue produzindo dry-run materializável; o fluxo bloqueado permanece sem mutação/dispatch.",
+      "verification": "verify-task-bud-1097-seed-decision-continuity"
     }
   ]
 }

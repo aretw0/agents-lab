@@ -23,6 +23,21 @@ function normalizeTaskIds(value: unknown): string[] {
   return value.map((item) => typeof item === "string" ? item.trim() : "").filter(Boolean).slice(0, 10);
 }
 
+function hasExplicitBrainstormIdeas(value: unknown): boolean {
+  return Array.isArray(value) && value.some((item) => {
+    if (!item || typeof item !== "object") return false;
+    const record = item as { theme?: unknown };
+    return typeof record.theme === "string" && record.theme.trim().length > 0;
+  });
+}
+
+function buildSeedDecisionBlockedNextAction(blockers: string[]): string {
+  if (blockers.includes("missing-seed-preview-proposals")) {
+    return "run lane_brainstorm_packet and lane_brainstorm_seed_preview in report-only mode, then rerun lane_brainstorm_seed_decision with explicit ideas or selected_proposal_ids.";
+  }
+  return "resolve blockers before materializing tasks.";
+}
+
 export function registerGuardrailsLaneBrainstormSurface(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "lane_brainstorm_packet",
@@ -125,6 +140,7 @@ export function registerGuardrailsLaneBrainstormSurface(pi: ExtensionAPI): void 
 
       if (preview.decision !== "needs-operator-seeding-decision") blockers.push("preview-blocked");
       if (selected.length === 0) blockers.push("no-selected-proposals");
+      if (preview.proposals.length === 0 && !hasExplicitBrainstormIdeas(p.ideas)) blockers.push("missing-seed-preview-proposals");
       if (requestedProposalIds.length > 0 && selected.length !== requestedProposalIds.length) blockers.push("unknown-selected-proposal");
       if (apply && !structuredApproval) blockers.push("structured-operator-approval-required");
       if (apply && taskIds.length !== selected.length) blockers.push("explicit-task-ids-required");
@@ -150,9 +166,12 @@ export function registerGuardrailsLaneBrainstormSurface(pi: ExtensionAPI): void 
           details: {
             decision,
             recommendationCode: blockers.length > 0 ? "brainstorm-seeding-decision-blocked" : "brainstorm-seeding-decision-preview",
-            nextAction: blockers.length > 0 ? "resolve blockers before materializing tasks." : "operator may approve apply=true with explicit task_ids.",
+            nextAction: blockers.length > 0 ? buildSeedDecisionBlockedNextAction(blockers) : "operator may approve apply=true with explicit task_ids.",
             plannedTasks,
             blockers,
+            recoveryRoute: blockers.includes("missing-seed-preview-proposals")
+              ? ["lane_brainstorm_packet", "lane_brainstorm_seed_preview", "lane_brainstorm_seed_decision"]
+              : undefined,
             apply: false,
             mutationAllowed: false,
             dispatchAllowed: false,

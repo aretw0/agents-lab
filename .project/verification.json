@@ -26,6 +26,15 @@
       "method": "smoke+dogfooding",
       "evidence": "Implemented narrow natural seed-decision routing in guardrails-core-tool-backed-route-canary and covered direct route plus empty-answer fallback. Validation: vitest guardrails-tool-backed-route-canary, guardrails-structured-interview, autonomy-lane-brainstorm-surface passed in the agents-lab devcontainer. Live Pi dogfooding after reload called lane_brainstorm_seed_decision before the final answer; the tool returned blocked because proposals=0, which is a separate seed-preview state/input issue.",
       "timestamp": "2026-05-27T23:39:00.000Z"
+    },
+    {
+      "id": "verify-task-bud-1097-seed-decision-continuity",
+      "target": "TASK-BUD-1097",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke",
+      "evidence": "Added explicit missing-seed-preview-proposals blocker and recoveryRoute to lane_brainstorm_seed_decision when no materializable proposals are available. Existing dry-run with explicit ideas remains non-mutating and materializable. Validation: vitest autonomy-lane-brainstorm-surface and guardrails-tool-backed-route-canary passed in the agents-lab devcontainer.",
+      "timestamp": "2026-05-27T23:46:00.000Z"
     }
   ]
 }
