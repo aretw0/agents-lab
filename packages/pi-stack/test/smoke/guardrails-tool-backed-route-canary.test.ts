@@ -106,6 +106,7 @@ describe("guardrails tool-backed route canary", () => {
 		expect(prompt).toContain("Tool-backed route guard is active");
 		expect(prompt).toContain("call operator_intent_intake_packet");
 		expect(prompt).toContain("blocked_missing_tool");
+		expect(buildToolBackedRouteSystemPrompt("Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.")).toContain("matching lane_brainstorm_* tool");
 		expect(buildToolBackedRouteSystemPrompt("Explique o roadmap de forma geral.")).toBeUndefined();
 	});
 
@@ -222,7 +223,7 @@ describe("guardrails tool-backed route canary", () => {
 		expect(pi.sendUserMessage.mock.calls[0]?.[1]).toEqual({ deliverAs: "followUp" });
 	});
 
-	it("intercepts natural seed decision prompts before the agent can infer", () => {
+	it("lets natural seed decision prompts continue with a system guard instead of dead-ending", () => {
 		const handlers = new Map<string, Function[]>();
 		const pi = {
 			on(eventName: string, handler: Function) {
@@ -237,10 +238,14 @@ describe("guardrails tool-backed route canary", () => {
 			text: "Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.",
 		});
 
-		expect(result).toEqual({ action: "handled" });
-		expect(pi.sendUserMessage).toHaveBeenCalledTimes(1);
-		expect(pi.sendUserMessage.mock.calls[0]?.[0]).toContain("[tool-backed-route canonical]");
-		expect(pi.sendUserMessage.mock.calls[0]?.[0]).toContain("Required tool(s): lane_brainstorm_seed_decision");
-		expect(pi.sendUserMessage.mock.calls[0]?.[1]).toEqual({ deliverAs: "followUp" });
+		expect(result).toEqual({ action: "continue" });
+		expect(pi.sendUserMessage).not.toHaveBeenCalled();
+
+		const beforeAgent = handlers.get("before_agent_start")?.[0]?.({
+			prompt: "Quero transformar o brainstorm seed-preview em uma decisão dry-run de seeding. Não modifique arquivos.",
+			systemPrompt: "base",
+		});
+		expect(beforeAgent.systemPrompt).toContain("base");
+		expect(beforeAgent.systemPrompt).toContain("call the matching lane_brainstorm_* tool");
 	});
 });

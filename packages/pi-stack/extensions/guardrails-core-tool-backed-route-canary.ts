@@ -32,7 +32,8 @@ export function buildToolBackedRouteSystemPrompt(userText: string): string | und
 	const text = userText.trim();
 	if (!text) return undefined;
 	const mentionsToolBackedRoute = /operator[_-]intent[_-]intake[_-]packet|lane[_-]brainstorm[_-]packet|lane[_-]brainstorm[_-]seed[_-]preview|lane[_-]brainstorm[_-]seed[_-]decision/i.test(text)
-		|| (/report-?only|packet|pacote/i.test(text) && /tool|brainstorm|intent|intake|capability|capacidade/i.test(text));
+		|| (/report-?only|packet|pacote|dry-?run/i.test(text) && /tool|brainstorm|intent|intake|capability|capacidade|seed|seeding|preview/i.test(text))
+		|| inferBrainstormSeedDecisionIntent(text);
 	if (!mentionsToolBackedRoute) return undefined;
 	return [
 		"Tool-backed route guard is active for this turn.",
@@ -225,6 +226,7 @@ export function registerToolBackedRouteCanary(pi: ExtensionAPI): void {
 		const ev = event as { text?: unknown; source?: unknown };
 		if (ev.source !== "interactive") return undefined;
 		const text = typeof ev.text === "string" ? ev.text : "";
+		if (inferBrainstormSeedDecisionIntent(text)) return { action: "continue" as const };
 		const routeIntent = resolveToolBackedRouteIntent(text);
 		if (!routeIntent) return undefined;
 		pi.sendUserMessage?.(buildToolBackedRouteCanonicalPrompt(text, routeIntent.requiredTools), { deliverAs: "followUp" });
