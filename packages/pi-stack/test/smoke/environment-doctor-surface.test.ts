@@ -269,6 +269,24 @@ shortcut. Skipping.
     expect(report.advisories.every((row) => row.level === "warn")).toBe(true);
   });
 
+  it("highlights recurring or severe watchdog spikes without converting them to stop", async () => {
+    const report = analyzeRuntimeOutputAdvisories(`
+ Error: Performance watchdog critical: event-loop max 454ms. Run /watchdog:status or /safe-mode on if input feels laggy.
+ Error: Performance watchdog critical: event-loop max 1213ms. Run /watchdog:status or /safe-mode on if input feels laggy.
+ Warning: Watchdog enabled safe mode automatically: safe mode is on (watchdog: event-loop max 832ms).
+`);
+
+    expect(report.decision).toBe("safe-mode");
+    expect(report.advisories).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        code: "performance-watchdog-recurring-or-severe",
+        level: "warn",
+        detail: "events=2 eventLoopMaxMs=1213",
+      }),
+    ]));
+    expect(report.summary).toContain("decision=safe-mode");
+  });
+
   it("environment_runtime_output_advisory exposes compact operator output", async () => {
     const pi = makeMockPi();
     environmentDoctorExtension(pi);

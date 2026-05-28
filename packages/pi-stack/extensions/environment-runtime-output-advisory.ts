@@ -21,6 +21,8 @@ const WATCHDOG_CRITICAL_RE = /Performance watchdog critical:\s*([^\r\n]+)/gi;
 const WATCHDOG_AUTO_SAFE_MODE_RE = /Watchdog enabled safe mode automatically:\s*safe mode is on\s*\(([^)\r\n]+)\)/gi;
 const EVENT_LOOP_MAX_RE = /event-loop max\s+(\d+)ms/i;
 const EVENT_LOOP_P99_RE = /event-loop p99\s+(\d+)ms/i;
+const WATCHDOG_RECURRING_EVENT_THRESHOLD = 3;
+const WATCHDOG_SEVERE_EVENT_LOOP_MAX_MS = 1000;
 
 function uniquePush(advisories: RuntimeOutputAdvisory[], advisory: RuntimeOutputAdvisory) {
   if (advisories.some((row) => row.code === advisory.code && row.detail === advisory.detail)) return;
@@ -38,6 +40,8 @@ function parseWatchdogLevel(detail: string): RuntimeOutputAdvisoryLevel {
 export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutputAdvisoryReport {
   const text = String(rawOutput ?? "");
   const advisories: RuntimeOutputAdvisory[] = [];
+  const watchdogCriticalDetails: string[] = [];
+  const watchdogCriticalMaxValues: number[] = [];
 
   if (!text.trim()) {
     return {
@@ -83,11 +87,27 @@ export function analyzeRuntimeOutputAdvisories(rawOutput: string): RuntimeOutput
 
   for (const match of text.matchAll(WATCHDOG_CRITICAL_RE)) {
     const detail = match[1].trim();
+    watchdogCriticalDetails.push(detail);
+    const max = EVENT_LOOP_MAX_RE.exec(detail)?.[1];
+    if (max) watchdogCriticalMaxValues.push(Number(max));
     uniquePush(advisories, {
       code: "performance-watchdog-critical",
       level: parseWatchdogLevel(detail),
       detail,
       action: "treat as safe-mode evidence when above the configured threshold; inspect live /watchdog:status in the Pi TUI",
+    });
+  }
+
+  const watchdogCriticalMax = watchdogCriticalMaxValues.length > 0 ? Math.max(...watchdogCriticalMaxValues) : 0;
+  if (
+    watchdogCriticalDetails.length >= WATCHDOG_RECURRING_EVENT_THRESHOLD ||
+    watchdogCriticalMax >= WATCHDOG_SEVERE_EVENT_LOOP_MAX_MS
+  ) {
+    uniquePush(advisories, {
+      code: "performance-watchdog-recurring-or-severe",
+      level: "warn",
+      detail: `events=${watchdogCriticalDetails.length} eventLoopMaxMs=${watchdogCriticalMax}`,
+      action: "treat as safe-mode recurrence evidence; keep work small/read-only, capture /watchdog:status in the Pi TUI after the next spike, and investigate runtime surfaces if it repeats after reload",
     });
   }
 

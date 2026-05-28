@@ -35,6 +35,15 @@
       "method": "smoke",
       "evidence": "Added explicit missing-seed-preview-proposals blocker and recoveryRoute to lane_brainstorm_seed_decision when no materializable proposals are available. Existing dry-run with explicit ideas remains non-mutating and materializable. Validation: vitest autonomy-lane-brainstorm-surface and guardrails-tool-backed-route-canary passed in the agents-lab devcontainer.",
       "timestamp": "2026-05-27T23:46:00.000Z"
+    },
+    {
+      "id": "verify-task-bud-1098-watchdog-output-recurrence",
+      "target": "TASK-BUD-1098",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke",
+      "evidence": "environment_runtime_output_advisory now emits performance-watchdog-recurring-or-severe for repeated pasted watchdog critical events or event-loop max >=1000ms, keeping decision=safe-mode unless another blocker exists. Validation: vitest environment-doctor-surface passed; node --test scripts/test/pi-runtime-health.test.mjs passed in the agents-lab devcontainer.",
+      "timestamp": "2026-05-28T03:02:00.000Z"
     }
   ]
 }

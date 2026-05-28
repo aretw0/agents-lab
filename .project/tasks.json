@@ -205,6 +205,28 @@
       "milestone": "0.8-control-plane-dogfooding",
       "notes": "Criada após validar TASK-BUD-1096 no Pi: a intenção natural passou a chamar `lane_brainstorm_seed_decision` diretamente, mas a tool retornou `decision=blocked proposals=0 blockers=2` porque não havia propostas materializáveis no call atual. Esta task trata a continuidade do fluxo seed-preview/decision, não a chamada da tool em si.\n2026-05-27: `lane_brainstorm_seed_decision` agora distingue falta de propostas de falha tool-backed e retorna `missing-seed-preview-proposals` com `recoveryRoute=[lane_brainstorm_packet,lane_brainstorm_seed_preview,lane_brainstorm_seed_decision]`. O fluxo com ideias explícitas segue produzindo dry-run materializável; o fluxo bloqueado permanece sem mutação/dispatch.",
       "verification": "verify-task-bud-1097-seed-decision-continuity"
+    },
+    {
+      "id": "TASK-BUD-1098",
+      "description": "[P1] Classificar recorrência/severidade de performance watchdog em output colado da TUI sem esconder picos nem promover stop sem evidência ativa.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/environment-runtime-output-advisory.ts",
+        "packages/pi-stack/test/smoke/environment-doctor-surface.test.ts",
+        "scripts/pi-runtime-health.mjs",
+        "scripts/test/pi-runtime-health.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "Output colado com múltiplos eventos ou evento severo de watchdog ganha advisory específico de recorrência/severidade.",
+        "A decisão permanece `safe-mode` quando não há blocker ativo adicional, preservando trabalho pequeno/read-only.",
+        "A ação recomendada pede `/watchdog:status` na TUI após o próximo pico e investigação se repetir após reload.",
+        "Teste cobre pico severo sem transformar em `stop-and-investigate`.",
+        "Runtime health programático continua separando métricas live da TUI de checks shell/read-only."
+      ],
+      "milestone": "0.8-runtime-health-dogfooding",
+      "notes": "Criada a partir do dogfooding no Pi: prompts simples estavam gerando `Performance watchdog critical` e safe-mode automático com event-loop max acima de 800ms/1200ms. A fatia não altera thresholds e não reduz alertas; ela melhora a classificação de output colado para diferenciar pico isolado, recorrência/severidade e evidência que exige investigação.",
+      "verification": "verify-task-bud-1098-watchdog-output-recurrence"
     }
   ]
 }
