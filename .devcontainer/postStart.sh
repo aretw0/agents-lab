@@ -145,6 +145,11 @@ repair_owned_dir /home/vscode/.codex
 if [[ -d "$REPO_ROOT/node_modules" ]]; then
   repair_owned_dir "$REPO_ROOT/node_modules"
 fi
+# The container runtime may clone as root, leaving .git/objects subdirs as
+# drwxr-xr-x and triggering "insufficient permission" on the first commit.
+if [[ -d "$REPO_ROOT/.git/objects" ]]; then
+  sudo chown -R "$(id -u):$(id -g)" "$REPO_ROOT/.git/objects" 2>/dev/null || true
+fi
 
 ensure_pnpm
 check_agent_sandbox_tools
