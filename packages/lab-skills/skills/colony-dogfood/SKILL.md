@@ -2,7 +2,7 @@
 name: colony-dogfood
 description: >
   Conduz um experimento de dogfood onde a colônia Pi executa uma task do
-  .project/tasks.json em dois tempos (research → código) com gates humanos.
+  .project/tasks.json em dois tempos (research → código) com gates do operador.
   Use quando o operador quiser ativar um experimento colony-experiment-phase1
   ou colony-experiment-phase2.
 ---
@@ -11,7 +11,7 @@ description: >
 
 Este skill guia a execução de um experimento de auto-uso onde o agents-lab
 usa sua própria colônia para evoluir. Siga os passos na ordem — nunca pule
-um gate humano.
+um gate do operador.
 
 ## Pré-condições
 
@@ -46,7 +46,7 @@ O worker deve criar `.project/reports/TASK-ID-research.md` preenchendo todos
 os campos do template. Se o budget for atingido antes da síntese estar
 completa, o worker deve marcar `status: parcial` e salvar o que conseguiu.
 
-### 4. Gate humano (obrigatório)
+### 4. Gate do operador (obrigatório)
 
 Leia `.project/reports/TASK-ID-research.md`.
 Preencha `.project/reports/TASK-ID-decision.md` a partir do template.
@@ -63,7 +63,7 @@ Com o gate aprovado, abra um segundo envelope colony:
 - `goal`: "Ler .project/reports/TASK-ID-research.md e .project/reports/TASK-ID-decision.md. Propor plano de implementação em .project/reports/TASK-ID-impl-plan.md seguindo o template. NÃO implementar — apenas propor."
 - `maxCost`: 1.0 (USD) — apenas leitura e escrita de documento
 
-### 2. Gate humano (obrigatório)
+### 2. Gate do operador (obrigatório)
 
 Leia `.project/reports/TASK-ID-impl-plan.md`.
 Aprove o plano ou peça revisão antes de avançar.
@@ -83,7 +83,7 @@ Execute o smoke da task antes de revisar o diff:
 pnpm run ci:local:parity
 ```
 
-### 5. Gate humano final
+### 5. Gate do operador — revisão final
 
 Revise o diff. Se aprovado, faça o merge. Atualize `tasks.json`:
 `status: "completed"`.
@@ -114,24 +114,3 @@ task: TASK-ID
 | Research | $2.00 | Leitura externa + síntese |
 | Impl-plan | $1.00 | Proposta de documento |
 | Implementação | $5.00 | Código + commit |
-
-## Passos
-
-1. Crie o diretório: `mkdir -p packages/lab-skills/skills/colony-dogfood`
-2. Crie o arquivo `SKILL.md` com o conteúdo exato acima.
-3. Confirme: `cat packages/lab-skills/skills/colony-dogfood/SKILL.md | head -5`
-4. Rode: `pnpm run docs:package:check`
-   - Se passar: continue.
-   - Se falhar por skill não registrado: leia o package.json de lab-skills e veja se skills precisam de registro explícito. Se sim, adicione a entrada necessária.
-5. Commit:
-```bash
-git add packages/lab-skills/skills/colony-dogfood/SKILL.md
-git commit -m "feat(lab-skills): adicionar skill colony-dogfood para experimentos de auto-uso"
-```
-
-## Relatório final
-
-Responda APENAS com:
-- `DONE`
-- `DONE_WITH_CONCERNS: [descrição]`
-- `BLOCKED: [motivo]`

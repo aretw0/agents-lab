@@ -26,7 +26,7 @@ e as melhores sínteses são promovidas para `docs/research/`.
 
 ### Estrutura de um experimento
 
-Cada experimento segue três fases com gates humanos obrigatórios:
+Cada experimento segue três fases com gates do operadors obrigatórios:
 
 ```
 task selecionada do board
@@ -34,13 +34,13 @@ task selecionada do board
 colony worker — Fase 1: research (maxCost: $2)
     ↓
 .project/reports/TASK-ID-research.md
-    ↓  gate humano: operador revisa e preenche decision.md
+    ↓  gate do operador: operador revisa e preenche decision.md
 .project/reports/TASK-ID-decision.md (approved: true/false)
     ↓  se aprovado e Fase 2 autorizada
 colony worker — Fase 2a: impl-plan (maxCost: $1)
-    ↓  gate humano: operador aprova plano
+    ↓  gate do operador: operador aprova plano
 colony worker — Fase 2b: código (maxCost: $5)
-    ↓  gate de smoke (pnpm run ci:local:parity) + gate humano
+    ↓  gate de smoke (pnpm run ci:local:parity) + gate do operador
 merge
 ```
 
@@ -52,7 +52,7 @@ protocolo. No Pi TUI, basta invocar o skill para a task desejada.
 Os templates de artefato ficam em `.project/reports/`:
 
 - `_template-research.md` — formato de síntese de research
-- `_template-decision.md` — formato do gate humano de decisão
+- `_template-decision.md` — formato do gate do operador de decisão
 - `_template-impl-plan.md` — formato da proposta de implementação
 
 ### Budget de referência
