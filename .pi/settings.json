@@ -11,8 +11,6 @@
         "!extensions/guardrails-background-process.ts",
         "!extensions/guardrails-core-extended-surfaces.ts",
         "!extensions/context-watchdog-surfaces.ts",
-        "!extensions/colony-pilot.ts",
-        "!extensions/colony-panel.ts",
         "!extensions/web-session-gateway.ts",
         "!extensions/quota-panel.ts",
         "!extensions/quota-alerts.ts",
