@@ -340,6 +340,13 @@
       "status": "decided",
       "context": "Discussão sobre `pi:dev`, `pi:isolated:config` e receio de capacidades úteis estarem indisponíveis enquanto o agents-lab migra o desenvolvimento diário para o próprio Pi.",
       "task": "TASK-BUD-1070"
+    },
+    {
+      "id": "DEC-BUD-048",
+      "decision": "Promover TASK-BUD-676, TASK-BUD-521 e TASK-BUD-480 de protected-parked-legacy para colony-experiment-phase1 como primeiros experimentos do pipeline de dogfood progressivo.",
+      "rationale": "O factory está estável e o scheduler está intencionalmente vazio. Usar a colônia nativa Pi para executar as tasks P3 de research prova o valor da stack antes da release v0.8.0, gerando evidência interna (.project/reports/) e externa (docs/guides/colony-self-use.md). Evolução de DEC-BUD-005.",
+      "status": "decided",
+      "context": "Pipeline de dogfood progressivo pré-v0.8.0. Spec: docs/superpowers/specs/2026-05-29-colony-dogfood-design.md"
     }
   ]
 }
