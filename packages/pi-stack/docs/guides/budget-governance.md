@@ -38,7 +38,7 @@ Sem esses campos, a decisão padrão é `defer`.
 Como referência de manutenção deste repositório, há um wrapper report-only para registrar pacote de evidência:
 
 ```bash
-pnpm run offload:evidence:template -- --task TASK-ID --decision defer
+pnpm run offload:evidence:template -- --task WORK-ITEM-ID --decision defer
 ```
 
 Controles mínimos do operador na lane protegida (sempre explícitos):

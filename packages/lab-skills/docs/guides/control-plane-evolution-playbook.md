@@ -67,7 +67,7 @@ Cada run remota deve registrar, no mínimo:
 Template prático local:
 
 ```bash
-pnpm run offload:evidence:template -- --task TASK-ID --decision defer
+pnpm run offload:evidence:template -- --task WORK-ITEM-ID --decision defer
 ```
 
 ## Steer/Intervenção do Operador (cancel/retry/override)

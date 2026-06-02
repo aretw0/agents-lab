@@ -569,7 +569,7 @@ Préflight de capacidade da máquina para long-run deve consultar `machine_maint
 
 ### Fila pós-calibração
 
-Após fechar uma macro-task de calibração, não puxe backlog protegido só para manter movimento. Em 2026-05-01, depois de `TASK-ID`, `TASK-ID` e `TASK-ID`, `autonomy_lane_next_task` sem escopos protegidos retornou `no-eligible-tasks`: 8 candidates, 4 bloqueados por dependência e 4 pulados por escopo protegido. As classes restantes eram promotion/recovery de colony, GitHub Actions/remote/release, research/config inspiration e tarefas dependentes.
+Após fechar uma macro-task de calibração, não puxe backlog protegido só para manter movimento. Em 2026-05-01, depois de `WORK-ITEM-ID`, `WORK-ITEM-ID` e `WORK-ITEM-ID`, `autonomy_lane_next_task` sem escopos protegidos retornou `no-eligible-tasks`: 8 candidates, 4 bloqueados por dependência e 4 pulados por escopo protegido. As classes restantes eram promotion/recovery de colony, GitHub Actions/remote/release, research/config inspiration e tarefas dependentes.
 
 Regra de continuidade: `no-eligible-tasks` é um stop condition local, não convite para invadir protected scope. O agente deve escolher uma destas saídas auditáveis:
 
@@ -586,15 +586,15 @@ Pacote de decisão local de 2026-05-01 para o backlog restante:
 | Classe | Exemplos no board | Decisão segura |
 | --- | --- | --- |
 | Colony promotion/recovery | `colony-c1-promotion`, `colony-c2-promotion`, `colony-c-123-promotion`, `colony-c-ret-1-promotion` | Não promover automaticamente. Exigir inventário de arquivos, validação focal e revisão do operador antes de materializar candidate no branch alvo. |
-| Remote/CI/release | `TASK-ID`, `TASK-ID` | Escopo protegido. Só entra com tarefa/decisão explícita, rollback, budget de custo/tempo e sem auto-dispatch. |
-| Inspiração/research/config | `TASK-ID`, `TASK-ID` | Opt-in bounded. Não iniciar pesquisa externa ampla nem mutar config; primeiro criar pergunta/artefato local claro. |
+| Remote/CI/release | `WORK-ITEM-ID`, `WORK-ITEM-ID` | Escopo protegido. Só entra com tarefa/decisão explícita, rollback, budget de custo/tempo e sem auto-dispatch. |
+| Inspiração/research/config | `WORK-ITEM-ID`, `WORK-ITEM-ID` | Opt-in bounded. Não iniciar pesquisa externa ampla nem mutar config; primeiro criar pergunta/artefato local claro. |
 | Dependentes/bloqueadas | tarefas planejadas com `depends_on` não resolvido | Não selecionar até dependencies concluídas ou reescopadas por decisão do operador. |
 
 Próximas decisões do operador possíveis, sem executar escopo protegido:
 
 1. autorizar uma revisão bounded de um único `*-promotion` de colony, começando por inventário read-only e decision packet, sem aplicar no branch;
 2. autorizar uma lane protegida para CI/release/remote com contrato próprio;
-3. escolher uma inspiração bounded (`TASK-ID` ou `TASK-ID`) e limitar a saída a um resumo local sem rede ampla/sem settings mutation;
+3. escolher uma inspiração bounded (`WORK-ITEM-ID` ou `WORK-ITEM-ID`) e limitar a saída a um resumo local sem rede ampla/sem settings mutation;
 4. criar uma nova fatia local-safe de hardening/limpeza se o objetivo for continuar sem tocar backlog protegido.
 
 ## Lei anti-spoof
@@ -609,7 +609,7 @@ Helpers medidos e re-exports canônicos também não são autorização operacio
 
 ## Superfície measured auditada futura
 
-Antes de implementar qualquer superfície runtime measured, revise as primitivas existentes e o scorecard de higiene (`TASK-ID`). Se já houver helper, tool ou doutrina com responsabilidade parecida, prefira estender, fundir ou refatorar em vez de criar uma nova superfície. A pergunta padrão deve ser: isso reduz ambiguidade operacional ou apenas adiciona mais um caminho sobreposto?
+Antes de implementar qualquer superfície runtime measured, revise as primitivas existentes e o scorecard de higiene (`WORK-ITEM-ID`). Se já houver helper, tool ou doutrina com responsabilidade parecida, prefira estender, fundir ou refatorar em vez de criar uma nova superfície. A pergunta padrão deve ser: isso reduz ambiguidade operacional ou apenas adiciona mais um caminho sobreposto?
 
 O contrato mínimo para uma primeira superfície measured deve ser read-only e advisory. Ela pode mostrar um packet derivado de fatos locais confiáveis, com evidência completa e bounded por gate, mas não pode iniciar scheduler, self-reload, loop, auto-continuação, remoto ou escrita ampla. Import canônico, helper medido e re-export não são permissões operacionais.
 
@@ -645,7 +645,7 @@ Um `ready=yes` em `context_watch_continuation_readiness` é evidência read-only
 
 A primeira prova verde local só vale quando as condições observáveis estão limpas: baseline canônico de settings já decidido, escopos protegidos fora do foco default, foco `in-progress` pequeno/local-safe, checkpoint fresco sem blockers reais, git state esperado, validation conhecida e smoke/readiness focal passando. Se qualquer uma dessas condições cair, o gate deve voltar a falhar fechado.
 
-Rehearsal local medido de 2026-05-01: `unattended_rehearsal_gate` retornou `ready=yes`, `decision=ready-for-canary`, `score=6/6` para 5 fatias locais concluídas com foco preservado, smoke focal verde, commits pequenos, handoff fresco, 0 seleções automáticas de escopo protegido e 0 blockers locais restantes. Esse sinal é suficiente para considerar o rehearsal local dos blockers resolvido, mas não fecha sozinho a macro-task multi-modo: `local_continuity_audit` e `context_watch_continuation_readiness` continuaram `ready=no` porque o foco amplo `TASK-ID` ainda referencia escopo protegido `.github/workflows/ci.yml`. Portanto, a próxima promoção precisa de decisão do operador de reescopo/fechamento ou tarefa explícita para o canal protegido; nada disso autoriza scheduler, remote/offload ou GitHub Actions automático.
+Rehearsal local medido de 2026-05-01: `unattended_rehearsal_gate` retornou `ready=yes`, `decision=ready-for-canary`, `score=6/6` para 5 fatias locais concluídas com foco preservado, smoke focal verde, commits pequenos, handoff fresco, 0 seleções automáticas de escopo protegido e 0 blockers locais restantes. Esse sinal é suficiente para considerar o rehearsal local dos blockers resolvido, mas não fecha sozinho a macro-task multi-modo: `local_continuity_audit` e `context_watch_continuation_readiness` continuaram `ready=no` porque o foco amplo `WORK-ITEM-ID` ainda referencia escopo protegido `.github/workflows/ci.yml`. Portanto, a próxima promoção precisa de decisão do operador de reescopo/fechamento ou tarefa explícita para o canal protegido; nada disso autoriza scheduler, remote/offload ou GitHub Actions automático.
 
 Use essa prova como critério de maturidade para desenhar o próximo canário, não como atalho para ativar automação. A promoção de `ready=yes` para execução unattended exige tarefa separada, autorização explícita, rollback e contrato de parada.
 
@@ -884,7 +884,7 @@ Quando a lane local retornar `no-eligible-tasks`, não forçar continuidade no f
 
 ## Lane de delegação (wave 2026-05)
 
-A evolução “delegar mais e executar menos” segue wave local-safe explícita, sem pular para automação protegida. O charter ativo da wave fica em `docs/research/control-plane-delegation-wave-2026-05.md` e define objetivos, métricas, limites hard e sequência de primitivas (`TASK-ID..TASK-ID`).
+A evolução “delegar mais e executar menos” segue wave local-safe explícita, sem pular para automação protegida. O charter ativo da wave fica em `docs/research/control-plane-delegation-wave-2026-05.md` e define objetivos, métricas, limites hard e sequência de primitivas (`WORK-ITEM-ID..WORK-ITEM-ID`).
 
 Contrato desta lane:
 - primeiro consolidar snapshot/score/packet read-only com recommendationCode estável;

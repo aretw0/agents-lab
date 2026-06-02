@@ -746,8 +746,8 @@ Objetivo: preservar segurança do contexto sem exigir confirmação do operador 
 Para rodar um milestone quase unattended no control plane, operar com um contrato explícito:
 
 - **semântica de milestone é user-defined**: pode ser release (minor/patch), épico interno, janela operacional ou outro alvo local; o fluxo não assume release específica.
-- **main quests**: manter 1–3 tasks P0/P1 como trilha principal (exemplos locais: `TASK-ID`, `TASK-ID`, `TASK-ID`, `TASK-ID`);
-- **side quests**: intercalar slices curtos de preparo/primitive-first (`TASK-ID`, `TASK-ID`, `TASK-ID`, `TASK-ID`, `TASK-ID`) apenas quando não quebrar continuidade da trilha principal;
+- **main quests**: manter 1–3 tasks P0/P1 como trilha principal (exemplos locais: `WORK-ITEM-ID`, `WORK-ITEM-ID`, `WORK-ITEM-ID`, `WORK-ITEM-ID`);
+- **side quests**: intercalar slices curtos de preparo/primitive-first (`WORK-ITEM-ID`, `WORK-ITEM-ID`, `WORK-ITEM-ID`, `WORK-ITEM-ID`, `WORK-ITEM-ID`) apenas quando não quebrar continuidade da trilha principal;
 - **stop conditions válidas**: (a) dúvida de requisito não resolvível por default seguro, (b) risco de segurança/perda de dados, (c) reload necessário para ativar código novo, (d) falha de teste sem mitigação segura no lote;
 - **prova obrigatória**: todo incremento técnico do milestone precisa terminar com smoke focal verde (evidence em `verification`) antes de avançar para o próximo bloco;
 - **cadência recomendada**: lotes de 10–50 micro-slices, com checkpoint em board (`notes`) + `VER-*` parcial por lote;
