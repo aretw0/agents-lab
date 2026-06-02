@@ -5,6 +5,17 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
+const DECUPLING_LANE_PHASES = ["stabilize", "delegate", "decouple"];
+const DOC_FILES = {
+  decouplingLane: path.join("docs", "research", "control-plane-decoupling-lane-2026-05.md"),
+  singleWorkerLane: path.join("docs", "research", "single-worker-board-driven-lane-maturity-2026-05.md"),
+  agentRunnerCheckpoint: path.join("docs", "research", "agent-runner-maturity-checkpoint-2026-05.md"),
+  firstWorkerMode: path.join("docs", "research", "agent-first-operating-mode-2026-05.md"),
+  firstPartyArch: path.join("docs", "research", "first-party-agent-lane-architecture-2026-05.md"),
+  nativeRunner: path.join("docs", "research", "agent-run-provider-native-runner-2026-05.md"),
+  colonyGapReport: path.join(".project", "reports", "TASK-BUD-521-executor-propagation-gap.md"),
+};
+
 function parseArgs(argv) {
   const out = { days: 7, json: false };
   for (let i = 0; i < argv.length; i++) {
@@ -33,6 +44,14 @@ function runNodeScript(args) {
   };
 }
 
+function readText(cwd, relPath) {
+  try {
+    return readFileSync(path.join(cwd, relPath), "utf8");
+  } catch {
+    return "";
+  }
+}
+
 export function readTasks(cwd) {
   const file = path.join(cwd, ".project", "tasks.json");
   const json = JSON.parse(readFileSync(file, "utf8"));
@@ -55,11 +74,73 @@ export function statusById(tasks, id) {
   return String(row?.status ?? "unknown");
 }
 
-export function resolveStage(task637, task638, task639) {
-  if (task639 === "completed") return "decouple";
-  if (task638 === "completed") return "delegate";
-  if (task637 === "completed") return "stabilize";
+export function extractTaskIdsFromText(text) {
+  const taskIds = [];
+  const seen = new Set();
+  const regex = /TASK-BUD-\d+/g;
+  for (const match of String(text ?? "").matchAll(regex)) {
+    const id = match[0];
+    if (!seen.has(id)) {
+      seen.add(id);
+      taskIds.push(id);
+    }
+  }
+  return taskIds;
+}
+
+export function resolveLanePhases(cwd) {
+  const decouplingLaneText = readText(cwd, DOC_FILES.decouplingLane);
+  const ids = extractTaskIdsFromText(decouplingLaneText);
+  const phases = Object.fromEntries(DECUPLING_LANE_PHASES.map((name) => [name, { id: undefined, status: "missing" }]));
+
+  for (let i = 0; i < DECUPLING_LANE_PHASES.length; i += 1) {
+    const phase = DECUPLING_LANE_PHASES[i];
+    const id = ids[i];
+    if (id) {
+      phases[phase].id = id;
+    }
+  }
+
+  return phases;
+}
+
+export function resolveLaneTaskStatuses(tasks = [], verificationRows = [], phases = {}) {
+  const out = {};
+  for (const phase of DECUPLING_LANE_PHASES) {
+    const ref = phases[phase] ?? { id: undefined };
+    const id = ref.id;
+    const boardStatus = id ? statusById(tasks, id) : "missing";
+    const verified = Boolean(id && hasVerificationEvidence(verificationRows, id));
+    let status = boardStatus;
+
+    if (id && status === "unknown" && verified) status = "completed";
+    out[phase] = {
+      id,
+      status: id ? (status === "unknown" ? "missing" : status) : "missing",
+    };
+  }
+
+  return out;
+}
+
+export function resolveStageFromLaneStatuses(laneStatuses = {}) {
+  const decouple = laneStatuses.decouple?.status;
+  const delegate = laneStatuses.delegate?.status;
+  const stabilize = laneStatuses.stabilize?.status;
+
+  if (decouple === "completed") return "decouple";
+  if (delegate === "completed") return "delegate";
+  if (stabilize === "completed") return "stabilize";
   return "bootstrap";
+}
+
+export function resolveStage(task637, task638, task639) {
+  const lane = {
+    stabilize: { status: task637 },
+    delegate: { status: task638 },
+    decouple: { status: task639 },
+  };
+  return resolveStageFromLaneStatuses(lane);
 }
 
 export function nextActionForStage(stage) {
@@ -87,15 +168,92 @@ export function nextActionForStage(stage) {
   };
 }
 
+function nextActionForMaturityState(state, laneStatuses = {}) {
+  if (state === "colony-blocked-by-executor-propagation-gap") {
+    return {
+      recommendationCode: "decoupling-colony-blocked-executor-propagation-gap",
+      nextAction: "pause colony promotion/research until executor propagation contract is fixed and revalidated with report-only anti-flux evidence.",
+    };
+  }
+  if (state === "single-worker-ready") {
+    const stableTask = laneStatuses.stabilize?.id ?? "decoupling-control-plane lane";
+    return {
+      recommendationCode: "decoupling-single-worker-ready",
+      nextAction: `advance single-worker lane with bounded local-safe slices; keep ${stableTask} as traceable first-party target.`,
+    };
+  }
+  if (state === "multi-worker-not-ready") {
+    return {
+      recommendationCode: "decoupling-multi-worker-not-ready",
+      nextAction: "multi-worker/colony remain blocked by evidence policy; continue single-worker lane until evidence for stable parallel execution is added.",
+    };
+  }
+  return {
+    recommendationCode: "decoupling-control-plane-only",
+    nextAction: "continue control-plane-only lane (local-safe, bounded, explicit operator authorization) until decoupling evidence appears on board/verification.",
+  };
+}
+
 export function hasVerificationEvidence(rows, taskId, marker) {
   const list = Array.isArray(rows) ? rows : [];
+  const normalizedMarker = typeof marker === "string" ? marker : "";
   return list.some((row) => {
     const id = String(row?.id ?? "");
     const rowTaskId = String(row?.task_id ?? row?.taskId ?? "");
     const evidence = String(row?.evidence ?? "");
     const matchesTask = id.includes(taskId) || rowTaskId === taskId;
-    return matchesTask && (!marker || id.includes(marker) || evidence.includes(marker));
+    if (!matchesTask) return false;
+    if (!normalizedMarker) return true;
+    return id.includes(normalizedMarker) || evidence.includes(normalizedMarker);
   });
+}
+
+export function resolveColonyPropagationGap(verificationRows = [], cwd = process.cwd()) {
+  const rows = Array.isArray(verificationRows) ? verificationRows : [];
+  const byVerification = rows.some((row) => {
+    const evidence = `${row?.id ?? ""} ${row?.task_id ?? ""} ${row?.target ?? ""} ${row?.evidence ?? ""}`.toLowerCase();
+    return evidence.includes("executor") && evidence.includes("propagation")
+      || evidence.includes("modeloverrides")
+      || evidence.includes("ant_colony")
+      || evidence.includes("ant-colony");
+  });
+
+  if (byVerification) return true;
+
+  const gapReport = readText(cwd, DOC_FILES.colonyGapReport).toLowerCase();
+  return gapReport.includes("executor propagation gap") || gapReport.includes("modeloverrides");
+}
+
+function fileContains(cwd, relPath, marker) {
+  const text = readText(cwd, relPath);
+  return text.includes(marker);
+}
+
+function hasAny(cwd, relPath, markers) {
+  const text = readText(cwd, relPath).toLowerCase();
+  return markers.some((marker) => text.includes(marker.toLowerCase()));
+}
+
+export function resolveDecouplingState({ laneStage, laneStatuses = {}, docsSignals = {} }) {
+  const multiWorkerBlocked = docsSignals.multiWorkerBlocked === true;
+
+  if (docsSignals.colonyGap === true) {
+    return "colony-blocked-by-executor-propagation-gap";
+  }
+
+  if (laneStage !== "bootstrap" && !multiWorkerBlocked) {
+    return "single-worker-ready";
+  }
+
+  if (laneStage === "delegate" || laneStage === "decouple") {
+    return "multi-worker-not-ready";
+  }
+
+  if (laneStage === "stabilize") {
+    return "single-worker-ready";
+  }
+
+  return "control-plane-only";
 }
 
 export function resolveAgentWorkerLane({ docs = {}, tasks = {}, verification = {} } = {}) {
@@ -170,14 +328,6 @@ export function resolveAgentWorkerLane({ docs = {}, tasks = {}, verification = {
   };
 }
 
-function fileContains(cwd, relPath, marker) {
-  try {
-    return readFileSync(path.join(cwd, relPath), "utf8").includes(marker);
-  } catch {
-    return false;
-  }
-}
-
 function main() {
   const args = parseArgs(process.argv.slice(2));
   const cwd = process.cwd();
@@ -202,30 +352,44 @@ function main() {
 
   const tasks = readTasks(cwd);
   const verificationRows = readVerificationRows(cwd);
-  const task637 = statusById(tasks, "TASK-BUD-637");
-  const task638 = statusById(tasks, "TASK-BUD-638");
-  const task639 = statusById(tasks, "TASK-BUD-639");
+
+  const lanePhases = resolveLanePhases(cwd);
+  const laneStatuses = resolveLaneTaskStatuses(tasks, verificationRows, lanePhases);
+  const stage = resolveStageFromLaneStatuses(laneStatuses);
+
   const task1066 = statusById(tasks, "TASK-BUD-1066");
   const task1068 = statusById(tasks, "TASK-BUD-1068");
   const task1075 = statusById(tasks, "TASK-BUD-1075");
 
-  const stage = resolveStage(task637, task638, task639);
-  const action = nextActionForStage(stage);
+  const docsSignals = {
+    colonyGap: resolveColonyPropagationGap(verificationRows, cwd),
+    multiWorkerBlocked: hasAny(cwd, DOC_FILES.singleWorkerLane, ["no multi-worker", "blocked", "colony promotion"]) ||
+      hasAny(cwd, DOC_FILES.firstPartyArch, ["current background gates not green", "parallel/background/colony", "multi-agent / colony"]) ||
+      hasAny(cwd, DOC_FILES.nativeRunner, ["keep multi-worker", "colony", "background"]),
+  };
+
+  const maturityState = resolveDecouplingState({
+    laneStage: stage,
+    laneStatuses,
+    docsSignals,
+  });
+  const maturityAction = nextActionForMaturityState(maturityState, laneStatuses);
+
   const agentWorkerLane = resolveAgentWorkerLane({
     docs: {
       singleWorkerMaturity: fileContains(
         cwd,
-        path.join("docs", "research", "single-worker-board-driven-lane-maturity-2026-05.md"),
+        DOC_FILES.singleWorkerLane,
         "single-worker-board-driven-lane-maturity-decision",
       ),
       agentRunnerMaturity: fileContains(
         cwd,
-        path.join("docs", "research", "agent-runner-maturity-checkpoint-2026-05.md"),
+        DOC_FILES.agentRunnerCheckpoint,
         "agent-first-worker-lane",
       ),
       agentFirstMode: fileContains(
         cwd,
-        path.join("docs", "research", "agent-first-operating-mode-2026-05.md"),
+        DOC_FILES.firstWorkerMode,
         "single-worker",
       ),
     },
@@ -253,32 +417,33 @@ function main() {
   const blockedNowCount = Number(triage?.recommendation?.metrics?.blockedNowCount ?? 0);
   const pendingCount = Array.isArray(triage?.board?.pending) ? triage.board.pending.length : 0;
 
-  const summary = `decoupling-maturity: stage=${stage} recommendationCode=${action.recommendationCode} next=${action.nextAction}`;
+  const summary = `decoupling-maturity: stage=${stage} maturity=${maturityState} recommendationCode=${maturityAction.recommendationCode} next=${maturityAction.nextAction}`;
 
   const report = {
     summary,
     generatedAt: new Date().toISOString(),
     lookbackDays: args.days,
     stage,
-    recommendationCode: action.recommendationCode,
-    nextAction: action.nextAction,
+    recommendationCode: maturityAction.recommendationCode,
+    nextAction: maturityAction.nextAction,
+    maturityState,
+
     metrics: {
       completeSignals,
       unlockNowCount,
       blockedNowCount,
       pendingCount,
     },
-    laneTasks: {
-      "TASK-BUD-637": task637,
-      "TASK-BUD-638": task638,
-      "TASK-BUD-639": task639,
-    },
+    laneTasks: laneStatuses,
+    lanePhases,
     agentWorkerLane,
     evidenceSources: {
       sessionTriage: triageRun.ok ? "ok" : `error(${triageRun.status})`,
       sessionTriageParse: triage?.parseError ? "invalid-json" : "ok",
       boardTasks: ".project/tasks.json",
       verification: ".project/verification.json",
+      laneDocs: DOC_FILES.decouplingLane,
+      colonyGapReport: docsSignals.colonyGap ? DOC_FILES.colonyGapReport : "none",
     },
   };
 
@@ -291,9 +456,10 @@ function main() {
   process.stdout.write(
     `metrics: completeSignals=${completeSignals} unlockNow=${unlockNowCount} blockedNow=${blockedNowCount} pending=${pendingCount}\n`,
   );
-  process.stdout.write(
-    `lane: 637=${task637} 638=${task638} 639=${task639}\n`,
-  );
+  for (const phase of DECUPLING_LANE_PHASES) {
+    const row = laneStatuses[phase];
+    process.stdout.write(`lanePhase ${phase}: ${row?.id ?? "-"} -> ${row?.status ?? "missing"}\n`);
+  }
   process.stdout.write(
     `agentWorkerLane: stage=${agentWorkerLane.stage} recommendationCode=${agentWorkerLane.recommendationCode} next=${agentWorkerLane.nextAction}\n`,
   );

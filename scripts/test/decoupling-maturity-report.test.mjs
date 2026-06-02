@@ -6,6 +6,10 @@ import {
   resolveAgentWorkerLane,
   resolveStage,
   statusById,
+  extractTaskIdsFromText,
+  resolveLaneTaskStatuses,
+  resolveStageFromLaneStatuses,
+  resolveDecouplingState,
 } from "../decoupling-maturity-report.mjs";
 
 test("resolveStage preserves the original decoupling ladder", () => {
@@ -88,4 +92,35 @@ test("hasVerificationEvidence matches task-specific verification markers", () =>
   assert.equal(hasVerificationEvidence(rows, "TASK-BUD-1075", "SDK-ONE-FILE-MUTATION-PASS"), true);
   assert.equal(hasVerificationEvidence(rows, "TASK-BUD-1075", "SDK-MUTATION-RUNG-CODIFIED"), true);
   assert.equal(hasVerificationEvidence(rows, "TASK-BUD-1068", "SDK-ONE-FILE-MUTATION-PASS"), false);
+});
+
+test("decoupling lane doc parsing uses dynamic task IDs and current-board-derived status", () => {
+  const text = "Task: `TASK-BUD-637`\\nTask: `TASK-BUD-638`\\nTask: `TASK-BUD-639`";
+  const ids = extractTaskIdsFromText(text);
+  assert.deepEqual(ids, ["TASK-BUD-637", "TASK-BUD-638", "TASK-BUD-639"]);
+
+  const tasks = [
+    { id: "TASK-BUD-638", status: "completed" },
+    { id: "TASK-BUD-639", status: "completed" },
+  ];
+  const verifications = [
+    { id: "VERIF-TASK-BUD-638-PASS", task_id: "TASK-BUD-638", evidence: "passed" },
+  ];
+  const phases = {
+    stabilize: { id: "TASK-BUD-637" },
+    delegate: { id: "TASK-BUD-638" },
+    decouple: { id: "TASK-BUD-639" },
+  };
+
+  const laneStatuses = resolveLaneTaskStatuses(tasks, verifications, phases);
+  assert.equal(resolveStageFromLaneStatuses(laneStatuses), "decouple");
+  const state = resolveDecouplingState({
+    laneStage: "decouple",
+    laneStatuses,
+    docsSignals: {
+      colonyGap: false,
+      multiWorkerBlocked: true,
+    },
+  });
+  assert.equal(state, "multi-worker-not-ready");
 });
