@@ -12,6 +12,8 @@ Guia para tratar custo como restrição de primeira classe em qualquer trabalho,
 
 ## Conceito: Budget Envelope
 
+`task` aqui é uma unidade de trabalho rastreável (unidade canônica desta pilha de runtime). Se o projeto usar outro sistema de memória (issues, tickets, PR/ID, DB ou wiki), trate esse termo como alias do seu item rastreável de referência e mantenha o mapeamento explícito no contrato.
+
 Um **budget envelope** é o contrato mínimo de custo de uma execução.
 
 Campos recomendados:
@@ -20,7 +22,7 @@ Campos recomendados:
 - `owner` (quem abriu)
 - `scope` (sessão/projeto/colônia)
 - `evidence` (links para `/usage`, `/session-breakdown`, `/quota-visibility export`)
-- `tasks` (decomposição do macro goal)
+- `work items` (decomposição do macro goal)
 
 Sem envelope explícito, não há controle operacional real.
 

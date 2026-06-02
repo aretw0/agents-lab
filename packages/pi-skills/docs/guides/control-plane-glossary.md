@@ -7,7 +7,7 @@ description: Glossary for control-plane concepts and operator language.
 
 Este glossário existe para reduzir gordura conceitual. O objetivo da stack não é criar uma taxonomia infinita; é construir um **relógio de trabalho digno e auditável**: escolher o próximo trabalho, executar uma fatia pequena, validar, registrar evidência, decidir se continua ou para, e retomar sem perder contexto.
 
-Use estes termos como linguagem canônica. Quando uma sessão usar outra alcunha, traduza para o termo canônico antes de criar nova ferramenta, task ou documento.
+Use estes termos como linguagem canônica. Quando uma sessão usar outra alcunha ou outro storage de trabalho, traduza para o termo canônico antes de criar nova ferramenta, task ou documento.
 
 ## Regra de ouro
 
@@ -18,7 +18,8 @@ Se um nome novo não muda o contrato operacional, ele é só um alias. Registre 
 | Termo | Significado operacional | Não significa | Aliases comuns |
 | --- | --- | --- | --- |
 | **Board** | Fonte local de verdade para trabalho: tasks, verificações, rationale e dependências. Hoje é `.project/*`, mas o contrato deve continuar adapter-agnostic. | Banco de dados definitivo para qualquer futuro remoto/CI. | ticket system, backlog, project state |
-| **Task** | Unidade de trabalho rastreável no board, com descrição, status, critérios e possível verificação. | Qualquer pensamento solto da conversa. | ticket, issue local, item |
+| **Task** | Unidade de trabalho rastreável (adapter canônico atual), com descrição, status, critérios e possível verificação. | Qualquer pensamento solto da conversa. | ticket, issue local, item |
+| **Work item** | Alias canônico para outros esquemas de memória (issue/kanban/DB/observações). Use este termo no texto quando quiser destacar independência de adapter. | Termo técnico da stack; pode ser mapeado para a entidade do ambiente local. | task local, registro rastreável |
 | **Macro-task** | Task ampla demais para fechar com uma verificação simples; normalmente envolve múltiplos arquivos, risco, protected scope, long-run, política ou várias capacidades. Deve ter dependências/side quests explícitas antes de fechamento. | Uma desculpa para nunca fechar nada. | epic, broad task, tarefa ampla, guarda-chuva |
 | **Side quest / Subtask** | Task explícita criada quando uma macro-task depende de trabalho menor descoberto antes ou durante execução. Deve ter critérios e verificação própria. | Nota invisível em handoff ou promessa informal. | blocker task, dependency task, prerequisite |
 | **Dependency (`depends_on`)** | Relação explícita de bloqueio entre tasks. Se A depende de B, B precisa existir no board. | Ordem vaga de preferência ou ideia implícita. | prerequisite, blocker, side quest link |
@@ -47,7 +48,7 @@ Se um nome novo não muda o contrato operacional, ele é só um alias. Registre 
 
 ## Relações importantes
 
-- **Task vs slice**: uma task é o item rastreável; uma slice é uma execução pequena dentro dela.
+- **Task vs slice**: uma task (ou work item) é o item rastreável; uma slice é uma execução pequena dentro dela.
 - **Macro-task vs side quest**: macro-task pode iniciar com evidência parcial, mas não fecha sem side quests/dependências materializadas quando elas existem.
 - **Milestone vs dependency**: milestone agrupa; `depends_on` bloqueia.
 - **Verification vs evidence**: verification é o registro; evidence é o conteúdo resumido que delimita o que foi provado.

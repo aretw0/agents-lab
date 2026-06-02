@@ -7,6 +7,8 @@ description: Canonical project-board and posterity pipeline.
 
 Objetivo: preservar contexto de forma durável e retomável com baixo custo.
 
+Observação de neutralidade: a unidade chamada `task` aqui é o atalho canônico desta stack para uma unidade rastreável de trabalho. Substitua por `work item` ou por seu primitivo de memória (issue/card/ticket/registro externo) quando esse guia for usado em outro backend.
+
 Skill distribuída: práticas recorrentes deste guia são resumidas em `packages/lab-skills/skills/control-plane-ops/SKILL.md` para que o contrato board-first/long-run viaje com a stack, não apenas com a documentação local.
 
 ## Regra principal

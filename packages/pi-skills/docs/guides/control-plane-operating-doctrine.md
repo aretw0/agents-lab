@@ -7,6 +7,8 @@ description: Operating doctrine for unattended control-plane work.
 
 Este guia consolida as opiniões operacionais que devem orientar o agente quando estiver trabalhando em modo local-first, com pouco atrito do operador, sem perder governança. Para nomenclatura canônica e aliases, use `docs/guides/control-plane-glossary.md` antes de criar novos termos ou surfaces.
 
+Observação de neutralidade de memória: `task` é o termo canônico para a unidade rastreável de trabalho nesta pilha; se o projeto usar outro tipo de memória (issue, card, PR, banco, wiki etc.), faça o mapeamento explícito do conceito sem assumir que a estrutura é a mesma.
+
 ## Norte
 
 O objetivo não é automatizar tudo. O objetivo é manter trabalho contínuo, organizado e auditado, parando apenas quando houver risco real, decisão estratégica ou escopo protegido.
@@ -723,7 +725,7 @@ Pré-condições mínimas:
 7. checkpoint obrigatório após a fatia;
 8. stop obrigatório após uma fatia, mesmo se outra oportunidade estiver pronta.
 
-A confirmação do operador precisa nomear a tarefa e a ação, por exemplo: “autorizo executar uma fatia local para TASK-BUD-XYZ com os arquivos listados”. Uma frase genérica como “pode seguir” continua sendo autorização para continuar rehearsal/control-plane, não autorização para um executor.
+A confirmação do operador precisa nomear a unidade de trabalho e a ação, por exemplo: “autorizo executar uma fatia local para WORK-ITEM-ID com os arquivos listados”. Uma frase genérica como “pode seguir” continua sendo autorização para continuar rehearsal/control-plane, não autorização para um executor.
 
 Mesmo com confirmação explícita, o contrato só cobre uma fatia local. Ele não cobre scheduler, repetição automática, self-reload, remote/offload, GitHub Actions, publish, `.pi/settings.json`, `.github`, `.obsidian`, manutenção destrutiva de git ou qualquer escopo protegido. Cada um desses itens exige tarefa, gate e autorização separados.
 

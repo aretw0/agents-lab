@@ -2,6 +2,8 @@
 
 Objetivo: evoluir de forma segura do control-plane local para delegação e, só depois, para federação multi-control-plane — sem misturar conceitos no mesmo ciclo.
 
+Observação de neutralidade: `task` nesta prática é o conceito canônico desta stack para unidade rastreável de trabalho; em ambientes com outro storage de memória (issues, DB, wiki, tracker), mapeie o termo para o seu primitivo local.
+
 Distribuição operacional: o núcleo deste playbook também viaja como skill versionada em `packages/lab-skills/skills/control-plane-ops/SKILL.md` para reduzir drift entre documentação local e comportamento dos agentes.
 
 Radar estratégico relacionado: `docs/research/linux-agent-primitives-radar-2026.md` (limpeza -> pesquisa -> escalabilidade com gates de promoção local-safe).
