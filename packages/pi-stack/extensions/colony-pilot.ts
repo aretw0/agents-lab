@@ -13,7 +13,7 @@
  * - Tracks state heuristically from emitted messages and tool outputs
  */
 
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type {
 	ExtensionAPI,
@@ -225,6 +225,185 @@ import {
 } from "./colony-pilot-public-api";
 export * from "./colony-pilot-public-api";
 
+type ColonyModelPropagationRole =
+	| "scout"
+	| "worker"
+	| "soldier"
+	| "design"
+	| "multimodal"
+	| "backend"
+	| "review";
+
+type ColonyModelPropagationContract = {
+	createdAt: number;
+	runtimeColonyId?: string;
+	goal?: string;
+	expectedRoleModel: Partial<Record<ColonyModelPropagationRole, string>>;
+};
+
+type ColonyModelPropagationState = ColonyModelPropagationContract & {
+	issues?: string[];
+	validatedAt?: number;
+};
+
+type ColonyModelPropagationContractValidation = {
+	ok: boolean;
+	issues: string[];
+};
+
+const COLONY_MODEL_OVERRIDE_ROLES: readonly [string, ColonyModelPropagationRole][] = [
+	["scoutModel", "scout"],
+	["workerModel", "worker"],
+	["soldierModel", "soldier"],
+	["designWorkerModel", "design"],
+	["multimodalWorkerModel", "multimodal"],
+	["backendWorkerModel", "backend"],
+	["reviewWorkerModel", "review"],
+] as const;
+
+function normalizeText(value: unknown): string | undefined {
+	if (typeof value !== "string") return undefined;
+	const trimmed = value.trim();
+	return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function toModelRoleKey(raw: string): string {
+	const normalized = raw.trim().toLowerCase();
+	if (normalized.endsWith("workermodel")) {
+		return normalized.slice(0, -"workermodel".length);
+	}
+	if (normalized.endsWith("model")) {
+		return normalized.slice(0, -"model".length);
+	}
+	return normalized;
+}
+
+function collectExplicitModelOverrides(
+	toolInput: AntColonyToolInput,
+): ColonyModelPropagationContract["expectedRoleModel"] {
+	const overrides: ColonyModelPropagationContract["expectedRoleModel"] = {};
+	for (const [inputKey, role] of COLONY_MODEL_OVERRIDE_ROLES) {
+		const value = normalizeText((toolInput as Record<string, unknown>)[inputKey]);
+		if (value) overrides[role] = value;
+	}
+	return overrides;
+}
+
+function readColonyRuntimeState(
+	cwd: string,
+	signalColonyId: string,
+	runtimeColonyId?: string,
+): { path: string; state: unknown } | undefined {
+	const candidates = buildAntColonyMirrorCandidates(cwd);
+	const seen = new Set<string>();
+	const normalizedSignalId = normalizeColonySignalId(signalColonyId);
+
+	for (const root of candidates) {
+		if (!existsSync(root)) continue;
+		const paths = [
+			runtimeColonyId
+				? path.join(root, "colonies", runtimeColonyId, "state.json")
+				: undefined,
+			normalizedSignalId
+				? path.join(root, "colonies", normalizedSignalId, "state.json")
+				: undefined,
+		];
+
+		for (const candidate of paths) {
+			if (!candidate || seen.has(candidate)) continue;
+			seen.add(candidate);
+			if (!existsSync(candidate)) continue;
+			try {
+				return {
+					path: candidate,
+					state: JSON.parse(readFileSync(candidate, "utf8")),
+				};
+			} catch {
+				return undefined;
+			}
+		}
+	}
+
+	return undefined;
+}
+
+function collectObservedModelOverrides(
+	state: unknown,
+): Partial<Record<string, string>> {
+	if (!state || typeof state !== "object") return {};
+	const root = state as Record<string, unknown>;
+	const out: Partial<Record<string, string>> = {};
+
+	const modelOverrides = root.modelOverrides;
+	if (modelOverrides && typeof modelOverrides === "object") {
+		for (const [key, value] of Object.entries(
+			modelOverrides as Record<string, unknown>,
+		)) {
+			const role = toModelRoleKey(key);
+			const normalizedValue = normalizeText(value);
+			if (role && normalizedValue) {
+				out[role] = normalizedValue;
+			}
+		}
+	}
+
+	const ants = root.ants;
+	if (Array.isArray(ants)) {
+		for (const ant of ants) {
+			if (!ant || typeof ant !== "object") continue;
+			const item = ant as Record<string, unknown>;
+			const role = toModelRoleKey(normalizeText(item.caste) ?? "");
+			const value = normalizeText(item.model);
+			if (role && value && !out[role]) {
+				out[role] = value;
+			}
+		}
+	}
+
+	return out;
+}
+
+function validateModelPropagationContract(
+	contract: ColonyModelPropagationContract,
+	state: unknown,
+	statePath: string | undefined,
+): ColonyModelPropagationContractValidation {
+	const observed = collectObservedModelOverrides(state);
+	const issues: string[] = [];
+	for (const [role, expectedModel] of Object.entries(contract.expectedRoleModel)) {
+		const observedModel = normalizeText(observed[role]);
+		if (!observedModel) {
+			issues.push(
+				`expected ${role} model override '${expectedModel}' not found in executor state${
+					statePath ? ` (${statePath})` : ""
+				}`,
+			);
+			continue;
+		}
+		if (observedModel !== expectedModel) {
+			issues.push(
+				`model override mismatch for ${role}: expected '${expectedModel}', observed '${observedModel}'${
+					statePath ? ` (${statePath})` : ""
+				}`,
+			);
+		}
+	}
+
+	return { ok: issues.length === 0, issues };
+}
+
+function consumeColonyModelPropagationContractByGoal(
+	queue: ColonyModelPropagationContract[],
+	goal?: string,
+): ColonyModelPropagationContract | undefined {
+	if (queue.length === 0) return undefined;
+	if (!goal) return queue.shift();
+	const idx = queue.findIndex((entry) => entry.goal === goal);
+	if (idx === -1) return queue.shift();
+	const [match] = queue.splice(idx, 1);
+	return match;
+}
+
 export default function (pi: ExtensionAPI) {
 	const state: PilotState = createPilotState();
 
@@ -241,6 +420,8 @@ export default function (pi: ExtensionAPI) {
 		source: "ant_colony" | "manual";
 		at: number;
 	}> = [];
+	const pendingColonyModelPropagationContracts: ColonyModelPropagationContract[] = [];
+	const colonyModelPropagationStates = new Map<string, ColonyModelPropagationState>();
 	const colonyTaskMap = new Map<string, string>();
 	const colonyGoalMap = new Map<string, string>();
 	let preflightCache:
@@ -258,6 +439,8 @@ export default function (pi: ExtensionAPI) {
 		state.lastSessionFile = ctx.sessionManager.getSessionFile?.() ?? undefined;
 		state.monitorMode = inferMonitorModeFromSessionFileImpl(state.lastSessionFile);
 		pendingColonyGoals.splice(0, pendingColonyGoals.length);
+		pendingColonyModelPropagationContracts.splice(0, pendingColonyModelPropagationContracts.length);
+		colonyModelPropagationStates.clear();
 		colonyTaskMap.clear();
 		colonyGoalMap.clear();
 
@@ -311,6 +494,68 @@ export default function (pi: ExtensionAPI) {
 		}
 
 		const taskIdOverride = colonyTaskMap.get(signal.id);
+		let modelPropagationContract = colonyModelPropagationStates.get(signal.id);
+		if (!modelPropagationContract && signal.phase === "launched") {
+			const pending = consumeColonyModelPropagationContractByGoal(
+				pendingColonyModelPropagationContracts,
+				guessedGoal,
+			);
+			if (
+				pending &&
+				Object.keys(pending.expectedRoleModel).length > 0
+			) {
+				modelPropagationContract = {
+					...pending,
+					runtimeColonyId,
+				};
+				colonyModelPropagationStates.set(signal.id, modelPropagationContract);
+			}
+		}
+
+		if (
+			modelPropagationContract &&
+			!modelPropagationContract.validatedAt &&
+			Object.keys(modelPropagationContract.expectedRoleModel).length > 0
+		) {
+			const runtimeState = readColonyRuntimeState(
+				ctx.cwd,
+				signal.id,
+				runtimeColonyId,
+			);
+
+			if (runtimeState) {
+				const validation = validateModelPropagationContract(
+					modelPropagationContract,
+					runtimeState.state,
+					runtimeState.path,
+				);
+				modelPropagationContract.validatedAt = Date.now();
+				if (!validation.ok) {
+					modelPropagationContract.issues = validation.issues;
+					pi.appendEntry("colony-pilot.model-propagation-contract", {
+						atIso: new Date().toISOString(),
+						colonyId: signal.id,
+						runtimeColonyId,
+						goal: guessedGoal,
+						issues: validation.issues,
+						expected: modelPropagationContract.expectedRoleModel,
+						sourcePath: runtimeState.path,
+					});
+					ctx.ui.notify(
+						[
+							"ant_colony bloqueada por contrato de propagação de modelo",
+							"Não foi possível confirmar em runtime que os modelOverrides explícitos foram aplicados.",
+							`colony=${signal.id}`,
+							`runtime=${runtimeColonyId ?? "(desconhecido)"}`,
+							"issues:",
+							...validation.issues.map((issue) => `  - ${issue}`),
+						].join("\n"),
+						"warning",
+					);
+				}
+				colonyModelPropagationStates.set(signal.id, modelPropagationContract);
+			}
+		}
 
 		const resolveCompletedDeliveryEvaluation = () => {
 			let deliveryEval = evaluateColonyDeliveryEvidence(
@@ -449,6 +694,30 @@ export default function (pi: ExtensionAPI) {
 				source: "ant_colony",
 			});
 
+			if (modelPropagationContract?.issues?.length) {
+				const block = readProjectTasksBlock(ctx.cwd);
+				const idx = block.tasks.findIndex((t) => t.id === syncResult?.taskId);
+				if (idx >= 0) {
+					const task = block.tasks[idx]!;
+					let changed = false;
+					if (task.status !== "blocked") {
+						task.status = "blocked";
+						changed = true;
+					}
+					const now = new Date().toISOString();
+					const dedupedNote = appendNoteOnceByNormalizedMessage(
+						task.notes,
+						`[${now}] model propagation contract mismatch: ${modelPropagationContract.issues.join("; ")}`,
+						projectTaskSyncConfig.maxNoteLines,
+					);
+					if (dedupedNote.appended) {
+						task.notes = dedupedNote.notes;
+						changed = true;
+					}
+					if (changed) writeProjectTasksBlock(ctx.cwd, block);
+				}
+			}
+
 			if (signal.phase === "completed") {
 				const deliveryEval = completedDelivery!.deliveryEval;
 				const requiresPromotion =
@@ -529,6 +798,7 @@ export default function (pi: ExtensionAPI) {
 
 		if (isTerminalSignal && candidateRetentionConfig.enabled) {
 			const deliveryEval = completedDelivery?.deliveryEval;
+			const propagationIssues = modelPropagationContract?.issues;
 			const mirrors = buildAntColonyMirrorCandidates(ctx.cwd).map((p) => ({
 				path: p,
 				exists: existsSync(p),
@@ -541,6 +811,9 @@ export default function (pi: ExtensionAPI) {
 							mirrors,
 						})
 					: undefined;
+				const deliveryOrPropagationIssues = Array.from(
+					new Set([...(deliveryEval?.issues ?? []), ...(propagationIssues ?? [])]),
+				);
 			const retention = persistColonyRetentionRecord(
 				ctx.cwd,
 				{
@@ -553,7 +826,7 @@ export default function (pi: ExtensionAPI) {
 						signal.phase === "completed"
 							? deliveryPolicyConfig.mode
 							: undefined,
-					deliveryIssues: deliveryEval?.issues,
+					deliveryIssues: deliveryOrPropagationIssues,
 					messageExcerpt: text,
 					mirrors,
 					runtimeColonyId,
@@ -653,6 +926,7 @@ export default function (pi: ExtensionAPI) {
 			: undefined;
 		const goal =
 			typeof toolInput.goal === "string" ? toolInput.goal.trim() : "";
+		const explicitModelOverrides = collectExplicitModelOverrides(toolInput);
 
 		if (modelPolicyConfig.enabled) {
 			const evaluation = evaluateAntColonyModelPolicy(
@@ -821,6 +1095,16 @@ export default function (pi: ExtensionAPI) {
 			pendingColonyGoals.push({ goal, source: "ant_colony", at: Date.now() });
 			while (pendingColonyGoals.length > 20) pendingColonyGoals.shift();
 		}
+		if (Object.keys(explicitModelOverrides).length > 0) {
+			pendingColonyModelPropagationContracts.push({
+				createdAt: Date.now(),
+				goal,
+				expectedRoleModel: explicitModelOverrides,
+			});
+			while (pendingColonyModelPropagationContracts.length > 20) {
+				pendingColonyModelPropagationContracts.shift();
+			}
+		}
 
 		return undefined;
 	});
@@ -877,6 +1161,8 @@ export default function (pi: ExtensionAPI) {
 	registerColonyPilotCommandShortcuts(pi);
 
 	pi.on("session_shutdown", () => {
+		pendingColonyModelPropagationContracts.splice(0, pendingColonyModelPropagationContracts.length);
+		colonyModelPropagationStates.clear();
 		updateStatusUIImpl(currentCtx, {
 			...state,
 			monitorMode: "unknown",
