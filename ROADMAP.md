@@ -76,7 +76,7 @@ Objetivo: publicar uma baseline madura da `pi-stack` e do laboratório sem prome
 | Tema | Direção |
 |---|---|
 | Refarm engine | criar adapter quando a engine estiver pronta, reaproveitando primitives já desacopladas |
-| vault-seed como consumidor | expor primitivas de auditoria (a11y, textual, performance) consumíveis por `dgk-cli` via interface estável; avaliação textual de job-vault-bk é candidata a primeira primitive compartilhada |
+| vault-seed como consumidor | expor primitivas de auditoria (a11y, textual, performance) consumíveis por `dgk-cli` via interface estável; estratégias de avaliação textual já validadas em campo são candidatas a primeira primitive compartilhada |
 | Workers e colônia | promover de report-only para execução apenas com métricas, budget e cancelamento confiáveis |
 | GitHub Actions como executor | manter protegido até existir contrato de task, artifact, rollback e permissão mínima |
 | Provider routing | canários pequenos, quota visível e decisão explícita antes de troca real |
