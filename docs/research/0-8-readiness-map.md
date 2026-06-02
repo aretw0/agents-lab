@@ -17,7 +17,7 @@ O estado atual para 0.8.0 é:
 2. **Base local:** desenvolvimento usa `pnpm`, devcontainer, `lab pi`, gates locais e `pi:dev` com capacidades frias por padrão.
 3. **Base de produto:** `@aretw0/pi-stack` deve continuar `strict-curated` por default; capacidades caras ficam opt-in.
 4. **Fronteira protegida:** publish npm, provider routing, remote/offload, GitHub Actions como executor e automação forte exigem intenção explícita do operador.
-5. **Release readiness:** `board-release-clear` está verde; o bloqueio restante é deliberado: pacotes ainda estão em `0.7.0`, então `target-version-ready` segue falso até decisão de release.
+5. **Release readiness:** `board-release-clear` ainda está bloqueado por tarefas de execução em andamento no board; o bloqueio explícito para liberação ainda é deliberado: pacotes estão em `0.7.0`, então `target-version-ready` segue falso até decisão de release.
 6. **Roadmap canônico:** direção macro fica em [ROADMAP.md]({{ site.repo_url }}/blob/main/ROADMAP.md); este arquivo registra readiness e evidência selecionada.
 
 ## Pronto
@@ -31,7 +31,7 @@ O estado atual para 0.8.0 é:
 | Discurso público | auditado | `repo:discourse:audit` cobre README, guias, primitives, architecture e research promovido |
 | Instalação padrão | conservadora | `npx @aretw0/pi-stack` instala perfil `strict-curated` |
 | Fronteira de engine | protegida | `engine:boundary:audit` mantém core portable e Pi em surfaces/adapters |
-| Board de release | limpo | `release:readiness:v0.8.0` reporta `board-release-clear` verde, sem P0 aberto, in-progress ou blocked |
+| Board de release | ainda com fluxo em andamento | `release:readiness:v0.8.0` reporta `board-release-clear` bloqueado por tarefas em execução, sem P0 aberto, e ainda sob revisão de release
 
 ## Preparado, mas ainda protegido
 

@@ -82,9 +82,7 @@
       "modelPolicy": {
         "enabled": true,
         "allowMixedProviders": false,
-        "allowedProviders": [
-          "openai-codex"
-        ],
+        "allowedProviders": [],
         "requireExplicitRoleModels": true,
         "roleModels": {
           "scout": "openai-codex/gpt-5.3-codex-spark",
@@ -241,10 +239,7 @@
           "hardPct": 100
         }
       },
-      "routeModelRefs": {
-        "openai-codex": "openai-codex/gpt-5.3-codex-spark",
-        "dashscope": "dashscope/qwen3.6-flash"
-      }
+      "routeModelRefs": {}
     },
     "quotaPanel": {
       "mode": "on"

@@ -9,7 +9,7 @@ import {
 	extractToolBackedRouteToolName,
 	registerToolBackedRouteCanary,
 	resolveToolBackedRouteIntent,
-} from "../../extensions/guardrails-core-tool-backed-route-canary";
+} from "../../extensions/guardrails-core-tool-backed-route-canary-surface";
 
 describe("guardrails tool-backed route canary", () => {
 	it("flags operator intent packet-shaped answers without the matching tool call", () => {
