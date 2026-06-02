@@ -44,7 +44,7 @@ Comportamento importante:
 
 ### 2.1) Contrato de propagação de modelo (prevenção de mismatch)
 
-A partir da investigação de `TASK-BUD-521`, o piloto passou a validar que os overrides enviados no `tool_call` realmente chegaram ao estado de execução da colônia:
+A partir da investigação de `TASK-ID`, o piloto passou a validar que os overrides enviados no `tool_call` realmente chegaram ao estado de execução da colônia:
 
 - Em `tool_call`, `ant_colony` normaliza e armazena `scout/worker/soldier/...` esperados.
 - Em `message_end` no `[COLONY_SIGNAL:LAUNCHED]`, o piloto lê `state.json` dos mirrors de execução e compara contra:
