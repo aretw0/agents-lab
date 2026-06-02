@@ -163,7 +163,7 @@
       "status": "completed",
       "priority": "p1",
       "files": [
-        "packages/pi-stack/extensions/guardrails-core-tool-backed-route-canary.ts",
+        "packages/pi-stack/extensions/guardrails-core-tool-backed-route-canary-surface.ts",
         "packages/pi-stack/extensions/guardrails-core-operator-intent-intake.ts",
         "packages/pi-stack/extensions/guardrails-core-lane-brainstorm-surface.ts",
         "packages/pi-stack/test/smoke/guardrails-tool-backed-route-canary.test.ts",
@@ -192,7 +192,7 @@
         "packages/pi-stack/extensions/guardrails-core-lane-brainstorm-surface.ts",
         "packages/pi-stack/extensions/lane-brainstorm-packet.ts",
         "packages/pi-stack/test/smoke/autonomy-lane-brainstorm-surface.test.ts",
-        "packages/pi-stack/extensions/guardrails-core-tool-backed-route-canary.ts",
+        "packages/pi-stack/extensions/guardrails-core-tool-backed-route-canary-surface.ts",
         "packages/pi-stack/test/smoke/guardrails-tool-backed-route-canary.test.ts"
       ],
       "acceptance_criteria": [

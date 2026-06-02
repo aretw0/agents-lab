@@ -11,6 +11,76 @@ function makeWorkspace(settings: Record<string, unknown>): string {
   return dir;
 }
 
+function seedProviderSessionForReadiness(cwd: string, costUsd: number, model = "gpt-5.3-codex-spark"): void {
+  const stamp = new Date().toISOString();
+  const sessionRoot = join(cwd, ".sandbox", "pi-agent", "sessions");
+  mkdirSync(sessionRoot, { recursive: true });
+  const sessionFile = join(sessionRoot, "2026-06-02T00-00-00-000Z-readiness.jsonl");
+  writeFileSync(
+    sessionFile,
+    [
+      JSON.stringify({
+        type: "session",
+        timestamp: stamp,
+      }),
+      JSON.stringify({
+        type: "message",
+        message: {
+          role: "user",
+          content: "probe",
+        },
+      }),
+      JSON.stringify({
+        type: "message",
+        provider: "openai-codex",
+        model,
+        timestamp: stamp,
+        message: {
+          role: "assistant",
+          usage: {
+            input: 10,
+            output: 5,
+            totalTokens: 15,
+            cost: {
+              total: costUsd,
+            },
+          },
+        },
+      }),
+    ].join("\n"),
+  );
+}
+
+function withProviderReadinessTelemetryIsolation<T>(cwd: string, usageCostUsd?: number, callback: () => Promise<T>): Promise<T> {
+  const previousAgentDir = process.env.PI_CODING_AGENT_DIR;
+  const previousBillingPath = process.env.PI_COPILOT_BILLING_PATH;
+  const isolateDir = mkdtempSync(join(tmpdir(), "pi-provider-readiness-agent-"));
+
+  process.env.PI_CODING_AGENT_DIR = isolateDir;
+  process.env.PI_COPILOT_BILLING_PATH = join(isolateDir, "missing-billing.json");
+  if (usageCostUsd !== undefined) {
+    seedProviderSessionForReadiness(cwd, usageCostUsd);
+  }
+
+  const done = async (): Promise<void> => {
+    if (previousAgentDir === undefined) {
+      delete process.env.PI_CODING_AGENT_DIR;
+    } else {
+      process.env.PI_CODING_AGENT_DIR = previousAgentDir;
+    }
+
+    if (previousBillingPath === undefined) {
+      delete process.env.PI_COPILOT_BILLING_PATH;
+    } else {
+      process.env.PI_COPILOT_BILLING_PATH = previousBillingPath;
+    }
+
+    await rmSync(isolateDir, { recursive: true, force: true });
+  };
+
+  return callback().finally(done);
+}
+
 function makeMockPi() {
   return {
     on: vi.fn(),
@@ -117,13 +187,15 @@ describe("provider-readiness matrix", () => {
       },
     });
     try {
-      const matrix = await buildProviderReadinessMatrix(dir);
-      const entry = matrix.entries.find((e) => e.provider === "openai-codex");
-      expect(entry).toBeDefined();
-      expect(entry!.modelRef).toBe("openai-codex/gpt-5.3-codex-spark");
-      expect(entry!.budgetState).toBe("ok");
-      expect(entry!.budgetScope).toBe("provider-model");
-      expect(entry!.notes).toContain("Model-specific budget state: OK.");
+      await withProviderReadinessTelemetryIsolation(dir, 1, async () => {
+        const matrix = await buildProviderReadinessMatrix(dir);
+        const entry = matrix.entries.find((e) => e.provider === "openai-codex");
+        expect(entry).toBeDefined();
+        expect(entry!.modelRef).toBe("openai-codex/gpt-5.3-codex-spark");
+        expect(entry!.budgetState).toBe("ok");
+        expect(entry!.budgetScope).toBe("provider-model");
+        expect(entry!.notes).toContain("Model-specific budget state: OK.");
+      });
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -149,14 +221,16 @@ describe("provider-readiness matrix", () => {
       },
     });
     try {
-      const matrix = await buildProviderReadinessMatrix(dir);
-      const entry = matrix.entries.find((e) => e.provider === "openai-codex");
-      expect(entry).toBeDefined();
-      expect(entry!.modelRef).toBe("openai-codex/gpt-5.3-codex-spark");
-      expect(entry!.readiness).toBe("blocked");
-      expect(entry!.budgetState).toBe("blocked");
-      expect(entry!.budgetScope).toBe("provider");
-      expect(entry!.notes.join("\n")).toContain("Budget state: BLOCKED");
+      await withProviderReadinessTelemetryIsolation(dir, 0.002, async () => {
+        const matrix = await buildProviderReadinessMatrix(dir);
+        const entry = matrix.entries.find((e) => e.provider === "openai-codex");
+        expect(entry).toBeDefined();
+        expect(entry!.modelRef).toBe("openai-codex/gpt-5.3-codex-spark");
+        expect(entry!.readiness).toBe("blocked");
+        expect(entry!.budgetState).toBe("blocked");
+        expect(entry!.budgetScope).toBe("provider");
+        expect(entry!.notes.join("\n")).toContain("Budget state: BLOCKED");
+      });
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
