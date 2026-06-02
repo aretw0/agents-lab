@@ -1,6 +1,6 @@
 {
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.3-codex",
+  "defaultModel": "gpt-5.3-codex-spark",
   "packages": [
     {
       "source": "../packages/pi-stack",
@@ -31,6 +31,7 @@
     "../packages/web-skills",
     "../packages/pi-skills",
     "../packages/lab-skills",
+    "npm:@ifi/oh-pi-ant-colony",
     {
       "source": "npm:@ifi/oh-pi-extensions",
       "extensions": [
@@ -72,12 +73,24 @@
         "requiredExecutables": [
           "node",
           "git"
+        ],
+        "requireColonyCapabilities": [
+          "colony",
+          "colonyStop"
         ]
       },
       "modelPolicy": {
         "enabled": true,
         "allowMixedProviders": false,
-        "allowedProviders": [],
+        "allowedProviders": [
+          "openai-codex"
+        ],
+        "requireExplicitRoleModels": true,
+        "roleModels": {
+          "scout": "openai-codex/gpt-5.3-codex-spark",
+          "worker": "openai-codex/gpt-5.3-codex-spark",
+          "soldier": "openai-codex/gpt-5.3-codex-spark"
+        },
         "modelGateEnabled": false,
         "gatedModelRefs": [],
         "gatedModelGoalTriggers": [
@@ -229,7 +242,7 @@
         }
       },
       "routeModelRefs": {
-        "openai-codex": "openai-codex/gpt-5.3-codex",
+        "openai-codex": "openai-codex/gpt-5.3-codex-spark",
         "dashscope": "dashscope/qwen3.6-flash"
       }
     },

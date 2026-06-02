@@ -49,6 +49,11 @@ merge
 O skill `colony-dogfood` do `@aretw0/lab-skills` guia o Pi por todo o
 protocolo. No Pi TUI, basta invocar o skill para a task desejada.
 
+Regra de gate: workers de colônia não criam nem editam
+`.project/reports/TASK-ID-decision.md`. Esse arquivo é exclusivo do operador.
+Se um worker preencher `approved: true` ou `Fase 2 autorizada?: sim`, o gate
+deve ser tratado como inválido até nova revisão humana explícita.
+
 Os templates de artefato ficam em `.project/reports/`:
 
 - `_template-research.md` — formato de síntese de research

@@ -271,6 +271,16 @@ export function evaluateAntColonyModelPolicy(
 			typeof input[key] === "string" ? input[key]?.trim() : undefined;
 		const roleIsActive = activeRoles.includes(role);
 		const configured = roleIsActive ? policy.roleModels[role] : undefined;
+		const hasExplicitInput = Boolean(explicit);
+
+		if (
+			policy.requireExplicitRoleModels &&
+			policy.requiredRoles.includes(role) &&
+			!hasExplicitInput
+		) {
+			issues.push(`missing explicit model for role '${role}' (${String(key)})`);
+			continue;
+		}
 
 		if (
 			!explicit &&
@@ -288,15 +298,6 @@ export function evaluateAntColonyModelPolicy(
 		effectiveModels[role] = effective;
 
 		if (!roleIsActive && !explicit) {
-			continue;
-		}
-
-		if (
-			policy.requireExplicitRoleModels &&
-			policy.requiredRoles.includes(role) &&
-			!input[key]
-		) {
-			issues.push(`missing explicit model for role '${role}' (${String(key)})`);
 			continue;
 		}
 

@@ -39,12 +39,15 @@ No Pi, use `ant_colony` com:
 - `maxCost`: 2.0 (USD) — suficiente para leitura de repo externo + síntese
 - Worker model: modelo econômico (ex: flash/mini) — research não requer o modelo mais caro
 - Sem permissão de escrita de código ou push
+- Não criar nem editar `.project/reports/TASK-ID-decision.md`; esse arquivo é exclusivo do operador
 
 ### 3. Output esperado do worker
 
 O worker deve criar `.project/reports/TASK-ID-research.md` preenchendo todos
 os campos do template. Se o budget for atingido antes da síntese estar
 completa, o worker deve marcar `status: parcial` e salvar o que conseguiu.
+Se o worker criar ou editar o arquivo de decisão, trate o gate como inválido
+até nova revisão humana explícita.
 
 ### 4. Gate do operador (obrigatório)
 
@@ -52,7 +55,8 @@ Leia `.project/reports/TASK-ID-research.md`.
 Preencha `.project/reports/TASK-ID-decision.md` a partir do template.
 Marque `approved: true` ou `approved: false`.
 
-Só avance para Fase 2 se `approved: true` E `Fase 2 autorizada?: sim`.
+Só avance para Fase 2 se `approved: true` E `Fase 2 autorizada?: sim`, ambos
+preenchidos pelo operador humano.
 
 ## Fase 2: Código
 

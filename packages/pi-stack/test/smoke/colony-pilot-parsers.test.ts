@@ -522,6 +522,40 @@ describe("colony-pilot parsers", () => {
 		expect(input.soldierModel).toBe("openai-codex/gpt-5.2-codex");
 	});
 
+	it("model policy exige role model explícito mesmo quando roleModels estão configurados", () => {
+		const policy = resolveColonyPilotModelPolicy({
+			allowMixedProviders: false,
+			allowedProviders: ["openai-codex"],
+			requireExplicitRoleModels: true,
+			roleModels: {
+				scout: "openai-codex/gpt-5.3-codex-spark",
+				worker: "openai-codex/gpt-5.3-codex-spark",
+				soldier: "openai-codex/gpt-5.3-codex-spark",
+			},
+		});
+
+		const input: any = { goal: "x" };
+		const registry = {
+			find: () => ({ id: "ok" }),
+			hasConfiguredAuth: () => true,
+		};
+
+		const evalResult = evaluateAntColonyModelPolicy(
+			input,
+			"openai-codex/gpt-5.3-codex-spark",
+			registry,
+			policy,
+			input.goal,
+		);
+
+		expect(evalResult.ok).toBe(false);
+		expect(evalResult.issues).toEqual([
+			"missing explicit model for role 'scout' (scoutModel)",
+			"missing explicit model for role 'worker' (workerModel)",
+			"missing explicit model for role 'soldier' (soldierModel)",
+		]);
+	});
+
 	it("model gate blocks gated model refs without explicit goal trigger", () => {
 		const policy = resolveColonyPilotModelPolicy({
 			allowMixedProviders: false,
