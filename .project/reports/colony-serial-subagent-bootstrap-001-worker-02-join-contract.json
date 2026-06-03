@@ -1,0 +1,65 @@
+{
+  "mode": "agent-worker-artifact",
+  "runId": "colony-serial-subagent-bootstrap-001-worker-02-join-contract",
+  "planId": "serial-subagent-bootstrap-001",
+  "workerPacketId": "worker-02-join-contract",
+  "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-02-join-contract",
+  "requiredArtifact": ".project/reports/colony-serial-subagent-bootstrap-001-worker-02-join-contract.json",
+  "status": "PASS",
+  "fileContract": "read-only",
+  "declaredFiles": [
+    "packages/pi-stack/extensions/guardrails-core-colony-plan-surface.ts",
+    "scripts/decoupling-maturity-report.mjs"
+  ],
+  "allowedTools": [
+    "read",
+    "grep",
+    "git"
+  ],
+  "allowedCapabilities": [
+    "contract-synthesis",
+    "fan-in-prep"
+  ],
+  "dispatchAllowed": false,
+  "batchExecutionAllowed": false,
+  "serialOnly": true,
+  "touchedFiles": [
+    ".project/reports/colony-serial-subagent-bootstrap-001-worker-02-join-contract.json"
+  ],
+  "blockers": [],
+  "stopConditionsSatisfied": [
+    "pare se contrato estiver inconsistente",
+    "pare se join policy não for fail-closed",
+    "pare se houver dependência circular de arquivos"
+  ],
+  "joinPolicy": {
+    "mode": "fail-closed",
+    "requiredOutcomeIds": [
+      "outcome:serial-subagent-bootstrap-001:worker-01-scope-scan",
+      "outcome:serial-subagent-bootstrap-001:worker-02-join-contract"
+    ],
+    "failClosedWhen": [
+      "missing outcome",
+      "outcome != PASS",
+      "artifact missing/empty",
+      "scope violation",
+      "stop condition violated",
+      "ant_colony launch"
+    ],
+    "promoteOnlyWhen": "any missing or failed signal keeps BLOCK; fan-in remains blocked until every required outcome is present and PASS and every required artifact is present and non-empty"
+  },
+  "validationEvidence": {
+    "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-02-join-contract",
+    "expectedArtifact": ".project/reports/colony-serial-subagent-bootstrap-001-worker-02-join-contract.json",
+    "outputBytes": 1849,
+    "outputPreview": [
+      "Arquivo de saída canônico no caminho .project/reports/colony-serial-subagent-bootstrap-001-worker-02-join-contract.json",
+      "joinPolicy.mode=fail-closed",
+      "joinPolicy.requiredOutcomeIds=[outcome:serial-subagent-bootstrap-001:worker-01-scope-scan, outcome:serial-subagent-bootstrap-001:worker-02-join-contract]",
+      "joinPolicy.failClosedWhen inclui missing outcome, outcome != PASS, artifact missing/empty, scope violation, stop condition violated, ant_colony launch",
+      "joinPolicy.promoteOnlyWhen: any missing/failed signal keeps BLOCK"
+    ]
+  },
+  "nextAction": "Não despachar; só executar fan-in local-controlado após critérios passarem e revisão do operador.",
+  "timestamp": "2026-06-03T16:59:48.728Z"
+}

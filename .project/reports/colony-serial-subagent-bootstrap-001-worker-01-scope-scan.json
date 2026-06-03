@@ -1,0 +1,69 @@
+{
+  "mode": "agent-worker-artifact",
+  "runId": "colony-serial-subagent-bootstrap-001-worker-01-scope-scan",
+  "planId": "serial-subagent-bootstrap-001",
+  "workerPacketId": "worker-01-scope-scan",
+  "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-01-scope-scan",
+  "expectedArtifact": ".project/reports/colony-serial-subagent-bootstrap-001-worker-01-scope-scan.json",
+  "status": "PASS",
+  "fileContract": "read-only",
+  "declaredFiles": [
+    "packages/pi-stack/extensions/guardrails-core-colony-plan.ts",
+    "packages/pi-stack/test/smoke/guardrails-colony-plan-packet.test.ts"
+  ],
+  "touchedFiles": [],
+  "blockers": [],
+  "stopConditionsSatisfied": [
+    "pare em divergência de escopo esperado",
+    "pare se dependência externa aparecer",
+    "pare se arquivo for alterado fora do escopo"
+  ],
+  "validation": {
+    "requiredOutputShape": [
+      "PASS/FAIL",
+      "requiredOutcomeId",
+      "expectedArtifact",
+      "filesTouched",
+      "validationEvidence",
+      "blockers"
+    ],
+    "evidence": {
+      "model": "openai-codex/gpt-5.3-codex-spark",
+      "tools": [
+        "read",
+        "grep",
+        "find",
+        "ls"
+      ],
+      "outputBytes": 1104,
+      "outputPreview": [
+        "Mapeamento local-safe concluído (sem escrita/disparo):",
+        "",
+        "- `packages/pi-stack/extensions/guardrails-core-colony-plan.ts`",
+        "- `packages/pi-stack/extensions/guardrails-core-colony-plan-surface.ts`",
+        "- `packages/pi-stack/extensions/guardrails-core-agent-run-start.ts`",
+        "- `packages/pi-stack/extensions/guardrails-core-agent-run-worker-economy.ts`",
+        "- `packages/pi-stack/test/smoke/guardrails-colony-plan-packet.test.ts`",
+        "",
+        "Contrato serial (derivado do seu objetivo):",
+        "- `requiredOutcomeId`: `outcome:serial-subagent-bootstrap-001:worker-01-scope-scan`",
+        "- `expectedArtifact`: `reports/colony-subagent/worker-01-scope-scan.json`",
+        "- `serialOnly`: `true`",
+        "- `dispatchAllowed`: `false`",
+        "- `processStartAllowed`: `false`",
+        "- `batchExecutionAllowed`: `false`",
+        "- Economia já aplicada em modo crítico com `maxOutputLines=30` no builder atual.",
+        "",
+        "Declaração mínima de escopo recomendada para a varredura:",
+        "- `allowed_tools`: `[\"read\",\"grep\",\"git\"]`",
+        "- `allowed_capabilities`: `[\"evidence-synthesis\",\"scope-readonly\"]`",
+        "",
+        "Objetivo do worker: varredura de escopo local-safe + contrato, sem escrita, sem outros workers e sem `ant_colony`."
+      ],
+      "touchedFilesCount": 0
+    }
+  },
+  "summary": "worker-01-scope-scan executed in strict read-only serial mode and produced no file mutations.",
+  "timestamp": "2026-06-03T14:29:57.712Z",
+  "promotedFrom": "reports/colony-subagent/worker-01-scope-scan.json"
+}
