@@ -1,6 +1,7 @@
 # Guia de Embedding do Pi em CLIs Externas
 
-**Relacionado:** colony-c3, WORK-ITEM-ID, WORK-ITEM-ID  
+**Relacionado:** colony-c3, WORK-ITEM-ID, WORK-ITEM-ID
+
 **Pré-requisitos:** Pi instalado, Node >= 22 (Node 24 recomendado para desenvolvimento) e ambiente de teste isolado via `PI_CODING_AGENT_DIR`.
 
 ---

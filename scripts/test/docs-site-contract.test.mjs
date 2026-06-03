@@ -321,6 +321,20 @@ test("package guide sync strips package omit blocks", () => {
 	assert.doesNotMatch(rendered, /package:omit/);
 });
 
+test("package guide sync replaces repository task IDs with generic work item IDs", () => {
+	const rendered = renderPackageGuideContent(
+		"Use TASK-BUD-123 and TASK-BUD-456 as repository-local examples.",
+		{ guides: [] },
+		{ siteBaseUrl: "https://example.test", repoUrl: "https://github.test/repo" },
+	);
+
+	assert.equal(
+		rendered,
+		"Use WORK-ITEM-ID and WORK-ITEM-ID as repository-local examples.",
+	);
+	assert.doesNotMatch(rendered, /TASK-BUD-\d+/);
+});
+
 test("supply-chain CI hardening guide stays operational and repo-scoped", () => {
 	const guides = read("docs/guides/README.md");
 	const guide = read("docs/guides/supply-chain-ci-hardening.md");

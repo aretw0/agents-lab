@@ -42,18 +42,6 @@ Comportamento importante:
   - `scoutModel`, `workerModel`, `soldierModel`
   - `designWorkerModel`, `multimodalWorkerModel`, `backendWorkerModel`, `reviewWorkerModel`
 
-### 2.1) Contrato de propagação de modelo (prevenção de mismatch)
-
-A partir da investigação de `WORK-ITEM-ID`, o piloto passou a validar que os overrides enviados no `tool_call` realmente chegaram ao estado de execução da colônia:
-
-- Em `tool_call`, `ant_colony` normaliza e armazena `scout/worker/soldier/...` esperados.
-- Em `message_end` no `[COLONY_SIGNAL:LAUNCHED]`, o piloto lê `state.json` dos mirrors de execução e compara contra:
-  - `state.modelOverrides`
-  - lista de `ants[]` (`caste` + `model`)
-- Em divergência, registra telemetria estruturada em `pi.appendEntry("colony-pilot.model-propagation-contract")`, notifica com warning e marca a task sincronizada como `blocked`.
-- Em alinhamento, sem telemetria de mismatch e sem alerta.
-- Coberto por testes de fumaça em `packages/pi-stack/test/smoke/colony-pilot-model-propagation-contract.test.ts`.
-
 ### 3) Pilot de orquestração (`colony-pilot` first-party)
 
 `/colony-pilot check` agora cobre:

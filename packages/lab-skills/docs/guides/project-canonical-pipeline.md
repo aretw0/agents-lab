@@ -7,8 +7,6 @@ description: Canonical project-board and posterity pipeline.
 
 Objetivo: preservar contexto de forma durável e retomável com baixo custo.
 
-Observação de neutralidade: a unidade chamada `task` aqui é o atalho canônico desta stack para uma unidade rastreável de trabalho. Substitua por `work item` ou por seu primitivo de memória (issue/card/ticket/registro externo) quando esse guia for usado em outro backend.
-
 Skill distribuída: práticas recorrentes deste guia são resumidas em `packages/lab-skills/skills/control-plane-ops/SKILL.md` para que o contrato board-first/long-run viaje com a stack, não apenas com a documentação local.
 
 ## Regra principal
@@ -749,7 +747,7 @@ Para rodar um milestone quase unattended no control plane, operar com um contrat
 
 - **semântica de milestone é user-defined**: pode ser release (minor/patch), épico interno, janela operacional ou outro alvo local; o fluxo não assume release específica.
 - **main quests**: manter 1–3 tasks P0/P1 como trilha principal (exemplos locais: `WORK-ITEM-ID`, `WORK-ITEM-ID`, `WORK-ITEM-ID`, `WORK-ITEM-ID`);
-- **side quests**: intercalar slices curtos de preparo/primitive-first (`WORK-ITEM-ID`, `WORK-ITEM-ID`, `WORK-ITEM-ID`, `WORK-ITEM-ID`, `WORK-ITEM-ID`) apenas quando não quebrar continuidade da trilha principal;
+- **side quests**: intercalar slices curtos de preparo/primitive-first (`WORK-ITEM-ID/145/146/149/153`) apenas quando não quebrar continuidade da trilha principal;
 - **stop conditions válidas**: (a) dúvida de requisito não resolvível por default seguro, (b) risco de segurança/perda de dados, (c) reload necessário para ativar código novo, (d) falha de teste sem mitigação segura no lote;
 - **prova obrigatória**: todo incremento técnico do milestone precisa terminar com smoke focal verde (evidence em `verification`) antes de avançar para o próximo bloco;
 - **cadência recomendada**: lotes de 10–50 micro-slices, com checkpoint em board (`notes`) + `VER-*` parcial por lote;

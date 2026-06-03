@@ -40,7 +40,7 @@ Use ao fechar cada micro-lote de trabalho. O objetivo é permitir parada, retoma
 
 ## 6) Snapshot para próxima sessão
 - Arquivo de entrada recomendado:
-- Item(ns) de trabalho envolvidos:
+- Task(s) envolvidas:
 - Estado atual em 1 frase:
 
 ## 7) Resposta final ao operador
