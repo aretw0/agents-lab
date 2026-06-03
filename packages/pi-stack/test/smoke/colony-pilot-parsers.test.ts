@@ -252,16 +252,49 @@ describe("colony-pilot parsers", () => {
 	});
 
 	it("buildAntColonyMirrorCandidates gera caminhos esperados no Windows", () => {
-		const candidates = buildAntColonyMirrorCandidates(
-			"C:/Users/alice/work/repo",
+		const previous = process.env.PI_CODING_AGENT_DIR;
+		delete process.env.PI_CODING_AGENT_DIR;
+		try {
+			const candidates = buildAntColonyMirrorCandidates(
+				"C:/Users/alice/work/repo",
+			);
+			expect(candidates.length).toBe(2);
+			expect(candidates[0].replace(/\\/g, "/")).toContain(
+				"/.pi/agent/ant-colony/c/Users/alice/work/repo",
+			);
+			expect(candidates[1].replace(/\\/g, "/")).toContain(
+				"/.pi/agent/ant-colony/root/c/Users/alice/work/repo",
+			);
+		} finally {
+			if (previous === undefined) {
+				delete process.env.PI_CODING_AGENT_DIR;
+			} else {
+				process.env.PI_CODING_AGENT_DIR = previous;
+			}
+		}
+	});
+
+	it("inclui raiz de PI_CODING_AGENT_DIR no lookup de state mirror", () => {
+		const previous = process.env.PI_CODING_AGENT_DIR;
+		const tempAgentRoot = mkdtempSync(join(tmpdir(), "ant-colony-agent-root-"));
+		process.env.PI_CODING_AGENT_DIR = tempAgentRoot;
+		try {
+			const candidates = buildAntColonyMirrorCandidates("/workspaces/agents-lab");
+			expect(candidates.length).toBeGreaterThanOrEqual(4);
+			expect(candidates).toEqual(
+				expect.arrayContaining([
+					join(tempAgentRoot, "ant-colony", "workspaces", "agents-lab"),
+					join(tempAgentRoot, "ant-colony", "root", "workspaces", "agents-lab"),
+				]),
 		);
-		expect(candidates.length).toBe(2);
-		expect(candidates[0].replace(/\\/g, "/")).toContain(
-			"/.pi/agent/ant-colony/c/Users/alice/work/repo",
-		);
-		expect(candidates[1].replace(/\\/g, "/")).toContain(
-			"/.pi/agent/ant-colony/root/c/Users/alice/work/repo",
-		);
+		} finally {
+			if (previous === undefined) {
+				delete process.env.PI_CODING_AGENT_DIR;
+			} else {
+				process.env.PI_CODING_AGENT_DIR = previous;
+			}
+			rmSync(tempAgentRoot, { force: true, recursive: true });
+		}
 	});
 
 	it("resolveColonyPilotPreflightConfig aplica defaults e overrides", () => {

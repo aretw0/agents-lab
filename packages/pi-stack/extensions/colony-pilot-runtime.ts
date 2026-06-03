@@ -166,19 +166,43 @@ export function buildRuntimeStopSequence(
 }
 
 export function buildAntColonyMirrorCandidates(cwd: string): string[] {
-	const root = path.join(homedir(), ".pi", "agent", "ant-colony");
+	const rawCwd = String(cwd ?? "").replace(/\\/g, "/");
+	const win = rawCwd.match(/^([A-Za-z]):\/(.*)$/);
+	const normalized = path.resolve(cwd).replace(/\\/g, "/");
+	const unix = normalized.startsWith("/") ? normalized.slice(1) : normalized;
 
-	const raw = String(cwd ?? "").replace(/\\/g, "/");
-	const win = raw.match(/^([A-Za-z]):\/(.*)$/);
+	const roots: string[] = [];
+	const push = (candidate: string | undefined) => {
+		if (!candidate) return;
+		if (!roots.includes(candidate)) roots.push(candidate);
+	};
+
+	const sessionRoot = String(process.env.PI_CODING_AGENT_DIR ?? "").trim();
+	if (sessionRoot) {
+		const localAntColonyRoot = path.join(sessionRoot, "ant-colony");
+		if (win) {
+			const drive = win[1].toLowerCase();
+			const rest = win[2];
+			push(path.join(localAntColonyRoot, drive, rest));
+			push(path.join(localAntColonyRoot, "root", drive, rest));
+		} else {
+			push(path.join(localAntColonyRoot, unix));
+			push(path.join(localAntColonyRoot, "root", unix));
+		}
+	}
+
+	const homeAntColonyRoot = path.join(homedir(), ".pi", "agent", "ant-colony");
 	if (win) {
 		const drive = win[1].toLowerCase();
 		const rest = win[2];
-		return [path.join(root, drive, rest), path.join(root, "root", drive, rest)];
+		push(path.join(homeAntColonyRoot, drive, rest));
+		push(path.join(homeAntColonyRoot, "root", drive, rest));
+	} else {
+		push(path.join(homeAntColonyRoot, unix));
+		push(path.join(homeAntColonyRoot, "root", unix));
 	}
 
-	const normalized = path.resolve(cwd).replace(/\\/g, "/");
-	const unix = normalized.startsWith("/") ? normalized.slice(1) : normalized;
-	return [path.join(root, unix), path.join(root, "root", unix)];
+	return roots;
 }
 
 export function missingCapabilities(
