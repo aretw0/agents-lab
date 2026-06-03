@@ -10,6 +10,7 @@ import {
   resolveLaneTaskStatuses,
   resolveStageFromLaneStatuses,
   resolveDecouplingState,
+  nextActionForMaturityState,
 } from "../decoupling-maturity-report.mjs";
 
 test("resolveStage preserves the original decoupling ladder", () => {
@@ -123,4 +124,17 @@ test("decoupling lane doc parsing uses dynamic task IDs and current-board-derive
     },
   });
   assert.equal(state, "multi-worker-not-ready");
+});
+
+test("decoupling maturity blocker for executor propagation gap recommends colony_plan_packet route", () => {
+  const action = nextActionForMaturityState("colony-blocked-by-executor-propagation-gap");
+
+  assert.equal(action.recommendationCode, "decoupling-colony-blocked-executor-propagation-gap");
+  assert.equal(action.localSafeRoute?.tool, "colony_plan_packet");
+  assert.equal(action.localSafeRoute?.mode, "report-only");
+  assert.equal(action.localSafeRoute?.noDispatch, true);
+  assert.match(
+    action.nextAction,
+    /colony_plan_packet.*report-only|fail-closed/i,
+  );
 });

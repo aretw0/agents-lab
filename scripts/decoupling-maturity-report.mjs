@@ -168,11 +168,18 @@ export function nextActionForStage(stage) {
   };
 }
 
-function nextActionForMaturityState(state, laneStatuses = {}) {
+export function nextActionForMaturityState(state, laneStatuses = {}) {
   if (state === "colony-blocked-by-executor-propagation-gap") {
     return {
       recommendationCode: "decoupling-colony-blocked-executor-propagation-gap",
-      nextAction: "pause colony promotion/research until executor propagation contract is fixed and revalidated with report-only anti-flux evidence.",
+      localSafeRoute: {
+        tool: "colony_plan_packet",
+        mode: "report-only",
+        instruction: "prepare 2-5 bounded worker packets and a fail-closed join plan before any colony launch",
+        noDispatch: true,
+      },
+      nextAction:
+        "maturity gate is blocked by executor propagation gap; use colony_plan_packet (report-only) to prepare bounded worker packets and merge locally via fail-closed fan-in, without launching ant_colony.",
     };
   }
   if (state === "single-worker-ready") {
@@ -427,6 +434,7 @@ function main() {
     recommendationCode: maturityAction.recommendationCode,
     nextAction: maturityAction.nextAction,
     maturityState,
+    ...(maturityAction.localSafeRoute ? { localSafeRoute: maturityAction.localSafeRoute } : {}),
 
     metrics: {
       completeSignals,
@@ -463,6 +471,13 @@ function main() {
   process.stdout.write(
     `agentWorkerLane: stage=${agentWorkerLane.stage} recommendationCode=${agentWorkerLane.recommendationCode} next=${agentWorkerLane.nextAction}\n`,
   );
+  if (maturityAction.localSafeRoute?.tool) {
+    process.stdout.write(
+      `localSafeRoute: tool=${maturityAction.localSafeRoute.tool} mode=${maturityAction.localSafeRoute.mode} noDispatch=${Boolean(
+        maturityAction.localSafeRoute.noDispatch,
+      )}\n`,
+    );
+  }
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;

@@ -975,6 +975,9 @@ pnpm run decoupling:maturity
 pnpm run decoupling:maturity:json
 ```
 
+Quando o estado vier como `colony-blocked-by-executor-propagation-gap`, o output passa a recomendar explicitamente a rota local-safe:
+`colony_plan_packet` (modo `report-only`, sem `ant_colony`) para decompor o objetivo em 2-5 worker packets.
+
 Batch local-safe de 3–5 fatias:
 - seguir preflight + stop contracts do runbook em `docs/research/control-plane-decoupling-lane-2026-05.md`;
 - parar imediatamente em `protected|risk|reload-required|validation-failed-or-unknown|no-successor`;
