@@ -392,6 +392,21 @@ function validateModelPropagationContract(
 	return { ok: issues.length === 0, issues };
 }
 
+function buildMissingRuntimeStatePropagationIssues(
+	contract: ColonyModelPropagationContract,
+	cwd: string,
+	signalColonyId: string,
+	runtimeColonyId?: string,
+): string[] {
+	const roles = Object.keys(contract.expectedRoleModel).join(", ");
+	const mirrors = buildAntColonyMirrorCandidates(cwd).join(", ");
+	return [
+		`expected explicit model overrides for roles [${roles}] but executor state.json was not found for colony '${signalColonyId}'${
+			runtimeColonyId ? ` (runtime '${runtimeColonyId}')` : ""
+		}; checked mirrors: ${mirrors || "(none)"}`,
+	];
+}
+
 function consumeColonyModelPropagationContractByGoal(
 	queue: ColonyModelPropagationContract[],
 	goal?: string,
@@ -493,6 +508,12 @@ export default function (pi: ExtensionAPI) {
 			colonyGoalMap.set(signal.id, guessedGoal);
 		}
 
+		const isTerminalSignal =
+			signal.phase === "completed" ||
+			signal.phase === "failed" ||
+			signal.phase === "aborted" ||
+			signal.phase === "budget_exceeded";
+
 		const taskIdOverride = colonyTaskMap.get(signal.id);
 		let modelPropagationContract = colonyModelPropagationStates.get(signal.id);
 		if (!modelPropagationContract && signal.phase === "launched") {
@@ -500,10 +521,7 @@ export default function (pi: ExtensionAPI) {
 				pendingColonyModelPropagationContracts,
 				guessedGoal,
 			);
-			if (
-				pending &&
-				Object.keys(pending.expectedRoleModel).length > 0
-			) {
+			if (pending && Object.keys(pending.expectedRoleModel).length > 0) {
 				modelPropagationContract = {
 					...pending,
 					runtimeColonyId,
@@ -553,6 +571,36 @@ export default function (pi: ExtensionAPI) {
 						"warning",
 					);
 				}
+				colonyModelPropagationStates.set(signal.id, modelPropagationContract);
+			} else if (isTerminalSignal) {
+				const issues = buildMissingRuntimeStatePropagationIssues(
+					modelPropagationContract,
+					ctx.cwd,
+					signal.id,
+					runtimeColonyId,
+				);
+				modelPropagationContract.validatedAt = Date.now();
+				modelPropagationContract.issues = issues;
+				pi.appendEntry("colony-pilot.model-propagation-contract", {
+					atIso: new Date().toISOString(),
+					colonyId: signal.id,
+					runtimeColonyId,
+					goal: guessedGoal,
+					issues,
+					expected: modelPropagationContract.expectedRoleModel,
+					sourcePath: undefined,
+				});
+				ctx.ui.notify(
+					[
+						"ant_colony bloqueada por contrato de propagação de modelo",
+						"Não foi possível encontrar state.json do executor para confirmar os modelOverrides explícitos.",
+						`colony=${signal.id}`,
+						`runtime=${runtimeColonyId ?? "(desconhecido)"}`,
+						"issues:",
+						...issues.map((issue) => `  - ${issue}`),
+					].join("\n"),
+					"warning",
+				);
 				colonyModelPropagationStates.set(signal.id, modelPropagationContract);
 			}
 		}
@@ -790,12 +838,6 @@ export default function (pi: ExtensionAPI) {
 			colonyTaskMap.set(signal.id, syncResult.taskId);
 		}
 
-		const isTerminalSignal =
-			signal.phase === "completed" ||
-			signal.phase === "failed" ||
-			signal.phase === "aborted" ||
-			signal.phase === "budget_exceeded";
-
 		if (isTerminalSignal && candidateRetentionConfig.enabled) {
 			const deliveryEval = completedDelivery?.deliveryEval;
 			const propagationIssues = modelPropagationContract?.issues;
@@ -811,9 +853,9 @@ export default function (pi: ExtensionAPI) {
 							mirrors,
 						})
 					: undefined;
-				const deliveryOrPropagationIssues = Array.from(
-					new Set([...(deliveryEval?.issues ?? []), ...(propagationIssues ?? [])]),
-				);
+			const deliveryOrPropagationIssues = Array.from(
+				new Set([...(deliveryEval?.issues ?? []), ...(propagationIssues ?? [])]),
+			);
 			const retention = persistColonyRetentionRecord(
 				ctx.cwd,
 				{

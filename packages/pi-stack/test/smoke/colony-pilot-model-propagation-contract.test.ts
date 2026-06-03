@@ -186,6 +186,81 @@ describe("colony-pilot model propagation contract", () => {
 		}
 	});
 
+	it("bloqueia contrato no sinal terminal quando state.json nao aparece", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "colony-propagation-missing-state-"));
+		try {
+			writeColonyPilotSettings(cwd);
+			const { pi, ctx } = bootstrapColonyPilot(cwd);
+			const colonyId = "contract-missing-state";
+
+			const toolCall = pi.handlers.get("tool_call");
+			expect(toolCall).toBeTypeOf("function");
+			await (toolCall as any)(
+				{
+					toolName: "ant_colony",
+					toolCallId: "tc-missing-state-1",
+					input: {
+						goal: "Validação sem state runtime",
+						scoutModel: BASE_MODELS.scout,
+						workerModel: BASE_MODELS.worker,
+						soldierModel: BASE_MODELS.soldier,
+					},
+				},
+				ctx,
+			);
+
+			const messageEnd = pi.handlers.get("message_end");
+			expect(messageEnd).toBeTypeOf("function");
+			(messageEnd as any)(
+				{
+					message: {
+						content: [
+							{
+								type: "text",
+								text: `[COLONY_SIGNAL:LAUNCHED] [${colonyId}]`,
+							},
+						],
+					},
+				},
+				ctx,
+			);
+
+			expect(pi.appendEntry).not.toHaveBeenCalled();
+			expect(ctx.ui.notify).not.toHaveBeenCalled();
+
+			(messageEnd as any)(
+				{
+					message: {
+						content: [
+							{
+								type: "text",
+								text: `[COLONY_SIGNAL:COMPLETED] [${colonyId}]`,
+							},
+						],
+					},
+				},
+				ctx,
+			);
+
+			expect(pi.appendEntry).toHaveBeenCalledWith(
+				"colony-pilot.model-propagation-contract",
+				expect.objectContaining({
+					colonyId,
+					issues: expect.arrayContaining([
+						expect.stringContaining("executor state.json was not found"),
+					]),
+					sourcePath: undefined,
+				}),
+			);
+			expect(ctx.ui.notify).toHaveBeenCalledWith(
+				expect.stringContaining("Não foi possível encontrar state.json"),
+				"warning",
+			);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("valida sucesso de propagação usando ants quando modelOverrides não existe", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "colony-propagation-success-"));
 		const mirrorCandidates: string[] = [];
