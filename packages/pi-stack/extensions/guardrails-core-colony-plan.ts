@@ -121,6 +121,7 @@ export interface ColonyPlanInput {
 const MIN_WORKERS = 2;
 const MAX_WORKERS = 5;
 const MAX_ITEMS_PER_LIST = 12;
+const DEFAULT_COLONY_REPORT_DIR = ".project/reports";
 const MAX_FILES_PER_WORKER = 20;
 
 function normalizeText(value: unknown): string {
@@ -262,7 +263,7 @@ export function buildColonyPlanPacket(input: ColonyPlanInput = {}): ColonyPlanPa
     const allowedCapabilities = normalizeList(record.allowedCapabilities, MAX_ITEMS_PER_LIST);
     const stopConditions = normalizeList(record.stopConditions, MAX_ITEMS_PER_LIST);
     const expectedArtifact = normalizeText(record.expectedArtifact)
-      || `reports/colony-${planId}-worker-${sourceIndex}.json`;
+      || `${DEFAULT_COLONY_REPORT_DIR}/colony-${planId}-worker-${sourceIndex}.json`;
     const budgetEvidence = normalizeText(record.budgetEvidence)
       || `budget evidence required for ${packetId}`;
     const budgetEvidencePolicy = normalizeBudgetPolicy(record.budgetEvidencePolicy);
@@ -372,7 +373,7 @@ export function buildColonyWorkerStartPacket(input: ColonyWorkerStartPacketInput
   const declaredFiles = normalizeFiles(input.declaredFiles);
   const stopConditions = normalizeList(input.stopConditions, MAX_ITEMS_PER_LIST);
   const expectedArtifact = normalizeText(input.expectedArtifact)
-    || `reports/colony-${planId}-${workerPacketId}.json`;
+    || `${DEFAULT_COLONY_REPORT_DIR}/colony-${planId}-${workerPacketId}.json`;
   const requiredOutcomeId = `outcome:${planId}:${workerPacketId}`;
   const objective = normalizeText(input.objective) || "worker objective missing";
   const budgetEvidencePolicy = normalizeBudgetPolicy(input.budgetEvidencePolicy);

@@ -18,7 +18,7 @@ describe("colony plan packet", () => {
       budgetEvidencePolicy: "warn" as ColonyPlanBudgetDecision,
       budgetEvidence: "provider advisory ok for local evidence packet",
       stopConditions: ["stop if model override mismatch", "stop on contract drift"],
-      expectedArtifact: "reports/colony-scan/worker-01.json",
+      expectedArtifact: ".project/reports/colony-scan/worker-01.json",
     },
     {
       id: "w-02",
@@ -29,7 +29,7 @@ describe("colony plan packet", () => {
       budgetEvidencePolicy: "warn" as ColonyPlanBudgetDecision,
       budgetEvidence: "provider advisory ok for runtime follow-up",
       stopConditions: ["stop if missing runtime artifact", "stop on dirty git state"],
-      expectedArtifact: "reports/colony-scan/worker-02.json",
+      expectedArtifact: ".project/reports/colony-scan/worker-02.json",
     },
   ];
 
@@ -154,6 +154,52 @@ describe("colony plan packet", () => {
     expect(result.agentInvocationSpecPacket.invocationSpec.declaredFiles).toEqual(baseWorkers[0].declaredFiles);
     expect(result.agentInvocationSpecPacket.invocationSpec.profile).toBe("read-only-review");
     expect(result.nextActions.join("\n")).toContain("agent_run_outcome_packet");
+  });
+
+  it("defaults colony artifacts to .project/reports when omitted", () => {
+    const plan = buildColonyPlanPacket({
+      planId: "serial-subagent-bootstrap-001",
+      objective: "derive default artifact paths",
+      validationKnown: true,
+      rollbackPlanKnown: true,
+      stopConditionsClear: true,
+      workers: [
+        { ...baseWorkers[0], expectedArtifact: undefined },
+        { ...baseWorkers[1], expectedArtifact: undefined },
+      ],
+    });
+    const worker = buildColonyWorkerStartPacket({
+      planId: "serial-subagent-bootstrap-001",
+      workerPacketId: "worker-01-scope-scan",
+      objective: baseWorkers[0].objective,
+      declaredFiles: baseWorkers[0].declaredFiles,
+      providerModelRef: baseWorkers[0].providerModelRef,
+      budgetEvidencePolicy: baseWorkers[0].budgetEvidencePolicy,
+      budgetEvidence: baseWorkers[0].budgetEvidence,
+      stopConditions: baseWorkers[0].stopConditions,
+    });
+
+    expect(plan.workers[0]?.expectedArtifact).toBe(".project/reports/colony-serial-subagent-bootstrap-001-worker-1.json");
+    expect(plan.workers[1]?.expectedArtifact).toBe(".project/reports/colony-serial-subagent-bootstrap-001-worker-2.json");
+    expect(worker.expectedArtifact).toBe(".project/reports/colony-serial-subagent-bootstrap-001-worker-01-scope-scan.json");
+  });
+
+  it("preserves explicit legacy reports artifact paths", () => {
+    const explicitArtifact = "reports/colony-subagent/worker-01-scope-scan.json";
+    const worker = buildColonyWorkerStartPacket({
+      planId: "serial-subagent-bootstrap-001",
+      workerPacketId: "worker-01-scope-scan",
+      objective: baseWorkers[0].objective,
+      declaredFiles: baseWorkers[0].declaredFiles,
+      providerModelRef: baseWorkers[0].providerModelRef,
+      budgetEvidencePolicy: baseWorkers[0].budgetEvidencePolicy,
+      budgetEvidence: baseWorkers[0].budgetEvidence,
+      stopConditions: baseWorkers[0].stopConditions,
+      expectedArtifact: explicitArtifact,
+    });
+
+    expect(worker.expectedArtifact).toBe(explicitArtifact);
+    expect(worker.agentInvocationSpecPacket.invocationSpec.goal).toContain(explicitArtifact);
   });
 
   it("exposes colony_worker_start_packet as report-only surface", () => {
