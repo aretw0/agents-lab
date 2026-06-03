@@ -2,7 +2,12 @@ import { type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-agent-run-basic-surface";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
-import { buildColonyPlanPacket, type ColonyPlanInput } from "./guardrails-core-colony-plan";
+import {
+  buildColonyPlanPacket,
+  buildColonyWorkerStartPacket,
+  type ColonyPlanInput,
+  type ColonyWorkerStartPacketInput,
+} from "./guardrails-core-colony-plan";
 
 function parseWorkerInputs(raw: unknown): NonNullable<ColonyPlanInput["workers"]> {
   if (!Array.isArray(raw)) {
@@ -76,6 +81,57 @@ export function registerColonyPlanPacketSurface(pi: ExtensionAPI): void {
       const result = buildColonyPlanPacket(input);
       return buildOperatorVisibleToolResponse({
         label: "colony_plan_packet",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "colony_worker_start_packet",
+    label: "Colony Worker Start Packet",
+    description:
+      "Report-only bridge from one colony worker packet to a serial agent invocation spec. It never dispatches and requires explicit operator approval before any future worker start.",
+    parameters: Type.Object({
+      plan_id: Type.Optional(Type.String({ description: "Parent colony plan id." })),
+      worker_packet_id: Type.Optional(Type.String({ description: "Selected worker packet id." })),
+      objective: Type.Optional(Type.String({ description: "Worker objective/prompt." })),
+      declared_files: Type.Optional(Type.Array(Type.String(), { description: "Exact declared files scoped to this worker." })),
+      allowed_tools: Type.Optional(Type.Array(Type.String(), { description: "Allowed tool names inherited from the worker packet." })),
+      allowed_capabilities: Type.Optional(Type.Array(Type.String(), { description: "Allowed capability labels inherited from the worker packet." })),
+      provider_model_ref: Type.Optional(Type.String({ description: "Optional provider/model for this worker." })),
+      budget_evidence_policy: Type.Optional(Type.String({ description: "Budget decision hint: ok/warn/blocked/unknown." })),
+      budget_evidence: Type.Optional(Type.String({ description: "Budget evidence text." })),
+      stop_conditions: Type.Optional(Type.Array(Type.String(), { description: "Explicit stop conditions for this worker." })),
+      expected_artifact: Type.Optional(Type.String({ description: "Expected artifact produced by this worker packet." })),
+      cwd: Type.Optional(Type.String({ description: "Worker cwd. Defaults downstream when omitted." })),
+      timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds." })),
+      mutation_requested: Type.Optional(Type.Boolean({ description: "When true, bridge to a mutation profile; otherwise read-only review." })),
+      validation: Type.Optional(Type.Array(Type.String(), { description: "Additional parent-side validation gates." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const input: ColonyWorkerStartPacketInput = {
+        planId: typeof p.plan_id === "string" ? p.plan_id : undefined,
+        workerPacketId: typeof p.worker_packet_id === "string" ? p.worker_packet_id : undefined,
+        objective: typeof p.objective === "string" ? p.objective : undefined,
+        declaredFiles: asOptionalStringArray(p.declared_files),
+        allowedTools: asOptionalStringArray(p.allowed_tools),
+        allowedCapabilities: asOptionalStringArray(p.allowed_capabilities),
+        providerModelRef: typeof p.provider_model_ref === "string" ? p.provider_model_ref : undefined,
+        budgetEvidencePolicy: typeof p.budget_evidence_policy === "string" ? p.budget_evidence_policy : undefined,
+        budgetEvidence: typeof p.budget_evidence === "string" ? p.budget_evidence : undefined,
+        stopConditions: asOptionalStringArray(p.stop_conditions),
+        expectedArtifact: typeof p.expected_artifact === "string" ? p.expected_artifact : undefined,
+        cwd: typeof p.cwd === "string" ? p.cwd : undefined,
+        timeoutMs: typeof p.timeout_ms === "number" ? p.timeout_ms : undefined,
+        mutationRequested: asOptionalBoolean(p.mutation_requested),
+        validation: asOptionalStringArray(p.validation),
+      };
+
+      const result = buildColonyWorkerStartPacket(input);
+      return buildOperatorVisibleToolResponse({
+        label: "colony_worker_start_packet",
         summary: result.summary,
         details: result,
       });

@@ -1,5 +1,9 @@
 import { GUARDRAILS_AUTHORIZATION_NONE, type GuardrailsAuthorizationNone } from "./guardrails-core-authorization";
 import { formatAuthorizationEvidence } from "./guardrails-core-authorization";
+import {
+  buildAgentInvocationSpecPacket,
+  type AgentInvocationSpecPacketResult,
+} from "./guardrails-core-agent-run-start";
 
 export type ColonyPlanDecision = "ready-for-operator-decision" | "blocked";
 export type ColonyPlanNextActionCode = "prepare-worker-fan-in" | "resolve-colony-plan-blockers";
@@ -68,6 +72,34 @@ export interface ColonyPlanPacket {
   joinPolicy: ColonyPlanJoinPolicy;
   nextActionCode: ColonyPlanNextActionCode;
   nextAction: string;
+  summary: string;
+}
+
+export interface ColonyWorkerStartPacketInput extends ColonyPlanWorkerInput {
+  planId?: string;
+  workerPacketId?: string;
+  cwd?: string;
+  timeoutMs?: number;
+  mutationRequested?: boolean;
+  validation?: string[];
+}
+
+export interface ColonyWorkerStartPacket {
+  mode: "colony-worker-start-packet";
+  activation: "none";
+  authorization: GuardrailsAuthorizationNone;
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  batchExecutionAllowed: false;
+  requiresOperatorDecision: true;
+  serialOnly: true;
+  planId: string;
+  workerPacketId: string;
+  requiredOutcomeId: string;
+  expectedArtifact: string;
+  agentInvocationSpecPacket: AgentInvocationSpecPacketResult;
+  nextActionCode: "present-agent-run-approval" | "resolve-worker-start-blockers";
+  nextActions: string[];
   summary: string;
 }
 
@@ -331,5 +363,100 @@ export function buildColonyPlanPacket(input: ColonyPlanInput = {}): ColonyPlanPa
     nextActionCode,
     nextAction,
     summary,
+  };
+}
+
+export function buildColonyWorkerStartPacket(input: ColonyWorkerStartPacketInput = {}): ColonyWorkerStartPacket {
+  const planId = normalizeId(input.planId, "colony-plan");
+  const workerPacketId = normalizeId(input.workerPacketId ?? input.id, "worker-1");
+  const declaredFiles = normalizeFiles(input.declaredFiles);
+  const stopConditions = normalizeList(input.stopConditions, MAX_ITEMS_PER_LIST);
+  const expectedArtifact = normalizeText(input.expectedArtifact)
+    || `reports/colony-${planId}-${workerPacketId}.json`;
+  const requiredOutcomeId = `outcome:${planId}:${workerPacketId}`;
+  const objective = normalizeText(input.objective) || "worker objective missing";
+  const budgetEvidencePolicy = normalizeBudgetPolicy(input.budgetEvidencePolicy);
+  const budgetEvidence = normalizeText(input.budgetEvidence) || `budget evidence required for ${workerPacketId}`;
+  const inheritedAllowedTools = normalizeList(input.allowedTools, MAX_ITEMS_PER_LIST);
+  const inheritedAllowedCapabilities = normalizeList(input.allowedCapabilities, MAX_ITEMS_PER_LIST);
+  const validation = [
+    `required outcome id: ${requiredOutcomeId}`,
+    `expected artifact must exist and be non-empty: ${expectedArtifact}`,
+    `touched files must be a subset of declared files: ${declaredFiles.join(", ") || "(none)"}`,
+    "worker output must include PASS/FAIL, filesTouched, validationEvidence, and blockers",
+    ...stopConditions.map((condition) => `stop condition: ${condition}`),
+    ...normalizeList(input.validation, MAX_ITEMS_PER_LIST),
+  ];
+  const fileContract = input.mutationRequested === true ? "mutation" : "read-only";
+
+  const agentInvocationSpecPacket = buildAgentInvocationSpecPacket({
+    taskId: `colony-${planId}-${workerPacketId}`,
+    runId: `colony-${planId}-${workerPacketId}`,
+    purpose: "colony-worker-serial",
+    profile: fileContract === "mutation" ? "small-mutation" : "read-only-review",
+    goal: [
+      objective,
+      "",
+      `Required outcome id: ${requiredOutcomeId}`,
+      `Expected artifact: ${expectedArtifact}`,
+      inheritedAllowedTools.length > 0 ? `Inherited worker allowed tools: ${inheritedAllowedTools.join(", ")}` : undefined,
+      inheritedAllowedCapabilities.length > 0 ? `Inherited worker allowed capabilities: ${inheritedAllowedCapabilities.join(", ")}` : undefined,
+      "Stay within declared files. Do not dispatch other workers. Do not launch ant_colony.",
+    ].filter((line): line is string => typeof line === "string").join("\n"),
+    providerModelRef: normalizeText(input.providerModelRef),
+    cwd: normalizeText(input.cwd) || ".",
+    declaredFiles,
+    timeoutMs: typeof input.timeoutMs === "number" ? input.timeoutMs : 90_000,
+    fileContract,
+    validation,
+    rollback: fileContract === "mutation" ? declaredFiles.map((file) => `git restore ${file}`) : ["read-only: no file rollback expected"],
+    outputSchema: "PASS|FAIL with requiredOutcomeId, expectedArtifact, filesTouched, validationEvidence, blockers",
+    budgetDecision: budgetEvidencePolicy,
+    budgetEvidence,
+    budgetEvidenceSource: "manual",
+    budgetEvidenceProvider: normalizeText(input.providerModelRef),
+    economyMode: "critical",
+    tokenBudgetEvidence: budgetEvidence,
+    maxOutputLines: 30,
+    extensionIsolation: "minimal-no-extensions",
+    protectedScopeRequested: false,
+  });
+
+  const nextActionCode = agentInvocationSpecPacket.decision === "ready-for-operator-decision"
+    ? "present-agent-run-approval"
+    : "resolve-worker-start-blockers";
+
+  return {
+    mode: "colony-worker-start-packet",
+    activation: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    batchExecutionAllowed: false,
+    requiresOperatorDecision: true,
+    serialOnly: true,
+    planId,
+    workerPacketId,
+    requiredOutcomeId,
+    expectedArtifact,
+    agentInvocationSpecPacket,
+    nextActionCode,
+    nextActions: agentInvocationSpecPacket.decision === "ready-for-operator-decision"
+      ? [
+          `present approval prompt exactly: ${agentInvocationSpecPacket.operatorApprovalPrompt}`,
+          "only after explicit operator approval, use the existing agent_run dispatch path for one serial worker",
+          "after completion, run agent_run_outcome_packet and match the required outcome id before starting any next worker",
+        ]
+      : ["resolve agent invocation spec blockers before any worker dispatch"],
+    summary: [
+      "colony-worker-start-packet:",
+      `decision=${agentInvocationSpecPacket.decision}`,
+      `plan=${planId}`,
+      `worker=${workerPacketId}`,
+      `outcome=${requiredOutcomeId}`,
+      `artifact=${expectedArtifact}`,
+      `nextActionCode=${nextActionCode}`,
+      "dispatch=no",
+    ].join(" "),
   };
 }

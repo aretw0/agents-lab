@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildColonyPlanPacket,
+  buildColonyWorkerStartPacket,
   ColonyPlanBudgetDecision,
 } from "../../extensions/guardrails-core-colony-plan";
 import { registerColonyPlanPacketSurface } from "../../extensions/guardrails-core-colony-plan-surface";
@@ -127,5 +128,59 @@ describe("colony plan packet", () => {
     expect(details.dispatchAllowed).toBe(false);
     expect(details.workerDispatchAllowed).toBe(false);
     expect(details.batchExecutionAllowed).toBe(false);
+  });
+
+  it("bridges one worker packet to a serial agent invocation spec without dispatch", () => {
+    const result = buildColonyWorkerStartPacket({
+      planId: "serial-subagent-bootstrap-001",
+      workerPacketId: "worker-01-scope-scan",
+      objective: baseWorkers[0].objective,
+      declaredFiles: baseWorkers[0].declaredFiles,
+      providerModelRef: baseWorkers[0].providerModelRef,
+      budgetEvidencePolicy: baseWorkers[0].budgetEvidencePolicy,
+      budgetEvidence: baseWorkers[0].budgetEvidence,
+      stopConditions: baseWorkers[0].stopConditions,
+      expectedArtifact: baseWorkers[0].expectedArtifact,
+    });
+
+    expect(result.mode).toBe("colony-worker-start-packet");
+    expect(result.dispatchAllowed).toBe(false);
+    expect(result.processStartAllowed).toBe(false);
+    expect(result.batchExecutionAllowed).toBe(false);
+    expect(result.serialOnly).toBe(true);
+    expect(result.requiredOutcomeId).toBe("outcome:serial-subagent-bootstrap-001:worker-01-scope-scan");
+    expect(result.agentInvocationSpecPacket.mode).toBe("agent-invocation-spec-packet");
+    expect(result.agentInvocationSpecPacket.dispatchAllowed).toBe(false);
+    expect(result.agentInvocationSpecPacket.invocationSpec.declaredFiles).toEqual(baseWorkers[0].declaredFiles);
+    expect(result.agentInvocationSpecPacket.invocationSpec.profile).toBe("read-only-review");
+    expect(result.nextActions.join("\n")).toContain("agent_run_outcome_packet");
+  });
+
+  it("exposes colony_worker_start_packet as report-only surface", () => {
+    const tools: Array<{ name: string; execute: (toolCallId: string, params: Record<string, unknown>) => { details: unknown } }> = [];
+    registerColonyPlanPacketSurface({
+      registerTool(tool: unknown) {
+        const typed = tool as { name: string; execute: (toolCallId: string, params: Record<string, unknown>) => { details: unknown } };
+        tools.push(typed);
+      },
+    } as never);
+
+    const tool = tools.find((row) => row.name === "colony_worker_start_packet");
+    const result = tool?.execute("call", {
+      plan_id: "serial-subagent-bootstrap-001",
+      worker_packet_id: "worker-01-scope-scan",
+      objective: baseWorkers[0].objective,
+      declared_files: baseWorkers[0].declaredFiles,
+      provider_model_ref: baseWorkers[0].providerModelRef,
+      budget_evidence_policy: baseWorkers[0].budgetEvidencePolicy,
+      budget_evidence: baseWorkers[0].budgetEvidence,
+      stop_conditions: baseWorkers[0].stopConditions,
+      expected_artifact: baseWorkers[0].expectedArtifact,
+    });
+
+    const details = (result?.details ?? {}) as Record<string, unknown>;
+    expect(details.mode).toBe("colony-worker-start-packet");
+    expect(details.dispatchAllowed).toBe(false);
+    expect(details.processStartAllowed).toBe(false);
   });
 });
