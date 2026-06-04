@@ -128,13 +128,24 @@ test("decoupling lane doc parsing uses dynamic task IDs and current-board-derive
 
 test("decoupling maturity blocker for executor propagation gap recommends colony_plan_packet route", () => {
   const action = nextActionForMaturityState("colony-blocked-by-executor-propagation-gap");
+  const sequenceTools = action.localSafeRoute?.sequence?.map((step) => step.tool) ?? [];
 
   assert.equal(action.recommendationCode, "decoupling-colony-blocked-executor-propagation-gap");
   assert.equal(action.localSafeRoute?.tool, "colony_plan_packet");
   assert.equal(action.localSafeRoute?.mode, "report-only");
   assert.equal(action.localSafeRoute?.noDispatch, true);
+  assert.equal(action.localSafeRoute?.executionManifestRequired, true);
+  assert.equal(action.localSafeRoute?.fanInMode, "fail-closed");
+  assert.equal(action.localSafeRoute?.completionTool, "colony_serial_fanin_packet");
+  assert.deepEqual(sequenceTools, [
+    "colony_plan_packet",
+    "colony_worker_start_packet",
+    "agent_run",
+    "agent_run_outcome_packet",
+    "colony_serial_fanin_packet",
+  ]);
   assert.match(
     action.nextAction,
-    /colony_plan_packet.*report-only|fail-closed/i,
+    /colony_plan_packet.*colony_worker_start_packet.*agent_run_outcome_packet.*colony_serial_fanin_packet/i,
   );
 });

@@ -175,11 +175,22 @@ export function nextActionForMaturityState(state, laneStatuses = {}) {
       localSafeRoute: {
         tool: "colony_plan_packet",
         mode: "report-only",
-        instruction: "prepare 2-5 bounded worker packets and a fail-closed join plan before any colony launch",
+        instruction:
+          "prepare the serial lane from executionManifest: plan packets, approve one worker at a time, validate outcomes, then apply fail-closed fan-in",
         noDispatch: true,
+        executionManifestRequired: true,
+        fanInMode: "fail-closed",
+        completionTool: "colony_serial_fanin_packet",
+        sequence: [
+          { step: 1, tool: "colony_plan_packet", mode: "report-only", dispatchAllowed: false },
+          { step: 2, tool: "colony_worker_start_packet", mode: "report-only", dispatchAllowed: false },
+          { step: 3, tool: "agent_run", mode: "single-worker-serial", requiresOperatorApproval: true },
+          { step: 4, tool: "agent_run_outcome_packet", mode: "parent-side-validation", dispatchAllowed: false },
+          { step: 5, tool: "colony_serial_fanin_packet", mode: "report-only", dispatchAllowed: false },
+        ],
       },
       nextAction:
-        "maturity gate is blocked by executor propagation gap; use colony_plan_packet (report-only) to prepare bounded worker packets and merge locally via fail-closed fan-in, without launching ant_colony.",
+        "maturity gate is blocked by executor propagation gap; use the local serial lane (colony_plan_packet -> colony_worker_start_packet -> one approved agent_run at a time -> agent_run_outcome_packet -> colony_serial_fanin_packet) from executionManifest, without launching ant_colony.",
     };
   }
   if (state === "single-worker-ready") {
@@ -477,6 +488,10 @@ function main() {
         maturityAction.localSafeRoute.noDispatch,
       )}\n`,
     );
+    if (Array.isArray(maturityAction.localSafeRoute.sequence)) {
+      const route = maturityAction.localSafeRoute.sequence.map((step) => step.tool).join(" -> ");
+      process.stdout.write(`localSafeRouteSequence: ${route}\n`);
+    }
   }
 }
 
