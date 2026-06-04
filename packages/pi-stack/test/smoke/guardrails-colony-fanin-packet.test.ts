@@ -76,6 +76,44 @@ describe("colony serial fan-in packet", () => {
     expect(result.blockers.join("\n")).toContain("read-only-declared-files-touched");
   });
 
+  it("blocks ant_colony launch evidence during serial fan-in", () => {
+    const result = buildColonySerialFanInPacket({
+      planId,
+      workers: [
+        worker01,
+        {
+          ...worker02,
+          antColonyLaunched: true,
+        },
+      ],
+    });
+
+    expect(result.decision).toBe("block");
+    expect(result.recommendation).toBe("block-promotion");
+    expect(result.blockers.join("\n")).toContain("ant-colony-launched");
+  });
+
+  it("blocks unexpected touched files while allowing expected artifact evidence", () => {
+    const result = buildColonySerialFanInPacket({
+      planId,
+      workers: [
+        worker01,
+        {
+          ...worker02,
+          touchedFiles: [
+            worker02.expectedArtifact,
+            "packages/pi-stack/extensions/guardrails-core-colony-plan.ts",
+          ],
+        },
+      ],
+    });
+
+    expect(result.decision).toBe("block");
+    expect(result.workerSummaries[1]?.evidenceTouchedFiles).toEqual([worker02.expectedArtifact]);
+    expect(result.workerSummaries[1]?.unexpectedTouchedFiles).toEqual(["packages/pi-stack/extensions/guardrails-core-colony-plan.ts"]);
+    expect(result.blockers.join("\n")).toContain("unexpected-touched-files");
+  });
+
   it("blocks invalid outcome id format", () => {
     const result = buildColonySerialFanInPacket({
       planId,
