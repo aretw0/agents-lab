@@ -1,0 +1,48 @@
+{
+  "mode": "agent-worker-artifact",
+  "runId": "colony-serial-subagent-bootstrap-001-worker-01-schema-gap",
+  "planId": "serial-subagent-bootstrap-001",
+  "workerPacketId": "worker-01-schema-gap",
+  "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-01-schema-gap",
+  "requiredArtifact": ".project/reports/serial-subagent-bootstrap-001-worker-01-schema-gap.json",
+  "status": "PASS",
+  "fileContract": "read-only",
+  "declaredFiles": [
+    "packages/pi-stack/extensions/guardrails-core-colony-plan.ts",
+    "packages/pi-stack/test/smoke/guardrails-colony-plan-packet.test.ts"
+  ],
+  "allowedTools": [
+    "read",
+    "grep",
+    "git"
+  ],
+  "allowedCapabilities": [
+    "evidence-synthesis",
+    "scope-readonly"
+  ],
+  "dispatchAllowed": false,
+  "batchExecutionAllowed": false,
+  "serialOnly": true,
+  "touchedFiles": [],
+  "blockers": [],
+  "validationEvidence": {
+    "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-01-schema-gap",
+    "expectedArtifact": ".project/reports/serial-subagent-bootstrap-001-worker-01-schema-gap.json",
+    "outputBytes": 1037,
+    "outputPreview": [
+      "Encontrado a lacuna mínima:",
+      "",
+      "**Divergência canônica de campo de artefato entre `requiredArtifact` e `expectedArtifact`**, que quebra a compatibilidade de borda serial.",
+      "",
+      "- `guardrails-core-colony-plan.ts` usa contrato de outcome com `requiredArtifact`.",
+      "- `buildColonyWorkerStartPacket`/`colony-fanin` schema (incluindo `guardrails-core-colony-plan-surface.ts` e `guardrails-core-colony-fanin-packet.ts`) exigem `expectedArtifact`/`expected_artifact`.",
+      "- O artifact `/workspace/agents-lab/.project/reports/serial-subagent-bootstrap-001-worker-01-schema-gap.json` já vem com `requiredArtifact` sem `expectedArtifact`, criando ambiguidade.",
+      "",
+      "**Correção mínima (mais barata):** adicionar alias/normalização de campo em ambos lados (`requiredArtifact` ⇄ `expectedArtifact`) e manter um único campo canônico no contrato interno.",
+      "",
+      "**Observação adicional:** também falta agregação top-level de `stopConditionsSatisfied` (hoje só implícita por contrato), se quiser eliminar essa ambiguidade depois da normalização de artefato.",
+      ""
+    ]
+  },
+  "timestamp": "2026-06-04T03:13:35.098Z"
+}

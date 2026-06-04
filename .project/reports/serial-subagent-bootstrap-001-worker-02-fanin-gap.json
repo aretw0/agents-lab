@@ -1,0 +1,51 @@
+{
+  "mode": "agent-worker-artifact",
+  "runId": "colony-serial-subagent-bootstrap-001-worker-02-fanin-gap",
+  "planId": "serial-subagent-bootstrap-001",
+  "workerPacketId": "worker-02-fanin-gap",
+  "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-02-fanin-gap",
+  "requiredArtifact": ".project/reports/serial-subagent-bootstrap-001-worker-02-fanin-gap.json",
+  "status": "PASS",
+  "fileContract": "read-only",
+  "declaredFiles": [
+    "packages/pi-stack/extensions/guardrails-core-colony-fanin-packet.ts",
+    "packages/pi-stack/test/smoke/guardrails-colony-fanin-packet.test.ts"
+  ],
+  "allowedTools": [
+    "read",
+    "grep",
+    "git"
+  ],
+  "allowedCapabilities": [
+    "evidence-synthesis",
+    "scope-readonly"
+  ],
+  "dispatchAllowed": false,
+  "batchExecutionAllowed": false,
+  "serialOnly": true,
+  "touchedFiles": [],
+  "blockers": [],
+  "validationEvidence": {
+    "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-02-fanin-gap",
+    "expectedArtifact": ".project/reports/serial-subagent-bootstrap-001-worker-02-fanin-gap.json",
+    "outputBytes": 978,
+    "outputPreview": [
+      "Identifiquei a lacuna mínima remanescente no fan-in serial:",
+      "",
+      "- **Lacuna:** `packages/pi-stack/extensions/guardrails-core-colony-fanin-packet.ts` ainda aceita lote vazio como **`decision: \"pass\"`**.",
+      "- Exemplo: `buildColonySerialFanInPacket({ planId: \"serial-subagent-bootstrap-001\" })`  ",
+      "  resulta em `workers=[]`, `requiredOutcomeIds=[]`, `blockers=[]`, `warnings=[]` ⇒ `decision: pass`.",
+      "- Isso viola o contrato fail-closed de fan-in serial: não pode promover sem evidências/requisitos mínimos.",
+      "",
+      "**requiredOutcomeId do artefato alvo:** `outcome:serial-subagent-bootstrap-001:worker-02-fanin-gap`  ",
+      "**Expected artifact:** `.project/reports/serial-subagent-bootstrap-001-worker-02-fanin-gap.json`",
+      "",
+      "**Correção mínima sugerida:**",
+      "- antes do retorno, bloquear quando não há workers/requirements:",
+      "  - `if (workers.length === 0) blockers.push(\"workers-missing\");`",
+      "  - opcionalmente também: `if (requiredOutcomeIds.length === 0) blockers.push(\"required-outcomes-missing\");`",
+      ""
+    ]
+  },
+  "timestamp": "2026-06-04T04:08:11.264Z"
+}
