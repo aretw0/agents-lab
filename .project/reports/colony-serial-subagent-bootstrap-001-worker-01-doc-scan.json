@@ -1,0 +1,41 @@
+{
+  "mode": "agent-worker-artifact",
+  "runId": "colony-serial-subagent-bootstrap-001-worker-01-doc-scan",
+  "planId": "serial-subagent-bootstrap-001",
+  "workerPacketId": "worker-01-doc-scan",
+  "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-01-doc-scan",
+  "requiredArtifact": ".project/reports/colony-serial-subagent-bootstrap-001-worker-01-doc-scan.json",
+  "status": "PASS",
+  "fileContract": "read-only",
+  "declaredFiles": [
+    "docs/guides/control-plane-operating-doctrine.md"
+  ],
+  "allowedTools": [
+    "read",
+    "grep",
+    "git"
+  ],
+  "allowedCapabilities": [
+    "evidence-synthesis",
+    "scope-readonly"
+  ],
+  "dispatchAllowed": false,
+  "batchExecutionAllowed": false,
+  "serialOnly": true,
+  "touchedFiles": [],
+  "blockers": [],
+  "validationEvidence": {
+    "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-01-doc-scan",
+    "expectedArtifact": ".project/reports/colony-serial-subagent-bootstrap-001-worker-01-doc-scan.json",
+    "outputBytes": 2704,
+    "outputPreview": [
+      "Artifact gerado em: `.project/reports/colony-serial-subagent-bootstrap-001-worker-01-doc-scan.json`",
+      "",
+      "```json",
+      "{\"mode\":\"agent-worker-artifact\",\"runId\":\"colony-serial-subagent-bootstrap-001-worker-01-doc-scan\",\"planId\":\"serial-subagent-bootstrap-001\",\"workerPacketId\":\"worker-01-doc-scan\",\"requiredOutcomeId\":\"outcome:serial-subagent-bootstrap-001:worker-01-doc-scan\",\"expectedArtifact\":\".project/reports/colony-serial-subagent-bootstrap-001-worker-01-doc-scan.json\",\"status\":\"PASS\",\"fileContract\":\"read-only\",\"declaredFiles\":[\"docs/guides/control-plane-operating-doctrine.md\"],\"allowedTools\":[\"read\",\"grep\",\"git\"],\"allowedCapabilities\":[\"evidence-synthesis\",\"scope-readonly\"],\"dispatchAllowed\":false,\"batchExecutionAllowed\":false,\"serialOnly\":true,\"touchedFiles\":[],\"serialLaneCriteria\":[\"colony_plan_packet: report-only, 2-5 workers, joinPolicy.mode=fail-closed\",\"colony_worker_start_packet: prepara exatamente 1 worker como agentInvocationSpecPacket; não despacha; exige aprovação explícita\",\"Após aprovação: executar 1 agente serial, validar com agent_run_outcome_packet e persistir artifact em .project/reports/\",\"Próximo worker só após outcome PASS do worker atual\",\"colony_serial_fanin_packet agrega outcomes sem dispatch; distingue declaredFiles(read-only) vs expectedArtifact evidência\",\"promoção da lane serial: decision=pass, blockers=[], artifacts em .project/reports/, declaredTouchedFiles=[] , unexpectedTouchedFiles=[] , touchedFileCount=0 em workerSummaries\",\"quaisquer missing outcome/empty artifact/touch em declared file/ant_colony launch/worker blocker => fan-in BLOCK/PARTIAL + revisão do operador\",\"batch local-safe: 3-5 fatias, seguir preflight/stop do runbook, parar em protected|risk|reload-required|validation-failed-or-unknown|no-successor; checkpoint curto por fatia\"],\"localGuardrailGaps\":[\"Contrato serial depende de 'preflight + stop contracts' externos (runbook) sem contrato explícito local completo\",\"Não há hard-fence local de timeout/cooldown/limite de custo entre workers serials\",\"Allowlist de writes não está explícita; é preciso amarrar que apenas arquivos de artifact (.project/reports/*) podem ser alterados\",\"Ambiguidade no tratamento de cacheStatus=unknown; precisa bloquear por padrão e registrar origem do unknown para reduzir falso green\",\"Não há regra local explícita para timeout de aprovação do operador (stale operator-decision pode travar batch/estado)\"],\"stopConditionsSatisfied\":[\"falta de escrita fora de escopo\",\"execução permanece sem dispatch\"],\"summary\":\"Leitura read-only concluída; critérios da lane serial e 5 lacunas de guardrails locais identificadas para endurecimento.\",\"timestamp\":\"2026-06-04T00:00:00Z\"}",
+      "```",
+      ""
+    ]
+  },
+  "timestamp": "2026-06-04T01:03:41.682Z"
+}

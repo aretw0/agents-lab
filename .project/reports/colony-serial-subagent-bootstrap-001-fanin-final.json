@@ -1,0 +1,148 @@
+{
+  "mode": "colony-serial-fanin-packet",
+  "activation": "none",
+  "authorization": "none",
+  "dispatchAllowed": false,
+  "processStartAllowed": false,
+  "processStopAllowed": false,
+  "requiresOperatorDecision": true,
+  "serialOnly": true,
+  "planId": "serial-subagent-bootstrap-001",
+  "batchId": "colony-fanin-serial-subagent-bootstrap-001",
+  "decision": "pass",
+  "recommendation": "promote-evidence",
+  "recommendationCode": "colony-serial-fanin-pass",
+  "requiredOutcomeIds": [
+    "outcome:serial-subagent-bootstrap-001:worker-01-doc-scan",
+    "outcome:serial-subagent-bootstrap-001:worker-02-test-scan"
+  ],
+  "requiredArtifacts": [
+    ".project/reports/colony-serial-subagent-bootstrap-001-worker-01-doc-scan.json",
+    ".project/reports/colony-serial-subagent-bootstrap-001-worker-02-test-scan.json"
+  ],
+  "blockers": [],
+  "warnings": [],
+  "contract": {
+    "mode": "fail-closed",
+    "requiredOutcomeIds": [
+      "outcome:serial-subagent-bootstrap-001:worker-01-doc-scan",
+      "outcome:serial-subagent-bootstrap-001:worker-02-test-scan"
+    ],
+    "failClosedWhen": [
+      "missing outcome",
+      "outcome != PASS",
+      "artifact missing/empty",
+      "scope violation",
+      "stop condition violated",
+      "ant_colony launch"
+    ],
+    "promoteOnlyWhen": "any missing or failed signal keeps BLOCK; promote only when every required outcome is present, PASS, artifact-backed, and scope-clean"
+  },
+  "workerSummaries": [
+    {
+      "workerPacketId": "worker-01-doc-scan",
+      "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-01-doc-scan",
+      "expectedArtifact": ".project/reports/colony-serial-subagent-bootstrap-001-worker-01-doc-scan.json",
+      "processState": "completed",
+      "contractDecision": "pass",
+      "artifactPresent": true,
+      "artifactBytes": 2704,
+      "artifactStatus": "PASS",
+      "outputBytes": 2704,
+      "fileContract": "read-only",
+      "cacheStatus": "unknown",
+      "cacheStatusInterpretation": "not-applicable",
+      "declaredFiles": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "touchedFiles": [],
+      "evidenceTouchedFiles": [],
+      "unexpectedTouchedFiles": [],
+      "declaredTouchedFiles": [],
+      "markerFailureCount": 0,
+      "blockers": [],
+      "decision": "pass"
+    },
+    {
+      "workerPacketId": "worker-02-test-scan",
+      "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-02-test-scan",
+      "expectedArtifact": ".project/reports/colony-serial-subagent-bootstrap-001-worker-02-test-scan.json",
+      "processState": "completed",
+      "contractDecision": "pass",
+      "artifactPresent": true,
+      "artifactBytes": 1124,
+      "artifactStatus": "PASS",
+      "outputBytes": 1124,
+      "fileContract": "read-only",
+      "cacheStatus": "unknown",
+      "cacheStatusInterpretation": "not-applicable",
+      "declaredFiles": [
+        "packages/pi-stack/test/smoke/guardrails-colony-fanin-packet.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-colony-plan-packet.test.ts"
+      ],
+      "touchedFiles": [],
+      "evidenceTouchedFiles": [],
+      "unexpectedTouchedFiles": [],
+      "declaredTouchedFiles": [],
+      "markerFailureCount": 0,
+      "blockers": [],
+      "decision": "pass"
+    }
+  ],
+  "batchOutcomePacket": {
+    "mode": "agent-run-batch-outcome-packet",
+    "activation": "none",
+    "authorization": "none",
+    "dispatchAllowed": false,
+    "processStartAllowed": false,
+    "processStopAllowed": false,
+    "decision": "pass",
+    "recommendation": "stop",
+    "recommendationCode": "agent-run-batch-outcome-pass",
+    "blockers": [],
+    "batchId": "colony-fanin-serial-subagent-bootstrap-001",
+    "expectedRunIds": [
+      "outcome:serial-subagent-bootstrap-001:worker-01-doc-scan",
+      "outcome:serial-subagent-bootstrap-001:worker-02-test-scan"
+    ],
+    "workerCount": 2,
+    "passedWorkerCount": 2,
+    "cacheHits": 0,
+    "cacheMisses": 0,
+    "cacheUnknown": 2,
+    "workerSummaries": [
+      {
+        "runId": "outcome:serial-subagent-bootstrap-001:worker-01-doc-scan",
+        "processState": "completed",
+        "contractDecision": "pass",
+        "touchedFileCount": 0,
+        "markerFailureCount": 0,
+        "outputBytes": 2704,
+        "cacheStatus": "unknown",
+        "cacheStatusInterpretation": "not-applicable"
+      },
+      {
+        "runId": "outcome:serial-subagent-bootstrap-001:worker-02-test-scan",
+        "processState": "completed",
+        "contractDecision": "pass",
+        "touchedFileCount": 0,
+        "markerFailureCount": 0,
+        "outputBytes": 1124,
+        "cacheStatus": "unknown",
+        "cacheStatusInterpretation": "not-applicable"
+      }
+    ],
+    "fanInContract": [
+      "batch outcome aggregation is report-only and never authorizes worker dispatch",
+      "read-only declared files must remain untouched",
+      "expected artifacts may be created or updated as evidence",
+      "cacheStatus=unknown is not-applicable when explicit outcome, artifact, and output evidence are present",
+      "any missing, failed, unexpected-touch, declared-file-touch, marker-failure, or ant_colony signal blocks promotion"
+    ],
+    "summary": "colony-serial-fanin: decision=pass recommendation=promote-evidence batchId=colony-fanin-serial-subagent-bootstrap-001 workers=2 passed=2 blockers=0 warnings=0 dispatch=no"
+  },
+  "nextActions": [
+    "operator may promote this evidence packet; no dispatch is authorized by the packet itself"
+  ],
+  "summary": "colony-serial-fanin: decision=pass recommendation=promote-evidence batchId=colony-fanin-serial-subagent-bootstrap-001 workers=2 passed=2 blockers=0 warnings=0 dispatch=no"
+}

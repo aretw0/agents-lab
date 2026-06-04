@@ -1,0 +1,59 @@
+{
+  "mode": "agent-worker-artifact",
+  "runId": "colony-serial-subagent-bootstrap-001-worker-02-test-scan",
+  "planId": "serial-subagent-bootstrap-001",
+  "workerPacketId": "worker-02-test-scan",
+  "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-02-test-scan",
+  "requiredArtifact": ".project/reports/colony-serial-subagent-bootstrap-001-worker-02-test-scan.json",
+  "status": "PASS",
+  "fileContract": "read-only",
+  "declaredFiles": [
+    "packages/pi-stack/test/smoke/guardrails-colony-fanin-packet.test.ts",
+    "packages/pi-stack/test/smoke/guardrails-colony-plan-packet.test.ts"
+  ],
+  "allowedTools": [
+    "read",
+    "grep",
+    "git"
+  ],
+  "allowedCapabilities": [
+    "evidence-synthesis",
+    "scope-readonly"
+  ],
+  "dispatchAllowed": false,
+  "batchExecutionAllowed": false,
+  "serialOnly": true,
+  "touchedFiles": [],
+  "blockers": [],
+  "validationEvidence": {
+    "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-02-test-scan",
+    "expectedArtifact": ".project/reports/colony-serial-subagent-bootstrap-001-worker-02-test-scan.json",
+    "outputBytes": 1124,
+    "outputPreview": [
+      "Lacunas de cobertura para a próxima fatia (foco pequeno):",
+      "",
+      "1) **Fan-in (`buildColonySerialFanInPacket`)**",
+      "- Falta testar `required_outcome_ids` explícitos com:",
+      "  - um id inválido (`invalid-required-outcome-id`)",
+      "  - um id ausente na lista de workers (`missing-required-outcome`).",
+      "",
+      "2) **Fan-in (status parcial)**",
+      "- Não há teste de caminho `partial`: `cache_status` com valor não-canônico (ex.: `\"reviewed-by-operator\"`) + sinais completos devem gerar `warnings`/`decision=\"partial\"` e batch `recommendation=\"ask-operator\"`.",
+      "",
+      "3) **Fan-in (sinais de bloqueio operacionais)**",
+      "- Não testado `ant_colony_launched: true` e o blocker correspondente (`ant-colony-launched`).",
+      "",
+      "4) **Plan Packet (`buildColonyPlanPacket`)**",
+      "- Falta validar erros por worker inválido:",
+      "  - `worker-objective-missing:<id>`",
+      "  - `worker-declared-files-missing:<id>`",
+      "  - `worker-id-duplicate:<id>`",
+      "  - `worker-budget-policy-blocked:<id>`.",
+      "",
+      "5) **Worker Start (`buildColonyWorkerStartPacket`)**",
+      "- Não coberto o modo mutation: `mutation_requested: true` sem validação extra -> blocker de profile mutation (e rollback/validation requirements) no spec.",
+      ""
+    ]
+  },
+  "timestamp": "2026-06-04T01:18:54.092Z"
+}
