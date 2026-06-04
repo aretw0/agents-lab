@@ -181,6 +181,8 @@ export function buildColonySerialFanInPacket(input: ColonySerialFanInInput = {})
       });
   const blockers: string[] = [];
   const warnings: string[] = [];
+  if (workers.length === 0) blockers.push("workers-missing");
+  if (requiredOutcomeIds.length === 0) blockers.push("required-outcomes-missing");
   const workerSummaries = workers.map((worker, index): ColonySerialFanInWorkerSummary => {
     const fallbackWorkerPacketId = `worker-${index + 1}`;
     const rawOutcomeId = normalizeText(worker.requiredOutcomeId);

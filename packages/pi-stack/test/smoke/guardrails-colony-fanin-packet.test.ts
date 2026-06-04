@@ -60,6 +60,18 @@ describe("colony serial fan-in packet", () => {
     expect(result.batchOutcomePacket.workerSummaries[1]?.touchedFileCount).toBe(0);
   });
 
+  it("blocks empty fan-in batches", () => {
+    const result = buildColonySerialFanInPacket({
+      planId,
+    });
+
+    expect(result.decision).toBe("block");
+    expect(result.recommendation).toBe("block-promotion");
+    expect(result.blockers).toContain("workers-missing");
+    expect(result.blockers).toContain("required-outcomes-missing");
+    expect(result.batchOutcomePacket.decision).toBe("block");
+  });
+
   it("blocks declared-file mutation for a read-only worker", () => {
     const result = buildColonySerialFanInPacket({
       planId,
