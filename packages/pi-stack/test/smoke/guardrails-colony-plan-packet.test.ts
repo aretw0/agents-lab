@@ -49,6 +49,22 @@ describe("colony plan packet", () => {
     expect(result.workerCount).toBe(2);
     expect(result.workers).toHaveLength(2);
     expect(result.workers[0]?.packetId).toBe("w-01");
+    expect(result.workers[0]?.workerSequence).toBe(1);
+    expect(result.workers[1]?.workerSequence).toBe(2);
+    expect(result.executionManifest).toEqual([
+      {
+        index: 1,
+        workerPacketId: "w-01",
+        requiredOutcomeId: "outcome:colonies-2026-06:w-01",
+        expectedArtifact: ".project/reports/colony-scan/worker-01.json",
+      },
+      {
+        index: 2,
+        workerPacketId: "w-02",
+        requiredOutcomeId: "outcome:colonies-2026-06:w-02",
+        expectedArtifact: ".project/reports/colony-scan/worker-02.json",
+      },
+    ]);
     expect(result.workers[0]?.outcomeContract.expectedArtifact).toBe(result.workers[0]?.expectedArtifact);
     expect(result.workers[0]?.outcomeContract.requiredArtifact).toBe(result.workers[0]?.expectedArtifact);
     expect(result.workers[0]?.outcomeContract.requiredScope.length).toBeGreaterThan(0);
@@ -58,6 +74,7 @@ describe("colony plan packet", () => {
     expect(result.batchExecutionAllowed).toBe(false);
     expect(result.workerDispatchAllowed).toBe(false);
     expect(result.dispatchAllowed).toBe(false);
+    expect(result.nextAction).toContain("executionManifest order");
     expect(result.summary).toContain("dispatch=no");
   });
 

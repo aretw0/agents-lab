@@ -24,6 +24,7 @@ export interface ColonyPlanWorkerInput {
 
 export interface ColonyPlanWorkerPacket {
   packetId: string;
+  workerSequence: number;
   objective: string;
   declaredFiles: string[];
   allowedTools: string[];
@@ -70,6 +71,12 @@ export interface ColonyPlanPacket {
   blockers: string[];
   blockedRequests: string[];
   workers: ColonyPlanWorkerPacket[];
+  executionManifest: Array<{
+    index: number;
+    workerPacketId: string;
+    requiredOutcomeId: string;
+    expectedArtifact: string;
+  }>;
   joinPolicy: ColonyPlanJoinPolicy;
   nextActionCode: ColonyPlanNextActionCode;
   nextAction: string;
@@ -290,6 +297,7 @@ export function buildColonyPlanPacket(input: ColonyPlanInput = {}): ColonyPlanPa
 
     return {
       packetId,
+      workerSequence: sourceIndex,
       objective: objectiveText || "worker objective missing",
       declaredFiles,
       allowedTools: allowedTools.length > 0 ? allowedTools : ["read", "grep", "git"],
@@ -323,9 +331,15 @@ export function buildColonyPlanPacket(input: ColonyPlanInput = {}): ColonyPlanPa
   const nextActionCode: ColonyPlanNextActionCode =
     decision === "ready-for-operator-decision" ? "prepare-worker-fan-in" : "resolve-colony-plan-blockers";
   const nextAction = decision === "ready-for-operator-decision"
-    ? "collect each worker outcome and apply fail-closed fan-in before any colony promotion or phase advance."
+    ? "execute workers by executionManifest order, collect each worker outcome, and apply fail-closed fan-in before any colony promotion or phase advance."
     : blockers.join("; ");
   const joinPolicy = buildJoinPolicy(workers);
+  const executionManifest = workers.map((worker) => ({
+    index: worker.workerSequence,
+    workerPacketId: worker.packetId,
+    requiredOutcomeId: worker.outcomeContract.requiredOutcomeId,
+    expectedArtifact: worker.expectedArtifact,
+  }));
 
   const summary = [
     "colony-plan-packet:",
@@ -362,6 +376,7 @@ export function buildColonyPlanPacket(input: ColonyPlanInput = {}): ColonyPlanPa
     blockers,
     blockedRequests,
     workers,
+    executionManifest,
     joinPolicy,
     nextActionCode,
     nextAction,
