@@ -92,6 +92,53 @@ describe("colony serial fan-in packet", () => {
     expect(result.blockers.join("\n")).toContain("invalid-outcome-id");
   });
 
+  it("blocks explicit invalid requiredOutcomeId in requiredOutcomeIds", () => {
+    const result = buildColonySerialFanInPacket({
+      planId,
+      requiredOutcomeIds: ["outcome-serial-subagent-bootstrap-001:worker-01-scope-scan"],
+      workers: [worker01, worker02],
+    });
+
+    expect(result.decision).toBe("block");
+    expect(result.recommendation).toBe("block-promotion");
+    expect(result.blockers.join("\n")).toContain("invalid-required-outcome-id:outcome-serial-subagent-bootstrap-001:worker-01-scope-scan");
+  });
+
+  it("blocks explicit requiredOutcomeIds missing from worker list", () => {
+    const result = buildColonySerialFanInPacket({
+      planId,
+      requiredOutcomeIds: ["outcome:serial-subagent-bootstrap-001:worker-03-missing"],
+      workers: [worker01, worker02],
+    });
+
+    expect(result.decision).toBe("block");
+    expect(result.recommendation).toBe("block-promotion");
+    expect(result.recommendationCode).toBe("colony-serial-fanin-block");
+    expect(result.blockers.join("\n")).toContain("missing-required-outcome:outcome:serial-subagent-bootstrap-001:worker-03-missing");
+  });
+
+  it("returns partial for non-canonical cache status with complete evidence", () => {
+    const result = buildColonySerialFanInPacket({
+      planId,
+      requiredOutcomeIds: [worker01.requiredOutcomeId, worker02.requiredOutcomeId],
+      workers: [
+        { ...worker01, cacheStatus: "reviewed-by-operator" },
+        { ...worker02, cacheStatus: "reviewed-by-operator" },
+      ],
+    });
+
+    expect(result.decision).toBe("partial");
+    expect(result.recommendation).toBe("ask-operator");
+    expect(result.recommendationCode).toBe("colony-serial-fanin-partial");
+    expect(result.blockers).toEqual([]);
+    expect(result.warnings.join("\n")).toContain("operator-reviewed");
+    expect(result.workerSummaries[0]?.cacheStatusInterpretation).toBe("operator-reviewed");
+    expect(result.workerSummaries[1]?.cacheStatusInterpretation).toBe("operator-reviewed");
+    expect(result.batchOutcomePacket.decision).toBe("partial");
+    expect(result.batchOutcomePacket.recommendation).toBe("ask-operator");
+    expect(result.batchOutcomePacket.recommendationCode).toBe("agent-run-batch-outcome-partial");
+  });
+
   it("exposes colony_serial_fanin_packet as report-only surface", () => {
     const tools: Array<{ name: string; execute: (toolCallId: string, params: Record<string, unknown>) => { details: unknown } }> = [];
     registerColonyPlanPacketSurface({
