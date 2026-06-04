@@ -1,0 +1,60 @@
+{
+  "mode": "agent-worker-artifact",
+  "runId": "colony-serial-subagent-bootstrap-001-worker-01-route-scan",
+  "planId": "serial-subagent-bootstrap-001",
+  "workerPacketId": "worker-01-route-scan",
+  "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-01-route-scan",
+  "requiredArtifact": ".project/reports/serial-subagent-bootstrap-001-worker-01-route-scan.json",
+  "status": "PASS",
+  "fileContract": "read-only",
+  "declaredFiles": [
+    "scripts/decoupling-maturity-report.mjs",
+    "docs/guides/control-plane-operating-doctrine.md"
+  ],
+  "allowedTools": [
+    "read",
+    "grep",
+    "git"
+  ],
+  "allowedCapabilities": [
+    "evidence-synthesis",
+    "scope-readonly"
+  ],
+  "dispatchAllowed": false,
+  "batchExecutionAllowed": false,
+  "serialOnly": true,
+  "touchedFiles": [],
+  "blockers": [],
+  "validationEvidence": {
+    "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-01-route-scan",
+    "expectedArtifact": ".project/reports/serial-subagent-bootstrap-001-worker-01-route-scan.json",
+    "outputBytes": 1022,
+    "outputPreview": [
+      "Concluindo a análise: **não está completo para a lane serial inteira**; aponta apenas para o **primeiro passo** (`colony_plan_packet`) em modo report-only.",
+      "",
+      "```json",
+      "{",
+      "  \"outcomeId\": \"outcome:serial-subagent-bootstrap-001:worker-01-route-scan\",",
+      "  \"artifact\": \".project/reports/serial-subagent-bootstrap-001-worker-01-route-scan.json\",",
+      "  \"assessment\": \"partial-route\",",
+      "  \"localSafeRouteCurrent\": {",
+      "    \"tool\": \"colony_plan_packet\",",
+      "    \"mode\": \"report-only\",",
+      "    \"noDispatch\": true",
+      "  },",
+      "  \"evidence\": [",
+      "    \"scripts/decoupling-maturity-report.mjs:175-183 (somente localSafeRoute -> colony_plan_packet)\",",
+      "    \"docs/guides/control-plane-operating-doctrine.md:983-989 (descrição completa da lane serial: plan -> worker_start -> agent_run -> outcome -> fan-in)\"",
+      "  ],",
+      "  \"gap\": [",
+      "    \"Não recomenda/encadeia diretamente `colony_worker_start_packet`\",",
+      "    \"Não recomenda/encadeia execução de `agent_run` serial por worker\",",
+      "    \"Não recomenda/encadeia `agent_run_outcome_packet` e `colony_serial_fanin_packet`\"",
+      "  ]",
+      "}",
+      "```",
+      ""
+    ]
+  },
+  "timestamp": "2026-06-04T08:03:26.203Z"
+}

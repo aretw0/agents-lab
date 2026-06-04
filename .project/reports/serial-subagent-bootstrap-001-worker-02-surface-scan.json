@@ -1,0 +1,61 @@
+{
+  "mode": "agent-worker-artifact",
+  "runId": "colony-serial-subagent-bootstrap-001-worker-02-surface-scan",
+  "planId": "serial-subagent-bootstrap-001",
+  "workerPacketId": "worker-02-surface-scan",
+  "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-02-surface-scan",
+  "requiredArtifact": ".project/reports/serial-subagent-bootstrap-001-worker-02-surface-scan.json",
+  "status": "PASS",
+  "fileContract": "read-only",
+  "declaredFiles": [
+    "packages/pi-stack/extensions/guardrails-core-colony-plan-surface.ts",
+    "packages/pi-stack/extensions/guardrails-core-colony-plan.ts",
+    "packages/pi-stack/extensions/guardrails-core-colony-fanin-packet.ts"
+  ],
+  "allowedTools": [
+    "read",
+    "grep",
+    "git"
+  ],
+  "allowedCapabilities": [
+    "evidence-synthesis",
+    "scope-readonly"
+  ],
+  "dispatchAllowed": false,
+  "batchExecutionAllowed": false,
+  "serialOnly": true,
+  "touchedFiles": [],
+  "blockers": [],
+  "validationEvidence": {
+    "requiredOutcomeId": "outcome:serial-subagent-bootstrap-001:worker-02-surface-scan",
+    "expectedArtifact": ".project/reports/serial-subagent-bootstrap-001-worker-02-surface-scan.json",
+    "outputBytes": 1477,
+    "outputPreview": [
+      "**Resultado da leitura (declared files only):**  ",
+      "- `packages/pi-stack/extensions/guardrails-core-colony-plan.ts`  ",
+      "- `packages/pi-stack/extensions/guardrails-core-colony-plan-surface.ts`  ",
+      "- `packages/pi-stack/extensions/guardrails-core-colony-fanin-packet.ts`  ",
+      "",
+      "`requiredOutcomeId: outcome:serial-subagent-bootstrap-001:worker-02-surface-scan`  ",
+      "`expectedArtifact: .project/reports/serial-subagent-bootstrap-001-worker-02-surface-scan.json`  ",
+      "",
+      "**Melhoria mínima de UX/contrato (mais barata):**  ",
+      "Adicionar metadado explícito de ordem/manifesto serial no `colony_plan_packet` para que o operador não precise reter a sequência da conversa.",
+      "",
+      "**Por que:** hoje o contrato serial só implicitamente preserva ordem pela posição do array; não há “manual de execução” persistido por worker para continuidade.",
+      "",
+      "**Proposta (contrato aditivo, sem mudar comportamento):**",
+      "- Em `ColonyPlanWorkerPacket` incluir `workerSequence: number`.",
+      "- Em `ColonyPlanPacket` incluir `executionManifest` (ou `serialSequence`) como lista ordenada:",
+      "  - `{ index, workerPacketId, requiredOutcomeId, expectedArtifact }`.",
+      "- No retorno, `nextAction` do `colony_plan_packet` pode citar:  ",
+      "  `execute workers por executionManifest em ordem 1..N`, referindo `requiredOutcomeId` + `expectedArtifact`.",
+      "",
+      "**Impacto esperado:**  ",
+      "- Semântica serial clara e autoexplicativa para o próximo passo, sem depender de memória de contexto.  ",
+      "- Menor erro de encadeamento quando a conversa perde histórico.",
+      ""
+    ]
+  },
+  "timestamp": "2026-06-04T08:17:13.619Z"
+}
