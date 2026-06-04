@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 
 import { buildDockerExecArgs } from "../devcontainer-lab.mjs";
 
@@ -95,6 +98,51 @@ test("devcontainer persists assistant homes and package caches across rebuilds",
 	assert.match(mounts, /source=agents-lab-claude-home,target=\/home\/vscode\/\.claude,type=volume/);
 	assert.match(mounts, /source=agents-lab-codex-home,target=\/home\/vscode\/\.codex,type=volume/);
 	assert.match(mounts, /source=agents-lab-gh-config,target=\/home\/vscode\/\.config\/gh,type=volume/);
+});
+
+test("substrate check detects unapplied devcontainer node_modules volume", () => {
+	if (process.platform !== "linux") return;
+	const tempDir = mkdtempSync(path.join(tmpdir(), "agents-lab-substrate-"));
+	try {
+		const binDir = path.join(tempDir, "node_modules", ".bin");
+		mkdirSync(path.join(tempDir, ".devcontainer"), { recursive: true });
+		mkdirSync(binDir, { recursive: true });
+		mkdirSync(path.join(tempDir, "packages", "pi-stack", "node_modules", "@ifi", "oh-pi-extensions"), { recursive: true });
+		for (const binary of ["vitest", "pi", "changeset"]) {
+			writeFileSync(path.join(binDir, binary), "", { mode: 0o755 });
+		}
+		writeFileSync(path.join(tempDir, "packages", "pi-stack", "node_modules", "@ifi", "oh-pi-extensions", "package.json"), "{}\n");
+		writeFileSync(
+			path.join(tempDir, ".devcontainer", "devcontainer.json"),
+			`${JSON.stringify({
+				mounts: [
+					`source=agents-lab-node-modules,target=${path.join(tempDir, "node_modules")},type=volume`,
+				],
+			}, null, 2)}\n`,
+		);
+
+		const result = spawnSync(process.execPath, [path.resolve("scripts/check-substrate.mjs"), "--json"], {
+			cwd: tempDir,
+			encoding: "utf8",
+			env: {
+				...process.env,
+				REFARM_NODE_SUBSTRATE_MOUNTINFO: `36 29 0:32 / ${tempDir} rw,relatime - 9p C: rw\n`,
+			},
+		});
+
+		assert.notEqual(result.status, 0);
+		const payload = JSON.parse(result.stdout);
+		assert.deepEqual(payload.mountIssues, [
+			{
+				id: "devcontainer_node_modules_mount",
+				path: "node_modules",
+				target: path.join(tempDir, "node_modules"),
+			},
+		]);
+		assert.match(payload.nextCommand, /Rebuild\/reopen the devcontainer/);
+	} finally {
+		rmSync(tempDir, { recursive: true, force: true });
+	}
 });
 
 test("devcontainer provides the baseline sandbox tools expected by agents", () => {

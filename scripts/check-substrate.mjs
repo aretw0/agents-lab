@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { access } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
@@ -34,6 +34,61 @@ async function addPathCheck(id, label, filePath, { executable = false, required 
   return ok;
 }
 
+async function readDevcontainerNodeModulesTarget() {
+  try {
+    const config = JSON.parse(await readFile(rel(".devcontainer", "devcontainer.json"), "utf8"));
+    const mounts = Array.isArray(config.mounts) ? config.mounts : [];
+    for (const mount of mounts) {
+      if (typeof mount !== "string") continue;
+      const fields = Object.fromEntries(
+        mount.split(",").map((field) => {
+          const index = field.indexOf("=");
+          if (index === -1) return [field.trim(), ""];
+          return [field.slice(0, index).trim(), field.slice(index + 1).trim()];
+        })
+      );
+      if (!fields.target || !fields.source?.includes("node-modules")) continue;
+      const target = path.resolve(fields.target);
+      if (target === path.resolve(rel("node_modules"))) return target;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function decodeMountInfoPath(value) {
+  return value.replace(/\\([0-7]{3})/g, (_, octal) => String.fromCharCode(Number.parseInt(octal, 8)));
+}
+
+async function readLinuxMountPoints() {
+  if (process.platform !== "linux") return [];
+  const content = process.env.REFARM_NODE_SUBSTRATE_MOUNTINFO ?? await readFile("/proc/self/mountinfo", "utf8");
+  return content
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => line.split(" - ")[0]?.split(" ")[4])
+    .filter(Boolean)
+    .map(decodeMountInfoPath)
+    .map((mountPoint) => path.resolve(mountPoint));
+}
+
+async function addDevcontainerNodeModulesMountCheck() {
+  const target = await readDevcontainerNodeModulesTarget();
+  if (!target) return;
+  const mountPoints = await readLinuxMountPoints();
+  if (mountPoints.length === 0) return;
+  checks.push({
+    id: "devcontainer_node_modules_mount",
+    label: "devcontainer node_modules volume mount",
+    ok: mountPoints.includes(target),
+    required: true,
+    path: "node_modules",
+    target
+  });
+}
+
 function addCommandCheck(id, command, args = ["--version"], { required = true } = {}) {
   const result = spawnSync(command, args, { cwd: root, encoding: "utf8", shell: isWindows });
   const ok = result.status === 0;
@@ -50,6 +105,7 @@ function addCommandCheck(id, command, args = ["--version"], { required = true } 
 
 await addPathCheck("node_modules", "workspace dependencies", rel("node_modules"));
 await addPathCheck("node_modules_bin", "workspace executable shims", rel("node_modules", ".bin"));
+await addDevcontainerNodeModulesMountCheck();
 await addPathCheck("bin_vitest", "vitest executable shim", rel("node_modules", ".bin", bin("vitest")), { executable: true });
 await addPathCheck("bin_pi", "pi executable shim", rel("node_modules", ".bin", bin("pi")), { executable: true });
 await addPathCheck("bin_changeset", "changeset executable shim", rel("node_modules", ".bin", bin("changeset")), { executable: true });
@@ -64,6 +120,9 @@ addCommandCheck("pnpm", "pnpm", ["--version"]);
 
 const missing = checks.filter((check) => check.required && !check.ok);
 
+if (missing.some((check) => check.id === "devcontainer_node_modules_mount")) {
+  recommendations.push("Rebuild/reopen the devcontainer so node_modules is mounted from its container-owned Docker volume.");
+}
 if (missing.some((check) => check.id.startsWith("node_modules") || check.id.startsWith("bin_") || check.id === "pi_stack_package_link")) {
   recommendations.push("Run: pnpm install --frozen-lockfile --prefer-offline --config.confirm-modules-purge=false");
 }
@@ -80,6 +139,9 @@ const result = {
   command: "substrate:check",
   checks,
   missing: missing.map((check) => check.id),
+  mountIssues: missing
+    .filter((check) => check.id === "devcontainer_node_modules_mount")
+    .map((check) => ({ id: check.id, path: check.path, target: check.target })),
   recommendations,
   nextCommand: missing.length > 0 ? recommendations[0] ?? null : null,
   nextCommands: missing.length > 0 ? recommendations : []
