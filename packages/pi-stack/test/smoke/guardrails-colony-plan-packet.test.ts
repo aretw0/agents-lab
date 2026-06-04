@@ -49,6 +49,8 @@ describe("colony plan packet", () => {
     expect(result.workerCount).toBe(2);
     expect(result.workers).toHaveLength(2);
     expect(result.workers[0]?.packetId).toBe("w-01");
+    expect(result.workers[0]?.outcomeContract.expectedArtifact).toBe(result.workers[0]?.expectedArtifact);
+    expect(result.workers[0]?.outcomeContract.requiredArtifact).toBe(result.workers[0]?.expectedArtifact);
     expect(result.workers[0]?.outcomeContract.requiredScope.length).toBeGreaterThan(0);
     expect(result.joinPolicy.mode).toBe("fail-closed");
     expect(result.joinPolicy.requiredOutcomeIds).toHaveLength(2);

@@ -34,6 +34,7 @@ export interface ColonyPlanWorkerPacket {
   expectedArtifact: string;
   outcomeContract: {
     requiredOutcomeId: string;
+    expectedArtifact: string;
     requiredArtifact: string;
     requiredScope: string[];
     requiredStopConditions: string[];
@@ -302,6 +303,7 @@ export function buildColonyPlanPacket(input: ColonyPlanInput = {}): ColonyPlanPa
       providerModelRef: providerModelRef || undefined,
       outcomeContract: {
         requiredOutcomeId: `outcome:${planId}:${packetId}`,
+        expectedArtifact,
         requiredArtifact: expectedArtifact,
         requiredScope: declaredFiles,
         requiredStopConditions: normalizedStopConditions,
