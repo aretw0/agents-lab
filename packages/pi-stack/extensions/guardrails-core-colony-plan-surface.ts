@@ -5,8 +5,10 @@ import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 import { buildColonySerialFanInPacket, type ColonySerialFanInInput } from "./guardrails-core-colony-fanin-packet";
 import {
   buildColonyPlanPacket,
+  buildColonySerialDriverPacket,
   buildColonyWorkerStartPacket,
   type ColonyPlanInput,
+  type ColonySerialDriverInput,
   type ColonyWorkerStartPacketInput,
 } from "./guardrails-core-colony-plan";
 
@@ -33,6 +35,21 @@ function parseWorkerInputs(raw: unknown): NonNullable<ColonyPlanInput["workers"]
 
 function asOptionalNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function parseExecutionManifest(raw: unknown): NonNullable<ColonySerialDriverInput["executionManifest"]> {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  return raw
+    .filter((item): item is Record<string, unknown> => item != null && typeof item === "object")
+    .map((record): NonNullable<ColonySerialDriverInput["executionManifest"]>[number] => ({
+      index: asOptionalNumber(record.index),
+      workerPacketId: typeof record.worker_packet_id === "string" ? record.worker_packet_id : undefined,
+      requiredOutcomeId: typeof record.required_outcome_id === "string" ? record.required_outcome_id : undefined,
+      expectedArtifact: typeof record.expected_artifact === "string" ? record.expected_artifact : undefined,
+    }));
 }
 
 function parseFanInWorkerInputs(raw: unknown): NonNullable<ColonySerialFanInInput["workers"]> {
@@ -113,6 +130,38 @@ export function registerColonyPlanPacketSurface(pi: ExtensionAPI): void {
       const result = buildColonyPlanPacket(input);
       return buildOperatorVisibleToolResponse({
         label: "colony_plan_packet",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "colony_serial_driver_packet",
+    label: "Colony Serial Driver Packet",
+    description:
+      "Report-only headless serial-lane driver packet. Selects the next worker from executionManifest and never dispatches execution.",
+    parameters: Type.Object({
+      plan_id: Type.Optional(Type.String({ description: "Parent serial colony plan id." })),
+      execution_manifest: Type.Optional(Type.Array(Type.Object({
+        index: Type.Optional(Type.Number({ description: "1-based serial worker order." })),
+        worker_packet_id: Type.Optional(Type.String({ description: "Worker packet id." })),
+        required_outcome_id: Type.Optional(Type.String({ description: "Canonical outcome id for the worker." })),
+        expected_artifact: Type.Optional(Type.String({ description: "Expected evidence artifact path." })),
+      }), { description: "Ordered executionManifest emitted by colony_plan_packet." })),
+      completed_outcomes: Type.Optional(Type.Array(Type.String(), { description: "Required outcome ids already completed and accepted by parent." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const input: ColonySerialDriverInput = {
+        planId: typeof p.plan_id === "string" ? p.plan_id : undefined,
+        executionManifest: parseExecutionManifest(p.execution_manifest),
+        completedOutcomes: asOptionalStringArray(p.completed_outcomes),
+      };
+
+      const result = buildColonySerialDriverPacket(input);
+      return buildOperatorVisibleToolResponse({
+        label: "colony_serial_driver_packet",
         summary: result.summary,
         details: result,
       });

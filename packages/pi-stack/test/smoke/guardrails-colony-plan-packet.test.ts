@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildColonyPlanPacket,
+  buildColonySerialDriverPacket,
   buildColonyWorkerStartPacket,
   ColonyPlanBudgetDecision,
 } from "../../extensions/guardrails-core-colony-plan";
@@ -247,5 +248,144 @@ describe("colony plan packet", () => {
     expect(details.mode).toBe("colony-worker-start-packet");
     expect(details.dispatchAllowed).toBe(false);
     expect(details.processStartAllowed).toBe(false);
+  });
+
+  it("selects the next pending worker from executionManifest without dispatch", () => {
+    const manifest = [
+      {
+        index: 1,
+        workerPacketId: "worker-01-route-scan",
+        requiredOutcomeId: "outcome:serial-subagent-bootstrap-001:worker-01-route-scan",
+        expectedArtifact: ".project/reports/worker-01-route-scan.json",
+      },
+      {
+        index: 2,
+        workerPacketId: "worker-02-surface-scan",
+        requiredOutcomeId: "outcome:serial-subagent-bootstrap-001:worker-02-surface-scan",
+        expectedArtifact: ".project/reports/worker-02-surface-scan.json",
+      },
+      {
+        index: 3,
+        workerPacketId: "worker-03-driver-scan",
+        requiredOutcomeId: "outcome:serial-subagent-bootstrap-001:worker-03-driver-scan",
+        expectedArtifact: ".project/reports/worker-03-driver-scan.json",
+      },
+    ];
+
+    const result = buildColonySerialDriverPacket({
+      planId: "serial-subagent-bootstrap-001",
+      executionManifest: manifest,
+      completedOutcomes: ["outcome:serial-subagent-bootstrap-001:worker-01-route-scan"],
+    });
+
+    expect(result.mode).toBe("colony-serial-driver-packet");
+    expect(result.decision).toBe("next-worker-ready");
+    expect(result.nextWorkerPacketId).toBe("worker-02-surface-scan");
+    expect(result.nextRequiredOutcomeId).toBe("outcome:serial-subagent-bootstrap-001:worker-02-surface-scan");
+    expect(result.nextExpectedArtifact).toBe(".project/reports/worker-02-surface-scan.json");
+    expect(result.requiredApprovalPrompt).toBe("approve worker colony-serial-subagent-bootstrap-001-worker-02-surface-scan");
+    expect(result.driverSteps.join("\n")).toContain("colony_worker_start_packet");
+    expect(result.driverSteps.join("\n")).toContain("agent_run_outcome_packet");
+    expect(result.dispatchAllowed).toBe(false);
+    expect(result.processStartAllowed).toBe(false);
+    expect(result.batchExecutionAllowed).toBe(false);
+  });
+
+  it("blocks missing or empty executionManifest", () => {
+    const missing = buildColonySerialDriverPacket({ planId: "serial-subagent-bootstrap-001" });
+    const empty = buildColonySerialDriverPacket({ planId: "serial-subagent-bootstrap-001", executionManifest: [] });
+
+    expect(missing.decision).toBe("blocked");
+    expect(missing.blockers).toContain("execution-manifest-missing");
+    expect(missing.blockers).toContain("execution-manifest-empty");
+    expect(empty.decision).toBe("blocked");
+    expect(empty.blockers).toContain("execution-manifest-empty");
+  });
+
+  it("blocks disordered executionManifest entries", () => {
+    const result = buildColonySerialDriverPacket({
+      planId: "serial-subagent-bootstrap-001",
+      executionManifest: [
+        {
+          index: 2,
+          workerPacketId: "worker-02",
+          requiredOutcomeId: "outcome:serial-subagent-bootstrap-001:worker-02",
+          expectedArtifact: ".project/reports/worker-02.json",
+        },
+        {
+          index: 1,
+          workerPacketId: "worker-01",
+          requiredOutcomeId: "outcome:serial-subagent-bootstrap-001:worker-01",
+          expectedArtifact: ".project/reports/worker-01.json",
+        },
+      ],
+    });
+
+    expect(result.decision).toBe("blocked");
+    expect(result.blockers.join("\n")).toContain("execution-manifest-disordered:");
+  });
+
+  it("blocks incomplete executionManifest items", () => {
+    const result = buildColonySerialDriverPacket({
+      planId: "serial-subagent-bootstrap-001",
+      executionManifest: [
+        {
+          index: 1,
+          workerPacketId: "worker-01",
+        },
+      ],
+    });
+
+    expect(result.decision).toBe("blocked");
+    expect(result.blockers).toContain("manifest-item-missing-required-outcome-id:1");
+    expect(result.blockers).toContain("manifest-item-missing-expected-artifact:1");
+  });
+
+  it("blocks ant_colony references in manifest and completed outcomes", () => {
+    const result = buildColonySerialDriverPacket({
+      planId: "serial-subagent-bootstrap-001",
+      executionManifest: [
+        {
+          index: 1,
+          workerPacketId: "worker-ant_colony",
+          requiredOutcomeId: "outcome:serial-subagent-bootstrap-001:worker-ant_colony",
+          expectedArtifact: ".project/reports/worker-01.json",
+        },
+      ],
+      completedOutcomes: ["outcome:serial-subagent-bootstrap-001:ant_colony"],
+    });
+
+    expect(result.decision).toBe("blocked");
+    expect(result.blockers).toContain("manifest-ant-colony-reference");
+  });
+
+  it("exposes colony_serial_driver_packet as report-only surface", () => {
+    const tools: Array<{ name: string; execute: (toolCallId: string, params: Record<string, unknown>) => { details: unknown } }> = [];
+    registerColonyPlanPacketSurface({
+      registerTool(tool: unknown) {
+        const typed = tool as { name: string; execute: (toolCallId: string, params: Record<string, unknown>) => { details: unknown } };
+        tools.push(typed);
+      },
+    } as never);
+
+    const tool = tools.find((row) => row.name === "colony_serial_driver_packet");
+    const result = tool?.execute("call", {
+      plan_id: "serial-subagent-bootstrap-001",
+      execution_manifest: [
+        {
+          index: 1,
+          worker_packet_id: "worker-01-route-scan",
+          required_outcome_id: "outcome:serial-subagent-bootstrap-001:worker-01-route-scan",
+          expected_artifact: ".project/reports/worker-01-route-scan.json",
+        },
+      ],
+      completed_outcomes: [],
+    });
+
+    const details = (result?.details ?? {}) as Record<string, unknown>;
+    expect(details.mode).toBe("colony-serial-driver-packet");
+    expect(details.dispatchAllowed).toBe(false);
+    expect(details.processStartAllowed).toBe(false);
+    expect(details.nextWorkerPacketId).toBe("worker-01-route-scan");
   });
 });

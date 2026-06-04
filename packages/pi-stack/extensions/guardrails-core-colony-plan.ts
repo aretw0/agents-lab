@@ -111,6 +111,41 @@ export interface ColonyWorkerStartPacket {
   summary: string;
 }
 
+export interface ColonySerialManifestItem {
+  index?: number;
+  workerPacketId?: string;
+  requiredOutcomeId?: string;
+  expectedArtifact?: string;
+}
+
+export interface ColonySerialDriverInput {
+  planId?: string;
+  executionManifest?: ColonySerialManifestItem[];
+  completedOutcomes?: string[];
+}
+
+export interface ColonySerialDriverPacket {
+  mode: "colony-serial-driver-packet";
+  activation: "none";
+  authorization: GuardrailsAuthorizationNone;
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  batchExecutionAllowed: false;
+  requiresOperatorDecision: true;
+  serialOnly: true;
+  decision: "next-worker-ready" | "completed" | "blocked";
+  recommendationCode: "colony-serial-driver-next-worker" | "colony-serial-driver-completed" | "colony-serial-driver-blocked";
+  planId: string;
+  nextWorkerPacketId: string;
+  nextRequiredOutcomeId: string;
+  nextExpectedArtifact: string;
+  requiredApprovalPrompt: string;
+  driverSteps: string[];
+  blockers: string[];
+  completedOutcomes: string[];
+  summary: string;
+}
+
 export interface ColonyPlanInput {
   planId?: string;
   objective?: string;
@@ -187,6 +222,15 @@ function boolText(value: boolean): string {
   return value ? "yes" : "no";
 }
 
+function containsAntColonyReference(value: unknown): boolean {
+  return typeof value === "string" && /ant_colony/i.test(value);
+}
+
+function isCanonicalOutcomeForPlan(planId: string, outcomeId: string): boolean {
+  const escapedPlanId = planId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`^outcome:${escapedPlanId}:[A-Za-z0-9._-]+$`).test(outcomeId);
+}
+
 function buildJoinPolicy(workers: ColonyPlanWorkerPacket[]): ColonyPlanJoinPolicy {
   const requiredOutcomeIds = workers.map((worker) => worker.outcomeContract.requiredOutcomeId);
 
@@ -209,6 +253,115 @@ function buildJoinPolicy(workers: ColonyPlanWorkerPacket[]): ColonyPlanJoinPolic
     ],
     promoteOnlyWhen:
       "Do not promote until all required worker outcomes pass; a single missing or failed outcome keeps the aggregate in fail-closed state.",
+  };
+}
+
+export function buildColonySerialDriverPacket(input: ColonySerialDriverInput = {}): ColonySerialDriverPacket {
+  const planId = normalizeId(input.planId, "colony-plan");
+  const manifest = Array.isArray(input.executionManifest) ? input.executionManifest : [];
+  const completedOutcomes = normalizeList(input.completedOutcomes, 50);
+  const completedSet = new Set(completedOutcomes);
+  const blockers: string[] = [];
+
+  if (!Array.isArray(input.executionManifest)) {
+    blockers.push("execution-manifest-missing");
+  }
+  if (manifest.length === 0) {
+    blockers.push("execution-manifest-empty");
+  }
+
+  const seenIndexes = new Set<number>();
+  for (let i = 0; i < manifest.length; i += 1) {
+    const item = manifest[i] ?? {};
+    const expectedIndex = i + 1;
+    const index = item.index;
+    const workerPacketId = normalizeText(item.workerPacketId);
+    const requiredOutcomeId = normalizeText(item.requiredOutcomeId);
+    const expectedArtifact = normalizeText(item.expectedArtifact);
+
+    if (typeof index !== "number" || !Number.isInteger(index) || index < 1) {
+      blockers.push(`execution-manifest-index-missing:${expectedIndex}`);
+    } else {
+      if (seenIndexes.has(index)) blockers.push(`execution-manifest-index-duplicate:${index}`);
+      seenIndexes.add(index);
+      if (index !== expectedIndex) blockers.push(`execution-manifest-disordered:${index}!=${expectedIndex}`);
+    }
+    if (!workerPacketId) blockers.push(`manifest-item-missing-worker-packet-id:${expectedIndex}`);
+    if (!requiredOutcomeId) {
+      blockers.push(`manifest-item-missing-required-outcome-id:${expectedIndex}`);
+    } else if (!isCanonicalOutcomeForPlan(planId, requiredOutcomeId)) {
+      blockers.push(`manifest-item-invalid-outcome-format:${requiredOutcomeId}`);
+    }
+    if (!expectedArtifact) blockers.push(`manifest-item-missing-expected-artifact:${expectedIndex}`);
+    if (
+      containsAntColonyReference(workerPacketId)
+      || containsAntColonyReference(requiredOutcomeId)
+      || containsAntColonyReference(expectedArtifact)
+    ) {
+      blockers.push("manifest-ant-colony-reference");
+    }
+  }
+
+  if (completedOutcomes.some(containsAntColonyReference)) {
+    blockers.push("manifest-ant-colony-reference");
+  }
+
+  const nextItem = blockers.length === 0
+    ? manifest.find((item) => !completedSet.has(normalizeText(item.requiredOutcomeId)))
+    : undefined;
+  const nextWorkerPacketId = normalizeText(nextItem?.workerPacketId);
+  const nextRequiredOutcomeId = normalizeText(nextItem?.requiredOutcomeId);
+  const nextExpectedArtifact = normalizeText(nextItem?.expectedArtifact);
+  const decision = blockers.length > 0 ? "blocked" : nextItem ? "next-worker-ready" : "completed";
+  const recommendationCode = decision === "blocked"
+    ? "colony-serial-driver-blocked"
+    : decision === "completed"
+      ? "colony-serial-driver-completed"
+      : "colony-serial-driver-next-worker";
+  const requiredApprovalPrompt = nextWorkerPacketId
+    ? `approve worker colony-${planId}-${nextWorkerPacketId}`
+    : "no next worker: executionManifest complete; run colony_serial_fanin_packet";
+  const driverSteps = nextWorkerPacketId
+    ? [
+        `call colony_worker_start_packet for worker ${nextWorkerPacketId} in plan ${planId}`,
+        `use explicit operator approval prompt exactly: ${requiredApprovalPrompt}`,
+        `after execution, run agent_run_outcome_packet for ${nextRequiredOutcomeId} and require PASS/evidence match before continuing`,
+        "when completedOutcomes satisfy executionManifest, run colony_serial_fanin_packet",
+      ]
+    : [
+        "no serial worker remains pending",
+        "run colony_serial_fanin_packet with all required outcomes before promotion",
+      ];
+  const summary = [
+    "colony-serial-driver-packet:",
+    `decision=${decision}`,
+    `plan=${planId}`,
+    nextWorkerPacketId ? `nextWorker=${nextWorkerPacketId}` : "nextWorker=none",
+    blockers.length > 0 ? `blockers=${blockers.slice(0, 4).join("|")}` : "blockers=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
+    "dispatch=no",
+  ].join(" ");
+
+  return {
+    mode: "colony-serial-driver-packet",
+    activation: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    batchExecutionAllowed: false,
+    requiresOperatorDecision: true,
+    serialOnly: true,
+    decision,
+    recommendationCode,
+    planId,
+    nextWorkerPacketId,
+    nextRequiredOutcomeId,
+    nextExpectedArtifact,
+    requiredApprovalPrompt,
+    driverSteps,
+    blockers,
+    completedOutcomes,
+    summary,
   };
 }
 
