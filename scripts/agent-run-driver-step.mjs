@@ -209,7 +209,9 @@ async function dispatchRun(cwd, runSpec) {
   writeRegistryEntry(cwd, running);
   const exit = await new Promise((resolve) => {
     let settled = false;
+    let timedOut = false;
     const timeout = setTimeout(() => {
+      timedOut = true;
       if (!child.killed) child.kill("SIGTERM");
     }, runSpec.timeoutMs);
     child.on("error", (error) => {
@@ -222,7 +224,7 @@ async function dispatchRun(cwd, runSpec) {
       if (settled) return;
       settled = true;
       clearTimeout(timeout);
-      resolve({ exitCode: typeof code === "number" ? code : 1, signal: signal || "none", timedOut: false });
+      resolve({ exitCode: typeof code === "number" ? code : timedOut ? 124 : 1, signal: signal || "none", timedOut });
     });
   });
   const elapsedMs = Date.now() - startedAtMs;
@@ -230,7 +232,7 @@ async function dispatchRun(cwd, runSpec) {
   await new Promise((resolve) => logStream.end(resolve));
   const completed = {
     ...running,
-    state: exit.exitCode === 0 ? "completed" : "failed",
+    state: exit.exitCode === 0 ? "completed" : exit.timedOut ? "timed-out" : "failed",
     exitCode: exit.exitCode,
     ...(exit.errorCode ? { errorCode: exit.errorCode, errorMessage: exit.errorMessage } : {}),
     outputBytes: logByteCount(logPath),
