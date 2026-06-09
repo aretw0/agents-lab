@@ -3,11 +3,14 @@ import { Type } from "@sinclair/typebox";
 import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-agent-run-basic-surface";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 import { buildColonySerialFanInPacket, type ColonySerialFanInInput } from "./guardrails-core-colony-fanin-packet";
+import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
 import {
   buildColonyPlanPacket,
+  buildColonySerialDriverDispatchPacket,
   buildColonySerialDriverPacket,
   buildColonyWorkerStartPacket,
   type ColonyPlanInput,
+  type ColonySerialDriverDispatchInput,
   type ColonySerialDriverInput,
   type ColonyWorkerStartPacketInput,
 } from "./guardrails-core-colony-plan";
@@ -162,6 +165,42 @@ export function registerColonyPlanPacketSurface(pi: ExtensionAPI): void {
       const result = buildColonySerialDriverPacket(input);
       return buildOperatorVisibleToolResponse({
         label: "colony_serial_driver_packet",
+        summary: result.summary,
+        details: result,
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "colony_serial_driver_dispatch",
+    label: "Colony Serial Driver Dispatch",
+    description:
+      "Preview-only serial driver dispatch wrapper. Prepares exactly one worker handoff from executionManifest and never starts execution in this slice.",
+    parameters: Type.Object({
+      plan_id: Type.Optional(Type.String({ description: "Parent serial colony plan id." })),
+      execution_manifest: Type.Optional(Type.Array(Type.Object({
+        index: Type.Optional(Type.Number({ description: "1-based serial worker order." })),
+        worker_packet_id: Type.Optional(Type.String({ description: "Worker packet id." })),
+        required_outcome_id: Type.Optional(Type.String({ description: "Canonical outcome id for the worker." })),
+        expected_artifact: Type.Optional(Type.String({ description: "Expected evidence artifact path." })),
+      }), { description: "Ordered executionManifest emitted by colony_plan_packet." })),
+      completed_outcomes: Type.Optional(Type.Array(Type.String(), { description: "Required outcome ids already completed and accepted by parent." })),
+      execute: Type.Optional(Type.Boolean({ description: "Future execution flag. This slice remains preview-only and never starts a process." })),
+      operator_approval: operatorApprovalParameter("Structured operator approval envelope for future execute=true."),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const input: ColonySerialDriverDispatchInput = {
+        planId: typeof p.plan_id === "string" ? p.plan_id : undefined,
+        executionManifest: parseExecutionManifest(p.execution_manifest),
+        completedOutcomes: asOptionalStringArray(p.completed_outcomes),
+        execute: asOptionalBoolean(p.execute),
+        operatorApproval: p.operator_approval,
+      };
+
+      const result = buildColonySerialDriverDispatchPacket(input);
+      return buildOperatorVisibleToolResponse({
+        label: "colony_serial_driver_dispatch",
         summary: result.summary,
         details: result,
       });

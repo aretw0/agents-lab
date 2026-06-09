@@ -4,6 +4,7 @@ import {
   buildAgentInvocationSpecPacket,
   type AgentInvocationSpecPacketResult,
 } from "./guardrails-core-agent-run-start";
+import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 
 export type ColonyPlanDecision = "ready-for-operator-decision" | "blocked";
 export type ColonyPlanNextActionCode = "prepare-worker-fan-in" | "resolve-colony-plan-blockers";
@@ -143,6 +144,36 @@ export interface ColonySerialDriverPacket {
   driverSteps: string[];
   blockers: string[];
   completedOutcomes: string[];
+  summary: string;
+}
+
+export interface ColonySerialDriverDispatchInput extends ColonySerialDriverInput {
+  execute?: boolean;
+  operatorApproval?: unknown;
+}
+
+export interface ColonySerialDriverDispatchPacket {
+  mode: "colony-serial-driver-dispatch-packet";
+  activation: "none";
+  authorization: GuardrailsAuthorizationNone;
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  batchExecutionAllowed: false;
+  requiresOperatorDecision: true;
+  serialOnly: true;
+  decision: "ready-for-operator-decision" | "blocked";
+  recommendationCode: "colony-serial-driver-dispatch-ready" | "colony-serial-driver-dispatch-blocked";
+  planId: string;
+  executeRequested: boolean;
+  structuredOperatorApproval: boolean;
+  driverPacket: ColonySerialDriverPacket;
+  nextWorkerPacketId: string;
+  nextRequiredOutcomeId: string;
+  nextExpectedArtifact: string;
+  requiredApprovalPrompt: string;
+  nextWorkerStartPacket?: ColonyWorkerStartPacket;
+  driverSteps: string[];
+  blockers: string[];
   summary: string;
 }
 
@@ -361,6 +392,88 @@ export function buildColonySerialDriverPacket(input: ColonySerialDriverInput = {
     driverSteps,
     blockers,
     completedOutcomes,
+    summary,
+  };
+}
+
+export function buildColonySerialDriverDispatchPacket(input: ColonySerialDriverDispatchInput = {}): ColonySerialDriverDispatchPacket {
+  const driverPacket = buildColonySerialDriverPacket({
+    planId: input.planId,
+    executionManifest: input.executionManifest,
+    completedOutcomes: input.completedOutcomes,
+  });
+  const executeRequested = input.execute === true;
+  const structuredOperatorApproval = hasStructuredOperatorApproval(input.operatorApproval);
+  const blockers = [...driverPacket.blockers];
+
+  if (driverPacket.decision !== "next-worker-ready") {
+    blockers.push("colony-driver-decision-not-ready-for-dispatch");
+  }
+  if (driverPacket.blockers.includes("manifest-ant-colony-reference")) {
+    blockers.push("colony-driver-dispatch-ant-colony-reference");
+  }
+  if (executeRequested && !structuredOperatorApproval) {
+    blockers.push("structured-operator-approval-missing");
+  }
+
+  const ready = blockers.length === 0;
+  const nextWorkerStartPacket = ready
+    ? buildColonyWorkerStartPacket({
+        planId: driverPacket.planId,
+        workerPacketId: driverPacket.nextWorkerPacketId,
+        objective: `Execute serial worker ${driverPacket.nextWorkerPacketId} for plan ${driverPacket.planId}`,
+        expectedArtifact: driverPacket.nextExpectedArtifact,
+        stopConditions: [
+          "do not launch ant_colony",
+          "do not dispatch another worker",
+          "stop on missing expected artifact",
+        ],
+      })
+    : undefined;
+  const decision = ready ? "ready-for-operator-decision" : "blocked";
+  const driverSteps = ready
+    ? [
+        `preview colony_worker_start_packet for ${driverPacket.nextWorkerPacketId}`,
+        `present approval prompt exactly: ${driverPacket.requiredApprovalPrompt}`,
+        "future execute=true path must require structured operator approval and still start only one worker",
+        `after execution, run agent_run_outcome_packet for ${driverPacket.nextRequiredOutcomeId}`,
+        "when all outcomes are complete, run colony_serial_fanin_packet",
+      ]
+    : ["resolve colony serial driver dispatch blockers before any worker handoff"];
+  const summary = [
+    "colony-serial-driver-dispatch-packet:",
+    `decision=${decision}`,
+    `plan=${driverPacket.planId}`,
+    `nextWorker=${driverPacket.nextWorkerPacketId || "none"}`,
+    `execute=${executeRequested ? "yes" : "no"}`,
+    `structuredApproval=${structuredOperatorApproval ? "yes" : "no"}`,
+    blockers.length > 0 ? `blockers=${blockers.slice(0, 4).join("|")}` : "blockers=none",
+    formatAuthorizationEvidence(GUARDRAILS_AUTHORIZATION_NONE),
+    "dispatch=no",
+  ].join(" ");
+
+  return {
+    mode: "colony-serial-driver-dispatch-packet",
+    activation: "none",
+    authorization: GUARDRAILS_AUTHORIZATION_NONE,
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    batchExecutionAllowed: false,
+    requiresOperatorDecision: true,
+    serialOnly: true,
+    decision,
+    recommendationCode: ready ? "colony-serial-driver-dispatch-ready" : "colony-serial-driver-dispatch-blocked",
+    planId: driverPacket.planId,
+    executeRequested,
+    structuredOperatorApproval,
+    driverPacket,
+    nextWorkerPacketId: driverPacket.nextWorkerPacketId,
+    nextRequiredOutcomeId: driverPacket.nextRequiredOutcomeId,
+    nextExpectedArtifact: driverPacket.nextExpectedArtifact,
+    requiredApprovalPrompt: driverPacket.requiredApprovalPrompt,
+    nextWorkerStartPacket,
+    driverSteps,
+    blockers,
     summary,
   };
 }
