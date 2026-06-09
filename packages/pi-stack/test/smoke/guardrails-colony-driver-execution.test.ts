@@ -1,8 +1,8 @@
 import { EventEmitter } from "node:events";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerColonyPlanPacketSurface } from "../../extensions/guardrails-core-colony-plan-surface";
 
 const spawnMock = vi.hoisted(() => vi.fn());
@@ -70,6 +70,10 @@ function getColonySerialDriverDispatchTool(): RegisteredTool {
 }
 
 describe("colony serial driver execution surface", () => {
+  beforeEach(() => {
+    spawnMock.mockReset();
+  });
+
   it("starts exactly one approved serial worker and records registry lifecycle", async () => {
     const tmp = mkdtempSync(path.join(tmpdir(), "colony-driver-dispatch-exec-"));
     const child = new FakeChildProcess();
@@ -116,5 +120,59 @@ describe("colony serial driver execution surface", () => {
       state: "completed",
       exitCode: 0,
     });
+  });
+
+  it("blocks approved serial worker dispatch when the run is already running", () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "colony-driver-dispatch-running-"));
+    const runId = "colony-serial-subagent-bootstrap-001-worker-01-route-scan";
+    const registryPath = path.join(tmp, ".pi", "reports", "agent-runs.json");
+    mkdirSync(path.dirname(registryPath), { recursive: true });
+    writeFileSync(registryPath, JSON.stringify({
+      runs: [
+        {
+          runId,
+          state: "running",
+          pid: 1001,
+          providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+          cwd: tmp,
+          declaredFiles: [],
+          logPath: ".pi/reports/existing.log",
+          timeoutMs: 90_000,
+        },
+      ],
+    }, null, 2), "utf8");
+
+    const result = getColonySerialDriverDispatchTool().execute("call", {
+      plan_id: "serial-subagent-bootstrap-001",
+      execute: true,
+      operator_approval: structuredApproval(),
+      execution_manifest: [
+        {
+          index: 1,
+          worker_packet_id: "worker-01-route-scan",
+          required_outcome_id: "outcome:serial-subagent-bootstrap-001:worker-01-route-scan",
+          expected_artifact: ".project/reports/worker-01-route-scan.json",
+        },
+      ],
+    }, undefined, undefined, { cwd: tmp });
+
+    expect(result.details.mode).toBe("colony-serial-driver-dispatch-execution");
+    expect(result.details.decision).toBe("blocked");
+    expect(result.details.dispatchAllowed).toBe(false);
+    expect(result.details.processStartAllowed).toBe(false);
+    expect(result.details.blockers).toContain("run-already-running");
+    expect(spawnMock).toHaveBeenCalledTimes(0);
+    expect(readRegistry(tmp).runs[0]).toMatchObject({ runId, state: "running", pid: 1001 });
+  });
+
+  it("keeps cwd mismatch blocking before serial worker spawn is allowed", () => {
+    const source = readFileSync(path.join(process.cwd(), "packages/pi-stack/extensions/guardrails-core-colony-plan-surface.ts"), "utf8");
+    const mismatchGuard = "if (executeRequested && !sameCwd(handoffCwd, currentCwd)) blockers.push(\"execute-cwd-mismatch\");";
+    const dispatchGate = "const dispatchAllowed = executeRequested && blockers.length === 0 && Boolean(handoff);";
+    const spawnCall = "spawn(subprocess.command, subprocess.args";
+
+    expect(source).toContain(mismatchGuard);
+    expect(source.indexOf(mismatchGuard)).toBeLessThan(source.indexOf(dispatchGate));
+    expect(source.indexOf(dispatchGate)).toBeLessThan(source.indexOf(spawnCall));
   });
 });
