@@ -1,0 +1,121 @@
+#!/usr/bin/env node
+import process from "node:process";
+import { pathToFileURL } from "node:url";
+import { buildPiDriverStepPayload } from "./agent-run-pi-driver-payload.mjs";
+import { runAgentRunDriverStep } from "./agent-run-driver-step.mjs";
+
+function parseArgs(argv = process.argv.slice(2)) {
+  const out = {
+    cwd: process.cwd(),
+    mode: "help",
+    runId: "",
+    logPath: "",
+    model: "",
+    prompt: "",
+    files: [],
+    tools: [],
+    execute: false,
+    approve: false,
+    follow: false,
+    buildOutcome: false,
+    pretty: false,
+    help: false,
+  };
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
+    else if (arg === "--mode") out.mode = argv[++index] ?? out.mode;
+    else if (arg === "--run-id") out.runId = argv[++index] ?? out.runId;
+    else if (arg === "--log-path") out.logPath = argv[++index] ?? out.logPath;
+    else if (arg === "--model") out.model = argv[++index] ?? out.model;
+    else if (arg === "--prompt") out.prompt = argv[++index] ?? out.prompt;
+    else if (arg === "--file") out.files.push(argv[++index] ?? "");
+    else if (arg === "--tool") out.tools.push(argv[++index] ?? "");
+    else if (arg === "--execute") out.execute = true;
+    else if (arg === "--approve") out.approve = true;
+    else if (arg === "--follow") out.follow = true;
+    else if (arg === "--build-outcome") out.buildOutcome = true;
+    else if (arg === "--pretty") out.pretty = true;
+    else if (arg === "--help" || arg === "-h") out.help = true;
+    else throw new Error(`Unknown argument: ${arg}`);
+  }
+  return out;
+}
+
+function structuredApproval() {
+  return {
+    packet_mode: "operator-approval-packet",
+    approved: true,
+    approval_state: "approved",
+  };
+}
+
+export async function runPiDriver(options = {}) {
+  const payloadPacket = buildPiDriverStepPayload({
+    cwd: options.cwd,
+    mode: options.mode,
+    runId: options.runId,
+    logPath: options.logPath,
+    model: options.model,
+    prompt: options.prompt,
+    files: options.files,
+    tools: options.tools,
+  });
+
+  if (payloadPacket.decision === "blocked") {
+    return {
+      mode: "agent-run-pi-driver",
+      decision: "blocked",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      payloadPacket,
+      blockers: payloadPacket.blockers ?? [],
+    };
+  }
+
+  const driverPayload = {
+    ...payloadPacket.payload,
+    execute: options.execute === true,
+    ...(options.approve === true ? { operator_approval: structuredApproval() } : {}),
+    follow: options.follow === true,
+    build_outcome: options.buildOutcome === true,
+  };
+  const driverStep = await runAgentRunDriverStep(driverPayload, options.cwd || process.cwd());
+
+  return {
+    mode: "agent-run-pi-driver",
+    decision: driverStep.decision,
+    dispatchAllowed: driverStep.dispatchAllowed,
+    processStartAllowed: driverStep.processStartAllowed,
+    payloadPacket,
+    driverStep,
+    summary: `agent-run-pi-driver: decision=${driverStep.decision} mode=${options.mode || "help"} dispatch=${driverStep.dispatchAllowed ? "yes" : "no"}`,
+  };
+}
+
+function printHelp() {
+  process.stdout.write([
+    "Usage: node scripts/agent-run-pi-driver.mjs [--mode help|print-readonly] [options] [--execute --approve] [--follow] [--build-outcome] [--pretty]",
+    "",
+    "This composes agent-run-pi-driver-payload and agent-run-driver-step.",
+    "It previews by default. Real execution requires both --execute and --approve.",
+  ].join("\n") + "\n");
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  let args;
+  try {
+    args = parseArgs();
+  } catch (error) {
+    process.stderr.write(`${String(error?.message ?? error)}\n`);
+    process.exit(2);
+  }
+  if (args.help) {
+    printHelp();
+  } else {
+    const result = await runPiDriver(args);
+    process.stdout.write(JSON.stringify(result, null, args.pretty ? 2 : 0));
+    process.stdout.write("\n");
+    if (result.decision === "blocked") process.exit(1);
+  }
+}
