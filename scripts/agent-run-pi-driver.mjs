@@ -18,6 +18,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     approve: false,
     follow: false,
     buildOutcome: false,
+    summary: false,
     pretty: false,
     help: false,
   };
@@ -35,6 +36,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--approve") out.approve = true;
     else if (arg === "--follow") out.follow = true;
     else if (arg === "--build-outcome") out.buildOutcome = true;
+    else if (arg === "--summary") out.summary = true;
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else throw new Error(`Unknown argument: ${arg}`);
@@ -93,9 +95,37 @@ export async function runPiDriver(options = {}) {
   };
 }
 
+export function buildPiDriverSummary(result) {
+  const driverStep = result?.driverStep ?? {};
+  const runSpec = driverStep.runSpec ?? {};
+  const follow = driverStep.follow ?? {};
+  const outcome = driverStep.agentRunOutcomePacket;
+  return {
+    mode: "agent-run-pi-driver-summary",
+    decision: result?.decision ?? "unknown",
+    dispatchAllowed: result?.dispatchAllowed === true,
+    processStartAllowed: result?.processStartAllowed === true,
+    runId: runSpec.runId,
+    providerModelRef: runSpec.providerModelRef,
+    payloadMode: result?.payloadPacket?.payloadMode ?? "help",
+    pid: driverStep.pid,
+    followTerminal: follow.terminal === true,
+    followDecision: follow.decision,
+    followState: follow.status?.state,
+    outputBytes: follow.outputBytes,
+    contractDecision: outcome?.contractDecision,
+    blockers: [
+      ...(Array.isArray(result?.blockers) ? result.blockers : []),
+      ...(Array.isArray(driverStep.blockers) ? driverStep.blockers : []),
+      ...(Array.isArray(outcome?.blockers) ? outcome.blockers : []),
+    ],
+    logTail: Array.isArray(follow.lines) ? follow.lines.slice(-8) : [],
+  };
+}
+
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-pi-driver.mjs [--mode help|print-readonly] [options] [--execute --approve] [--follow] [--build-outcome] [--pretty]",
+    "Usage: node scripts/agent-run-pi-driver.mjs [--mode help|print-readonly] [options] [--execute --approve] [--follow] [--build-outcome] [--summary] [--pretty]",
     "",
     "This composes agent-run-pi-driver-payload and agent-run-driver-step.",
     "It previews by default. Real execution requires both --execute and --approve.",
@@ -114,7 +144,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     printHelp();
   } else {
     const result = await runPiDriver(args);
-    process.stdout.write(JSON.stringify(result, null, args.pretty ? 2 : 0));
+    const output = args.summary ? buildPiDriverSummary(result) : result;
+    process.stdout.write(JSON.stringify(output, null, args.pretty ? 2 : 0));
     process.stdout.write("\n");
     if (result.decision === "blocked") process.exit(1);
   }

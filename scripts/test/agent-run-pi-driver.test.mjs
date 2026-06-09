@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { runPiDriver } from "../agent-run-pi-driver.mjs";
+import { buildPiDriverSummary, runPiDriver } from "../agent-run-pi-driver.mjs";
 
 function writeFakePi(cwd) {
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
@@ -59,6 +59,46 @@ test("pi driver executes approved local help and materializes outcome", async ()
 
   const registry = JSON.parse(readFileSync(path.join(cwd, ".pi", "reports", "agent-runs.json"), "utf8"));
   assert.equal(registry.runs[0].state, "completed");
+});
+
+test("pi driver summary keeps compact execution evidence", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-summary-"));
+  writeFakePi(cwd);
+
+  const result = await runPiDriver({
+    cwd,
+    mode: "help",
+    runId: "pi-driver-summary",
+    execute: true,
+    approve: true,
+    follow: true,
+    buildOutcome: true,
+  });
+  const summary = buildPiDriverSummary(result);
+
+  assert.equal(summary.mode, "agent-run-pi-driver-summary");
+  assert.equal(summary.decision, "dispatched");
+  assert.equal(summary.dispatchAllowed, true);
+  assert.equal(summary.processStartAllowed, true);
+  assert.equal(summary.runId, "pi-driver-summary");
+  assert.equal(summary.payloadMode, "help");
+  assert.equal(summary.followTerminal, true);
+  assert.equal(summary.followState, "completed");
+  assert.equal(summary.contractDecision, "pass");
+  assert.ok(summary.outputBytes > 0);
+  assert.ok(Array.isArray(summary.logTail));
+});
+
+test("pi driver summary reports blockers compactly", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-summary-blocked-"));
+  writeFakePi(cwd);
+
+  const result = await runPiDriver({ cwd, mode: "help", runId: "pi-driver-summary-blocked", execute: true });
+  const summary = buildPiDriverSummary(result);
+
+  assert.equal(summary.decision, "blocked");
+  assert.equal(summary.dispatchAllowed, false);
+  assert.ok(summary.blockers.includes("structured-operator-approval-missing"));
 });
 
 test("pi driver previews print-readonly payload without provider execution", async () => {
