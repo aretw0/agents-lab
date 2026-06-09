@@ -7,8 +7,10 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { registerGuardrailsAgentSpawnReadinessSurface } from "./guardrails-core-agent-spawn-readiness-surface";
 import { registerColonyPlanPacketSurface } from "./guardrails-core-colony-plan-surface";
+import { registerAgentRunDriverStepSurface } from "./guardrails-core-agent-run-driver-step-surface";
 
 export default function guardrailsAgentRun(pi: ExtensionAPI): void {
   registerGuardrailsAgentSpawnReadinessSurface(pi);
+  registerAgentRunDriverStepSurface(pi);
   registerColonyPlanPacketSurface(pi);
 }
