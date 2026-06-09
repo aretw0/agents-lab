@@ -7,21 +7,46 @@ import { pathToFileURL } from "node:url";
 function parseArgs(argv = process.argv.slice(2)) {
   const out = {
     cwd: process.cwd(),
+    mode: "help",
     runId: "agent-run-pi-help-canary",
     logPath: "",
+    model: "",
+    prompt: "",
+    files: [],
+    tools: [],
     pretty: false,
     help: false,
   };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
+    else if (arg === "--mode") out.mode = argv[++index] ?? out.mode;
     else if (arg === "--run-id") out.runId = argv[++index] ?? out.runId;
     else if (arg === "--log-path") out.logPath = argv[++index] ?? out.logPath;
+    else if (arg === "--model") out.model = argv[++index] ?? out.model;
+    else if (arg === "--prompt") out.prompt = argv[++index] ?? out.prompt;
+    else if (arg === "--file") out.files.push(argv[++index] ?? "");
+    else if (arg === "--tool") out.tools.push(argv[++index] ?? "");
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else throw new Error(`Unknown argument: ${arg}`);
   }
   return out;
+}
+
+function asCleanString(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function asCleanStringArray(value) {
+  return Array.isArray(value)
+    ? value.flatMap((entry) => String(entry ?? "").split(",")).map((entry) => entry.trim()).filter(Boolean)
+    : [];
+}
+
+function normalizeDeclaredFile(filePath) {
+  const clean = asCleanString(filePath);
+  return clean.startsWith("@") ? clean.slice(1) : clean;
 }
 
 export function resolveLocalPiCli(cwd = process.cwd()) {
@@ -34,12 +59,12 @@ export function resolveLocalPiCli(cwd = process.cwd()) {
 
 export function buildPiHelpDriverStepPayload(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
-  const runId = typeof options.runId === "string" && options.runId.trim()
-    ? options.runId.trim()
+  const runId = asCleanString(options.runId)
+    ? asCleanString(options.runId)
     : "agent-run-pi-help-canary";
   const cliPath = options.cliPath ?? resolveLocalPiCli(cwd);
-  const logPath = typeof options.logPath === "string" && options.logPath.trim()
-    ? options.logPath.trim()
+  const logPath = asCleanString(options.logPath)
+    ? asCleanString(options.logPath)
     : `.pi/reports/${runId}.log`;
 
   if (!cliPath) {
@@ -78,10 +103,100 @@ export function buildPiHelpDriverStepPayload(options = {}) {
   };
 }
 
+export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
+  const cwd = path.resolve(options.cwd ?? process.cwd());
+  const runId = asCleanString(options.runId) || "agent-run-pi-print-readonly-canary";
+  const cliPath = options.cliPath ?? resolveLocalPiCli(cwd);
+  const logPath = asCleanString(options.logPath) || `.pi/reports/${runId}.log`;
+  const model = asCleanString(options.model);
+  const prompt = asCleanString(options.prompt);
+  const declaredFiles = asCleanStringArray(options.files).map(normalizeDeclaredFile);
+  const tools = asCleanStringArray(options.tools);
+  const toolList = tools.length > 0 ? tools : ["read", "grep", "find", "ls"];
+  const blockers = [];
+
+  if (!cliPath) blockers.push("local-pi-cli-missing");
+  if (!model) blockers.push("model-missing");
+  if (!prompt) blockers.push("prompt-missing");
+  if (declaredFiles.length === 0) blockers.push("declared-files-missing");
+
+  if (blockers.length > 0) {
+    return {
+      mode: "agent-run-pi-driver-payload",
+      payloadMode: "print-readonly",
+      decision: "blocked",
+      blockers,
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      cwd,
+      runId,
+    };
+  }
+
+  return {
+    mode: "agent-run-pi-driver-payload",
+    payloadMode: "print-readonly",
+    decision: "ready-for-driver-step",
+    blockers: [],
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    payload: {
+      run_spec: {
+        run_id: runId,
+        provider_model_ref: model,
+        cwd,
+        declared_files: declaredFiles,
+        log_path: logPath,
+        timeout_ms: 90_000,
+        execution_preview: {
+          command: process.execPath,
+          args: [
+            cliPath,
+            "--no-session",
+            "--no-extensions",
+            "--no-skills",
+            "--no-prompt-templates",
+            "--no-themes",
+            "--no-context-files",
+            "--model",
+            model,
+            "--tools",
+            toolList.join(","),
+            "--print",
+            ...declaredFiles.map((filePath) => `@${filePath}`),
+            prompt,
+          ],
+        },
+      },
+    },
+    summary: `agent-run-pi-driver-payload: decision=ready-for-driver-step mode=print-readonly runId=${runId} dispatch=no`,
+  };
+}
+
+export function buildPiDriverStepPayload(options = {}) {
+  const mode = asCleanString(options.mode) || "help";
+  if (mode === "help") return buildPiHelpDriverStepPayload(options);
+  if (mode === "print-readonly") return buildPiPrintReadonlyDriverStepPayload(options);
+  return {
+    mode: "agent-run-pi-driver-payload",
+    decision: "blocked",
+    blockers: [`unsupported-payload-mode:${mode}`],
+    dispatchAllowed: false,
+    processStartAllowed: false,
+  };
+}
+
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-pi-driver-payload.mjs [--cwd DIR] [--run-id ID] [--log-path PATH] [--pretty]",
-    "Builds a local Pi CLI --help canary payload for scripts/agent-run-driver-step.mjs.",
+    "Usage: node scripts/agent-run-pi-driver-payload.mjs [--mode help|print-readonly] [options] [--pretty]",
+    "",
+    "help options:",
+    "  --cwd DIR --run-id ID --log-path PATH",
+    "",
+    "print-readonly options:",
+    "  --cwd DIR --run-id ID --model PROVIDER/MODEL --file PATH --prompt TEXT [--tool read,grep,find,ls]",
+    "",
+    "Builds payloads for scripts/agent-run-driver-step.mjs. It never dispatches by itself.",
   ].join("\n") + "\n");
 }
 
@@ -96,7 +211,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   if (args.help) {
     printHelp();
   } else {
-    const result = buildPiHelpDriverStepPayload(args);
+    const result = buildPiDriverStepPayload(args);
     process.stdout.write(JSON.stringify(result, null, args.pretty ? 2 : 0));
     process.stdout.write("\n");
     if (result.decision === "blocked") process.exit(1);

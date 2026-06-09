@@ -4,7 +4,11 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import test from "node:test";
-import { buildPiHelpDriverStepPayload } from "../agent-run-pi-driver-payload.mjs";
+import {
+  buildPiDriverStepPayload,
+  buildPiHelpDriverStepPayload,
+  buildPiPrintReadonlyDriverStepPayload,
+} from "../agent-run-pi-driver-payload.mjs";
 
 test("builds a headless driver-step payload for local pi help", () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-"));
@@ -31,4 +35,77 @@ test("blocks when local pi cli is missing", () => {
   assert.equal(result.decision, "blocked");
   assert.equal(result.dispatchAllowed, false);
   assert.ok(result.blockers.includes("local-pi-cli-missing"));
+});
+
+test("builds a print-readonly payload with isolated pi flags", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-print-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+
+  const result = buildPiPrintReadonlyDriverStepPayload({
+    cwd,
+    runId: "pi-print-readonly-smoke",
+    model: "local/test-model",
+    files: ["README.md"],
+    prompt: "Return PASS.",
+  });
+
+  assert.equal(result.decision, "ready-for-driver-step");
+  assert.equal(result.payloadMode, "print-readonly");
+  assert.equal(result.payload.run_spec.provider_model_ref, "local/test-model");
+  assert.deepEqual(result.payload.run_spec.declared_files, ["README.md"]);
+  assert.deepEqual(result.payload.run_spec.execution_preview.args, [
+    cliPath,
+    "--no-session",
+    "--no-extensions",
+    "--no-skills",
+    "--no-prompt-templates",
+    "--no-themes",
+    "--no-context-files",
+    "--model",
+    "local/test-model",
+    "--tools",
+    "read,grep,find,ls",
+    "--print",
+    "@README.md",
+    "Return PASS.",
+  ]);
+});
+
+test("blocks incomplete print-readonly payloads", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-print-blocked-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+
+  const result = buildPiPrintReadonlyDriverStepPayload({ cwd, runId: "pi-print-blocked" });
+
+  assert.equal(result.decision, "blocked");
+  assert.ok(result.blockers.includes("model-missing"));
+  assert.ok(result.blockers.includes("prompt-missing"));
+  assert.ok(result.blockers.includes("declared-files-missing"));
+});
+
+test("dispatches builder by payload mode", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-mode-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+
+  const help = buildPiDriverStepPayload({ cwd, mode: "help", runId: "mode-help" });
+  const printReadonly = buildPiDriverStepPayload({
+    cwd,
+    mode: "print-readonly",
+    runId: "mode-print",
+    model: "local/test-model",
+    files: ["@README.md"],
+    prompt: "Return PASS.",
+  });
+  const unsupported = buildPiDriverStepPayload({ cwd, mode: "unknown" });
+
+  assert.equal(help.decision, "ready-for-driver-step");
+  assert.equal(printReadonly.payload.run_spec.declared_files[0], "README.md");
+  assert.equal(unsupported.decision, "blocked");
+  assert.ok(unsupported.blockers.includes("unsupported-payload-mode:unknown"));
 });
