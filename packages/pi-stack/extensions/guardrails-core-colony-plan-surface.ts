@@ -71,6 +71,7 @@ function parseExecutionManifest(raw: unknown): NonNullable<ColonySerialDriverInp
       workerPacketId: typeof record.worker_packet_id === "string" ? record.worker_packet_id : undefined,
       requiredOutcomeId: typeof record.required_outcome_id === "string" ? record.required_outcome_id : undefined,
       expectedArtifact: typeof record.expected_artifact === "string" ? record.expected_artifact : undefined,
+      cwd: typeof record.worker_cwd === "string" ? record.worker_cwd : undefined,
     }));
 }
 
@@ -170,6 +171,7 @@ export function registerColonyPlanPacketSurface(pi: ExtensionAPI): void {
         worker_packet_id: Type.Optional(Type.String({ description: "Worker packet id." })),
         required_outcome_id: Type.Optional(Type.String({ description: "Canonical outcome id for the worker." })),
         expected_artifact: Type.Optional(Type.String({ description: "Expected evidence artifact path." })),
+        worker_cwd: Type.Optional(Type.String({ description: "Optional worker cwd override for serial execution guardrails." })),
       }), { description: "Ordered executionManifest emitted by colony_plan_packet." })),
       completed_outcomes: Type.Optional(Type.Array(Type.String(), { description: "Required outcome ids already completed and accepted by parent." })),
     }),
@@ -202,6 +204,7 @@ export function registerColonyPlanPacketSurface(pi: ExtensionAPI): void {
         worker_packet_id: Type.Optional(Type.String({ description: "Worker packet id." })),
         required_outcome_id: Type.Optional(Type.String({ description: "Canonical outcome id for the worker." })),
         expected_artifact: Type.Optional(Type.String({ description: "Expected evidence artifact path." })),
+        worker_cwd: Type.Optional(Type.String({ description: "Optional worker cwd override for serial execution guardrails." })),
       }), { description: "Ordered executionManifest emitted by colony_plan_packet." })),
       completed_outcomes: Type.Optional(Type.Array(Type.String(), { description: "Required outcome ids already completed and accepted by parent." })),
       execute: Type.Optional(Type.Boolean({ description: "When true, start exactly one worker subprocess after structured operator approval." })),

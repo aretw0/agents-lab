@@ -165,14 +165,30 @@ describe("colony serial driver execution surface", () => {
     expect(readRegistry(tmp).runs[0]).toMatchObject({ runId, state: "running", pid: 1001 });
   });
 
-  it("keeps cwd mismatch blocking before serial worker spawn is allowed", () => {
-    const source = readFileSync(path.join(process.cwd(), "packages/pi-stack/extensions/guardrails-core-colony-plan-surface.ts"), "utf8");
-    const mismatchGuard = "if (executeRequested && !sameCwd(handoffCwd, currentCwd)) blockers.push(\"execute-cwd-mismatch\");";
-    const dispatchGate = "const dispatchAllowed = executeRequested && blockers.length === 0 && Boolean(handoff);";
-    const spawnCall = "spawn(subprocess.command, subprocess.args";
+  it("blocks approved serial worker dispatch when worker_cwd mismatches the current cwd", () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "colony-driver-dispatch-cwd-"));
+    const otherTmp = mkdtempSync(path.join(tmpdir(), "colony-driver-dispatch-other-cwd-"));
 
-    expect(source).toContain(mismatchGuard);
-    expect(source.indexOf(mismatchGuard)).toBeLessThan(source.indexOf(dispatchGate));
-    expect(source.indexOf(dispatchGate)).toBeLessThan(source.indexOf(spawnCall));
+    const result = getColonySerialDriverDispatchTool().execute("call", {
+      plan_id: "serial-subagent-bootstrap-001",
+      execute: true,
+      operator_approval: structuredApproval(),
+      execution_manifest: [
+        {
+          index: 1,
+          worker_packet_id: "worker-01-route-scan",
+          required_outcome_id: "outcome:serial-subagent-bootstrap-001:worker-01-route-scan",
+          expected_artifact: ".project/reports/worker-01-route-scan.json",
+          worker_cwd: otherTmp,
+        },
+      ],
+    }, undefined, undefined, { cwd: tmp });
+
+    expect(result.details.mode).toBe("colony-serial-driver-dispatch-execution");
+    expect(result.details.decision).toBe("blocked");
+    expect(result.details.dispatchAllowed).toBe(false);
+    expect(result.details.processStartAllowed).toBe(false);
+    expect(result.details.blockers).toContain("execute-cwd-mismatch");
+    expect(spawnMock).toHaveBeenCalledTimes(0);
   });
 });

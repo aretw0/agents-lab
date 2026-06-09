@@ -117,6 +117,7 @@ export interface ColonySerialManifestItem {
   workerPacketId?: string;
   requiredOutcomeId?: string;
   expectedArtifact?: string;
+  cwd?: string;
 }
 
 export interface ColonySerialDriverInput {
@@ -425,6 +426,9 @@ export function buildColonySerialDriverDispatchPacket(input: ColonySerialDriverD
   const executeRequested = input.execute === true;
   const structuredOperatorApproval = hasStructuredOperatorApproval(input.operatorApproval);
   const blockers = [...driverPacket.blockers];
+  const nextManifestItem = Array.isArray(input.executionManifest)
+    ? input.executionManifest.find((item) => normalizeText(item?.requiredOutcomeId) === driverPacket.nextRequiredOutcomeId)
+    : undefined;
 
   if (driverPacket.decision !== "next-worker-ready") {
     blockers.push("colony-driver-decision-not-ready-for-dispatch");
@@ -443,6 +447,7 @@ export function buildColonySerialDriverDispatchPacket(input: ColonySerialDriverD
         workerPacketId: driverPacket.nextWorkerPacketId,
         objective: `Execute serial worker ${driverPacket.nextWorkerPacketId} for plan ${driverPacket.planId}`,
         expectedArtifact: driverPacket.nextExpectedArtifact,
+        cwd: normalizeText(nextManifestItem?.cwd),
         stopConditions: [
           "do not launch ant_colony",
           "do not dispatch another worker",
