@@ -172,6 +172,26 @@ export interface ColonySerialDriverDispatchPacket {
   nextExpectedArtifact: string;
   requiredApprovalPrompt: string;
   nextWorkerStartPacket?: ColonyWorkerStartPacket;
+  nextWorkerHandoff?: {
+    handoffId: string;
+    planId: string;
+    workerPacketId: string;
+    requiredOutcomeId: string;
+    expectedArtifact: string;
+    requiredArtifact: string;
+    requiredApprovalPrompt: string;
+    logPath: string;
+    nextWorkerStartPacket: ColonyWorkerStartPacket;
+    registryRequiredFields: {
+      runId: string;
+      cwd: string;
+      declaredFiles: string[];
+      providerModelRef: string;
+      timeoutMs: number;
+      logPath: string;
+      state: "planned";
+    };
+  };
   driverSteps: string[];
   blockers: string[];
   summary: string;
@@ -430,6 +450,29 @@ export function buildColonySerialDriverDispatchPacket(input: ColonySerialDriverD
         ],
       })
     : undefined;
+  const invocationSpec = nextWorkerStartPacket?.agentInvocationSpecPacket.invocationSpec;
+  const nextWorkerHandoff = nextWorkerStartPacket && invocationSpec
+    ? {
+        handoffId: `handoff:${driverPacket.planId}:${driverPacket.nextWorkerPacketId}`,
+        planId: driverPacket.planId,
+        workerPacketId: driverPacket.nextWorkerPacketId,
+        requiredOutcomeId: driverPacket.nextRequiredOutcomeId,
+        expectedArtifact: driverPacket.nextExpectedArtifact,
+        requiredArtifact: driverPacket.nextExpectedArtifact,
+        requiredApprovalPrompt: driverPacket.requiredApprovalPrompt,
+        logPath: invocationSpec.logPath,
+        nextWorkerStartPacket,
+        registryRequiredFields: {
+          runId: invocationSpec.runId,
+          cwd: invocationSpec.cwd,
+          declaredFiles: invocationSpec.declaredFiles,
+          providerModelRef: invocationSpec.providerModelRef,
+          timeoutMs: invocationSpec.timeoutMs,
+          logPath: invocationSpec.logPath,
+          state: "planned" as const,
+        },
+      }
+    : undefined;
   const decision = ready ? "ready-for-operator-decision" : "blocked";
   const driverSteps = ready
     ? [
@@ -472,6 +515,7 @@ export function buildColonySerialDriverDispatchPacket(input: ColonySerialDriverD
     nextExpectedArtifact: driverPacket.nextExpectedArtifact,
     requiredApprovalPrompt: driverPacket.requiredApprovalPrompt,
     nextWorkerStartPacket,
+    nextWorkerHandoff,
     driverSteps,
     blockers,
     summary,

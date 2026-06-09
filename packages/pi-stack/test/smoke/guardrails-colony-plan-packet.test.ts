@@ -414,6 +414,18 @@ describe("colony plan packet", () => {
     expect(result.nextWorkerPacketId).toBe("worker-01-route-scan");
     expect(result.nextWorkerStartPacket?.mode).toBe("colony-worker-start-packet");
     expect(result.nextWorkerStartPacket?.dispatchAllowed).toBe(false);
+    expect(result.nextWorkerHandoff?.handoffId).toBe("handoff:serial-subagent-bootstrap-001:worker-01-route-scan");
+    expect(result.nextWorkerHandoff?.planId).toBe("serial-subagent-bootstrap-001");
+    expect(result.nextWorkerHandoff?.workerPacketId).toBe("worker-01-route-scan");
+    expect(result.nextWorkerHandoff?.requiredOutcomeId).toBe("outcome:serial-subagent-bootstrap-001:worker-01-route-scan");
+    expect(result.nextWorkerHandoff?.expectedArtifact).toBe(".project/reports/worker-01-route-scan.json");
+    expect(result.nextWorkerHandoff?.requiredArtifact).toBe(".project/reports/worker-01-route-scan.json");
+    expect(result.nextWorkerHandoff?.requiredApprovalPrompt).toBe(result.requiredApprovalPrompt);
+    expect(result.nextWorkerHandoff?.nextWorkerStartPacket.mode).toBe("colony-worker-start-packet");
+    expect(result.nextWorkerHandoff?.logPath).toBe(result.nextWorkerStartPacket?.agentInvocationSpecPacket.invocationSpec.logPath);
+    expect(result.nextWorkerHandoff?.registryRequiredFields.runId).toBe(result.nextWorkerStartPacket?.agentInvocationSpecPacket.invocationSpec.runId);
+    expect(result.nextWorkerHandoff?.registryRequiredFields.logPath).toBe(result.nextWorkerHandoff?.logPath);
+    expect(result.nextWorkerHandoff?.registryRequiredFields.state).toBe("planned");
     expect(result.driverSteps.join("\n")).toContain("colony_worker_start_packet");
     expect(result.dispatchAllowed).toBe(false);
     expect(result.processStartAllowed).toBe(false);
@@ -502,6 +514,7 @@ describe("colony plan packet", () => {
     expect(result.structuredOperatorApproval).toBe(false);
     expect(result.decision).toBe("blocked");
     expect(result.blockers).toContain("structured-operator-approval-missing");
+    expect(result.nextWorkerHandoff).toBeUndefined();
     expect(result.dispatchAllowed).toBe(false);
     expect(result.processStartAllowed).toBe(false);
   });
