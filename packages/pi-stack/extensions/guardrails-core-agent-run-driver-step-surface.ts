@@ -4,7 +4,7 @@ import { createWriteStream, mkdirSync } from "node:fs";
 import path from "node:path";
 import { Type } from "@sinclair/typebox";
 import { GUARDRAILS_AUTHORIZATION_NONE } from "./guardrails-core-authorization";
-import { buildAgentRunStatus, type AgentRunState } from "./guardrails-core-agent-run-runtime";
+import { buildAgentRunOutcomePacket, buildAgentRunStatus, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import {
   appendAgentRunLogLine,
   buildPiSubprocessPreflightLines,
@@ -121,6 +121,7 @@ export function registerAgentRunDriverStepSurface(pi: ExtensionAPI): void {
       execute: Type.Optional(Type.Boolean({ description: "When true, start exactly one subprocess after structured operator approval." })),
       operator_approval: operatorApprovalParameter("Structured operator approval envelope for execute=true."),
       follow: Type.Optional(Type.Boolean({ description: "When true, perform bounded read-only follow after lookup or dispatch." })),
+      build_outcome: Type.Optional(Type.Boolean({ description: "When true with follow terminal, materialize an embedded agent-run outcome packet." })),
       follow_max_wait_ms: Type.Optional(Type.Number({ description: "Maximum bounded follow wait in milliseconds. Clamped to 0..30000; default 5000." })),
       follow_poll_interval_ms: Type.Optional(Type.Number({ description: "Follow polling interval in milliseconds. Clamped to 100..5000; default 500." })),
       follow_max_lines: Type.Optional(Type.Number({ description: "Maximum log tail lines, clamped to 1..500; default 80." })),
@@ -131,6 +132,7 @@ export function registerAgentRunDriverStepSurface(pi: ExtensionAPI): void {
       const runSpec = parseRunSpec(p.run_spec);
       const executeRequested = p.execute === true;
       const followRequested = p.follow === true;
+      const buildOutcomeRequested = p.build_outcome === true;
       const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
       const runCwd = resolveRunCwd(runSpec.cwd, currentCwd);
       const existingEntry = runSpec.runId ? readRegistryEntry(currentCwd, runSpec.runId) : undefined;
@@ -238,6 +240,14 @@ export function registerAgentRunDriverStepSurface(pi: ExtensionAPI): void {
         ? await followAgentRun(currentCwd, runSpec.runId, maxWaitMs, pollIntervalMs, maxLines)
         : undefined;
       const terminal = follow?.terminal === true;
+      const agentRunOutcomePacket = terminal && buildOutcomeRequested
+        ? buildAgentRunOutcomePacket({
+            runId: runSpec.runId,
+            entry: follow.entry,
+            outputBytes: follow.outputBytes,
+            fileContract: "read-only",
+          })
+        : undefined;
       const mode = executeRequested ? "agent-run-driver-step-dispatch" as const : "agent-run-driver-step-packet" as const;
       const decision = dispatchAllowed ? "dispatched" : blockers.length > 0 ? "blocked" : "ready-for-operator-decision";
       const result = {
@@ -254,10 +264,12 @@ export function registerAgentRunDriverStepSurface(pi: ExtensionAPI): void {
         executeRequested,
         structuredOperatorApproval,
         followRequested,
+        buildOutcomeRequested,
         pid,
         registryEntry,
         follow,
         nextAgentRunOutcomePacket: terminal ? outcomePacket(runSpec.runId, follow.outputBytes) : undefined,
+        agentRunOutcomePacket,
         nextActionCode: terminal ? "build-agent-run-outcome-packet" : dispatchAllowed ? "poll-agent-run-follow" : blockers.length > 0 ? "resolve-driver-step-blockers" : "present-operator-approval",
         summary: [
           "agent-run-driver-step:",

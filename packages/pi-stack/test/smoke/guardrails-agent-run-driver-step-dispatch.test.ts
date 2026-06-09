@@ -203,6 +203,47 @@ describe("agent run driver step dispatch", () => {
       tool: "agent_run_outcome_packet",
       params: { run_id: "driver-step-run-1", file_contract: "read-only" },
     });
+    expect(result.details.agentRunOutcomePacket).toBeUndefined();
+    expect(spawnMock).toHaveBeenCalledTimes(0);
+  });
+
+  it("materializes an embedded outcome packet when follow is terminal and build_outcome is requested", async () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-driver-step-build-outcome-"));
+    const logPath = path.join(tmp, ".pi", "reports", "driver-step-run-1.log");
+    mkdirSync(path.dirname(logPath), { recursive: true });
+    writeFileSync(logPath, "worker output\n", "utf8");
+    writeRegistry(tmp, {
+      runId: "driver-step-run-1",
+      state: "completed",
+      exitCode: 0,
+      cwd: tmp,
+      declaredFiles: ["README.md"],
+      logPath,
+      timeoutMs: 90_000,
+    });
+
+    const result = await getTool().execute("call", {
+      run_spec: runSpec(),
+      follow: true,
+      build_outcome: true,
+      follow_max_wait_ms: 0,
+    }, undefined, undefined, { cwd: tmp });
+
+    expect(result.details.follow).toMatchObject({ decision: "terminal", terminal: true });
+    expect(result.details.nextAgentRunOutcomePacket).toMatchObject({
+      tool: "agent_run_outcome_packet",
+      params: { run_id: "driver-step-run-1", file_contract: "read-only" },
+    });
+    expect(result.details.agentRunOutcomePacket).toMatchObject({
+      mode: "agent-run-outcome-packet",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      runId: "driver-step-run-1",
+      found: true,
+      processState: "completed",
+      contractDecision: "pass",
+      fileContract: "read-only",
+    });
     expect(spawnMock).toHaveBeenCalledTimes(0);
   });
 });
