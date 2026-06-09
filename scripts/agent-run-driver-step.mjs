@@ -1,0 +1,303 @@
+#!/usr/bin/env node
+import { createWriteStream, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+function parseArgs(argv) {
+  const out = { input: "", cwd: process.cwd(), pretty: false };
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--input") out.input = argv[++index] ?? "";
+    else if (arg === "--cwd") out.cwd = argv[++index] ?? "";
+    else if (arg === "--pretty") out.pretty = true;
+    else if (arg === "--help") out.help = true;
+  }
+  return out;
+}
+
+function readPayload(inputPath) {
+  if (inputPath) return JSON.parse(readFileSync(inputPath, "utf8"));
+  const stdin = readFileSync(0, "utf8").trim();
+  return stdin ? JSON.parse(stdin) : {};
+}
+
+function asString(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function asStringArray(value) {
+  return Array.isArray(value) ? value.filter((entry) => typeof entry === "string").map((entry) => entry.trim()).filter(Boolean) : [];
+}
+
+function normalizeTimeoutMs(value) {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.floor(value) : 90_000;
+}
+
+function registryPath(cwd) {
+  return path.join(cwd, ".pi", "reports", "agent-runs.json");
+}
+
+function readRegistryRows(cwd) {
+  const filePath = registryPath(cwd);
+  if (!existsSync(filePath)) return [];
+  const parsed = JSON.parse(readFileSync(filePath, "utf8"));
+  return Array.isArray(parsed) ? parsed : Array.isArray(parsed.runs) ? parsed.runs : [];
+}
+
+function readRegistryEntry(cwd, runId) {
+  return readRegistryRows(cwd).find((row) => row?.runId === runId);
+}
+
+function writeRegistryEntry(cwd, entry) {
+  const filePath = registryPath(cwd);
+  const rows = readRegistryRows(cwd).filter((row) => row?.runId !== entry.runId);
+  rows.push(entry);
+  mkdirSync(path.dirname(filePath), { recursive: true });
+  writeFileSync(filePath, JSON.stringify({ runs: rows }, null, 2), "utf8");
+}
+
+function logByteCount(logPath) {
+  return logPath && existsSync(logPath) ? statSync(logPath).size : 0;
+}
+
+function readLogTail(logPath, maxLines) {
+  if (!logPath || !existsSync(logPath)) return [];
+  return readFileSync(logPath, "utf8").split(/\r?\n/).slice(-Math.max(1, Math.min(500, maxLines)));
+}
+
+function sameCwd(a, b) {
+  return path.resolve(a || "").replace(/\\/g, "/").replace(/\/+$/, "").toLowerCase()
+    === path.resolve(b || "").replace(/\\/g, "/").replace(/\/+$/, "").toLowerCase();
+}
+
+function hasStructuredApproval(value) {
+  return !!value
+    && typeof value === "object"
+    && !Array.isArray(value)
+    && value.packet_mode === "operator-approval-packet"
+    && value.approved === true
+    && value.approval_state === "approved";
+}
+
+function parseRunSpec(raw) {
+  const row = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const preview = row.execution_preview && typeof row.execution_preview === "object" && !Array.isArray(row.execution_preview)
+    ? row.execution_preview
+    : {};
+  return {
+    runId: asString(row.run_id),
+    providerModelRef: asString(row.provider_model_ref),
+    cwd: asString(row.cwd) || ".",
+    declaredFiles: asStringArray(row.declared_files),
+    logPath: asString(row.log_path),
+    timeoutMs: normalizeTimeoutMs(row.timeout_ms),
+    executionPreview: {
+      command: asString(preview.command),
+      args: asStringArray(preview.args),
+    },
+  };
+}
+
+function buildStatus(runId, entry) {
+  return {
+    mode: "agent-run-status",
+    runId,
+    found: !!entry,
+    state: entry?.state ?? "unknown",
+    pid: entry?.pid,
+    exitCode: entry?.exitCode,
+    outputBytes: entry?.outputBytes,
+    logPath: entry?.logPath,
+    declaredFiles: asStringArray(entry?.declaredFiles),
+  };
+}
+
+function isTerminal(state) {
+  return state === "completed" || state === "failed" || state === "timed-out" || state === "aborted";
+}
+
+async function sleep(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function followRun(cwd, runId, maxWaitMs, pollIntervalMs, maxLines) {
+  const deadline = Date.now() + maxWaitMs;
+  let entry = readRegistryEntry(cwd, runId);
+  let status = buildStatus(runId, entry);
+  while (status.found && !isTerminal(status.state) && Date.now() < deadline) {
+    await sleep(Math.min(pollIntervalMs, Math.max(0, deadline - Date.now())));
+    entry = readRegistryEntry(cwd, runId);
+    status = buildStatus(runId, entry);
+  }
+  const terminal = status.found && isTerminal(status.state);
+  const logPath = entry?.logPath;
+  return {
+    entry,
+    status,
+    terminal,
+    decision: !status.found ? "missing-run" : terminal ? "terminal" : "timeout",
+    outputBytes: logByteCount(logPath),
+    logPath,
+    lines: readLogTail(logPath, maxLines),
+  };
+}
+
+function buildOutcome(runId, entry, outputBytes) {
+  const found = !!entry;
+  const processState = entry?.state ?? "unknown";
+  const blockers = [];
+  if (!found) blockers.push("run-not-found");
+  if (found && processState !== "completed") blockers.push(`process-state-${processState}`);
+  if (found && processState === "completed" && outputBytes === 0) blockers.push("empty-output");
+  return {
+    mode: "agent-run-outcome-packet",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    runId,
+    found,
+    processState,
+    contractDecision: blockers.length === 0 ? "pass" : "fail",
+    recommendation: blockers.length === 0 ? "stop" : "ask-operator",
+    outputBytes,
+    fileContract: "read-only",
+    blockers,
+  };
+}
+
+async function dispatchRun(cwd, runSpec) {
+  const logPath = path.isAbsolute(runSpec.logPath) ? runSpec.logPath : path.join(cwd, runSpec.logPath);
+  mkdirSync(path.dirname(logPath), { recursive: true });
+  const now = new Date().toISOString();
+  const planned = {
+    runId: runSpec.runId,
+    state: "planned",
+    providerModelRef: runSpec.providerModelRef,
+    cwd,
+    declaredFiles: runSpec.declaredFiles,
+    logPath,
+    timeoutMs: runSpec.timeoutMs,
+    createdAtIso: now,
+    lastEventAtIso: now,
+  };
+  writeRegistryEntry(cwd, planned);
+  const startedAtMs = Date.now();
+  const logStream = createWriteStream(logPath, { flags: "a" });
+  logStream.write(`[agent-runner] starting command=${runSpec.executionPreview.command} source=preview-command cwd=${cwd}\n`);
+  logStream.write(`[agent-runner] argv=${JSON.stringify(runSpec.executionPreview.args)}\n`);
+  logStream.write(`[agent-runner] preflight platform=${process.platform} node=${process.version} cwdExists=${existsSync(cwd) ? "yes" : "no"}\n`);
+  const child = spawn(runSpec.executionPreview.command, runSpec.executionPreview.args, { cwd, shell: false, stdio: ["ignore", "pipe", "pipe"] });
+  let outputBytes = 0;
+  let stdoutBytes = 0;
+  let stderrBytes = 0;
+  let firstOutputElapsedMs;
+  const capture = (streamName) => (chunk) => {
+    const byteLength = Buffer.isBuffer(chunk) ? chunk.byteLength : Buffer.byteLength(chunk);
+    outputBytes += byteLength;
+    if (streamName === "stdout") stdoutBytes += byteLength;
+    if (streamName === "stderr") stderrBytes += byteLength;
+    if (firstOutputElapsedMs === undefined) {
+      firstOutputElapsedMs = Date.now() - startedAtMs;
+      logStream.write(`[agent-runner] first-byte stream=${streamName} elapsedMs=${firstOutputElapsedMs} bytes=${byteLength}\n`);
+    }
+    logStream.write(chunk);
+  };
+  child.stdout?.on("data", capture("stdout"));
+  child.stderr?.on("data", capture("stderr"));
+  const running = { ...planned, state: "running", pid: child.pid, startedAtIso: new Date().toISOString(), lastEventAtIso: new Date().toISOString() };
+  writeRegistryEntry(cwd, running);
+  const exit = await new Promise((resolve) => {
+    let settled = false;
+    const timeout = setTimeout(() => {
+      if (!child.killed) child.kill("SIGTERM");
+    }, runSpec.timeoutMs);
+    child.on("error", (error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      resolve({ exitCode: 1, errorCode: error.code || "spawn-error", errorMessage: error.message, signal: "none", timedOut: false });
+    });
+    child.on("close", (code, signal) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      resolve({ exitCode: typeof code === "number" ? code : 1, signal: signal || "none", timedOut: false });
+    });
+  });
+  const elapsedMs = Date.now() - startedAtMs;
+  logStream.write(`[agent-runner] close exitCode=${exit.exitCode} signal=${exit.signal} timedOut=${exit.timedOut ? "yes" : "no"} elapsedMs=${elapsedMs} childOutputBytes=${outputBytes} stdoutBytes=${stdoutBytes} stderrBytes=${stderrBytes} firstOutputElapsedMs=${firstOutputElapsedMs ?? "none"}\n`);
+  await new Promise((resolve) => logStream.end(resolve));
+  const completed = {
+    ...running,
+    state: exit.exitCode === 0 ? "completed" : "failed",
+    exitCode: exit.exitCode,
+    ...(exit.errorCode ? { errorCode: exit.errorCode, errorMessage: exit.errorMessage } : {}),
+    outputBytes: logByteCount(logPath),
+    lastEventAtIso: new Date().toISOString(),
+  };
+  writeRegistryEntry(cwd, completed);
+  return { pid: child.pid, registryEntry: completed };
+}
+
+export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
+  const runSpec = parseRunSpec(payload.run_spec);
+  const executeRequested = payload.execute === true;
+  const followRequested = payload.follow === true;
+  const buildOutcomeRequested = payload.build_outcome === true;
+  const blockers = [];
+  const runCwd = runSpec.cwd === "." || runSpec.cwd === "" ? cwd : runSpec.cwd;
+  const existing = runSpec.runId ? readRegistryEntry(cwd, runSpec.runId) : undefined;
+  if (!runSpec.runId) blockers.push("run-id-missing");
+  if (runSpec.declaredFiles.length === 0) blockers.push("declared-files-missing");
+  if (!runSpec.logPath) blockers.push("log-path-missing");
+  if (!runSpec.executionPreview.command) blockers.push("execution-preview-command-missing");
+  if (executeRequested && !hasStructuredApproval(payload.operator_approval)) blockers.push("structured-operator-approval-missing");
+  if (executeRequested && existing?.state === "running") blockers.push("run-already-running");
+  if (executeRequested && !sameCwd(runCwd, cwd)) blockers.push("execute-cwd-mismatch");
+
+  const dispatchAllowed = executeRequested && blockers.length === 0;
+  let dispatch;
+  if (dispatchAllowed) dispatch = await dispatchRun(cwd, runSpec);
+  const maxWaitMs = Math.max(0, Math.min(30_000, Math.floor(typeof payload.follow_max_wait_ms === "number" ? payload.follow_max_wait_ms : 5_000)));
+  const pollIntervalMs = Math.max(100, Math.min(5_000, Math.floor(typeof payload.follow_poll_interval_ms === "number" ? payload.follow_poll_interval_ms : 500)));
+  const maxLines = Math.max(1, Math.min(500, Math.floor(typeof payload.follow_max_lines === "number" ? payload.follow_max_lines : 80)));
+  const follow = followRequested && runSpec.runId ? await followRun(cwd, runSpec.runId, maxWaitMs, pollIntervalMs, maxLines) : undefined;
+  const terminal = follow?.terminal === true;
+  return {
+    mode: executeRequested ? "agent-run-driver-step-dispatch" : "agent-run-driver-step-packet",
+    decision: dispatchAllowed ? "dispatched" : blockers.length > 0 ? "blocked" : "ready-for-operator-decision",
+    dispatchAllowed,
+    processStartAllowed: dispatchAllowed,
+    processStopAllowed: false,
+    singleRunOnly: true,
+    blockers,
+    runSpec,
+    executeRequested,
+    structuredOperatorApproval: hasStructuredApproval(payload.operator_approval),
+    followRequested,
+    pid: dispatch?.pid,
+    registryEntry: dispatch?.registryEntry,
+    follow,
+    nextAgentRunOutcomePacket: terminal ? { tool: "agent_run_outcome_packet", params: { run_id: runSpec.runId, output_bytes: follow.outputBytes, file_contract: "read-only" } } : undefined,
+    agentRunOutcomePacket: terminal && buildOutcomeRequested ? buildOutcome(runSpec.runId, follow.entry, follow.outputBytes) : undefined,
+  };
+}
+
+function printHelp() {
+  process.stdout.write([
+    "Usage: node scripts/agent-run-driver-step.mjs --input payload.json [--cwd DIR] [--pretty]",
+    "Reads JSON payload compatible with agent_run_driver_step_dispatch and prints JSON result.",
+  ].join("\n") + "\n");
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {
+  const args = parseArgs(process.argv.slice(2));
+  if (args.help) {
+    printHelp();
+  } else {
+    const result = await runAgentRunDriverStep(readPayload(args.input), args.cwd || process.cwd());
+    process.stdout.write(JSON.stringify(result, null, args.pretty ? 2 : 0));
+    process.stdout.write("\n");
+  }
+}
