@@ -1,9 +1,24 @@
 import { type ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { spawn } from "node:child_process";
+import { createWriteStream, mkdirSync } from "node:fs";
+import path from "node:path";
 import { Type } from "@sinclair/typebox";
 import { asOptionalBoolean, asOptionalStringArray } from "./guardrails-core-agent-run-basic-surface";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 import { buildColonySerialFanInPacket, type ColonySerialFanInInput } from "./guardrails-core-colony-fanin-packet";
+import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
+import { sameCwd } from "./guardrails-core-execution-context";
+import {
+  appendAgentRunLogLine,
+  buildPiSubprocessPreflightLines,
+  createAgentRunChildOutputCapture,
+  formatAgentRunnerArgvForLog,
+  readLogByteCount,
+  readRegistryEntry,
+  resolvePiSubprocessInvocation,
+  writeRegistryEntry,
+} from "./guardrails-core-agent-run-surface-runtime";
 import {
   buildColonyPlanPacket,
   buildColonySerialDriverDispatchPacket,
@@ -38,6 +53,10 @@ function parseWorkerInputs(raw: unknown): NonNullable<ColonyPlanInput["workers"]
 
 function asOptionalNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function resolveHandoffCwd(cwd: string, currentCwd: string): string {
+  return cwd === "." || cwd === "" ? currentCwd : cwd;
 }
 
 function parseExecutionManifest(raw: unknown): NonNullable<ColonySerialDriverInput["executionManifest"]> {
@@ -175,7 +194,7 @@ export function registerColonyPlanPacketSurface(pi: ExtensionAPI): void {
     name: "colony_serial_driver_dispatch",
     label: "Colony Serial Driver Dispatch",
     description:
-      "Preview-only serial driver dispatch wrapper. Prepares exactly one worker handoff from executionManifest and never starts execution in this slice.",
+      "Serial driver dispatch wrapper. Preview by default; execute=true requires structured operator approval and starts exactly one worker subprocess.",
     parameters: Type.Object({
       plan_id: Type.Optional(Type.String({ description: "Parent serial colony plan id." })),
       execution_manifest: Type.Optional(Type.Array(Type.Object({
@@ -185,10 +204,10 @@ export function registerColonyPlanPacketSurface(pi: ExtensionAPI): void {
         expected_artifact: Type.Optional(Type.String({ description: "Expected evidence artifact path." })),
       }), { description: "Ordered executionManifest emitted by colony_plan_packet." })),
       completed_outcomes: Type.Optional(Type.Array(Type.String(), { description: "Required outcome ids already completed and accepted by parent." })),
-      execute: Type.Optional(Type.Boolean({ description: "Future execution flag. This slice remains preview-only and never starts a process." })),
-      operator_approval: operatorApprovalParameter("Structured operator approval envelope for future execute=true."),
+      execute: Type.Optional(Type.Boolean({ description: "When true, start exactly one worker subprocess after structured operator approval." })),
+      operator_approval: operatorApprovalParameter("Structured operator approval envelope for execute=true."),
     }),
-    execute(_toolCallId, params) {
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const input: ColonySerialDriverDispatchInput = {
         planId: typeof p.plan_id === "string" ? p.plan_id : undefined,
@@ -199,6 +218,156 @@ export function registerColonyPlanPacketSurface(pi: ExtensionAPI): void {
       };
 
       const result = buildColonySerialDriverDispatchPacket(input);
+      const currentCwd = ctx?.cwd ?? process.cwd();
+      const executeRequested = p.execute === true;
+      const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
+      const handoff = result.nextWorkerHandoff;
+      const blockers = [...result.blockers];
+      const runId = handoff?.registryRequiredFields.runId ?? "";
+      const handoffCwd = resolveHandoffCwd(handoff?.registryRequiredFields.cwd ?? "", currentCwd);
+      const existingEntry = runId ? readRegistryEntry(currentCwd, runId) : undefined;
+      if (executeRequested && result.decision !== "ready-for-operator-decision") blockers.push("serial-driver-dispatch-packet-blocked");
+      if (executeRequested && !handoff) blockers.push("serial-driver-handoff-missing");
+      if (executeRequested && !structuredOperatorApproval && !blockers.includes("structured-operator-approval-missing")) {
+        blockers.push("structured-operator-approval-missing");
+      }
+      if (executeRequested && existingEntry?.state === "running") blockers.push("run-already-running");
+      if (executeRequested && !sameCwd(handoffCwd, currentCwd)) blockers.push("execute-cwd-mismatch");
+
+      const dispatchAllowed = executeRequested && blockers.length === 0 && Boolean(handoff);
+      let pid: number | undefined;
+      let registryEntry = handoff
+        ? {
+            runId: handoff.registryRequiredFields.runId,
+            state: "planned" as const,
+            providerModelRef: handoff.registryRequiredFields.providerModelRef,
+            cwd: currentCwd,
+            declaredFiles: handoff.registryRequiredFields.declaredFiles,
+            logPath: handoff.registryRequiredFields.logPath,
+            timeoutMs: handoff.registryRequiredFields.timeoutMs,
+            createdAtIso: new Date().toISOString(),
+            lastEventAtIso: new Date().toISOString(),
+          }
+        : undefined;
+
+      if (dispatchAllowed && handoff && registryEntry) {
+        const invocationSpec = handoff.nextWorkerStartPacket.agentInvocationSpecPacket.invocationSpec;
+        const logPath = path.isAbsolute(invocationSpec.logPath) ? invocationSpec.logPath : path.join(currentCwd, invocationSpec.logPath);
+        mkdirSync(path.dirname(logPath), { recursive: true });
+        writeRegistryEntry(currentCwd, registryEntry);
+        const subprocess = resolvePiSubprocessInvocation(invocationSpec.executionPreview);
+        appendAgentRunLogLine(logPath, `[agent-runner] starting command=${subprocess.command} source=${subprocess.source} cwd=${currentCwd}`);
+        appendAgentRunLogLine(logPath, `[agent-runner] argv=${formatAgentRunnerArgvForLog(subprocess.args)}`);
+        for (const line of buildPiSubprocessPreflightLines(currentCwd, subprocess)) appendAgentRunLogLine(logPath, line);
+        const logStream = createWriteStream(logPath, { flags: "a" });
+        const startedAtMs = Date.now();
+        const outputCapture = createAgentRunChildOutputCapture(logStream, startedAtMs);
+        const child = spawn(subprocess.command, subprocess.args, { cwd: currentCwd, shell: false, stdio: ["ignore", "pipe", "pipe"] });
+        pid = child.pid;
+        child.stdout?.on("data", outputCapture.captureChildOutput("stdout"));
+        child.stderr?.on("data", outputCapture.captureChildOutput("stderr"));
+        registryEntry = {
+          ...registryEntry,
+          ...(pid ? { pid } : {}),
+          state: "running",
+          startedAtIso: new Date().toISOString(),
+          lastEventAtIso: new Date().toISOString(),
+        };
+        writeRegistryEntry(currentCwd, registryEntry);
+        const timeoutMs = invocationSpec.timeoutMs;
+        let settled = false;
+        let timedOut = false;
+        const timeout = setTimeout(() => {
+          timedOut = true;
+          logStream.write(`[agent-runner] timeout ms=${timeoutMs} elapsedMs=${Date.now() - startedAtMs}; sending SIGTERM\n`);
+          if (!child.killed) child.kill("SIGTERM");
+        }, timeoutMs);
+        child.on("error", (error: NodeJS.ErrnoException) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timeout);
+          const code = error.code || "unknown";
+          const message = error.message || String(error);
+          logStream.write(`[agent-runner] spawn error code=${code} message=${message}\n`, () => {
+            logStream.end(() => {
+              writeRegistryEntry(currentCwd, {
+                ...registryEntry,
+                state: "failed",
+                errorCode: code,
+                errorMessage: message,
+                outputBytes: readLogByteCount(logPath),
+                lastEventAtIso: new Date().toISOString(),
+              });
+            });
+          });
+        });
+        child.on("close", (code, signal) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timeout);
+          const exitCode = typeof code === "number" ? code : timedOut ? 124 : 1;
+          const childOutputBytes = outputCapture.outputBytes();
+          const zeroOutput = childOutputBytes === 0;
+          const silentFailure = !timedOut && exitCode !== 0 && zeroOutput;
+          const silentFailureLine = silentFailure
+            ? "[agent-runner] failure code=silent-runner-failure message=subprocess exited non-zero without stdout/stderr; preflight lines above record platform/node/cwd/command/entrypoint; next probe should validate provider bootstrap and CLI argument parsing\n"
+            : "";
+          const elapsedMs = Date.now() - startedAtMs;
+          const timeoutLine = timedOut ? `[agent-runner] failure code=runner-timeout message=subprocess exceeded timeoutMs=${timeoutMs} elapsedMs=${elapsedMs} outputBytes=${childOutputBytes} firstOutputElapsedMs=${outputCapture.firstOutputElapsedMs() ?? "none"}; preflight reached command/entrypoint, so next probe should isolate provider/model-call/bootstrap hang\n` : "";
+          logStream.write(`${silentFailureLine}${timeoutLine}[agent-runner] close exitCode=${exitCode} signal=${signal || "none"} timedOut=${timedOut ? "yes" : "no"} elapsedMs=${elapsedMs} childOutputBytes=${childOutputBytes} stdoutBytes=${outputCapture.stdoutBytes()} stderrBytes=${outputCapture.stderrBytes()} firstOutputElapsedMs=${outputCapture.firstOutputElapsedMs() ?? "none"}\n`, () => {
+            logStream.end(() => {
+              writeRegistryEntry(currentCwd, {
+                ...registryEntry,
+                state: exitCode === 0 ? "completed" : timedOut ? "timed-out" : "failed",
+                exitCode,
+                ...(silentFailure ? {
+                  errorCode: "silent-runner-failure",
+                  errorMessage: "subprocess exited non-zero without stdout/stderr; preflight evidence recorded in log",
+                } : timedOut ? {
+                  errorCode: zeroOutput ? "runner-timeout-zero-output" : "runner-timeout",
+                  errorMessage: `subprocess exceeded timeoutMs=${timeoutMs}; ${zeroOutput ? "no stdout/stderr after valid command preflight" : "partial output captured"}`,
+                } : {}),
+                outputBytes: readLogByteCount(logPath),
+                lastEventAtIso: new Date().toISOString(),
+              });
+            });
+          });
+        });
+      }
+
+      if (executeRequested) {
+        const executionResult = {
+          ...result,
+          mode: "colony-serial-driver-dispatch-execution" as const,
+          authorization: dispatchAllowed ? "explicit-operator" as const : result.authorization,
+          dispatchAllowed,
+          processStartAllowed: dispatchAllowed,
+          processStopAllowed: false,
+          singleRunOnly: true,
+          decision: dispatchAllowed ? "dispatched" as const : blockers.length > 0 ? "blocked" as const : result.decision,
+          blockers,
+          executeRequested,
+          structuredOperatorApproval,
+          runId,
+          pid,
+          registryEntry,
+          summary: [
+            "colony-serial-driver-dispatch-execution:",
+            `decision=${dispatchAllowed ? "dispatched" : blockers.length > 0 ? "blocked" : result.decision}`,
+            `runId=${runId || "unknown"}`,
+            `execute=${executeRequested ? "yes" : "no"}`,
+            `dispatch=${dispatchAllowed ? "yes" : "no"}`,
+            pid ? `pid=${pid}` : undefined,
+            blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+          ].filter(Boolean).join(" "),
+        };
+        return buildOperatorVisibleToolResponse({
+          label: "colony_serial_driver_dispatch",
+          summary: executionResult.summary,
+          details: executionResult,
+        });
+      }
+
       return buildOperatorVisibleToolResponse({
         label: "colony_serial_driver_dispatch",
         summary: result.summary,

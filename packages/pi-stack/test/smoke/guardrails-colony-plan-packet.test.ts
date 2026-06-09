@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { tmpdir } from "node:os";
 import {
   buildColonyPlanPacket,
   buildColonySerialDriverDispatchPacket,
@@ -520,6 +523,7 @@ describe("colony plan packet", () => {
   });
 
   it("exposes colony_serial_driver_dispatch as preview-only surface", () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "colony-driver-dispatch-preview-"));
     const tools: Array<{ name: string; execute: (toolCallId: string, params: Record<string, unknown>) => { details: unknown } }> = [];
     registerColonyPlanPacketSurface({
       registerTool(tool: unknown) {
@@ -539,12 +543,59 @@ describe("colony plan packet", () => {
           expected_artifact: ".project/reports/worker-01-route-scan.json",
         },
       ],
-    });
+    }, undefined as never, undefined as never, undefined as never, { cwd: tmp } as never);
 
     const details = (result?.details ?? {}) as Record<string, unknown>;
     expect(details.mode).toBe("colony-serial-driver-dispatch-packet");
     expect(details.dispatchAllowed).toBe(false);
     expect(details.processStartAllowed).toBe(false);
     expect(details.nextWorkerPacketId).toBe("worker-01-route-scan");
+    expect(existsSync(path.join(tmp, ".pi", "reports", "agent-runs.json"))).toBe(false);
+  });
+
+  it("blocks colony_serial_driver_dispatch execute=true without structured approval at the surface", () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "colony-driver-dispatch-blocked-"));
+    const tools: Array<{ name: string; execute: (toolCallId: string, params: Record<string, unknown>, signal?: AbortSignal, onUpdate?: unknown, ctx?: { cwd: string }) => { details: unknown } }> = [];
+    registerColonyPlanPacketSurface({
+      registerTool(tool: unknown) {
+        const typed = tool as { name: string; execute: (toolCallId: string, params: Record<string, unknown>, signal?: AbortSignal, onUpdate?: unknown, ctx?: { cwd: string }) => { details: unknown } };
+        tools.push(typed);
+      },
+    } as never);
+
+    const tool = tools.find((row) => row.name === "colony_serial_driver_dispatch");
+    const result = tool?.execute("call", {
+      plan_id: "serial-subagent-bootstrap-001",
+      execute: true,
+      execution_manifest: [
+        {
+          index: 1,
+          worker_packet_id: "worker-01-route-scan",
+          required_outcome_id: "outcome:serial-subagent-bootstrap-001:worker-01-route-scan",
+          expected_artifact: ".project/reports/worker-01-route-scan.json",
+        },
+      ],
+    }, undefined, undefined, { cwd: tmp });
+
+    const details = (result?.details ?? {}) as Record<string, unknown>;
+    expect(details.mode).toBe("colony-serial-driver-dispatch-execution");
+    expect(details.decision).toBe("blocked");
+    expect(details.dispatchAllowed).toBe(false);
+    expect(details.processStartAllowed).toBe(false);
+    expect(details.structuredOperatorApproval).toBe(false);
+    expect((details.blockers as string[])).toContain("structured-operator-approval-missing");
+    expect(existsSync(path.join(tmp, ".pi", "reports", "agent-runs.json"))).toBe(false);
+  });
+
+  it("keeps colony serial execute path wired to one subprocess and registry lifecycle", () => {
+    const source = readFileSync(path.join(process.cwd(), "packages/pi-stack/extensions/guardrails-core-colony-plan-surface.ts"), "utf8");
+    expect(source).toContain("writeRegistryEntry(currentCwd, registryEntry)");
+    expect(source).toContain("spawn(subprocess.command, subprocess.args");
+    expect(source).toContain("child.on(\"error\", (error: NodeJS.ErrnoException)");
+    expect(source).toContain("child.on(\"close\", (code, signal)");
+    expect(source).toContain("resolvePiSubprocessInvocation(invocationSpec.executionPreview)");
+    expect(source).toContain("buildPiSubprocessPreflightLines(currentCwd, subprocess)");
+    expect(source).toContain("state: \"running\"");
+    expect(source).not.toContain("colony_serial_fanin_packet(input)");
   });
 });
