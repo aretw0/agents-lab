@@ -44,6 +44,25 @@ test("agent-run driver canary executes local node version and passes outcome", a
   assert.ok((report.outputBytes ?? 0) > 0);
 });
 
+test("agent-run driver canary supports bounded mutation evidence", async () => {
+  const cwd = workspace("agent-run-driver-canary-mutation-");
+  const report = await runAgentRunDriverCanary({
+    cwd,
+    runId: "driver-canary-mutation-test",
+    mode: "mutation",
+  });
+
+  assert.equal(report.mode, "agent-run-driver-canary-report");
+  assert.equal(report.schemaVersion, 1);
+  assert.equal(report.canaryMode, "mutation");
+  assert.equal(report.decision, "dispatched");
+  assert.equal(report.contractDecision, "pass");
+  assert.equal(report.fileContract, "mutation");
+  assert.deepEqual(report.touchedFiles, [".artifacts/agent-run-driver/mutation-target.txt"]);
+  assert.deepEqual(report.mutationTargetFiles, [".artifacts/agent-run-driver/mutation-target.txt"]);
+  assert.equal(existsSync(path.join(cwd, ".artifacts", "agent-run-driver", "mutation-target.txt")), true);
+});
+
 test("agent-run driver canary CLI writes latest artifact", () => {
   const cwd = workspace("agent-run-driver-canary-cli-");
   const outPath = ".artifacts/agent-run-driver/latest.json";

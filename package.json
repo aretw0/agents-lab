@@ -81,6 +81,7 @@
     "session:triage:events:jsonl": "node scripts/session-triage.mjs --days 30 --events docs/research/data/session-triage/canonical-events.example.jsonl --json",
     "agent-run:driver-step": "node scripts/agent-run-driver-step.mjs",
     "agent-run:driver-canary": "node scripts/agent-run-driver-canary.mjs --execute --out .artifacts/agent-run-driver/latest.json",
+    "agent-run:driver-canary:mutation": "node scripts/agent-run-driver-canary.mjs --mode mutation --execute --run-id agent-run-driver-local-mutation-canary --out .artifacts/agent-run-driver/latest-mutation.json",
     "agent-run:pi-driver": "node scripts/agent-run-pi-driver.mjs",
     "agent-run:pi-driver-payload": "node scripts/agent-run-pi-driver-payload.mjs",
     "test:session-triage:delegation": "node --test scripts/test/session-triage-delegation.test.mjs",

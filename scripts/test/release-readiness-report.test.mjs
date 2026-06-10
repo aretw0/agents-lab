@@ -150,6 +150,12 @@ test("buildReport marks target release not ready until version and board gates a
       decision: "missing",
       summary: "no local agent-run driver canary artifact found",
     });
+    assert.deepEqual(data.agentRunDrivers.lastMutationCanaryEvidence, {
+      path: ".artifacts/agent-run-driver/latest-mutation.json",
+      present: false,
+      decision: "missing",
+      summary: "no local agent-run driver canary artifact found",
+    });
     assert.deepEqual(report.operatorDecisions.map((decision) => decision.id), ["decide-target-version"]);
     assert.deepEqual(report.operatorDecisions[0].allowedActions, ["defer-release", "bump-tag-release-when-ready"]);
     assert.equal(report.operatorDecisions[0].requiresOperatorDecision, true);
@@ -424,6 +430,41 @@ test("readiness exposes last agent-run driver canary evidence when present", () 
   }
 });
 
+test("readiness exposes last agent-run driver mutation canary evidence when present", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const evidencePath = path.join(workspace, ".artifacts", "agent-run-driver", "latest-mutation.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, JSON.stringify({
+      mode: "agent-run-driver-canary-report",
+      schemaVersion: 1,
+      canaryMode: "mutation",
+      decision: "dispatched",
+      runId: "agent-run-driver-local-mutation-canary",
+      followTerminal: true,
+      contractDecision: "pass",
+      fileContract: "mutation",
+      outputBytes: 512,
+      summary: "agent-run-driver-canary: decision=dispatched",
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+
+    assert.equal(data.agentRunDrivers.lastMutationCanaryEvidence.present, true);
+    assert.equal(data.agentRunDrivers.lastMutationCanaryEvidence.decision, "pass");
+    assert.equal(data.agentRunDrivers.lastMutationCanaryEvidence.mode, "agent-run-driver-canary-report");
+    assert.equal(data.agentRunDrivers.lastMutationCanaryEvidence.runId, "agent-run-driver-local-mutation-canary");
+    assert.equal(data.agentRunDrivers.lastMutationCanaryEvidence.contractDecision, "pass");
+    assert.equal(data.agentRunDrivers.lastMutationCanaryEvidence.followTerminal, true);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("cli strict exits non-zero when release is not ready", () => {
   const workspace = makeWorkspace({
     version: "0.7.0",
@@ -494,6 +535,7 @@ test("cli can write structured json for agents", () => {
     assert.deepEqual(json.gates, { agentRunDrivers: true, packageSmoke: true });
     assert.equal(json.agentRunDrivers.ok, true);
     assert.equal(json.agentRunDrivers.lastCanaryEvidence.decision, "missing");
+    assert.equal(json.agentRunDrivers.lastMutationCanaryEvidence.decision, "missing");
     assert.deepEqual(json.agentRunDrivers.requiredTests, [
       "scripts/test/agent-run-driver-step.test.mjs",
       "scripts/test/agent-run-pi-driver.test.mjs",

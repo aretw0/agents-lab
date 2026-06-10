@@ -29,7 +29,7 @@ pnpm run agent-run:pi-driver
 pnpm run agent-run:pi-driver-payload
 ```
 
-`agent-run:driver-canary` runs a bounded local `node --version` canary through the same driver step and writes `.artifacts/agent-run-driver/latest.json` for release readiness evidence.
+`agent-run:driver-canary` runs a bounded local `node --version` canary through the same driver step and writes `.artifacts/agent-run-driver/latest.json` for release readiness evidence. `agent-run:driver-canary:mutation` exercises the same driver with `file_contract=mutation`, but only writes the ignored `.artifacts/agent-run-driver/mutation-target.txt` fixture.
 
 Those scripts are canonical for this repository workflow, but they are not the distributed package API by themselves. Portable consumers should target the primitive/tool contract and treat scripts as examples or local adapters.
 

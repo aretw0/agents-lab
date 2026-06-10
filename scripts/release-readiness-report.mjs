@@ -92,8 +92,7 @@ function agentRunDriverGateReport(cwd) {
   };
 }
 
-function agentRunDriverCanaryEvidence(cwd) {
-  const relPath = ".artifacts/agent-run-driver/latest.json";
+function agentRunDriverCanaryEvidence(cwd, relPath = ".artifacts/agent-run-driver/latest.json") {
   const fullPath = path.join(cwd, relPath);
   if (!existsSync(fullPath)) {
     return {
@@ -434,6 +433,7 @@ export function gather(target, cwd = process.cwd()) {
   const packageSmoke = buildReleasePackageSmokeReport({ cwd, runPack: false });
   const agentRunDrivers = agentRunDriverGateReport(cwd);
   agentRunDrivers.lastCanaryEvidence = agentRunDriverCanaryEvidence(cwd);
+  agentRunDrivers.lastMutationCanaryEvidence = agentRunDriverCanaryEvidence(cwd, ".artifacts/agent-run-driver/latest-mutation.json");
 
   return {
     target,
