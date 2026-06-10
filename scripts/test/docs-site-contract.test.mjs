@@ -298,6 +298,7 @@ test("published primitives use operator terminology for local contracts", () => 
 	assert.match(driverStep, /Repository scripts are wrappers of reference/);
 	assert.match(driverStep, /not the distributed package API by themselves/);
 	assert.match(driverStep, /never calls fan-in, starts a next worker or launches `ant_colony`/);
+	assert.doesNotMatch(driverStep, /^permalink:/m);
 });
 
 test("package guide sync keeps lab-only maintenance out of distributed docs", () => {

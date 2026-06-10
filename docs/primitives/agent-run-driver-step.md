@@ -1,9 +1,3 @@
----
-title: Agent Run Driver Step
-description: Provider-agnostic driver step for one bounded local agent run.
-permalink: /primitives/agent-run-driver-step/
----
-
 # Agent Run Driver Step
 
 `agent_run_driver_step_dispatch` is the agnostic operational primitive for one bounded agent run. It exists to remove the operator as glue between preview, dispatch, follow and outcome materialization without promoting a colony, fan-in or next worker automatically.
