@@ -69,7 +69,6 @@ test("builds a print-readonly payload with isolated pi flags", () => {
     "read,grep,find,ls",
     "--print",
     "@README.md",
-    "--",
     "Return PASS.",
   ]);
 });
@@ -86,6 +85,24 @@ test("blocks incomplete print-readonly payloads", () => {
   assert.ok(result.blockers.includes("model-missing"));
   assert.ok(result.blockers.includes("prompt-missing"));
   assert.ok(result.blockers.includes("declared-files-missing"));
+});
+
+test("blocks print-readonly prompts that look like flags", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-print-leading-dash-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+
+  const result = buildPiPrintReadonlyDriverStepPayload({
+    cwd,
+    runId: "pi-print-leading-dash",
+    model: "local/test-model",
+    files: ["README.md"],
+    prompt: "--looks-like-a-flag",
+  });
+
+  assert.equal(result.decision, "blocked");
+  assert.ok(result.blockers.includes("prompt-leading-dash"));
 });
 
 test("dispatches builder by payload mode", () => {

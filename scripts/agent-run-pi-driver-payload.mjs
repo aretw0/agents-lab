@@ -118,6 +118,7 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
   if (!cliPath) blockers.push("local-pi-cli-missing");
   if (!model) blockers.push("model-missing");
   if (!prompt) blockers.push("prompt-missing");
+  if (prompt.startsWith("-")) blockers.push("prompt-leading-dash");
   if (declaredFiles.length === 0) blockers.push("declared-files-missing");
 
   if (blockers.length > 0) {
@@ -164,7 +165,6 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
             toolList.join(","),
             "--print",
             ...declaredFiles.map((filePath) => `@${filePath}`),
-            "--",
             prompt,
           ],
         },
