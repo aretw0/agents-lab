@@ -22,10 +22,19 @@ Para execução real, o contrato exige aprovação estruturada explícita:
 pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --execute --approve --follow --build-outcome --summary
 ```
 
+Para runs de mutação, o outcome só deve ser promovido com evidência parent-side explícita. O driver aceita a mesma evidência que `agent_run_outcome_packet`:
+
+```bash
+pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --file README.md --prompt "Apply the scoped change." --file-contract mutation --touched-file README.md --mutation-target-file README.md --marker acceptance=true --execute --approve --follow --build-outcome --summary
+```
+
+Sem `--touched-file`/`--mutation-target-file`, mutation terminal fica `contractDecision=partial`, não `pass`.
+
 Evidência já validada:
 
 - `real-pi-print-readonly-readme-canary-20260609`: Pi local, `openai-codex/gpt-5.3-codex-spark`, read-only, `README.md`, `contractDecision=pass`.
 - `real-next-slice-decoupling-scan-20260610`: worker real pequeno recomendou a correção `readTasks/readVerificationRows` fail-closed; a mudança entrou em commit e testes.
+- `agent_run_driver_step_dispatch` e `agent-run:pi-driver`: preservam `file_contract`, `touched_files`, `marker_results` e `mutation_target_files` para materializar outcome embutido em `follow=true` + `build_outcome=true`.
 
 Regra atual: para tarefas local-safe pequenas, tentar primeiro um worker via `agent-run:pi-driver` com escopo mínimo. Se um worker com múltiplos arquivos der timeout sem saída, reduzir o escopo antes de retry; não promover timeout como evidência.
 
