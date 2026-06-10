@@ -14,6 +14,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     prompt: "",
     files: [],
     tools: [],
+    fileContract: "read-only",
     pretty: false,
     help: false,
   };
@@ -27,6 +28,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--prompt") out.prompt = argv[++index] ?? out.prompt;
     else if (arg === "--file") out.files.push(argv[++index] ?? "");
     else if (arg === "--tool") out.tools.push(argv[++index] ?? "");
+    else if (arg === "--file-contract") out.fileContract = argv[++index] ?? out.fileContract;
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else throw new Error(`Unknown argument: ${arg}`);
@@ -47,6 +49,10 @@ function asCleanStringArray(value) {
 function normalizeDeclaredFile(filePath) {
   const clean = asCleanString(filePath);
   return clean.startsWith("@") ? clean.slice(1) : clean;
+}
+
+function normalizeFileContract(value) {
+  return value === "mutation" ? "mutation" : "read-only";
 }
 
 export function resolveLocalPiCli(cwd = process.cwd()) {
@@ -93,6 +99,7 @@ export function buildPiHelpDriverStepPayload(options = {}) {
         declared_files: ["package.json"],
         log_path: logPath,
         timeout_ms: 30_000,
+        file_contract: "read-only",
         execution_preview: {
           command: process.execPath,
           args: [cliPath, "--help"],
@@ -113,6 +120,7 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
   const declaredFiles = asCleanStringArray(options.files).map(normalizeDeclaredFile);
   const tools = asCleanStringArray(options.tools);
   const toolList = tools.length > 0 ? tools : ["read", "grep", "find", "ls"];
+  const fileContract = normalizeFileContract(options.fileContract);
   const blockers = [];
 
   if (!cliPath) blockers.push("local-pi-cli-missing");
@@ -149,6 +157,7 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
         declared_files: declaredFiles,
         log_path: logPath,
         timeout_ms: 90_000,
+        file_contract: fileContract,
         execution_preview: {
           command: process.execPath,
           args: [
@@ -195,7 +204,7 @@ function printHelp() {
     "  --cwd DIR --run-id ID --log-path PATH",
     "",
     "print-readonly options:",
-    "  --cwd DIR --run-id ID --model PROVIDER/MODEL --file PATH --prompt TEXT [--tool read,grep,find,ls]",
+    "  --cwd DIR --run-id ID --model PROVIDER/MODEL --file PATH --prompt TEXT [--file-contract read-only|mutation] [--tool read,grep,find,ls]",
     "",
     "Builds payloads for scripts/agent-run-driver-step.mjs. It never dispatches by itself.",
   ].join("\n") + "\n");

@@ -24,6 +24,7 @@ test("builds a headless driver-step payload for local pi help", () => {
   assert.equal(result.processStartAllowed, false);
   assert.equal(result.payload.run_spec.run_id, "pi-help-smoke");
   assert.equal(result.payload.run_spec.provider_model_ref, "local/pi-cli");
+  assert.equal(result.payload.run_spec.file_contract, "read-only");
   assert.equal(result.payload.run_spec.execution_preview.command, process.execPath);
   assert.deepEqual(result.payload.run_spec.execution_preview.args, [cliPath, "--help"]);
 });
@@ -54,6 +55,7 @@ test("builds a print-readonly payload with isolated pi flags", () => {
   assert.equal(result.decision, "ready-for-driver-step");
   assert.equal(result.payloadMode, "print-readonly");
   assert.equal(result.payload.run_spec.provider_model_ref, "local/test-model");
+  assert.equal(result.payload.run_spec.file_contract, "read-only");
   assert.deepEqual(result.payload.run_spec.declared_files, ["README.md"]);
   assert.deepEqual(result.payload.run_spec.execution_preview.args, [
     cliPath,
@@ -71,6 +73,25 @@ test("builds a print-readonly payload with isolated pi flags", () => {
     "@README.md",
     "Return PASS.",
   ]);
+});
+
+test("builds a print payload with mutation file contract when requested", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-print-mutation-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+
+  const result = buildPiPrintReadonlyDriverStepPayload({
+    cwd,
+    runId: "pi-print-mutation-smoke",
+    model: "local/test-model",
+    files: ["README.md"],
+    prompt: "Apply scoped change.",
+    fileContract: "mutation",
+  });
+
+  assert.equal(result.decision, "ready-for-driver-step");
+  assert.equal(result.payload.run_spec.file_contract, "mutation");
 });
 
 test("blocks incomplete print-readonly payloads", () => {
