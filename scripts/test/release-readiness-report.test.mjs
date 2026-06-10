@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -218,6 +218,47 @@ test("cli strict exits non-zero when release is not ready", () => {
 
     assert.equal(result.status, 1);
     assert.match(result.stdout, /release-readiness-report: wrote/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
+test("cli can write structured json for agents", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [
+      {
+        id: "TASK-BUD-521",
+        status: "in_progress",
+        priority: "p3",
+        description: "external isolation influence",
+      },
+    ],
+  });
+  const evidencePath = path.join(workspace, "docs", "research", "task-bud-521-local-isolation-canary-2026-06.md");
+  const outPath = path.join(workspace, "readiness.json");
+  mkdirSync(path.dirname(evidencePath), { recursive: true });
+  writeFileSync(evidencePath, "# canary\n");
+
+  try {
+    const result = spawnSync(process.execPath, [
+      path.resolve("scripts/release-readiness-report.mjs"),
+      "--target",
+      "0.8.0",
+      "--json",
+      "--out",
+      outPath,
+    ], {
+      cwd: workspace,
+      encoding: "utf8",
+    });
+
+    assert.equal(result.status, 0);
+    const json = JSON.parse(readFileSync(outPath, "utf8"));
+    assert.equal(json.ready, false);
+    assert.deepEqual(json.operatorDecisions.map((decision) => decision.id), ["decide-board-evidence-candidates"]);
+    assert.equal(json.board.releaseDecisionReady, true);
+    assert.ok(json.checklist.some((item) => item.id === "board-release-clear" && item.ok === false));
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }

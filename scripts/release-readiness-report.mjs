@@ -253,6 +253,7 @@ function parseArgs(argv) {
     target: "0.8.0",
     out: "",
     strict: false,
+    json: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
@@ -260,6 +261,7 @@ function parseArgs(argv) {
     if (k === "--target" && v) { out.target = v; i++; continue; }
     if (k === "--out" && v) { out.out = v; i++; continue; }
     if (k === "--strict") { out.strict = true; continue; }
+    if (k === "--json") { out.json = true; continue; }
   }
   return out;
 }
@@ -371,11 +373,23 @@ function main() {
   const report = buildReport(data);
 
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const defaultOut = path.join(process.cwd(), ".artifacts", "release-readiness", `v${args.target}-${stamp}.md`);
+  const defaultOut = path.join(process.cwd(), ".artifacts", "release-readiness", `v${args.target}-${stamp}.${args.json ? "json" : "md"}`);
   const outPath = args.out ? path.resolve(process.cwd(), args.out) : defaultOut;
 
   mkdirSync(path.dirname(outPath), { recursive: true });
-  writeFileSync(outPath, `${report.markdown}\n`);
+  if (args.json) {
+    writeFileSync(outPath, `${JSON.stringify({
+      target: data.target,
+      head: data.head,
+      latestTag: data.latestTag,
+      ready: report.ready,
+      checklist: report.checklist,
+      operatorDecisions: report.operatorDecisions,
+      board: data.board,
+    }, null, 2)}\n`);
+  } else {
+    writeFileSync(outPath, `${report.markdown}\n`);
+  }
 
   process.stdout.write(`release-readiness-report: wrote ${path.relative(process.cwd(), outPath).replace(/\\/g, "/")}\n`);
   if (args.strict && !report.ready) process.exit(1);
