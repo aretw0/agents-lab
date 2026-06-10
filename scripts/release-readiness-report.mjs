@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { buildReleasePackageSmokeReport } from "./release-package-smoke.mjs";
 
 const PACKAGES = [
   "packages/pi-stack/package.json",
@@ -373,6 +374,7 @@ export function gather(target, cwd = process.cwd()) {
     publish: existsSync(path.join(cwd, ".github", "workflows", "publish.yml")),
     releaseDraft: existsSync(path.join(cwd, ".github", "workflows", "release-draft.yml")),
   };
+  const packageSmoke = buildReleasePackageSmokeReport({ cwd, runPack: false });
 
   return {
     target,
@@ -384,7 +386,9 @@ export function gather(target, cwd = process.cwd()) {
     workflows,
     gates: {
       agentRunDrivers: hasAgentRunDriverGate(cwd),
+      packageSmoke: packageSmoke.ok,
     },
+    packageSmoke,
     board: summarizeBoard(cwd),
   };
 }
@@ -398,6 +402,7 @@ export function buildReport(data) {
     { id: "workflow-publish", ok: data.workflows.publish, evidence: ".github/workflows/publish.yml" },
     { id: "workflow-release-draft", ok: data.workflows.releaseDraft, evidence: ".github/workflows/release-draft.yml" },
     { id: "agent-run-driver-gate", ok: data.gates.agentRunDrivers, evidence: `package.json scripts.test:agent-run:drivers includes ${AGENT_RUN_DRIVER_GATE_TESTS.join(", ")}` },
+    { id: "release-package-smoke", ok: data.packageSmoke.ok, evidence: data.packageSmoke.packageBlockers.length ? data.packageSmoke.packageBlockers.map((blocker) => blocker.id).join(", ") : "release package smoke report pass" },
     { id: "board-release-clear", ok: data.board.releaseReady, evidence: data.board.blockers.length ? data.board.blockers.join(", ") : "no open P0/in-progress/blocked tasks" },
   ].map((item) => ({ ...item, kind: releaseGateKind(item.id) }));
   const ready = checklist.every((item) => item.ok);
@@ -494,6 +499,7 @@ function main() {
       targetVersionReady: data.targetVersionReady,
       workflows: data.workflows,
       gates: data.gates,
+      packageSmoke: data.packageSmoke,
       decision: report.decision,
       ready: report.ready,
       checklist: report.checklist,

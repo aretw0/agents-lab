@@ -6,7 +6,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const PACKAGE_DIR = path.join(ROOT, "packages");
 const RELEASE_PACKAGES = [
   "packages/pi-stack",
   "packages/git-skills",
@@ -20,19 +19,20 @@ const REPORT_ONLY_PERMISSIONS = {
   processStartAllowed: false,
 };
 
-function readText(relPath) {
-  return readFileSync(path.join(ROOT, relPath), "utf8");
+function readText(relPath, cwd = ROOT) {
+  return readFileSync(path.join(cwd, relPath), "utf8");
 }
 
-function listWorkspacePackages() {
-  return readdirSync(PACKAGE_DIR, { withFileTypes: true })
+function listWorkspacePackages(cwd = ROOT) {
+  const packageDir = path.join(cwd, "packages");
+  return readdirSync(packageDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => `packages/${entry.name}`)
-    .filter((relPath) => existsSync(path.join(ROOT, relPath, "package.json")))
+    .filter((relPath) => existsSync(path.join(cwd, relPath, "package.json")))
     .sort();
 }
 
-function runPackDryRun(relPath) {
+function runPackDryRun(relPath, cwd = ROOT) {
   const uid = typeof process.getuid === "function" ? process.getuid() : "user";
   const npmCache = process.env.AGENTS_LAB_NPM_PACK_CACHE
     ?? path.join(tmpdir(), `agents-lab-npm-pack-cache-${uid}`);
@@ -41,7 +41,7 @@ function runPackDryRun(relPath) {
     "npm",
     ["pack", "--dry-run", "--ignore-scripts", "--json"],
     {
-      cwd: path.join(ROOT, relPath),
+      cwd: path.join(cwd, relPath),
       encoding: "utf8",
       env: {
         ...process.env,
@@ -79,9 +79,10 @@ function runPackDryRun(relPath) {
 
 export function buildReleasePackageSmokeReport(options = {}) {
   const runPack = options.runPack !== false;
-  const readTextFn = options.readText ?? readText;
+  const cwd = options.cwd ?? ROOT;
+  const readTextFn = options.readText ?? ((relPath) => readText(relPath, cwd));
   const readJsonFn = (relPath) => JSON.parse(readTextFn(relPath));
-  const packageDirs = listWorkspacePackages();
+  const packageDirs = listWorkspacePackages(cwd);
   const packages = packageDirs.map((relPath) => ({
     relPath,
     manifest: readJsonFn(path.join(relPath, "package.json")),
@@ -207,7 +208,7 @@ export function buildReleasePackageSmokeReport(options = {}) {
   }
 
   const packResults = runPack
-    ? RELEASE_PACKAGES.map(runPackDryRun)
+    ? RELEASE_PACKAGES.map((relPath) => runPackDryRun(relPath, cwd))
     : [];
   for (const result of packResults) {
     if (!result.ok) {

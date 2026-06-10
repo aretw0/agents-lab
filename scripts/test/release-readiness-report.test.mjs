@@ -22,6 +22,7 @@ function makeWorkspace({
 } = {}) {
   const root = mkdtempSync(path.join(tmpdir(), "release-readiness-"));
   writeFileSync(path.join(root, "package.json"), JSON.stringify({
+    private: true,
     scripts: {
       "test:agent-run:drivers": agentRunDriverScript,
     },
@@ -29,13 +30,53 @@ function makeWorkspace({
   for (const relPath of PACKAGES) {
     const fullPath = path.join(root, relPath);
     mkdirSync(path.dirname(fullPath), { recursive: true });
-    writeFileSync(fullPath, JSON.stringify({ version }, null, 2));
+    const packageDir = path.dirname(relPath).replace(/\\/g, "/");
+    const packageName = `@aretw0/${path.basename(packageDir)}`;
+    writeFileSync(fullPath, JSON.stringify({
+      name: packageName,
+      version,
+      private: false,
+      repository: {
+        type: "git",
+        url: "https://github.com/aretw0/agents-lab.git",
+        directory: packageDir,
+      },
+      files: ["dist", "README.md"],
+    }, null, 2));
   }
-  for (const workflow of ["ci.yml", "publish.yml", "release-draft.yml"]) {
-    const fullPath = path.join(root, ".github", "workflows", workflow);
-    mkdirSync(path.dirname(fullPath), { recursive: true });
-    writeFileSync(fullPath, "name: test\n");
-  }
+  const changesetPath = path.join(root, ".changeset", "config.json");
+  mkdirSync(path.dirname(changesetPath), { recursive: true });
+  writeFileSync(changesetPath, JSON.stringify({
+    access: "public",
+    baseBranch: "main",
+    fixed: [["@aretw0/pi-stack", "@aretw0/git-skills", "@aretw0/web-skills", "@aretw0/pi-skills", "@aretw0/lab-skills"]],
+  }, null, 2));
+  const workflowDir = path.join(root, ".github", "workflows");
+  mkdirSync(workflowDir, { recursive: true });
+  writeFileSync(path.join(workflowDir, "ci.yml"), "name: ci\n");
+  writeFileSync(path.join(workflowDir, "publish.yml"), [
+    "name: publish",
+    "permissions:",
+    "  id-token: write",
+    "jobs:",
+    "  publish:",
+    "    steps:",
+    "      - run: npm publish --workspace packages/pi-stack --provenance --access public",
+    "      - run: git tag --points-at \"$SHA\"",
+    "",
+  ].join("\n"));
+  writeFileSync(path.join(workflowDir, "release-draft.yml"), [
+    "name: release draft",
+    "on:",
+    "  workflow_dispatch:",
+    "jobs:",
+    "  draft:",
+    "    steps:",
+    "      - uses: actions/create-release@v1",
+    "        with:",
+    "          draft: true",
+    "",
+  ].join("\n"));
   mkdirSync(path.join(root, ".project"), { recursive: true });
   writeFileSync(path.join(root, ".project", "tasks.json"), JSON.stringify({ tasks }, null, 2));
   return root;
@@ -94,6 +135,7 @@ test("buildReport marks target release not ready until version and board gates a
       ["workflow-publish", "technical-gate"],
       ["workflow-release-draft", "technical-gate"],
       ["agent-run-driver-gate", "technical-gate"],
+      ["release-package-smoke", "technical-gate"],
       ["board-release-clear", "board-state"],
     ]);
     assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.id), ["target-version-ready", "board-release-clear"]);
@@ -119,6 +161,7 @@ test("buildReport marks target release not ready until version and board gates a
     assert.match(report.markdown, /\[ \] target-version-ready/);
     assert.match(report.markdown, /\[ \] board-release-clear/);
     assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
+    assert.match(report.markdown, /\[x\] release-package-smoke/);
     assert.match(report.markdown, /## Release Blockers/);
     assert.match(report.markdown, /## Operator Decisions/);
     assert.match(report.markdown, /decide-target-version: packages are not yet at v0\.8\.0/);
@@ -157,6 +200,7 @@ test("buildReport marks release ready when versions and board gates are clear", 
     assert.match(report.markdown, /decision: ready/);
     assert.match(report.markdown, /\[x\] target-version-ready/);
     assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
+    assert.match(report.markdown, /\[x\] release-package-smoke/);
     assert.match(report.markdown, /\[x\] board-release-clear/);
     assert.match(report.markdown, /## Release Blockers\n- none/);
   } finally {
@@ -305,6 +349,33 @@ test("agent-run driver gate requires the full driver suite script", () => {
   }
 });
 
+test("package smoke gate blocks release readiness with structured evidence", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const rootPackagePath = path.join(workspace, "package.json");
+    const rootPackage = JSON.parse(readFileSync(rootPackagePath, "utf8"));
+    writeFileSync(rootPackagePath, JSON.stringify({ ...rootPackage, private: false }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+    const report = buildReport(data);
+
+    assert.equal(data.gates.packageSmoke, false);
+    assert.equal(data.packageSmoke.decision, "block");
+    assert.deepEqual(data.packageSmoke.packageBlockers.map((blocker) => blocker.id), ["root-package-not-private"]);
+    assert.equal(report.ready, false);
+    assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.id), ["release-package-smoke"]);
+    assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.evidence), ["root-package-not-private"]);
+    assert.match(report.markdown, /\[ \] release-package-smoke/);
+    assert.match(report.markdown, /release-package-smoke \[technical-gate\]: root-package-not-private/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("cli strict exits non-zero when release is not ready", () => {
   const workspace = makeWorkspace({
     version: "0.7.0",
@@ -372,7 +443,10 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.versionsAligned, true);
     assert.equal(json.targetVersionReady, true);
     assert.deepEqual(json.workflows, { ci: true, publish: true, releaseDraft: true });
-    assert.deepEqual(json.gates, { agentRunDrivers: true });
+    assert.deepEqual(json.gates, { agentRunDrivers: true, packageSmoke: true });
+    assert.equal(json.packageSmoke.mode, "release-package-smoke-report");
+    assert.equal(json.packageSmoke.decision, "pass");
+    assert.deepEqual(json.packageSmoke.packageBlockers, []);
     assert.deepEqual(json.checklist.map((item) => [item.id, item.kind]), [
       ["versions-aligned", "technical-gate"],
       ["target-version-ready", "operator-decision"],
@@ -380,6 +454,7 @@ test("cli can write structured json for agents", () => {
       ["workflow-publish", "technical-gate"],
       ["workflow-release-draft", "technical-gate"],
       ["agent-run-driver-gate", "technical-gate"],
+      ["release-package-smoke", "technical-gate"],
       ["board-release-clear", "board-state"],
     ]);
     assert.deepEqual(json.releaseBlockers.map((blocker) => blocker.id), ["board-release-clear"]);
