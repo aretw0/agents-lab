@@ -90,10 +90,18 @@ Automação mínima existente:
 - `publish.yml` mantém publish gateado por tag semver + smoke/test/verify/audits;
 - `release-draft.yml` prepara draft release manual com artefato de notas;
 - `pnpm run release:readiness:v0.8.0` gera checklist local canônico em `.artifacts/release-readiness/`.
+- `pnpm run release:readiness:v0.8.0:json` gera o mesmo estado em JSON para agentes e automação local, incluindo `operatorDecisions`.
+
+Interpretação do readiness report:
+- `Release Blockers` separa gate técnico, decisão de operador e estado do board;
+- `Operator Decisions` lista as decisões humanas restantes antes do release;
+- `Board Evidence Candidates` lista tarefas ainda abertas que já têm evidência local-safe para decisão;
+- `releaseDecisionReady: yes` significa que o board está pronto para decisão explícita, não que o release está aprovado.
 
 Checklist de readiness v0.8.0 (board/handoff):
 - versões de pacotes alinhadas;
 - CI/publish/release-draft prontos e auditáveis;
+- candidatos de evidência do board decididos como `park-for-0.8` ou `require-work`;
 - decisão explícita do operador de `draft` -> `publish`;
 - rollback documentado para falha pós-corte.
 

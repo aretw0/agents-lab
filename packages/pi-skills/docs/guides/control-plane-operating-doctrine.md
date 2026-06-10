@@ -978,6 +978,16 @@ pnpm run decoupling:maturity:json
 Quando o estado vier como `colony-blocked-by-executor-propagation-gap`, o output passa a recomendar explicitamente a rota local-safe:
 `colony_plan_packet` (modo `report-only`, sem `ant_colony`) para decompor o objetivo em 2-5 worker packets.
 
+Lane serial validada para subagents locais:
+
+1. `colony_plan_packet` cria plano report-only com 2-5 workers e `joinPolicy.mode=fail-closed`.
+2. `colony_worker_start_packet` prepara exatamente um worker como `agentInvocationSpecPacket`; ainda não despacha e exige aprovação explícita do operador.
+3. Após aprovação, executar só um `agent_run` serial, validar com `agent_run_outcome_packet` e salvar o artifact em `.project/reports/`.
+4. Repetir o passo anterior para o próximo worker apenas depois de outcome PASS do worker atual.
+5. `colony_serial_fanin_packet` agrega os outcomes sem dispatch, diferenciando `declaredFiles` read-only de `expectedArtifact` permitido como evidência. `cacheStatus=unknown` pode ser interpretado como `not-applicable` quando há outcome explícito, artifact presente/não vazio e output não vazio.
+
+Critério de promoção da lane serial: `colony_serial_fanin_packet.decision=pass`, `blockers=[]`, artifacts requeridos em `.project/reports/`, `declaredTouchedFiles=[]`, `unexpectedTouchedFiles=[]` e `batchOutcomePacket.workerSummaries[*].touchedFileCount=0`. Qualquer missing outcome, artifact vazio, touch em declared file, ant_colony launch ou blocker de worker mantém o fan-in em BLOCK/PARTIAL e exige revisão do operador.
+
 Batch local-safe de 3–5 fatias:
 - seguir preflight + stop contracts do runbook em `docs/research/control-plane-decoupling-lane-2026-05.md`;
 - parar imediatamente em `protected|risk|reload-required|validation-failed-or-unknown|no-successor`;
