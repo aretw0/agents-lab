@@ -22,6 +22,24 @@ function readPayload(inputPath) {
   return stdin ? JSON.parse(stdin) : {};
 }
 
+function normalizeDriverPayload(payload) {
+  if (
+    payload
+    && typeof payload === "object"
+    && !Array.isArray(payload)
+    && payload.tool === "agent_run_driver_step_dispatch"
+    && payload.params
+    && typeof payload.params === "object"
+    && !Array.isArray(payload.params)
+  ) {
+    return {
+      ...payload.params,
+      ...(payload.operator_approval ? { operator_approval: payload.operator_approval } : {}),
+    };
+  }
+  return payload;
+}
+
 function asString(value) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -296,6 +314,7 @@ async function dispatchRun(cwd, runSpec) {
 }
 
 export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
+  payload = normalizeDriverPayload(payload);
   const runSpec = parseRunSpec(payload.run_spec);
   const executeRequested = payload.execute === true;
   const followRequested = payload.follow === true;

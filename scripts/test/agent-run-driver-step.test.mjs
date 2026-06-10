@@ -110,6 +110,29 @@ test("headless driver step executes local process and materializes outcome", asy
   assert.equal(registry.runs[0].state, "completed");
 });
 
+test("headless driver step accepts next driver step call wrapper", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-call-wrapper-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const result = await runAgentRunDriverStep({
+    tool: "agent_run_driver_step_dispatch",
+    operatorApprovalRequired: true,
+    operator_approval: structuredApproval(),
+    params: {
+      ...payload(),
+      execute: true,
+      follow: true,
+      build_outcome: true,
+      follow_max_wait_ms: 5_000,
+    },
+  }, cwd);
+
+  assert.equal(result.mode, "agent-run-driver-step-dispatch");
+  assert.equal(result.decision, "dispatched");
+  assert.equal(result.dispatchAllowed, true);
+  assert.equal(result.follow?.terminal, true);
+  assert.equal(result.agentRunOutcomePacket?.contractDecision, "pass");
+});
+
 test("headless driver step records timed-out runs distinctly", async () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-timeout-"));
   writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
