@@ -31,7 +31,7 @@ O estado atual para 0.8.0 é:
 | Discurso público | auditado | `repo:discourse:audit` cobre README, guias, primitives, architecture e research promovido |
 | Instalação padrão | conservadora | `npx @aretw0/pi-stack` instala perfil `strict-curated` |
 | Fronteira de engine | protegida | `engine:boundary:audit` mantém core portable e Pi em surfaces/adapters |
-| Driver agent-run agnóstico | verde | `test:agent-run:drivers` cobre driver-step, pi-driver e payload emitido |
+| Driver agent-run agnóstico | verde | `test:agent-run:drivers` cobre driver-step, pi-driver, payload emitido e cadeia arquivo-a-arquivo packet/result |
 | Board de release | ainda com fluxo em andamento | `release:readiness:v0.8.0` reporta `board-release-clear` bloqueado por tarefas em execução, sem P0 aberto, e ainda sob revisão de release
 
 ## Preparado, mas ainda protegido
