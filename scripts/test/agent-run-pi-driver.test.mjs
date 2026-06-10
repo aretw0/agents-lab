@@ -33,6 +33,9 @@ test("pi driver previews help without dispatch by default", async () => {
   const result = await runPiDriver({ cwd, mode: "help", runId: "pi-driver-preview" });
 
   assert.equal(result.mode, "agent-run-pi-driver");
+  assert.equal(result.schemaVersion, 1);
+  assert.equal(result.payloadPacket.schemaVersion, 1);
+  assert.equal(result.driverStep.schemaVersion, 1);
   assert.equal(result.decision, "ready-for-operator-decision");
   assert.equal(result.dispatchAllowed, false);
   assert.equal(result.driverStep.processStartAllowed, false);
@@ -127,6 +130,7 @@ test("pi driver CLI writes summary output file", () => {
   assert.deepEqual(JSON.parse(readFileSync(outputPath, "utf8")), JSON.parse(stdout));
   const summary = JSON.parse(stdout);
   assert.equal(summary.mode, "agent-run-pi-driver-summary");
+  assert.equal(summary.schemaVersion, 1);
   assert.equal(summary.decision, "dispatched");
   assert.equal(summary.contractDecision, "pass");
   assert.match(summary.driverStepSummary, /agent-run-driver-step: decision=dispatched/);

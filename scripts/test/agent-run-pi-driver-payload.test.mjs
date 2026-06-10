@@ -32,6 +32,7 @@ test("builds a headless driver-step payload for local pi help", () => {
   const result = buildPiHelpDriverStepPayload({ cwd, runId: "pi-help-smoke" });
 
   assert.equal(result.mode, "agent-run-pi-driver-payload");
+  assert.equal(result.schemaVersion, 1);
   assert.equal(result.decision, "ready-for-driver-step");
   assert.equal(result.dispatchAllowed, false);
   assert.equal(result.processStartAllowed, false);
@@ -91,6 +92,7 @@ test("blocks when local pi cli is missing", () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-missing-"));
   const result = buildPiHelpDriverStepPayload({ cwd, runId: "pi-help-missing" });
 
+  assert.equal(result.schemaVersion, 1);
   assert.equal(result.decision, "blocked");
   assert.equal(result.dispatchAllowed, false);
   assert.ok(result.blockers.includes("local-pi-cli-missing"));
@@ -127,6 +129,7 @@ test("builds a print-readonly payload with isolated pi flags", () => {
   });
 
   assert.equal(result.decision, "ready-for-driver-step");
+  assert.equal(result.schemaVersion, 1);
   assert.equal(result.payloadMode, "print-readonly");
   assert.equal(result.payload.run_spec.provider_model_ref, "local/test-model");
   assert.equal(result.payload.run_spec.file_contract, "read-only");

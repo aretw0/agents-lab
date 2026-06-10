@@ -6,6 +6,8 @@ import { pathToFileURL } from "node:url";
 import { buildPiDriverStepPayload } from "./agent-run-pi-driver-payload.mjs";
 import { runAgentRunDriverStep } from "./agent-run-driver-step.mjs";
 
+const SCHEMA_VERSION = 1;
+
 function parseArgs(argv = process.argv.slice(2)) {
   const out = {
     cwd: process.cwd(),
@@ -90,6 +92,7 @@ export async function runPiDriver(options = {}) {
   if (payloadPacket.decision === "blocked") {
     return {
       mode: "agent-run-pi-driver",
+      schemaVersion: SCHEMA_VERSION,
       decision: "blocked",
       dispatchAllowed: false,
       processStartAllowed: false,
@@ -118,6 +121,7 @@ export async function runPiDriver(options = {}) {
 
   return {
     mode: "agent-run-pi-driver",
+    schemaVersion: SCHEMA_VERSION,
     decision: driverStep.decision,
     dispatchAllowed: driverStep.dispatchAllowed,
     processStartAllowed: driverStep.processStartAllowed,
@@ -134,6 +138,7 @@ export function buildPiDriverSummary(result) {
   const outcome = driverStep.agentRunOutcomePacket;
   return {
     mode: "agent-run-pi-driver-summary",
+    schemaVersion: SCHEMA_VERSION,
     decision: result?.decision ?? "unknown",
     dispatchAllowed: result?.dispatchAllowed === true,
     processStartAllowed: result?.processStartAllowed === true,

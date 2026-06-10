@@ -4,6 +4,8 @@ import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
 
+const SCHEMA_VERSION = 1;
+
 function parseArgs(argv = process.argv.slice(2)) {
   const out = {
     cwd: process.cwd(),
@@ -148,6 +150,7 @@ export function buildPiHelpDriverStepPayload(options = {}) {
   if (!cliPath) {
     return {
       mode: "agent-run-pi-driver-payload",
+      schemaVersion: SCHEMA_VERSION,
       decision: "blocked",
       blockers: ["local-pi-cli-missing"],
       dispatchAllowed: false,
@@ -175,6 +178,7 @@ export function buildPiHelpDriverStepPayload(options = {}) {
 
   return {
     mode: "agent-run-pi-driver-payload",
+    schemaVersion: SCHEMA_VERSION,
     decision: "ready-for-driver-step",
     blockers: [],
     dispatchAllowed: false,
@@ -208,6 +212,7 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
   if (blockers.length > 0) {
     return {
       mode: "agent-run-pi-driver-payload",
+      schemaVersion: SCHEMA_VERSION,
       payloadMode: "print-readonly",
       decision: "blocked",
       blockers,
@@ -251,6 +256,7 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
 
   return {
     mode: "agent-run-pi-driver-payload",
+    schemaVersion: SCHEMA_VERSION,
     payloadMode: "print-readonly",
     decision: "ready-for-driver-step",
     blockers: [],
@@ -269,6 +275,7 @@ export function buildPiDriverStepPayload(options = {}) {
   if (mode === "print-readonly") return buildPiPrintReadonlyDriverStepPayload(options);
   return {
     mode: "agent-run-pi-driver-payload",
+    schemaVersion: SCHEMA_VERSION,
     decision: "blocked",
     blockers: [`unsupported-payload-mode:${mode}`],
     dispatchAllowed: false,

@@ -4,7 +4,7 @@
 
 ## Contract
 
-- Outputs include `schemaVersion=1` on the driver-step packet and on any embedded `agent-run-outcome-packet`.
+- Outputs include `schemaVersion=1` on the driver-step packet, Pi driver wrapper packets/summaries and any embedded `agent-run-outcome-packet`.
 - Preview is default: `execute=false` returns `dispatchAllowed=false` and `processStartAllowed=false`.
 - Real execution requires structured operator approval and starts at most one subprocess.
 - The run registry moves through `planned -> running -> terminal` with `runId`, `cwd`, `declaredFiles`, `providerModelRef`, `timeoutMs` and `logPath`.
