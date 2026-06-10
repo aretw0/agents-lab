@@ -533,6 +533,12 @@ describe("agent run task packet surfaces", () => {
     expect(preview.details?.decision).toBe("preview");
     expect(preview.details?.dispatchAllowed).toBe(false);
     expect(preview.details?.processStartAllowed).toBe(false);
+    expect(preview.details?.preferredDriverStep).toMatchObject({
+      mode: "agent-run-driver-step-preview",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      tool: "agent_run_driver_step_dispatch",
+    });
     expect(existsSync(path.join(tmp, ".pi", "reports", "agent-runs.json"))).toBe(false);
     expect(preview.content?.[0]?.text).toContain("dispatch=no");
 
