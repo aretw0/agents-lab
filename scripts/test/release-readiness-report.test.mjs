@@ -142,6 +142,40 @@ test("buildReport lists local-safe evidence candidates without clearing the boar
   }
 });
 
+test("buildReport does not mark board decision-ready when an active task lacks evidence", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [
+      {
+        id: "TASK-BUD-521",
+        status: "in_progress",
+        priority: "p3",
+        description: "external isolation influence",
+      },
+      {
+        id: "TASK-UNCOVERED",
+        status: "in_progress",
+        priority: "p2",
+        description: "active work without local-safe evidence",
+      },
+    ],
+  });
+  const evidencePath = path.join(workspace, "docs", "research", "task-bud-521-local-isolation-canary-2026-06.md");
+  mkdirSync(path.dirname(evidencePath), { recursive: true });
+  writeFileSync(evidencePath, "# canary\n");
+
+  try {
+    const report = buildReport(gather("0.8.0", workspace));
+    assert.equal(report.ready, false);
+    assert.match(report.markdown, /board-release-clear \[board-state\]: in-progress=2/);
+    assert.match(report.markdown, /releaseDecisionReady: no/);
+    assert.doesNotMatch(report.markdown, /decide-board-evidence-candidates/);
+    assert.match(report.markdown, /TASK-UNCOVERED \[p2\/in-progress\]/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("agent-run driver gate requires the full driver suite script", () => {
   const workspace = makeWorkspace({
     version: "0.8.0",
