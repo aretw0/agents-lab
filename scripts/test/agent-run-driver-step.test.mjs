@@ -133,6 +133,35 @@ test("headless driver step accepts next driver step call wrapper", async () => {
   assert.equal(result.agentRunOutcomePacket?.contractDecision, "pass");
 });
 
+test("headless driver step accepts payload packet with embedded driver step call", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-payload-packet-wrapper-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const params = {
+    ...payload(),
+    execute: true,
+    follow: true,
+    build_outcome: true,
+    follow_max_wait_ms: 5_000,
+  };
+  const result = await runAgentRunDriverStep({
+    mode: "agent-run-pi-driver-payload",
+    decision: "ready-for-driver-step",
+    payload: params,
+    driverStepCall: {
+      tool: "agent_run_driver_step_dispatch",
+      operatorApprovalRequired: true,
+      operator_approval: structuredApproval(),
+      params,
+    },
+  }, cwd);
+
+  assert.equal(result.mode, "agent-run-driver-step-dispatch");
+  assert.equal(result.decision, "dispatched");
+  assert.equal(result.dispatchAllowed, true);
+  assert.equal(result.structuredOperatorApproval, true);
+  assert.equal(result.agentRunOutcomePacket?.contractDecision, "pass");
+});
+
 test("headless driver step accepts wrapper approval in declared params field", async () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-call-wrapper-param-"));
   writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");

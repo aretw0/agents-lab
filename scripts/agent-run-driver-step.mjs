@@ -27,6 +27,16 @@ function normalizeDriverPayload(payload) {
     payload
     && typeof payload === "object"
     && !Array.isArray(payload)
+    && payload.driverStepCall
+    && typeof payload.driverStepCall === "object"
+    && !Array.isArray(payload.driverStepCall)
+  ) {
+    return normalizeDriverPayload(payload.driverStepCall);
+  }
+  if (
+    payload
+    && typeof payload === "object"
+    && !Array.isArray(payload)
     && payload.tool === "agent_run_driver_step_dispatch"
     && payload.params
     && typeof payload.params === "object"
