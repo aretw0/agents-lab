@@ -62,7 +62,7 @@ O estado atual para 0.8.0 é:
 |---|---|
 | Revisar release notes/changelog | confirmar mudanças desde `v0.7.0`, riscos e rollback antes de tag |
 | Decidir candidatos de evidência do board | usar `operatorDecisions[*].candidateTaskIds`, `operatorDecisions[*].allowedActions` e `releaseDecisionReady` no JSON do readiness report para decidir se `TASK-BUD-480`, `TASK-BUD-521` e `TASK-BUD-676` ficam parked para 0.8 ou entram como trabalho requerido |
-| Decidir bump 0.8.0 | `release:readiness:v0.8.0` deve ficar verde exceto antes do bump; depois, verde completo |
+| Decidir bump 0.8.0 | `release:readiness -- --target 0.8.0` deve ficar verde exceto antes do bump; depois, verde completo |
 | Revalidar instalação limpa | `release:package:smoke`, `docs:package:check`, install/smoke em ambiente limpo; GitHub Packages deve continuar opt-in se não aprovado |
 | Manter acoplamentos de engine sob controle | `engine:boundary:audit`, sem dependências Pi em core portable |
 

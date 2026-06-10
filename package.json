@@ -40,6 +40,8 @@
     "release:package:smoke:json": "node scripts/release-package-smoke.mjs --json",
     "publish:all": "pnpm -r --if-present run build && pnpm exec changeset publish",
     "offload:evidence:template": "node scripts/offload-evidence-template.mjs",
+    "release:readiness": "node scripts/release-readiness-report.mjs",
+    "release:readiness:json": "node scripts/release-readiness-report.mjs --json",
     "release:readiness:v0.8.0": "node scripts/release-readiness-report.mjs --target 0.8.0",
     "release:readiness:v0.8.0:json": "node scripts/release-readiness-report.mjs --target 0.8.0 --json",
     "pi:local": "node scripts/pi-source-switch.mjs local",

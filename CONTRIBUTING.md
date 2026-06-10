@@ -96,7 +96,7 @@ Ver guia completo em [`docs/guides/publishing.md`](./docs/guides/publishing.md).
 
 ```bash
 pnpm run release             # bumpa versões + atualiza CHANGELOG.md
-pnpm run release:readiness:v0.8.0
+pnpm run release:readiness -- --target X.X.X
 git add .
 git commit -m "chore(release): vX.X.X"
 git tag vX.X.X
