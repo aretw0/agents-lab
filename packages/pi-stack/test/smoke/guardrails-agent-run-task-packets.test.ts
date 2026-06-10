@@ -570,6 +570,84 @@ describe("agent run task packet surfaces", () => {
     expect((protectedScope.details?.blockers as string[])).toContain("protected-scope-requested");
   });
 
+  it("routes read-only task dispatch execution to the preferred driver step", async () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-task-dispatch-driver-route-"));
+    mkdirSync(path.join(tmp, ".project"), { recursive: true });
+    writeFileSync(path.join(tmp, "README.md"), "# Test fixture\n", "utf8");
+    writeFileSync(path.join(tmp, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-READONLY",
+          description: "Review README without mutations.",
+          status: "planned",
+          files: ["README.md"],
+          acceptance_criteria: ["returns read-only evidence"],
+        },
+      ],
+    }, null, 2), "utf8");
+
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
+
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_task_dispatch");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+
+    const result = await tool.execute(
+      "tc-agent-run-task-dispatch-driver-route",
+      {
+        task_id: "TASK-READONLY",
+        profile: "read-only-review",
+        provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+        budget_decision: "warn",
+        budget_evidence: "scoped model budget usable",
+        budget_evidence_source: "manual",
+        budget_evidence_provider: "openai-codex/gpt-5.3-codex-spark",
+        execute: true,
+        operator_approval: {
+          packet_mode: "operator-approval-packet",
+          approved: true,
+          approval_state: "approved",
+        },
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: tmp },
+    );
+
+    expect(result.details?.decision).toBe("blocked");
+    expect(result.details?.dispatchAllowed).toBe(false);
+    expect(result.details?.processStartAllowed).toBe(false);
+    expect(result.details?.preferredDriverStepAvailable).toBe(true);
+    expect((result.details?.blockers as string[])).toContain("prefer-agent-run-driver-step-dispatch");
+    expect(result.details?.preferredDriverStep).toMatchObject({
+      tool: "agent_run_driver_step_dispatch",
+      available: true,
+      payload: {
+        run_spec: {
+          run_id: "task-readonly-task-packet",
+          file_contract: "read-only",
+          declared_files: ["README.md"],
+        },
+      },
+    });
+    expect(existsSync(path.join(tmp, ".pi", "reports", "agent-runs.json"))).toBe(false);
+  });
+
   it("hardens agent_run_task_dispatch against subprocess spawn errors", () => {
     const source = [
       "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",

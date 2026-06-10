@@ -552,6 +552,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       if (existingEntry?.state === "running") blockers.push("run-already-running");
       if (executeRequested && !sameCwd(cwd, ctx.cwd)) blockers.push("execute-cwd-mismatch");
       if (executeRequested && !structuredOperatorApproval) blockers.push("structured-operator-approval-missing");
+      if (executeRequested && packet.headlessDriverPreview.available) blockers.push("prefer-agent-run-driver-step-dispatch");
       const dispatchAllowed = executeRequested && blockers.length === 0;
       let pid: number | undefined;
       let registryEntry = packet.registryPreview.entry;
