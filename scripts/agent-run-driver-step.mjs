@@ -146,7 +146,9 @@ async function followRun(cwd, runId, maxWaitMs, pollIntervalMs, maxLines) {
     status = buildStatus(runId, entry);
   }
   const terminal = status.found && isTerminal(status.state);
-  const logPath = entry?.logPath;
+  const logPath = entry?.logPath
+    ? path.isAbsolute(entry.logPath) ? entry.logPath : path.join(cwd, entry.logPath)
+    : undefined;
   return {
     entry,
     status,

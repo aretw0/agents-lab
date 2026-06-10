@@ -142,6 +142,39 @@ test("headless driver step records timed-out runs distinctly", async () => {
   assert.equal(registry.runs[0].exitCode, 124);
 });
 
+test("headless driver step follows existing runs with relative log paths", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-relative-log-"));
+  const reportsDir = path.join(cwd, ".pi", "reports");
+  mkdirSync(reportsDir, { recursive: true });
+  writeFileSync(path.join(reportsDir, "relative-log.log"), "existing output\n", "utf8");
+  writeFileSync(path.join(reportsDir, "agent-runs.json"), JSON.stringify({
+    runs: [{
+      runId: "headless-driver-step-relative-log",
+      state: "completed",
+      exitCode: 0,
+      cwd,
+      declaredFiles: ["README.md"],
+      logPath: ".pi/reports/relative-log.log",
+      timeoutMs: 30_000,
+    }],
+  }, null, 2), "utf8");
+
+  const result = await runAgentRunDriverStep({
+    run_spec: {
+      ...payload().run_spec,
+      run_id: "headless-driver-step-relative-log",
+      log_path: ".pi/reports/relative-log.log",
+    },
+    follow: true,
+    build_outcome: true,
+    follow_max_wait_ms: 0,
+  }, cwd);
+
+  assert.equal(result.follow?.terminal, true);
+  assert.equal(result.follow?.outputBytes, Buffer.byteLength("existing output\n"));
+  assert.equal(result.agentRunOutcomePacket?.contractDecision, "pass");
+});
+
 test("headless driver step preserves mutation outcome without touched evidence as partial", async () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-mutation-partial-"));
   writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
