@@ -344,6 +344,11 @@ test("cli can write structured json for agents", () => {
     assert.match(json.generatedAt, /^\d{4}-\d{2}-\d{2}T/);
     assert.equal(json.decision, "not-ready");
     assert.equal(json.ready, false);
+    assert.deepEqual(json.versions.map((row) => row.version), ["0.8.0", "0.8.0", "0.8.0", "0.8.0", "0.8.0"]);
+    assert.equal(json.versionsAligned, true);
+    assert.equal(json.targetVersionReady, true);
+    assert.deepEqual(json.workflows, { ci: true, publish: true, releaseDraft: true });
+    assert.deepEqual(json.gates, { agentRunDrivers: true });
     assert.deepEqual(json.checklist.map((item) => [item.id, item.kind]), [
       ["versions-aligned", "technical-gate"],
       ["target-version-ready", "operator-decision"],
