@@ -649,7 +649,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
           ? "resolve-task-dispatch-blockers"
           : "present-operator-approval";
       const nextAction = nextActionCode === "use-preferred-driver-step"
-        ? "call agent_run_driver_step_dispatch with preferredDriverStep.payload"
+        ? "call agent_run_driver_step_dispatch with preferredDriverStep.executionPayloadTemplate plus structured operator_approval"
         : nextActionCode === "resolve-task-dispatch-blockers"
           ? "resolve task dispatch blockers before any worker dispatch"
           : "present structured operator approval before dispatch";

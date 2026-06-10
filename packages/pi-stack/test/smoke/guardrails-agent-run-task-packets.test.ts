@@ -647,7 +647,7 @@ describe("agent run task packet surfaces", () => {
     expect(result.details?.processStartAllowed).toBe(false);
     expect(result.details?.preferredDriverStepAvailable).toBe(true);
     expect(result.details?.nextActionCode).toBe("use-preferred-driver-step");
-    expect(result.details?.nextAction).toBe("call agent_run_driver_step_dispatch with preferredDriverStep.payload");
+    expect(result.details?.nextAction).toBe("call agent_run_driver_step_dispatch with preferredDriverStep.executionPayloadTemplate plus structured operator_approval");
     expect((result.details?.blockers as string[])).toContain("prefer-agent-run-driver-step-dispatch");
     expect(result.details?.preferredDriverStep).toMatchObject({
       tool: "agent_run_driver_step_dispatch",
