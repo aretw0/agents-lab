@@ -349,6 +349,12 @@ export interface AgentRunTaskStartPacketResult {
     blockers: string[];
     summary: string;
   };
+  nextDriverStepCall?: {
+    tool: "agent_run_driver_step_dispatch";
+    params: AgentRunTaskStartPacketResult["headlessDriverPreview"]["executionPayloadTemplate"];
+    operatorApprovalRequired: true;
+    operatorApprovalParam: "operator_approval";
+  };
   statusPreview: ReturnType<typeof buildAgentRunStatus>;
   logTailPreview: {
     runId: string;
@@ -947,6 +953,14 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
     fileContract: spec.fileContract,
   });
   const blockers = [...taskPacket.blockers, ...registryPreview.blockers];
+  const nextDriverStepCall = headlessDriverAvailable
+    ? {
+        tool: headlessDriverPreview.tool,
+        params: headlessDriverPreview.executionPayloadTemplate,
+        operatorApprovalRequired: headlessDriverPreview.operatorApprovalRequired,
+        operatorApprovalParam: "operator_approval" as const,
+      }
+    : undefined;
   let recommendationCode: AgentRunTaskStartPacketResult["recommendationCode"] = taskPacket.recommendationCode;
   if (taskPacket.decision === "blocked" && !blockers.includes("task-packet-blocked")) {
     recommendationCode = "agent-run-task-start-blocked-task-packet";
@@ -972,6 +986,7 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
     registryPreview,
     startPreview: spec.executionPreview,
     headlessDriverPreview,
+    nextDriverStepCall,
     statusPreview,
     logTailPreview: {
       runId: spec.runId,

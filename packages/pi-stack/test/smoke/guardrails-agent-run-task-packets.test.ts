@@ -324,6 +324,20 @@ describe("agent run task packet surfaces", () => {
       },
     });
     expect(result.headlessDriverPreview.operatorApprovalRequired).toBe(true);
+    expect(result.nextDriverStepCall).toMatchObject({
+      tool: "agent_run_driver_step_dispatch",
+      operatorApprovalRequired: true,
+      operatorApprovalParam: "operator_approval",
+      params: {
+        execute: true,
+        follow: true,
+        build_outcome: true,
+        run_spec: {
+          run_id: "task-readonly-task-packet",
+          file_contract: "read-only",
+        },
+      },
+    });
   });
 
   it("propagates inherited extension isolation for custom-provider task workers", () => {
@@ -377,6 +391,7 @@ describe("agent run task packet surfaces", () => {
       available: false,
       blockers: expect.arrayContaining(["headless-driver-preview-task-packet-blocked"]),
     });
+    expect(result.nextDriverStepCall).toBeUndefined();
   });
 
   it("exposes agent_run_task_packet as a report-only board surface", async () => {
@@ -860,6 +875,21 @@ describe("agent run task packet surfaces", () => {
         },
       },
       blockers: [],
+    });
+    expect(result.details?.nextDriverStepCall).toMatchObject({
+      tool: "agent_run_driver_step_dispatch",
+      operatorApprovalRequired: true,
+      operatorApprovalParam: "operator_approval",
+      params: {
+        execute: true,
+        follow: true,
+        build_outcome: true,
+        run_spec: {
+          run_id: "task-readonly-task-packet",
+          file_contract: "read-only",
+          declared_files: ["README.md"],
+        },
+      },
     });
 
     const driverToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_driver_step_dispatch");
