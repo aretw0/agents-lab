@@ -164,6 +164,7 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
             toolList.join(","),
             "--print",
             ...declaredFiles.map((filePath) => `@${filePath}`),
+            "--",
             prompt,
           ],
         },

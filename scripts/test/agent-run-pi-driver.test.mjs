@@ -131,6 +131,7 @@ test("pi driver previews print-readonly payload without provider execution", asy
     "read,grep,find,ls",
     "--print",
     "@README.md",
+    "--",
     "Return PASS.",
   ]);
 });

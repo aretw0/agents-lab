@@ -69,6 +69,7 @@ test("builds a print-readonly payload with isolated pi flags", () => {
     "read,grep,find,ls",
     "--print",
     "@README.md",
+    "--",
     "Return PASS.",
   ]);
 });
