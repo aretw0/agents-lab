@@ -643,6 +643,16 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
       }
 
       const decision = dispatchAllowed ? "dispatched" : blockers.length > 0 ? "blocked" : "preview";
+      const nextActionCode = packet.headlessDriverPreview.available
+        ? "use-preferred-driver-step"
+        : blockers.length > 0
+          ? "resolve-task-dispatch-blockers"
+          : "present-operator-approval";
+      const nextAction = nextActionCode === "use-preferred-driver-step"
+        ? "call agent_run_driver_step_dispatch with preferredDriverStep.payload"
+        : nextActionCode === "resolve-task-dispatch-blockers"
+          ? "resolve task dispatch blockers before any worker dispatch"
+          : "present structured operator approval before dispatch";
       const result = {
         mode: "agent-run-task-dispatch" as const,
         activation: "none" as const,
@@ -662,12 +672,15 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         preferredDriverStep: packet.headlessDriverPreview,
         preferredDriverStepAvailable: packet.headlessDriverPreview.available,
         registryEntry,
+        nextActionCode,
+        nextAction,
         summary: [
           "agent-run-task-dispatch:",
           `decision=${decision}`,
           `runId=${packet.taskPacket.invocationSpec.runId || "unknown"}`,
           `execute=${executeRequested ? "yes" : "no"}`,
           `dispatch=${dispatchAllowed ? "yes" : "no"}`,
+          `nextActionCode=${nextActionCode}`,
           pid ? `pid=${pid}` : undefined,
           blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
         ].filter(Boolean).join(" "),

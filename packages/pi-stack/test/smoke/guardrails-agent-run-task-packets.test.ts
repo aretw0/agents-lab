@@ -548,6 +548,7 @@ describe("agent run task packet surfaces", () => {
       tool: "agent_run_driver_step_dispatch",
     });
     expect(preview.details?.preferredDriverStepAvailable).toBe(false);
+    expect(preview.details?.nextActionCode).toBe("present-operator-approval");
     expect(existsSync(path.join(tmp, ".pi", "reports", "agent-runs.json"))).toBe(false);
     expect(preview.content?.[0]?.text).toContain("dispatch=no");
 
@@ -555,6 +556,7 @@ describe("agent run task packet surfaces", () => {
     expect(missingApproval.details?.decision).toBe("blocked");
     expect(missingApproval.details?.dispatchAllowed).toBe(false);
     expect((missingApproval.details?.blockers as string[])).toContain("structured-operator-approval-missing");
+    expect(missingApproval.details?.nextActionCode).toBe("resolve-task-dispatch-blockers");
     expect(missingApproval.details?.structuredOperatorApproval).toBe(false);
     expect(existsSync(path.join(tmp, ".pi", "reports", "agent-runs.json"))).toBe(false);
 
@@ -633,6 +635,8 @@ describe("agent run task packet surfaces", () => {
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.processStartAllowed).toBe(false);
     expect(result.details?.preferredDriverStepAvailable).toBe(true);
+    expect(result.details?.nextActionCode).toBe("use-preferred-driver-step");
+    expect(result.details?.nextAction).toBe("call agent_run_driver_step_dispatch with preferredDriverStep.payload");
     expect((result.details?.blockers as string[])).toContain("prefer-agent-run-driver-step-dispatch");
     expect(result.details?.preferredDriverStep).toMatchObject({
       tool: "agent_run_driver_step_dispatch",
