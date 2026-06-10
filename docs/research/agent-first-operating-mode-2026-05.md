@@ -46,6 +46,7 @@ Evidência já validada:
 - `real-pi-print-readonly-readme-canary-20260609`: Pi local, `openai-codex/gpt-5.3-codex-spark`, read-only, `README.md`, `contractDecision=pass`.
 - `real-next-slice-decoupling-scan-20260610`: worker real pequeno recomendou a correção `readTasks/readVerificationRows` fail-closed; a mudança entrou em commit e testes.
 - `agent_run_driver_step_dispatch`, `agent-run:pi-driver` e `agent-run:pi-driver-payload`: preservam `file_contract`, `touched_files`, `marker_results` e `mutation_target_files` para materializar outcome embutido em `follow=true` + `build_outcome=true`; o pacote emitido pelo CLI pode ser entregue diretamente a `agent-run:driver-step`.
+- `agent-run:driver-step`: retorna `summary` compacto com decisão, run id, dispatch, follow, estado, bytes, contrato e contagem de blockers para leitura por operador ou agente externo antes de inspecionar o JSON completo.
 - Gate local da lane: `pnpm run test:agent-run:drivers` (ou `node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs` em ambientes onde `pnpm` tenta instalar dependências).
 
 Regra atual: para tarefas local-safe pequenas, tentar primeiro um worker via `agent-run:pi-driver` com escopo mínimo. Se um worker com múltiplos arquivos der timeout sem saída, reduzir o escopo antes de retry; não promover timeout como evidência.
