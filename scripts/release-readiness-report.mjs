@@ -126,6 +126,17 @@ function boardEvidenceOneLine(row) {
   ].join(" — ");
 }
 
+function operatorDecisionLines(data, failedChecklist) {
+  const lines = [];
+  if (failedChecklist.some((item) => item.id === "target-version-ready")) {
+    lines.push(`- decide-target-version: packages are not yet at v${data.target}; bump/tag/release remains operator-gated`);
+  }
+  if (failedChecklist.some((item) => item.id === "board-release-clear") && data.board.releaseDecisionReady) {
+    lines.push("- decide-board-evidence-candidates: choose park-for-0.8 or require-work for current Board Evidence Candidates");
+  }
+  return lines;
+}
+
 export function summarizeBoard(cwd = process.cwd()) {
   const tasksPath = path.join(cwd, ".project", "tasks.json");
   if (!existsSync(tasksPath)) {
@@ -278,6 +289,7 @@ export function buildReport(data) {
   ];
   const ready = checklist.every((item) => item.ok);
   const failedChecklist = checklist.filter((item) => !item.ok);
+  const decisions = operatorDecisionLines(data, failedChecklist);
 
   const lines = [
     `# Release readiness report v${data.target}`,
@@ -292,6 +304,9 @@ export function buildReport(data) {
     "",
     "## Release Blockers",
     ...(failedChecklist.length ? failedChecklist.map((c) => `- ${c.id} [${releaseBlockerKind(c.id)}]: ${c.evidence}`) : ["- none"]),
+    "",
+    "## Operator Decisions",
+    ...(decisions.length ? decisions : ["- none"]),
     "",
     "## Board Summary",
     `- tasks: ${data.board.total}`,

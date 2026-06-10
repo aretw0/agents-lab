@@ -78,6 +78,8 @@ test("buildReport marks target release not ready until version and board gates a
     assert.match(report.markdown, /\[ \] board-release-clear/);
     assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
     assert.match(report.markdown, /## Release Blockers/);
+    assert.match(report.markdown, /## Operator Decisions/);
+    assert.match(report.markdown, /decide-target-version: packages are not yet at v0\.8\.0/);
     assert.match(report.markdown, /target-version-ready \[operator-decision\]: target=v0\.8\.0/);
     assert.match(report.markdown, /board-release-clear \[board-state\]: open-p0=1/);
     assert.match(report.markdown, /agent-run-pi-driver-payload\.test\.mjs/);
@@ -129,6 +131,7 @@ test("buildReport lists local-safe evidence candidates without clearing the boar
     assert.match(report.markdown, /\[ \] board-release-clear/);
     assert.match(report.markdown, /board-release-clear \[board-state\]: in-progress=1/);
     assert.match(report.markdown, /releaseDecisionReady: yes/);
+    assert.match(report.markdown, /decide-board-evidence-candidates: choose park-for-0\.8 or require-work/);
     assert.match(report.markdown, /### Board Evidence Candidates/);
     assert.match(report.markdown, /TASK-BUD-521 \[p3\/in-progress\]/);
     assert.match(report.markdown, /external-influence-isolation/);
