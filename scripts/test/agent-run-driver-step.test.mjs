@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { runAgentRunDriverStep } from "../agent-run-driver-step.mjs";
+
+const cliPath = fileURLToPath(new URL("../agent-run-driver-step.mjs", import.meta.url));
 
 function structuredApproval() {
   return {
@@ -189,6 +193,45 @@ test("headless driver step accepts payload packet with top-level approval", asyn
   assert.equal(result.dispatchAllowed, true);
   assert.equal(result.structuredOperatorApproval, true);
   assert.equal(result.agentRunOutcomePacket?.contractDecision, "pass");
+});
+
+test("headless driver step CLI accepts payload packet input file", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-payload-packet-cli-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const params = {
+    ...payload(),
+    execute: true,
+    follow: true,
+    build_outcome: true,
+    follow_max_wait_ms: 5_000,
+  };
+  const inputPath = path.join(cwd, "driver-packet.json");
+  writeFileSync(inputPath, JSON.stringify({
+    mode: "agent-run-pi-driver-payload",
+    decision: "ready-for-driver-step",
+    operator_approval: structuredApproval(),
+    payload: params,
+    driverStepCall: {
+      tool: "agent_run_driver_step_dispatch",
+      operatorApprovalRequired: true,
+      params,
+    },
+  }), "utf8");
+
+  const stdout = execFileSync(process.execPath, [
+    cliPath,
+    "--cwd",
+    cwd,
+    "--input",
+    inputPath,
+  ], { encoding: "utf8" });
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.mode, "agent-run-driver-step-dispatch");
+  assert.equal(result.decision, "dispatched");
+  assert.equal(result.dispatchAllowed, true);
+  assert.equal(result.structuredOperatorApproval, true);
+  assert.equal(result.agentRunOutcomePacket.contractDecision, "pass");
 });
 
 test("headless driver step accepts wrapper approval in declared params field", async () => {
