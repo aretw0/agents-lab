@@ -652,6 +652,7 @@ describe("agent run task packet surfaces", () => {
     expect(result.details?.nextDriverStepCall).toMatchObject({
       tool: "agent_run_driver_step_dispatch",
       operatorApprovalRequired: true,
+      operatorApprovalParam: "operator_approval",
       params: {
         execute: true,
         follow: true,

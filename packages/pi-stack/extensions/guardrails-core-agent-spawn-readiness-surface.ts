@@ -658,6 +658,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
             tool: packet.headlessDriverPreview.tool,
             params: packet.headlessDriverPreview.executionPayloadTemplate,
             operatorApprovalRequired: packet.headlessDriverPreview.operatorApprovalRequired,
+            operatorApprovalParam: "operator_approval" as const,
           }
         : undefined;
       const result = {
