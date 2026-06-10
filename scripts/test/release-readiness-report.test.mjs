@@ -174,6 +174,38 @@ test("buildReport lists local-safe evidence candidates without clearing the boar
   }
 });
 
+test("operator decision packets stay target-agnostic for future releases", () => {
+  const workspace = makeWorkspace({
+    version: "1.0.0",
+    tasks: [
+      {
+        id: "TASK-BUD-521",
+        status: "in_progress",
+        priority: "p3",
+        description: "external isolation influence",
+      },
+    ],
+  });
+  const evidencePath = path.join(workspace, "docs", "research", "task-bud-521-local-isolation-canary-2026-06.md");
+  mkdirSync(path.dirname(evidencePath), { recursive: true });
+  writeFileSync(evidencePath, "# canary\n");
+
+  try {
+    const report = buildReport(gather("1.0.0", workspace));
+    const decision = report.operatorDecisions[0];
+    assert.equal(decision.id, "decide-board-evidence-candidates");
+    assert.equal(decision.target, "1.0.0");
+    assert.equal(decision.recommendation, "choose-park-for-target-release-or-require-work");
+    assert.deepEqual(decision.allowedActions, ["park-for-target-release", "require-work"]);
+    assert.deepEqual(decision.candidateTaskIds, ["TASK-BUD-521"]);
+    assert.doesNotMatch(JSON.stringify(decision), /0\.8/);
+    assert.match(report.markdown, /park-for-target-release/);
+    assert.doesNotMatch(report.markdown, /park-for-0\.8/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("buildReport does not mark board decision-ready when an active task lacks evidence", () => {
   const workspace = makeWorkspace({
     version: "0.8.0",
