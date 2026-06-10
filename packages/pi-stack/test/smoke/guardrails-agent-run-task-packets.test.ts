@@ -638,4 +638,81 @@ describe("agent run task packet surfaces", () => {
     expect(result.content?.[0]?.text).toContain("agent-run-task-start-packet: decision=ready-for-operator-decision");
     expect(result.content?.[0]?.text).toContain("dispatch=no");
   });
+
+  it("exposes a ready headless driver preview through agent_run_task_start_packet for read-only tasks", async () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-task-start-headless-"));
+    mkdirSync(path.join(tmp, ".project"), { recursive: true });
+    writeFileSync(path.join(tmp, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-READONLY",
+          description: "Review README without mutations.",
+          status: "planned",
+          files: ["README.md"],
+          acceptance_criteria: ["returns read-only evidence"],
+        },
+      ],
+    }, null, 2), "utf8");
+
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsAgentRun>[0];
+    guardrailsAgentRun(pi);
+
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_task_start_packet");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+
+    const result = await tool.execute(
+      "tc-agent-run-task-start-headless",
+      {
+        task_id: "TASK-READONLY",
+        profile: "read-only-review",
+        provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
+        budget_decision: "warn",
+        budget_evidence: "scoped model budget usable",
+        budget_evidence_source: "manual",
+        budget_evidence_provider: "openai-codex/gpt-5.3-codex-spark",
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: tmp },
+    );
+
+    expect(result.details?.mode).toBe("agent-run-task-start-packet");
+    expect(result.details?.dispatchAllowed).toBe(false);
+    expect(result.details?.processStartAllowed).toBe(false);
+    expect(result.details?.headlessDriverPreview).toMatchObject({
+      mode: "agent-run-driver-step-preview",
+      decision: "ready-for-operator-decision",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      tool: "agent_run_driver_step_dispatch",
+      payload: {
+        execute: false,
+        follow: false,
+        buildOutcome: false,
+        runSpec: {
+          runId: "task-readonly-task-packet",
+          providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+          cwd: tmp,
+          declaredFiles: ["README.md"],
+          fileContract: "read-only",
+        },
+      },
+      blockers: [],
+    });
+  });
 });
