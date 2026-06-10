@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -96,6 +96,40 @@ test("pi driver CLI accepts structured operator approval file", () => {
   assert.equal(summary.dispatchAllowed, true);
   assert.equal(summary.processStartAllowed, true);
   assert.equal(summary.contractDecision, "pass");
+});
+
+test("pi driver CLI writes summary output file", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-summary-out-"));
+  writeFakePi(cwd);
+  const approvalPath = path.join(cwd, "approval.json");
+  const outputPath = path.join(cwd, "nested", "pi-driver-summary.json");
+  writeFileSync(approvalPath, JSON.stringify(structuredApproval()), "utf8");
+
+  const stdout = execFileSync(process.execPath, [
+    cliPath,
+    "--cwd",
+    cwd,
+    "--mode",
+    "help",
+    "--run-id",
+    "pi-driver-summary-out",
+    "--execute",
+    "--operator-approval-file",
+    approvalPath,
+    "--follow",
+    "--build-outcome",
+    "--summary",
+    "--out",
+    outputPath,
+  ], { encoding: "utf8" });
+
+  assert.equal(existsSync(outputPath), true);
+  assert.deepEqual(JSON.parse(readFileSync(outputPath, "utf8")), JSON.parse(stdout));
+  const summary = JSON.parse(stdout);
+  assert.equal(summary.mode, "agent-run-pi-driver-summary");
+  assert.equal(summary.decision, "dispatched");
+  assert.equal(summary.contractDecision, "pass");
+  assert.match(summary.driverStepSummary, /agent-run-driver-step: decision=dispatched/);
 });
 
 test("pi driver executes approved local help and materializes outcome", async () => {

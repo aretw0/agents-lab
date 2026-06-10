@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { buildPiDriverStepPayload } from "./agent-run-pi-driver-payload.mjs";
@@ -21,6 +22,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     markerResults: [],
     operatorApproval: undefined,
     operatorApprovalFile: "",
+    outPath: "",
     execute: false,
     approve: false,
     follow: false,
@@ -48,6 +50,7 @@ function parseArgs(argv = process.argv.slice(2)) {
       out.markerResults.push({ label, ok: state !== "false" && state !== "fail" });
     }
     else if (arg === "--operator-approval-file") out.operatorApprovalFile = argv[++index] ?? "";
+    else if (arg === "--out") out.outPath = argv[++index] ?? "";
     else if (arg === "--execute") out.execute = true;
     else if (arg === "--approve") out.approve = true;
     else if (arg === "--follow") out.follow = true;
@@ -158,7 +161,7 @@ export function buildPiDriverSummary(result) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-pi-driver.mjs [--mode help|print-readonly] [options] [--execute --approve] [--follow] [--build-outcome] [--summary] [--pretty]",
+    "Usage: node scripts/agent-run-pi-driver.mjs [--mode help|print-readonly] [options] [--execute --approve] [--follow] [--build-outcome] [--summary] [--out result.json] [--pretty]",
     "",
     "This composes agent-run-pi-driver-payload and agent-run-driver-step.",
     "It previews by default. Real execution requires both --execute and --approve.",
@@ -180,7 +183,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   } else {
     const result = await runPiDriver(args);
     const output = args.summary ? buildPiDriverSummary(result) : result;
-    process.stdout.write(JSON.stringify(output, null, args.pretty ? 2 : 0));
+    const json = JSON.stringify(output, null, args.pretty ? 2 : 0);
+    if (args.outPath) {
+      const outPath = path.resolve(args.outPath);
+      mkdirSync(path.dirname(outPath), { recursive: true });
+      writeFileSync(outPath, `${json}\n`, "utf8");
+    }
+    process.stdout.write(json);
     process.stdout.write("\n");
     if (result.decision === "blocked") process.exit(1);
   }
