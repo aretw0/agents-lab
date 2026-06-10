@@ -30,6 +30,20 @@ function asStringArray(value) {
   return Array.isArray(value) ? value.filter((entry) => typeof entry === "string").map((entry) => entry.trim()).filter(Boolean) : [];
 }
 
+function asFileContract(value) {
+  return value === "mutation" ? "mutation" : "read-only";
+}
+
+function asMarkerResults(value) {
+  if (!Array.isArray(value)) return undefined;
+  return value
+    .filter((entry) => entry && typeof entry === "object" && !Array.isArray(entry))
+    .map((entry) => ({
+      label: asString(entry.label),
+      ...(entry.ok === true || entry.ok === false ? { ok: entry.ok } : {}),
+    }));
+}
+
 function normalizeTimeoutMs(value) {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.floor(value) : 90_000;
 }
@@ -92,6 +106,7 @@ function parseRunSpec(raw) {
     declaredFiles: asStringArray(row.declared_files),
     logPath: asString(row.log_path),
     timeoutMs: normalizeTimeoutMs(row.timeout_ms),
+    fileContract: asFileContract(row.file_contract),
     executionPreview: {
       command: asString(preview.command),
       args: asStringArray(preview.args),
@@ -143,13 +158,30 @@ async function followRun(cwd, runId, maxWaitMs, pollIntervalMs, maxLines) {
   };
 }
 
-function buildOutcome(runId, entry, outputBytes) {
+function buildOutcome({ runId, entry, outputBytes, fileContract, touchedFiles = [], markerResults = [], mutationTargetFiles = [] }) {
   const found = !!entry;
   const processState = entry?.state ?? "unknown";
+  const declaredFiles = asStringArray(entry?.declaredFiles);
+  const expectedTouched = fileContract === "mutation" && mutationTargetFiles.length > 0 ? mutationTargetFiles : declaredFiles;
+  const unexpectedFiles = touchedFiles.filter((file) => !expectedTouched.includes(file));
+  const missingDeclaredFiles = fileContract === "mutation" && touchedFiles.length > 0
+    ? expectedTouched.filter((file) => !touchedFiles.includes(file))
+    : [];
+  const markerFailures = markerResults.filter((marker) => marker?.ok === false).map((marker, index) => asString(marker.label) || `marker-${index + 1}`);
   const blockers = [];
   if (!found) blockers.push("run-not-found");
   if (found && processState !== "completed") blockers.push(`process-state-${processState}`);
   if (found && processState === "completed" && outputBytes === 0) blockers.push("empty-output");
+  if (fileContract === "read-only" && touchedFiles.length > 0) blockers.push("read-only-touched-files");
+  if (unexpectedFiles.length > 0) blockers.push("unexpected-files");
+  if (fileContract !== "read-only" && touchedFiles.length > 0 && missingDeclaredFiles.length > 0) blockers.push("declared-files-missing");
+  if (markerFailures.length > 0) blockers.push("marker-failures");
+  const mutationMissingEvidence = found
+    && processState === "completed"
+    && outputBytes > 0
+    && fileContract === "mutation"
+    && touchedFiles.length === 0
+    && blockers.length === 0;
   return {
     mode: "agent-run-outcome-packet",
     dispatchAllowed: false,
@@ -158,11 +190,30 @@ function buildOutcome(runId, entry, outputBytes) {
     runId,
     found,
     processState,
-    contractDecision: blockers.length === 0 ? "pass" : "fail",
-    recommendation: blockers.length === 0 ? "stop" : "ask-operator",
+    contractDecision: blockers.length > 0 ? "fail" : mutationMissingEvidence ? "partial" : "pass",
+    recommendation: blockers.length === 0 && !mutationMissingEvidence ? "stop" : "ask-operator",
     outputBytes,
-    fileContract: "read-only",
+    fileContract,
+    declaredFiles,
+    touchedFiles,
+    missingDeclaredFiles,
+    unexpectedFiles,
+    markerFailures,
     blockers,
+  };
+}
+
+function outcomePacket({ runId, outputBytes, fileContract, touchedFiles, markerResults, mutationTargetFiles }) {
+  return {
+    tool: "agent_run_outcome_packet",
+    params: {
+      run_id: runId,
+      output_bytes: outputBytes,
+      file_contract: fileContract,
+      ...(touchedFiles.length > 0 ? { touched_files: touchedFiles } : {}),
+      ...(markerResults.length > 0 ? { marker_results: markerResults } : {}),
+      ...(mutationTargetFiles.length > 0 ? { mutation_target_files: mutationTargetFiles } : {}),
+    },
   };
 }
 
@@ -247,6 +298,9 @@ export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
   const executeRequested = payload.execute === true;
   const followRequested = payload.follow === true;
   const buildOutcomeRequested = payload.build_outcome === true;
+  const touchedFiles = asStringArray(payload.touched_files);
+  const markerResults = asMarkerResults(payload.marker_results) ?? [];
+  const mutationTargetFiles = asStringArray(payload.mutation_target_files);
   const blockers = [];
   const runCwd = runSpec.cwd === "." || runSpec.cwd === "" ? cwd : runSpec.cwd;
   const existing = runSpec.runId ? readRegistryEntry(cwd, runSpec.runId) : undefined;
@@ -281,8 +335,23 @@ export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
     pid: dispatch?.pid,
     registryEntry: dispatch?.registryEntry,
     follow,
-    nextAgentRunOutcomePacket: terminal ? { tool: "agent_run_outcome_packet", params: { run_id: runSpec.runId, output_bytes: follow.outputBytes, file_contract: "read-only" } } : undefined,
-    agentRunOutcomePacket: terminal && buildOutcomeRequested ? buildOutcome(runSpec.runId, follow.entry, follow.outputBytes) : undefined,
+    nextAgentRunOutcomePacket: terminal ? outcomePacket({
+      runId: runSpec.runId,
+      outputBytes: follow.outputBytes,
+      fileContract: runSpec.fileContract,
+      touchedFiles,
+      markerResults,
+      mutationTargetFiles,
+    }) : undefined,
+    agentRunOutcomePacket: terminal && buildOutcomeRequested ? buildOutcome({
+      runId: runSpec.runId,
+      entry: follow.entry,
+      outputBytes: follow.outputBytes,
+      fileContract: runSpec.fileContract,
+      touchedFiles,
+      markerResults,
+      mutationTargetFiles,
+    }) : undefined,
   };
 }
 

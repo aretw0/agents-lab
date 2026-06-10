@@ -22,6 +22,7 @@ function payload(cwd = ".") {
       declared_files: ["README.md"],
       log_path: ".pi/reports/headless-driver-step-node-version.log",
       timeout_ms: 30_000,
+      file_contract: "read-only",
       execution_preview: {
         command: "node",
         args: ["--version"],
@@ -139,4 +140,53 @@ test("headless driver step records timed-out runs distinctly", async () => {
   const registry = JSON.parse(readFileSync(path.join(cwd, ".pi", "reports", "agent-runs.json"), "utf8"));
   assert.equal(registry.runs[0].state, "timed-out");
   assert.equal(registry.runs[0].exitCode, 124);
+});
+
+test("headless driver step preserves mutation outcome without touched evidence as partial", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-mutation-partial-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const result = await runAgentRunDriverStep({
+    run_spec: {
+      ...payload().run_spec,
+      file_contract: "mutation",
+    },
+    execute: true,
+    operator_approval: structuredApproval(),
+    follow: true,
+    build_outcome: true,
+    follow_max_wait_ms: 5_000,
+  }, cwd);
+
+  assert.equal(result.nextAgentRunOutcomePacket?.params.file_contract, "mutation");
+  assert.equal(result.agentRunOutcomePacket?.fileContract, "mutation");
+  assert.equal(result.agentRunOutcomePacket?.contractDecision, "partial");
+  assert.equal(result.agentRunOutcomePacket?.recommendation, "ask-operator");
+});
+
+test("headless driver step passes mutation touched evidence into outcome", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-mutation-pass-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const result = await runAgentRunDriverStep({
+    run_spec: {
+      ...payload().run_spec,
+      file_contract: "mutation",
+    },
+    execute: true,
+    operator_approval: structuredApproval(),
+    follow: true,
+    build_outcome: true,
+    touched_files: ["README.md"],
+    mutation_target_files: ["README.md"],
+    marker_results: [{ label: "acceptance", ok: true }],
+    follow_max_wait_ms: 5_000,
+  }, cwd);
+
+  assert.deepEqual(result.nextAgentRunOutcomePacket?.params.touched_files, ["README.md"]);
+  assert.deepEqual(result.nextAgentRunOutcomePacket?.params.mutation_target_files, ["README.md"]);
+  assert.deepEqual(result.nextAgentRunOutcomePacket?.params.marker_results, [{ label: "acceptance", ok: true }]);
+  assert.equal(result.agentRunOutcomePacket?.fileContract, "mutation");
+  assert.equal(result.agentRunOutcomePacket?.contractDecision, "pass");
+  assert.equal(result.agentRunOutcomePacket?.recommendation, "stop");
+  assert.deepEqual(result.agentRunOutcomePacket?.touchedFiles, ["README.md"]);
+  assert.deepEqual(result.agentRunOutcomePacket?.markerFailures, []);
 });
