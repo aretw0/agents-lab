@@ -85,6 +85,8 @@ test("buildReport marks target release not ready until version and board gates a
   try {
     const report = buildReport(gather("0.8.0", workspace));
     assert.equal(report.ready, false);
+    assert.equal(report.decision, "not-ready");
+    assert.match(report.generatedAt, /^\d{4}-\d{2}-\d{2}T/);
     assert.deepEqual(report.checklist.map((item) => [item.id, item.kind]), [
       ["versions-aligned", "technical-gate"],
       ["target-version-ready", "operator-decision"],
@@ -126,6 +128,7 @@ test("buildReport marks release ready when versions and board gates are clear", 
   try {
     const report = buildReport(gather("0.8.0", workspace));
     assert.equal(report.ready, true);
+    assert.equal(report.decision, "ready");
     assert.deepEqual(report.releaseBlockers, []);
     assert.match(report.markdown, /decision: ready/);
     assert.match(report.markdown, /\[x\] target-version-ready/);
@@ -330,6 +333,8 @@ test("cli can write structured json for agents", () => {
     const json = JSON.parse(readFileSync(outPath, "utf8"));
     assert.equal(json.mode, "release-readiness-report");
     assert.equal(json.schemaVersion, 1);
+    assert.match(json.generatedAt, /^\d{4}-\d{2}-\d{2}T/);
+    assert.equal(json.decision, "not-ready");
     assert.equal(json.ready, false);
     assert.deepEqual(json.checklist.map((item) => [item.id, item.kind]), [
       ["versions-aligned", "technical-gate"],

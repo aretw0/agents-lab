@@ -347,6 +347,7 @@ export function buildReport(data) {
     { id: "board-release-clear", ok: data.board.releaseReady, evidence: data.board.blockers.length ? data.board.blockers.join(", ") : "no open P0/in-progress/blocked tasks" },
   ].map((item) => ({ ...item, kind: releaseGateKind(item.id) }));
   const ready = checklist.every((item) => item.ok);
+  const decision = ready ? "ready" : "not-ready";
   const failedChecklist = checklist.filter((item) => !item.ok);
   const releaseBlockers = failedChecklist.map(releaseBlockerRow);
   const operatorDecisions = operatorDecisionPackets(data, failedChecklist);
@@ -358,7 +359,7 @@ export function buildReport(data) {
     `- generatedAt: ${now}`,
     `- head: ${data.head || "unknown"}`,
     `- latestTag: ${data.latestTag || "none"}`,
-    `- decision: ${ready ? "ready" : "not-ready"}`,
+    `- decision: ${decision}`,
     "",
     "## Checklist",
     ...checklist.map((c) => `- [${c.ok ? "x" : " "}] ${c.id} — ${c.evidence}`),
@@ -401,7 +402,7 @@ export function buildReport(data) {
     "",
   ];
 
-  return { markdown: lines.join("\n"), checklist, ready, releaseBlockers, operatorDecisions };
+  return { markdown: lines.join("\n"), generatedAt: now, decision, checklist, ready, releaseBlockers, operatorDecisions };
 }
 
 function main() {
@@ -419,8 +420,10 @@ function main() {
       mode: "release-readiness-report",
       schemaVersion: 1,
       target: data.target,
+      generatedAt: report.generatedAt,
       head: data.head,
       latestTag: data.latestTag,
+      decision: report.decision,
       ready: report.ready,
       checklist: report.checklist,
       releaseBlockers: report.releaseBlockers,
