@@ -4,6 +4,8 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+const SCHEMA_VERSION = 1;
+
 function parseArgs(argv) {
   const out = { input: "", cwd: process.cwd(), outPath: "", pretty: false };
   for (let index = 0; index < argv.length; index += 1) {
@@ -224,6 +226,7 @@ function buildOutcome({ runId, entry, outputBytes, fileContract, touchedFiles = 
     && blockers.length === 0;
   return {
     mode: "agent-run-outcome-packet",
+    schemaVersion: SCHEMA_VERSION,
     dispatchAllowed: false,
     processStartAllowed: false,
     processStopAllowed: false,
@@ -396,6 +399,7 @@ export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
   }) : undefined;
   return {
     mode: executeRequested ? "agent-run-driver-step-dispatch" : "agent-run-driver-step-packet",
+    schemaVersion: SCHEMA_VERSION,
     decision,
     dispatchAllowed,
     processStartAllowed: dispatchAllowed,

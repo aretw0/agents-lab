@@ -40,6 +40,7 @@ test("headless driver step previews without dispatch", async () => {
   const result = await runAgentRunDriverStep(payload(), cwd);
 
   assert.equal(result.mode, "agent-run-driver-step-packet");
+  assert.equal(result.schemaVersion, 1);
   assert.equal(result.decision, "ready-for-operator-decision");
   assert.equal(result.dispatchAllowed, false);
   assert.equal(result.processStartAllowed, false);
@@ -112,6 +113,7 @@ test("headless driver step executes local process and materializes outcome", asy
   assert.equal(result.follow?.status.state, "completed");
   assert.ok((result.follow?.outputBytes ?? 0) > 0);
   assert.equal(result.agentRunOutcomePacket?.mode, "agent-run-outcome-packet");
+  assert.equal(result.agentRunOutcomePacket?.schemaVersion, 1);
   assert.equal(result.agentRunOutcomePacket?.contractDecision, "pass");
   assert.match(result.summary, /decision=dispatched/);
   assert.match(result.summary, /follow=terminal/);
