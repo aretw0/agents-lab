@@ -138,6 +138,7 @@ export function buildPiDriverSummary(result) {
     providerModelRef: runSpec.providerModelRef,
     payloadMode: result?.payloadPacket?.payloadMode ?? "help",
     pid: driverStep.pid,
+    driverStepSummary: driverStep.summary,
     followTerminal: follow.terminal === true,
     followDecision: follow.decision,
     followState: follow.status?.state,

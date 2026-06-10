@@ -147,6 +147,8 @@ test("pi driver summary keeps compact execution evidence", async () => {
   assert.equal(summary.followState, "completed");
   assert.equal(summary.contractDecision, "pass");
   assert.equal(summary.fileContract, "read-only");
+  assert.match(summary.driverStepSummary, /agent-run-driver-step: decision=dispatched/);
+  assert.match(summary.driverStepSummary, /contract=pass/);
   assert.ok(summary.outputBytes > 0);
   assert.ok(Array.isArray(summary.logTail));
 });
