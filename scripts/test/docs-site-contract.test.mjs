@@ -36,6 +36,13 @@ function listPublishedMarkdownFiles() {
 	return listMarkdownFiles("docs").filter((file) => read(file).match(/^---\r?\n/));
 }
 
+function frontMatterPermalink(source) {
+	const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
+	if (!match) return "";
+	const permalink = match[1].match(/^permalink:\s*(\S+)\s*$/m);
+	return permalink?.[1] ?? "";
+}
+
 test("docs site uses the minimal Hacker Jekyll surface", () => {
 	const config = read("docs/_config.yml");
 	const gemfile = read("docs/Gemfile");
@@ -247,6 +254,22 @@ test("public entrypoint html links point to Jekyll-rendered sources", () => {
 			const sourcePath = `docs/${href.replace(/\.html$/, ".md")}`;
 			assert.equal(existsSync(sourcePath), true, `${file} links to missing source ${sourcePath}`);
 			assert.match(read(sourcePath), /^---\r?\n/, `${sourcePath} needs front matter to render as html`);
+		}
+	}
+});
+
+test("published html links do not conflict with source permalinks", () => {
+	for (const file of listMarkdownFiles("docs")) {
+		if (file.includes("/_site/") || file.includes("/archive/")) continue;
+		const source = read(file);
+		const htmlLinks = [...source.matchAll(/\{\{\s*'\/([^']+\.html)'\s*\|\s*relative_url\s*\}\}/g)]
+			.map((match) => match[1]);
+
+		for (const href of htmlLinks) {
+			const sourcePath = `docs/${href.replace(/\.html$/, ".md")}`;
+			if (!existsSync(sourcePath)) continue;
+			const permalink = frontMatterPermalink(read(sourcePath));
+			assert.ok(!permalink || permalink === `/${href}`, `${file} links to ${href}, but ${sourcePath} declares permalink ${permalink}`);
 		}
 	}
 });
