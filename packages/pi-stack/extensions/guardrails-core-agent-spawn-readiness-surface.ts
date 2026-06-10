@@ -659,6 +659,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         pid,
         packet,
         preferredDriverStep: packet.headlessDriverPreview,
+        preferredDriverStepAvailable: packet.headlessDriverPreview.available,
         registryEntry,
         summary: [
           "agent-run-task-dispatch:",

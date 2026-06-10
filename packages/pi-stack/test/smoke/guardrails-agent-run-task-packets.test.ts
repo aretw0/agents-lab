@@ -258,6 +258,7 @@ describe("agent run task packet surfaces", () => {
     expect(result.headlessDriverPreview).toMatchObject({
       mode: "agent-run-driver-step-preview",
       decision: "blocked",
+      available: false,
       dispatchAllowed: false,
       processStartAllowed: false,
       tool: "agent_run_driver_step_dispatch",
@@ -293,6 +294,7 @@ describe("agent run task packet surfaces", () => {
     expect(result.headlessDriverPreview).toMatchObject({
       mode: "agent-run-driver-step-preview",
       decision: "ready-for-operator-decision",
+      available: true,
       dispatchAllowed: false,
       processStartAllowed: false,
       tool: "agent_run_driver_step_dispatch",
@@ -359,6 +361,11 @@ describe("agent run task packet surfaces", () => {
     expect(result.processStartAllowed).toBe(false);
     expect(result.blockers).toContain("protected-scope-requested");
     expect(result.blockers).toContain("task-packet-blocked");
+    expect(result.headlessDriverPreview).toMatchObject({
+      decision: "blocked",
+      available: false,
+      blockers: expect.arrayContaining(["headless-driver-preview-task-packet-blocked"]),
+    });
   });
 
   it("exposes agent_run_task_packet as a report-only board surface", async () => {
@@ -535,10 +542,12 @@ describe("agent run task packet surfaces", () => {
     expect(preview.details?.processStartAllowed).toBe(false);
     expect(preview.details?.preferredDriverStep).toMatchObject({
       mode: "agent-run-driver-step-preview",
+      available: false,
       dispatchAllowed: false,
       processStartAllowed: false,
       tool: "agent_run_driver_step_dispatch",
     });
+    expect(preview.details?.preferredDriverStepAvailable).toBe(false);
     expect(existsSync(path.join(tmp, ".pi", "reports", "agent-runs.json"))).toBe(false);
     expect(preview.content?.[0]?.text).toContain("dispatch=no");
 
@@ -703,6 +712,7 @@ describe("agent run task packet surfaces", () => {
     expect(result.details?.headlessDriverPreview).toMatchObject({
       mode: "agent-run-driver-step-preview",
       decision: "ready-for-operator-decision",
+      available: true,
       dispatchAllowed: false,
       processStartAllowed: false,
       tool: "agent_run_driver_step_dispatch",

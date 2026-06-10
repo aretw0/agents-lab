@@ -311,6 +311,7 @@ export interface AgentRunTaskStartPacketResult {
   headlessDriverPreview: {
     mode: "agent-run-driver-step-preview";
     decision: "ready-for-operator-decision" | "blocked";
+    available: boolean;
     dispatchAllowed: false;
     processStartAllowed: false;
     tool: "agent_run_driver_step_dispatch";
@@ -855,10 +856,15 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
 export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput = {}): AgentRunTaskStartPacketResult {
   const taskPacket = buildAgentRunTaskPacket(input);
   const spec = taskPacket.invocationSpec;
-  const headlessDriverBlockers = spec.fileContract === "read-only" ? [] : ["headless-driver-preview-read-only-only"];
+  const headlessDriverBlockers = [
+    ...(taskPacket.decision === "ready-for-operator-decision" ? [] : ["headless-driver-preview-task-packet-blocked"]),
+    ...(spec.fileContract === "read-only" ? [] : ["headless-driver-preview-read-only-only"]),
+  ];
+  const headlessDriverAvailable = headlessDriverBlockers.length === 0;
   const headlessDriverPreview = {
     mode: "agent-run-driver-step-preview" as const,
-    decision: (headlessDriverBlockers.length === 0 ? "ready-for-operator-decision" : "blocked") as AgentRunStartDecision,
+    decision: (headlessDriverAvailable ? "ready-for-operator-decision" : "blocked") as AgentRunStartDecision,
+    available: headlessDriverAvailable,
     dispatchAllowed: false as const,
     processStartAllowed: false as const,
     tool: "agent_run_driver_step_dispatch" as const,
@@ -880,9 +886,10 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
     blockers: headlessDriverBlockers,
     summary: [
       "agent-run-driver-step-preview:",
-      `decision=${headlessDriverBlockers.length === 0 ? "ready-for-operator-decision" : "blocked"}`,
+      `decision=${headlessDriverAvailable ? "ready-for-operator-decision" : "blocked"}`,
       `runId=${spec.runId || "unknown"}`,
       `fileContract=${spec.fileContract}`,
+      `available=${headlessDriverAvailable ? "yes" : "no"}`,
       "dispatch=no",
       headlessDriverBlockers.length > 0 ? `blockers=${headlessDriverBlockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),
