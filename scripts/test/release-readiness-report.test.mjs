@@ -105,6 +105,12 @@ test("buildReport marks target release not ready until version and board gates a
     assert.equal(report.nextActionCode, "resolve-operator-decisions");
     assert.deepEqual(report.nextActions.map((action) => action.id), ["decide-target-version"]);
     assert.deepEqual(report.nextActions[0].allowedActions, ["defer-release", "bump-tag-release-when-ready"]);
+    assert.deepEqual(report.automationPermissions, {
+      tagAllowed: false,
+      publishAllowed: false,
+      workflowDispatchAllowed: false,
+      processStartAllowed: false,
+    });
     assert.match(report.markdown, /decision: not-ready/);
     assert.match(report.markdown, /\[ \] target-version-ready/);
     assert.match(report.markdown, /\[ \] board-release-clear/);
@@ -136,6 +142,12 @@ test("buildReport marks release ready when versions and board gates are clear", 
     assert.equal(report.nextActionCode, "review-release-draft");
     assert.deepEqual(report.nextActions.map((action) => action.id), ["review-release-draft"]);
     assert.deepEqual(report.nextActions[0].allowedActions, ["defer-release", "prepare-draft-release"]);
+    assert.deepEqual(report.automationPermissions, {
+      tagAllowed: false,
+      publishAllowed: false,
+      workflowDispatchAllowed: false,
+      processStartAllowed: false,
+    });
     assert.match(report.markdown, /decision: ready/);
     assert.match(report.markdown, /\[x\] target-version-ready/);
     assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
@@ -368,6 +380,12 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.nextActionCode, "resolve-operator-decisions");
     assert.deepEqual(json.nextActions.map((action) => action.id), ["decide-board-evidence-candidates"]);
     assert.deepEqual(json.nextActions[0].allowedActions, ["park-for-target-release", "require-work"]);
+    assert.deepEqual(json.automationPermissions, {
+      tagAllowed: false,
+      publishAllowed: false,
+      workflowDispatchAllowed: false,
+      processStartAllowed: false,
+    });
     assert.equal(json.board.releaseDecisionReady, true);
     assert.deepEqual(json.board.inProgressRows.map((row) => row.taskId), ["TASK-BUD-521"]);
     assert.deepEqual(json.board.evidenceCandidateRows.map((row) => row.taskId), ["TASK-BUD-521"]);

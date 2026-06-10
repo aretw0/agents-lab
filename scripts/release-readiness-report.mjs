@@ -37,6 +37,13 @@ const BOARD_RELEASE_EVIDENCE = {
   },
 };
 
+const REPORT_ONLY_PERMISSIONS = {
+  tagAllowed: false,
+  publishAllowed: false,
+  workflowDispatchAllowed: false,
+  processStartAllowed: false,
+};
+
 function runGit(args, cwd = process.cwd()) {
   const out = spawnSync("git", args, { cwd, encoding: "utf8", stdio: "pipe" });
   if (out.status !== 0) return "";
@@ -440,7 +447,18 @@ export function buildReport(data) {
     "",
   ];
 
-  return { markdown: lines.join("\n"), generatedAt: now, decision, checklist, ready, releaseBlockers, operatorDecisions, nextActionCode, nextActions };
+  return {
+    markdown: lines.join("\n"),
+    generatedAt: now,
+    decision,
+    checklist,
+    ready,
+    releaseBlockers,
+    operatorDecisions,
+    nextActionCode,
+    nextActions,
+    automationPermissions: REPORT_ONLY_PERMISSIONS,
+  };
 }
 
 function main() {
@@ -473,6 +491,7 @@ function main() {
       operatorDecisions: report.operatorDecisions,
       nextActionCode: report.nextActionCode,
       nextActions: report.nextActions,
+      automationPermissions: report.automationPermissions,
       board: data.board,
     }, null, 2)}\n`);
   } else {

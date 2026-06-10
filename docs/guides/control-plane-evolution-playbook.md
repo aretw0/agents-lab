@@ -106,6 +106,7 @@ Interpretação do readiness report:
 - no JSON, `releaseBlockers` expõe os mesmos bloqueios do Markdown com `id`, `kind` e `evidence`;
 - no JSON, `operatorDecisions[*]` inclui payload acionável por decisão, como `allowedActions`, versões atuais e `candidateTaskIds`;
 - no JSON, `nextActionCode` e `nextActions` indicam o próximo passo seguro sem autorizar publish automático;
+- no JSON, `automationPermissions` mantém `tagAllowed`, `publishAllowed`, `workflowDispatchAllowed` e `processStartAllowed` falsos; readiness report é sempre report-only;
 - `Board Evidence Candidates` lista tarefas ainda abertas que já têm evidência local-safe para decisão;
 - no JSON, `board.openP0Rows`, `board.inProgressRows` e `board.blockedRows` expõem o estado do board sem exigir parse de linhas Markdown;
 - no JSON, `board.evidenceCandidateRows` expõe os mesmos candidatos em forma estruturada para agentes;
