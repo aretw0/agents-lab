@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerAgentRunDriverStepSurface } from "../../extensions/guardrails-core-agent-run-driver-step-surface";
+import { buildAgentRunTaskStartPacket } from "../../extensions/guardrails-core-agent-run-start";
 
 const spawnMock = vi.hoisted(() => vi.fn());
 
@@ -132,6 +133,61 @@ describe("agent run driver step dispatch", () => {
     expect(result.details.pid).toBe(4343);
     expect(spawnMock).toHaveBeenCalledTimes(1);
     expect(readRegistry(tmp).runs[0]).toMatchObject({ runId: "driver-step-run-1", state: "running", pid: 4343 });
+  });
+
+  it("dispatches directly from a read-only task start headless preview payload", async () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-driver-step-task-preview-"));
+    writeFileSync(path.join(tmp, "README.md"), "# Test fixture\n", "utf8");
+    const taskStart = buildAgentRunTaskStartPacket({
+      taskId: "TASK-READONLY",
+      task: {
+        id: "TASK-READONLY",
+        description: "Review README without mutations.",
+        status: "planned",
+        files: ["README.md"],
+        acceptance_criteria: ["returns read-only evidence"],
+      },
+      profile: "read-only-review",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: tmp,
+      budgetDecision: "warn",
+      budgetEvidence: "scoped model budget usable",
+      budgetEvidenceSource: "manual",
+      budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
+    });
+    const child = new FakeChildProcess();
+    spawnMock.mockImplementationOnce(() => {
+      setImmediate(() => child.emit("close", 0, null));
+      return child;
+    });
+
+    const result = await getTool().execute("call", {
+      ...taskStart.headlessDriverPreview.payload,
+      execute: true,
+      operator_approval: structuredApproval(),
+    }, undefined, undefined, { cwd: tmp });
+
+    expect(taskStart.headlessDriverPreview).toMatchObject({
+      tool: "agent_run_driver_step_dispatch",
+      decision: "ready-for-operator-decision",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      blockers: [],
+    });
+    expect(result.details.mode).toBe("agent-run-driver-step-dispatch");
+    expect(result.details.decision).toBe("dispatched");
+    expect(result.details.dispatchAllowed).toBe(true);
+    expect(result.details.processStartAllowed).toBe(true);
+    expect(result.details.pid).toBe(4343);
+    expect(result.details.nextAgentRunOutcomePacket).toBeUndefined();
+    expect(spawnMock).toHaveBeenCalledTimes(1);
+    expect(readRegistry(tmp).runs[0]).toMatchObject({
+      runId: "task-readonly-task-packet",
+      state: "running",
+      pid: 4343,
+      cwd: tmp,
+      declaredFiles: ["README.md"],
+    });
   });
 
   it("blocks duplicate running run before spawn", async () => {
