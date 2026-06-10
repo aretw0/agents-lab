@@ -91,6 +91,47 @@ function agentRunDriverGateReport(cwd) {
   };
 }
 
+function agentRunDriverCanaryEvidence(cwd) {
+  const relPath = ".artifacts/agent-run-driver/latest.json";
+  const fullPath = path.join(cwd, relPath);
+  if (!existsSync(fullPath)) {
+    return {
+      path: relPath,
+      present: false,
+      decision: "missing",
+      summary: "no local agent-run driver canary artifact found",
+    };
+  }
+  try {
+    const payload = JSON.parse(readFileSync(fullPath, "utf8"));
+    const driverStep = payload.driverStep ?? payload;
+    const outcome = payload.agentRunOutcomePacket ?? driverStep.agentRunOutcomePacket;
+    const contractDecision = payload.contractDecision ?? outcome?.contractDecision;
+    const runId = payload.runId ?? driverStep.runSpec?.runId;
+    const followTerminal = payload.followTerminal === true || driverStep.follow?.terminal === true;
+    const decision = contractDecision === "pass" && followTerminal ? "pass" : "review";
+    return {
+      path: relPath,
+      present: true,
+      decision,
+      mode: payload.mode,
+      schemaVersion: payload.schemaVersion,
+      runId,
+      followTerminal,
+      contractDecision,
+      outputBytes: payload.outputBytes ?? driverStep.follow?.outputBytes,
+      summary: payload.summary ?? driverStep.summary ?? "agent-run driver canary artifact present",
+    };
+  } catch (error) {
+    return {
+      path: relPath,
+      present: true,
+      decision: "invalid-json",
+      summary: `could not parse local agent-run driver canary artifact: ${String(error?.message ?? error)}`,
+    };
+  }
+}
+
 function releaseGateKind(id) {
   if (id === "target-version-ready") return "operator-decision";
   if (id === "board-release-clear") return "board-state";
@@ -391,6 +432,7 @@ export function gather(target, cwd = process.cwd()) {
   };
   const packageSmoke = buildReleasePackageSmokeReport({ cwd, runPack: false });
   const agentRunDrivers = agentRunDriverGateReport(cwd);
+  agentRunDrivers.lastCanaryEvidence = agentRunDriverCanaryEvidence(cwd);
 
   return {
     target,

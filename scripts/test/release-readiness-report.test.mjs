@@ -144,6 +144,12 @@ test("buildReport marks target release not ready until version and board gates a
     assert.equal(data.agentRunDrivers.ok, true);
     assert.equal(data.agentRunDrivers.scriptName, "test:agent-run:drivers");
     assert.deepEqual(data.agentRunDrivers.missingTests, []);
+    assert.deepEqual(data.agentRunDrivers.lastCanaryEvidence, {
+      path: ".artifacts/agent-run-driver/latest.json",
+      present: false,
+      decision: "missing",
+      summary: "no local agent-run driver canary artifact found",
+    });
     assert.deepEqual(report.operatorDecisions.map((decision) => decision.id), ["decide-target-version"]);
     assert.deepEqual(report.operatorDecisions[0].allowedActions, ["defer-release", "bump-tag-release-when-ready"]);
     assert.equal(report.operatorDecisions[0].requiresOperatorDecision, true);
@@ -384,6 +390,39 @@ test("package smoke gate blocks release readiness with structured evidence", () 
   }
 });
 
+test("readiness exposes last agent-run driver canary evidence when present", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const evidencePath = path.join(workspace, ".artifacts", "agent-run-driver", "latest.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, JSON.stringify({
+      mode: "agent-run-pi-driver-summary",
+      schemaVersion: 1,
+      decision: "dispatched",
+      runId: "agent-run-driver-local-canary",
+      followTerminal: true,
+      contractDecision: "pass",
+      outputBytes: 512,
+      summary: "agent-run-pi-driver-summary: decision=dispatched",
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+
+    assert.equal(data.agentRunDrivers.lastCanaryEvidence.present, true);
+    assert.equal(data.agentRunDrivers.lastCanaryEvidence.decision, "pass");
+    assert.equal(data.agentRunDrivers.lastCanaryEvidence.runId, "agent-run-driver-local-canary");
+    assert.equal(data.agentRunDrivers.lastCanaryEvidence.contractDecision, "pass");
+    assert.equal(data.agentRunDrivers.lastCanaryEvidence.followTerminal, true);
+    assert.equal(data.agentRunDrivers.lastCanaryEvidence.schemaVersion, 1);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("cli strict exits non-zero when release is not ready", () => {
   const workspace = makeWorkspace({
     version: "0.7.0",
@@ -453,6 +492,7 @@ test("cli can write structured json for agents", () => {
     assert.deepEqual(json.workflows, { ci: true, publish: true, releaseDraft: true });
     assert.deepEqual(json.gates, { agentRunDrivers: true, packageSmoke: true });
     assert.equal(json.agentRunDrivers.ok, true);
+    assert.equal(json.agentRunDrivers.lastCanaryEvidence.decision, "missing");
     assert.deepEqual(json.agentRunDrivers.requiredTests, [
       "scripts/test/agent-run-driver-step.test.mjs",
       "scripts/test/agent-run-pi-driver.test.mjs",
