@@ -43,6 +43,8 @@ test("headless driver step previews without dispatch", async () => {
   assert.equal(result.decision, "ready-for-operator-decision");
   assert.equal(result.dispatchAllowed, false);
   assert.equal(result.processStartAllowed, false);
+  assert.match(result.summary, /agent-run-driver-step: decision=ready-for-operator-decision/);
+  assert.match(result.summary, /dispatch=no/);
 });
 
 test("headless driver step blocks execute without structured approval", async () => {
@@ -53,6 +55,8 @@ test("headless driver step blocks execute without structured approval", async ()
   assert.equal(result.decision, "blocked");
   assert.equal(result.dispatchAllowed, false);
   assert.ok(result.blockers.includes("structured-operator-approval-missing"));
+  assert.match(result.summary, /decision=blocked/);
+  assert.match(result.summary, /blockers=1/);
 });
 
 test("headless driver step blocks duplicate running run", async () => {
@@ -109,6 +113,9 @@ test("headless driver step executes local process and materializes outcome", asy
   assert.ok((result.follow?.outputBytes ?? 0) > 0);
   assert.equal(result.agentRunOutcomePacket?.mode, "agent-run-outcome-packet");
   assert.equal(result.agentRunOutcomePacket?.contractDecision, "pass");
+  assert.match(result.summary, /decision=dispatched/);
+  assert.match(result.summary, /follow=terminal/);
+  assert.match(result.summary, /contract=pass/);
 
   const registry = JSON.parse(readFileSync(path.join(cwd, ".pi", "reports", "agent-runs.json"), "utf8"));
   assert.equal(registry.runs[0].state, "completed");

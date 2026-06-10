@@ -256,6 +256,21 @@ function outcomePacket({ runId, outputBytes, fileContract, touchedFiles, markerR
   };
 }
 
+function buildDriverStepSummary({ decision, runSpec, dispatchAllowed, blockers, follow, agentRunOutcomePacket }) {
+  const parts = [
+    "agent-run-driver-step:",
+    `decision=${decision}`,
+    `runId=${runSpec.runId || "missing"}`,
+    `dispatch=${dispatchAllowed ? "yes" : "no"}`,
+    follow ? `follow=${follow.decision}` : "follow=not-requested",
+    follow?.status?.state ? `state=${follow.status.state}` : undefined,
+    typeof follow?.outputBytes === "number" ? `outputBytes=${follow.outputBytes}` : undefined,
+    agentRunOutcomePacket ? `contract=${agentRunOutcomePacket.contractDecision}` : "contract=not-built",
+    `blockers=${blockers.length + (Array.isArray(agentRunOutcomePacket?.blockers) ? agentRunOutcomePacket.blockers.length : 0)}`,
+  ].filter(Boolean);
+  return parts.join(" ");
+}
+
 async function dispatchRun(cwd, runSpec) {
   const logPath = path.isAbsolute(runSpec.logPath) ? runSpec.logPath : path.join(cwd, runSpec.logPath);
   mkdirSync(path.dirname(logPath), { recursive: true });
@@ -360,9 +375,27 @@ export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
   const maxLines = Math.max(1, Math.min(500, Math.floor(typeof payload.follow_max_lines === "number" ? payload.follow_max_lines : 80)));
   const follow = followRequested && runSpec.runId ? await followRun(cwd, runSpec.runId, maxWaitMs, pollIntervalMs, maxLines) : undefined;
   const terminal = follow?.terminal === true;
+  const decision = dispatchAllowed ? "dispatched" : blockers.length > 0 ? "blocked" : "ready-for-operator-decision";
+  const nextAgentRunOutcomePacket = terminal ? outcomePacket({
+    runId: runSpec.runId,
+    outputBytes: follow.outputBytes,
+    fileContract: runSpec.fileContract,
+    touchedFiles,
+    markerResults,
+    mutationTargetFiles,
+  }) : undefined;
+  const agentRunOutcomePacket = terminal && buildOutcomeRequested ? buildOutcome({
+    runId: runSpec.runId,
+    entry: follow.entry,
+    outputBytes: follow.outputBytes,
+    fileContract: runSpec.fileContract,
+    touchedFiles,
+    markerResults,
+    mutationTargetFiles,
+  }) : undefined;
   return {
     mode: executeRequested ? "agent-run-driver-step-dispatch" : "agent-run-driver-step-packet",
-    decision: dispatchAllowed ? "dispatched" : blockers.length > 0 ? "blocked" : "ready-for-operator-decision",
+    decision,
     dispatchAllowed,
     processStartAllowed: dispatchAllowed,
     processStopAllowed: false,
@@ -375,23 +408,9 @@ export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
     pid: dispatch?.pid,
     registryEntry: dispatch?.registryEntry,
     follow,
-    nextAgentRunOutcomePacket: terminal ? outcomePacket({
-      runId: runSpec.runId,
-      outputBytes: follow.outputBytes,
-      fileContract: runSpec.fileContract,
-      touchedFiles,
-      markerResults,
-      mutationTargetFiles,
-    }) : undefined,
-    agentRunOutcomePacket: terminal && buildOutcomeRequested ? buildOutcome({
-      runId: runSpec.runId,
-      entry: follow.entry,
-      outputBytes: follow.outputBytes,
-      fileContract: runSpec.fileContract,
-      touchedFiles,
-      markerResults,
-      mutationTargetFiles,
-    }) : undefined,
+    nextAgentRunOutcomePacket,
+    agentRunOutcomePacket,
+    summary: buildDriverStepSummary({ decision, runSpec, dispatchAllowed, blockers, follow, agentRunOutcomePacket }),
   };
 }
 
