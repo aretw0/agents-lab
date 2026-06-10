@@ -31,7 +31,12 @@ function normalizeDriverPayload(payload) {
     && typeof payload.driverStepCall === "object"
     && !Array.isArray(payload.driverStepCall)
   ) {
-    return normalizeDriverPayload(payload.driverStepCall);
+    const approvalParam = asString(payload.driverStepCall.operatorApprovalParam) || "operator_approval";
+    const outerApproval = payload.operator_approval ?? payload[approvalParam];
+    const driverStepCall = outerApproval && !payload.driverStepCall.operator_approval && !payload.driverStepCall[approvalParam]
+      ? { ...payload.driverStepCall, [approvalParam]: outerApproval }
+      : payload.driverStepCall;
+    return normalizeDriverPayload(driverStepCall);
   }
   if (
     payload
