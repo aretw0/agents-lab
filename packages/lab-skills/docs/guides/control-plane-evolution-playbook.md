@@ -91,6 +91,7 @@ Automação mínima existente:
 - `release-draft.yml` prepara draft release manual com artefato de notas;
 - `pnpm run release:readiness -- --target X.Y.Z` gera checklist local canônico para qualquer target;
 - `pnpm run release:readiness:json -- --target X.Y.Z` gera o mesmo contrato em JSON para agentes;
+- `pnpm run release:readiness:strict -- --target X.Y.Z` aplica o mesmo contrato como gate local não-verde;
 - `pnpm run release:readiness:v0.8.0` gera checklist local canônico em `.artifacts/release-readiness/`.
 - `pnpm run release:readiness:v0.8.0:json` gera o mesmo estado em JSON para agentes e automação local, incluindo `operatorDecisions`.
 

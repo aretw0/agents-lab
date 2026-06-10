@@ -191,9 +191,11 @@ test("public 0.8 readiness map matches the canonical release readiness gate", ()
 	assert.match(readiness, /`target-version-ready` segue falso/);
 	assert.equal(pkg.scripts["release:readiness"], "node scripts/release-readiness-report.mjs");
 	assert.equal(pkg.scripts["release:readiness:json"], "node scripts/release-readiness-report.mjs --json");
+	assert.equal(pkg.scripts["release:readiness:strict"], "node scripts/release-readiness-report.mjs --strict");
 	assert.equal(pkg.scripts["release:readiness:v0.8.0:json"], "node scripts/release-readiness-report.mjs --target 0.8.0 --json");
 	assert.match(playbook, /release:readiness -- --target X\.Y\.Z/);
 	assert.match(playbook, /release:readiness:json -- --target X\.Y\.Z/);
+	assert.match(playbook, /release:readiness:strict -- --target X\.Y\.Z/);
 	assert.match(playbook, /release:readiness:v0\.8\.0:json/);
 	assert.match(playbook, /schemaVersion=1/);
 	assert.match(playbook, /operatorDecisions/);
@@ -415,7 +417,7 @@ test("publishing guide keeps release validation and commit format explicit", () 
 	const guide = read("docs/guides/publishing.md");
 
 	assert.match(guide, /pnpm run ci:local:parity/);
-	assert.match(guide, /pnpm run release:readiness -- --target X\.X\.X/);
+	assert.match(guide, /pnpm run release:readiness:strict -- --target X\.X\.X/);
 	assert.match(guide, /git commit -m "chore\(release\): vX\.X\.X"/);
 	assert.doesNotMatch(guide, /git commit -m "chore: release vX\.X\.X"/);
 });
@@ -426,7 +428,7 @@ test("contributing guide matches the canonical pnpm release workflow", () => {
 	assert.match(guide, /pnpm run pi:local/);
 	assert.match(guide, /pnpm run test:smoke/);
 	assert.match(guide, /pnpm exec changeset/);
-	assert.match(guide, /pnpm run release:readiness -- --target X\.X\.X/);
+	assert.match(guide, /pnpm run release:readiness:strict -- --target X\.X\.X/);
 	assert.match(guide, /git commit -m "chore\(release\): vX\.X\.X"/);
 	assert.doesNotMatch(guide, /\bnpm run\b|\bnpm test\b|\bnpx changeset\b|git commit -m "chore: release vX\.X\.X"/);
 	assert.doesNotMatch(guide, /incr[ií]vel|estado da arte|liberar o potencial|jornada/i);

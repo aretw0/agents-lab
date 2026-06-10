@@ -64,7 +64,7 @@ Revise as mudanças antes de commitar:
 ```bash
 git diff
 pnpm run ci:local:parity
-pnpm run release:readiness -- --target X.X.X
+pnpm run release:readiness:strict -- --target X.X.X
 ```
 
 ### 3. Commitar, taggear e publicar
