@@ -8,6 +8,27 @@ O control plane deve trabalhar o mínimo possível. Seu papel é escolher foco, 
 
 O caminho atual provou que provider-native workers funcionam, mas ainda é artesanal: o control plane monta comandos `pi --print ... @files ...` manualmente. Isso mantém o control plane como gargalo, aumenta risco de erro de argv, e limita a evolução para agentes mais autônomos.
 
+## Atualização operacional — 2026-06-10
+
+O caminho artesanal foi substituído, para canaries e workers bounded, pela camada headless agnóstica:
+
+```bash
+pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --summary
+```
+
+Para execução real, o contrato exige aprovação estruturada explícita:
+
+```bash
+pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --execute --approve --follow --build-outcome --summary
+```
+
+Evidência já validada:
+
+- `real-pi-print-readonly-readme-canary-20260609`: Pi local, `openai-codex/gpt-5.3-codex-spark`, read-only, `README.md`, `contractDecision=pass`.
+- `real-next-slice-decoupling-scan-20260610`: worker real pequeno recomendou a correção `readTasks/readVerificationRows` fail-closed; a mudança entrou em commit e testes.
+
+Regra atual: para tarefas local-safe pequenas, tentar primeiro um worker via `agent-run:pi-driver` com escopo mínimo. Se um worker com múltiplos arquivos der timeout sem saída, reduzir o escopo antes de retry; não promover timeout como evidência.
+
 ## Evidência de worker
 
 Run read-only: `task-bud-1000-agent-first-invocation-design-review`.
