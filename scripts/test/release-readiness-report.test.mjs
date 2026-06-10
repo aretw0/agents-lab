@@ -85,6 +85,15 @@ test("buildReport marks target release not ready until version and board gates a
   try {
     const report = buildReport(gather("0.8.0", workspace));
     assert.equal(report.ready, false);
+    assert.deepEqual(report.checklist.map((item) => [item.id, item.kind]), [
+      ["versions-aligned", "technical-gate"],
+      ["target-version-ready", "operator-decision"],
+      ["workflow-ci", "technical-gate"],
+      ["workflow-publish", "technical-gate"],
+      ["workflow-release-draft", "technical-gate"],
+      ["agent-run-driver-gate", "technical-gate"],
+      ["board-release-clear", "board-state"],
+    ]);
     assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.id), ["target-version-ready", "board-release-clear"]);
     assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.kind), ["operator-decision", "board-state"]);
     assert.deepEqual(report.operatorDecisions.map((decision) => decision.id), ["decide-target-version"]);
@@ -322,6 +331,15 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.mode, "release-readiness-report");
     assert.equal(json.schemaVersion, 1);
     assert.equal(json.ready, false);
+    assert.deepEqual(json.checklist.map((item) => [item.id, item.kind]), [
+      ["versions-aligned", "technical-gate"],
+      ["target-version-ready", "operator-decision"],
+      ["workflow-ci", "technical-gate"],
+      ["workflow-publish", "technical-gate"],
+      ["workflow-release-draft", "technical-gate"],
+      ["agent-run-driver-gate", "technical-gate"],
+      ["board-release-clear", "board-state"],
+    ]);
     assert.deepEqual(json.releaseBlockers.map((blocker) => blocker.id), ["board-release-clear"]);
     assert.deepEqual(json.releaseBlockers.map((blocker) => blocker.kind), ["board-state"]);
     assert.deepEqual(json.operatorDecisions.map((decision) => decision.id), ["decide-board-evidence-candidates"]);

@@ -68,7 +68,7 @@ function hasAgentRunDriverGate(cwd) {
     && AGENT_RUN_DRIVER_GATE_TESTS.every((testPath) => script.includes(testPath));
 }
 
-function releaseBlockerKind(id) {
+function releaseGateKind(id) {
   if (id === "target-version-ready") return "operator-decision";
   if (id === "board-release-clear") return "board-state";
   return "technical-gate";
@@ -77,7 +77,7 @@ function releaseBlockerKind(id) {
 function releaseBlockerRow(item) {
   return {
     id: item.id,
-    kind: releaseBlockerKind(item.id),
+    kind: item.kind,
     evidence: item.evidence,
   };
 }
@@ -345,7 +345,7 @@ export function buildReport(data) {
     { id: "workflow-release-draft", ok: data.workflows.releaseDraft, evidence: ".github/workflows/release-draft.yml" },
     { id: "agent-run-driver-gate", ok: data.gates.agentRunDrivers, evidence: `package.json scripts.test:agent-run:drivers includes ${AGENT_RUN_DRIVER_GATE_TESTS.join(", ")}` },
     { id: "board-release-clear", ok: data.board.releaseReady, evidence: data.board.blockers.length ? data.board.blockers.join(", ") : "no open P0/in-progress/blocked tasks" },
-  ];
+  ].map((item) => ({ ...item, kind: releaseGateKind(item.id) }));
   const ready = checklist.every((item) => item.ok);
   const failedChecklist = checklist.filter((item) => !item.ok);
   const releaseBlockers = failedChecklist.map(releaseBlockerRow);
