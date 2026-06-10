@@ -308,6 +308,30 @@ export interface AgentRunTaskStartPacketResult {
   taskPacket: AgentRunTaskPacketResult;
   registryPreview: ReturnType<typeof buildAgentRunRegistryUpsertPacket>;
   startPreview: AgentRunStartPacketResult["commandPreview"];
+  headlessDriverPreview: {
+    mode: "agent-run-driver-step-preview";
+    decision: "ready-for-operator-decision" | "blocked";
+    dispatchAllowed: false;
+    processStartAllowed: false;
+    tool: "agent_run_driver_step_dispatch";
+    payload: {
+      execute: false;
+      follow: false;
+      buildOutcome: false;
+      runSpec: {
+        runId: string;
+        providerModelRef: string;
+        cwd: string;
+        declaredFiles: string[];
+        timeoutMs: number;
+        logPath: string;
+        fileContract: AgentRunOperatorFileContract;
+        executionPreview: AgentRunStartPacketResult["commandPreview"];
+      };
+    };
+    blockers: string[];
+    summary: string;
+  };
   statusPreview: ReturnType<typeof buildAgentRunStatus>;
   logTailPreview: {
     runId: string;
@@ -831,6 +855,38 @@ export function buildAgentRunTaskPacket(input: AgentRunTaskPacketInput = {}): Ag
 export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput = {}): AgentRunTaskStartPacketResult {
   const taskPacket = buildAgentRunTaskPacket(input);
   const spec = taskPacket.invocationSpec;
+  const headlessDriverBlockers = spec.fileContract === "read-only" ? [] : ["headless-driver-preview-read-only-only"];
+  const headlessDriverPreview = {
+    mode: "agent-run-driver-step-preview" as const,
+    decision: (headlessDriverBlockers.length === 0 ? "ready-for-operator-decision" : "blocked") as AgentRunStartDecision,
+    dispatchAllowed: false as const,
+    processStartAllowed: false as const,
+    tool: "agent_run_driver_step_dispatch" as const,
+    payload: {
+      execute: false as const,
+      follow: false as const,
+      buildOutcome: false as const,
+      runSpec: {
+        runId: spec.runId,
+        providerModelRef: spec.providerModelRef,
+        cwd: spec.cwd,
+        declaredFiles: spec.declaredFiles,
+        timeoutMs: spec.timeoutMs,
+        logPath: spec.logPath,
+        fileContract: spec.fileContract,
+        executionPreview: spec.executionPreview,
+      },
+    },
+    blockers: headlessDriverBlockers,
+    summary: [
+      "agent-run-driver-step-preview:",
+      `decision=${headlessDriverBlockers.length === 0 ? "ready-for-operator-decision" : "blocked"}`,
+      `runId=${spec.runId || "unknown"}`,
+      `fileContract=${spec.fileContract}`,
+      "dispatch=no",
+      headlessDriverBlockers.length > 0 ? `blockers=${headlessDriverBlockers.join("|")}` : undefined,
+    ].filter(Boolean).join(" "),
+  };
   const registryPreview = buildAgentRunRegistryUpsertPacket({
     runId: spec.runId,
     existingEntry: input.existingEntry,
@@ -876,6 +932,7 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
     taskPacket,
     registryPreview,
     startPreview: spec.executionPreview,
+    headlessDriverPreview,
     statusPreview,
     logTailPreview: {
       runId: spec.runId,
@@ -896,6 +953,7 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
     nextActions: decision === "ready-for-operator-decision"
       ? [
           "show registry/start/status/log/abort/outcome previews to the operator",
+          "prefer headlessDriverPreview when the task is read-only and ready",
           "require structured operator approval before any dispatch",
           "if confirmed later, write registry planned/running before subprocess start",
           "after exit, run outcome packet before any board completion",

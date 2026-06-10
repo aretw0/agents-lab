@@ -255,11 +255,62 @@ describe("agent run task packet surfaces", () => {
       dispatchAllowed: false,
     });
     expect(result.startPreview.command).toBe("pi");
+    expect(result.headlessDriverPreview).toMatchObject({
+      mode: "agent-run-driver-step-preview",
+      decision: "blocked",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      tool: "agent_run_driver_step_dispatch",
+      blockers: ["headless-driver-preview-read-only-only"],
+    });
     expect(result.statusPreview.processStartAllowed).toBe(false);
     expect(result.logTailPreview.readOnly).toBe(true);
     expect(result.abortPreview.processStopAllowed).toBe(false);
     expect(result.outcomeChecklist.join("\n")).toContain("fail contract on empty output");
     expect(result.summary).toContain("dispatch=no");
+  });
+
+  it("adds a ready headless driver preview for read-only task workers", () => {
+    const result = buildAgentRunTaskStartPacket({
+      taskId: "TASK-READONLY",
+      task: {
+        id: "TASK-READONLY",
+        description: "Review a declared file without mutations.",
+        status: "planned",
+        files: ["README.md"],
+        acceptance_criteria: ["return review evidence"],
+      },
+      profile: "read-only-review",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: process.cwd(),
+      budgetDecision: "warn",
+      budgetEvidence: "scoped model budget usable",
+      budgetEvidenceSource: "manual",
+      budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
+    });
+
+    expect(result.decision).toBe("ready-for-operator-decision");
+    expect(result.headlessDriverPreview).toMatchObject({
+      mode: "agent-run-driver-step-preview",
+      decision: "ready-for-operator-decision",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      tool: "agent_run_driver_step_dispatch",
+      blockers: [],
+    });
+    expect(result.headlessDriverPreview.payload).toMatchObject({
+      execute: false,
+      follow: false,
+      buildOutcome: false,
+      runSpec: {
+        runId: "task-readonly-task-packet",
+        providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+        cwd: process.cwd(),
+        declaredFiles: ["README.md"],
+        fileContract: "read-only",
+        executionPreview: result.startPreview,
+      },
+    });
   });
 
   it("propagates inherited extension isolation for custom-provider task workers", () => {
