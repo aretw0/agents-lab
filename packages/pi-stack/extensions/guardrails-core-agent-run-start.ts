@@ -317,16 +317,16 @@ export interface AgentRunTaskStartPacketResult {
     payload: {
       execute: false;
       follow: false;
-      buildOutcome: false;
-      runSpec: {
-        runId: string;
-        providerModelRef: string;
+      build_outcome: false;
+      run_spec: {
+        run_id: string;
+        provider_model_ref: string;
         cwd: string;
-        declaredFiles: string[];
-        timeoutMs: number;
-        logPath: string;
-        fileContract: AgentRunOperatorFileContract;
-        executionPreview: AgentRunStartPacketResult["commandPreview"];
+        declared_files: string[];
+        timeout_ms: number;
+        log_path: string;
+        file_contract: AgentRunOperatorFileContract;
+        execution_preview: AgentRunStartPacketResult["commandPreview"];
       };
     };
     blockers: string[];
@@ -865,16 +865,16 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
     payload: {
       execute: false as const,
       follow: false as const,
-      buildOutcome: false as const,
-      runSpec: {
-        runId: spec.runId,
-        providerModelRef: spec.providerModelRef,
+      build_outcome: false as const,
+      run_spec: {
+        run_id: spec.runId,
+        provider_model_ref: spec.providerModelRef,
         cwd: spec.cwd,
-        declaredFiles: spec.declaredFiles,
-        timeoutMs: spec.timeoutMs,
-        logPath: spec.logPath,
-        fileContract: spec.fileContract,
-        executionPreview: spec.executionPreview,
+        declared_files: spec.declaredFiles,
+        timeout_ms: spec.timeoutMs,
+        log_path: spec.logPath,
+        file_contract: spec.fileContract,
+        execution_preview: spec.executionPreview,
       },
     },
     blockers: headlessDriverBlockers,

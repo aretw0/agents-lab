@@ -301,14 +301,14 @@ describe("agent run task packet surfaces", () => {
     expect(result.headlessDriverPreview.payload).toMatchObject({
       execute: false,
       follow: false,
-      buildOutcome: false,
-      runSpec: {
-        runId: "task-readonly-task-packet",
-        providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      build_outcome: false,
+      run_spec: {
+        run_id: "task-readonly-task-packet",
+        provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
         cwd: process.cwd(),
-        declaredFiles: ["README.md"],
-        fileContract: "read-only",
-        executionPreview: result.startPreview,
+        declared_files: ["README.md"],
+        file_contract: "read-only",
+        execution_preview: result.startPreview,
       },
     });
   });
@@ -703,16 +703,46 @@ describe("agent run task packet surfaces", () => {
       payload: {
         execute: false,
         follow: false,
-        buildOutcome: false,
-        runSpec: {
-          runId: "task-readonly-task-packet",
-          providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+        build_outcome: false,
+        run_spec: {
+          run_id: "task-readonly-task-packet",
+          provider_model_ref: "openai-codex/gpt-5.3-codex-spark",
           cwd: tmp,
-          declaredFiles: ["README.md"],
-          fileContract: "read-only",
+          declared_files: ["README.md"],
+          file_contract: "read-only",
         },
       },
       blockers: [],
+    });
+
+    const driverToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "agent_run_driver_step_dispatch");
+    const driverTool = driverToolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+    const preview = result.details?.headlessDriverPreview as { payload?: Record<string, unknown> } | undefined;
+    const driverResult = await driverTool.execute(
+      "tc-agent-run-driver-step-from-task-start-preview",
+      preview?.payload ?? {},
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: tmp },
+    );
+
+    expect(driverResult.details?.mode).toBe("agent-run-driver-step-packet");
+    expect(driverResult.details?.decision).toBe("ready-for-operator-decision");
+    expect(driverResult.details?.dispatchAllowed).toBe(false);
+    expect(driverResult.details?.processStartAllowed).toBe(false);
+    expect(driverResult.details?.runSpec).toMatchObject({
+      runId: "task-readonly-task-packet",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: tmp,
+      declaredFiles: ["README.md"],
     });
   });
 });
