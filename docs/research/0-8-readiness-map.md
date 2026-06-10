@@ -32,7 +32,7 @@ O estado atual para 0.8.0 é:
 | Instalação padrão | conservadora | `npx @aretw0/pi-stack` instala perfil `strict-curated` |
 | Fronteira de engine | protegida | `engine:boundary:audit` mantém core portable e Pi em surfaces/adapters |
 | Driver agent-run agnóstico | verde | `test:agent-run:drivers` cobre driver-step, pi-driver, payload emitido e cadeia arquivo-a-arquivo packet/result |
-| Board de release | ainda com decisão pendente | `release:readiness:v0.8.0` reporta `board-release-clear` bloqueado por tarefas em execução, sem P0 aberto, e lista evidência candidata para `TASK-BUD-480`, `TASK-BUD-521` e `TASK-BUD-676` |
+| Board de release | ainda com decisão pendente | `release:readiness:v0.8.0` reporta `board-release-clear` bloqueado por tarefas em execução, sem P0 aberto, e lista evidência candidata para `TASK-BUD-480`, `TASK-BUD-521` e `TASK-BUD-676`; o JSON expõe `operatorDecisions` e `releaseDecisionReady` para agentes/automação local |
 
 ## Preparado, mas ainda protegido
 
@@ -61,7 +61,7 @@ O estado atual para 0.8.0 é:
 | Fatia | Validação |
 |---|---|
 | Revisar release notes/changelog | confirmar mudanças desde `v0.7.0`, riscos e rollback antes de tag |
-| Decidir candidatos de evidência do board | usar a seção `Board Evidence Candidates` do readiness report para decidir se `TASK-BUD-480`, `TASK-BUD-521` e `TASK-BUD-676` ficam parked para 0.8 ou entram como trabalho requerido |
+| Decidir candidatos de evidência do board | usar `operatorDecisions` + `releaseDecisionReady` no JSON do readiness report e a seção `Board Evidence Candidates` para decidir se `TASK-BUD-480`, `TASK-BUD-521` e `TASK-BUD-676` ficam parked para 0.8 ou entram como trabalho requerido |
 | Decidir bump 0.8.0 | `release:readiness:v0.8.0` deve ficar verde exceto antes do bump; depois, verde completo |
 | Revalidar instalação limpa | `release:package:smoke`, `docs:package:check`, install/smoke em ambiente limpo; GitHub Packages deve continuar opt-in se não aprovado |
 | Manter acoplamentos de engine sob controle | `engine:boundary:audit`, sem dependências Pi em core portable |
