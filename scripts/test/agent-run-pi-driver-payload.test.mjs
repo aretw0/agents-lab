@@ -201,6 +201,31 @@ test("builds a driver-step call with execution preview flags", () => {
   });
 });
 
+test("builds a driver-step call with explicit structured approval", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-approval-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('help')\n", "utf8");
+  const approval = structuredApproval();
+
+  const result = buildPiHelpDriverStepPayload({
+    cwd,
+    runId: "pi-help-approval",
+    execute: true,
+    follow: true,
+    buildOutcome: true,
+    operatorApproval: approval,
+  });
+
+  assert.equal(result.dispatchAllowed, false);
+  assert.equal(result.processStartAllowed, false);
+  assert.equal(result.operator_approval, approval);
+  assert.equal(result.driverStepCall.operator_approval, approval);
+  assert.equal(result.driverStepCall.params.execute, true);
+  assert.equal(result.driverStepCall.params.follow, true);
+  assert.equal(result.driverStepCall.params.build_outcome, true);
+});
+
 test("payload CLI emits driver-step execution flags without dispatch", () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-cli-exec-flags-"));
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
@@ -228,6 +253,36 @@ test("payload CLI emits driver-step execution flags without dispatch", () => {
   assert.equal(result.driverStepCall.params.follow, true);
   assert.equal(result.driverStepCall.params.build_outcome, true);
   assert.equal(result.driverStepCall.params.follow_max_wait_ms, 5_000);
+});
+
+test("payload CLI loads structured operator approval file", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-cli-approval-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('help')\n", "utf8");
+  const approvalPath = path.join(cwd, "approval.json");
+  writeFileSync(approvalPath, JSON.stringify(structuredApproval()), "utf8");
+
+  const stdout = execFileSync(process.execPath, [
+    payloadCliPath,
+    "--cwd",
+    cwd,
+    "--run-id",
+    "pi-help-cli-approval",
+    "--execute",
+    "--follow",
+    "--build-outcome",
+    "--operator-approval-file",
+    approvalPath,
+    "--pretty",
+  ], { encoding: "utf8" });
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.dispatchAllowed, false);
+  assert.equal(result.processStartAllowed, false);
+  assert.equal(result.operator_approval.approved, true);
+  assert.equal(result.driverStepCall.operator_approval.approval_state, "approved");
+  assert.equal(result.driverStepCall.params.execute, true);
 });
 
 test("blocks incomplete print-readonly payloads", () => {

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
@@ -21,6 +21,8 @@ function parseArgs(argv = process.argv.slice(2)) {
     followMaxWaitMs: undefined,
     followPollIntervalMs: undefined,
     followMaxLines: undefined,
+    operatorApproval: undefined,
+    operatorApprovalFile: "",
     pretty: false,
     help: false,
   };
@@ -41,9 +43,13 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--follow-max-wait-ms") out.followMaxWaitMs = Number(argv[++index] ?? "");
     else if (arg === "--follow-poll-interval-ms") out.followPollIntervalMs = Number(argv[++index] ?? "");
     else if (arg === "--follow-max-lines") out.followMaxLines = Number(argv[++index] ?? "");
+    else if (arg === "--operator-approval-file") out.operatorApprovalFile = argv[++index] ?? "";
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else throw new Error(`Unknown argument: ${arg}`);
+  }
+  if (out.operatorApprovalFile) {
+    out.operatorApproval = JSON.parse(readFileSync(out.operatorApprovalFile, "utf8"));
   }
   return out;
 }
@@ -86,6 +92,7 @@ function buildDriverStepCall(payload, options = {}) {
     params,
     operatorApprovalRequired: true,
     operatorApprovalParam: "operator_approval",
+    ...(options.operatorApproval ? { operator_approval: options.operatorApproval } : {}),
   };
 }
 
@@ -143,6 +150,7 @@ export function buildPiHelpDriverStepPayload(options = {}) {
     dispatchAllowed: false,
     processStartAllowed: false,
     payload,
+    ...(options.operatorApproval ? { operator_approval: options.operatorApproval } : {}),
     driverStepCall: buildDriverStepCall(payload, options),
     summary: `agent-run-pi-driver-payload: decision=ready-for-driver-step runId=${runId} dispatch=no`,
   };
@@ -219,6 +227,7 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
     dispatchAllowed: false,
     processStartAllowed: false,
     payload,
+    ...(options.operatorApproval ? { operator_approval: options.operatorApproval } : {}),
     driverStepCall: buildDriverStepCall(payload, options),
     summary: `agent-run-pi-driver-payload: decision=ready-for-driver-step mode=print-readonly runId=${runId} dispatch=no`,
   };
@@ -242,10 +251,10 @@ function printHelp() {
     "Usage: node scripts/agent-run-pi-driver-payload.mjs [--mode help|print-readonly] [options] [--pretty]",
     "",
     "help options:",
-    "  --cwd DIR --run-id ID --log-path PATH [--execute] [--follow] [--build-outcome]",
+    "  --cwd DIR --run-id ID --log-path PATH [--execute] [--follow] [--build-outcome] [--operator-approval-file approval.json]",
     "",
     "print-readonly options:",
-    "  --cwd DIR --run-id ID --model PROVIDER/MODEL --file PATH --prompt TEXT [--file-contract read-only|mutation] [--tool read,grep,find,ls] [--execute] [--follow] [--build-outcome]",
+    "  --cwd DIR --run-id ID --model PROVIDER/MODEL --file PATH --prompt TEXT [--file-contract read-only|mutation] [--tool read,grep,find,ls] [--execute] [--follow] [--build-outcome] [--operator-approval-file approval.json]",
     "",
     "Builds payloads for scripts/agent-run-driver-step.mjs. It never dispatches by itself.",
   ].join("\n") + "\n");

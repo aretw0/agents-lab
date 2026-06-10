@@ -25,11 +25,11 @@ pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --f
 Agentes externos podem evitar remontagem manual de JSON usando o pacote completo. O payload builder emite `driverStepCall`, e o driver aceita esse envelope inteiro:
 
 ```bash
-pnpm run agent-run:pi-driver-payload -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --execute --follow --build-outcome --pretty > driver-packet.json
+pnpm run agent-run:pi-driver-payload -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --execute --follow --build-outcome --operator-approval-file approval.json --pretty > driver-packet.json
 pnpm run agent-run:driver-step -- --input driver-packet.json --cwd .
 ```
 
-Quando a aprovação estruturada já existe em arquivo, use `--operator-approval-file` no `agent-run:pi-driver` ou anexe `operator_approval` no topo do pacote antes de chamar `agent-run:driver-step`.
+Quando a aprovação estruturada já existe em arquivo, use `--operator-approval-file` no `agent-run:pi-driver` ou no `agent-run:pi-driver-payload`; o pacote emitido preserva `operator_approval` no envelope e no `driverStepCall`.
 
 Para runs de mutação, o outcome só deve ser promovido com evidência parent-side explícita. O driver aceita a mesma evidência que `agent_run_outcome_packet`:
 
