@@ -25,7 +25,7 @@ pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --f
 Agentes externos podem evitar remontagem manual de JSON usando o pacote completo. O payload builder emite `driverStepCall`, e o driver aceita esse envelope inteiro:
 
 ```bash
-pnpm run agent-run:pi-driver-payload -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --execute --follow --build-outcome --operator-approval-file approval.json --pretty > driver-packet.json
+pnpm run agent-run:pi-driver-payload -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --execute --follow --build-outcome --operator-approval-file approval.json --out driver-packet.json --pretty
 pnpm run agent-run:driver-step -- --input driver-packet.json --cwd .
 ```
 
@@ -46,6 +46,7 @@ Evidência já validada:
 - `real-pi-print-readonly-readme-canary-20260609`: Pi local, `openai-codex/gpt-5.3-codex-spark`, read-only, `README.md`, `contractDecision=pass`.
 - `real-next-slice-decoupling-scan-20260610`: worker real pequeno recomendou a correção `readTasks/readVerificationRows` fail-closed; a mudança entrou em commit e testes.
 - `agent_run_driver_step_dispatch`, `agent-run:pi-driver` e `agent-run:pi-driver-payload`: preservam `file_contract`, `touched_files`, `marker_results` e `mutation_target_files` para materializar outcome embutido em `follow=true` + `build_outcome=true`; o pacote emitido pelo CLI pode ser entregue diretamente a `agent-run:driver-step`.
+- `agent-run:pi-driver-payload --out`: grava o pacote em arquivo sem depender de redirecionamento de shell e mantém stdout JSON para compatibilidade.
 - `agent-run:driver-step`: retorna `summary` compacto com decisão, run id, dispatch, follow, estado, bytes, contrato e contagem de blockers para leitura por operador ou agente externo antes de inspecionar o JSON completo.
 - Gate local da lane: `pnpm run test:agent-run:drivers` (ou `node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs` em ambientes onde `pnpm` tenta instalar dependências).
 
