@@ -15,6 +15,12 @@ function parseArgs(argv = process.argv.slice(2)) {
     files: [],
     tools: [],
     fileContract: "read-only",
+    execute: false,
+    follow: false,
+    buildOutcome: false,
+    followMaxWaitMs: undefined,
+    followPollIntervalMs: undefined,
+    followMaxLines: undefined,
     pretty: false,
     help: false,
   };
@@ -29,6 +35,12 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--file") out.files.push(argv[++index] ?? "");
     else if (arg === "--tool") out.tools.push(argv[++index] ?? "");
     else if (arg === "--file-contract") out.fileContract = argv[++index] ?? out.fileContract;
+    else if (arg === "--execute") out.execute = true;
+    else if (arg === "--follow") out.follow = true;
+    else if (arg === "--build-outcome") out.buildOutcome = true;
+    else if (arg === "--follow-max-wait-ms") out.followMaxWaitMs = Number(argv[++index] ?? "");
+    else if (arg === "--follow-poll-interval-ms") out.followPollIntervalMs = Number(argv[++index] ?? "");
+    else if (arg === "--follow-max-lines") out.followMaxLines = Number(argv[++index] ?? "");
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else throw new Error(`Unknown argument: ${arg}`);
@@ -55,10 +67,23 @@ function normalizeFileContract(value) {
   return value === "mutation" ? "mutation" : "read-only";
 }
 
-function buildDriverStepCall(payload) {
+function positiveInteger(value) {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.floor(value) : undefined;
+}
+
+function buildDriverStepCall(payload, options = {}) {
+  const params = {
+    ...payload,
+    ...(options.execute === true ? { execute: true } : {}),
+    ...(options.follow === true ? { follow: true } : {}),
+    ...(options.buildOutcome === true ? { build_outcome: true } : {}),
+    ...(positiveInteger(options.followMaxWaitMs) ? { follow_max_wait_ms: positiveInteger(options.followMaxWaitMs) } : {}),
+    ...(positiveInteger(options.followPollIntervalMs) ? { follow_poll_interval_ms: positiveInteger(options.followPollIntervalMs) } : {}),
+    ...(positiveInteger(options.followMaxLines) ? { follow_max_lines: positiveInteger(options.followMaxLines) } : {}),
+  };
   return {
     tool: "agent_run_driver_step_dispatch",
-    params: payload,
+    params,
     operatorApprovalRequired: true,
     operatorApprovalParam: "operator_approval",
   };
@@ -118,7 +143,7 @@ export function buildPiHelpDriverStepPayload(options = {}) {
     dispatchAllowed: false,
     processStartAllowed: false,
     payload,
-    driverStepCall: buildDriverStepCall(payload),
+    driverStepCall: buildDriverStepCall(payload, options),
     summary: `agent-run-pi-driver-payload: decision=ready-for-driver-step runId=${runId} dispatch=no`,
   };
 }
@@ -194,7 +219,7 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
     dispatchAllowed: false,
     processStartAllowed: false,
     payload,
-    driverStepCall: buildDriverStepCall(payload),
+    driverStepCall: buildDriverStepCall(payload, options),
     summary: `agent-run-pi-driver-payload: decision=ready-for-driver-step mode=print-readonly runId=${runId} dispatch=no`,
   };
 }
@@ -217,10 +242,10 @@ function printHelp() {
     "Usage: node scripts/agent-run-pi-driver-payload.mjs [--mode help|print-readonly] [options] [--pretty]",
     "",
     "help options:",
-    "  --cwd DIR --run-id ID --log-path PATH",
+    "  --cwd DIR --run-id ID --log-path PATH [--execute] [--follow] [--build-outcome]",
     "",
     "print-readonly options:",
-    "  --cwd DIR --run-id ID --model PROVIDER/MODEL --file PATH --prompt TEXT [--file-contract read-only|mutation] [--tool read,grep,find,ls]",
+    "  --cwd DIR --run-id ID --model PROVIDER/MODEL --file PATH --prompt TEXT [--file-contract read-only|mutation] [--tool read,grep,find,ls] [--execute] [--follow] [--build-outcome]",
     "",
     "Builds payloads for scripts/agent-run-driver-step.mjs. It never dispatches by itself.",
   ].join("\n") + "\n");

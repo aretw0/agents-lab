@@ -13,6 +13,7 @@ import {
 } from "../agent-run-pi-driver-payload.mjs";
 
 const driverStepCliPath = fileURLToPath(new URL("../agent-run-driver-step.mjs", import.meta.url));
+const payloadCliPath = fileURLToPath(new URL("../agent-run-pi-driver-payload.mjs", import.meta.url));
 
 function structuredApproval() {
   return {
@@ -130,7 +131,7 @@ test("builds a print-readonly payload with isolated pi flags", () => {
   assert.equal(result.payload.run_spec.provider_model_ref, "local/test-model");
   assert.equal(result.payload.run_spec.file_contract, "read-only");
   assert.equal(result.driverStepCall.tool, "agent_run_driver_step_dispatch");
-  assert.equal(result.driverStepCall.params, result.payload);
+  assert.deepEqual(result.driverStepCall.params, result.payload);
   assert.equal(result.driverStepCall.operatorApprovalParam, "operator_approval");
   assert.deepEqual(result.payload.run_spec.declared_files, ["README.md"]);
   assert.deepEqual(result.payload.run_spec.execution_preview.args, [
@@ -168,6 +169,65 @@ test("builds a print payload with mutation file contract when requested", () => 
 
   assert.equal(result.decision, "ready-for-driver-step");
   assert.equal(result.payload.run_spec.file_contract, "mutation");
+});
+
+test("builds a driver-step call with execution preview flags", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-exec-flags-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('help')\n", "utf8");
+
+  const result = buildPiHelpDriverStepPayload({
+    cwd,
+    runId: "pi-help-exec-flags",
+    execute: true,
+    follow: true,
+    buildOutcome: true,
+    followMaxWaitMs: 5_000,
+    followPollIntervalMs: 250,
+    followMaxLines: 20,
+  });
+
+  assert.equal(result.dispatchAllowed, false);
+  assert.equal(result.processStartAllowed, false);
+  assert.deepEqual(result.driverStepCall.params, {
+    ...result.payload,
+    execute: true,
+    follow: true,
+    build_outcome: true,
+    follow_max_wait_ms: 5_000,
+    follow_poll_interval_ms: 250,
+    follow_max_lines: 20,
+  });
+});
+
+test("payload CLI emits driver-step execution flags without dispatch", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-cli-exec-flags-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('help')\n", "utf8");
+
+  const stdout = execFileSync(process.execPath, [
+    payloadCliPath,
+    "--cwd",
+    cwd,
+    "--run-id",
+    "pi-help-cli-exec-flags",
+    "--execute",
+    "--follow",
+    "--build-outcome",
+    "--follow-max-wait-ms",
+    "5000",
+    "--pretty",
+  ], { encoding: "utf8" });
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.dispatchAllowed, false);
+  assert.equal(result.processStartAllowed, false);
+  assert.equal(result.driverStepCall.params.execute, true);
+  assert.equal(result.driverStepCall.params.follow, true);
+  assert.equal(result.driverStepCall.params.build_outcome, true);
+  assert.equal(result.driverStepCall.params.follow_max_wait_ms, 5_000);
 });
 
 test("blocks incomplete print-readonly payloads", () => {

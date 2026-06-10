@@ -25,7 +25,7 @@ pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --f
 Agentes externos podem evitar remontagem manual de JSON usando o pacote completo. O payload builder emite `driverStepCall`, e o driver aceita esse envelope inteiro:
 
 ```bash
-pnpm run agent-run:pi-driver-payload -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --pretty > driver-packet.json
+pnpm run agent-run:pi-driver-payload -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --execute --follow --build-outcome --pretty > driver-packet.json
 pnpm run agent-run:driver-step -- --input driver-packet.json --cwd .
 ```
 
