@@ -77,6 +77,9 @@ test("buildReport marks target release not ready until version and board gates a
     assert.match(report.markdown, /\[ \] target-version-ready/);
     assert.match(report.markdown, /\[ \] board-release-clear/);
     assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
+    assert.match(report.markdown, /## Release Blockers/);
+    assert.match(report.markdown, /target-version-ready: target=v0\.8\.0/);
+    assert.match(report.markdown, /board-release-clear: open-p0=1/);
     assert.match(report.markdown, /agent-run-pi-driver-payload\.test\.mjs/);
     assert.match(report.markdown, /TASK-P0 \[p0\/planned\]/);
     assert.match(report.markdown, /### P0 Ready To Start/);
@@ -98,6 +101,7 @@ test("buildReport marks release ready when versions and board gates are clear", 
     assert.match(report.markdown, /\[x\] target-version-ready/);
     assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
     assert.match(report.markdown, /\[x\] board-release-clear/);
+    assert.match(report.markdown, /## Release Blockers\n- none/);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }

@@ -210,6 +210,7 @@ export function buildReport(data) {
     { id: "board-release-clear", ok: data.board.releaseReady, evidence: data.board.blockers.length ? data.board.blockers.join(", ") : "no open P0/in-progress/blocked tasks" },
   ];
   const ready = checklist.every((item) => item.ok);
+  const failedChecklist = checklist.filter((item) => !item.ok);
 
   const lines = [
     `# Release readiness report v${data.target}`,
@@ -221,6 +222,9 @@ export function buildReport(data) {
     "",
     "## Checklist",
     ...checklist.map((c) => `- [${c.ok ? "x" : " "}] ${c.id} — ${c.evidence}`),
+    "",
+    "## Release Blockers",
+    ...(failedChecklist.length ? failedChecklist.map((c) => `- ${c.id}: ${c.evidence}`) : ["- none"]),
     "",
     "## Board Summary",
     `- tasks: ${data.board.total}`,
