@@ -38,6 +38,22 @@ test("blocks when local pi cli is missing", () => {
   assert.ok(result.blockers.includes("local-pi-cli-missing"));
 });
 
+test("builds a help payload with mutation file contract when requested", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-help-mutation-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('help')\n", "utf8");
+
+  const result = buildPiHelpDriverStepPayload({
+    cwd,
+    runId: "pi-help-mutation-smoke",
+    fileContract: "mutation",
+  });
+
+  assert.equal(result.decision, "ready-for-driver-step");
+  assert.equal(result.payload.run_spec.file_contract, "mutation");
+});
+
 test("builds a print-readonly payload with isolated pi flags", () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-print-"));
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");

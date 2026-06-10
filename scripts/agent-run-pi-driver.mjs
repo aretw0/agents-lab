@@ -74,6 +74,7 @@ export async function runPiDriver(options = {}) {
     prompt: options.prompt,
     files: options.files,
     tools: options.tools,
+    fileContract: options.fileContract,
   });
 
   if (payloadPacket.decision === "blocked") {

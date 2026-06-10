@@ -110,6 +110,7 @@ test("pi driver forwards mutation outcome evidence to the headless driver", asyn
   const summary = buildPiDriverSummary(result);
 
   assert.equal(result.driverStep.runSpec.fileContract, "mutation");
+  assert.equal(result.payloadPacket.payload.run_spec.file_contract, "mutation");
   assert.equal(result.driverStep.nextAgentRunOutcomePacket.params.file_contract, "mutation");
   assert.deepEqual(result.driverStep.nextAgentRunOutcomePacket.params.touched_files, ["README.md"]);
   assert.deepEqual(result.driverStep.nextAgentRunOutcomePacket.params.mutation_target_files, ["README.md"]);

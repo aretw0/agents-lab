@@ -72,6 +72,7 @@ export function buildPiHelpDriverStepPayload(options = {}) {
   const logPath = asCleanString(options.logPath)
     ? asCleanString(options.logPath)
     : `.pi/reports/${runId}.log`;
+  const fileContract = normalizeFileContract(options.fileContract);
 
   if (!cliPath) {
     return {
@@ -99,7 +100,7 @@ export function buildPiHelpDriverStepPayload(options = {}) {
         declared_files: ["package.json"],
         log_path: logPath,
         timeout_ms: 30_000,
-        file_contract: "read-only",
+        file_contract: fileContract,
         execution_preview: {
           command: process.execPath,
           args: [cliPath, "--help"],
