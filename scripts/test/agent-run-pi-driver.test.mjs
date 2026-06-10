@@ -14,6 +14,14 @@ function writeFakePi(cwd) {
   return cliPath;
 }
 
+function structuredApproval() {
+  return {
+    packet_mode: "operator-approval-packet",
+    approved: true,
+    approval_state: "approved",
+  };
+}
+
 test("pi driver previews help without dispatch by default", async () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-preview-"));
   writeFakePi(cwd);
@@ -35,6 +43,26 @@ test("pi driver blocks execute without approval", async () => {
   assert.equal(result.decision, "blocked");
   assert.equal(result.dispatchAllowed, false);
   assert.ok(result.driverStep.blockers.includes("structured-operator-approval-missing"));
+});
+
+test("pi driver accepts explicit structured operator approval", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-explicit-approval-"));
+  writeFakePi(cwd);
+
+  const result = await runPiDriver({
+    cwd,
+    mode: "help",
+    runId: "pi-driver-explicit-approval",
+    execute: true,
+    operatorApproval: structuredApproval(),
+    follow: true,
+    buildOutcome: true,
+  });
+
+  assert.equal(result.decision, "dispatched");
+  assert.equal(result.dispatchAllowed, true);
+  assert.equal(result.driverStep.structuredOperatorApproval, true);
+  assert.equal(result.driverStep.agentRunOutcomePacket.contractDecision, "pass");
 });
 
 test("pi driver executes approved local help and materializes outcome", async () => {
