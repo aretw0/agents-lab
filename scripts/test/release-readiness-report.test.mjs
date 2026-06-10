@@ -128,6 +128,7 @@ test("buildReport lists local-safe evidence candidates without clearing the boar
     assert.equal(report.ready, false);
     assert.match(report.markdown, /\[ \] board-release-clear/);
     assert.match(report.markdown, /board-release-clear \[board-state\]: in-progress=1/);
+    assert.match(report.markdown, /releaseDecisionReady: yes/);
     assert.match(report.markdown, /### Board Evidence Candidates/);
     assert.match(report.markdown, /TASK-BUD-521 \[p3\/in-progress\]/);
     assert.match(report.markdown, /external-influence-isolation/);

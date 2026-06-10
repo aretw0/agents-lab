@@ -140,6 +140,7 @@ export function summarizeBoard(cwd = process.cwd()) {
       inProgress: [],
       blocked: [],
       evidenceCandidates: [],
+      releaseDecisionReady: false,
       releaseReady: false,
       blockers: ["board-missing"],
     };
@@ -186,6 +187,17 @@ export function summarizeBoard(cwd = process.cwd()) {
   if (openP0.length > 0) blockers.push(`open-p0=${openP0.length}`);
   if (inProgress.length > 0) blockers.push(`in-progress=${inProgress.length}`);
   if (blocked.length > 0) blockers.push(`blocked=${blocked.length}`);
+  const evidenceCandidateTaskIds = new Set(
+    evidenceCandidates
+      .filter((row) => row.evidencePresent)
+      .map((row) => row.taskId),
+  );
+  const inProgressCoveredByEvidence = inProgress.length > 0
+    && inProgress.every((task) => evidenceCandidateTaskIds.has(String(task?.id ?? "")));
+  const releaseDecisionReady = blockers.length > 0
+    && openP0.length === 0
+    && blocked.length === 0
+    && inProgressCoveredByEvidence;
 
   return {
     exists: true,
@@ -198,6 +210,7 @@ export function summarizeBoard(cwd = process.cwd()) {
     inProgress: inProgress.map(taskOneLine).slice(0, 12),
     blocked: blocked.map(taskOneLine).slice(0, 12),
     evidenceCandidates: evidenceCandidates.map(boardEvidenceOneLine).slice(0, 12),
+    releaseDecisionReady,
     releaseReady: blockers.length === 0,
     blockers,
   };
@@ -285,6 +298,7 @@ export function buildReport(data) {
     `- byStatus: ${Object.entries(data.board.byStatus).map(([k, v]) => `${k}=${v}`).join(", ") || "none"}`,
     `- byPriority: ${Object.entries(data.board.byPriority).map(([k, v]) => `${k}=${v}`).join(", ") || "none"}`,
     `- releaseBlockers: ${data.board.blockers.length ? data.board.blockers.join(", ") : "none"}`,
+    `- releaseDecisionReady: ${data.board.releaseDecisionReady ? "yes" : "no"}`,
     "",
     "### Open P0",
     ...(data.board.openP0.length ? data.board.openP0.map((line) => `- ${line}`) : ["- none"]),
