@@ -50,7 +50,7 @@ Evidência já validada:
 - `agent-run:pi-driver-payload --out`: grava o pacote em arquivo sem depender de redirecionamento de shell e mantém stdout JSON para compatibilidade.
 - `agent-run:driver-step --out`: grava o resultado em arquivo sem depender de captura de stdout e mantém stdout JSON para compatibilidade.
 - `agent-run:driver-step`: retorna `summary` compacto com decisão, run id, dispatch, follow, estado, bytes, contrato e contagem de blockers para leitura por operador ou agente externo antes de inspecionar o JSON completo.
-- Gate local da lane: `pnpm run test:agent-run:drivers` (ou `node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs` em ambientes onde `pnpm` tenta instalar dependências).
+- Gate local da lane: `pnpm run test:agent-run:drivers` (ou `node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs` em ambientes onde `pnpm` tenta instalar dependências).
 
 Regra atual: para tarefas local-safe pequenas, tentar primeiro um worker via `agent-run:pi-driver` com escopo mínimo. Se um worker com múltiplos arquivos der timeout sem saída, reduzir o escopo antes de retry; não promover timeout como evidência.
 
