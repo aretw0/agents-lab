@@ -43,6 +43,7 @@
     "release:readiness": "node scripts/release-readiness-report.mjs",
     "release:readiness:json": "node scripts/release-readiness-report.mjs --json",
     "release:readiness:strict": "node scripts/release-readiness-report.mjs --strict",
+    "release:readiness:strict:json": "node scripts/release-readiness-report.mjs --strict --json",
     "release:readiness:v0.8.0": "node scripts/release-readiness-report.mjs --target 0.8.0",
     "release:readiness:v0.8.0:json": "node scripts/release-readiness-report.mjs --target 0.8.0 --json",
     "pi:local": "node scripts/pi-source-switch.mjs local",

@@ -65,6 +65,7 @@ Revise as mudanças antes de commitar:
 git diff
 pnpm run ci:local:parity
 pnpm run release:readiness:strict -- --target X.X.X
+pnpm run release:readiness:strict:json -- --target X.X.X
 ```
 
 ### 3. Commitar, taggear e publicar
