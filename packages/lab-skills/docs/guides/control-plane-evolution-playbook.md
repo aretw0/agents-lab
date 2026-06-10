@@ -103,6 +103,7 @@ Interpretação do readiness report:
 - no JSON, `generatedAt` e `decision` identificam o snapshot e a decisão (`ready` ou `not-ready`) sem parsear Markdown;
 - no JSON, `versions`, `versionsAligned`, `targetVersionReady`, `workflows`, `gates`, `agentRunDrivers` e `packageSmoke` expõem os gates principais sem parsear `checklist[*].evidence`;
 - no JSON, `agentRunDrivers.lastCanaryEvidence` pode apontar `.artifacts/agent-run-driver/latest.json` como evidência local advisory; ausência desse arquivo não bloqueia release por si só;
+- `pnpm run agent-run:driver-canary` produz essa evidência local com um canário bounded de `node --version`, sem provider real, sem fan-in e sem colônia;
 - no JSON, `checklist[*].kind` classifica cada gate como `technical-gate`, `operator-decision` ou `board-state`;
 - no JSON, `releaseBlockers` expõe os mesmos bloqueios do Markdown com `id`, `kind` e `evidence`;
 - no JSON, `operatorDecisions[*]` inclui payload acionável por decisão, como `allowedActions`, versões atuais e `candidateTaskIds`;

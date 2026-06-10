@@ -24,9 +24,12 @@ Repository scripts are wrappers of reference for local automation and external a
 
 ```bash
 pnpm run agent-run:driver-step
+pnpm run agent-run:driver-canary
 pnpm run agent-run:pi-driver
 pnpm run agent-run:pi-driver-payload
 ```
+
+`agent-run:driver-canary` runs a bounded local `node --version` canary through the same driver step and writes `.artifacts/agent-run-driver/latest.json` for release readiness evidence.
 
 Those scripts are canonical for this repository workflow, but they are not the distributed package API by themselves. Portable consumers should target the primitive/tool contract and treat scripts as examples or local adapters.
 

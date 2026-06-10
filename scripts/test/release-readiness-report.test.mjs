@@ -18,7 +18,7 @@ const PACKAGES = [
 function makeWorkspace({
   version = "0.7.0",
   tasks = [],
-  agentRunDriverScript = "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs",
+  agentRunDriverScript = "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs",
 } = {}) {
   const root = mkdtempSync(path.join(tmpdir(), "release-readiness-"));
   writeFileSync(path.join(root, "package.json"), JSON.stringify({
@@ -355,6 +355,7 @@ test("agent-run driver gate requires the full driver suite script", () => {
     assert.deepEqual(gather("0.8.0", workspace).agentRunDrivers.missingTests, [
       "scripts/test/agent-run-pi-driver.test.mjs",
       "scripts/test/agent-run-pi-driver-payload.test.mjs",
+      "scripts/test/agent-run-driver-canary.test.mjs",
     ]);
     assert.match(report.markdown, /\[ \] agent-run-driver-gate/);
     assert.match(report.markdown, /agent-run-driver-gate \[technical-gate\]: missing scripts\/test\/agent-run-pi-driver\.test\.mjs/);
@@ -497,6 +498,7 @@ test("cli can write structured json for agents", () => {
       "scripts/test/agent-run-driver-step.test.mjs",
       "scripts/test/agent-run-pi-driver.test.mjs",
       "scripts/test/agent-run-pi-driver-payload.test.mjs",
+      "scripts/test/agent-run-driver-canary.test.mjs",
     ]);
     assert.deepEqual(json.agentRunDrivers.missingTests, []);
     assert.equal(json.packageSmoke.mode, "release-package-smoke-report");

@@ -18,6 +18,7 @@ const AGENT_RUN_DRIVER_GATE_TESTS = [
   "scripts/test/agent-run-driver-step.test.mjs",
   "scripts/test/agent-run-pi-driver.test.mjs",
   "scripts/test/agent-run-pi-driver-payload.test.mjs",
+  "scripts/test/agent-run-driver-canary.test.mjs",
 ];
 
 const BOARD_RELEASE_EVIDENCE = {
