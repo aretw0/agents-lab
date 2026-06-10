@@ -171,6 +171,33 @@ test("builds a print payload with mutation file contract when requested", () => 
   assert.equal(result.payload.run_spec.file_contract, "mutation");
 });
 
+test("builds a driver-step call with mutation evidence", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-mutation-evidence-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+
+  const result = buildPiPrintReadonlyDriverStepPayload({
+    cwd,
+    runId: "pi-print-mutation-evidence",
+    model: "local/test-model",
+    files: ["README.md"],
+    prompt: "Apply scoped change.",
+    fileContract: "mutation",
+    touchedFiles: ["README.md"],
+    mutationTargetFiles: ["README.md"],
+    markerResults: [{ label: "acceptance", ok: true }],
+    execute: true,
+    follow: true,
+    buildOutcome: true,
+  });
+
+  assert.equal(result.payload.run_spec.file_contract, "mutation");
+  assert.deepEqual(result.driverStepCall.params.touched_files, ["README.md"]);
+  assert.deepEqual(result.driverStepCall.params.mutation_target_files, ["README.md"]);
+  assert.deepEqual(result.driverStepCall.params.marker_results, [{ label: "acceptance", ok: true }]);
+});
+
 test("builds a driver-step call with execution preview flags", () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-exec-flags-"));
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
@@ -253,6 +280,47 @@ test("payload CLI emits driver-step execution flags without dispatch", () => {
   assert.equal(result.driverStepCall.params.follow, true);
   assert.equal(result.driverStepCall.params.build_outcome, true);
   assert.equal(result.driverStepCall.params.follow_max_wait_ms, 5_000);
+});
+
+test("payload CLI emits mutation evidence for driver-step outcome", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-cli-mutation-evidence-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+
+  const stdout = execFileSync(process.execPath, [
+    payloadCliPath,
+    "--cwd",
+    cwd,
+    "--mode",
+    "print-readonly",
+    "--run-id",
+    "pi-print-cli-mutation-evidence",
+    "--model",
+    "local/test-model",
+    "--file",
+    "README.md",
+    "--prompt",
+    "Apply scoped change.",
+    "--file-contract",
+    "mutation",
+    "--touched-file",
+    "README.md",
+    "--mutation-target-file",
+    "README.md",
+    "--marker",
+    "acceptance=true",
+    "--execute",
+    "--follow",
+    "--build-outcome",
+    "--pretty",
+  ], { encoding: "utf8" });
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.payload.run_spec.file_contract, "mutation");
+  assert.deepEqual(result.driverStepCall.params.touched_files, ["README.md"]);
+  assert.deepEqual(result.driverStepCall.params.mutation_target_files, ["README.md"]);
+  assert.deepEqual(result.driverStepCall.params.marker_results, [{ label: "acceptance", ok: true }]);
 });
 
 test("payload CLI loads structured operator approval file", () => {

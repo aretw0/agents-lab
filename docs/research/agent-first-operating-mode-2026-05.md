@@ -37,6 +37,8 @@ Para runs de mutação, o outcome só deve ser promovido com evidência parent-s
 pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --file README.md --prompt "Apply the scoped change." --file-contract mutation --touched-file README.md --mutation-target-file README.md --marker acceptance=true --execute --approve --follow --build-outcome --summary
 ```
 
+O mesmo conjunto de flags de evidência (`--touched-file`, `--mutation-target-file`, `--marker`) pode ser usado em `agent-run:pi-driver-payload`; elas são preservadas em `driverStepCall.params` para o outcome embutido.
+
 Sem `--touched-file`/`--mutation-target-file`, mutation terminal fica `contractDecision=partial`, não `pass`.
 
 Evidência já validada:

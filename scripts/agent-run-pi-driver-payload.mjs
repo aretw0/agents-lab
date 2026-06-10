@@ -15,6 +15,9 @@ function parseArgs(argv = process.argv.slice(2)) {
     files: [],
     tools: [],
     fileContract: "read-only",
+    touchedFiles: [],
+    mutationTargetFiles: [],
+    markerResults: [],
     execute: false,
     follow: false,
     buildOutcome: false,
@@ -37,6 +40,13 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--file") out.files.push(argv[++index] ?? "");
     else if (arg === "--tool") out.tools.push(argv[++index] ?? "");
     else if (arg === "--file-contract") out.fileContract = argv[++index] ?? out.fileContract;
+    else if (arg === "--touched-file") out.touchedFiles.push(argv[++index] ?? "");
+    else if (arg === "--mutation-target-file") out.mutationTargetFiles.push(argv[++index] ?? "");
+    else if (arg === "--marker") {
+      const raw = argv[++index] ?? "";
+      const [label, state = "true"] = raw.split("=");
+      out.markerResults.push({ label, ok: state !== "false" && state !== "fail" });
+    }
     else if (arg === "--execute") out.execute = true;
     else if (arg === "--follow") out.follow = true;
     else if (arg === "--build-outcome") out.buildOutcome = true;
@@ -73,16 +83,34 @@ function normalizeFileContract(value) {
   return value === "mutation" ? "mutation" : "read-only";
 }
 
+function normalizeMarkerResults(value) {
+  return Array.isArray(value)
+    ? value
+        .filter((entry) => entry && typeof entry === "object" && !Array.isArray(entry))
+        .map((entry) => ({
+          label: asCleanString(entry.label),
+          ...(entry.ok === true || entry.ok === false ? { ok: entry.ok } : {}),
+        }))
+        .filter((entry) => entry.label)
+    : [];
+}
+
 function positiveInteger(value) {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.floor(value) : undefined;
 }
 
 function buildDriverStepCall(payload, options = {}) {
+  const touchedFiles = asCleanStringArray(options.touchedFiles);
+  const mutationTargetFiles = asCleanStringArray(options.mutationTargetFiles);
+  const markerResults = normalizeMarkerResults(options.markerResults);
   const params = {
     ...payload,
     ...(options.execute === true ? { execute: true } : {}),
     ...(options.follow === true ? { follow: true } : {}),
     ...(options.buildOutcome === true ? { build_outcome: true } : {}),
+    ...(touchedFiles.length > 0 ? { touched_files: touchedFiles } : {}),
+    ...(mutationTargetFiles.length > 0 ? { mutation_target_files: mutationTargetFiles } : {}),
+    ...(markerResults.length > 0 ? { marker_results: markerResults } : {}),
     ...(positiveInteger(options.followMaxWaitMs) ? { follow_max_wait_ms: positiveInteger(options.followMaxWaitMs) } : {}),
     ...(positiveInteger(options.followPollIntervalMs) ? { follow_poll_interval_ms: positiveInteger(options.followPollIntervalMs) } : {}),
     ...(positiveInteger(options.followMaxLines) ? { follow_max_lines: positiveInteger(options.followMaxLines) } : {}),
@@ -254,7 +282,7 @@ function printHelp() {
     "  --cwd DIR --run-id ID --log-path PATH [--execute] [--follow] [--build-outcome] [--operator-approval-file approval.json]",
     "",
     "print-readonly options:",
-    "  --cwd DIR --run-id ID --model PROVIDER/MODEL --file PATH --prompt TEXT [--file-contract read-only|mutation] [--tool read,grep,find,ls] [--execute] [--follow] [--build-outcome] [--operator-approval-file approval.json]",
+    "  --cwd DIR --run-id ID --model PROVIDER/MODEL --file PATH --prompt TEXT [--file-contract read-only|mutation] [--tool read,grep,find,ls] [--touched-file PATH] [--mutation-target-file PATH] [--marker label=true|false] [--execute] [--follow] [--build-outcome] [--operator-approval-file approval.json]",
     "",
     "Builds payloads for scripts/agent-run-driver-step.mjs. It never dispatches by itself.",
   ].join("\n") + "\n");
