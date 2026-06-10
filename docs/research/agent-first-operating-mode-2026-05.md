@@ -13,13 +13,13 @@ O caminho atual provou que provider-native workers funcionam, mas ainda é artes
 O caminho artesanal foi substituído, para canaries e workers bounded, pela camada headless agnóstica:
 
 ```bash
-pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --summary
+pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --summary --out pi-driver-summary.json
 ```
 
 Para execução real, o contrato exige aprovação estruturada explícita:
 
 ```bash
-pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --execute --approve --follow --build-outcome --summary
+pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --execute --approve --follow --build-outcome --summary --out pi-driver-summary.json
 ```
 
 Agentes externos podem evitar remontagem manual de JSON usando o pacote completo. O payload builder emite `driverStepCall`, e o driver aceita esse envelope inteiro:
@@ -34,7 +34,7 @@ Quando a aprovação estruturada já existe em arquivo, use `--operator-approval
 Para runs de mutação, o outcome só deve ser promovido com evidência parent-side explícita. O driver aceita a mesma evidência que `agent_run_outcome_packet`:
 
 ```bash
-pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --file README.md --prompt "Apply the scoped change." --file-contract mutation --touched-file README.md --mutation-target-file README.md --marker acceptance=true --execute --approve --follow --build-outcome --summary
+pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --file README.md --prompt "Apply the scoped change." --file-contract mutation --touched-file README.md --mutation-target-file README.md --marker acceptance=true --execute --approve --follow --build-outcome --summary --out pi-driver-summary.json
 ```
 
 O mesmo conjunto de flags de evidência (`--touched-file`, `--mutation-target-file`, `--marker`) pode ser usado em `agent-run:pi-driver-payload`; elas são preservadas em `driverStepCall.params` para o outcome embutido.
@@ -46,6 +46,7 @@ Evidência já validada:
 - `real-pi-print-readonly-readme-canary-20260609`: Pi local, `openai-codex/gpt-5.3-codex-spark`, read-only, `README.md`, `contractDecision=pass`.
 - `real-next-slice-decoupling-scan-20260610`: worker real pequeno recomendou a correção `readTasks/readVerificationRows` fail-closed; a mudança entrou em commit e testes.
 - `agent_run_driver_step_dispatch`, `agent-run:pi-driver` e `agent-run:pi-driver-payload`: preservam `file_contract`, `touched_files`, `marker_results` e `mutation_target_files` para materializar outcome embutido em `follow=true` + `build_outcome=true`; o pacote emitido pelo CLI pode ser entregue diretamente a `agent-run:driver-step`.
+- `agent-run:pi-driver --out`: grava o resultado composto ou summary em arquivo e mantém stdout JSON para compatibilidade.
 - `agent-run:pi-driver-payload --out`: grava o pacote em arquivo sem depender de redirecionamento de shell e mantém stdout JSON para compatibilidade.
 - `agent-run:driver-step --out`: grava o resultado em arquivo sem depender de captura de stdout e mantém stdout JSON para compatibilidade.
 - `agent-run:driver-step`: retorna `summary` compacto com decisão, run id, dispatch, follow, estado, bytes, contrato e contagem de blockers para leitura por operador ou agente externo antes de inspecionar o JSON completo.
