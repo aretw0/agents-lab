@@ -121,6 +121,7 @@ export function registerAgentRunDriverStepSurface(pi: ExtensionAPI): void {
         declared_files: Type.Optional(Type.Array(Type.String(), { description: "Declared file scope for the run." })),
         log_path: Type.Optional(Type.String({ description: "Run log path." })),
         timeout_ms: Type.Optional(Type.Number({ description: "Bounded timeout in milliseconds." })),
+        file_contract: Type.Optional(Type.String({ description: "File contract for outcome materialization: read-only or mutation. Defaults to read-only." })),
         execution_preview: Type.Optional(Type.Object({
           command: Type.Optional(Type.String({ description: "Command to execute." })),
           args: Type.Optional(Type.Array(Type.String(), { description: "Command argv." })),

@@ -101,6 +101,20 @@ describe("agent run driver step dispatch", () => {
     expect(spawnMock).toHaveBeenCalledTimes(0);
   });
 
+  it("exposes file_contract in the public run_spec schema", () => {
+    const tool = getTool() as RegisteredTool & {
+      parameters?: {
+        properties?: {
+          run_spec?: {
+            properties?: Record<string, unknown>;
+          };
+        };
+      };
+    };
+
+    expect(tool.parameters?.properties?.run_spec?.properties).toHaveProperty("file_contract");
+  });
+
   it("blocks execute=true without structured operator approval", async () => {
     const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-driver-step-approval-"));
     const result = await getTool().execute("call", { run_spec: runSpec(), execute: true }, undefined, undefined, { cwd: tmp });
