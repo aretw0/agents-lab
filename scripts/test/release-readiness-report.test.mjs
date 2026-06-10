@@ -140,6 +140,16 @@ test("buildReport lists local-safe evidence candidates without clearing the boar
     assert.match(report.markdown, /external-influence-isolation/);
     assert.match(report.markdown, /task-bud-521-local-isolation-canary-2026-06\.md/);
     assert.match(report.markdown, /operator-may-park-for-0\.8/);
+    const data = gather("0.8.0", workspace);
+    assert.deepEqual(data.board.evidenceCandidateRows, [{
+      taskId: "TASK-BUD-521",
+      status: "in-progress",
+      priority: "p3",
+      kind: "external-influence-isolation",
+      evidencePath: "docs/research/task-bud-521-local-isolation-canary-2026-06.md",
+      evidencePresent: true,
+      decision: "operator-may-park-for-0.8",
+    }]);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }
@@ -258,6 +268,8 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.ready, false);
     assert.deepEqual(json.operatorDecisions.map((decision) => decision.id), ["decide-board-evidence-candidates"]);
     assert.equal(json.board.releaseDecisionReady, true);
+    assert.deepEqual(json.board.evidenceCandidateRows.map((row) => row.taskId), ["TASK-BUD-521"]);
+    assert.equal(json.board.evidenceCandidateRows[0].evidencePresent, true);
     assert.ok(json.checklist.some((item) => item.id === "board-release-clear" && item.ok === false));
   } finally {
     rmSync(workspace, { recursive: true, force: true });

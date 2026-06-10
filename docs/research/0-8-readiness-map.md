@@ -32,7 +32,7 @@ O estado atual para 0.8.0 é:
 | Instalação padrão | conservadora | `npx @aretw0/pi-stack` instala perfil `strict-curated` |
 | Fronteira de engine | protegida | `engine:boundary:audit` mantém core portable e Pi em surfaces/adapters |
 | Driver agent-run agnóstico | verde | `test:agent-run:drivers` cobre driver-step, pi-driver, payload emitido e cadeia arquivo-a-arquivo packet/result |
-| Board de release | ainda com decisão pendente | `release:readiness:v0.8.0` reporta `board-release-clear` bloqueado por tarefas em execução, sem P0 aberto, e lista evidência candidata para `TASK-BUD-480`, `TASK-BUD-521` e `TASK-BUD-676`; o JSON expõe `operatorDecisions` e `releaseDecisionReady` para agentes/automação local |
+| Board de release | ainda com decisão pendente | `release:readiness:v0.8.0` reporta `board-release-clear` bloqueado por tarefas em execução, sem P0 aberto, e lista evidência candidata para `TASK-BUD-480`, `TASK-BUD-521` e `TASK-BUD-676`; o JSON expõe `operatorDecisions`, `releaseDecisionReady` e `board.evidenceCandidateRows` para agentes/automação local |
 
 ## Preparado, mas ainda protegido
 

@@ -96,6 +96,7 @@ Interpretação do readiness report:
 - `Release Blockers` separa gate técnico, decisão de operador e estado do board;
 - `Operator Decisions` lista as decisões humanas restantes antes do release;
 - `Board Evidence Candidates` lista tarefas ainda abertas que já têm evidência local-safe para decisão;
+- no JSON, `board.evidenceCandidateRows` expõe os mesmos candidatos em forma estruturada para agentes;
 - `releaseDecisionReady: yes` significa que o board está pronto para decisão explícita, não que o release está aprovado.
 
 Checklist de readiness v0.8.0 (board/handoff):
