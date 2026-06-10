@@ -274,10 +274,13 @@ test("published documentation indexes keep audience boundaries explicit", () => 
 	const guides = read("docs/guides/README.md");
 	const primitives = read("docs/primitives/README.md");
 	const research = read("docs/research/README.md");
+	const reloadLifecycle = read("docs/guides/reload-lifecycle-diagnostic.md");
 
 	for (const heading of ["Operação da stack", "Operação do control plane", "Manutenção distribuível", "Manutenção do laboratório", "Evidência selecionada"]) {
 		assert.match(guides, new RegExp(`### ${heading}`));
 	}
+	assert.match(guides, /reload-lifecycle-diagnostic\.html/);
+	assert.doesNotMatch(reloadLifecycle, /^permalink:/m);
 	assert.match(guides, /[Nn]ão entram em pacotes distribuídos salvo decisão explícita/);
 	assert.match(guides, /Research não é guia operacional por padrão/);
 	assert.match(primitives, /não são ideias soltas/);

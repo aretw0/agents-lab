@@ -1,7 +1,6 @@
 ---
 title: Reload lifecycle diagnostic
 description: Evidence packet for slow or unclear Pi reloads.
-permalink: /guides/reload-lifecycle-diagnostic/
 ---
 
 # Reload lifecycle diagnostic
