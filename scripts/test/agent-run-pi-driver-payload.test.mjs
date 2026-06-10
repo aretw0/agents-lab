@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -376,6 +376,49 @@ test("payload CLI output can be passed directly to driver-step CLI", () => {
     approvalPath,
   ], { encoding: "utf8" });
   writeFileSync(inputPath, packetJson, "utf8");
+
+  const stdout = execFileSync(process.execPath, [
+    driverStepCliPath,
+    "--cwd",
+    cwd,
+    "--input",
+    inputPath,
+  ], { encoding: "utf8" });
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.decision, "dispatched");
+  assert.equal(result.dispatchAllowed, true);
+  assert.equal(result.structuredOperatorApproval, true);
+  assert.equal(result.agentRunOutcomePacket.contractDecision, "pass");
+});
+
+test("payload CLI writes packet file for driver-step CLI", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-cli-out-to-driver-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.error('help')\n", "utf8");
+  writeFileSync(path.join(cwd, "package.json"), "{}\n", "utf8");
+  const approvalPath = path.join(cwd, "approval.json");
+  writeFileSync(approvalPath, JSON.stringify(structuredApproval()), "utf8");
+  const inputPath = path.join(cwd, "nested", "driver-packet.json");
+
+  const packetJson = execFileSync(process.execPath, [
+    payloadCliPath,
+    "--cwd",
+    cwd,
+    "--run-id",
+    "pi-payload-cli-out-to-driver",
+    "--execute",
+    "--follow",
+    "--build-outcome",
+    "--operator-approval-file",
+    approvalPath,
+    "--out",
+    inputPath,
+  ], { encoding: "utf8" });
+
+  assert.equal(existsSync(inputPath), true);
+  assert.deepEqual(JSON.parse(readFileSync(inputPath, "utf8")), JSON.parse(packetJson));
 
   const stdout = execFileSync(process.execPath, [
     driverStepCliPath,

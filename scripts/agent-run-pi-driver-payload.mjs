@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
@@ -26,6 +26,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     followMaxLines: undefined,
     operatorApproval: undefined,
     operatorApprovalFile: "",
+    outPath: "",
     pretty: false,
     help: false,
   };
@@ -54,6 +55,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--follow-poll-interval-ms") out.followPollIntervalMs = Number(argv[++index] ?? "");
     else if (arg === "--follow-max-lines") out.followMaxLines = Number(argv[++index] ?? "");
     else if (arg === "--operator-approval-file") out.operatorApprovalFile = argv[++index] ?? "";
+    else if (arg === "--out") out.outPath = argv[++index] ?? "";
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else throw new Error(`Unknown argument: ${arg}`);
@@ -279,10 +281,10 @@ function printHelp() {
     "Usage: node scripts/agent-run-pi-driver-payload.mjs [--mode help|print-readonly] [options] [--pretty]",
     "",
     "help options:",
-    "  --cwd DIR --run-id ID --log-path PATH [--execute] [--follow] [--build-outcome] [--operator-approval-file approval.json]",
+    "  --cwd DIR --run-id ID --log-path PATH [--execute] [--follow] [--build-outcome] [--operator-approval-file approval.json] [--out driver-packet.json]",
     "",
     "print-readonly options:",
-    "  --cwd DIR --run-id ID --model PROVIDER/MODEL --file PATH --prompt TEXT [--file-contract read-only|mutation] [--tool read,grep,find,ls] [--touched-file PATH] [--mutation-target-file PATH] [--marker label=true|false] [--execute] [--follow] [--build-outcome] [--operator-approval-file approval.json]",
+    "  --cwd DIR --run-id ID --model PROVIDER/MODEL --file PATH --prompt TEXT [--file-contract read-only|mutation] [--tool read,grep,find,ls] [--touched-file PATH] [--mutation-target-file PATH] [--marker label=true|false] [--execute] [--follow] [--build-outcome] [--operator-approval-file approval.json] [--out driver-packet.json]",
     "",
     "Builds payloads for scripts/agent-run-driver-step.mjs. It never dispatches by itself.",
   ].join("\n") + "\n");
@@ -300,7 +302,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     printHelp();
   } else {
     const result = buildPiDriverStepPayload(args);
-    process.stdout.write(JSON.stringify(result, null, args.pretty ? 2 : 0));
+    const json = JSON.stringify(result, null, args.pretty ? 2 : 0);
+    if (args.outPath) {
+      const outPath = path.resolve(args.outPath);
+      mkdirSync(path.dirname(outPath), { recursive: true });
+      writeFileSync(outPath, `${json}\n`, "utf8");
+    }
+    process.stdout.write(json);
     process.stdout.write("\n");
     if (result.decision === "blocked") process.exit(1);
   }
