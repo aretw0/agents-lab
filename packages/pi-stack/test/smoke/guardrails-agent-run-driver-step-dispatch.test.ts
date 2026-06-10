@@ -105,6 +105,9 @@ describe("agent run driver step dispatch", () => {
     const tool = getTool() as RegisteredTool & {
       parameters?: {
         properties?: {
+          touched_files?: unknown;
+          marker_results?: unknown;
+          mutation_target_files?: unknown;
           run_spec?: {
             properties?: Record<string, unknown>;
           };
@@ -113,6 +116,9 @@ describe("agent run driver step dispatch", () => {
     };
 
     expect(tool.parameters?.properties?.run_spec?.properties).toHaveProperty("file_contract");
+    expect(tool.parameters?.properties).toHaveProperty("touched_files");
+    expect(tool.parameters?.properties).toHaveProperty("marker_results");
+    expect(tool.parameters?.properties).toHaveProperty("mutation_target_files");
   });
 
   it("blocks execute=true without structured operator approval", async () => {
@@ -418,6 +424,55 @@ describe("agent run driver step dispatch", () => {
       contractDecision: "partial",
       recommendation: "ask-operator",
       fileContract: "mutation",
+    });
+    expect(spawnMock).toHaveBeenCalledTimes(0);
+  });
+
+  it("passes mutation touched-file evidence into terminal outcome materialization", async () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-driver-step-mutation-pass-"));
+    const logPath = path.join(tmp, ".pi", "reports", "driver-step-run-1.log");
+    mkdirSync(path.dirname(logPath), { recursive: true });
+    writeFileSync(logPath, "mutation worker output\n", "utf8");
+    writeRegistry(tmp, {
+      runId: "driver-step-run-1",
+      state: "completed",
+      exitCode: 0,
+      cwd: tmp,
+      declaredFiles: ["README.md"],
+      logPath,
+      timeoutMs: 90_000,
+    });
+
+    const result = await getTool().execute("call", {
+      run_spec: { ...runSpec(), file_contract: "mutation" },
+      follow: true,
+      build_outcome: true,
+      touched_files: ["README.md"],
+      mutation_target_files: ["README.md"],
+      marker_results: [{ label: "acceptance", ok: true }],
+      follow_max_wait_ms: 0,
+    }, undefined, undefined, { cwd: tmp });
+
+    expect(result.details.nextAgentRunOutcomePacket).toMatchObject({
+      tool: "agent_run_outcome_packet",
+      params: {
+        run_id: "driver-step-run-1",
+        file_contract: "mutation",
+        touched_files: ["README.md"],
+        mutation_target_files: ["README.md"],
+        marker_results: [{ label: "acceptance", ok: true }],
+      },
+    });
+    expect(result.details.agentRunOutcomePacket).toMatchObject({
+      mode: "agent-run-outcome-packet",
+      runId: "driver-step-run-1",
+      found: true,
+      processState: "completed",
+      contractDecision: "pass",
+      recommendation: "stop",
+      fileContract: "mutation",
+      touchedFiles: ["README.md"],
+      markerFailures: [],
     });
     expect(spawnMock).toHaveBeenCalledTimes(0);
   });

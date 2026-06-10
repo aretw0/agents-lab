@@ -4,7 +4,7 @@ import { createWriteStream, mkdirSync } from "node:fs";
 import path from "node:path";
 import { Type } from "@sinclair/typebox";
 import { GUARDRAILS_AUTHORIZATION_NONE } from "./guardrails-core-authorization";
-import { buildAgentRunOutcomePacket, buildAgentRunStatus, type AgentRunFileContract, type AgentRunState } from "./guardrails-core-agent-run-runtime";
+import { buildAgentRunOutcomePacket, buildAgentRunStatus, type AgentRunFileContract, type AgentRunMarkerResult, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import {
   appendAgentRunLogLine,
   buildPiSubprocessPreflightLines,
@@ -59,6 +59,16 @@ function parseFileContract(value: unknown): AgentRunFileContract {
   return value === "mutation" ? "mutation" : "read-only";
 }
 
+function parseMarkerResults(raw: unknown): AgentRunMarkerResult[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  return raw
+    .filter((row): row is Record<string, unknown> => !!row && typeof row === "object" && !Array.isArray(row))
+    .map((row) => ({
+      label: normalizeText(row.label),
+      ...(row.ok === true || row.ok === false ? { ok: row.ok } : {}),
+    }));
+}
+
 function parseRunSpec(raw: unknown): DriverStepRunSpec {
   const row = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
   return {
@@ -96,13 +106,23 @@ async function followAgentRun(cwd: string, runId: string, maxWaitMs: number, pol
   return { entry, status, terminal, decision, logPath, lines, outputBytes };
 }
 
-function outcomePacket(runId: string, outputBytes: number, fileContract: AgentRunFileContract) {
+function outcomePacket(input: {
+  runId: string;
+  outputBytes: number;
+  fileContract: AgentRunFileContract;
+  touchedFiles?: string[];
+  markerResults?: AgentRunMarkerResult[];
+  mutationTargetFiles?: string[];
+}) {
   return {
     tool: "agent_run_outcome_packet",
     params: {
-      run_id: runId,
-      output_bytes: outputBytes,
-      file_contract: fileContract,
+      run_id: input.runId,
+      output_bytes: input.outputBytes,
+      file_contract: input.fileContract,
+      ...(input.touchedFiles && input.touchedFiles.length > 0 ? { touched_files: input.touchedFiles } : {}),
+      ...(input.markerResults && input.markerResults.length > 0 ? { marker_results: input.markerResults } : {}),
+      ...(input.mutationTargetFiles && input.mutationTargetFiles.length > 0 ? { mutation_target_files: input.mutationTargetFiles } : {}),
     },
   };
 }
@@ -131,6 +151,12 @@ export function registerAgentRunDriverStepSurface(pi: ExtensionAPI): void {
       operator_approval: operatorApprovalParameter("Structured operator approval envelope for execute=true."),
       follow: Type.Optional(Type.Boolean({ description: "When true, perform bounded read-only follow after lookup or dispatch." })),
       build_outcome: Type.Optional(Type.Boolean({ description: "When true with follow terminal, materialize an embedded agent-run outcome packet." })),
+      touched_files: Type.Optional(Type.Array(Type.String(), { description: "Optional parent-observed touched files to pass into the embedded/next outcome packet." })),
+      marker_results: Type.Optional(Type.Array(Type.Object({
+        label: Type.Optional(Type.String({ description: "Marker/check label." })),
+        ok: Type.Optional(Type.Boolean({ description: "Whether the marker/check passed." })),
+      }), { description: "Optional parent-side marker/check results for the embedded/next outcome packet." })),
+      mutation_target_files: Type.Optional(Type.Array(Type.String(), { description: "Optional expected mutation target files for mutation contract outcome materialization." })),
       follow_max_wait_ms: Type.Optional(Type.Number({ description: "Maximum bounded follow wait in milliseconds. Clamped to 0..30000; default 5000." })),
       follow_poll_interval_ms: Type.Optional(Type.Number({ description: "Follow polling interval in milliseconds. Clamped to 100..5000; default 500." })),
       follow_max_lines: Type.Optional(Type.Number({ description: "Maximum log tail lines, clamped to 1..500; default 80." })),
@@ -142,6 +168,9 @@ export function registerAgentRunDriverStepSurface(pi: ExtensionAPI): void {
       const executeRequested = p.execute === true;
       const followRequested = p.follow === true;
       const buildOutcomeRequested = p.build_outcome === true;
+      const touchedFiles = asOptionalStringArray(p.touched_files);
+      const markerResults = parseMarkerResults(p.marker_results);
+      const mutationTargetFiles = asOptionalStringArray(p.mutation_target_files);
       const structuredOperatorApproval = hasStructuredOperatorApproval(p.operator_approval);
       const runCwd = resolveRunCwd(runSpec.cwd, currentCwd);
       const existingEntry = runSpec.runId ? readRegistryEntry(currentCwd, runSpec.runId) : undefined;
@@ -253,8 +282,11 @@ export function registerAgentRunDriverStepSurface(pi: ExtensionAPI): void {
         ? buildAgentRunOutcomePacket({
             runId: runSpec.runId,
             entry: follow.entry,
+            touchedFiles,
+            markerResults,
             outputBytes: follow.outputBytes,
             fileContract: runSpec.fileContract,
+            mutationTargetFiles,
           })
         : undefined;
       const mode = executeRequested ? "agent-run-driver-step-dispatch" as const : "agent-run-driver-step-packet" as const;
@@ -277,7 +309,14 @@ export function registerAgentRunDriverStepSurface(pi: ExtensionAPI): void {
         pid,
         registryEntry,
         follow,
-        nextAgentRunOutcomePacket: terminal ? outcomePacket(runSpec.runId, follow.outputBytes, runSpec.fileContract) : undefined,
+        nextAgentRunOutcomePacket: terminal ? outcomePacket({
+          runId: runSpec.runId,
+          outputBytes: follow.outputBytes,
+          fileContract: runSpec.fileContract,
+          touchedFiles,
+          markerResults,
+          mutationTargetFiles,
+        }) : undefined,
         agentRunOutcomePacket,
         nextActionCode: terminal ? "build-agent-run-outcome-packet" : dispatchAllowed ? "poll-agent-run-follow" : blockers.length > 0 ? "resolve-driver-step-blockers" : "present-operator-approval",
         summary: [
