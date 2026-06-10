@@ -90,3 +90,29 @@ test("release package smoke exposes a structured block decision", () => {
     processStartAllowed: false,
   });
 });
+
+test("release package smoke blocks lab-only scripts in published package manifests", () => {
+  const piStackPackage = JSON.parse(readFixtureText("packages/pi-stack/package.json"));
+  const piStackPackagePath = path.join("packages/pi-stack", "package.json");
+  const report = buildReleasePackageSmokeReport({
+    runPack: false,
+    readText: (relPath) => readFixtureText(relPath, {
+      [piStackPackagePath]: JSON.stringify({
+        ...piStackPackage,
+        scripts: {
+          ...piStackPackage.scripts,
+          "agent-run:driver-canaries": "node scripts/agent-run-driver-canary-suite.mjs",
+        },
+      }),
+    }),
+  });
+
+  assert.equal(report.ok, false);
+  assert.equal(report.decision, "block");
+  assert.deepEqual(report.packageBlockers.map((blocker) => blocker.id), ["lab-only-scripts-in-release-package"]);
+  assert.equal(report.packageBlockers[0].kind, "package-boundary");
+  assert.deepEqual(report.packageBlockers[0].evidence, {
+    relPath: "packages/pi-stack",
+    scripts: ["agent-run:driver-canaries"],
+  });
+});

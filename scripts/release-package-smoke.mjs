@@ -13,6 +13,14 @@ const RELEASE_PACKAGES = [
   "packages/pi-skills",
   "packages/lab-skills",
 ];
+const LAB_ONLY_SCRIPT_PREFIXES = [
+  "agent-run:",
+  "release:",
+  "test:",
+  "pi:",
+  "monitor:",
+  "decoupling:",
+];
 const REPORT_ONLY_PERMISSIONS = {
   publishAllowed: false,
   workflowDispatchAllowed: false,
@@ -169,6 +177,16 @@ export function buildReleasePackageSmokeReport(options = {}) {
       addBlocker("package-files-boundary-missing", "package-boundary", `${relPath} must declare files[] for package boundary control`, {
         relPath,
       });
+    }
+    const labOnlyScripts = Object.keys(manifest.scripts ?? {})
+      .filter((scriptName) => LAB_ONLY_SCRIPT_PREFIXES.some((prefix) => scriptName.startsWith(prefix)));
+    if (labOnlyScripts.length) {
+      addBlocker(
+        "lab-only-scripts-in-release-package",
+        "package-boundary",
+        `${relPath} must not expose lab-only scripts in the published package manifest: ${labOnlyScripts.join(", ")}`,
+        { relPath, scripts: labOnlyScripts },
+      );
     }
   }
 
