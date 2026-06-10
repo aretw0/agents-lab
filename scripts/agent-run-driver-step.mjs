@@ -32,9 +32,12 @@ function normalizeDriverPayload(payload) {
     && typeof payload.params === "object"
     && !Array.isArray(payload.params)
   ) {
+    const approvalParam = asString(payload.operatorApprovalParam) || "operator_approval";
+    const params = payload.params;
     return {
-      ...payload.params,
+      ...params,
       ...(payload.operator_approval ? { operator_approval: payload.operator_approval } : {}),
+      ...(!payload.operator_approval && params[approvalParam] ? { operator_approval: params[approvalParam] } : {}),
     };
   }
   return payload;
