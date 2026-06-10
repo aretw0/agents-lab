@@ -392,6 +392,69 @@ test("payload CLI output can be passed directly to driver-step CLI", () => {
   assert.equal(result.agentRunOutcomePacket.contractDecision, "pass");
 });
 
+test("payload CLI mutation output can be passed directly to driver-step CLI", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-cli-mutation-to-driver-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.error('mutation ok')\n", "utf8");
+  writeFileSync(path.join(cwd, "README.md"), "before\n", "utf8");
+  writeFileSync(path.join(cwd, "package.json"), "{}\n", "utf8");
+  const approvalPath = path.join(cwd, "approval.json");
+  writeFileSync(approvalPath, JSON.stringify(structuredApproval()), "utf8");
+  const inputPath = path.join(cwd, "driver-packet.json");
+
+  const packetJson = execFileSync(process.execPath, [
+    payloadCliPath,
+    "--cwd",
+    cwd,
+    "--mode",
+    "print-readonly",
+    "--run-id",
+    "pi-payload-cli-mutation-to-driver",
+    "--model",
+    "local/test-model",
+    "--file",
+    "README.md",
+    "--prompt",
+    "Apply scoped change.",
+    "--file-contract",
+    "mutation",
+    "--touched-file",
+    "README.md",
+    "--mutation-target-file",
+    "README.md",
+    "--marker",
+    "acceptance=true",
+    "--execute",
+    "--follow",
+    "--build-outcome",
+    "--operator-approval-file",
+    approvalPath,
+  ], { encoding: "utf8" });
+  writeFileSync(inputPath, packetJson, "utf8");
+
+  const stdout = execFileSync(process.execPath, [
+    driverStepCliPath,
+    "--cwd",
+    cwd,
+    "--input",
+    inputPath,
+  ], { encoding: "utf8" });
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.decision, "dispatched");
+  assert.equal(result.dispatchAllowed, true);
+  assert.equal(result.structuredOperatorApproval, true);
+  assert.equal(result.runSpec.fileContract, "mutation");
+  assert.equal(result.nextAgentRunOutcomePacket.params.file_contract, "mutation");
+  assert.deepEqual(result.nextAgentRunOutcomePacket.params.touched_files, ["README.md"]);
+  assert.deepEqual(result.nextAgentRunOutcomePacket.params.mutation_target_files, ["README.md"]);
+  assert.equal(result.agentRunOutcomePacket.contractDecision, "pass");
+  assert.equal(result.agentRunOutcomePacket.fileContract, "mutation");
+  assert.deepEqual(result.agentRunOutcomePacket.touchedFiles, ["README.md"]);
+  assert.deepEqual(result.agentRunOutcomePacket.markerFailures, []);
+});
+
 test("blocks incomplete print-readonly payloads", () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-print-blocked-"));
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
