@@ -191,9 +191,11 @@ test("public 0.8 readiness map matches the canonical release readiness gate", ()
 	assert.match(readiness, /`target-version-ready` segue falso/);
 	assert.equal(pkg.scripts["release:readiness:v0.8.0:json"], "node scripts/release-readiness-report.mjs --target 0.8.0 --json");
 	assert.match(playbook, /release:readiness:v0\.8\.0:json/);
+	assert.match(playbook, /schemaVersion=1/);
 	assert.match(playbook, /operatorDecisions/);
 	assert.match(playbook, /board\.inProgressRows/);
 	assert.match(playbook, /board\.evidenceCandidateRows/);
+	assert.match(readiness, /schemaVersion=1/);
 	assert.match(readiness, /operatorDecisions/);
 	assert.match(readiness, /releaseDecisionReady/);
 	assert.match(readiness, /board\.\*Rows/);

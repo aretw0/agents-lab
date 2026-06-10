@@ -406,6 +406,8 @@ function main() {
   mkdirSync(path.dirname(outPath), { recursive: true });
   if (args.json) {
     writeFileSync(outPath, `${JSON.stringify({
+      mode: "release-readiness-report",
+      schemaVersion: 1,
       target: data.target,
       head: data.head,
       latestTag: data.latestTag,

@@ -95,6 +95,7 @@ Automação mínima existente:
 Interpretação do readiness report:
 - `Release Blockers` separa gate técnico, decisão de operador e estado do board;
 - `Operator Decisions` lista as decisões humanas restantes antes do release;
+- no JSON, `mode=release-readiness-report` e `schemaVersion=1` identificam o contrato estruturado;
 - `Board Evidence Candidates` lista tarefas ainda abertas que já têm evidência local-safe para decisão;
 - no JSON, `board.openP0Rows`, `board.inProgressRows` e `board.blockedRows` expõem o estado do board sem exigir parse de linhas Markdown;
 - no JSON, `board.evidenceCandidateRows` expõe os mesmos candidatos em forma estruturada para agentes;

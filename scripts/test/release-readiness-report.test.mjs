@@ -277,6 +277,8 @@ test("cli can write structured json for agents", () => {
 
     assert.equal(result.status, 0);
     const json = JSON.parse(readFileSync(outPath, "utf8"));
+    assert.equal(json.mode, "release-readiness-report");
+    assert.equal(json.schemaVersion, 1);
     assert.equal(json.ready, false);
     assert.deepEqual(json.operatorDecisions.map((decision) => decision.id), ["decide-board-evidence-candidates"]);
     assert.equal(json.board.releaseDecisionReady, true);
