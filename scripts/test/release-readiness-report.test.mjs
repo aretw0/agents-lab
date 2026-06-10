@@ -78,8 +78,8 @@ test("buildReport marks target release not ready until version and board gates a
     assert.match(report.markdown, /\[ \] board-release-clear/);
     assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
     assert.match(report.markdown, /## Release Blockers/);
-    assert.match(report.markdown, /target-version-ready: target=v0\.8\.0/);
-    assert.match(report.markdown, /board-release-clear: open-p0=1/);
+    assert.match(report.markdown, /target-version-ready \[operator-decision\]: target=v0\.8\.0/);
+    assert.match(report.markdown, /board-release-clear \[board-state\]: open-p0=1/);
     assert.match(report.markdown, /agent-run-pi-driver-payload\.test\.mjs/);
     assert.match(report.markdown, /TASK-P0 \[p0\/planned\]/);
     assert.match(report.markdown, /### P0 Ready To Start/);
@@ -118,6 +118,7 @@ test("agent-run driver gate requires the full driver suite script", () => {
     const report = buildReport(gather("0.8.0", workspace));
     assert.equal(report.ready, false);
     assert.match(report.markdown, /\[ \] agent-run-driver-gate/);
+    assert.match(report.markdown, /agent-run-driver-gate \[technical-gate\]/);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }

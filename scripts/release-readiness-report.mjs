@@ -50,6 +50,12 @@ function hasAgentRunDriverGate(cwd) {
     && AGENT_RUN_DRIVER_GATE_TESTS.every((testPath) => script.includes(testPath));
 }
 
+function releaseBlockerKind(id) {
+  if (id === "target-version-ready") return "operator-decision";
+  if (id === "board-release-clear") return "board-state";
+  return "technical-gate";
+}
+
 function normalizeStatus(value) {
   return String(value ?? "unknown").trim().toLowerCase().replace(/_/g, "-") || "unknown";
 }
@@ -224,7 +230,7 @@ export function buildReport(data) {
     ...checklist.map((c) => `- [${c.ok ? "x" : " "}] ${c.id} — ${c.evidence}`),
     "",
     "## Release Blockers",
-    ...(failedChecklist.length ? failedChecklist.map((c) => `- ${c.id}: ${c.evidence}`) : ["- none"]),
+    ...(failedChecklist.length ? failedChecklist.map((c) => `- ${c.id} [${releaseBlockerKind(c.id)}]: ${c.evidence}`) : ["- none"]),
     "",
     "## Board Summary",
     `- tasks: ${data.board.total}`,
