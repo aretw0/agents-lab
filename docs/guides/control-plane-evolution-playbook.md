@@ -96,6 +96,7 @@ Interpretação do readiness report:
 - `Release Blockers` separa gate técnico, decisão de operador e estado do board;
 - `Operator Decisions` lista as decisões humanas restantes antes do release;
 - no JSON, `mode=release-readiness-report` e `schemaVersion=1` identificam o contrato estruturado;
+- no JSON, `operatorDecisions[*]` inclui payload acionável por decisão, como `allowedActions`, versões atuais e `candidateTaskIds`;
 - `Board Evidence Candidates` lista tarefas ainda abertas que já têm evidência local-safe para decisão;
 - no JSON, `board.openP0Rows`, `board.inProgressRows` e `board.blockedRows` expõem o estado do board sem exigir parse de linhas Markdown;
 - no JSON, `board.evidenceCandidateRows` expõe os mesmos candidatos em forma estruturada para agentes;
@@ -104,7 +105,7 @@ Interpretação do readiness report:
 Checklist de readiness v0.8.0 (board/handoff):
 - versões de pacotes alinhadas;
 - CI/publish/release-draft prontos e auditáveis;
-- candidatos de evidência do board decididos como `park-for-0.8` ou `require-work`;
+- candidatos de evidência do board decididos como `park-for-target-release` ou `require-work`;
 - decisão explícita do operador de `draft` -> `publish`;
 - rollback documentado para falha pós-corte.
 

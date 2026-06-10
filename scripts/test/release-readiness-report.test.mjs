@@ -86,6 +86,9 @@ test("buildReport marks target release not ready until version and board gates a
     const report = buildReport(gather("0.8.0", workspace));
     assert.equal(report.ready, false);
     assert.deepEqual(report.operatorDecisions.map((decision) => decision.id), ["decide-target-version"]);
+    assert.deepEqual(report.operatorDecisions[0].allowedActions, ["defer-release", "bump-tag-release-when-ready"]);
+    assert.equal(report.operatorDecisions[0].target, "0.8.0");
+    assert.deepEqual(report.operatorDecisions[0].currentVersions.map((row) => row.version), ["0.7.0", "0.7.0", "0.7.0", "0.7.0", "0.7.0"]);
     assert.match(report.markdown, /decision: not-ready/);
     assert.match(report.markdown, /\[ \] target-version-ready/);
     assert.match(report.markdown, /\[ \] board-release-clear/);
@@ -142,16 +145,20 @@ test("buildReport lists local-safe evidence candidates without clearing the boar
     const report = buildReport(gather("0.8.0", workspace));
     assert.equal(report.ready, false);
     assert.deepEqual(report.operatorDecisions.map((decision) => decision.id), ["decide-board-evidence-candidates"]);
-    assert.deepEqual(report.operatorDecisions.map((decision) => decision.recommendation), ["choose-park-for-0.8-or-require-work"]);
+    assert.deepEqual(report.operatorDecisions.map((decision) => decision.recommendation), ["choose-park-for-target-release-or-require-work"]);
+    assert.equal(report.operatorDecisions[0].target, "0.8.0");
+    assert.deepEqual(report.operatorDecisions[0].allowedActions, ["park-for-target-release", "require-work"]);
+    assert.deepEqual(report.operatorDecisions[0].candidateTaskIds, ["TASK-BUD-521"]);
+    assert.deepEqual(report.operatorDecisions[0].evidenceCandidateRows.map((row) => row.taskId), ["TASK-BUD-521"]);
     assert.match(report.markdown, /\[ \] board-release-clear/);
     assert.match(report.markdown, /board-release-clear \[board-state\]: in-progress=1/);
     assert.match(report.markdown, /releaseDecisionReady: yes/);
-    assert.match(report.markdown, /decide-board-evidence-candidates: choose park-for-0\.8 or require-work/);
+    assert.match(report.markdown, /decide-board-evidence-candidates: choose park-for-target-release or require-work/);
     assert.match(report.markdown, /### Board Evidence Candidates/);
     assert.match(report.markdown, /TASK-BUD-521 \[p3\/in-progress\]/);
     assert.match(report.markdown, /external-influence-isolation/);
     assert.match(report.markdown, /task-bud-521-local-isolation-canary-2026-06\.md/);
-    assert.match(report.markdown, /operator-may-park-for-0\.8/);
+    assert.match(report.markdown, /operator-may-park-for-target-release/);
     const data = gather("0.8.0", workspace);
     assert.deepEqual(data.board.evidenceCandidateRows, [{
       taskId: "TASK-BUD-521",
@@ -160,7 +167,7 @@ test("buildReport lists local-safe evidence candidates without clearing the boar
       kind: "external-influence-isolation",
       evidencePath: "docs/research/task-bud-521-local-isolation-canary-2026-06.md",
       evidencePresent: true,
-      decision: "operator-may-park-for-0.8",
+      decision: "operator-may-park-for-target-release",
     }]);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
@@ -281,6 +288,10 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.schemaVersion, 1);
     assert.equal(json.ready, false);
     assert.deepEqual(json.operatorDecisions.map((decision) => decision.id), ["decide-board-evidence-candidates"]);
+    assert.equal(json.operatorDecisions[0].target, "0.8.0");
+    assert.deepEqual(json.operatorDecisions[0].allowedActions, ["park-for-target-release", "require-work"]);
+    assert.deepEqual(json.operatorDecisions[0].candidateTaskIds, ["TASK-BUD-521"]);
+    assert.deepEqual(json.operatorDecisions[0].evidenceCandidateRows.map((row) => row.taskId), ["TASK-BUD-521"]);
     assert.equal(json.board.releaseDecisionReady, true);
     assert.deepEqual(json.board.inProgressRows.map((row) => row.taskId), ["TASK-BUD-521"]);
     assert.deepEqual(json.board.evidenceCandidateRows.map((row) => row.taskId), ["TASK-BUD-521"]);

@@ -23,17 +23,17 @@ const BOARD_RELEASE_EVIDENCE = {
   "TASK-BUD-480": {
     kind: "external-influence-agent-patterns",
     evidencePath: "docs/research/task-bud-480-local-agent-patterns-canary-2026-06.md",
-    decision: "operator-may-park-for-0.8",
+    decision: "operator-may-park-for-target-release",
   },
   "TASK-BUD-521": {
     kind: "external-influence-isolation",
     evidencePath: "docs/research/task-bud-521-local-isolation-canary-2026-06.md",
-    decision: "operator-may-park-for-0.8",
+    decision: "operator-may-park-for-target-release",
   },
   "TASK-BUD-676": {
     kind: "external-influence-memory",
     evidencePath: "docs/research/task-bud-676-local-memory-canary-2026-06.md",
-    decision: "operator-may-park-for-0.8",
+    decision: "operator-may-park-for-target-release",
   },
 };
 
@@ -159,7 +159,7 @@ function operatorDecisionLines(data, failedChecklist) {
     lines.push(`- decide-target-version: packages are not yet at v${data.target}; bump/tag/release remains operator-gated`);
   }
   if (failedChecklist.some((item) => item.id === "board-release-clear") && data.board.releaseDecisionReady) {
-    lines.push("- decide-board-evidence-candidates: choose park-for-0.8 or require-work for current Board Evidence Candidates");
+    lines.push("- decide-board-evidence-candidates: choose park-for-target-release or require-work for current Board Evidence Candidates");
   }
   return lines;
 }
@@ -171,15 +171,23 @@ function operatorDecisionPackets(data, failedChecklist) {
       id: "decide-target-version",
       kind: "operator-decision",
       recommendation: "bump-tag-release-when-ready",
+      target: data.target,
+      currentVersions: data.versions,
+      allowedActions: ["defer-release", "bump-tag-release-when-ready"],
       summary: `packages are not yet at v${data.target}; bump/tag/release remains operator-gated`,
     });
   }
   if (failedChecklist.some((item) => item.id === "board-release-clear") && data.board.releaseDecisionReady) {
+    const candidateRows = data.board.evidenceCandidateRows;
     decisions.push({
       id: "decide-board-evidence-candidates",
       kind: "board-state",
-      recommendation: "choose-park-for-0.8-or-require-work",
-      summary: "choose park-for-0.8 or require-work for current Board Evidence Candidates",
+      recommendation: "choose-park-for-target-release-or-require-work",
+      target: data.target,
+      candidateTaskIds: candidateRows.map((row) => row.taskId),
+      evidenceCandidateRows: candidateRows,
+      allowedActions: ["park-for-target-release", "require-work"],
+      summary: "choose park-for-target-release or require-work for current Board Evidence Candidates",
     });
   }
   return decisions;
