@@ -1,14 +1,26 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import {
   buildPiDriverStepPayload,
   buildPiHelpDriverStepPayload,
   buildPiPrintReadonlyDriverStepPayload,
 } from "../agent-run-pi-driver-payload.mjs";
+
+const driverStepCliPath = fileURLToPath(new URL("../agent-run-driver-step.mjs", import.meta.url));
+
+function structuredApproval() {
+  return {
+    packet_mode: "operator-approval-packet",
+    approved: true,
+    approval_state: "approved",
+  };
+}
 
 test("builds a headless driver-step payload for local pi help", () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-"));
@@ -33,6 +45,45 @@ test("builds a headless driver-step payload for local pi help", () => {
     operatorApprovalRequired: true,
     operatorApprovalParam: "operator_approval",
   });
+});
+
+test("emitted payload packet can be consumed by driver-step CLI", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-to-driver-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.error('help')\n", "utf8");
+  writeFileSync(path.join(cwd, "package.json"), "{}\n", "utf8");
+
+  const packet = buildPiHelpDriverStepPayload({ cwd, runId: "pi-payload-to-driver" });
+  const inputPath = path.join(cwd, "driver-packet.json");
+  writeFileSync(inputPath, JSON.stringify({
+    ...packet,
+    operator_approval: structuredApproval(),
+    driverStepCall: {
+      ...packet.driverStepCall,
+      params: {
+        ...packet.driverStepCall.params,
+        execute: true,
+        follow: true,
+        build_outcome: true,
+        follow_max_wait_ms: 5_000,
+      },
+    },
+  }), "utf8");
+
+  const stdout = execFileSync(process.execPath, [
+    driverStepCliPath,
+    "--cwd",
+    cwd,
+    "--input",
+    inputPath,
+  ], { encoding: "utf8" });
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.decision, "dispatched");
+  assert.equal(result.dispatchAllowed, true);
+  assert.equal(result.structuredOperatorApproval, true);
+  assert.equal(result.agentRunOutcomePacket.contractDecision, "pass");
 });
 
 test("blocks when local pi cli is missing", () => {
