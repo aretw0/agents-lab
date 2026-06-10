@@ -7,6 +7,7 @@ const shipped = [
 	"context-watchdog",
 	"environment-doctor",
 	"guardrails-core",
+	"guardrails-agent-run",
 	"machine-maintenance",
 	"monitor-summary",
 	"project-board-surface",
@@ -20,6 +21,14 @@ test("classifyRootScript marks distributed wrappers", () => {
 
 	assert.equal(row.category, "distributed-wrapper");
 	assert.equal(row.targetSurface, "subagent-readiness");
+});
+
+test("classifyRootScript marks agent-run scripts as guardrails-agent-run wrappers", () => {
+	const row = classifyRootScript("agent-run:driver-canaries", "node scripts/agent-run-driver-canary-suite.mjs", shipped);
+
+	assert.equal(row.category, "distributed-wrapper");
+	assert.equal(row.targetSurface, "guardrails-agent-run");
+	assert.equal(row.recommendedAction, "fold-wrapper-into-extension-or-doc-as-lab-shortcut");
 });
 
 test("classifyRootScript marks promoted dev pressure as distributed wrapper", () => {
@@ -112,6 +121,7 @@ test("buildUserSurfaceAudit exposes grouped promotion targets", () => {
 	const audit = buildUserSurfaceAudit(process.cwd(), new Date("2026-05-18T00:00:00.000Z"));
 	assert.equal(audit.generatedAtIso, "2026-05-18T00:00:00.000Z");
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "subagent-readiness"));
+	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "guardrails-agent-run" && group.scripts.includes("agent-run:driver-canaries")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "environment-doctor" && group.scripts.includes("pi:dev:pressure")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "safe-boot" && group.scripts.includes("pi:artifact:audit:strict")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "machine-maintenance" && group.scripts.includes("ops:disk:check")));

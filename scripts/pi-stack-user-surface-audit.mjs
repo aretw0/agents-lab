@@ -53,6 +53,11 @@ function groupByTarget(rows) {
 
 const DISTRIBUTED_WRAPPERS = [
 	{
+		match: /^agent-run:/,
+		surface: "guardrails-agent-run",
+		reason: "agent-run driver wrappers are distributed through guardrails-agent-run; root scripts remain lab/CI shortcuts and canary evidence commands",
+	},
+	{
 		match: /^subagent:readiness/,
 		surface: "subagent-readiness",
 		reason: "readiness already has a distributed extension/tool surface; root script is a lab wrapper",
