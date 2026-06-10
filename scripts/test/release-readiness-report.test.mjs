@@ -85,6 +85,8 @@ test("buildReport marks target release not ready until version and board gates a
   try {
     const report = buildReport(gather("0.8.0", workspace));
     assert.equal(report.ready, false);
+    assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.id), ["target-version-ready", "board-release-clear"]);
+    assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.kind), ["operator-decision", "board-state"]);
     assert.deepEqual(report.operatorDecisions.map((decision) => decision.id), ["decide-target-version"]);
     assert.deepEqual(report.operatorDecisions[0].allowedActions, ["defer-release", "bump-tag-release-when-ready"]);
     assert.equal(report.operatorDecisions[0].target, "0.8.0");
@@ -115,6 +117,7 @@ test("buildReport marks release ready when versions and board gates are clear", 
   try {
     const report = buildReport(gather("0.8.0", workspace));
     assert.equal(report.ready, true);
+    assert.deepEqual(report.releaseBlockers, []);
     assert.match(report.markdown, /decision: ready/);
     assert.match(report.markdown, /\[x\] target-version-ready/);
     assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
@@ -319,6 +322,8 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.mode, "release-readiness-report");
     assert.equal(json.schemaVersion, 1);
     assert.equal(json.ready, false);
+    assert.deepEqual(json.releaseBlockers.map((blocker) => blocker.id), ["board-release-clear"]);
+    assert.deepEqual(json.releaseBlockers.map((blocker) => blocker.kind), ["board-state"]);
     assert.deepEqual(json.operatorDecisions.map((decision) => decision.id), ["decide-board-evidence-candidates"]);
     assert.equal(json.operatorDecisions[0].target, "0.8.0");
     assert.deepEqual(json.operatorDecisions[0].allowedActions, ["park-for-target-release", "require-work"]);

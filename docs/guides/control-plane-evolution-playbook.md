@@ -96,6 +96,7 @@ Interpretação do readiness report:
 - `Release Blockers` separa gate técnico, decisão de operador e estado do board;
 - `Operator Decisions` lista as decisões humanas restantes antes do release;
 - no JSON, `mode=release-readiness-report` e `schemaVersion=1` identificam o contrato estruturado;
+- no JSON, `releaseBlockers` expõe os mesmos bloqueios do Markdown com `id`, `kind` e `evidence`;
 - no JSON, `operatorDecisions[*]` inclui payload acionável por decisão, como `allowedActions`, versões atuais e `candidateTaskIds`;
 - `Board Evidence Candidates` lista tarefas ainda abertas que já têm evidência local-safe para decisão;
 - no JSON, `board.openP0Rows`, `board.inProgressRows` e `board.blockedRows` expõem o estado do board sem exigir parse de linhas Markdown;

@@ -74,6 +74,14 @@ function releaseBlockerKind(id) {
   return "technical-gate";
 }
 
+function releaseBlockerRow(item) {
+  return {
+    id: item.id,
+    kind: releaseBlockerKind(item.id),
+    evidence: item.evidence,
+  };
+}
+
 function normalizeStatus(value) {
   return String(value ?? "unknown").trim().toLowerCase().replace(/_/g, "-") || "unknown";
 }
@@ -340,6 +348,7 @@ export function buildReport(data) {
   ];
   const ready = checklist.every((item) => item.ok);
   const failedChecklist = checklist.filter((item) => !item.ok);
+  const releaseBlockers = failedChecklist.map(releaseBlockerRow);
   const operatorDecisions = operatorDecisionPackets(data, failedChecklist);
   const decisions = operatorDecisionLines(operatorDecisions);
 
@@ -355,7 +364,7 @@ export function buildReport(data) {
     ...checklist.map((c) => `- [${c.ok ? "x" : " "}] ${c.id} — ${c.evidence}`),
     "",
     "## Release Blockers",
-    ...(failedChecklist.length ? failedChecklist.map((c) => `- ${c.id} [${releaseBlockerKind(c.id)}]: ${c.evidence}`) : ["- none"]),
+    ...(releaseBlockers.length ? releaseBlockers.map((c) => `- ${c.id} [${c.kind}]: ${c.evidence}`) : ["- none"]),
     "",
     "## Operator Decisions",
     ...(decisions.length ? decisions : ["- none"]),
@@ -392,7 +401,7 @@ export function buildReport(data) {
     "",
   ];
 
-  return { markdown: lines.join("\n"), checklist, ready, operatorDecisions };
+  return { markdown: lines.join("\n"), checklist, ready, releaseBlockers, operatorDecisions };
 }
 
 function main() {
@@ -414,6 +423,7 @@ function main() {
       latestTag: data.latestTag,
       ready: report.ready,
       checklist: report.checklist,
+      releaseBlockers: report.releaseBlockers,
       operatorDecisions: report.operatorDecisions,
       board: data.board,
     }, null, 2)}\n`);
