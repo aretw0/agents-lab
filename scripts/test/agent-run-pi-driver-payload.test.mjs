@@ -435,6 +435,53 @@ test("payload CLI writes packet file for driver-step CLI", () => {
   assert.equal(result.agentRunOutcomePacket.contractDecision, "pass");
 });
 
+test("payload and driver CLIs exchange packet and result files", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-cli-file-chain-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.error('help')\n", "utf8");
+  writeFileSync(path.join(cwd, "package.json"), "{}\n", "utf8");
+  const approvalPath = path.join(cwd, "approval.json");
+  writeFileSync(approvalPath, JSON.stringify(structuredApproval()), "utf8");
+  const inputPath = path.join(cwd, "handoff", "driver-packet.json");
+  const outputPath = path.join(cwd, "handoff", "driver-result.json");
+
+  execFileSync(process.execPath, [
+    payloadCliPath,
+    "--cwd",
+    cwd,
+    "--run-id",
+    "pi-payload-cli-file-chain",
+    "--execute",
+    "--follow",
+    "--build-outcome",
+    "--operator-approval-file",
+    approvalPath,
+    "--out",
+    inputPath,
+  ], { encoding: "utf8" });
+
+  const driverStdout = execFileSync(process.execPath, [
+    driverStepCliPath,
+    "--cwd",
+    cwd,
+    "--input",
+    inputPath,
+    "--out",
+    outputPath,
+  ], { encoding: "utf8" });
+
+  assert.equal(existsSync(inputPath), true);
+  assert.equal(existsSync(outputPath), true);
+  assert.deepEqual(JSON.parse(readFileSync(outputPath, "utf8")), JSON.parse(driverStdout));
+  const result = JSON.parse(readFileSync(outputPath, "utf8"));
+  assert.equal(result.decision, "dispatched");
+  assert.equal(result.dispatchAllowed, true);
+  assert.equal(result.structuredOperatorApproval, true);
+  assert.equal(result.agentRunOutcomePacket.contractDecision, "pass");
+  assert.match(result.summary, /agent-run-driver-step: decision=dispatched/);
+});
+
 test("payload CLI mutation output can be passed directly to driver-step CLI", () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-payload-cli-mutation-to-driver-"));
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
