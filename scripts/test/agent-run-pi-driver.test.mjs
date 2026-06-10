@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { buildPiDriverSummary, runPiDriver } from "../agent-run-pi-driver.mjs";
+
+const cliPath = fileURLToPath(new URL("../agent-run-pi-driver.mjs", import.meta.url));
 
 function writeFakePi(cwd) {
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
@@ -63,6 +67,35 @@ test("pi driver accepts explicit structured operator approval", async () => {
   assert.equal(result.dispatchAllowed, true);
   assert.equal(result.driverStep.structuredOperatorApproval, true);
   assert.equal(result.driverStep.agentRunOutcomePacket.contractDecision, "pass");
+});
+
+test("pi driver CLI accepts structured operator approval file", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-approval-file-"));
+  writeFakePi(cwd);
+  const approvalPath = path.join(cwd, "approval.json");
+  writeFileSync(approvalPath, JSON.stringify(structuredApproval()), "utf8");
+
+  const stdout = execFileSync(process.execPath, [
+    cliPath,
+    "--cwd",
+    cwd,
+    "--mode",
+    "help",
+    "--run-id",
+    "pi-driver-approval-file",
+    "--execute",
+    "--operator-approval-file",
+    approvalPath,
+    "--follow",
+    "--build-outcome",
+    "--summary",
+  ], { encoding: "utf8" });
+  const summary = JSON.parse(stdout);
+
+  assert.equal(summary.decision, "dispatched");
+  assert.equal(summary.dispatchAllowed, true);
+  assert.equal(summary.processStartAllowed, true);
+  assert.equal(summary.contractDecision, "pass");
 });
 
 test("pi driver executes approved local help and materializes outcome", async () => {

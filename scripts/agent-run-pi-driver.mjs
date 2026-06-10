@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { buildPiDriverStepPayload } from "./agent-run-pi-driver-payload.mjs";
@@ -18,6 +19,8 @@ function parseArgs(argv = process.argv.slice(2)) {
     touchedFiles: [],
     mutationTargetFiles: [],
     markerResults: [],
+    operatorApproval: undefined,
+    operatorApprovalFile: "",
     execute: false,
     approve: false,
     follow: false,
@@ -44,6 +47,7 @@ function parseArgs(argv = process.argv.slice(2)) {
       const [label, state = "true"] = raw.split("=");
       out.markerResults.push({ label, ok: state !== "false" && state !== "fail" });
     }
+    else if (arg === "--operator-approval-file") out.operatorApprovalFile = argv[++index] ?? "";
     else if (arg === "--execute") out.execute = true;
     else if (arg === "--approve") out.approve = true;
     else if (arg === "--follow") out.follow = true;
@@ -52,6 +56,9 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else throw new Error(`Unknown argument: ${arg}`);
+  }
+  if (out.operatorApprovalFile) {
+    out.operatorApproval = JSON.parse(readFileSync(out.operatorApprovalFile, "utf8"));
   }
   return out;
 }
@@ -154,6 +161,7 @@ function printHelp() {
     "",
     "This composes agent-run-pi-driver-payload and agent-run-driver-step.",
     "It previews by default. Real execution requires both --execute and --approve.",
+    "External agents can pass structured approval with --operator-approval-file approval.json instead of --approve.",
     "Outcome evidence options: --file-contract read-only|mutation --touched-file PATH --mutation-target-file PATH --marker label=true|false",
   ].join("\n") + "\n");
 }
