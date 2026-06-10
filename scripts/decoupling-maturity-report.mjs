@@ -54,7 +54,12 @@ function readText(cwd, relPath) {
 
 export function readTasks(cwd) {
   const file = path.join(cwd, ".project", "tasks.json");
-  const json = JSON.parse(readFileSync(file, "utf8"));
+  let json;
+  try {
+    json = JSON.parse(readFileSync(file, "utf8"));
+  } catch {
+    return [];
+  }
   if (Array.isArray(json)) return json;
   if (Array.isArray(json.tasks)) return json.tasks;
   return [];
@@ -62,7 +67,12 @@ export function readTasks(cwd) {
 
 export function readVerificationRows(cwd) {
   const file = path.join(cwd, ".project", "verification.json");
-  const json = JSON.parse(readFileSync(file, "utf8"));
+  let json;
+  try {
+    json = JSON.parse(readFileSync(file, "utf8"));
+  } catch {
+    return [];
+  }
   if (Array.isArray(json)) return json;
   if (Array.isArray(json.verifications)) return json.verifications;
   if (Array.isArray(json.items)) return json.items;

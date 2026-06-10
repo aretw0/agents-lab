@@ -1,8 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import {
   nextActionForStage,
   hasVerificationEvidence,
+  readTasks,
+  readVerificationRows,
   resolveAgentWorkerLane,
   resolveStage,
   statusById,
@@ -12,6 +17,20 @@ import {
   resolveDecouplingState,
   nextActionForMaturityState,
 } from "../decoupling-maturity-report.mjs";
+
+test("readTasks and readVerificationRows fail closed to empty arrays", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "decoupling-maturity-missing-"));
+  assert.deepEqual(readTasks(cwd), []);
+  assert.deepEqual(readVerificationRows(cwd), []);
+
+  const malformed = mkdtempSync(path.join(tmpdir(), "decoupling-maturity-malformed-"));
+  mkdirSync(path.join(malformed, ".project"), { recursive: true });
+  writeFileSync(path.join(malformed, ".project", "tasks.json"), "{not-json", "utf8");
+  writeFileSync(path.join(malformed, ".project", "verification.json"), "{not-json", "utf8");
+
+  assert.deepEqual(readTasks(malformed), []);
+  assert.deepEqual(readVerificationRows(malformed), []);
+});
 
 test("resolveStage preserves the original decoupling ladder", () => {
   assert.equal(resolveStage("planned", "planned", "planned"), "bootstrap");
