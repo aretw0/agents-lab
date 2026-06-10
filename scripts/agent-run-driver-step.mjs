@@ -5,11 +5,12 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 function parseArgs(argv) {
-  const out = { input: "", cwd: process.cwd(), pretty: false };
+  const out = { input: "", cwd: process.cwd(), outPath: "", pretty: false };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--input") out.input = argv[++index] ?? "";
     else if (arg === "--cwd") out.cwd = argv[++index] ?? "";
+    else if (arg === "--out") out.outPath = argv[++index] ?? "";
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help") out.help = true;
   }
@@ -416,7 +417,7 @@ export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-driver-step.mjs --input payload.json [--cwd DIR] [--pretty]",
+    "Usage: node scripts/agent-run-driver-step.mjs --input payload.json [--cwd DIR] [--out result.json] [--pretty]",
     "Reads JSON payload compatible with agent_run_driver_step_dispatch and prints JSON result.",
   ].join("\n") + "\n");
 }
@@ -427,7 +428,13 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToP
     printHelp();
   } else {
     const result = await runAgentRunDriverStep(readPayload(args.input), args.cwd || process.cwd());
-    process.stdout.write(JSON.stringify(result, null, args.pretty ? 2 : 0));
+    const json = JSON.stringify(result, null, args.pretty ? 2 : 0);
+    if (args.outPath) {
+      const outPath = path.resolve(args.outPath);
+      mkdirSync(path.dirname(outPath), { recursive: true });
+      writeFileSync(outPath, `${json}\n`, "utf8");
+    }
+    process.stdout.write(json);
     process.stdout.write("\n");
   }
 }

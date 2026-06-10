@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -239,6 +239,39 @@ test("headless driver step CLI accepts payload packet input file", () => {
   assert.equal(result.dispatchAllowed, true);
   assert.equal(result.structuredOperatorApproval, true);
   assert.equal(result.agentRunOutcomePacket.contractDecision, "pass");
+});
+
+test("headless driver step CLI writes result file", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-result-out-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const inputPath = path.join(cwd, "driver-packet.json");
+  const outputPath = path.join(cwd, "nested", "driver-result.json");
+  writeFileSync(inputPath, JSON.stringify({
+    ...payload(),
+    execute: true,
+    operator_approval: structuredApproval(),
+    follow: true,
+    build_outcome: true,
+    follow_max_wait_ms: 5_000,
+  }), "utf8");
+
+  const stdout = execFileSync(process.execPath, [
+    cliPath,
+    "--cwd",
+    cwd,
+    "--input",
+    inputPath,
+    "--out",
+    outputPath,
+  ], { encoding: "utf8" });
+
+  assert.equal(existsSync(outputPath), true);
+  assert.deepEqual(JSON.parse(readFileSync(outputPath, "utf8")), JSON.parse(stdout));
+  const result = JSON.parse(stdout);
+  assert.equal(result.decision, "dispatched");
+  assert.equal(result.dispatchAllowed, true);
+  assert.equal(result.agentRunOutcomePacket.contractDecision, "pass");
+  assert.match(result.summary, /agent-run-driver-step: decision=dispatched/);
 });
 
 test("headless driver step accepts wrapper approval in declared params field", async () => {
