@@ -5,7 +5,7 @@ description: Readiness map for agents-lab and pi-stack 0.8.
 
 # Mapa de readiness 0.8.0 — agents-lab / pi-stack
 
-Última revisão: 2026-05-22
+Última revisão: 2026-06-10
 Status: mapa público de readiness
 Escopo: `agents-lab`, `@aretw0/pi-stack`, GitHub Pages e CI
 
@@ -17,7 +17,7 @@ O estado atual para 0.8.0 é:
 2. **Base local:** desenvolvimento usa `pnpm`, devcontainer, `lab pi`, gates locais e `pi:dev` com capacidades frias por padrão.
 3. **Base de produto:** `@aretw0/pi-stack` deve continuar `strict-curated` por default; capacidades caras ficam opt-in.
 4. **Fronteira protegida:** publish npm, provider routing, remote/offload, GitHub Actions como executor e automação forte exigem intenção explícita do operador.
-5. **Release readiness:** `agent-run-driver-gate` está verde; `board-release-clear` ainda está bloqueado por tarefas de execução em andamento no board; o bloqueio explícito para liberação ainda é deliberado: pacotes estão em `0.7.0`, então `target-version-ready` segue falso até decisão de release.
+5. **Release readiness:** `agent-run-driver-gate` está verde; `board-release-clear` ainda está bloqueado por tarefas em andamento no board, mas o relatório agora lista evidência candidata para as três influências externas P3. O bloqueio explícito para liberação ainda é deliberado: pacotes estão em `0.7.0`, então `target-version-ready` segue falso até decisão de release.
 6. **Roadmap canônico:** direção macro fica em [ROADMAP.md]({{ site.repo_url }}/blob/main/ROADMAP.md); este arquivo registra readiness e evidência selecionada.
 
 ## Pronto
@@ -32,7 +32,7 @@ O estado atual para 0.8.0 é:
 | Instalação padrão | conservadora | `npx @aretw0/pi-stack` instala perfil `strict-curated` |
 | Fronteira de engine | protegida | `engine:boundary:audit` mantém core portable e Pi em surfaces/adapters |
 | Driver agent-run agnóstico | verde | `test:agent-run:drivers` cobre driver-step, pi-driver, payload emitido e cadeia arquivo-a-arquivo packet/result |
-| Board de release | ainda com fluxo em andamento | `release:readiness:v0.8.0` reporta `board-release-clear` bloqueado por tarefas em execução, sem P0 aberto, e ainda sob revisão de release
+| Board de release | ainda com decisão pendente | `release:readiness:v0.8.0` reporta `board-release-clear` bloqueado por tarefas em execução, sem P0 aberto, e lista evidência candidata para `TASK-BUD-480`, `TASK-BUD-521` e `TASK-BUD-676` |
 
 ## Preparado, mas ainda protegido
 
@@ -50,7 +50,7 @@ O estado atual para 0.8.0 é:
 
 | Item | Motivo de park |
 |---|---|
-| Influências externas adicionais (`hermes-agent`, `sandcastle`, `claude-mem`) | úteis como inspiração, mas desviam da convergência 0.8 se retomadas antes da lane local-safe amadurecer |
+| Influências externas adicionais (`hermes-agent`, `sandcastle`, `claude-mem`) | agora têm canários local-safe versionados; a decisão restante é assimilação/park explícito, não pesquisa aberta automática |
 | Colônias antigas | reconciliadas como telemetria histórica; não devem voltar como blockers sem candidate novo e evidência verificável |
 | Remote/offload/GitHub Actions como executor | protegido; só depois de maturidade local e contrato de cancelamento/rollback claro |
 | Publish/release 0.8.0 | só após decisão de versionamento, release notes/changelog e validação final |
@@ -61,6 +61,7 @@ O estado atual para 0.8.0 é:
 | Fatia | Validação |
 |---|---|
 | Revisar release notes/changelog | confirmar mudanças desde `v0.7.0`, riscos e rollback antes de tag |
+| Decidir candidatos de evidência do board | usar a seção `Board Evidence Candidates` do readiness report para decidir se `TASK-BUD-480`, `TASK-BUD-521` e `TASK-BUD-676` ficam parked para 0.8 ou entram como trabalho requerido |
 | Decidir bump 0.8.0 | `release:readiness:v0.8.0` deve ficar verde exceto antes do bump; depois, verde completo |
 | Revalidar instalação limpa | `release:package:smoke`, `docs:package:check`, install/smoke em ambiente limpo; GitHub Packages deve continuar opt-in se não aprovado |
 | Manter acoplamentos de engine sob controle | `engine:boundary:audit`, sem dependências Pi em core portable |
