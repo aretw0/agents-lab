@@ -132,6 +132,40 @@ function agentRunDriverCanaryEvidence(cwd, relPath = ".artifacts/agent-run-drive
   }
 }
 
+function agentRunDriverCanarySuiteEvidence(cwd) {
+  const relPath = ".artifacts/agent-run-driver/suite.json";
+  const fullPath = path.join(cwd, relPath);
+  if (!existsSync(fullPath)) {
+    return {
+      path: relPath,
+      present: false,
+      decision: "missing",
+      summary: "no local agent-run driver canary suite artifact found",
+    };
+  }
+  try {
+    const payload = JSON.parse(readFileSync(fullPath, "utf8"));
+    return {
+      path: relPath,
+      present: true,
+      decision: payload.decision === "pass" ? "pass" : "review",
+      mode: payload.mode,
+      schemaVersion: payload.schemaVersion,
+      readOnlyDecision: payload.canaries?.readOnly?.contractDecision,
+      mutationDecision: payload.canaries?.mutation?.contractDecision,
+      blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
+      summary: payload.summary ?? "agent-run driver canary suite artifact present",
+    };
+  } catch (error) {
+    return {
+      path: relPath,
+      present: true,
+      decision: "invalid-json",
+      summary: `could not parse local agent-run driver canary suite artifact: ${String(error?.message ?? error)}`,
+    };
+  }
+}
+
 function releaseGateKind(id) {
   if (id === "target-version-ready") return "operator-decision";
   if (id === "board-release-clear") return "board-state";
@@ -432,6 +466,7 @@ export function gather(target, cwd = process.cwd()) {
   };
   const packageSmoke = buildReleasePackageSmokeReport({ cwd, runPack: false });
   const agentRunDrivers = agentRunDriverGateReport(cwd);
+  agentRunDrivers.canarySuiteEvidence = agentRunDriverCanarySuiteEvidence(cwd);
   agentRunDrivers.lastCanaryEvidence = agentRunDriverCanaryEvidence(cwd);
   agentRunDrivers.lastMutationCanaryEvidence = agentRunDriverCanaryEvidence(cwd, ".artifacts/agent-run-driver/latest-mutation.json");
 
