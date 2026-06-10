@@ -90,6 +90,7 @@ Automação mínima existente:
 - `publish.yml` mantém publish gateado por tag semver + smoke/test/verify/audits;
 - `release-draft.yml` prepara draft release manual com artefato de notas;
 - `pnpm run release:readiness:v0.8.0` gera checklist local canônico em `.artifacts/release-readiness/`.
+- `pnpm run release:readiness:v0.8.0:json` gera o mesmo estado em JSON para agentes e automação local, incluindo `operatorDecisions`.
 
 Interpretação do readiness report:
 - `Release Blockers` separa gate técnico, decisão de operador e estado do board;

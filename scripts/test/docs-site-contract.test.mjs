@@ -163,6 +163,8 @@ test("engine documentation matches the zero-exception boundary audit", () => {
 
 test("public 0.8 readiness map matches the canonical release readiness gate", () => {
 	const readiness = read("docs/research/0-8-readiness-map.md");
+	const playbook = read("docs/guides/control-plane-evolution-playbook.md");
+	const pkg = JSON.parse(read("package.json"));
 	const report = buildReport(gather("0.8.0"));
 	const checklist = new Map(report.checklist.map((item) => [item.id, item]));
 
@@ -180,6 +182,9 @@ test("public 0.8 readiness map matches the canonical release readiness gate", ()
 		);
 	}
 	assert.match(readiness, /`target-version-ready` segue falso/);
+	assert.equal(pkg.scripts["release:readiness:v0.8.0:json"], "node scripts/release-readiness-report.mjs --target 0.8.0 --json");
+	assert.match(playbook, /release:readiness:v0\.8\.0:json/);
+	assert.match(playbook, /operatorDecisions/);
 	assert.doesNotMatch(readiness, /stale colony|colony board items|releaseBlockers: (?!none)/i);
 });
 
