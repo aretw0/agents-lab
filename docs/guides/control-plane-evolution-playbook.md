@@ -101,7 +101,7 @@ Interpretação do readiness report:
 - `Operator Decisions` lista as decisões humanas restantes antes do release;
 - no JSON, `mode=release-readiness-report` e `schemaVersion=1` identificam o contrato estruturado;
 - no JSON, `generatedAt` e `decision` identificam o snapshot e a decisão (`ready` ou `not-ready`) sem parsear Markdown;
-- no JSON, `versions`, `versionsAligned`, `targetVersionReady`, `workflows`, `gates` e `packageSmoke` expõem os gates principais sem parsear `checklist[*].evidence`;
+- no JSON, `versions`, `versionsAligned`, `targetVersionReady`, `workflows`, `gates`, `agentRunDrivers` e `packageSmoke` expõem os gates principais sem parsear `checklist[*].evidence`;
 - no JSON, `checklist[*].kind` classifica cada gate como `technical-gate`, `operator-decision` ou `board-state`;
 - no JSON, `releaseBlockers` expõe os mesmos bloqueios do Markdown com `id`, `kind` e `evidence`;
 - no JSON, `operatorDecisions[*]` inclui payload acionável por decisão, como `allowedActions`, versões atuais e `candidateTaskIds`;

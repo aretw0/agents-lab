@@ -140,6 +140,10 @@ test("buildReport marks target release not ready until version and board gates a
     ]);
     assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.id), ["target-version-ready", "board-release-clear"]);
     assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.kind), ["operator-decision", "board-state"]);
+    const data = gather("0.8.0", workspace);
+    assert.equal(data.agentRunDrivers.ok, true);
+    assert.equal(data.agentRunDrivers.scriptName, "test:agent-run:drivers");
+    assert.deepEqual(data.agentRunDrivers.missingTests, []);
     assert.deepEqual(report.operatorDecisions.map((decision) => decision.id), ["decide-target-version"]);
     assert.deepEqual(report.operatorDecisions[0].allowedActions, ["defer-release", "bump-tag-release-when-ready"]);
     assert.equal(report.operatorDecisions[0].requiresOperatorDecision, true);
@@ -342,8 +346,12 @@ test("agent-run driver gate requires the full driver suite script", () => {
   try {
     const report = buildReport(gather("0.8.0", workspace));
     assert.equal(report.ready, false);
+    assert.deepEqual(gather("0.8.0", workspace).agentRunDrivers.missingTests, [
+      "scripts/test/agent-run-pi-driver.test.mjs",
+      "scripts/test/agent-run-pi-driver-payload.test.mjs",
+    ]);
     assert.match(report.markdown, /\[ \] agent-run-driver-gate/);
-    assert.match(report.markdown, /agent-run-driver-gate \[technical-gate\]/);
+    assert.match(report.markdown, /agent-run-driver-gate \[technical-gate\]: missing scripts\/test\/agent-run-pi-driver\.test\.mjs/);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }
@@ -444,6 +452,13 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.targetVersionReady, true);
     assert.deepEqual(json.workflows, { ci: true, publish: true, releaseDraft: true });
     assert.deepEqual(json.gates, { agentRunDrivers: true, packageSmoke: true });
+    assert.equal(json.agentRunDrivers.ok, true);
+    assert.deepEqual(json.agentRunDrivers.requiredTests, [
+      "scripts/test/agent-run-driver-step.test.mjs",
+      "scripts/test/agent-run-pi-driver.test.mjs",
+      "scripts/test/agent-run-pi-driver-payload.test.mjs",
+    ]);
+    assert.deepEqual(json.agentRunDrivers.missingTests, []);
     assert.equal(json.packageSmoke.mode, "release-package-smoke-report");
     assert.equal(json.packageSmoke.decision, "pass");
     assert.deepEqual(json.packageSmoke.packageBlockers, []);

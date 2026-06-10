@@ -76,6 +76,21 @@ function hasAgentRunDriverGate(cwd) {
     && AGENT_RUN_DRIVER_GATE_TESTS.every((testPath) => script.includes(testPath));
 }
 
+function agentRunDriverGateReport(cwd) {
+  const script = rootScript(cwd, "test:agent-run:drivers");
+  const missingTests = AGENT_RUN_DRIVER_GATE_TESTS.filter((testPath) => !script.includes(testPath));
+  const nodeTest = script.includes("node --test");
+  const scriptPresent = hasRootScript(cwd, "test:agent-run:drivers");
+  return {
+    ok: scriptPresent && nodeTest && missingTests.length === 0,
+    scriptName: "test:agent-run:drivers",
+    script,
+    nodeTest,
+    requiredTests: AGENT_RUN_DRIVER_GATE_TESTS,
+    missingTests,
+  };
+}
+
 function releaseGateKind(id) {
   if (id === "target-version-ready") return "operator-decision";
   if (id === "board-release-clear") return "board-state";
@@ -375,6 +390,7 @@ export function gather(target, cwd = process.cwd()) {
     releaseDraft: existsSync(path.join(cwd, ".github", "workflows", "release-draft.yml")),
   };
   const packageSmoke = buildReleasePackageSmokeReport({ cwd, runPack: false });
+  const agentRunDrivers = agentRunDriverGateReport(cwd);
 
   return {
     target,
@@ -385,9 +401,10 @@ export function gather(target, cwd = process.cwd()) {
     targetVersionReady,
     workflows,
     gates: {
-      agentRunDrivers: hasAgentRunDriverGate(cwd),
+      agentRunDrivers: agentRunDrivers.ok,
       packageSmoke: packageSmoke.ok,
     },
+    agentRunDrivers,
     packageSmoke,
     board: summarizeBoard(cwd),
   };
@@ -401,7 +418,7 @@ export function buildReport(data) {
     { id: "workflow-ci", ok: data.workflows.ci, evidence: ".github/workflows/ci.yml" },
     { id: "workflow-publish", ok: data.workflows.publish, evidence: ".github/workflows/publish.yml" },
     { id: "workflow-release-draft", ok: data.workflows.releaseDraft, evidence: ".github/workflows/release-draft.yml" },
-    { id: "agent-run-driver-gate", ok: data.gates.agentRunDrivers, evidence: `package.json scripts.test:agent-run:drivers includes ${AGENT_RUN_DRIVER_GATE_TESTS.join(", ")}` },
+    { id: "agent-run-driver-gate", ok: data.gates.agentRunDrivers, evidence: data.agentRunDrivers.missingTests.length ? `missing ${data.agentRunDrivers.missingTests.join(", ")}` : `package.json scripts.test:agent-run:drivers includes ${data.agentRunDrivers.requiredTests.join(", ")}` },
     { id: "release-package-smoke", ok: data.packageSmoke.ok, evidence: data.packageSmoke.packageBlockers.length ? data.packageSmoke.packageBlockers.map((blocker) => blocker.id).join(", ") : "release package smoke report pass" },
     { id: "board-release-clear", ok: data.board.releaseReady, evidence: data.board.blockers.length ? data.board.blockers.join(", ") : "no open P0/in-progress/blocked tasks" },
   ].map((item) => ({ ...item, kind: releaseGateKind(item.id) }));
@@ -499,6 +516,7 @@ function main() {
       targetVersionReady: data.targetVersionReady,
       workflows: data.workflows,
       gates: data.gates,
+      agentRunDrivers: data.agentRunDrivers,
       packageSmoke: data.packageSmoke,
       decision: report.decision,
       ready: report.ready,
