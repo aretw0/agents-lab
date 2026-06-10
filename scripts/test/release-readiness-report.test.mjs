@@ -17,6 +17,11 @@ const PACKAGES = [
 
 function makeWorkspace({ version = "0.7.0", tasks = [] } = {}) {
   const root = mkdtempSync(path.join(tmpdir(), "release-readiness-"));
+  writeFileSync(path.join(root, "package.json"), JSON.stringify({
+    scripts: {
+      "test:agent-run:drivers": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs",
+    },
+  }, null, 2));
   for (const relPath of PACKAGES) {
     const fullPath = path.join(root, relPath);
     mkdirSync(path.dirname(fullPath), { recursive: true });
@@ -67,6 +72,7 @@ test("buildReport marks target release not ready until version and board gates a
     assert.match(report.markdown, /decision: not-ready/);
     assert.match(report.markdown, /\[ \] target-version-ready/);
     assert.match(report.markdown, /\[ \] board-release-clear/);
+    assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
     assert.match(report.markdown, /TASK-P0 \[p0\/planned\]/);
     assert.match(report.markdown, /### P0 Ready To Start/);
   } finally {
@@ -85,6 +91,7 @@ test("buildReport marks release ready when versions and board gates are clear", 
     assert.equal(report.ready, true);
     assert.match(report.markdown, /decision: ready/);
     assert.match(report.markdown, /\[x\] target-version-ready/);
+    assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
     assert.match(report.markdown, /\[x\] board-release-clear/);
   } finally {
     rmSync(workspace, { recursive: true, force: true });

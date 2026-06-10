@@ -23,6 +23,13 @@ function readJson(cwd, relPath) {
   return JSON.parse(readFileSync(path.join(cwd, relPath), "utf8"));
 }
 
+function hasRootScript(cwd, scriptName) {
+  const packagePath = path.join(cwd, "package.json");
+  if (!existsSync(packagePath)) return false;
+  const json = JSON.parse(readFileSync(packagePath, "utf8"));
+  return typeof json?.scripts?.[scriptName] === "string" && json.scripts[scriptName].trim().length > 0;
+}
+
 function normalizeStatus(value) {
   return String(value ?? "unknown").trim().toLowerCase().replace(/_/g, "-") || "unknown";
 }
@@ -164,6 +171,9 @@ export function gather(target, cwd = process.cwd()) {
     versionsAligned,
     targetVersionReady,
     workflows,
+    gates: {
+      agentRunDrivers: hasRootScript(cwd, "test:agent-run:drivers"),
+    },
     board: summarizeBoard(cwd),
   };
 }
@@ -176,6 +186,7 @@ export function buildReport(data) {
     { id: "workflow-ci", ok: data.workflows.ci, evidence: ".github/workflows/ci.yml" },
     { id: "workflow-publish", ok: data.workflows.publish, evidence: ".github/workflows/publish.yml" },
     { id: "workflow-release-draft", ok: data.workflows.releaseDraft, evidence: ".github/workflows/release-draft.yml" },
+    { id: "agent-run-driver-gate", ok: data.gates.agentRunDrivers, evidence: "package.json scripts.test:agent-run:drivers" },
     { id: "board-release-clear", ok: data.board.releaseReady, evidence: data.board.blockers.length ? data.board.blockers.join(", ") : "no open P0/in-progress/blocked tasks" },
   ];
   const ready = checklist.every((item) => item.ok);
