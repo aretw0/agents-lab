@@ -13,6 +13,12 @@ const PACKAGES = [
   "packages/lab-skills/package.json",
 ];
 
+const AGENT_RUN_DRIVER_GATE_TESTS = [
+  "scripts/test/agent-run-driver-step.test.mjs",
+  "scripts/test/agent-run-pi-driver.test.mjs",
+  "scripts/test/agent-run-pi-driver-payload.test.mjs",
+];
+
 function runGit(args, cwd = process.cwd()) {
   const out = spawnSync("git", args, { cwd, encoding: "utf8", stdio: "pipe" });
   if (out.status !== 0) return "";
@@ -41,9 +47,7 @@ function hasAgentRunDriverGate(cwd) {
   const script = rootScript(cwd, "test:agent-run:drivers");
   return hasRootScript(cwd, "test:agent-run:drivers")
     && script.includes("node --test")
-    && script.includes("scripts/test/agent-run-driver-step.test.mjs")
-    && script.includes("scripts/test/agent-run-pi-driver.test.mjs")
-    && script.includes("scripts/test/agent-run-pi-driver-payload.test.mjs");
+    && AGENT_RUN_DRIVER_GATE_TESTS.every((testPath) => script.includes(testPath));
 }
 
 function normalizeStatus(value) {
@@ -202,7 +206,7 @@ export function buildReport(data) {
     { id: "workflow-ci", ok: data.workflows.ci, evidence: ".github/workflows/ci.yml" },
     { id: "workflow-publish", ok: data.workflows.publish, evidence: ".github/workflows/publish.yml" },
     { id: "workflow-release-draft", ok: data.workflows.releaseDraft, evidence: ".github/workflows/release-draft.yml" },
-    { id: "agent-run-driver-gate", ok: data.gates.agentRunDrivers, evidence: "package.json scripts.test:agent-run:drivers" },
+    { id: "agent-run-driver-gate", ok: data.gates.agentRunDrivers, evidence: `package.json scripts.test:agent-run:drivers includes ${AGENT_RUN_DRIVER_GATE_TESTS.join(", ")}` },
     { id: "board-release-clear", ok: data.board.releaseReady, evidence: data.board.blockers.length ? data.board.blockers.join(", ") : "no open P0/in-progress/blocked tasks" },
   ];
   const ready = checklist.every((item) => item.ok);
