@@ -14,6 +14,10 @@ function parseArgs(argv = process.argv.slice(2)) {
     prompt: "",
     files: [],
     tools: [],
+    fileContract: "read-only",
+    touchedFiles: [],
+    mutationTargetFiles: [],
+    markerResults: [],
     execute: false,
     approve: false,
     follow: false,
@@ -32,6 +36,14 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--prompt") out.prompt = argv[++index] ?? out.prompt;
     else if (arg === "--file") out.files.push(argv[++index] ?? "");
     else if (arg === "--tool") out.tools.push(argv[++index] ?? "");
+    else if (arg === "--file-contract") out.fileContract = argv[++index] ?? out.fileContract;
+    else if (arg === "--touched-file") out.touchedFiles.push(argv[++index] ?? "");
+    else if (arg === "--mutation-target-file") out.mutationTargetFiles.push(argv[++index] ?? "");
+    else if (arg === "--marker") {
+      const raw = argv[++index] ?? "";
+      const [label, state = "true"] = raw.split("=");
+      out.markerResults.push({ label, ok: state !== "false" && state !== "fail" });
+    }
     else if (arg === "--execute") out.execute = true;
     else if (arg === "--approve") out.approve = true;
     else if (arg === "--follow") out.follow = true;
@@ -77,10 +89,17 @@ export async function runPiDriver(options = {}) {
 
   const driverPayload = {
     ...payloadPacket.payload,
+    run_spec: {
+      ...payloadPacket.payload.run_spec,
+      file_contract: options.fileContract === "mutation" ? "mutation" : "read-only",
+    },
     execute: options.execute === true,
     ...(options.approve === true ? { operator_approval: structuredApproval() } : {}),
     follow: options.follow === true,
     build_outcome: options.buildOutcome === true,
+    ...(Array.isArray(options.touchedFiles) && options.touchedFiles.length > 0 ? { touched_files: options.touchedFiles } : {}),
+    ...(Array.isArray(options.markerResults) && options.markerResults.length > 0 ? { marker_results: options.markerResults } : {}),
+    ...(Array.isArray(options.mutationTargetFiles) && options.mutationTargetFiles.length > 0 ? { mutation_target_files: options.mutationTargetFiles } : {}),
   };
   const driverStep = await runAgentRunDriverStep(driverPayload, options.cwd || process.cwd());
 
@@ -114,6 +133,9 @@ export function buildPiDriverSummary(result) {
     followState: follow.status?.state,
     outputBytes: follow.outputBytes,
     contractDecision: outcome?.contractDecision,
+    fileContract: outcome?.fileContract ?? driverStep.runSpec?.fileContract,
+    touchedFileCount: Array.isArray(outcome?.touchedFiles) ? outcome.touchedFiles.length : undefined,
+    markerFailureCount: Array.isArray(outcome?.markerFailures) ? outcome.markerFailures.length : undefined,
     blockers: [
       ...(Array.isArray(result?.blockers) ? result.blockers : []),
       ...(Array.isArray(driverStep.blockers) ? driverStep.blockers : []),
@@ -129,6 +151,7 @@ function printHelp() {
     "",
     "This composes agent-run-pi-driver-payload and agent-run-driver-step.",
     "It previews by default. Real execution requires both --execute and --approve.",
+    "Outcome evidence options: --file-contract read-only|mutation --touched-file PATH --mutation-target-file PATH --marker label=true|false",
   ].join("\n") + "\n");
 }
 

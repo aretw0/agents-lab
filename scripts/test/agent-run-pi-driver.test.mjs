@@ -85,8 +85,40 @@ test("pi driver summary keeps compact execution evidence", async () => {
   assert.equal(summary.followTerminal, true);
   assert.equal(summary.followState, "completed");
   assert.equal(summary.contractDecision, "pass");
+  assert.equal(summary.fileContract, "read-only");
   assert.ok(summary.outputBytes > 0);
   assert.ok(Array.isArray(summary.logTail));
+});
+
+test("pi driver forwards mutation outcome evidence to the headless driver", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-mutation-evidence-"));
+  writeFakePi(cwd);
+
+  const result = await runPiDriver({
+    cwd,
+    mode: "help",
+    runId: "pi-driver-mutation-evidence",
+    fileContract: "mutation",
+    touchedFiles: ["README.md"],
+    mutationTargetFiles: ["README.md"],
+    markerResults: [{ label: "acceptance", ok: true }],
+    execute: true,
+    approve: true,
+    follow: true,
+    buildOutcome: true,
+  });
+  const summary = buildPiDriverSummary(result);
+
+  assert.equal(result.driverStep.runSpec.fileContract, "mutation");
+  assert.equal(result.driverStep.nextAgentRunOutcomePacket.params.file_contract, "mutation");
+  assert.deepEqual(result.driverStep.nextAgentRunOutcomePacket.params.touched_files, ["README.md"]);
+  assert.deepEqual(result.driverStep.nextAgentRunOutcomePacket.params.mutation_target_files, ["README.md"]);
+  assert.deepEqual(result.driverStep.nextAgentRunOutcomePacket.params.marker_results, [{ label: "acceptance", ok: true }]);
+  assert.equal(result.driverStep.agentRunOutcomePacket.contractDecision, "pass");
+  assert.equal(result.driverStep.agentRunOutcomePacket.fileContract, "mutation");
+  assert.equal(summary.fileContract, "mutation");
+  assert.equal(summary.touchedFileCount, 1);
+  assert.equal(summary.markerFailureCount, 0);
 });
 
 test("pi driver summary reports blockers compactly", async () => {
