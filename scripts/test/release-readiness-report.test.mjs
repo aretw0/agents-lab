@@ -19,12 +19,14 @@ function makeWorkspace({
   version = "0.7.0",
   tasks = [],
   agentRunDriverScript = "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs",
+  agentRunDriverCanariesScript = "node scripts/agent-run-driver-canary-suite.mjs --execute --out .artifacts/agent-run-driver/suite.json",
 } = {}) {
   const root = mkdtempSync(path.join(tmpdir(), "release-readiness-"));
   writeFileSync(path.join(root, "package.json"), JSON.stringify({
     private: true,
     scripts: {
       "test:agent-run:drivers": agentRunDriverScript,
+      "agent-run:driver-canaries": agentRunDriverCanariesScript,
     },
   }, null, 2));
   for (const relPath of PACKAGES) {
@@ -143,7 +145,10 @@ test("buildReport marks target release not ready until version and board gates a
     const data = gather("0.8.0", workspace);
     assert.equal(data.agentRunDrivers.ok, true);
     assert.equal(data.agentRunDrivers.scriptName, "test:agent-run:drivers");
+    assert.equal(data.agentRunDrivers.canaryScriptName, "agent-run:driver-canaries");
+    assert.equal(data.agentRunDrivers.canaryScriptPresent, true);
     assert.deepEqual(data.agentRunDrivers.missingTests, []);
+    assert.deepEqual(data.agentRunDrivers.missingCanaryScriptMarkers, []);
     assert.deepEqual(data.agentRunDrivers.canarySuiteEvidence, {
       path: ".artifacts/agent-run-driver/suite.json",
       present: false,
@@ -371,7 +376,28 @@ test("agent-run driver gate requires the full driver suite script", () => {
       "scripts/test/agent-run-driver-canary-suite.test.mjs",
     ]);
     assert.match(report.markdown, /\[ \] agent-run-driver-gate/);
-    assert.match(report.markdown, /agent-run-driver-gate \[technical-gate\]: missing scripts\/test\/agent-run-pi-driver\.test\.mjs/);
+    assert.match(report.markdown, /agent-run-driver-gate \[technical-gate\]: missing tests scripts\/test\/agent-run-pi-driver\.test\.mjs/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
+test("agent-run driver gate requires the executable canary suite script", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+    agentRunDriverCanariesScript: "",
+  });
+
+  try {
+    const data = gather("0.8.0", workspace);
+    const report = buildReport(data);
+
+    assert.equal(data.agentRunDrivers.ok, false);
+    assert.equal(data.agentRunDrivers.canaryScriptPresent, false);
+    assert.equal(report.ready, false);
+    assert.match(report.markdown, /\[ \] agent-run-driver-gate/);
+    assert.match(report.markdown, /missing script agent-run:driver-canaries/);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }

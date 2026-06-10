@@ -32,6 +32,7 @@ pnpm run agent-run:pi-driver-payload
 
 `agent-run:driver-canary` runs a bounded local `node --version` canary through the same driver step and writes `.artifacts/agent-run-driver/latest.json` for release readiness evidence. `agent-run:driver-canary:mutation` exercises the same driver with `file_contract=mutation`, but only writes the ignored `.artifacts/agent-run-driver/mutation-target.txt` fixture.
 `agent-run:driver-canaries` runs both canaries and writes `.artifacts/agent-run-driver/suite.json` plus the individual latest artifacts.
+`test:agent-run:drivers` is the structural gate for this surface and must include the driver-step, pi-driver, payload, canary, and canary-suite smoke tests; `agent-run:driver-canaries` is the executable local canary evidence command.
 
 Those scripts are canonical for this repository workflow, but they are not the distributed package API by themselves. Portable consumers should target the primitive/tool contract and treat scripts as examples or local adapters.
 

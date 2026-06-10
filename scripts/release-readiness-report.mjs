@@ -21,6 +21,12 @@ const AGENT_RUN_DRIVER_GATE_TESTS = [
   "scripts/test/agent-run-driver-canary.test.mjs",
   "scripts/test/agent-run-driver-canary-suite.test.mjs",
 ];
+const AGENT_RUN_DRIVER_CANARY_SCRIPT = "agent-run:driver-canaries";
+const AGENT_RUN_DRIVER_CANARY_SCRIPT_MARKERS = [
+  "node scripts/agent-run-driver-canary-suite.mjs",
+  "--execute",
+  ".artifacts/agent-run-driver/suite.json",
+];
 
 const BOARD_RELEASE_EVIDENCE = {
   "TASK-BUD-480": {
@@ -73,23 +79,34 @@ function rootScript(cwd, scriptName) {
 
 function hasAgentRunDriverGate(cwd) {
   const script = rootScript(cwd, "test:agent-run:drivers");
+  const canaryScript = rootScript(cwd, AGENT_RUN_DRIVER_CANARY_SCRIPT);
   return hasRootScript(cwd, "test:agent-run:drivers")
     && script.includes("node --test")
-    && AGENT_RUN_DRIVER_GATE_TESTS.every((testPath) => script.includes(testPath));
+    && AGENT_RUN_DRIVER_GATE_TESTS.every((testPath) => script.includes(testPath))
+    && hasRootScript(cwd, AGENT_RUN_DRIVER_CANARY_SCRIPT)
+    && AGENT_RUN_DRIVER_CANARY_SCRIPT_MARKERS.every((marker) => canaryScript.includes(marker));
 }
 
 function agentRunDriverGateReport(cwd) {
   const script = rootScript(cwd, "test:agent-run:drivers");
+  const canaryScript = rootScript(cwd, AGENT_RUN_DRIVER_CANARY_SCRIPT);
   const missingTests = AGENT_RUN_DRIVER_GATE_TESTS.filter((testPath) => !script.includes(testPath));
   const nodeTest = script.includes("node --test");
   const scriptPresent = hasRootScript(cwd, "test:agent-run:drivers");
+  const missingCanaryScriptMarkers = AGENT_RUN_DRIVER_CANARY_SCRIPT_MARKERS.filter((marker) => !canaryScript.includes(marker));
+  const canaryScriptPresent = hasRootScript(cwd, AGENT_RUN_DRIVER_CANARY_SCRIPT);
   return {
-    ok: scriptPresent && nodeTest && missingTests.length === 0,
+    ok: scriptPresent && nodeTest && missingTests.length === 0 && canaryScriptPresent && missingCanaryScriptMarkers.length === 0,
     scriptName: "test:agent-run:drivers",
     script,
     nodeTest,
     requiredTests: AGENT_RUN_DRIVER_GATE_TESTS,
     missingTests,
+    canaryScriptName: AGENT_RUN_DRIVER_CANARY_SCRIPT,
+    canaryScript,
+    canaryScriptPresent,
+    requiredCanaryScriptMarkers: AGENT_RUN_DRIVER_CANARY_SCRIPT_MARKERS,
+    missingCanaryScriptMarkers,
   };
 }
 
@@ -179,6 +196,19 @@ function releaseBlockerRow(item) {
     kind: item.kind,
     evidence: item.evidence,
   };
+}
+
+function agentRunDriverGateEvidence(report) {
+  const blockers = [
+    ...(report.missingTests.length ? [`missing tests ${report.missingTests.join(", ")}`] : []),
+    ...(!report.canaryScriptPresent ? [`missing script ${report.canaryScriptName}`] : []),
+    ...(report.missingCanaryScriptMarkers.length ? [`${report.canaryScriptName} missing ${report.missingCanaryScriptMarkers.join(", ")}`] : []),
+  ];
+  if (blockers.length) return blockers.join("; ");
+  return [
+    `package.json scripts.test:agent-run:drivers includes ${report.requiredTests.join(", ")}`,
+    `${report.canaryScriptName} writes .artifacts/agent-run-driver/suite.json`,
+  ].join("; ");
 }
 
 function normalizeStatus(value) {
@@ -497,7 +527,7 @@ export function buildReport(data) {
     { id: "workflow-ci", ok: data.workflows.ci, evidence: ".github/workflows/ci.yml" },
     { id: "workflow-publish", ok: data.workflows.publish, evidence: ".github/workflows/publish.yml" },
     { id: "workflow-release-draft", ok: data.workflows.releaseDraft, evidence: ".github/workflows/release-draft.yml" },
-    { id: "agent-run-driver-gate", ok: data.gates.agentRunDrivers, evidence: data.agentRunDrivers.missingTests.length ? `missing ${data.agentRunDrivers.missingTests.join(", ")}` : `package.json scripts.test:agent-run:drivers includes ${data.agentRunDrivers.requiredTests.join(", ")}` },
+    { id: "agent-run-driver-gate", ok: data.gates.agentRunDrivers, evidence: agentRunDriverGateEvidence(data.agentRunDrivers) },
     { id: "release-package-smoke", ok: data.packageSmoke.ok, evidence: data.packageSmoke.packageBlockers.length ? data.packageSmoke.packageBlockers.map((blocker) => blocker.id).join(", ") : "release package smoke report pass" },
     { id: "board-release-clear", ok: data.board.releaseReady, evidence: data.board.blockers.length ? data.board.blockers.join(", ") : "no open P0/in-progress/blocked tasks" },
   ].map((item) => ({ ...item, kind: releaseGateKind(item.id) }));
