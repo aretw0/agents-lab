@@ -153,15 +153,8 @@ function boardEvidenceOneLine(row) {
   ].join(" — ");
 }
 
-function operatorDecisionLines(data, failedChecklist) {
-  const lines = [];
-  if (failedChecklist.some((item) => item.id === "target-version-ready")) {
-    lines.push(`- decide-target-version: packages are not yet at v${data.target}; bump/tag/release remains operator-gated`);
-  }
-  if (failedChecklist.some((item) => item.id === "board-release-clear") && data.board.releaseDecisionReady) {
-    lines.push("- decide-board-evidence-candidates: choose park-for-target-release or require-work for current Board Evidence Candidates");
-  }
-  return lines;
+function operatorDecisionLines(decisions) {
+  return decisions.map((decision) => `- ${decision.id}: ${decision.summary}`);
 }
 
 function operatorDecisionPackets(data, failedChecklist) {
@@ -347,8 +340,8 @@ export function buildReport(data) {
   ];
   const ready = checklist.every((item) => item.ok);
   const failedChecklist = checklist.filter((item) => !item.ok);
-  const decisions = operatorDecisionLines(data, failedChecklist);
   const operatorDecisions = operatorDecisionPackets(data, failedChecklist);
+  const decisions = operatorDecisionLines(operatorDecisions);
 
   const lines = [
     `# Release readiness report v${data.target}`,
