@@ -23,6 +23,8 @@ test("release package smoke keeps release/package publishing dry-run gated", () 
     workflowDispatchAllowed: false,
     processStartAllowed: false,
   });
+  assert.deepEqual(report.packageBlockers, []);
+  assert.deepEqual(report.packageWarnings, []);
   assert.equal(report.releaseVersion, "0.7.0");
   assert.equal(report.githubReleases.draftOnly, true);
   assert.equal(report.githubReleases.manualDraft, true);
@@ -61,6 +63,8 @@ registry-url: https://npm.pkg.github.com
   assert.equal(report.githubPackages.mode, "configured-opt-in");
   assert.match(report.githubPackages.note, /publish markers exist/);
   assert.match(report.warnings.join("\n"), /GitHub Packages publishing is configured/);
+  assert.deepEqual(report.packageWarnings.map((warning) => warning.id), ["github-packages-configured"]);
+  assert.equal(report.packageWarnings[0].kind, "package-registry");
 });
 
 test("release package smoke exposes a structured block decision", () => {
@@ -77,6 +81,9 @@ test("release package smoke exposes a structured block decision", () => {
   assert.equal(report.ok, false);
   assert.equal(report.decision, "block");
   assert.match(report.blockers.join("\n"), /root package must remain private/);
+  assert.deepEqual(report.packageBlockers.map((blocker) => blocker.id), ["root-package-not-private"]);
+  assert.equal(report.packageBlockers[0].kind, "package-boundary");
+  assert.deepEqual(report.packageBlockers[0].evidence, { relPath: "package.json" });
   assert.deepEqual(report.automationPermissions, {
     publishAllowed: false,
     workflowDispatchAllowed: false,

@@ -94,67 +94,132 @@ export function buildReleasePackageSmokeReport(options = {}) {
 
   const blockers = [];
   const warnings = [];
+  const packageBlockers = [];
+  const packageWarnings = [];
+
+  function addBlocker(id, kind, summary, evidence = {}) {
+    blockers.push(summary);
+    packageBlockers.push({ id, kind, summary, evidence });
+  }
+
+  function addWarning(id, kind, summary, evidence = {}) {
+    warnings.push(summary);
+    packageWarnings.push({ id, kind, summary, evidence });
+  }
 
   const missingReleasePackages = RELEASE_PACKAGES.filter((relPath) => !packageDirs.includes(relPath));
   for (const relPath of missingReleasePackages) {
-    blockers.push(`missing release package directory: ${relPath}`);
+    addBlocker("missing-release-package", "package-directory", `missing release package directory: ${relPath}`, {
+      relPath,
+    });
   }
 
   const releasePackageVersions = RELEASE_PACKAGES
     .map((relPath) => readJsonFn(path.join(relPath, "package.json")).version);
   const uniqueReleaseVersions = new Set(releasePackageVersions);
   if (uniqueReleaseVersions.size !== 1) {
-    blockers.push(`release package versions are not aligned: ${[...uniqueReleaseVersions].join(", ")}`);
+    addBlocker(
+      "release-package-versions-not-aligned",
+      "version-alignment",
+      `release package versions are not aligned: ${[...uniqueReleaseVersions].join(", ")}`,
+      { versions: [...uniqueReleaseVersions] },
+    );
   }
 
   if (rootPackage.private !== true) {
-    blockers.push("root package must remain private to avoid accidental monorepo publish");
+    addBlocker(
+      "root-package-not-private",
+      "package-boundary",
+      "root package must remain private to avoid accidental monorepo publish",
+      { relPath: "package.json" },
+    );
   }
   if (changesetConfig.access !== "public") {
-    blockers.push(".changeset/config.json must keep access=public for scoped public packages");
+    addBlocker("changeset-access-not-public", "package-boundary", ".changeset/config.json must keep access=public for scoped public packages", {
+      relPath: ".changeset/config.json",
+      expected: "public",
+      actual: changesetConfig.access,
+    });
   }
   if (changesetConfig.baseBranch !== "main") {
-    blockers.push(".changeset/config.json must keep baseBranch=main");
+    addBlocker("changeset-base-branch-not-main", "package-boundary", ".changeset/config.json must keep baseBranch=main", {
+      relPath: ".changeset/config.json",
+      expected: "main",
+      actual: changesetConfig.baseBranch,
+    });
   }
   if (!Array.isArray(changesetConfig.fixed) || changesetConfig.fixed.length === 0) {
-    blockers.push("changesets fixed package group is required for lockstep pi-stack release packages");
+    addBlocker(
+      "changeset-fixed-group-missing",
+      "version-alignment",
+      "changesets fixed package group is required for lockstep pi-stack release packages",
+      { relPath: ".changeset/config.json" },
+    );
   }
   for (const relPath of RELEASE_PACKAGES) {
     const manifest = readJsonFn(path.join(relPath, "package.json"));
-    if (manifest.private === true) blockers.push(`${relPath} must not be private`);
-    if (!manifest.repository?.directory) blockers.push(`${relPath} must declare repository.directory`);
+    if (manifest.private === true) {
+      addBlocker("release-package-private", "package-boundary", `${relPath} must not be private`, { relPath });
+    }
+    if (!manifest.repository?.directory) {
+      addBlocker("repository-directory-missing", "package-boundary", `${relPath} must declare repository.directory`, { relPath });
+    }
     if (!manifest.files || !Array.isArray(manifest.files) || manifest.files.length === 0) {
-      blockers.push(`${relPath} must declare files[] for package boundary control`);
+      addBlocker("package-files-boundary-missing", "package-boundary", `${relPath} must declare files[] for package boundary control`, {
+        relPath,
+      });
     }
   }
 
   if (!/id-token:\s*write/.test(publishWorkflow)) {
-    blockers.push("publish workflow must keep id-token: write for npm provenance");
+    addBlocker("publish-provenance-permission-missing", "publish-workflow", "publish workflow must keep id-token: write for npm provenance", {
+      relPath: ".github/workflows/publish.yml",
+    });
   }
   if (!/npm publish --workspace packages\/pi-stack --provenance --access public/.test(publishWorkflow)) {
-    blockers.push("publish workflow must publish release packages with npm provenance");
+    addBlocker("publish-command-provenance-missing", "publish-workflow", "publish workflow must publish release packages with npm provenance", {
+      relPath: ".github/workflows/publish.yml",
+    });
   }
   if (!/git tag --points-at "\$SHA"/.test(publishWorkflow)) {
-    blockers.push("publish workflow must remain tag-gated");
+    addBlocker("publish-tag-gate-missing", "publish-workflow", "publish workflow must remain tag-gated", {
+      relPath: ".github/workflows/publish.yml",
+    });
   }
   const githubPackagesConfigured = /npm\.pkg\.github\.com|packages:\s*write/.test(publishWorkflow);
   if (githubPackagesConfigured) {
-    warnings.push("GitHub Packages publishing is configured; verify it remains opt-in and separately gated");
+    addWarning(
+      "github-packages-configured",
+      "package-registry",
+      "GitHub Packages publishing is configured; verify it remains opt-in and separately gated",
+      { relPath: ".github/workflows/publish.yml" },
+    );
   }
   if (!/draft:\s*true/.test(releaseDraftWorkflow)) {
-    blockers.push("release draft workflow must create draft releases only");
+    addBlocker("release-draft-not-draft", "release-draft-workflow", "release draft workflow must create draft releases only", {
+      relPath: ".github/workflows/release-draft.yml",
+    });
   }
   if (!/workflow_dispatch:/.test(releaseDraftWorkflow)) {
-    blockers.push("release draft workflow must remain manual");
+    addBlocker("release-draft-not-manual", "release-draft-workflow", "release draft workflow must remain manual", {
+      relPath: ".github/workflows/release-draft.yml",
+    });
   }
 
   const packResults = runPack
     ? RELEASE_PACKAGES.map(runPackDryRun)
     : [];
   for (const result of packResults) {
-    if (!result.ok) blockers.push(`${result.packageDir} pack dry-run failed: ${result.error}`);
+    if (!result.ok) {
+      addBlocker("pack-dry-run-failed", "package-pack", `${result.packageDir} pack dry-run failed: ${result.error}`, {
+        relPath: result.packageDir,
+        error: result.error,
+      });
+    }
     if (result.ok && (!result.files || result.files <= 0)) {
-      blockers.push(`${result.packageDir} pack dry-run produced no files`);
+      addBlocker("pack-dry-run-empty", "package-pack", `${result.packageDir} pack dry-run produced no files`, {
+        relPath: result.packageDir,
+      });
     }
   }
 
@@ -186,6 +251,8 @@ export function buildReleasePackageSmokeReport(options = {}) {
         : "GitHub Packages is intentionally absent from the current publish workflow.",
     },
     automationPermissions: REPORT_ONLY_PERMISSIONS,
+    packageBlockers,
+    packageWarnings,
     blockers,
     warnings,
   };
