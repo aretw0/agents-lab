@@ -55,6 +55,15 @@ function normalizeFileContract(value) {
   return value === "mutation" ? "mutation" : "read-only";
 }
 
+function buildDriverStepCall(payload) {
+  return {
+    tool: "agent_run_driver_step_dispatch",
+    params: payload,
+    operatorApprovalRequired: true,
+    operatorApprovalParam: "operator_approval",
+  };
+}
+
 export function resolveLocalPiCli(cwd = process.cwd()) {
   const candidates = [
     path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js"),
@@ -86,27 +95,30 @@ export function buildPiHelpDriverStepPayload(options = {}) {
     };
   }
 
+  const payload = {
+    run_spec: {
+      run_id: runId,
+      provider_model_ref: "local/pi-cli",
+      cwd,
+      declared_files: ["package.json"],
+      log_path: logPath,
+      timeout_ms: 30_000,
+      file_contract: fileContract,
+      execution_preview: {
+        command: process.execPath,
+        args: [cliPath, "--help"],
+      },
+    },
+  };
+
   return {
     mode: "agent-run-pi-driver-payload",
     decision: "ready-for-driver-step",
     blockers: [],
     dispatchAllowed: false,
     processStartAllowed: false,
-    payload: {
-      run_spec: {
-        run_id: runId,
-        provider_model_ref: "local/pi-cli",
-        cwd,
-        declared_files: ["package.json"],
-        log_path: logPath,
-        timeout_ms: 30_000,
-        file_contract: fileContract,
-        execution_preview: {
-          command: process.execPath,
-          args: [cliPath, "--help"],
-        },
-      },
-    },
+    payload,
+    driverStepCall: buildDriverStepCall(payload),
     summary: `agent-run-pi-driver-payload: decision=ready-for-driver-step runId=${runId} dispatch=no`,
   };
 }
@@ -143,6 +155,37 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
     };
   }
 
+  const payload = {
+    run_spec: {
+      run_id: runId,
+      provider_model_ref: model,
+      cwd,
+      declared_files: declaredFiles,
+      log_path: logPath,
+      timeout_ms: 90_000,
+      file_contract: fileContract,
+      execution_preview: {
+        command: process.execPath,
+        args: [
+          cliPath,
+          "--no-session",
+          "--no-extensions",
+          "--no-skills",
+          "--no-prompt-templates",
+          "--no-themes",
+          "--no-context-files",
+          "--model",
+          model,
+          "--tools",
+          toolList.join(","),
+          "--print",
+          ...declaredFiles.map((filePath) => `@${filePath}`),
+          prompt,
+        ],
+      },
+    },
+  };
+
   return {
     mode: "agent-run-pi-driver-payload",
     payloadMode: "print-readonly",
@@ -150,36 +193,8 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
     blockers: [],
     dispatchAllowed: false,
     processStartAllowed: false,
-    payload: {
-      run_spec: {
-        run_id: runId,
-        provider_model_ref: model,
-        cwd,
-        declared_files: declaredFiles,
-        log_path: logPath,
-        timeout_ms: 90_000,
-        file_contract: fileContract,
-        execution_preview: {
-          command: process.execPath,
-          args: [
-            cliPath,
-            "--no-session",
-            "--no-extensions",
-            "--no-skills",
-            "--no-prompt-templates",
-            "--no-themes",
-            "--no-context-files",
-            "--model",
-            model,
-            "--tools",
-            toolList.join(","),
-            "--print",
-            ...declaredFiles.map((filePath) => `@${filePath}`),
-            prompt,
-          ],
-        },
-      },
-    },
+    payload,
+    driverStepCall: buildDriverStepCall(payload),
     summary: `agent-run-pi-driver-payload: decision=ready-for-driver-step mode=print-readonly runId=${runId} dispatch=no`,
   };
 }

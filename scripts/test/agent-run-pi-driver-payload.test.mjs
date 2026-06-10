@@ -27,6 +27,12 @@ test("builds a headless driver-step payload for local pi help", () => {
   assert.equal(result.payload.run_spec.file_contract, "read-only");
   assert.equal(result.payload.run_spec.execution_preview.command, process.execPath);
   assert.deepEqual(result.payload.run_spec.execution_preview.args, [cliPath, "--help"]);
+  assert.deepEqual(result.driverStepCall, {
+    tool: "agent_run_driver_step_dispatch",
+    params: result.payload,
+    operatorApprovalRequired: true,
+    operatorApprovalParam: "operator_approval",
+  });
 });
 
 test("blocks when local pi cli is missing", () => {
@@ -72,6 +78,9 @@ test("builds a print-readonly payload with isolated pi flags", () => {
   assert.equal(result.payloadMode, "print-readonly");
   assert.equal(result.payload.run_spec.provider_model_ref, "local/test-model");
   assert.equal(result.payload.run_spec.file_contract, "read-only");
+  assert.equal(result.driverStepCall.tool, "agent_run_driver_step_dispatch");
+  assert.equal(result.driverStepCall.params, result.payload);
+  assert.equal(result.driverStepCall.operatorApprovalParam, "operator_approval");
   assert.deepEqual(result.payload.run_spec.declared_files, ["README.md"]);
   assert.deepEqual(result.payload.run_spec.execution_preview.args, [
     cliPath,
