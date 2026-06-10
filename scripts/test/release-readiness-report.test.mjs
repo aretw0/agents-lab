@@ -73,6 +73,7 @@ test("buildReport marks target release not ready until version and board gates a
   try {
     const report = buildReport(gather("0.8.0", workspace));
     assert.equal(report.ready, false);
+    assert.deepEqual(report.operatorDecisions.map((decision) => decision.id), ["decide-target-version"]);
     assert.match(report.markdown, /decision: not-ready/);
     assert.match(report.markdown, /\[ \] target-version-ready/);
     assert.match(report.markdown, /\[ \] board-release-clear/);
@@ -128,6 +129,8 @@ test("buildReport lists local-safe evidence candidates without clearing the boar
   try {
     const report = buildReport(gather("0.8.0", workspace));
     assert.equal(report.ready, false);
+    assert.deepEqual(report.operatorDecisions.map((decision) => decision.id), ["decide-board-evidence-candidates"]);
+    assert.deepEqual(report.operatorDecisions.map((decision) => decision.recommendation), ["choose-park-for-0.8-or-require-work"]);
     assert.match(report.markdown, /\[ \] board-release-clear/);
     assert.match(report.markdown, /board-release-clear \[board-state\]: in-progress=1/);
     assert.match(report.markdown, /releaseDecisionReady: yes/);
@@ -167,6 +170,7 @@ test("buildReport does not mark board decision-ready when an active task lacks e
   try {
     const report = buildReport(gather("0.8.0", workspace));
     assert.equal(report.ready, false);
+    assert.equal(report.operatorDecisions.length, 0);
     assert.match(report.markdown, /board-release-clear \[board-state\]: in-progress=2/);
     assert.match(report.markdown, /releaseDecisionReady: no/);
     assert.doesNotMatch(report.markdown, /decide-board-evidence-candidates/);

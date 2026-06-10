@@ -137,6 +137,27 @@ function operatorDecisionLines(data, failedChecklist) {
   return lines;
 }
 
+function operatorDecisionPackets(data, failedChecklist) {
+  const decisions = [];
+  if (failedChecklist.some((item) => item.id === "target-version-ready")) {
+    decisions.push({
+      id: "decide-target-version",
+      kind: "operator-decision",
+      recommendation: "bump-tag-release-when-ready",
+      summary: `packages are not yet at v${data.target}; bump/tag/release remains operator-gated`,
+    });
+  }
+  if (failedChecklist.some((item) => item.id === "board-release-clear") && data.board.releaseDecisionReady) {
+    decisions.push({
+      id: "decide-board-evidence-candidates",
+      kind: "board-state",
+      recommendation: "choose-park-for-0.8-or-require-work",
+      summary: "choose park-for-0.8 or require-work for current Board Evidence Candidates",
+    });
+  }
+  return decisions;
+}
+
 export function summarizeBoard(cwd = process.cwd()) {
   const tasksPath = path.join(cwd, ".project", "tasks.json");
   if (!existsSync(tasksPath)) {
@@ -290,6 +311,7 @@ export function buildReport(data) {
   const ready = checklist.every((item) => item.ok);
   const failedChecklist = checklist.filter((item) => !item.ok);
   const decisions = operatorDecisionLines(data, failedChecklist);
+  const operatorDecisions = operatorDecisionPackets(data, failedChecklist);
 
   const lines = [
     `# Release readiness report v${data.target}`,
@@ -340,7 +362,7 @@ export function buildReport(data) {
     "",
   ];
 
-  return { markdown: lines.join("\n"), checklist, ready };
+  return { markdown: lines.join("\n"), checklist, ready, operatorDecisions };
 }
 
 function main() {
