@@ -4,7 +4,7 @@ import { createWriteStream, mkdirSync } from "node:fs";
 import path from "node:path";
 import { Type } from "@sinclair/typebox";
 import { GUARDRAILS_AUTHORIZATION_NONE } from "./guardrails-core-authorization";
-import { buildAgentRunOutcomePacket, buildAgentRunStatus, type AgentRunState } from "./guardrails-core-agent-run-runtime";
+import { buildAgentRunOutcomePacket, buildAgentRunStatus, type AgentRunFileContract, type AgentRunState } from "./guardrails-core-agent-run-runtime";
 import {
   appendAgentRunLogLine,
   buildPiSubprocessPreflightLines,
@@ -31,6 +31,7 @@ type DriverStepRunSpec = {
   declaredFiles: string[];
   logPath: string;
   timeoutMs: number;
+  fileContract: AgentRunFileContract;
   executionPreview: {
     command: string;
     args: string[];
@@ -54,6 +55,10 @@ function parseExecutionPreview(raw: unknown): DriverStepRunSpec["executionPrevie
   };
 }
 
+function parseFileContract(value: unknown): AgentRunFileContract {
+  return value === "mutation" ? "mutation" : "read-only";
+}
+
 function parseRunSpec(raw: unknown): DriverStepRunSpec {
   const row = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
   return {
@@ -63,6 +68,7 @@ function parseRunSpec(raw: unknown): DriverStepRunSpec {
     declaredFiles: asOptionalStringArray(row.declared_files),
     logPath: normalizeText(row.log_path),
     timeoutMs: normalizeTimeoutMs(row.timeout_ms),
+    fileContract: parseFileContract(row.file_contract),
     executionPreview: parseExecutionPreview(row.execution_preview),
   };
 }
@@ -90,13 +96,13 @@ async function followAgentRun(cwd: string, runId: string, maxWaitMs: number, pol
   return { entry, status, terminal, decision, logPath, lines, outputBytes };
 }
 
-function outcomePacket(runId: string, outputBytes: number) {
+function outcomePacket(runId: string, outputBytes: number, fileContract: AgentRunFileContract) {
   return {
     tool: "agent_run_outcome_packet",
     params: {
       run_id: runId,
       output_bytes: outputBytes,
-      file_contract: "read-only",
+      file_contract: fileContract,
     },
   };
 }
@@ -247,7 +253,7 @@ export function registerAgentRunDriverStepSurface(pi: ExtensionAPI): void {
             runId: runSpec.runId,
             entry: follow.entry,
             outputBytes: follow.outputBytes,
-            fileContract: "read-only",
+            fileContract: runSpec.fileContract,
           })
         : undefined;
       const mode = executeRequested ? "agent-run-driver-step-dispatch" as const : "agent-run-driver-step-packet" as const;
@@ -270,7 +276,7 @@ export function registerAgentRunDriverStepSurface(pi: ExtensionAPI): void {
         pid,
         registryEntry,
         follow,
-        nextAgentRunOutcomePacket: terminal ? outcomePacket(runSpec.runId, follow.outputBytes) : undefined,
+        nextAgentRunOutcomePacket: terminal ? outcomePacket(runSpec.runId, follow.outputBytes, runSpec.fileContract) : undefined,
         agentRunOutcomePacket,
         nextActionCode: terminal ? "build-agent-run-outcome-packet" : dispatchAllowed ? "poll-agent-run-follow" : blockers.length > 0 ? "resolve-driver-step-blockers" : "present-operator-approval",
         summary: [

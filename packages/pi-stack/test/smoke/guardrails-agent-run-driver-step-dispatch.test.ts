@@ -51,6 +51,7 @@ function runSpec(cwd = ".") {
     declared_files: ["README.md"],
     log_path: ".pi/reports/driver-step-run-1.log",
     timeout_ms: 90_000,
+    file_contract: "read-only",
     execution_preview: {
       command: "node",
       args: ["--version"],
@@ -365,6 +366,44 @@ describe("agent run driver step dispatch", () => {
       processState: "completed",
       contractDecision: "pass",
       fileContract: "read-only",
+    });
+    expect(spawnMock).toHaveBeenCalledTimes(0);
+  });
+
+  it("preserves mutation file_contract in terminal follow outcome previews", async () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-driver-step-mutation-outcome-"));
+    const logPath = path.join(tmp, ".pi", "reports", "driver-step-run-1.log");
+    mkdirSync(path.dirname(logPath), { recursive: true });
+    writeFileSync(logPath, "mutation worker output\n", "utf8");
+    writeRegistry(tmp, {
+      runId: "driver-step-run-1",
+      state: "completed",
+      exitCode: 0,
+      cwd: tmp,
+      declaredFiles: ["README.md"],
+      logPath,
+      timeoutMs: 90_000,
+    });
+
+    const result = await getTool().execute("call", {
+      run_spec: { ...runSpec(), file_contract: "mutation" },
+      follow: true,
+      build_outcome: true,
+      follow_max_wait_ms: 0,
+    }, undefined, undefined, { cwd: tmp });
+
+    expect(result.details.nextAgentRunOutcomePacket).toMatchObject({
+      tool: "agent_run_outcome_packet",
+      params: { run_id: "driver-step-run-1", file_contract: "mutation" },
+    });
+    expect(result.details.agentRunOutcomePacket).toMatchObject({
+      mode: "agent-run-outcome-packet",
+      runId: "driver-step-run-1",
+      found: true,
+      processState: "completed",
+      contractDecision: "partial",
+      recommendation: "ask-operator",
+      fileContract: "mutation",
     });
     expect(spawnMock).toHaveBeenCalledTimes(0);
   });
