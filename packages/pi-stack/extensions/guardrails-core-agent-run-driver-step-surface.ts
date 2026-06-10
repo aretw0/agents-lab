@@ -82,7 +82,9 @@ async function followAgentRun(cwd: string, runId: string, maxWaitMs: number, pol
   }
   const terminal = status.found && isTerminalAgentRunState(status.state as AgentRunState);
   const decision = !status.found ? "missing-run" : terminal ? "terminal" : status.stale ? "running-stale" : "timeout";
-  const logPath = entry?.logPath;
+  const logPath = entry?.logPath
+    ? path.isAbsolute(entry.logPath) ? entry.logPath : path.join(cwd, entry.logPath)
+    : undefined;
   const lines = logPath ? readLogTail(logPath, maxLines) : [];
   const outputBytes = readLogByteCount(logPath);
   return { entry, status, terminal, decision, logPath, lines, outputBytes };

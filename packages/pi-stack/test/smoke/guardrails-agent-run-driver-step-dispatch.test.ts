@@ -190,6 +190,72 @@ describe("agent run driver step dispatch", () => {
     });
   });
 
+  it("follows a task headless preview dispatch and materializes its outcome packet", async () => {
+    const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-driver-step-task-outcome-"));
+    writeFileSync(path.join(tmp, "README.md"), "# Test fixture\n", "utf8");
+    const taskStart = buildAgentRunTaskStartPacket({
+      taskId: "TASK-READONLY",
+      task: {
+        id: "TASK-READONLY",
+        description: "Review README without mutations.",
+        status: "planned",
+        files: ["README.md"],
+        acceptance_criteria: ["returns read-only evidence"],
+      },
+      profile: "read-only-review",
+      providerModelRef: "openai-codex/gpt-5.3-codex-spark",
+      cwd: tmp,
+      budgetDecision: "warn",
+      budgetEvidence: "scoped model budget usable",
+      budgetEvidenceSource: "manual",
+      budgetEvidenceProvider: "openai-codex/gpt-5.3-codex-spark",
+    });
+    const child = new FakeChildProcess();
+    spawnMock.mockImplementationOnce(() => {
+      setImmediate(() => {
+        child.stdout.emit("data", Buffer.from("PASS task review\n"));
+        child.emit("close", 0, null);
+      });
+      return child;
+    });
+
+    const result = await getTool().execute("call", {
+      ...taskStart.headlessDriverPreview.payload,
+      execute: true,
+      operator_approval: structuredApproval(),
+      follow: true,
+      build_outcome: true,
+      follow_poll_interval_ms: 100,
+      follow_max_wait_ms: 5_000,
+    }, undefined, undefined, { cwd: tmp });
+
+    expect(result.details.mode).toBe("agent-run-driver-step-dispatch");
+    expect(result.details.decision).toBe("dispatched");
+    expect(result.details.dispatchAllowed).toBe(true);
+    expect(result.details.processStartAllowed).toBe(true);
+    expect(result.details.follow).toMatchObject({ decision: "terminal", terminal: true });
+    expect(result.details.nextAgentRunOutcomePacket).toMatchObject({
+      tool: "agent_run_outcome_packet",
+      params: { run_id: "task-readonly-task-packet", file_contract: "read-only" },
+    });
+    expect(result.details.agentRunOutcomePacket).toMatchObject({
+      mode: "agent-run-outcome-packet",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      runId: "task-readonly-task-packet",
+      found: true,
+      processState: "completed",
+      contractDecision: "pass",
+      fileContract: "read-only",
+    });
+    expect(spawnMock).toHaveBeenCalledTimes(1);
+    expect(readRegistry(tmp).runs[0]).toMatchObject({
+      runId: "task-readonly-task-packet",
+      state: "completed",
+      exitCode: 0,
+    });
+  });
+
   it("blocks duplicate running run before spawn", async () => {
     const tmp = mkdtempSync(path.join(tmpdir(), "agent-run-driver-step-running-"));
     writeRegistry(tmp, {
