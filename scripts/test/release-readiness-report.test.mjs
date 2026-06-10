@@ -56,9 +56,21 @@ test("summarizeBoard normalizes active release blockers", () => {
     assert.equal(summary.releaseReady, false);
     assert.deepEqual(summary.blockers, ["open-p0=2", "in-progress=1", "blocked=1"]);
     assert.equal(summary.byStatus["in-progress"], 1);
-    assert.equal(summary.p0Ready.length, 1);
-    assert.equal(summary.p0BlockedByDependency.length, 1);
-    assert.match(summary.p0BlockedByDependency[0], /blockedBy=TASK-C/);
+    assert.deepEqual(summary.openP0Rows.map((row) => row.taskId), ["TASK-B", "TASK-D"]);
+    assert.deepEqual(summary.p0ReadyRows.map((row) => row.taskId), ["TASK-B"]);
+    assert.deepEqual(summary.p0BlockedByDependencyRows, [{
+      taskId: "TASK-D",
+      status: "planned",
+      priority: "p0",
+      description: "blocked by dep",
+      blockedBy: ["TASK-C"],
+    }]);
+    assert.deepEqual(summary.inProgressRows.map((row) => row.taskId), ["TASK-B"]);
+    assert.deepEqual(summary.blockedRows.map((row) => row.taskId), ["TASK-C"]);
+    assert.equal("p0Ready" in summary, false);
+    assert.equal("p0BlockedByDependency" in summary, false);
+    assert.equal("inProgress" in summary, false);
+    assert.equal("blocked" in summary, false);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }
@@ -268,8 +280,11 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.ready, false);
     assert.deepEqual(json.operatorDecisions.map((decision) => decision.id), ["decide-board-evidence-candidates"]);
     assert.equal(json.board.releaseDecisionReady, true);
+    assert.deepEqual(json.board.inProgressRows.map((row) => row.taskId), ["TASK-BUD-521"]);
     assert.deepEqual(json.board.evidenceCandidateRows.map((row) => row.taskId), ["TASK-BUD-521"]);
     assert.equal(json.board.evidenceCandidateRows[0].evidencePresent, true);
+    assert.equal("inProgress" in json.board, false);
+    assert.equal("evidenceCandidates" in json.board, false);
     assert.ok(json.checklist.some((item) => item.id === "board-release-clear" && item.ok === false));
   } finally {
     rmSync(workspace, { recursive: true, force: true });

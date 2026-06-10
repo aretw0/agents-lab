@@ -95,6 +95,33 @@ function taskOneLine(task) {
   return `${id} [${priority}/${status}] ${description}`.slice(0, 180);
 }
 
+function taskRow(task) {
+  return {
+    taskId: String(task?.id ?? ""),
+    status: normalizeStatus(task?.status),
+    priority: normalizePriority(task?.priority),
+    description: String(task?.description ?? "")
+      .replace(/\u001b\[[0-9;]*m/g, "")
+      .replace(/\\n/g, " ")
+      .replace(/[\u0000-\u001f\u007f]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim(),
+  };
+}
+
+function taskRowOneLine(row) {
+  const id = String(row?.taskId ?? "?");
+  const status = normalizeStatus(row?.status);
+  const priority = normalizePriority(row?.priority);
+  const description = String(row?.description ?? "")
+    .replace(/\u001b\[[0-9;]*m/g, "")
+    .replace(/\\n/g, " ")
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return `${id} [${priority}/${status}] ${description}`.slice(0, 180);
+}
+
 function taskDependencies(task) {
   return Array.isArray(task?.depends_on)
     ? task.depends_on.map((dep) => String(dep ?? "").trim()).filter(Boolean)
@@ -166,13 +193,12 @@ export function summarizeBoard(cwd = process.cwd()) {
       total: 0,
       byStatus: {},
       byPriority: {},
-      openP0: [],
-      p0Ready: [],
-      p0BlockedByDependency: [],
-      inProgress: [],
-      blocked: [],
+      openP0Rows: [],
+      p0ReadyRows: [],
+      p0BlockedByDependencyRows: [],
+      inProgressRows: [],
+      blockedRows: [],
       evidenceCandidateRows: [],
-      evidenceCandidates: [],
       releaseDecisionReady: false,
       releaseReady: false,
       blockers: ["board-missing"],
@@ -205,7 +231,7 @@ export function summarizeBoard(cwd = process.cwd()) {
       const unmetDeps = taskDependencies(task).filter((dep) => statusById.get(dep) !== "completed");
       openP0.push(task);
       if (unmetDeps.length > 0) {
-        p0BlockedByDependency.push(`${taskOneLine(task)} blockedBy=${unmetDeps.slice(0, 5).join(",")}`);
+        p0BlockedByDependency.push({ task, blockedBy: unmetDeps.slice(0, 5) });
       } else {
         p0Ready.push(task);
       }
@@ -237,13 +263,12 @@ export function summarizeBoard(cwd = process.cwd()) {
     total: tasks.length,
     byStatus,
     byPriority,
-    openP0: openP0.map(taskOneLine).slice(0, 12),
-    p0Ready: p0Ready.map(taskOneLine).slice(0, 12),
-    p0BlockedByDependency: p0BlockedByDependency.slice(0, 12),
-    inProgress: inProgress.map(taskOneLine).slice(0, 12),
-    blocked: blocked.map(taskOneLine).slice(0, 12),
+    openP0Rows: openP0.map(taskRow).slice(0, 12),
+    p0ReadyRows: p0Ready.map(taskRow).slice(0, 12),
+    p0BlockedByDependencyRows: p0BlockedByDependency.map(({ task, blockedBy }) => ({ ...taskRow(task), blockedBy })).slice(0, 12),
+    inProgressRows: inProgress.map(taskRow).slice(0, 12),
+    blockedRows: blocked.map(taskRow).slice(0, 12),
     evidenceCandidateRows: evidenceCandidates.slice(0, 12),
-    evidenceCandidates: evidenceCandidates.map(boardEvidenceOneLine).slice(0, 12),
     releaseDecisionReady,
     releaseReady: blockers.length === 0,
     blockers,
@@ -342,22 +367,22 @@ export function buildReport(data) {
     `- releaseDecisionReady: ${data.board.releaseDecisionReady ? "yes" : "no"}`,
     "",
     "### Open P0",
-    ...(data.board.openP0.length ? data.board.openP0.map((line) => `- ${line}`) : ["- none"]),
+    ...(data.board.openP0Rows.length ? data.board.openP0Rows.map((row) => `- ${taskRowOneLine(row)}`) : ["- none"]),
     "",
     "### P0 Ready To Start",
-    ...(data.board.p0Ready.length ? data.board.p0Ready.map((line) => `- ${line}`) : ["- none"]),
+    ...(data.board.p0ReadyRows.length ? data.board.p0ReadyRows.map((row) => `- ${taskRowOneLine(row)}`) : ["- none"]),
     "",
     "### P0 Blocked By Dependency",
-    ...(data.board.p0BlockedByDependency.length ? data.board.p0BlockedByDependency.map((line) => `- ${line}`) : ["- none"]),
+    ...(data.board.p0BlockedByDependencyRows.length ? data.board.p0BlockedByDependencyRows.map((row) => `- ${taskRowOneLine(row)} blockedBy=${row.blockedBy.join(",")}`) : ["- none"]),
     "",
     "### In Progress",
-    ...(data.board.inProgress.length ? data.board.inProgress.map((line) => `- ${line}`) : ["- none"]),
+    ...(data.board.inProgressRows.length ? data.board.inProgressRows.map((row) => `- ${taskRowOneLine(row)}`) : ["- none"]),
     "",
     "### Blocked",
-    ...(data.board.blocked.length ? data.board.blocked.map((line) => `- ${line}`) : ["- none"]),
+    ...(data.board.blockedRows.length ? data.board.blockedRows.map((row) => `- ${taskRowOneLine(row)}`) : ["- none"]),
     "",
     "### Board Evidence Candidates",
-    ...(data.board.evidenceCandidates.length ? data.board.evidenceCandidates.map((line) => `- ${line}`) : ["- none"]),
+    ...(data.board.evidenceCandidateRows.length ? data.board.evidenceCandidateRows.map((row) => `- ${boardEvidenceOneLine(row)}`) : ["- none"]),
     "",
     "## Governance notes",
     "- publish permanece gateado por tag semver + smoke/test/verify/audit",
