@@ -313,6 +313,17 @@ describe("agent run task packet surfaces", () => {
         execution_preview: result.startPreview,
       },
     });
+    expect(result.headlessDriverPreview.executionPayloadTemplate).toMatchObject({
+      execute: true,
+      follow: true,
+      build_outcome: true,
+      run_spec: {
+        run_id: "task-readonly-task-packet",
+        file_contract: "read-only",
+        execution_preview: result.startPreview,
+      },
+    });
+    expect(result.headlessDriverPreview.operatorApprovalRequired).toBe(true);
   });
 
   it("propagates inherited extension isolation for custom-provider task workers", () => {
@@ -641,7 +652,18 @@ describe("agent run task packet surfaces", () => {
     expect(result.details?.preferredDriverStep).toMatchObject({
       tool: "agent_run_driver_step_dispatch",
       available: true,
+      operatorApprovalRequired: true,
       payload: {
+        run_spec: {
+          run_id: "task-readonly-task-packet",
+          file_contract: "read-only",
+          declared_files: ["README.md"],
+        },
+      },
+      executionPayloadTemplate: {
+        execute: true,
+        follow: true,
+        build_outcome: true,
         run_spec: {
           run_id: "task-readonly-task-packet",
           file_contract: "read-only",
@@ -795,6 +817,7 @@ describe("agent run task packet surfaces", () => {
       mode: "agent-run-driver-step-preview",
       decision: "ready-for-operator-decision",
       available: true,
+      operatorApprovalRequired: true,
       dispatchAllowed: false,
       processStartAllowed: false,
       tool: "agent_run_driver_step_dispatch",
@@ -808,6 +831,16 @@ describe("agent run task packet surfaces", () => {
           cwd: tmp,
           declared_files: ["README.md"],
           file_contract: "read-only",
+        },
+      },
+      executionPayloadTemplate: {
+        execute: true,
+        follow: true,
+        build_outcome: true,
+        run_spec: {
+          run_id: "task-readonly-task-packet",
+          file_contract: "read-only",
+          declared_files: ["README.md"],
         },
       },
       blockers: [],

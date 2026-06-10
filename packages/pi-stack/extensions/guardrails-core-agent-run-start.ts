@@ -330,6 +330,22 @@ export interface AgentRunTaskStartPacketResult {
         execution_preview: AgentRunStartPacketResult["commandPreview"];
       };
     };
+    executionPayloadTemplate: {
+      execute: true;
+      follow: true;
+      build_outcome: true;
+      run_spec: {
+        run_id: string;
+        provider_model_ref: string;
+        cwd: string;
+        declared_files: string[];
+        timeout_ms: number;
+        log_path: string;
+        file_contract: AgentRunOperatorFileContract;
+        execution_preview: AgentRunStartPacketResult["commandPreview"];
+      };
+    };
+    operatorApprovalRequired: true;
     blockers: string[];
     summary: string;
   };
@@ -883,6 +899,22 @@ export function buildAgentRunTaskStartPacket(input: AgentRunTaskStartPacketInput
         execution_preview: spec.executionPreview,
       },
     },
+    executionPayloadTemplate: {
+      execute: true as const,
+      follow: true as const,
+      build_outcome: true as const,
+      run_spec: {
+        run_id: spec.runId,
+        provider_model_ref: spec.providerModelRef,
+        cwd: spec.cwd,
+        declared_files: spec.declaredFiles,
+        timeout_ms: spec.timeoutMs,
+        log_path: spec.logPath,
+        file_contract: spec.fileContract,
+        execution_preview: spec.executionPreview,
+      },
+    },
+    operatorApprovalRequired: true as const,
     blockers: headlessDriverBlockers,
     summary: [
       "agent-run-driver-step-preview:",
