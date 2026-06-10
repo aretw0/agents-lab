@@ -183,8 +183,7 @@ describe("agent run driver step dispatch", () => {
     });
 
     const result = await getTool().execute("call", {
-      ...taskStart.headlessDriverPreview.payload,
-      execute: true,
+      ...taskStart.headlessDriverPreview.executionPayloadTemplate,
       operator_approval: structuredApproval(),
     }, undefined, undefined, { cwd: tmp });
 
@@ -200,11 +199,20 @@ describe("agent run driver step dispatch", () => {
     expect(result.details.dispatchAllowed).toBe(true);
     expect(result.details.processStartAllowed).toBe(true);
     expect(result.details.pid).toBe(4343);
-    expect(result.details.nextAgentRunOutcomePacket).toBeUndefined();
+    expect(result.details.follow).toMatchObject({ decision: "terminal", terminal: true });
+    expect(result.details.nextAgentRunOutcomePacket).toMatchObject({
+      tool: "agent_run_outcome_packet",
+      params: { run_id: "task-readonly-task-packet", file_contract: "read-only" },
+    });
+    expect(result.details.agentRunOutcomePacket).toMatchObject({
+      mode: "agent-run-outcome-packet",
+      contractDecision: "pass",
+      fileContract: "read-only",
+    });
     expect(spawnMock).toHaveBeenCalledTimes(1);
     expect(readRegistry(tmp).runs[0]).toMatchObject({
       runId: "task-readonly-task-packet",
-      state: "running",
+      state: "completed",
       pid: 4343,
       cwd: tmp,
       declaredFiles: ["README.md"],
@@ -241,11 +249,8 @@ describe("agent run driver step dispatch", () => {
     });
 
     const result = await getTool().execute("call", {
-      ...taskStart.headlessDriverPreview.payload,
-      execute: true,
+      ...taskStart.headlessDriverPreview.executionPayloadTemplate,
       operator_approval: structuredApproval(),
-      follow: true,
-      build_outcome: true,
       follow_poll_interval_ms: 100,
       follow_max_wait_ms: 5_000,
     }, undefined, undefined, { cwd: tmp });
