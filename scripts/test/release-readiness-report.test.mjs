@@ -100,11 +100,15 @@ test("buildReport marks target release not ready until version and board gates a
     assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.kind), ["operator-decision", "board-state"]);
     assert.deepEqual(report.operatorDecisions.map((decision) => decision.id), ["decide-target-version"]);
     assert.deepEqual(report.operatorDecisions[0].allowedActions, ["defer-release", "bump-tag-release-when-ready"]);
+    assert.equal(report.operatorDecisions[0].requiresOperatorDecision, true);
+    assert.equal(report.operatorDecisions[0].automationAllowed, false);
     assert.equal(report.operatorDecisions[0].target, "0.8.0");
     assert.deepEqual(report.operatorDecisions[0].currentVersions.map((row) => row.version), ["0.7.0", "0.7.0", "0.7.0", "0.7.0", "0.7.0"]);
     assert.equal(report.nextActionCode, "resolve-operator-decisions");
     assert.deepEqual(report.nextActions.map((action) => action.id), ["decide-target-version"]);
     assert.deepEqual(report.nextActions[0].allowedActions, ["defer-release", "bump-tag-release-when-ready"]);
+    assert.equal(report.nextActions[0].requiresOperatorDecision, true);
+    assert.equal(report.nextActions[0].automationAllowed, false);
     assert.deepEqual(report.automationPermissions, {
       tagAllowed: false,
       publishAllowed: false,
@@ -142,6 +146,8 @@ test("buildReport marks release ready when versions and board gates are clear", 
     assert.equal(report.nextActionCode, "review-release-draft");
     assert.deepEqual(report.nextActions.map((action) => action.id), ["review-release-draft"]);
     assert.deepEqual(report.nextActions[0].allowedActions, ["defer-release", "prepare-draft-release"]);
+    assert.equal(report.nextActions[0].requiresOperatorDecision, true);
+    assert.equal(report.nextActions[0].automationAllowed, false);
     assert.deepEqual(report.automationPermissions, {
       tagAllowed: false,
       publishAllowed: false,
@@ -181,6 +187,8 @@ test("buildReport lists local-safe evidence candidates without clearing the boar
     assert.deepEqual(report.operatorDecisions.map((decision) => decision.recommendation), ["choose-park-for-target-release-or-require-work"]);
     assert.equal(report.operatorDecisions[0].target, "0.8.0");
     assert.deepEqual(report.operatorDecisions[0].allowedActions, ["park-for-target-release", "require-work"]);
+    assert.equal(report.operatorDecisions[0].requiresOperatorDecision, true);
+    assert.equal(report.operatorDecisions[0].automationAllowed, false);
     assert.deepEqual(report.operatorDecisions[0].candidateTaskIds, ["TASK-BUD-521"]);
     assert.deepEqual(report.operatorDecisions[0].evidenceCandidateRows.map((row) => row.taskId), ["TASK-BUD-521"]);
     assert.match(report.markdown, /\[ \] board-release-clear/);
@@ -230,6 +238,8 @@ test("operator decision packets stay target-agnostic for future releases", () =>
     assert.equal(decision.target, "1.0.0");
     assert.equal(decision.recommendation, "choose-park-for-target-release-or-require-work");
     assert.deepEqual(decision.allowedActions, ["park-for-target-release", "require-work"]);
+    assert.equal(decision.requiresOperatorDecision, true);
+    assert.equal(decision.automationAllowed, false);
     assert.deepEqual(decision.candidateTaskIds, ["TASK-BUD-521"]);
     assert.doesNotMatch(JSON.stringify(decision), /0\.8/);
     assert.match(report.markdown, /park-for-target-release/);
@@ -267,6 +277,8 @@ test("buildReport does not mark board decision-ready when an active task lacks e
     assert.equal(report.operatorDecisions.length, 0);
     assert.equal(report.nextActionCode, "resolve-release-blockers");
     assert.deepEqual(report.nextActions.map((action) => action.blockerId), ["board-release-clear"]);
+    assert.equal(report.nextActions[0].requiresOperatorDecision, false);
+    assert.equal(report.nextActions[0].automationAllowed, false);
     assert.match(report.markdown, /board-release-clear \[board-state\]: in-progress=2/);
     assert.match(report.markdown, /releaseDecisionReady: no/);
     assert.doesNotMatch(report.markdown, /decide-board-evidence-candidates/);
@@ -380,6 +392,8 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.nextActionCode, "resolve-operator-decisions");
     assert.deepEqual(json.nextActions.map((action) => action.id), ["decide-board-evidence-candidates"]);
     assert.deepEqual(json.nextActions[0].allowedActions, ["park-for-target-release", "require-work"]);
+    assert.equal(json.nextActions[0].requiresOperatorDecision, true);
+    assert.equal(json.nextActions[0].automationAllowed, false);
     assert.deepEqual(json.automationPermissions, {
       tagAllowed: false,
       publishAllowed: false,

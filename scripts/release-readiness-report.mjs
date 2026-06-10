@@ -182,6 +182,8 @@ function operatorDecisionPackets(data, failedChecklist) {
       target: data.target,
       currentVersions: data.versions,
       allowedActions: ["defer-release", "bump-tag-release-when-ready"],
+      requiresOperatorDecision: true,
+      automationAllowed: false,
       summary: `packages are not yet at v${data.target}; bump/tag/release remains operator-gated`,
     });
   }
@@ -195,6 +197,8 @@ function operatorDecisionPackets(data, failedChecklist) {
       candidateTaskIds: candidateRows.map((row) => row.taskId),
       evidenceCandidateRows: candidateRows,
       allowedActions: ["park-for-target-release", "require-work"],
+      requiresOperatorDecision: true,
+      automationAllowed: false,
       summary: "choose park-for-target-release or require-work for current Board Evidence Candidates",
     });
   }
@@ -209,6 +213,8 @@ function releaseNextActionPacket({ ready, releaseBlockers, operatorDecisions }) 
         id: "review-release-draft",
         kind: "operator-decision",
         allowedActions: ["defer-release", "prepare-draft-release"],
+        requiresOperatorDecision: true,
+        automationAllowed: false,
         summary: "release readiness is green; draft and publish remain operator-gated",
       }],
     };
@@ -220,6 +226,8 @@ function releaseNextActionPacket({ ready, releaseBlockers, operatorDecisions }) 
         id: decision.id,
         kind: decision.kind,
         allowedActions: decision.allowedActions,
+        requiresOperatorDecision: decision.requiresOperatorDecision,
+        automationAllowed: decision.automationAllowed,
         target: decision.target,
         candidateTaskIds: decision.candidateTaskIds ?? [],
         summary: decision.summary,
@@ -233,6 +241,8 @@ function releaseNextActionPacket({ ready, releaseBlockers, operatorDecisions }) 
       kind: blocker.kind,
       blockerId: blocker.id,
       evidence: blocker.evidence,
+      requiresOperatorDecision: false,
+      automationAllowed: false,
       summary: `clear ${blocker.id} before release promotion`,
     })),
   };
