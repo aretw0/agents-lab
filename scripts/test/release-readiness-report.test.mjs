@@ -107,6 +107,37 @@ test("buildReport marks release ready when versions and board gates are clear", 
   }
 });
 
+test("buildReport lists local-safe evidence candidates without clearing the board gate", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [
+      {
+        id: "TASK-BUD-521",
+        status: "in_progress",
+        priority: "p3",
+        description: "external isolation influence",
+      },
+    ],
+  });
+  const evidencePath = path.join(workspace, "docs", "research", "task-bud-521-local-isolation-canary-2026-06.md");
+  mkdirSync(path.dirname(evidencePath), { recursive: true });
+  writeFileSync(evidencePath, "# canary\n");
+
+  try {
+    const report = buildReport(gather("0.8.0", workspace));
+    assert.equal(report.ready, false);
+    assert.match(report.markdown, /\[ \] board-release-clear/);
+    assert.match(report.markdown, /board-release-clear \[board-state\]: in-progress=1/);
+    assert.match(report.markdown, /### Board Evidence Candidates/);
+    assert.match(report.markdown, /TASK-BUD-521 \[p3\/in-progress\]/);
+    assert.match(report.markdown, /external-influence-isolation/);
+    assert.match(report.markdown, /task-bud-521-local-isolation-canary-2026-06\.md/);
+    assert.match(report.markdown, /operator-may-park-for-0\.8/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("agent-run driver gate requires the full driver suite script", () => {
   const workspace = makeWorkspace({
     version: "0.8.0",

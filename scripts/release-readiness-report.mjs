@@ -19,6 +19,24 @@ const AGENT_RUN_DRIVER_GATE_TESTS = [
   "scripts/test/agent-run-pi-driver-payload.test.mjs",
 ];
 
+const BOARD_RELEASE_EVIDENCE = {
+  "TASK-BUD-480": {
+    kind: "external-influence-agent-patterns",
+    evidencePath: "docs/research/task-bud-480-local-agent-patterns-canary-2026-06.md",
+    decision: "operator-may-park-for-0.8",
+  },
+  "TASK-BUD-521": {
+    kind: "external-influence-isolation",
+    evidencePath: "docs/research/task-bud-521-local-isolation-canary-2026-06.md",
+    decision: "operator-may-park-for-0.8",
+  },
+  "TASK-BUD-676": {
+    kind: "external-influence-memory",
+    evidencePath: "docs/research/task-bud-676-local-memory-canary-2026-06.md",
+    decision: "operator-may-park-for-0.8",
+  },
+};
+
 function runGit(args, cwd = process.cwd()) {
   const out = spawnSync("git", args, { cwd, encoding: "utf8", stdio: "pipe" });
   if (out.status !== 0) return "";
@@ -83,6 +101,31 @@ function taskDependencies(task) {
     : [];
 }
 
+function boardEvidenceCandidate(cwd, task) {
+  const id = String(task?.id ?? "");
+  const evidence = BOARD_RELEASE_EVIDENCE[id];
+  if (!evidence) return undefined;
+  const present = existsSync(path.join(cwd, evidence.evidencePath));
+  return {
+    taskId: id,
+    status: normalizeStatus(task?.status),
+    priority: normalizePriority(task?.priority),
+    kind: evidence.kind,
+    evidencePath: evidence.evidencePath,
+    evidencePresent: present,
+    decision: present ? evidence.decision : "evidence-missing",
+  };
+}
+
+function boardEvidenceOneLine(row) {
+  return [
+    `${row.taskId} [${row.priority}/${row.status}]`,
+    row.kind,
+    row.evidencePresent ? row.evidencePath : `missing:${row.evidencePath}`,
+    row.decision,
+  ].join(" — ");
+}
+
 export function summarizeBoard(cwd = process.cwd()) {
   const tasksPath = path.join(cwd, ".project", "tasks.json");
   if (!existsSync(tasksPath)) {
@@ -96,6 +139,7 @@ export function summarizeBoard(cwd = process.cwd()) {
       p0BlockedByDependency: [],
       inProgress: [],
       blocked: [],
+      evidenceCandidates: [],
       releaseReady: false,
       blockers: ["board-missing"],
     };
@@ -110,6 +154,7 @@ export function summarizeBoard(cwd = process.cwd()) {
   const p0BlockedByDependency = [];
   const inProgress = [];
   const blocked = [];
+  const evidenceCandidates = [];
   const statusById = new Map();
 
   for (const task of tasks) {
@@ -133,6 +178,8 @@ export function summarizeBoard(cwd = process.cwd()) {
     }
     if (status === "in-progress") inProgress.push(task);
     if (status === "blocked") blocked.push(task);
+    const evidence = boardEvidenceCandidate(cwd, task);
+    if (evidence && status !== "completed" && status !== "cancelled") evidenceCandidates.push(evidence);
   }
 
   const blockers = [];
@@ -150,6 +197,7 @@ export function summarizeBoard(cwd = process.cwd()) {
     p0BlockedByDependency: p0BlockedByDependency.slice(0, 12),
     inProgress: inProgress.map(taskOneLine).slice(0, 12),
     blocked: blocked.map(taskOneLine).slice(0, 12),
+    evidenceCandidates: evidenceCandidates.map(boardEvidenceOneLine).slice(0, 12),
     releaseReady: blockers.length === 0,
     blockers,
   };
@@ -252,6 +300,9 @@ export function buildReport(data) {
     "",
     "### Blocked",
     ...(data.board.blocked.length ? data.board.blocked.map((line) => `- ${line}`) : ["- none"]),
+    "",
+    "### Board Evidence Candidates",
+    ...(data.board.evidenceCandidates.length ? data.board.evidenceCandidates.map((line) => `- ${line}`) : ["- none"]),
     "",
     "## Governance notes",
     "- publish permanece gateado por tag semver + smoke/test/verify/audit",
