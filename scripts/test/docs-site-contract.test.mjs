@@ -168,6 +168,8 @@ test("public 0.8 readiness map matches the canonical release readiness gate", ()
 
 	assert.equal(report.ready, false, "0.8.0 should remain unreleased until the explicit version bump decision");
 	assert.equal(checklist.get("target-version-ready")?.ok, false, "target version should remain the deliberate release blocker");
+	assert.equal(checklist.get("agent-run-driver-gate")?.ok, true, "agent-run driver gate should be present and green");
+	assert.match(readiness, /`agent-run-driver-gate` está verde/);
 	const boardReleaseClear = checklist.get("board-release-clear")?.ok === true;
 	if (boardReleaseClear) {
 		assert.match(readiness, /`board-release-clear` está verde/i);
