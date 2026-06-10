@@ -15,11 +15,15 @@ const PACKAGES = [
   "packages/lab-skills/package.json",
 ];
 
-function makeWorkspace({ version = "0.7.0", tasks = [] } = {}) {
+function makeWorkspace({
+  version = "0.7.0",
+  tasks = [],
+  agentRunDriverScript = "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs",
+} = {}) {
   const root = mkdtempSync(path.join(tmpdir(), "release-readiness-"));
   writeFileSync(path.join(root, "package.json"), JSON.stringify({
     scripts: {
-      "test:agent-run:drivers": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs",
+      "test:agent-run:drivers": agentRunDriverScript,
     },
   }, null, 2));
   for (const relPath of PACKAGES) {
@@ -93,6 +97,22 @@ test("buildReport marks release ready when versions and board gates are clear", 
     assert.match(report.markdown, /\[x\] target-version-ready/);
     assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
     assert.match(report.markdown, /\[x\] board-release-clear/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
+test("agent-run driver gate requires the full driver suite script", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+    agentRunDriverScript: "node --test scripts/test/agent-run-driver-step.test.mjs",
+  });
+
+  try {
+    const report = buildReport(gather("0.8.0", workspace));
+    assert.equal(report.ready, false);
+    assert.match(report.markdown, /\[ \] agent-run-driver-gate/);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }

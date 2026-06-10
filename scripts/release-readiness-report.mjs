@@ -30,6 +30,22 @@ function hasRootScript(cwd, scriptName) {
   return typeof json?.scripts?.[scriptName] === "string" && json.scripts[scriptName].trim().length > 0;
 }
 
+function rootScript(cwd, scriptName) {
+  const packagePath = path.join(cwd, "package.json");
+  if (!existsSync(packagePath)) return "";
+  const json = JSON.parse(readFileSync(packagePath, "utf8"));
+  return typeof json?.scripts?.[scriptName] === "string" ? json.scripts[scriptName].trim() : "";
+}
+
+function hasAgentRunDriverGate(cwd) {
+  const script = rootScript(cwd, "test:agent-run:drivers");
+  return hasRootScript(cwd, "test:agent-run:drivers")
+    && script.includes("node --test")
+    && script.includes("scripts/test/agent-run-driver-step.test.mjs")
+    && script.includes("scripts/test/agent-run-pi-driver.test.mjs")
+    && script.includes("scripts/test/agent-run-pi-driver-payload.test.mjs");
+}
+
 function normalizeStatus(value) {
   return String(value ?? "unknown").trim().toLowerCase().replace(/_/g, "-") || "unknown";
 }
@@ -172,7 +188,7 @@ export function gather(target, cwd = process.cwd()) {
     targetVersionReady,
     workflows,
     gates: {
-      agentRunDrivers: hasRootScript(cwd, "test:agent-run:drivers"),
+      agentRunDrivers: hasAgentRunDriverGate(cwd),
     },
     board: summarizeBoard(cwd),
   };
