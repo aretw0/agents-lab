@@ -194,6 +194,43 @@ function operatorDecisionPackets(data, failedChecklist) {
   return decisions;
 }
 
+function releaseNextActionPacket({ ready, releaseBlockers, operatorDecisions }) {
+  if (ready) {
+    return {
+      nextActionCode: "review-release-draft",
+      nextActions: [{
+        id: "review-release-draft",
+        kind: "operator-decision",
+        allowedActions: ["defer-release", "prepare-draft-release"],
+        summary: "release readiness is green; draft and publish remain operator-gated",
+      }],
+    };
+  }
+  if (operatorDecisions.length > 0) {
+    return {
+      nextActionCode: "resolve-operator-decisions",
+      nextActions: operatorDecisions.map((decision) => ({
+        id: decision.id,
+        kind: decision.kind,
+        allowedActions: decision.allowedActions,
+        target: decision.target,
+        candidateTaskIds: decision.candidateTaskIds ?? [],
+        summary: decision.summary,
+      })),
+    };
+  }
+  return {
+    nextActionCode: "resolve-release-blockers",
+    nextActions: releaseBlockers.map((blocker) => ({
+      id: `resolve-${blocker.id}`,
+      kind: blocker.kind,
+      blockerId: blocker.id,
+      evidence: blocker.evidence,
+      summary: `clear ${blocker.id} before release promotion`,
+    })),
+  };
+}
+
 export function summarizeBoard(cwd = process.cwd()) {
   const tasksPath = path.join(cwd, ".project", "tasks.json");
   if (!existsSync(tasksPath)) {
@@ -351,6 +388,7 @@ export function buildReport(data) {
   const failedChecklist = checklist.filter((item) => !item.ok);
   const releaseBlockers = failedChecklist.map(releaseBlockerRow);
   const operatorDecisions = operatorDecisionPackets(data, failedChecklist);
+  const { nextActionCode, nextActions } = releaseNextActionPacket({ ready, releaseBlockers, operatorDecisions });
   const decisions = operatorDecisionLines(operatorDecisions);
 
   const lines = [
@@ -402,7 +440,7 @@ export function buildReport(data) {
     "",
   ];
 
-  return { markdown: lines.join("\n"), generatedAt: now, decision, checklist, ready, releaseBlockers, operatorDecisions };
+  return { markdown: lines.join("\n"), generatedAt: now, decision, checklist, ready, releaseBlockers, operatorDecisions, nextActionCode, nextActions };
 }
 
 function main() {
@@ -428,6 +466,8 @@ function main() {
       checklist: report.checklist,
       releaseBlockers: report.releaseBlockers,
       operatorDecisions: report.operatorDecisions,
+      nextActionCode: report.nextActionCode,
+      nextActions: report.nextActions,
       board: data.board,
     }, null, 2)}\n`);
   } else {
