@@ -22,6 +22,15 @@ Para execução real, o contrato exige aprovação estruturada explícita:
 pnpm run agent-run:pi-driver -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --execute --approve --follow --build-outcome --summary
 ```
 
+Agentes externos podem evitar remontagem manual de JSON usando o pacote completo. O payload builder emite `driverStepCall`, e o driver aceita esse envelope inteiro:
+
+```bash
+pnpm run agent-run:pi-driver-payload -- --mode print-readonly --model provider/model --file README.md --prompt "Return PASS." --pretty > driver-packet.json
+pnpm run agent-run:driver-step -- --input driver-packet.json --cwd .
+```
+
+Quando a aprovação estruturada já existe em arquivo, use `--operator-approval-file` no `agent-run:pi-driver` ou anexe `operator_approval` no topo do pacote antes de chamar `agent-run:driver-step`.
+
 Para runs de mutação, o outcome só deve ser promovido com evidência parent-side explícita. O driver aceita a mesma evidência que `agent_run_outcome_packet`:
 
 ```bash
@@ -35,6 +44,7 @@ Evidência já validada:
 - `real-pi-print-readonly-readme-canary-20260609`: Pi local, `openai-codex/gpt-5.3-codex-spark`, read-only, `README.md`, `contractDecision=pass`.
 - `real-next-slice-decoupling-scan-20260610`: worker real pequeno recomendou a correção `readTasks/readVerificationRows` fail-closed; a mudança entrou em commit e testes.
 - `agent_run_driver_step_dispatch` e `agent-run:pi-driver`: preservam `file_contract`, `touched_files`, `marker_results` e `mutation_target_files` para materializar outcome embutido em `follow=true` + `build_outcome=true`.
+- Gate local da lane: `pnpm run test:agent-run:drivers` (ou `node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs` em ambientes onde `pnpm` tenta instalar dependências).
 
 Regra atual: para tarefas local-safe pequenas, tentar primeiro um worker via `agent-run:pi-driver` com escopo mínimo. Se um worker com múltiplos arquivos der timeout sem saída, reduzir o escopo antes de retry; não promover timeout como evidência.
 
