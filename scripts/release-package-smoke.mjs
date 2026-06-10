@@ -14,6 +14,11 @@ const RELEASE_PACKAGES = [
   "packages/pi-skills",
   "packages/lab-skills",
 ];
+const REPORT_ONLY_PERMISSIONS = {
+  publishAllowed: false,
+  workflowDispatchAllowed: false,
+  processStartAllowed: false,
+};
 
 function readText(relPath) {
   return readFileSync(path.join(ROOT, relPath), "utf8");
@@ -153,8 +158,14 @@ export function buildReleasePackageSmokeReport(options = {}) {
     }
   }
 
+  const ok = blockers.length === 0;
+  const decision = ok ? "pass" : "block";
+
   return {
-    ok: blockers.length === 0,
+    mode: "release-package-smoke-report",
+    schemaVersion: 1,
+    ok,
+    decision,
     releaseVersion: uniqueReleaseVersions.size === 1 ? releasePackageVersions[0] : undefined,
     packageCount: packages.length,
     releasePackages: RELEASE_PACKAGES.map((relPath) => ({
@@ -174,6 +185,7 @@ export function buildReleasePackageSmokeReport(options = {}) {
         ? "GitHub Packages publish markers exist in publish workflow; review gating before release."
         : "GitHub Packages is intentionally absent from the current publish workflow.",
     },
+    automationPermissions: REPORT_ONLY_PERMISSIONS,
     blockers,
     warnings,
   };

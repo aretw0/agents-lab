@@ -17,6 +17,7 @@ This guide is repository maintenance material. It documents the current `agents-
 - `npm` use is intentional only for registry semantics: `npm publish --provenance`, `npm pack` package smoke evidence and `npm deprecate` release recovery.
 - `npx` use is public installer UX for `@aretw0/pi-stack`, not a development install path.
 - GitHub Packages is not configured in the current publish workflow. Keep it `not-configured-opt-in` until there is a separate package visibility, credential and consumer-routing decision.
+- `release:package:smoke:json` emits `mode=release-package-smoke-report`, `schemaVersion=1`, `decision=pass|block` and report-only `automationPermissions`; consumers must not treat this report as publish or workflow authorization.
 - CI cache: `.github/workflows/ci.yml` disables dependency cache writes on pull requests by passing `{% raw %}`cache-mode: ${{ github.event_name == 'pull_request' && 'off' || 'auto' }}`{% endraw %}.
 - Publish cache: `.github/workflows/publish.yml` keeps dependency cache off and publishes only from an accepted release path with npm provenance.
 - Audit: `.github/workflows/security-audit.yml` is isolated from pull requests and runs with read-only repository permissions.
