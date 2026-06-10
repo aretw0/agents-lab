@@ -653,6 +653,13 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         : nextActionCode === "resolve-task-dispatch-blockers"
           ? "resolve task dispatch blockers before any worker dispatch"
           : "present structured operator approval before dispatch";
+      const nextDriverStepCall = packet.headlessDriverPreview.available
+        ? {
+            tool: packet.headlessDriverPreview.tool,
+            params: packet.headlessDriverPreview.executionPayloadTemplate,
+            operatorApprovalRequired: packet.headlessDriverPreview.operatorApprovalRequired,
+          }
+        : undefined;
       const result = {
         mode: "agent-run-task-dispatch" as const,
         activation: "none" as const,
@@ -674,6 +681,7 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         registryEntry,
         nextActionCode,
         nextAction,
+        nextDriverStepCall,
         summary: [
           "agent-run-task-dispatch:",
           `decision=${decision}`,

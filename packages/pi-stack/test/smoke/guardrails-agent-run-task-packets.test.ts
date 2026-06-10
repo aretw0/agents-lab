@@ -560,6 +560,7 @@ describe("agent run task packet surfaces", () => {
     });
     expect(preview.details?.preferredDriverStepAvailable).toBe(false);
     expect(preview.details?.nextActionCode).toBe("present-operator-approval");
+    expect(preview.details?.nextDriverStepCall).toBeUndefined();
     expect(existsSync(path.join(tmp, ".pi", "reports", "agent-runs.json"))).toBe(false);
     expect(preview.content?.[0]?.text).toContain("dispatch=no");
 
@@ -648,6 +649,20 @@ describe("agent run task packet surfaces", () => {
     expect(result.details?.preferredDriverStepAvailable).toBe(true);
     expect(result.details?.nextActionCode).toBe("use-preferred-driver-step");
     expect(result.details?.nextAction).toBe("call agent_run_driver_step_dispatch with preferredDriverStep.executionPayloadTemplate plus structured operator_approval");
+    expect(result.details?.nextDriverStepCall).toMatchObject({
+      tool: "agent_run_driver_step_dispatch",
+      operatorApprovalRequired: true,
+      params: {
+        execute: true,
+        follow: true,
+        build_outcome: true,
+        run_spec: {
+          run_id: "task-readonly-task-packet",
+          file_contract: "read-only",
+          declared_files: ["README.md"],
+        },
+      },
+    });
     expect((result.details?.blockers as string[])).toContain("prefer-agent-run-driver-step-dispatch");
     expect(result.details?.preferredDriverStep).toMatchObject({
       tool: "agent_run_driver_step_dispatch",
