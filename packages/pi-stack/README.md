@@ -225,8 +225,9 @@ Para evitar regressão de UX, operamos em duas trilhas:
    - Exemplos já publicados: `monitor-summary`, `monitor-sovereign`, `guardrails-core`, `colony-pilot`, `subagent-readiness`, `context-watchdog`.
 
 2. **Utilitários de laboratório (workspace scripts)**
-   - Scripts como `monitor:stability:*`, `subagent:readiness:*` e `pi:parity:*` aceleram estabilização no lab (mesmo com `subagent-readiness` já publicado como tool/command, os scripts continuam úteis para CI/reports).
+   - Scripts como `monitor:stability:*`, `subagent:readiness:*`, `pi:parity:*` e `agent-run:*` aceleram estabilização no lab (mesmo quando a primitiva correspondente já está publicada como tool/command, os scripts continuam úteis para CI/reports).
    - Eles **não** fazem parte automaticamente da superfície npm publicada enquanto não virarem extensão/tool first-party.
+   - Para execução headless agnóstica, a superfície distribuível é `agent_run_driver_step_dispatch`; `agent-run:driver-step`, `agent-run:pi-driver` e `agent-run:pi-driver-payload` são wrappers de referência do repositório.
 
 Auditoria rápida da fronteira publicada vs lab:
 

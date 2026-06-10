@@ -289,10 +289,15 @@ test("published documentation indexes keep audience boundaries explicit", () => 
 
 test("published primitives use operator terminology for local contracts", () => {
 	const continuity = read("docs/primitives/nudge-free-local-continuity.md");
+	const driverStep = read("docs/primitives/agent-run-driver-step.md");
 
 	assert.match(continuity, /local_slice_operator_contract_review/);
 	assert.doesNotMatch(continuity, /local_slice_human_contract_review/);
 	assert.doesNotMatch(continuity, /\bqueen\b/i);
+	assert.match(driverStep, /agent_run_driver_step_dispatch/);
+	assert.match(driverStep, /Repository scripts are wrappers of reference/);
+	assert.match(driverStep, /not the distributed package API by themselves/);
+	assert.match(driverStep, /never calls fan-in, starts a next worker or launches `ant_colony`/);
 });
 
 test("package guide sync keeps lab-only maintenance out of distributed docs", () => {
