@@ -213,3 +213,48 @@ test("release evidence status blocks protected action flags in source artifacts"
     rmSync(cwd, { recursive: true, force: true });
   }
 });
+
+test("release evidence status derives protected prompts from arbitrary release tags", () => {
+  const cwd = workspace();
+  try {
+    writeJson(cwd, ".artifacts/release-cut/v1.2.3-evidence-refresh.json", refresh({
+      target: "1.2.3",
+      tag: "v1.2.3",
+      paths: {
+        finalGatePath: ".artifacts/release-cut/v1.2.3-final-gate.json",
+      },
+      requiredApprovalPrompts: [
+        "approve release tag create v1.2.3",
+        "approve release tag push v1.2.3",
+        "approve release draft prepare-draft-release v1.2.3",
+        "approve release publish v1.2.3",
+      ],
+    }));
+    writeJson(cwd, ".artifacts/release-cut/v1.2.3-final-gate.json", finalGate({
+      target: "1.2.3",
+      tag: "v1.2.3",
+      requiredApprovalPrompts: [
+        "approve release tag create v1.2.3",
+        "approve release tag push v1.2.3",
+        "approve release draft prepare-draft-release v1.2.3",
+        "approve release publish v1.2.3",
+      ],
+    }));
+
+    const result = buildReleaseEvidenceStatus({ cwd, target: "1.2.3", head: "abc1234" });
+
+    assert.equal(result.decision, "pass");
+    assert.equal(result.tag, "v1.2.3");
+    assert.equal(result.evidencePath, ".artifacts/release-cut/v1.2.3-evidence-refresh.json");
+    assert.equal(result.finalGatePath, ".artifacts/release-cut/v1.2.3-final-gate.json");
+    assert.deepEqual(result.blockers, []);
+    assert.deepEqual(result.requiredApprovalPrompts, [
+      "approve release tag create v1.2.3",
+      "approve release tag push v1.2.3",
+      "approve release draft prepare-draft-release v1.2.3",
+      "approve release publish v1.2.3",
+    ]);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
