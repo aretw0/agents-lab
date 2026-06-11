@@ -147,6 +147,41 @@ test("headless driver step executes local process and materializes outcome", asy
   assert.equal(registry.runs[0].state, "completed");
 });
 
+test("headless driver step passes allowed run_spec env to subprocess", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-env-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const result = await runAgentRunDriverStep({
+    run_spec: {
+      ...payload().run_spec,
+      run_id: "headless-driver-step-env",
+      log_path: ".pi/reports/headless-driver-step-env.log",
+      env: {
+        PI_CODING_AGENT_DIR: path.join(cwd, ".sandbox", "pi-agent"),
+        SHOULD_NOT_PASS: "no",
+      },
+      execution_preview: {
+        command: "node",
+        args: ["-e", "console.log(process.env.PI_CODING_AGENT_DIR); console.log(process.env.SHOULD_NOT_PASS || 'unset')"],
+      },
+    },
+    execute: true,
+    operator_approval: structuredApproval(),
+    follow: true,
+    build_outcome: true,
+    follow_max_wait_ms: 5_000,
+  }, cwd);
+
+  assert.equal(result.decision, "dispatched");
+  assert.equal(result.agentRunOutcomePacket?.contractDecision, "pass");
+  assert.equal(result.runSpec.env.PI_CODING_AGENT_DIR, path.join(cwd, ".sandbox", "pi-agent"));
+  assert.equal(result.runSpec.env.SHOULD_NOT_PASS, undefined);
+  assert.deepEqual(result.registryEntry.envKeys, ["PI_CODING_AGENT_DIR"]);
+  const log = readFileSync(path.join(cwd, ".pi", "reports", "headless-driver-step-env.log"), "utf8");
+  assert.match(log, /PI_CODING_AGENT_DIR/);
+  assert.match(log, /\.sandbox/);
+  assert.match(log, /unset/);
+});
+
 test("headless driver step accepts next driver step call wrapper", async () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-call-wrapper-"));
   writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");

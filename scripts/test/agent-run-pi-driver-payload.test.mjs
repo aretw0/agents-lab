@@ -133,6 +133,7 @@ test("builds a print-readonly payload with isolated pi flags", () => {
   assert.equal(result.payloadMode, "print-readonly");
   assert.equal(result.payload.run_spec.provider_model_ref, "local/test-model");
   assert.equal(result.payload.run_spec.file_contract, "read-only");
+  assert.equal(result.payload.run_spec.env.PI_CODING_AGENT_DIR, path.join(cwd, ".sandbox", "pi-agent"));
   assert.equal(result.driverStepCall.tool, "agent_run_driver_step_dispatch");
   assert.deepEqual(result.driverStepCall.params, result.payload);
   assert.equal(result.driverStepCall.operatorApprovalParam, "operator_approval");

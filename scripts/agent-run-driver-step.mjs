@@ -70,6 +70,14 @@ function asStringArray(value) {
   return Array.isArray(value) ? value.filter((entry) => typeof entry === "string").map((entry) => entry.trim()).filter(Boolean) : [];
 }
 
+function asEnv(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const allowed = new Set(["PI_CODING_AGENT_DIR"]);
+  return Object.fromEntries(Object.entries(value)
+    .filter(([key, entry]) => allowed.has(key) && typeof entry === "string" && entry.trim())
+    .map(([key, entry]) => [key, entry.trim()]));
+}
+
 function asFileContract(value) {
   return value === "mutation" ? "mutation" : "read-only";
 }
@@ -157,6 +165,7 @@ function parseRunSpec(raw) {
     logPath: asString(row.log_path),
     timeoutMs: normalizeTimeoutMs(row.timeout_ms),
     fileContract: asFileContract(row.file_contract),
+    env: asEnv(row.env),
     executionPreview: {
       command: asString(preview.command),
       args: asStringArray(preview.args),
@@ -297,6 +306,7 @@ async function dispatchRun(cwd, runSpec) {
     declaredFiles: runSpec.declaredFiles,
     logPath,
     timeoutMs: runSpec.timeoutMs,
+    envKeys: Object.keys(runSpec.env),
     createdAtIso: now,
     lastEventAtIso: now,
   };
@@ -306,7 +316,13 @@ async function dispatchRun(cwd, runSpec) {
   logStream.write(`[agent-runner] starting command=${runSpec.executionPreview.command} source=preview-command cwd=${cwd}\n`);
   logStream.write(`[agent-runner] argv=${JSON.stringify(runSpec.executionPreview.args)}\n`);
   logStream.write(`[agent-runner] preflight platform=${process.platform} node=${process.version} cwdExists=${existsSync(cwd) ? "yes" : "no"}\n`);
-  const child = spawn(runSpec.executionPreview.command, runSpec.executionPreview.args, { cwd, shell: false, stdio: ["ignore", "pipe", "pipe"] });
+  logStream.write(`[agent-runner] envKeys=${JSON.stringify(Object.keys(runSpec.env))}\n`);
+  const child = spawn(runSpec.executionPreview.command, runSpec.executionPreview.args, {
+    cwd,
+    shell: false,
+    stdio: ["ignore", "pipe", "pipe"],
+    env: { ...process.env, ...runSpec.env },
+  });
   let outputBytes = 0;
   let stdoutBytes = 0;
   let stderrBytes = 0;

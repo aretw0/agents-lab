@@ -99,6 +99,11 @@ function normalizeMarkerResults(value) {
     : [];
 }
 
+function normalizeAgentDir(value, cwd) {
+  const clean = asCleanString(value);
+  return clean ? path.resolve(cwd, clean) : path.join(cwd, ".sandbox", "pi-agent");
+}
+
 function positiveInteger(value) {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.floor(value) : undefined;
 }
@@ -201,6 +206,7 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
   const tools = asCleanStringArray(options.tools);
   const toolList = tools.length > 0 ? tools : ["read", "grep", "find", "ls"];
   const fileContract = normalizeFileContract(options.fileContract);
+  const agentDir = normalizeAgentDir(options.agentDir, cwd);
   const blockers = [];
 
   if (!cliPath) blockers.push("local-pi-cli-missing");
@@ -232,6 +238,9 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
       log_path: logPath,
       timeout_ms: 90_000,
       file_contract: fileContract,
+      env: {
+        PI_CODING_AGENT_DIR: agentDir,
+      },
       execution_preview: {
         command: process.execPath,
         args: [
