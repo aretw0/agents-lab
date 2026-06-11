@@ -314,6 +314,19 @@ test("buildReport lists local-safe evidence candidates without clearing the boar
     assert.equal(report.operatorDecisions[0].automationAllowed, false);
     assert.deepEqual(report.operatorDecisions[0].candidateTaskIds, ["TASK-BUD-521"]);
     assert.deepEqual(report.operatorDecisions[0].evidenceCandidateRows.map((row) => row.taskId), ["TASK-BUD-521"]);
+    assert.equal(report.operatorDecisions[0].boardReleaseDispositionPacket.mode, "board-release-disposition-packet");
+    assert.equal(report.operatorDecisions[0].boardReleaseDispositionPacket.decision, "ready-for-operator-decision");
+    assert.equal(report.operatorDecisions[0].boardReleaseDispositionPacket.allCandidatesHaveEvidence, true);
+    assert.equal(report.operatorDecisions[0].boardReleaseDispositionPacket.recommendedBulkAction, "park-for-target-release");
+    assert.deepEqual(report.operatorDecisions[0].boardReleaseDispositionPacket.dispositionRows.map((row) => ({
+      taskId: row.taskId,
+      recommendedAction: row.recommendedAction,
+      automationAllowed: row.automationAllowed,
+    })), [{
+      taskId: "TASK-BUD-521",
+      recommendedAction: "park-for-target-release",
+      automationAllowed: false,
+    }]);
     assert.match(report.markdown, /\[ \] board-release-clear/);
     assert.match(report.markdown, /board-release-clear \[board-state\]: in-progress=1/);
     assert.match(report.markdown, /releaseDecisionReady: yes/);
@@ -811,6 +824,9 @@ test("cli can write structured json for agents", () => {
     assert.deepEqual(json.operatorDecisions[0].allowedActions, ["park-for-target-release", "require-work"]);
     assert.deepEqual(json.operatorDecisions[0].candidateTaskIds, ["TASK-BUD-521"]);
     assert.deepEqual(json.operatorDecisions[0].evidenceCandidateRows.map((row) => row.taskId), ["TASK-BUD-521"]);
+    assert.equal(json.operatorDecisions[0].boardReleaseDispositionPacket.mode, "board-release-disposition-packet");
+    assert.equal(json.operatorDecisions[0].boardReleaseDispositionPacket.recommendedBulkAction, "park-for-target-release");
+    assert.deepEqual(json.operatorDecisions[0].boardReleaseDispositionPacket.dispositionRows.map((row) => row.recommendedAction), ["park-for-target-release"]);
     assert.equal(json.nextActionCode, "resolve-operator-decisions");
     assert.deepEqual(json.nextActions.map((action) => action.id), ["decide-board-evidence-candidates"]);
     assert.deepEqual(json.nextActions[0].allowedActions, ["park-for-target-release", "require-work"]);

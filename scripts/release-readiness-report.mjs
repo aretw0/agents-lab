@@ -360,6 +360,22 @@ function boardEvidenceOneLine(row) {
   ].join(" — ");
 }
 
+function boardEvidenceDispositionRows(candidateRows) {
+  return candidateRows.map((row) => ({
+    taskId: row.taskId,
+    currentStatus: row.status,
+    priority: row.priority,
+    evidencePath: row.evidencePath,
+    evidencePresent: row.evidencePresent,
+    recommendedAction: row.evidencePresent ? "park-for-target-release" : "require-work",
+    allowedActions: ["park-for-target-release", "require-work"],
+    automationAllowed: false,
+    rationale: row.evidencePresent
+      ? "release evidence exists; operator may park this external influence for target release instead of treating it as required work"
+      : "release evidence is missing; operator must require work or provide evidence before parking",
+  }));
+}
+
 function operatorDecisionLines(decisions) {
   return decisions.map((decision) => `- ${decision.id}: ${decision.summary}`);
 }
@@ -381,6 +397,7 @@ function operatorDecisionPackets(data, failedChecklist) {
   }
   if (failedChecklist.some((item) => item.id === "board-release-clear") && data.board.releaseDecisionReady) {
     const candidateRows = data.board.evidenceCandidateRows;
+    const dispositionRows = boardEvidenceDispositionRows(candidateRows);
     decisions.push({
       id: "decide-board-evidence-candidates",
       kind: "board-state",
@@ -388,6 +405,17 @@ function operatorDecisionPackets(data, failedChecklist) {
       target: data.target,
       candidateTaskIds: candidateRows.map((row) => row.taskId),
       evidenceCandidateRows: candidateRows,
+      boardReleaseDispositionPacket: {
+        mode: "board-release-disposition-packet",
+        decision: "ready-for-operator-decision",
+        target: data.target,
+        candidateTaskIds: dispositionRows.map((row) => row.taskId),
+        dispositionRows,
+        allCandidatesHaveEvidence: dispositionRows.every((row) => row.evidencePresent),
+        recommendedBulkAction: dispositionRows.every((row) => row.evidencePresent) ? "park-for-target-release" : "require-work",
+        automationAllowed: false,
+        summary: `board release disposition: candidates=${dispositionRows.length} recommended=${dispositionRows.every((row) => row.evidencePresent) ? "park-for-target-release" : "require-work"}`,
+      },
       allowedActions: ["park-for-target-release", "require-work"],
       requiresOperatorDecision: true,
       automationAllowed: false,
