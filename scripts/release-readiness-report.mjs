@@ -423,8 +423,15 @@ function agentRunProviderRecoveryNextEvidence(cwd) {
       sourcePath: payload.sourcePath,
       sourceDecision: payload.sourceDecision,
       actionCount: payload.actionCount,
+      actionStage: payload.actionStage,
       nextAction: payload.nextAction && typeof payload.nextAction === "object"
         ? payload.nextAction
+        : undefined,
+      selectedCommandPreview: payload.selectedCommandPreview && typeof payload.selectedCommandPreview === "object"
+        ? payload.selectedCommandPreview
+        : undefined,
+      providerNetworkCheck: payload.providerNetworkCheck && typeof payload.providerNetworkCheck === "object"
+        ? payload.providerNetworkCheck
         : undefined,
       commandPreviews: payload.commandPreviews && typeof payload.commandPreviews === "object"
         ? payload.commandPreviews

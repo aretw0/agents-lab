@@ -984,10 +984,22 @@ test("readiness exposes provider recovery next evidence when present", () => {
       sourcePath: ".artifacts/agent-run-driver/pi-provider-container-canary-report.json",
       sourceDecision: "block",
       actionCount: 1,
+      actionStage: "run-network-check",
       nextAction: {
         diagnosticCode: "provider-fetch-failed",
         actionCode: "verify-provider-network",
+        verificationScript: "agent-run:pi-provider-network-check",
         retryCanaryScript: "agent-run:pi-provider-canary:container",
+      },
+      selectedCommandPreview: {
+        command: "pnpm",
+        args: ["run", "agent-run:pi-provider-network-check"],
+        shellInterpolationAllowed: false,
+      },
+      providerNetworkCheck: {
+        path: ".artifacts/agent-run-driver/pi-provider-network-check.json",
+        present: true,
+        decision: "ready-for-operator-decision",
       },
       commandPreviews: {
         retryCanary: {
@@ -1007,8 +1019,12 @@ test("readiness exposes provider recovery next evidence when present", () => {
     assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.mode, "agent-run-pi-provider-recovery-next");
     assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.sourceDecision, "block");
     assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.actionCount, 1);
+    assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.actionStage, "run-network-check");
     assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.nextAction.actionCode, "verify-provider-network");
+    assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.nextAction.verificationScript, "agent-run:pi-provider-network-check");
     assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.nextAction.retryCanaryScript, "agent-run:pi-provider-canary:container");
+    assert.deepEqual(data.agentRunDrivers.providerRecoveryNextEvidence.selectedCommandPreview.args, ["run", "agent-run:pi-provider-network-check"]);
+    assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.providerNetworkCheck.decision, "ready-for-operator-decision");
     assert.deepEqual(data.agentRunDrivers.providerRecoveryNextEvidence.commandPreviews.retryCanary.args, ["run", "agent-run:pi-provider-canary:container"]);
     assert.deepEqual(data.agentRunDrivers.providerRecoveryNextEvidence.blockers, []);
     assert.equal(data.agentRunDrivers.ok, true);
