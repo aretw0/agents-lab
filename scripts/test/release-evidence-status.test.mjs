@@ -29,6 +29,7 @@ function refresh(overrides = {}) {
     readinessDecision: "ready",
     draftDecision: "ready-for-operator-review",
     finalGateDecision: "pass",
+    finalGateHead: "abc1234",
     requiredApprovalPrompts: ["approve release tag create v0.8.0"],
     protectedActionsAllowed: false,
     ...overrides,
@@ -117,6 +118,24 @@ test("release evidence status blocks when current head is unavailable", () => {
     assert.equal(result.decision, "block");
     assert.ok(result.blockers.includes("release-current-head-missing"));
     assert.equal(result.headMatches, false);
+    assert.equal(result.protectedActionsAllowed, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("release evidence status blocks when refresh final gate head is stale or mismatched", () => {
+  const cwd = workspace();
+  try {
+    writeJson(cwd, ".artifacts/release-cut/v0.8.0-evidence-refresh.json", refresh({ finalGateHead: "oldsha" }));
+    writeJson(cwd, ".artifacts/release-cut/v0.8.0-final-gate.json", finalGate({ head: "abc1234" }));
+
+    const result = buildReleaseEvidenceStatus({ cwd, target: "0.8.0", head: "abc1234" });
+
+    assert.equal(result.decision, "block");
+    assert.ok(result.blockers.includes("release-evidence-final-gate-stale-head"));
+    assert.ok(result.blockers.includes("release-evidence-final-gate-head-mismatch"));
+    assert.equal(result.finalGateHead, "abc1234");
     assert.equal(result.protectedActionsAllowed, false);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
