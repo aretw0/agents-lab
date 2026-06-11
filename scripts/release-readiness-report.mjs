@@ -1070,8 +1070,13 @@ export function buildReport(data) {
   ];
 
   return {
+    mode: "release-readiness-report",
+    schemaVersion: 1,
+    target: data.target,
     markdown: lines.join("\n"),
     generatedAt: now,
+    head: data.head,
+    latestTag: data.latestTag,
     decision,
     checklist,
     ready,

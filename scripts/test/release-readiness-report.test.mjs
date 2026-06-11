@@ -181,6 +181,9 @@ test("buildReport marks target release not ready until version and board gates a
 
   try {
     const report = buildReport(gather("0.8.0", workspace));
+    assert.equal(report.mode, "release-readiness-report");
+    assert.equal(report.schemaVersion, 1);
+    assert.equal(report.target, "0.8.0");
     assert.equal(report.ready, false);
     assert.equal(report.decision, "not-ready");
     assert.match(report.generatedAt, /^\d{4}-\d{2}-\d{2}T/);
