@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
@@ -74,6 +74,27 @@ function providerContainerCanaryExecution(payload) {
   const canaryReport = payload.canaryReport && typeof payload.canaryReport === "object" ? payload.canaryReport : undefined;
   if (canaryReport?.agentRunOutcomePacket?.contractDecision !== "pass") return undefined;
   return canaryReport.workerDispatch?.driverStep ? canaryReport.workerDispatch : canaryReport;
+}
+
+function artifactMtimeMs(filePath) {
+  try {
+    return statSync(filePath).mtimeMs;
+  } catch {
+    return 0;
+  }
+}
+
+function selectLatestProviderCanaryExecution({ canaryExecution, canaryPath, containerCanaryExecution, containerCanaryPath }) {
+  const candidates = [
+    containerCanaryExecution
+      ? { execution: containerCanaryExecution, source: "provider-container-canary", mtimeMs: artifactMtimeMs(containerCanaryPath), priority: 1 }
+      : undefined,
+    canaryExecution
+      ? { execution: canaryExecution, source: "provider-canary", mtimeMs: artifactMtimeMs(canaryPath), priority: 0 }
+      : undefined,
+  ].filter(Boolean);
+  candidates.sort((left, right) => (right.mtimeMs - left.mtimeMs) || (right.priority - left.priority));
+  return candidates[0];
 }
 
 export function classifyProviderSignals(lines) {
@@ -241,8 +262,14 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
   const providerCanary = readJsonIfExists(providerCanaryPath);
   const containerCanaryExecution = providerContainerCanaryExecution(providerContainerCanary);
   const canaryExecution = providerCanaryExecution(providerCanary);
-  const lastExecution = containerCanaryExecution ?? canaryExecution ?? legacyLastExecution;
-  const lastExecutionSource = containerCanaryExecution ? "provider-container-canary" : canaryExecution ? "provider-canary" : "last-execution";
+  const latestProviderCanary = selectLatestProviderCanaryExecution({
+    canaryExecution,
+    canaryPath: providerCanaryPath,
+    containerCanaryExecution,
+    containerCanaryPath: providerContainerCanaryPath,
+  });
+  const lastExecution = latestProviderCanary?.execution ?? legacyLastExecution;
+  const lastExecutionSource = latestProviderCanary?.source ?? "last-execution";
   const providerNetworkCheck = providerNetworkCheckEvidence(readJsonIfExists(networkCheckPath));
   const diagnosticNetworkCheck = lastExecutionSource === "provider-canary"
     ? { ...providerNetworkCheck, decision: "not-applied-to-current-canary" }

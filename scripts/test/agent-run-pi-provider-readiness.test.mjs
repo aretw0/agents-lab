@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -51,6 +51,7 @@ function writeProviderCanary(cwd, lines) {
       },
     },
   }, null, 2)}\n`, "utf8");
+  return filePath;
 }
 
 function writeProviderContainerCanaryPass(cwd) {
@@ -81,6 +82,7 @@ function writeProviderContainerCanaryPass(cwd) {
     },
     blockers: [],
   }, null, 2)}\n`, "utf8");
+  return filePath;
 }
 
 function writeNetworkCheck(cwd, payload) {
@@ -91,6 +93,11 @@ function writeNetworkCheck(cwd, payload) {
     schemaVersion: 1,
     ...payload,
   }, null, 2)}\n`, "utf8");
+}
+
+function setMtime(filePath, iso) {
+  const date = new Date(iso);
+  utimesSync(filePath, date, date);
 }
 
 test("provider readiness is ready when plan is isolated and no failing prior execution exists", () => {
@@ -247,8 +254,10 @@ test("provider readiness prefers passing container canary over older local canar
   const cwd = workspace("pi-provider-readiness-container-pass-");
   try {
     writeAgentRunPiProviderFanoutPlan({ cwd, outPath: ".artifacts/agent-run-driver/pi-provider-fanout-plan.json" });
-    writeProviderCanary(cwd, ["fetch failed"]);
-    writeProviderContainerCanaryPass(cwd);
+    const localPath = writeProviderCanary(cwd, ["fetch failed"]);
+    const containerPath = writeProviderContainerCanaryPass(cwd);
+    setMtime(localPath, "2026-06-01T00:00:00.000Z");
+    setMtime(containerPath, "2026-06-01T00:01:00.000Z");
     writeNetworkCheck(cwd, {
       decision: "pass",
       executeRequested: true,
@@ -268,6 +277,39 @@ test("provider readiness prefers passing container canary over older local canar
     assert.equal(result.providerRecoveryPlan.decision, "ready");
     assert.deepEqual(result.providerRecoveryPlan.blockers, []);
     assert.deepEqual(result.providerRecoveryPlan.actions, []);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider readiness blocks newer local canary failure over older container pass", () => {
+  const cwd = workspace("pi-provider-readiness-local-fail-newer-");
+  try {
+    writeAgentRunPiProviderFanoutPlan({ cwd, outPath: ".artifacts/agent-run-driver/pi-provider-fanout-plan.json" });
+    const containerPath = writeProviderContainerCanaryPass(cwd);
+    const localPath = writeProviderCanary(cwd, ["fetch failed"]);
+    setMtime(containerPath, "2026-06-01T00:00:00.000Z");
+    setMtime(localPath, "2026-06-01T00:01:00.000Z");
+    writeNetworkCheck(cwd, {
+      decision: "pass",
+      executeRequested: true,
+      networkRequestAllowed: true,
+      networkDecision: "reachable-auth-required",
+      httpStatus: 401,
+      blockers: [],
+    });
+
+    const result = buildAgentRunPiProviderReadiness({ cwd });
+
+    assert.equal(result.decision, "blocked");
+    assert.equal(result.lastExecutionSource, "provider-canary");
+    assert.deepEqual(result.providerSignals, ["provider-fetch-failed"]);
+    assert.ok(result.blockers.includes("provider-fetch-failed"));
+    assert.deepEqual(result.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
+      ["provider-fetch-failed", "network-or-provider", "blocker"],
+    ]);
+    assert.equal(result.providerRecoveryPlan.decision, "blocked");
+    assert.deepEqual(result.providerRecoveryPlan.blockers, ["provider-fetch-failed"]);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

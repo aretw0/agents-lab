@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
@@ -43,6 +43,19 @@ function writeJson(cwd, relPath, value, pretty = false) {
   const fullPath = path.resolve(cwd, relPath);
   mkdirSync(path.dirname(fullPath), { recursive: true });
   writeFileSync(fullPath, `${JSON.stringify(value, null, pretty ? 2 : 0)}\n`, "utf8");
+}
+
+function artifactMtimeMs(cwd, relPath) {
+  try {
+    return statSync(path.resolve(cwd, relPath)).mtimeMs;
+  } catch {
+    return -1;
+  }
+}
+
+function sourcePathsForSelection(cwd, sourcePath) {
+  if (sourcePath) return [sourcePath];
+  return [...DEFAULT_SOURCES].sort((left, right) => artifactMtimeMs(cwd, right) - artifactMtimeMs(cwd, left));
 }
 
 function recoveryPlanFromPayload(payload) {
@@ -115,7 +128,8 @@ function networkCheckEvidence(cwd, relPath = DEFAULT_NETWORK_CHECK) {
 
 function nextActionStage({ nextAction, networkEvidence, payload }) {
   if (nextAction?.actionCode !== "verify-provider-network") return "run-verification";
-  if (networkEvidence?.decision === "pass" && payload?.lastExecutionSource === "provider-canary") {
+  if (networkEvidence?.decision === "pass"
+    && (payload?.lastExecutionSource === "provider-canary" || payload?.mode === "agent-run-pi-provider-canary")) {
     return "retry-provider-canary";
   }
   if (networkEvidence?.decision === "pass") return "rerun-readiness";
@@ -125,9 +139,7 @@ function nextActionStage({ nextAction, networkEvidence, payload }) {
 
 export function buildAgentRunPiProviderRecoveryNext(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
-  const sourcePaths = options.sourcePath
-    ? [options.sourcePath]
-    : DEFAULT_SOURCES;
+  const sourcePaths = sourcePathsForSelection(cwd, options.sourcePath);
   const attempts = [];
   let sourcePath = "";
   let payload;

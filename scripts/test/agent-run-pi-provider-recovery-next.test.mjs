@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -8,6 +8,11 @@ import { buildAgentRunPiProviderRecoveryNext } from "../agent-run-pi-provider-re
 
 function workspace(prefix) {
   return mkdtempSync(path.join(tmpdir(), prefix));
+}
+
+function setMtime(filePath, iso) {
+  const date = new Date(iso);
+  utimesSync(filePath, date, date);
 }
 
 test("provider recovery next selects first recovery action from container canary evidence", () => {
@@ -294,6 +299,70 @@ test("provider recovery next treats passing container canary as recovery clear",
     assert.deepEqual(result.selectedCommandPreview, {
       command: "pnpm",
       args: ["run", "agent-run:pi-provider-canary"],
+      shellInterpolationAllowed: false,
+    });
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider recovery next uses newer readiness over older container pass", () => {
+  const cwd = workspace("pi-provider-recovery-next-newer-readiness-");
+  try {
+    const containerPath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-container-canary-report.json");
+    const readinessPath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-readiness.json");
+    const networkPath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-network-check.json");
+    mkdirSync(path.dirname(containerPath), { recursive: true });
+    writeFileSync(containerPath, `${JSON.stringify({
+      mode: "agent-run-pi-provider-container-canary-report",
+      decision: "pass",
+      canaryReport: {
+        mode: "agent-run-pi-provider-canary",
+        decision: "dispatched",
+        agentRunOutcomePacket: {
+          mode: "agent-run-outcome-packet",
+          contractDecision: "pass",
+        },
+      },
+      blockers: [],
+    })}\n`, "utf8");
+    writeFileSync(readinessPath, `${JSON.stringify({
+      mode: "agent-run-pi-provider-readiness",
+      decision: "blocked",
+      lastExecutionSource: "provider-canary",
+      providerRecoveryPlan: {
+        mode: "agent-run-pi-provider-recovery-plan",
+        decision: "blocked",
+        actions: [{
+          diagnosticCode: "provider-fetch-failed",
+          actionCode: "verify-provider-network",
+          verificationScript: "agent-run:pi-provider-network-check",
+          retryCanaryScript: "agent-run:pi-provider-canary:container",
+          rerunReadinessScript: "agent-run:pi-provider-readiness",
+        }],
+      },
+    })}\n`, "utf8");
+    writeFileSync(networkPath, `${JSON.stringify({
+      mode: "agent-run-pi-provider-network-check",
+      decision: "pass",
+      executeRequested: true,
+      networkRequestAllowed: true,
+      networkDecision: "reachable-auth-required",
+      httpStatus: 401,
+      blockers: [],
+    })}\n`, "utf8");
+    setMtime(containerPath, "2026-06-01T00:00:00.000Z");
+    setMtime(readinessPath, "2026-06-01T00:01:00.000Z");
+
+    const result = buildAgentRunPiProviderRecoveryNext({ cwd });
+
+    assert.equal(result.decision, "next-action-ready");
+    assert.equal(result.sourcePath, ".artifacts/agent-run-driver/pi-provider-readiness.json");
+    assert.equal(result.sourceMode, "agent-run-pi-provider-readiness");
+    assert.equal(result.actionStage, "retry-provider-canary");
+    assert.deepEqual(result.selectedCommandPreview, {
+      command: "pnpm",
+      args: ["run", "agent-run:pi-provider-canary:container", "--", "--recovery-retry"],
       shellInterpolationAllowed: false,
     });
   } finally {
