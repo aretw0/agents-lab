@@ -18,7 +18,7 @@ const PACKAGES = [
 function makeWorkspace({
   version = "0.7.0",
   tasks = [],
-  agentRunDriverScript = "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs scripts/test/agent-run-driver-container-canary-suite.test.mjs scripts/test/agent-run-driver-fanout-rehearsal.test.mjs scripts/test/agent-run-driver-container-fanout-rehearsal.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs scripts/test/agent-run-pi-provider-readiness.test.mjs scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs scripts/test/agent-run-pi-provider-canary.test.mjs",
+  agentRunDriverScript = "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs scripts/test/agent-run-driver-container-canary-suite.test.mjs scripts/test/agent-run-driver-fanout-rehearsal.test.mjs scripts/test/agent-run-driver-container-fanout-rehearsal.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs scripts/test/agent-run-pi-provider-readiness.test.mjs scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs scripts/test/agent-run-pi-provider-canary.test.mjs scripts/test/agent-run-pi-provider-container-canary.test.mjs",
   agentRunDriverCanariesScript = "node scripts/agent-run-driver-canary-suite.mjs --execute --out .artifacts/agent-run-driver/suite.json",
   writeAgentRunDriverCanarySuite = true,
   agentRunDriverCanarySuiteGitHead = "",
@@ -34,6 +34,7 @@ function makeWorkspace({
       "agent-run:pi-provider-fanout-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --out .artifacts/agent-run-driver/pi-provider-fanout-plan.json",
       "agent-run:pi-provider-readiness": "node scripts/agent-run-pi-provider-readiness.mjs --out .artifacts/agent-run-driver/pi-provider-readiness.json",
       "agent-run:pi-provider-canary": "node scripts/agent-run-pi-provider-canary.mjs --out .artifacts/agent-run-driver/pi-provider-canary.json",
+      "agent-run:pi-provider-canary:container": "node scripts/agent-run-pi-provider-container-canary.mjs",
       "agent-run:pi-provider-worker-dispatch": "node scripts/agent-run-pi-provider-worker-dispatch.mjs",
       ...rootScripts,
     },
@@ -467,6 +468,7 @@ test("agent-run driver gate requires the full driver suite script", () => {
       "scripts/test/agent-run-pi-provider-readiness.test.mjs",
       "scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs",
       "scripts/test/agent-run-pi-provider-canary.test.mjs",
+      "scripts/test/agent-run-pi-provider-container-canary.test.mjs",
     ]);
     assert.match(report.markdown, /\[ \] agent-run-driver-gate/);
     assert.match(report.markdown, /agent-run-driver-gate \[technical-gate\]: missing tests scripts\/test\/agent-run-pi-driver\.test\.mjs/);
@@ -583,12 +585,13 @@ test("worktree clean gate blocks release readiness for tracked changes", () => {
     writeFileSync(path.join(workspace, "package.json"), JSON.stringify({
       private: true,
       scripts: {
-        "test:agent-run:drivers": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs scripts/test/agent-run-driver-container-canary-suite.test.mjs scripts/test/agent-run-driver-fanout-rehearsal.test.mjs scripts/test/agent-run-driver-container-fanout-rehearsal.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs scripts/test/agent-run-pi-provider-readiness.test.mjs scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs scripts/test/agent-run-pi-provider-canary.test.mjs",
+        "test:agent-run:drivers": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs scripts/test/agent-run-driver-container-canary-suite.test.mjs scripts/test/agent-run-driver-fanout-rehearsal.test.mjs scripts/test/agent-run-driver-container-fanout-rehearsal.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs scripts/test/agent-run-pi-provider-readiness.test.mjs scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs scripts/test/agent-run-pi-provider-canary.test.mjs scripts/test/agent-run-pi-provider-container-canary.test.mjs",
         "agent-run:driver-canaries": "node scripts/agent-run-driver-canary-suite.mjs --execute --out .artifacts/agent-run-driver/suite.json",
         "agent-run:driver-fanout-rehearsal": "node scripts/agent-run-driver-fanout-rehearsal.mjs --execute --out .artifacts/agent-run-driver/fanout-rehearsal.json",
         "agent-run:pi-provider-fanout-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --out .artifacts/agent-run-driver/pi-provider-fanout-plan.json",
         "agent-run:pi-provider-readiness": "node scripts/agent-run-pi-provider-readiness.mjs --out .artifacts/agent-run-driver/pi-provider-readiness.json",
         "agent-run:pi-provider-canary": "node scripts/agent-run-pi-provider-canary.mjs --out .artifacts/agent-run-driver/pi-provider-canary.json",
+        "agent-run:pi-provider-canary:container": "node scripts/agent-run-pi-provider-container-canary.mjs",
         "agent-run:pi-provider-worker-dispatch": "node scripts/agent-run-pi-provider-worker-dispatch.mjs",
       },
       dirtyMarker: true,
@@ -940,6 +943,7 @@ test("cli can write structured json for agents", () => {
       "scripts/test/agent-run-pi-provider-readiness.test.mjs",
       "scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs",
       "scripts/test/agent-run-pi-provider-canary.test.mjs",
+      "scripts/test/agent-run-pi-provider-container-canary.test.mjs",
     ]);
     assert.deepEqual(json.agentRunDrivers.missingTests, []);
     assert.deepEqual(json.agentRunDrivers.missingOperationalScripts, []);
@@ -948,6 +952,7 @@ test("cli can write structured json for agents", () => {
       ["agent-run:pi-provider-fanout-plan", true, []],
       ["agent-run:pi-provider-readiness", true, []],
       ["agent-run:pi-provider-canary", true, []],
+      ["agent-run:pi-provider-canary:container", true, []],
       ["agent-run:pi-provider-worker-dispatch", true, []],
     ]);
     assert.equal(json.agentRunDrivers.providerReadinessEvidence.decision, "missing");
