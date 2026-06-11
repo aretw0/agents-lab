@@ -384,12 +384,24 @@ function operatorDecisionLines(decisions) {
 function operatorDecisionPackets(data, failedChecklist) {
   const decisions = [];
   if (failedChecklist.some((item) => item.id === "target-version-ready")) {
+    const requiredApprovalPrompt = `approve release target-version bump-tag-release-when-ready ${data.target}`;
     decisions.push({
       id: "decide-target-version",
       kind: "operator-decision",
       recommendation: "bump-tag-release-when-ready",
       target: data.target,
       currentVersions: data.versions,
+      releaseVersionDecisionPacket: {
+        mode: "release-version-decision-packet",
+        decision: "ready-for-operator-decision",
+        target: data.target,
+        currentVersions: data.versions,
+        recommendedAction: "bump-tag-release-when-ready",
+        allowedActions: ["defer-release", "bump-tag-release-when-ready"],
+        requiredApprovalPrompt,
+        automationAllowed: false,
+        summary: `release version decision: target=${data.target} recommended=bump-tag-release-when-ready`,
+      },
       allowedActions: ["defer-release", "bump-tag-release-when-ready"],
       requiresOperatorDecision: true,
       automationAllowed: false,
@@ -454,6 +466,7 @@ function releaseNextActionPacket({ ready, releaseBlockers, operatorDecisions }) 
         automationAllowed: decision.automationAllowed,
         target: decision.target,
         candidateTaskIds: decision.candidateTaskIds ?? [],
+        ...(decision.releaseVersionDecisionPacket ? { releaseVersionDecisionPacket: decision.releaseVersionDecisionPacket } : {}),
         ...(decision.boardReleaseDispositionPacket ? { boardReleaseDispositionPacket: decision.boardReleaseDispositionPacket } : {}),
         summary: decision.summary,
       })),

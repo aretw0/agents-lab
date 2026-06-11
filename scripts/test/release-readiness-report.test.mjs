@@ -222,9 +222,14 @@ test("buildReport marks target release not ready until version and board gates a
     assert.equal(report.operatorDecisions[0].automationAllowed, false);
     assert.equal(report.operatorDecisions[0].target, "0.8.0");
     assert.deepEqual(report.operatorDecisions[0].currentVersions.map((row) => row.version), ["0.7.0", "0.7.0", "0.7.0", "0.7.0", "0.7.0"]);
+    assert.equal(report.operatorDecisions[0].releaseVersionDecisionPacket.mode, "release-version-decision-packet");
+    assert.equal(report.operatorDecisions[0].releaseVersionDecisionPacket.target, "0.8.0");
+    assert.equal(report.operatorDecisions[0].releaseVersionDecisionPacket.recommendedAction, "bump-tag-release-when-ready");
+    assert.equal(report.operatorDecisions[0].releaseVersionDecisionPacket.requiredApprovalPrompt, "approve release target-version bump-tag-release-when-ready 0.8.0");
     assert.equal(report.nextActionCode, "resolve-operator-decisions");
     assert.deepEqual(report.nextActions.map((action) => action.id), ["decide-target-version"]);
     assert.deepEqual(report.nextActions[0].allowedActions, ["defer-release", "bump-tag-release-when-ready"]);
+    assert.equal(report.nextActions[0].releaseVersionDecisionPacket.requiredApprovalPrompt, "approve release target-version bump-tag-release-when-ready 0.8.0");
     assert.equal(report.nextActions[0].requiresOperatorDecision, true);
     assert.equal(report.nextActions[0].automationAllowed, false);
     assert.deepEqual(report.automationPermissions, {
