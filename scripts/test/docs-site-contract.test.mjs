@@ -191,6 +191,7 @@ test("public 0.8 readiness map matches the canonical release readiness gate", ()
 	assert.equal(pkg.scripts["release:readiness:strict:json"], "node scripts/release-readiness-report.mjs --strict --json");
 	assert.equal(pkg.scripts["release:readiness:v0.8.0:json"], "node scripts/release-readiness-report.mjs --target 0.8.0 --json");
 	assert.equal(pkg.scripts["release:evidence:refresh"], "node scripts/release-evidence-refresh.mjs --execute-canaries");
+	assert.equal(pkg.scripts["release:evidence:status"], "node scripts/release-evidence-status.mjs");
 	assert.equal(pkg.scripts["release:final:gate"], "node scripts/release-final-gate.mjs");
 	assert.equal(pkg.scripts["release:artifact:audit"], "node scripts/release-artifact-audit.mjs");
 	assert.match(playbook, /release:readiness -- --target X\.Y\.Z/);
@@ -199,6 +200,8 @@ test("public 0.8 readiness map matches the canonical release readiness gate", ()
 	assert.match(playbook, /release:readiness:strict:json -- --target X\.Y\.Z/);
 	assert.match(playbook, /release:readiness:v0\.8\.0:json/);
 	assert.match(playbook, /release:evidence:refresh -- --target X\.Y\.Z/);
+	assert.match(playbook, /release:evidence:status -- --target X\.Y\.Z/);
+	assert.match(playbook, /release-evidence-status/);
 	assert.match(playbook, /mode=release-evidence-refresh/);
 	assert.match(playbook, /finalGateDecision=pass/);
 	assert.match(playbook, /protectedActionsAllowed=false/);
