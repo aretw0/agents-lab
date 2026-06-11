@@ -9,9 +9,18 @@ import { buildDockerExecArgs } from "./devcontainer-lab.mjs";
 const SCHEMA_VERSION = 1;
 const DEFAULT_REPORT_OUT = ".artifacts/agent-run-driver/container-fanout-rehearsal-report.json";
 const DEFAULT_REHEARSAL_OUT = ".artifacts/agent-run-driver/container-fanout-rehearsal.json";
+const DEFAULT_MANIFEST_OUT = ".artifacts/agent-run-driver/container-fanout-manifest.json";
 
 function toContainerPath(relPath) {
   return String(relPath || DEFAULT_REHEARSAL_OUT).replace(/\\/g, "/");
+}
+
+function shellWord(value) {
+  return JSON.stringify(String(value));
+}
+
+function shellCommand(parts) {
+  return parts.map((part) => (part === "&&" || part === ">" ? part : shellWord(part))).join(" ");
 }
 
 export function parseArgs(argv = process.argv.slice(2)) {
@@ -20,6 +29,7 @@ export function parseArgs(argv = process.argv.slice(2)) {
     cwd: process.cwd(),
     reportOutPath: DEFAULT_REPORT_OUT,
     rehearsalOutPath: DEFAULT_REHEARSAL_OUT,
+    manifestOutPath: DEFAULT_MANIFEST_OUT,
     batchId: "agent-run-driver-container-fanout-rehearsal",
     execute: true,
     pretty: false,
@@ -31,6 +41,7 @@ export function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
     else if (arg === "--out") out.reportOutPath = argv[++index] ?? out.reportOutPath;
     else if (arg === "--rehearsal-out") out.rehearsalOutPath = argv[++index] ?? out.rehearsalOutPath;
+    else if (arg === "--manifest-out") out.manifestOutPath = argv[++index] ?? out.manifestOutPath;
     else if (arg === "--batch-id") out.batchId = argv[++index] ?? out.batchId;
     else if (arg === "--preview") out.execute = false;
     else if (arg === "--execute") out.execute = true;
@@ -42,16 +53,32 @@ export function parseArgs(argv = process.argv.slice(2)) {
 }
 
 export function buildContainerFanoutDockerArgs(options) {
+  const manifestStdoutPath = ".artifacts/agent-run-driver/container-fanout-manifest.stdout";
   const command = [
-    "node",
-    "scripts/agent-run-driver-fanout-rehearsal.mjs",
-    options.execute === false ? "--preview" : "--execute",
-    "--batch-id",
-    options.batchId || "agent-run-driver-container-fanout-rehearsal",
-    "--out",
-    toContainerPath(options.rehearsalOutPath || DEFAULT_REHEARSAL_OUT),
+    "sh",
+    "-lc",
+    shellCommand([
+      "node",
+      "scripts/agent-run-driver-fanout-manifest.mjs",
+      "--batch-id",
+      options.batchId || "agent-run-driver-container-fanout-rehearsal",
+      "--out",
+      toContainerPath(options.manifestOutPath || DEFAULT_MANIFEST_OUT),
+      ">",
+      manifestStdoutPath,
+      "&&",
+      "node",
+      "scripts/agent-run-driver-fanout-rehearsal.mjs",
+      options.execute === false ? "--preview" : "--execute",
+      "--batch-id",
+      options.batchId || "agent-run-driver-container-fanout-rehearsal",
+      "--manifest",
+      toContainerPath(options.manifestOutPath || DEFAULT_MANIFEST_OUT),
+      "--out",
+      toContainerPath(options.rehearsalOutPath || DEFAULT_REHEARSAL_OUT),
+    ]),
   ];
-  if (options.pretty === true) command.push("--pretty");
+  if (options.pretty === true) command[2] += " --pretty";
   return buildDockerExecArgs({
     headless: true,
     container: options.container,
@@ -78,6 +105,7 @@ export function runAgentRunDriverContainerFanoutRehearsal(options = {}) {
       executeRequested: options.execute !== false,
       dispatchAllowed: false,
       processStartAllowed: false,
+      manifestOutPath: toContainerPath(options.manifestOutPath || DEFAULT_MANIFEST_OUT),
       rehearsalOutPath: toContainerPath(options.rehearsalOutPath || DEFAULT_REHEARSAL_OUT),
       blockers: ["container-missing"],
       summary: "agent-run-driver-container-fanout-rehearsal: decision=block blocker=container-missing",
@@ -87,6 +115,7 @@ export function runAgentRunDriverContainerFanoutRehearsal(options = {}) {
   const dockerArgs = buildContainerFanoutDockerArgs({
     container,
     batchId: options.batchId || "agent-run-driver-container-fanout-rehearsal",
+    manifestOutPath: options.manifestOutPath || DEFAULT_MANIFEST_OUT,
     rehearsalOutPath: options.rehearsalOutPath || DEFAULT_REHEARSAL_OUT,
     execute: options.execute !== false,
     pretty,
@@ -112,6 +141,7 @@ export function runAgentRunDriverContainerFanoutRehearsal(options = {}) {
     executeRequested: options.execute !== false,
     dispatchAllowed: rehearsalReport?.dispatchAllowed === true,
     processStartAllowed: rehearsalReport?.processStartAllowed === true,
+    manifestOutPath: toContainerPath(options.manifestOutPath || DEFAULT_MANIFEST_OUT),
     rehearsalOutPath: toContainerPath(options.rehearsalOutPath || DEFAULT_REHEARSAL_OUT),
     dockerArgs,
     rehearsalReport: rehearsalReport ?? null,
@@ -125,9 +155,9 @@ export function runAgentRunDriverContainerFanoutRehearsal(options = {}) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-driver-container-fanout-rehearsal.mjs --container NAME [--execute|--preview] [--out PATH] [--rehearsal-out PATH] [--batch-id ID] [--pretty]",
+    "Usage: node scripts/agent-run-driver-container-fanout-rehearsal.mjs --container NAME [--execute|--preview] [--out PATH] [--manifest-out PATH] [--rehearsal-out PATH] [--batch-id ID] [--pretty]",
     "",
-    "Runs the two-worker local fan-out rehearsal inside the devcontainer through the headless lab wrapper.",
+    "Builds a fan-out manifest and runs the bounded fan-out rehearsal inside the devcontainer through the headless lab wrapper.",
     `Default wrapper report: ${DEFAULT_REPORT_OUT}`,
     `Default in-container rehearsal artifact: ${DEFAULT_REHEARSAL_OUT}`,
   ].join("\n") + "\n");
