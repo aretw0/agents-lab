@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
@@ -63,6 +63,41 @@ function taskCriteria(task) {
     : [];
 }
 
+function normalizeRelPath(value) {
+  return String(value || "").replace(/\\/g, "/").replace(/^\.\/+/, "");
+}
+
+function findTaskEvidenceFiles(cwd, taskId, candidateDirs = ["docs/research/"]) {
+  const needle = String(taskId || "").trim().toLowerCase();
+  if (!needle) return [];
+  const matches = [];
+  for (const candidateDir of candidateDirs) {
+    const relDir = normalizeRelPath(candidateDir).replace(/\/?$/, "/");
+    const fullDir = path.resolve(cwd, relDir);
+    if (!existsSync(fullDir)) continue;
+    let stat;
+    try {
+      stat = statSync(fullDir);
+    } catch {
+      continue;
+    }
+    if (!stat.isDirectory()) continue;
+    for (const entry of readdirSync(fullDir, { withFileTypes: true })) {
+      if (!entry.isFile()) continue;
+      const relFile = `${relDir}${entry.name}`;
+      if (relFile.toLowerCase().includes(needle)) matches.push(relFile);
+    }
+  }
+  return [...new Set(matches)].sort();
+}
+
+function protectedTaskFiles(cwd, taskId, files) {
+  const declaredFiles = files.length ? files : ["docs/research/"];
+  const candidateDirs = declaredFiles.filter((file) => normalizeRelPath(file).endsWith("/"));
+  const evidenceFiles = findTaskEvidenceFiles(cwd, taskId, candidateDirs.length ? candidateDirs : ["docs/research/"]);
+  return evidenceFiles.length ? evidenceFiles : declaredFiles;
+}
+
 function isProtectedTask(task) {
   const haystack = [
     task?.id,
@@ -112,6 +147,10 @@ function selectProtectedBoardTasks({ cwd, boardPath, limit }) {
       skipped.push({ taskId, reason: "not-protected" });
       continue;
     }
+    const selectedFiles = protectedTaskFiles(cwd, taskId, taskFiles(task));
+    const declaredFilesSource = selectedFiles.some((file) => normalizeRelPath(file).toLowerCase().includes(taskId.toLowerCase()))
+      ? "local-task-evidence"
+      : "task-files";
     selected.push({
       taskId,
       workerId: sanitizeWorkerId(taskId),
@@ -119,7 +158,8 @@ function selectProtectedBoardTasks({ cwd, boardPath, limit }) {
       priority: normalizePriority(task?.priority) || "unknown",
       status,
       milestone: String(task?.milestone || "").trim(),
-      files: taskFiles(task).length ? taskFiles(task) : ["docs/research/"],
+      files: selectedFiles,
+      declaredFilesSource,
       acceptanceCriteria: taskCriteria(task),
     });
     if (selected.length >= limit) break;
@@ -223,6 +263,7 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
         taskId: workerSpecs[index]?.taskId,
         taskPriority: workerSpecs[index]?.priority,
         taskStatus: workerSpecs[index]?.status,
+        declaredFilesSource: workerSpecs[index]?.declaredFilesSource,
       } : {}),
       workerId: workerSpecs[index]?.workerId,
       ...packet,

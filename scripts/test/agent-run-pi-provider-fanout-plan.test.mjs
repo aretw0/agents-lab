@@ -120,6 +120,43 @@ test("provider fanout plan derives protected board research workers without disp
   }
 });
 
+test("provider fanout plan narrows protected board files to local task evidence when present", () => {
+  const cwd = workspace("pi-provider-fanout-plan-protected-board-evidence-");
+  try {
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    mkdirSync(path.join(cwd, "docs", "research"), { recursive: true });
+    writeFileSync(path.join(cwd, "docs", "research", "task-protected-1-local-canary.md"), "# local evidence\n", "utf8");
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-PROTECTED-1",
+          status: "planned",
+          priority: "p3",
+          milestone: "parked-for-0.8.0",
+          description: "Evaluate https://example.test later",
+          files: ["docs/research/"],
+          acceptance_criteria: ["Keep protected"],
+        },
+      ],
+    }, null, 2)}\n`, "utf8");
+
+    const report = buildAgentRunPiProviderFanoutPlan({
+      cwd,
+      fromBoardProtected: true,
+      batchId: "protected-research",
+    });
+
+    assert.equal(report.decision, "ready-for-operator-decision");
+    assert.equal(report.workerPackets[0].declaredFilesSource, "local-task-evidence");
+    assert.deepEqual(report.workerPackets[0].payload.run_spec.declared_files, ["docs/research/task-protected-1-local-canary.md"]);
+    assert.match(report.workerPackets[0].payload.run_spec.execution_preview.args.join(" "), /@docs\/research\/task-protected-1-local-canary\.md/);
+    assert.equal(report.dispatchAllowed, false);
+    assert.equal(report.processStartAllowed, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("provider fanout plan blocks protected board mode when no protected workers exist", () => {
   const cwd = workspace("pi-provider-fanout-plan-protected-board-empty-");
   try {
