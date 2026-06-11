@@ -1,0 +1,153 @@
+#!/usr/bin/env node
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import process from "node:process";
+import { pathToFileURL } from "node:url";
+
+const SCHEMA_VERSION = 1;
+const DEFAULT_PLAN = ".artifacts/agent-run-driver/pi-provider-fanout-plan.json";
+const DEFAULT_LAST_EXECUTION = ".artifacts/agent-run-driver/pi-provider-worker-a-real-execute.json";
+
+function parseArgs(argv = process.argv.slice(2)) {
+  const out = {
+    cwd: process.cwd(),
+    planPath: DEFAULT_PLAN,
+    lastExecutionPath: DEFAULT_LAST_EXECUTION,
+    outPath: "",
+    pretty: false,
+    help: false,
+  };
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
+    else if (arg === "--plan") out.planPath = argv[++index] ?? out.planPath;
+    else if (arg === "--last-execution") out.lastExecutionPath = argv[++index] ?? out.lastExecutionPath;
+    else if (arg === "--out") out.outPath = argv[++index] ?? "";
+    else if (arg === "--pretty") out.pretty = true;
+    else if (arg === "--help" || arg === "-h") out.help = true;
+    else throw new Error(`Unknown argument: ${arg}`);
+  }
+  return out;
+}
+
+function readJsonIfExists(filePath) {
+  return existsSync(filePath) ? JSON.parse(readFileSync(filePath, "utf8")) : undefined;
+}
+
+function writeJson(filePath, value, pretty = false) {
+  mkdirSync(path.dirname(filePath), { recursive: true });
+  writeFileSync(filePath, `${JSON.stringify(value, null, pretty ? 2 : 0)}\n`, "utf8");
+}
+
+function asWorkerPackets(plan) {
+  return Array.isArray(plan?.workerPackets) ? plan.workerPackets : [];
+}
+
+function workerEnvKeys(plan) {
+  return asWorkerPackets(plan).map((packet) => Object.keys(packet?.payload?.run_spec?.env ?? {}));
+}
+
+function collectLogLines(execution) {
+  const direct = execution?.driverStep?.follow?.lines;
+  return Array.isArray(direct) ? direct.filter((line) => typeof line === "string") : [];
+}
+
+function classifyProviderSignals(lines) {
+  const text = lines.join("\n").toLowerCase();
+  const signals = [];
+  if (text.includes("no api key found")) signals.push("provider-auth-missing");
+  if (text.includes("fetch failed")) signals.push("provider-fetch-failed");
+  if (text.includes("eperm") && text.includes("settings.json.lock")) signals.push("provider-global-settings-lock-error");
+  return signals;
+}
+
+export function buildAgentRunPiProviderReadiness(options = {}) {
+  const cwd = path.resolve(options.cwd ?? process.cwd());
+  const planPath = path.resolve(cwd, options.planPath || DEFAULT_PLAN);
+  const lastExecutionPath = path.resolve(cwd, options.lastExecutionPath || DEFAULT_LAST_EXECUTION);
+  const blockers = [];
+  const warnings = [];
+  const plan = readJsonIfExists(planPath);
+  const lastExecution = readJsonIfExists(lastExecutionPath);
+
+  if (!plan) blockers.push("provider-fanout-plan-missing");
+  if (plan && plan.mode !== "agent-run-pi-provider-fanout-plan") blockers.push("provider-fanout-plan-mode-invalid");
+  if (plan && plan.decision !== "ready-for-operator-decision") blockers.push("provider-fanout-plan-not-ready");
+  const workers = asWorkerPackets(plan);
+  if (plan && workers.length === 0) blockers.push("worker-packets-missing");
+
+  const envKeyRows = workerEnvKeys(plan);
+  const missingAgentDir = envKeyRows.some((keys) => !keys.includes("PI_CODING_AGENT_DIR"));
+  if (plan && missingAgentDir) blockers.push("pi-coding-agent-dir-missing");
+
+  const lastLines = collectLogLines(lastExecution);
+  const providerSignals = classifyProviderSignals(lastLines);
+  if (providerSignals.includes("provider-global-settings-lock-error")) blockers.push("provider-global-settings-lock-error");
+  if (providerSignals.includes("provider-auth-missing")) blockers.push("provider-auth-missing");
+  if (providerSignals.includes("provider-fetch-failed")) blockers.push("provider-fetch-failed");
+  if (!lastExecution) warnings.push("last-provider-execution-missing");
+
+  const decision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
+  return {
+    mode: "agent-run-pi-provider-readiness",
+    schemaVersion: SCHEMA_VERSION,
+    decision,
+    recommendation: decision === "blocked" ? "resolve-provider-readiness-blockers" : "provider-worker-canary-ready",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    batchExecutionAllowed: false,
+    planPath: path.relative(cwd, planPath) || planPath,
+    lastExecutionPath: path.relative(cwd, lastExecutionPath) || lastExecutionPath,
+    model: plan?.model,
+    workerCount: workers.length,
+    workerEnvKeys: envKeyRows,
+    lastExecution: lastExecution ? {
+      decision: lastExecution.decision,
+      terminalProcessState: lastExecution.terminalProcessState,
+      contractDecision: lastExecution.contractDecision,
+      outcomeBlockers: lastExecution.outcomeBlockers ?? [],
+      envKeys: lastExecution.driverStep?.registryEntry?.envKeys ?? [],
+    } : undefined,
+    providerSignals,
+    blockers,
+    warnings,
+    nextActions: decision === "blocked"
+      ? [
+          "resolve provider auth/connectivity before executing another provider worker",
+          "keep using preview-only worker dispatch until readiness is clear",
+        ]
+      : [
+          "execute exactly one provider worker through agent-run-pi-provider-worker-dispatch",
+          "require agentRunOutcomePacket pass before selecting another worker",
+        ],
+    summary: `agent-run-pi-provider-readiness: decision=${decision} model=${plan?.model ?? "missing"} workers=${workers.length} blockers=${blockers.length} dispatch=no`,
+  };
+}
+
+function printHelp() {
+  process.stdout.write([
+    "Usage: node scripts/agent-run-pi-provider-readiness.mjs [--plan PATH] [--last-execution PATH] [--out PATH] [--pretty]",
+    "",
+    "Report-only readiness gate for provider-backed pi workers. It never starts a process.",
+  ].join("\n") + "\n");
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  let args;
+  try {
+    args = parseArgs();
+  } catch (error) {
+    process.stderr.write(`${String(error?.message ?? error)}\n`);
+    process.exit(2);
+  }
+  if (args.help) {
+    printHelp();
+  } else {
+    const result = buildAgentRunPiProviderReadiness(args);
+    const json = JSON.stringify(result, null, args.pretty ? 2 : 0);
+    if (args.outPath) writeJson(path.resolve(args.cwd, args.outPath), result, args.pretty);
+    process.stdout.write(json);
+    process.stdout.write("\n");
+    if (result.decision === "blocked") process.exit(1);
+  }
+}
