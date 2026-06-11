@@ -524,6 +524,9 @@ function agentRunProviderProtectedBoardPlanEvidence(cwd) {
       model: payload.model,
       requireLocalTaskEvidence: payload.requireLocalTaskEvidence === true,
       workerCount: payload.workerCount,
+      workerDeclaredFilesSources: Array.isArray(payload.workerPackets)
+        ? payload.workerPackets.map((packet) => String(packet?.declaredFilesSource ?? "unknown"))
+        : [],
       selectedTaskIds: Array.isArray(payload.boardSelection?.selectedTaskIds) ? payload.boardSelection.selectedTaskIds : [],
       dispatchAllowed: payload.dispatchAllowed === true,
       processStartAllowed: payload.processStartAllowed === true,
@@ -979,8 +982,14 @@ export function gather(target, cwd = process.cwd()) {
   agentRunDrivers.currentHead = head;
   agentRunDrivers.canarySuiteHeadMatches = !head || agentRunDrivers.canarySuiteEvidence.gitHead === head;
   agentRunDrivers.protectedBoardPlanStrictRequired = true;
+  agentRunDrivers.protectedBoardPlanLocalEvidenceSourcesOk = agentRunDrivers.providerProtectedBoardPlanEvidence.present !== true
+    || agentRunDrivers.providerProtectedBoardPlanEvidence.workerDeclaredFilesSources.length === 0
+    || agentRunDrivers.providerProtectedBoardPlanEvidence.workerDeclaredFilesSources.every((source) => source === "local-task-evidence");
   agentRunDrivers.protectedBoardPlanStrictGateOk = agentRunDrivers.providerProtectedBoardPlanEvidence.present !== true
-    || agentRunDrivers.providerProtectedBoardPlanEvidence.requireLocalTaskEvidence === true;
+    || (
+      agentRunDrivers.providerProtectedBoardPlanEvidence.requireLocalTaskEvidence === true
+      && agentRunDrivers.protectedBoardPlanLocalEvidenceSourcesOk
+    );
   agentRunDrivers.ok = agentRunDrivers.scriptGateOk
     && agentRunDrivers.canarySuiteGateOk
     && agentRunDrivers.canarySuiteHeadMatches

@@ -1101,6 +1101,11 @@ test("readiness exposes protected board provider plan evidence when present", ()
       model: "openai-codex/gpt-5.3-codex-spark",
       requireLocalTaskEvidence: true,
       workerCount: 3,
+      workerPackets: [
+        { taskId: "TASK-BUD-480", declaredFilesSource: "local-task-evidence" },
+        { taskId: "TASK-BUD-521", declaredFilesSource: "local-task-evidence" },
+        { taskId: "TASK-BUD-676", declaredFilesSource: "local-task-evidence" },
+      ],
       boardSelection: {
         selectedTaskIds: ["TASK-BUD-480", "TASK-BUD-521", "TASK-BUD-676"],
       },
@@ -1121,14 +1126,72 @@ test("readiness exposes protected board provider plan evidence when present", ()
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.model, "openai-codex/gpt-5.3-codex-spark");
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.requireLocalTaskEvidence, true);
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.workerCount, 3);
+    assert.deepEqual(data.agentRunDrivers.providerProtectedBoardPlanEvidence.workerDeclaredFilesSources, [
+      "local-task-evidence",
+      "local-task-evidence",
+      "local-task-evidence",
+    ]);
     assert.deepEqual(data.agentRunDrivers.providerProtectedBoardPlanEvidence.selectedTaskIds, ["TASK-BUD-480", "TASK-BUD-521", "TASK-BUD-676"]);
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.dispatchAllowed, false);
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.processStartAllowed, false);
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.batchExecutionAllowed, false);
     assert.deepEqual(data.agentRunDrivers.providerProtectedBoardPlanEvidence.blockers, []);
     assert.equal(data.agentRunDrivers.protectedBoardPlanStrictRequired, true);
+    assert.equal(data.agentRunDrivers.protectedBoardPlanLocalEvidenceSourcesOk, true);
     assert.equal(data.agentRunDrivers.protectedBoardPlanStrictGateOk, true);
     assert.equal(data.agentRunDrivers.ok, true);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
+test("agent-run driver gate rejects protected board plan workers without local evidence source", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const evidencePath = path.join(workspace, ".artifacts", "agent-run-driver", "pi-provider-protected-board-fanout-plan.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, JSON.stringify({
+      mode: "agent-run-pi-provider-fanout-plan",
+      schemaVersion: 1,
+      decision: "ready-for-operator-decision",
+      source: "protected-board",
+      batchId: "protected-board-research-0-8",
+      model: "openai-codex/gpt-5.3-codex-spark",
+      requireLocalTaskEvidence: true,
+      workerCount: 2,
+      workerPackets: [
+        { taskId: "TASK-BUD-480", declaredFilesSource: "local-task-evidence" },
+        { taskId: "TASK-BUD-521", declaredFilesSource: "research-docs-fallback" },
+      ],
+      boardSelection: {
+        selectedTaskIds: ["TASK-BUD-480", "TASK-BUD-521"],
+      },
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      batchExecutionAllowed: false,
+      blockers: [],
+      summary: "agent-run-pi-provider-fanout-plan: decision=ready-for-operator-decision source=protected-board workers=2 dispatch=no",
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+    const report = buildReport(data);
+
+    assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.requireLocalTaskEvidence, true);
+    assert.deepEqual(data.agentRunDrivers.providerProtectedBoardPlanEvidence.workerDeclaredFilesSources, [
+      "local-task-evidence",
+      "research-docs-fallback",
+    ]);
+    assert.equal(data.agentRunDrivers.protectedBoardPlanLocalEvidenceSourcesOk, false);
+    assert.equal(data.agentRunDrivers.protectedBoardPlanStrictGateOk, false);
+    assert.equal(data.agentRunDrivers.ok, false);
+    assert.match(
+      report.checklist.find((item) => item.id === "agent-run-driver-gate").evidence,
+      /protected board provider plan evidence must require local task evidence/,
+    );
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }
