@@ -8,6 +8,7 @@ const SCHEMA_VERSION = 1;
 const DEFAULT_PLAN = ".artifacts/agent-run-driver/pi-provider-fanout-plan.json";
 const DEFAULT_LAST_EXECUTION = ".artifacts/agent-run-driver/pi-provider-worker-a-real-execute.json";
 const DEFAULT_NETWORK_CHECK = ".artifacts/agent-run-driver/pi-provider-network-check.json";
+const DEFAULT_PROVIDER_CANARY = ".artifacts/agent-run-driver/pi-provider-canary.json";
 
 function parseArgs(argv = process.argv.slice(2)) {
   const out = {
@@ -15,6 +16,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     planPath: DEFAULT_PLAN,
     lastExecutionPath: DEFAULT_LAST_EXECUTION,
     networkCheckPath: DEFAULT_NETWORK_CHECK,
+    providerCanaryPath: DEFAULT_PROVIDER_CANARY,
     outPath: "",
     pretty: false,
     help: false,
@@ -25,6 +27,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--plan") out.planPath = argv[++index] ?? out.planPath;
     else if (arg === "--last-execution") out.lastExecutionPath = argv[++index] ?? out.lastExecutionPath;
     else if (arg === "--network-check") out.networkCheckPath = argv[++index] ?? out.networkCheckPath;
+    else if (arg === "--provider-canary") out.providerCanaryPath = argv[++index] ?? out.providerCanaryPath;
     else if (arg === "--out") out.outPath = argv[++index] ?? "";
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
@@ -53,6 +56,12 @@ function workerEnvKeys(plan) {
 function collectLogLines(execution) {
   const direct = execution?.driverStep?.follow?.lines;
   return Array.isArray(direct) ? direct.filter((line) => typeof line === "string") : [];
+}
+
+function providerCanaryExecution(payload) {
+  if (!payload || typeof payload !== "object") return undefined;
+  if (payload.workerDispatch?.driverStep) return payload.workerDispatch;
+  return payload.driverStep ? payload : undefined;
 }
 
 export function classifyProviderSignals(lines) {
@@ -210,11 +219,19 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
   const planPath = path.resolve(cwd, options.planPath || DEFAULT_PLAN);
   const lastExecutionPath = path.resolve(cwd, options.lastExecutionPath || DEFAULT_LAST_EXECUTION);
   const networkCheckPath = path.resolve(cwd, options.networkCheckPath || DEFAULT_NETWORK_CHECK);
+  const providerCanaryPath = path.resolve(cwd, options.providerCanaryPath || DEFAULT_PROVIDER_CANARY);
   const blockers = [];
   const warnings = [];
   const plan = readJsonIfExists(planPath);
-  const lastExecution = readJsonIfExists(lastExecutionPath);
+  const legacyLastExecution = readJsonIfExists(lastExecutionPath);
+  const providerCanary = readJsonIfExists(providerCanaryPath);
+  const canaryExecution = providerCanaryExecution(providerCanary);
+  const lastExecution = canaryExecution ?? legacyLastExecution;
+  const lastExecutionSource = canaryExecution ? "provider-canary" : "last-execution";
   const providerNetworkCheck = providerNetworkCheckEvidence(readJsonIfExists(networkCheckPath));
+  const diagnosticNetworkCheck = lastExecutionSource === "provider-canary"
+    ? { ...providerNetworkCheck, decision: "not-applied-to-current-canary" }
+    : providerNetworkCheck;
 
   if (!plan) blockers.push("provider-fanout-plan-missing");
   if (plan && plan.mode !== "agent-run-pi-provider-fanout-plan") blockers.push("provider-fanout-plan-mode-invalid");
@@ -230,12 +247,17 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
   const providerSignals = classifyProviderSignals(lastLines);
   if (providerSignals.includes("provider-global-settings-lock-error")) blockers.push("provider-global-settings-lock-error");
   if (providerSignals.includes("provider-auth-missing")) blockers.push("provider-auth-missing");
-  if (providerSignals.includes("provider-fetch-failed") && providerNetworkCheck.decision !== "pass") blockers.push("provider-fetch-failed");
-  if (providerSignals.includes("provider-fetch-failed") && providerNetworkCheck.decision === "pass") {
+  if (providerSignals.includes("provider-fetch-failed") && diagnosticNetworkCheck.decision !== "pass") blockers.push("provider-fetch-failed");
+  if (providerSignals.includes("provider-fetch-failed") && diagnosticNetworkCheck.decision === "pass") {
     warnings.push("provider-fetch-failed-cleared-by-network-check");
   }
   if (!lastExecution) warnings.push("last-provider-execution-missing");
-  const providerDiagnostics = buildProviderDiagnostics({ providerSignals, plan, lastExecution, providerNetworkCheck });
+  const providerDiagnostics = buildProviderDiagnostics({
+    providerSignals,
+    plan,
+    lastExecution,
+    providerNetworkCheck: diagnosticNetworkCheck,
+  });
   const decision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   const providerRecoveryPlan = buildProviderRecoveryPlan({ decision, providerDiagnostics });
   const operatorActions = providerDiagnostics
@@ -252,6 +274,8 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
     batchExecutionAllowed: false,
     planPath: path.relative(cwd, planPath) || planPath,
     lastExecutionPath: path.relative(cwd, lastExecutionPath) || lastExecutionPath,
+    providerCanaryPath: path.relative(cwd, providerCanaryPath) || providerCanaryPath,
+    lastExecutionSource,
     networkCheckPath: path.relative(cwd, networkCheckPath) || networkCheckPath,
     model: plan?.model,
     workerCount: workers.length,
@@ -284,7 +308,7 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-pi-provider-readiness.mjs [--plan PATH] [--last-execution PATH] [--out PATH] [--pretty]",
+    "Usage: node scripts/agent-run-pi-provider-readiness.mjs [--plan PATH] [--last-execution PATH] [--provider-canary PATH] [--out PATH] [--pretty]",
     "",
     "Report-only readiness gate for provider-backed pi workers. It never starts a process.",
   ].join("\n") + "\n");

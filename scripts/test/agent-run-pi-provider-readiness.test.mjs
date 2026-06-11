@@ -32,6 +32,27 @@ function writeLastExecution(cwd, lines) {
   }, null, 2)}\n`, "utf8");
 }
 
+function writeProviderCanary(cwd, lines) {
+  const filePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-canary.json");
+  mkdirSync(path.dirname(filePath), { recursive: true });
+  writeFileSync(filePath, `${JSON.stringify({
+    mode: "agent-run-pi-provider-canary",
+    decision: "dispatched",
+    workerId: "worker-a",
+    workerDispatch: {
+      mode: "agent-run-pi-provider-worker-dispatch",
+      decision: "dispatched",
+      terminalProcessState: "failed",
+      contractDecision: "fail",
+      outcomeBlockers: ["process-state-failed"],
+      driverStep: {
+        registryEntry: { envKeys: ["PI_CODING_AGENT_DIR"] },
+        follow: { lines },
+      },
+    },
+  }, null, 2)}\n`, "utf8");
+}
+
 function writeNetworkCheck(cwd, payload) {
   const filePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-network-check.json");
   mkdirSync(path.dirname(filePath), { recursive: true });
@@ -153,6 +174,40 @@ test("provider readiness clears fetch failure when network check passes", () => 
       "execute exactly one provider worker through agent-run-pi-provider-worker-dispatch",
       "require agentRunOutcomePacket pass before selecting another worker",
     ]);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider readiness blocks current provider canary fetch failure even when network check passed", () => {
+  const cwd = workspace("pi-provider-readiness-current-canary-fail-");
+  try {
+    writeAgentRunPiProviderFanoutPlan({ cwd, outPath: ".artifacts/agent-run-driver/pi-provider-fanout-plan.json" });
+    writeLastExecution(cwd, ["fetch failed"]);
+    writeProviderCanary(cwd, ["fetch failed"]);
+    writeNetworkCheck(cwd, {
+      decision: "pass",
+      executeRequested: true,
+      networkRequestAllowed: true,
+      networkDecision: "reachable-auth-required",
+      httpStatus: 401,
+      blockers: [],
+      summary: "agent-run-pi-provider-network-check: decision=pass host=api.openai.com network=reachable-auth-required status=401",
+    });
+
+    const result = buildAgentRunPiProviderReadiness({ cwd });
+
+    assert.equal(result.decision, "blocked");
+    assert.equal(result.lastExecutionSource, "provider-canary");
+    assert.ok(result.providerSignals.includes("provider-fetch-failed"));
+    assert.ok(result.blockers.includes("provider-fetch-failed"));
+    assert.equal(result.providerNetworkCheck.decision, "pass");
+    assert.deepEqual(result.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
+      ["provider-fetch-failed", "network-or-provider", "blocker"],
+    ]);
+    assert.equal(result.providerRecoveryPlan.decision, "blocked");
+    assert.deepEqual(result.providerRecoveryPlan.blockers, ["provider-fetch-failed"]);
+    assert.ok(result.nextActions.includes("verify network, proxy, and provider endpoint reachability, then rerun readiness"));
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
