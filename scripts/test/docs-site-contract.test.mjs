@@ -175,20 +175,13 @@ test("public 0.8 readiness map matches the canonical release readiness gate", ()
 	const report = buildReport(gather("0.8.0"));
 	const checklist = new Map(report.checklist.map((item) => [item.id, item]));
 
-	assert.equal(report.ready, false, "0.8.0 should remain unreleased until the explicit version bump decision");
-	assert.equal(checklist.get("target-version-ready")?.ok, false, "target version should remain the deliberate release blocker");
+	assert.equal(checklist.get("target-version-ready")?.ok, true, "target version should be ready after the explicit 0.8.0 bump");
 	assert.equal(checklist.get("agent-run-driver-gate")?.ok, true, "agent-run driver gate should be present and green");
 	assert.match(readiness, /`agent-run-driver-gate` está verde/);
 	const boardReleaseClear = checklist.get("board-release-clear")?.ok === true;
-	if (boardReleaseClear) {
-		assert.match(readiness, /`board-release-clear` está verde/i);
-	} else {
-		assert.match(
-			readiness,
-			/`board-release-clear`[\s\S]{0,140}(est[aá]\s+bloqueado|n[aã]o\s+est[aá]\s+verde|not\s+green|still\s+blocked)/i,
-		);
-	}
-	assert.match(readiness, /`target-version-ready` segue falso/);
+	assert.equal(boardReleaseClear, true, "board release gate should be green");
+	assert.match(readiness, /`board-release-clear` est[aá] verde/i);
+	assert.match(readiness, /`target-version-ready` est[aá] verde/i);
 	assert.equal(pkg.scripts["release:readiness"], "node scripts/release-readiness-report.mjs");
 	assert.equal(pkg.scripts["release:readiness:json"], "node scripts/release-readiness-report.mjs --json");
 	assert.equal(pkg.scripts["release:readiness:strict"], "node scripts/release-readiness-report.mjs --strict");
@@ -204,9 +197,9 @@ test("public 0.8 readiness map matches the canonical release readiness gate", ()
 	assert.match(playbook, /board\.inProgressRows/);
 	assert.match(playbook, /board\.evidenceCandidateRows/);
 	assert.match(readiness, /schemaVersion=1/);
+	assert.match(readiness, /releaseBlockers: (none|\[\])/);
 	assert.match(readiness, /operatorDecisions/);
-	assert.match(readiness, /releaseVersionDecisionPacket/);
-	assert.match(readiness, /boardReleaseDispositionPacket/);
+	assert.match(readiness, /providerProtectedBoardPlanEvidence/);
 	assert.match(readiness, /releaseDecisionReady/);
 	assert.match(readiness, /worktree/);
 	assert.match(readiness, /userSurface/);
