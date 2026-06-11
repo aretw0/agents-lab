@@ -56,14 +56,18 @@ function recoveryPlanFromPayload(payload) {
   return undefined;
 }
 
-function commandPreviewFor(scriptName) {
+function commandPreviewFor(scriptName, extraArgs = []) {
   return scriptName
     ? {
         command: "pnpm",
-        args: ["run", scriptName],
+        args: ["run", scriptName, ...extraArgs],
         shellInterpolationAllowed: false,
       }
     : undefined;
+}
+
+function retryCanaryCommandPreviewFor(scriptName, recoveryRetry) {
+  return commandPreviewFor(scriptName, recoveryRetry === true ? ["--", "--recovery-retry"] : []);
 }
 
 function networkCheckEvidence(cwd, relPath = DEFAULT_NETWORK_CHECK) {
@@ -144,12 +148,13 @@ export function buildAgentRunPiProviderRecoveryNext(options = {}) {
     : decision === "next-action-ready"
     ? nextActionStage({ nextAction, networkEvidence: providerNetworkCheck, payload })
     : "blocked";
+  const recoveryRetrySelected = actionStage === "retry-provider-canary" && Boolean(nextAction);
   const selectedCommandPreview = actionStage === "rerun-readiness"
     ? commandPreviewFor(nextAction?.rerunReadinessScript)
     : actionStage === "resolve-network-blockers"
       ? commandPreviewFor(nextAction?.verificationScript)
       : actionStage === "retry-provider-canary"
-        ? commandPreviewFor(nextAction?.retryCanaryScript ?? "agent-run:pi-provider-canary")
+        ? retryCanaryCommandPreviewFor(nextAction?.retryCanaryScript ?? "agent-run:pi-provider-canary", recoveryRetrySelected)
       : providerNetworkCheck.commandPreview ?? commandPreviewFor(nextAction?.verificationScript);
   return {
     mode: "agent-run-pi-provider-recovery-next",
@@ -171,7 +176,7 @@ export function buildAgentRunPiProviderRecoveryNext(options = {}) {
     commandPreviews: nextAction
       ? {
           verification: commandPreviewFor(nextAction.verificationScript),
-          retryCanary: commandPreviewFor(nextAction.retryCanaryScript),
+          retryCanary: retryCanaryCommandPreviewFor(nextAction.retryCanaryScript, true),
           rerunReadiness: commandPreviewFor(nextAction.rerunReadinessScript),
         }
       : {},

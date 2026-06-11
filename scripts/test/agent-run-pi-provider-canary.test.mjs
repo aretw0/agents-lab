@@ -86,6 +86,46 @@ test("provider canary blocks execute when readiness is blocked", async () => {
   }
 });
 
+test("provider canary recovery retry bypasses stale readiness blocker for one selected worker", async () => {
+  const cwd = workspace("pi-provider-canary-recovery-retry-");
+  try {
+    writeBlockedReadinessExecution(cwd);
+    const result = await runAgentRunPiProviderCanary({ cwd, recoveryRetry: true });
+
+    assert.equal(result.decision, "ready-for-operator-decision");
+    assert.equal(result.recoveryRetry, true);
+    assert.equal(result.dispatchAllowed, false);
+    assert.equal(result.processStartAllowed, false);
+    assert.equal(result.providerReadiness.decision, "blocked");
+    assert.equal(result.workerDispatch.decision, "ready-for-operator-decision");
+    assert.deepEqual(result.blockers, []);
+    assert.ok(result.nextActions.includes("recovery retry is ready; execute exactly one provider worker after explicit approval"));
+    assert.equal(existsSync(path.join(cwd, ".pi", "reports", "agent-runs.json")), false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider canary recovery retry can execute exactly one worker with approval", async () => {
+  const cwd = workspace("pi-provider-canary-recovery-retry-execute-");
+  try {
+    writeBlockedReadinessExecution(cwd);
+    const result = await runAgentRunPiProviderCanary({ cwd, recoveryRetry: true, execute: true, approve: true });
+
+    assert.equal(result.decision, "dispatched");
+    assert.equal(result.recoveryRetry, true);
+    assert.equal(result.dispatchAllowed, true);
+    assert.equal(result.processStartAllowed, true);
+    assert.equal(result.agentRunOutcomePacket?.contractDecision, "pass");
+
+    const registry = JSON.parse(readFileSync(path.join(cwd, ".pi", "reports", "agent-runs.json"), "utf8"));
+    assert.equal(registry.runs.length, 1);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+
 test("provider canary executes exactly one worker with approval when readiness is clear", async () => {
   const cwd = workspace("pi-provider-canary-execute-");
   try {

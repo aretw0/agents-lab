@@ -1004,7 +1004,7 @@ test("readiness exposes provider recovery next evidence when present", () => {
       commandPreviews: {
         retryCanary: {
           command: "pnpm",
-          args: ["run", "agent-run:pi-provider-canary:container"],
+          args: ["run", "agent-run:pi-provider-canary:container", "--", "--recovery-retry"],
           shellInterpolationAllowed: false,
         },
       },
@@ -1025,7 +1025,7 @@ test("readiness exposes provider recovery next evidence when present", () => {
     assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.nextAction.retryCanaryScript, "agent-run:pi-provider-canary:container");
     assert.deepEqual(data.agentRunDrivers.providerRecoveryNextEvidence.selectedCommandPreview.args, ["run", "agent-run:pi-provider-network-check"]);
     assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.providerNetworkCheck.decision, "ready-for-operator-decision");
-    assert.deepEqual(data.agentRunDrivers.providerRecoveryNextEvidence.commandPreviews.retryCanary.args, ["run", "agent-run:pi-provider-canary:container"]);
+    assert.deepEqual(data.agentRunDrivers.providerRecoveryNextEvidence.commandPreviews.retryCanary.args, ["run", "agent-run:pi-provider-canary:container", "--", "--recovery-retry"]);
     assert.deepEqual(data.agentRunDrivers.providerRecoveryNextEvidence.blockers, []);
     assert.equal(data.agentRunDrivers.ok, true);
   } finally {

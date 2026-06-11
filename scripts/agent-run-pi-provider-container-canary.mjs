@@ -24,6 +24,7 @@ export function parseArgs(argv = process.argv.slice(2)) {
     workerId: "",
     execute: false,
     approve: false,
+    recoveryRetry: false,
     pretty: false,
     help: false,
   };
@@ -38,6 +39,7 @@ export function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--execute") out.execute = true;
     else if (arg === "--preview") out.execute = false;
     else if (arg === "--approve") out.approve = true;
+    else if (arg === "--recovery-retry") out.recoveryRetry = true;
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else throw new Error(`Unknown argument: ${arg}`);
@@ -57,6 +59,7 @@ export function buildProviderContainerCanaryDockerArgs(options) {
   ];
   if (options.workerId) command.push("--worker-id", String(options.workerId));
   if (options.approve === true) command.push("--approve");
+  if (options.recoveryRetry === true) command.push("--recovery-retry");
   if (options.pretty === true) command.push("--pretty");
   return buildDockerExecArgs({
     headless: true,
@@ -134,6 +137,7 @@ export function runAgentRunPiProviderContainerCanary(options = {}) {
     workerId: options.workerId,
     execute: options.execute === true,
     approve: options.approve === true,
+    recoveryRetry: options.recoveryRetry === true,
     pretty,
   });
   const result = spawnSync("docker", dockerArgs, { cwd, encoding: "utf8", stdio: "pipe" });
@@ -161,7 +165,7 @@ export function runAgentRunPiProviderContainerCanary(options = {}) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-pi-provider-container-canary.mjs --container NAME [--preview|--execute --approve] [--out PATH] [--canary-out PATH] [--pretty]",
+    "Usage: node scripts/agent-run-pi-provider-container-canary.mjs --container NAME [--preview|--execute --approve] [--recovery-retry] [--out PATH] [--canary-out PATH] [--pretty]",
     "",
     "Runs the single-worker provider canary inside the devcontainer through the headless lab wrapper.",
     `Default wrapper report: ${DEFAULT_REPORT_OUT}`,

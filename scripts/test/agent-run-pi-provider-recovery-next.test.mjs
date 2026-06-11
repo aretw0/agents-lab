@@ -81,7 +81,7 @@ test("provider recovery next selects first recovery action from container canary
     });
     assert.deepEqual(result.commandPreviews.retryCanary, {
       command: "pnpm",
-      args: ["run", "agent-run:pi-provider-canary:container"],
+      args: ["run", "agent-run:pi-provider-canary:container", "--", "--recovery-retry"],
       shellInterpolationAllowed: false,
     });
   } finally {
@@ -175,7 +175,7 @@ test("provider recovery next retries canary when readiness already used current 
     assert.equal(result.actionStage, "retry-provider-canary");
     assert.deepEqual(result.selectedCommandPreview, {
       command: "pnpm",
-      args: ["run", "agent-run:pi-provider-canary:container"],
+      args: ["run", "agent-run:pi-provider-canary:container", "--", "--recovery-retry"],
       shellInterpolationAllowed: false,
     });
     assert.match(result.nextActions.join("\n"), /retry with agent-run:pi-provider-canary:container/);

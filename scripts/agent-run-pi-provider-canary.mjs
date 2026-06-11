@@ -21,6 +21,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     workerId: "",
     execute: false,
     approve: false,
+    recoveryRetry: false,
     pretty: false,
     help: false,
   };
@@ -34,6 +35,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--execute") out.execute = true;
     else if (arg === "--preview") out.execute = false;
     else if (arg === "--approve") out.approve = true;
+    else if (arg === "--recovery-retry") out.recoveryRetry = true;
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else throw new Error(`Unknown argument: ${arg}`);
@@ -47,9 +49,9 @@ function writeJson(cwd, relPath, value, pretty = false) {
   writeFileSync(outPath, `${JSON.stringify(value, null, pretty ? 2 : 0)}\n`, "utf8");
 }
 
-function canaryDecision({ fanoutPlan, providerReadiness, workerDispatch, executeRequested }) {
+function canaryDecision({ fanoutPlan, providerReadiness, workerDispatch, executeRequested, recoveryRetry }) {
   if (fanoutPlan.decision === "blocked") return "blocked";
-  if (providerReadiness.decision === "blocked") return "blocked";
+  if (providerReadiness.decision === "blocked" && recoveryRetry !== true) return "blocked";
   if (workerDispatch.decision === "blocked") return "blocked";
   if (executeRequested) return workerDispatch.decision;
   return "ready-for-operator-decision";
@@ -59,6 +61,7 @@ export async function runAgentRunPiProviderCanary(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const planPath = options.planPath || DEFAULT_PLAN;
   const executeRequested = options.execute === true;
+  const recoveryRetry = options.recoveryRetry === true;
   const fanoutPlan = writeAgentRunPiProviderFanoutPlan({
     cwd,
     outPath: planPath,
@@ -72,15 +75,20 @@ export async function runAgentRunPiProviderCanary(options = {}) {
     workerId: options.workerId ?? "",
     execute: executeRequested,
     approve: options.approve === true,
+    skipReadiness: recoveryRetry,
   });
-  const decision = canaryDecision({ fanoutPlan, providerReadiness, workerDispatch, executeRequested });
+  const decision = canaryDecision({ fanoutPlan, providerReadiness, workerDispatch, executeRequested, recoveryRetry });
   const blockers = [
     ...(fanoutPlan.blockers ?? []).map((blocker) => `fanout-plan:${blocker}`),
-    ...(providerReadiness.blockers ?? []).map((blocker) => `provider-readiness:${blocker}`),
+    ...(recoveryRetry ? [] : (providerReadiness.blockers ?? []).map((blocker) => `provider-readiness:${blocker}`)),
     ...(workerDispatch.blockers ?? []).map((blocker) => `worker-dispatch:${blocker}`),
   ];
-  const providerDiagnostics = workerDispatch.providerDiagnostics ?? providerReadiness.providerDiagnostics ?? [];
-  const providerRecoveryPlan = workerDispatch.providerRecoveryPlan ?? providerReadiness.providerRecoveryPlan;
+  const providerDiagnostics = recoveryRetry && workerDispatch.decision !== "blocked"
+    ? workerDispatch.providerDiagnostics ?? []
+    : workerDispatch.providerDiagnostics ?? providerReadiness.providerDiagnostics ?? [];
+  const providerRecoveryPlan = recoveryRetry && workerDispatch.decision !== "blocked"
+    ? workerDispatch.providerRecoveryPlan
+    : workerDispatch.providerRecoveryPlan ?? providerReadiness.providerRecoveryPlan;
   const providerRecoveryBlocked = (providerRecoveryPlan?.blockers ?? []).length > 0;
 
   return {
@@ -91,6 +99,7 @@ export async function runAgentRunPiProviderCanary(options = {}) {
       ? "resolve-provider-canary-blockers"
       : executeRequested ? "record-provider-canary-outcome" : "approve-provider-worker-canary",
     executeRequested,
+    recoveryRetry,
     dispatchAllowed: workerDispatch.dispatchAllowed === true,
     processStartAllowed: workerDispatch.processStartAllowed === true,
     batchExecutionAllowed: false,
@@ -118,10 +127,14 @@ export async function runAgentRunPiProviderCanary(options = {}) {
             : workerDispatch.nextActions ?? []),
           "do not select another provider worker until this canary is ready or resolved",
         ]
+      : recoveryRetry && !executeRequested
+        ? ["recovery retry is ready; execute exactly one provider worker after explicit approval"]
       : providerRecoveryBlocked
         ? [
-            ...(workerDispatch.providerNextActions ?? []),
-            "rerun provider readiness after provider recovery actions before widening provider workers",
+            ...(recoveryRetry ? [] : (workerDispatch.providerNextActions ?? [])),
+            recoveryRetry
+              ? "recovery retry is ready; execute exactly one provider worker after explicit approval"
+              : "rerun provider readiness after provider recovery actions before widening provider workers",
           ]
       : executeRequested
         ? ["record provider canary outcome before widening to more workers"]
@@ -132,7 +145,7 @@ export async function runAgentRunPiProviderCanary(options = {}) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-pi-provider-canary.mjs [--preview|--execute --approve] [--worker-index N|--worker-id ID] [--out PATH] [--pretty]",
+    "Usage: node scripts/agent-run-pi-provider-canary.mjs [--preview|--execute --approve] [--recovery-retry] [--worker-index N|--worker-id ID] [--out PATH] [--pretty]",
     "",
     "Composes provider fanout plan, provider readiness, and exactly one provider worker dispatch.",
     "It never starts a process unless --execute and structured approval are provided and readiness is clear.",

@@ -24,6 +24,7 @@ test("provider container canary builds a headless devcontainer command", () => {
       workerId: "worker-b",
       execute: true,
       approve: true,
+      recoveryRetry: true,
     }),
     [
       "exec",
@@ -43,6 +44,7 @@ test("provider container canary builds a headless devcontainer command", () => {
       "--worker-id",
       "worker-b",
       "--approve",
+      "--recovery-retry",
     ],
   );
 });
