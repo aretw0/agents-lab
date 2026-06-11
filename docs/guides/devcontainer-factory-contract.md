@@ -53,6 +53,7 @@ Antes de aplicar este contrato em outro repositório:
 - [ ] Criar ou revisar `.github/actions/setup`.
 - [ ] Mover permissões GitHub Actions para job-level quando possível.
 - [ ] Rodar o gate canônico dentro do devcontainer.
+- [ ] Rodar `agent-run:driver-canaries:container` com `--container <nome>` quando houver devcontainer ativo para provar o driver headless antes de fan-out.
 
 ## Prompt De Handoff
 
