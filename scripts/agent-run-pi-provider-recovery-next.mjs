@@ -78,6 +78,9 @@ function networkCheckEvidence(cwd, relPath = DEFAULT_NETWORK_CHECK) {
       networkRequestAllowed: payload.networkRequestAllowed === true,
       networkDecision: payload.networkDecision,
       httpStatus: payload.httpStatus,
+      commandPreview: payload.commandPreview && typeof payload.commandPreview === "object"
+        ? payload.commandPreview
+        : undefined,
       blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
       summary: payload.summary ?? "provider network check artifact present",
     };
@@ -139,7 +142,7 @@ export function buildAgentRunPiProviderRecoveryNext(options = {}) {
     ? commandPreviewFor(nextAction?.rerunReadinessScript)
     : actionStage === "resolve-network-blockers"
       ? commandPreviewFor(nextAction?.verificationScript)
-      : commandPreviewFor(nextAction?.verificationScript);
+      : providerNetworkCheck.commandPreview ?? commandPreviewFor(nextAction?.verificationScript);
   return {
     mode: "agent-run-pi-provider-recovery-next",
     schemaVersion: SCHEMA_VERSION,

@@ -14,6 +14,7 @@ test("provider recovery next selects first recovery action from container canary
   const cwd = workspace("pi-provider-recovery-next-");
   try {
     const evidencePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-container-canary-report.json");
+    const networkPath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-network-check.json");
     mkdirSync(path.dirname(evidencePath), { recursive: true });
     writeFileSync(evidencePath, `${JSON.stringify({
       mode: "agent-run-pi-provider-container-canary-report",
@@ -30,6 +31,27 @@ test("provider recovery next selects first recovery action from container canary
         }],
       },
     })}\n`, "utf8");
+    writeFileSync(networkPath, `${JSON.stringify({
+      mode: "agent-run-pi-provider-network-check",
+      decision: "ready-for-operator-decision",
+      executeRequested: false,
+      networkRequestAllowed: false,
+      commandPreview: {
+        command: "pnpm",
+        args: [
+          "run",
+          "agent-run:pi-provider-network-check",
+          "--",
+          "--execute",
+          "--endpoint",
+          "https://api.openai.com/v1/models",
+          "--timeout-ms",
+          "10000",
+        ],
+        shellInterpolationAllowed: false,
+      },
+      blockers: [],
+    })}\n`, "utf8");
 
     const result = buildAgentRunPiProviderRecoveryNext({ cwd });
 
@@ -41,16 +63,17 @@ test("provider recovery next selects first recovery action from container canary
     assert.equal(result.sourcePath, ".artifacts/agent-run-driver/pi-provider-container-canary-report.json");
     assert.equal(result.nextAction.actionCode, "verify-provider-network");
     assert.equal(result.actionStage, "run-network-check");
-    assert.deepEqual(result.providerNetworkCheck, {
-      path: ".artifacts/agent-run-driver/pi-provider-network-check.json",
-      present: false,
-      decision: "missing",
-    });
-    assert.deepEqual(result.selectedCommandPreview, {
-      command: "pnpm",
-      args: ["run", "agent-run:pi-provider-network-check"],
-      shellInterpolationAllowed: false,
-    });
+    assert.equal(result.providerNetworkCheck.decision, "ready-for-operator-decision");
+    assert.deepEqual(result.selectedCommandPreview.args, [
+      "run",
+      "agent-run:pi-provider-network-check",
+      "--",
+      "--execute",
+      "--endpoint",
+      "https://api.openai.com/v1/models",
+      "--timeout-ms",
+      "10000",
+    ]);
     assert.deepEqual(result.commandPreviews.verification, {
       command: "pnpm",
       args: ["run", "agent-run:pi-provider-network-check"],
