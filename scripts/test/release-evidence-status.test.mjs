@@ -37,6 +37,10 @@ function refresh(overrides = {}) {
       "approve release publish v0.8.0",
     ],
     protectedActionsAllowed: false,
+    tagAllowed: false,
+    publishAllowed: false,
+    workflowDispatchAllowed: false,
+    processStartAllowed: false,
     ...overrides,
   };
 }
@@ -55,6 +59,10 @@ function finalGate(overrides = {}) {
       "approve release publish v0.8.0",
     ],
     protectedActionsAllowed: false,
+    tagAllowed: false,
+    publishAllowed: false,
+    workflowDispatchAllowed: false,
+    processStartAllowed: false,
     ...overrides,
   };
 }
@@ -183,6 +191,24 @@ test("release evidence status requires approval prompts in refresh and final gat
     assert.ok(result.blockers.includes("release-final-gate-approval-prompt-missing:approve release tag create v0.8.0"));
     assert.ok(result.blockers.includes("release-final-gate-approval-prompt-missing:approve release publish v0.8.0"));
     assert.equal(result.processStartAllowed, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("release evidence status blocks protected action flags in source artifacts", () => {
+  const cwd = workspace();
+  try {
+    writeJson(cwd, ".artifacts/release-cut/v0.8.0-evidence-refresh.json", refresh({ publishAllowed: true }));
+    writeJson(cwd, ".artifacts/release-cut/v0.8.0-final-gate.json", finalGate({ workflowDispatchAllowed: true }));
+
+    const result = buildReleaseEvidenceStatus({ cwd, target: "0.8.0", head: "abc1234" });
+
+    assert.equal(result.decision, "block");
+    assert.ok(result.blockers.includes("release-evidence-publishAllowed-not-false"));
+    assert.ok(result.blockers.includes("release-final-gate-workflowDispatchAllowed-not-false"));
+    assert.equal(result.publishAllowed, false);
+    assert.equal(result.workflowDispatchAllowed, false);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

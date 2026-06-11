@@ -58,6 +58,12 @@ function expectedApprovalPrompts(tag) {
   ];
 }
 
+function protectedFlagsFalse(packet, prefix, blockers) {
+  for (const flag of ["protectedActionsAllowed", "tagAllowed", "publishAllowed", "workflowDispatchAllowed", "processStartAllowed"]) {
+    if (packet?.[flag] !== false) blockers.push(`${prefix}-${flag}-not-false`);
+  }
+}
+
 export function buildReleaseEvidenceStatus(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const target = String(options.target ?? "0.8.0");
@@ -86,8 +92,8 @@ export function buildReleaseEvidenceStatus(options = {}) {
   if (finalGate && finalGate.mode !== "release-final-gate") blockers.push("release-final-gate-mode-mismatch");
   if (finalGate && finalGate.decision !== "pass") blockers.push("release-final-gate-not-pass");
   if (finalGate && finalGate.head && currentHead && finalGate.head !== currentHead) blockers.push("release-final-gate-stale-head");
-  if (refresh?.protectedActionsAllowed !== false) blockers.push("release-evidence-protected-actions-not-false");
-  if (finalGate?.protectedActionsAllowed !== false) blockers.push("release-final-gate-protected-actions-not-false");
+  if (refresh) protectedFlagsFalse(refresh, "release-evidence", blockers);
+  if (finalGate) protectedFlagsFalse(finalGate, "release-final-gate", blockers);
   for (const prompt of expectedPrompts) {
     if (!approvalPrompts.includes(prompt)) blockers.push(`release-approval-prompt-missing:${prompt}`);
     if (refresh && !(refresh.requiredApprovalPrompts ?? []).includes(prompt)) blockers.push(`release-evidence-approval-prompt-missing:${prompt}`);
