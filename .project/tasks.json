@@ -3,7 +3,7 @@
     {
       "id": "TASK-BUD-480",
       "description": "Pesquisa futura (externa) de influências: analisar https://github.com/nousresearch/hermes-agent e sintetizar padrões reaproveitáveis para o control-plane local-first.",
-      "status": "in_progress",
+      "status": "planned",
       "priority": "p3",
       "files": [
         "docs/research/"
@@ -13,13 +13,13 @@
         "Sem dispatch automático: decisão humana explícita antes de qualquer promoção de escopo.",
         "Registrar riscos/custos e proposta de experimento bounded."
       ],
-      "milestone": "colony-experiment-phase1",
-      "notes": "[rationale:risk-control] registrar influência cedo evita perda de contexto sem interromper lane ativa. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n[provenance:human] source_task=none reason=unspecified\n2026-05-01: packet protected-focus (report-only) => decision=ready-for-human-decision, recommendedOption=promote, code=protected-focus-promote-canary, risk=medium, value=low. Classificação protected: protected-external-url|protected-external-research|protected-parked-milestone.\n2026-05-01: decisão humana explícita = defer. Manter em protected-parked-legacy; sem promoção de escopo nesta rodada.\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Terceiro experimento do pipeline de dogfood progressivo."
+      "milestone": "parked-for-0.8.0",
+      "notes": "[rationale:risk-control] registrar influência cedo evita perda de contexto sem interromper lane ativa. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n[provenance:human] source_task=none reason=unspecified\n2026-05-01: packet protected-focus (report-only) => decision=ready-for-human-decision, recommendedOption=promote, code=protected-focus-promote-canary, risk=medium, value=low. Classificação protected: protected-external-url|protected-external-research|protected-parked-milestone.\n2026-05-01: decisão humana explícita = defer. Manter em protected-parked-legacy; sem promoção de escopo nesta rodada.\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Terceiro experimento do pipeline de dogfood progressivo.\n2026-06-11: board release disposition = park-for-target-release for 0.8.0; local evidence accepted for release gating; external research remains parked/protected."
     },
     {
       "id": "TASK-BUD-521",
       "description": "Influência externa parked: avaliar futuramente `mattpocock/sandcastle` como referência de isolamento/sandboxing quando a trilha background->spawn estiver madura.",
-      "status": "in_progress",
+      "status": "planned",
       "priority": "p3",
       "files": [
         "docs/research/"
@@ -29,16 +29,16 @@
         "Permanece fora da seleção local-safe até foco humano explícito.",
         "Sem execução/pesquisa externa automática nesta fatia."
       ],
-      "milestone": "colony-experiment-phase1",
-      "notes": "[rationale:risk-control] influência externa útil, mas deve entrar só após maturidade local-safe da trilha background/spawn. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito. https://github.com/mattpocock/sandcastle\n[provenance:human] source_task=TASK-BUD-520 reason=nova influência externa fornecida pelo operador para assimilação futura\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Segundo experimento do pipeline de dogfood progressivo."
+      "milestone": "parked-for-0.8.0",
+      "notes": "[rationale:risk-control] influência externa útil, mas deve entrar só após maturidade local-safe da trilha background/spawn. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito. https://github.com/mattpocock/sandcastle\n[provenance:human] source_task=TASK-BUD-520 reason=nova influência externa fornecida pelo operador para assimilação futura\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Segundo experimento do pipeline de dogfood progressivo.\n2026-06-11: board release disposition = park-for-target-release for 0.8.0; local evidence accepted for release gating; external research remains parked/protected."
     },
     {
       "id": "TASK-BUD-676",
       "description": "Influência externa parked: avaliar futuramente https://github.com/aretw0/claude-mem como referência de memória/sessão para continuidade com governança local-first.",
-      "status": "in_progress",
+      "status": "planned",
       "priority": "p3",
-      "milestone": "colony-experiment-phase1",
-      "notes": "[rationale:risk-control] Pesquisa externa fica parked/protected para não contaminar execução local-safe contínua sem decisão explícita do operador.\n[provenance:human] source_task=none reason=Pedido explícito do operador para adicionar claude-mem no backlog de influências para estudo futuro.\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Primeiro experimento do pipeline de dogfood progressivo."
+      "milestone": "parked-for-0.8.0",
+      "notes": "[rationale:risk-control] Pesquisa externa fica parked/protected para não contaminar execução local-safe contínua sem decisão explícita do operador.\n[provenance:human] source_task=none reason=Pedido explícito do operador para adicionar claude-mem no backlog de influências para estudo futuro.\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Primeiro experimento do pipeline de dogfood progressivo.\n2026-06-11: board release disposition = park-for-target-release for 0.8.0; local evidence accepted for release gating; external research remains parked/protected."
     },
     {
       "id": "TASK-BUD-1069",
