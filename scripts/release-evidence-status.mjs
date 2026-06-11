@@ -90,6 +90,8 @@ export function buildReleaseEvidenceStatus(options = {}) {
   if (finalGate?.protectedActionsAllowed !== false) blockers.push("release-final-gate-protected-actions-not-false");
   for (const prompt of expectedPrompts) {
     if (!approvalPrompts.includes(prompt)) blockers.push(`release-approval-prompt-missing:${prompt}`);
+    if (refresh && !(refresh.requiredApprovalPrompts ?? []).includes(prompt)) blockers.push(`release-evidence-approval-prompt-missing:${prompt}`);
+    if (finalGate && !(finalGate.requiredApprovalPrompts ?? []).includes(prompt)) blockers.push(`release-final-gate-approval-prompt-missing:${prompt}`);
   }
 
   const decision = blockers.length === 0 ? "pass" : "block";

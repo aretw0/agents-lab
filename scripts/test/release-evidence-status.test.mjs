@@ -169,3 +169,21 @@ test("release evidence status blocks when protected approval prompts are incompl
     rmSync(cwd, { recursive: true, force: true });
   }
 });
+
+test("release evidence status requires approval prompts in refresh and final gate artifacts", () => {
+  const cwd = workspace();
+  try {
+    writeJson(cwd, ".artifacts/release-cut/v0.8.0-evidence-refresh.json", refresh());
+    writeJson(cwd, ".artifacts/release-cut/v0.8.0-final-gate.json", finalGate({ requiredApprovalPrompts: [] }));
+
+    const result = buildReleaseEvidenceStatus({ cwd, target: "0.8.0", head: "abc1234" });
+
+    assert.equal(result.decision, "block");
+    assert.equal(result.approvalPromptCount, 4);
+    assert.ok(result.blockers.includes("release-final-gate-approval-prompt-missing:approve release tag create v0.8.0"));
+    assert.ok(result.blockers.includes("release-final-gate-approval-prompt-missing:approve release publish v0.8.0"));
+    assert.equal(result.processStartAllowed, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
