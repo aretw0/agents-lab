@@ -7,12 +7,14 @@ import { pathToFileURL } from "node:url";
 const SCHEMA_VERSION = 1;
 const DEFAULT_PLAN = ".artifacts/agent-run-driver/pi-provider-fanout-plan.json";
 const DEFAULT_LAST_EXECUTION = ".artifacts/agent-run-driver/pi-provider-worker-a-real-execute.json";
+const DEFAULT_NETWORK_CHECK = ".artifacts/agent-run-driver/pi-provider-network-check.json";
 
 function parseArgs(argv = process.argv.slice(2)) {
   const out = {
     cwd: process.cwd(),
     planPath: DEFAULT_PLAN,
     lastExecutionPath: DEFAULT_LAST_EXECUTION,
+    networkCheckPath: DEFAULT_NETWORK_CHECK,
     outPath: "",
     pretty: false,
     help: false,
@@ -22,6 +24,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
     else if (arg === "--plan") out.planPath = argv[++index] ?? out.planPath;
     else if (arg === "--last-execution") out.lastExecutionPath = argv[++index] ?? out.lastExecutionPath;
+    else if (arg === "--network-check") out.networkCheckPath = argv[++index] ?? out.networkCheckPath;
     else if (arg === "--out") out.outPath = argv[++index] ?? "";
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
@@ -61,7 +64,21 @@ function classifyProviderSignals(lines) {
   return signals;
 }
 
-function buildProviderDiagnostics({ providerSignals, plan, lastExecution }) {
+function providerNetworkCheckEvidence(payload) {
+  if (!payload) return { present: false, decision: "missing" };
+  return {
+    present: true,
+    decision: payload.decision ?? "unknown",
+    executeRequested: payload.executeRequested === true,
+    networkRequestAllowed: payload.networkRequestAllowed === true,
+    networkDecision: payload.networkDecision,
+    httpStatus: payload.httpStatus,
+    blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
+    summary: payload.summary ?? "provider network check artifact present",
+  };
+}
+
+function buildProviderDiagnostics({ providerSignals, plan, lastExecution, providerNetworkCheck }) {
   const diagnostics = [];
   if (!plan) {
     diagnostics.push({
@@ -90,13 +107,22 @@ function buildProviderDiagnostics({ providerSignals, plan, lastExecution }) {
       operatorAction: "configure provider credentials for the selected model before executing provider workers",
     });
   }
-  if (providerSignals.includes("provider-fetch-failed")) {
+  if (providerSignals.includes("provider-fetch-failed") && providerNetworkCheck?.decision !== "pass") {
     diagnostics.push({
       code: "provider-fetch-failed",
       category: "network-or-provider",
       severity: "blocker",
       evidence: "last execution log reported fetch failed",
       operatorAction: "verify network, proxy, and provider endpoint reachability, then rerun readiness",
+    });
+  }
+  if (providerSignals.includes("provider-fetch-failed") && providerNetworkCheck?.decision === "pass") {
+    diagnostics.push({
+      code: "provider-fetch-failed-cleared-by-network-check",
+      category: "network-or-provider",
+      severity: "warning",
+      evidence: "network check artifact passed after last execution reported fetch failed",
+      operatorAction: "retry exactly one provider canary after readiness is clear",
     });
   }
   if (providerSignals.includes("provider-global-settings-lock-error")) {
@@ -183,10 +209,12 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const planPath = path.resolve(cwd, options.planPath || DEFAULT_PLAN);
   const lastExecutionPath = path.resolve(cwd, options.lastExecutionPath || DEFAULT_LAST_EXECUTION);
+  const networkCheckPath = path.resolve(cwd, options.networkCheckPath || DEFAULT_NETWORK_CHECK);
   const blockers = [];
   const warnings = [];
   const plan = readJsonIfExists(planPath);
   const lastExecution = readJsonIfExists(lastExecutionPath);
+  const providerNetworkCheck = providerNetworkCheckEvidence(readJsonIfExists(networkCheckPath));
 
   if (!plan) blockers.push("provider-fanout-plan-missing");
   if (plan && plan.mode !== "agent-run-pi-provider-fanout-plan") blockers.push("provider-fanout-plan-mode-invalid");
@@ -202,9 +230,12 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
   const providerSignals = classifyProviderSignals(lastLines);
   if (providerSignals.includes("provider-global-settings-lock-error")) blockers.push("provider-global-settings-lock-error");
   if (providerSignals.includes("provider-auth-missing")) blockers.push("provider-auth-missing");
-  if (providerSignals.includes("provider-fetch-failed")) blockers.push("provider-fetch-failed");
+  if (providerSignals.includes("provider-fetch-failed") && providerNetworkCheck.decision !== "pass") blockers.push("provider-fetch-failed");
+  if (providerSignals.includes("provider-fetch-failed") && providerNetworkCheck.decision === "pass") {
+    warnings.push("provider-fetch-failed-cleared-by-network-check");
+  }
   if (!lastExecution) warnings.push("last-provider-execution-missing");
-  const providerDiagnostics = buildProviderDiagnostics({ providerSignals, plan, lastExecution });
+  const providerDiagnostics = buildProviderDiagnostics({ providerSignals, plan, lastExecution, providerNetworkCheck });
   const decision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   const providerRecoveryPlan = buildProviderRecoveryPlan({ decision, providerDiagnostics });
   const operatorActions = providerDiagnostics
@@ -221,6 +252,7 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
     batchExecutionAllowed: false,
     planPath: path.relative(cwd, planPath) || planPath,
     lastExecutionPath: path.relative(cwd, lastExecutionPath) || lastExecutionPath,
+    networkCheckPath: path.relative(cwd, networkCheckPath) || networkCheckPath,
     model: plan?.model,
     workerCount: workers.length,
     workerEnvKeys: envKeyRows,
@@ -231,6 +263,7 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
       outcomeBlockers: lastExecution.outcomeBlockers ?? [],
       envKeys: lastExecution.driverStep?.registryEntry?.envKeys ?? [],
     } : undefined,
+    providerNetworkCheck,
     providerSignals,
     providerDiagnostics,
     providerRecoveryPlan,

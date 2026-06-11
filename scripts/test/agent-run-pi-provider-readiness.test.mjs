@@ -32,6 +32,16 @@ function writeLastExecution(cwd, lines) {
   }, null, 2)}\n`, "utf8");
 }
 
+function writeNetworkCheck(cwd, payload) {
+  const filePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-network-check.json");
+  mkdirSync(path.dirname(filePath), { recursive: true });
+  writeFileSync(filePath, `${JSON.stringify({
+    mode: "agent-run-pi-provider-network-check",
+    schemaVersion: 1,
+    ...payload,
+  }, null, 2)}\n`, "utf8");
+}
+
 test("provider readiness is ready when plan is isolated and no failing prior execution exists", () => {
   const cwd = workspace("pi-provider-readiness-ready-");
   try {
@@ -105,6 +115,44 @@ test("provider readiness blocks known provider auth and fetch failures", () => {
     assert.equal(result.providerRecoveryPlan.actions.find((item) => item.actionCode === "verify-provider-network").verificationScript, "agent-run:pi-provider-network-check");
     assert.ok(result.nextActions.includes("configure provider credentials for the selected model before executing provider workers"));
     assert.ok(result.nextActions.includes("verify network, proxy, and provider endpoint reachability, then rerun readiness"));
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider readiness clears fetch failure when network check passes", () => {
+  const cwd = workspace("pi-provider-readiness-network-cleared-");
+  try {
+    writeAgentRunPiProviderFanoutPlan({ cwd, outPath: ".artifacts/agent-run-driver/pi-provider-fanout-plan.json" });
+    writeLastExecution(cwd, ["fetch failed"]);
+    writeNetworkCheck(cwd, {
+      decision: "pass",
+      executeRequested: true,
+      networkRequestAllowed: true,
+      networkDecision: "reachable-auth-required",
+      httpStatus: 401,
+      blockers: [],
+      summary: "agent-run-pi-provider-network-check: decision=pass host=api.openai.com network=reachable-auth-required status=401",
+    });
+
+    const result = buildAgentRunPiProviderReadiness({ cwd });
+
+    assert.equal(result.decision, "ready-for-operator-decision");
+    assert.ok(result.providerSignals.includes("provider-fetch-failed"));
+    assert.equal(result.blockers.includes("provider-fetch-failed"), false);
+    assert.ok(result.warnings.includes("provider-fetch-failed-cleared-by-network-check"));
+    assert.equal(result.providerNetworkCheck.decision, "pass");
+    assert.equal(result.providerNetworkCheck.networkDecision, "reachable-auth-required");
+    assert.deepEqual(result.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
+      ["provider-fetch-failed-cleared-by-network-check", "network-or-provider", "warning"],
+    ]);
+    assert.equal(result.providerRecoveryPlan.decision, "ready");
+    assert.deepEqual(result.providerRecoveryPlan.blockers, []);
+    assert.deepEqual(result.providerRecoveryPlan.actions, []);
+    assert.deepEqual(result.nextActions, [
+      "execute exactly one provider worker through agent-run-pi-provider-worker-dispatch",
+      "require agentRunOutcomePacket pass before selecting another worker",
+    ]);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

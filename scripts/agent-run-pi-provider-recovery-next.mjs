@@ -130,18 +130,23 @@ export function buildAgentRunPiProviderRecoveryNext(options = {}) {
   const actions = Array.isArray(providerRecoveryPlan?.actions) ? providerRecoveryPlan.actions : [];
   const nextAction = actions[0];
   const providerNetworkCheck = networkCheckEvidence(cwd, options.networkCheckPath || DEFAULT_NETWORK_CHECK);
+  const recoveryReady = providerRecoveryPlan?.decision === "ready" && actions.length === 0;
   const blockers = [
     ...(providerRecoveryPlan ? [] : ["provider-recovery-plan-missing"]),
-    ...(providerRecoveryPlan && actions.length === 0 ? ["provider-recovery-actions-missing"] : []),
+    ...(providerRecoveryPlan && actions.length === 0 && !recoveryReady ? ["provider-recovery-actions-missing"] : []),
   ];
   const decision = blockers.length === 0 ? "next-action-ready" : "blocked";
-  const actionStage = decision === "next-action-ready"
+  const actionStage = recoveryReady
+    ? "retry-provider-canary"
+    : decision === "next-action-ready"
     ? nextActionStage({ nextAction, networkEvidence: providerNetworkCheck })
     : "blocked";
   const selectedCommandPreview = actionStage === "rerun-readiness"
     ? commandPreviewFor(nextAction?.rerunReadinessScript)
     : actionStage === "resolve-network-blockers"
       ? commandPreviewFor(nextAction?.verificationScript)
+      : actionStage === "retry-provider-canary"
+        ? commandPreviewFor("agent-run:pi-provider-canary")
       : providerNetworkCheck.commandPreview ?? commandPreviewFor(nextAction?.verificationScript);
   return {
     mode: "agent-run-pi-provider-recovery-next",
@@ -169,7 +174,12 @@ export function buildAgentRunPiProviderRecoveryNext(options = {}) {
       : {},
     blockers,
     nextActions: decision === "next-action-ready"
-      ? actionStage === "rerun-readiness"
+      ? actionStage === "retry-provider-canary"
+        ? [
+            "provider recovery is clear; run agent-run:pi-provider-canary preview before any approved execute",
+            "execute only one provider worker canary after explicit approval",
+          ]
+        : actionStage === "rerun-readiness"
         ? [
             "provider network check passed; rerun agent-run:pi-provider-readiness",
             `retry with ${nextAction.retryCanaryScript} only after readiness improves`,

@@ -184,6 +184,40 @@ test("provider recovery next keeps network blockers ahead of readiness rerun", (
   }
 });
 
+test("provider recovery next selects provider canary preview when recovery is clear", () => {
+  const cwd = workspace("pi-provider-recovery-next-clear-");
+  try {
+    const evidencePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-readiness.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, `${JSON.stringify({
+      mode: "agent-run-pi-provider-readiness",
+      decision: "ready-for-operator-decision",
+      providerRecoveryPlan: {
+        mode: "agent-run-pi-provider-recovery-plan",
+        decision: "ready",
+        actions: [],
+        blockers: [],
+      },
+    })}\n`, "utf8");
+
+    const result = buildAgentRunPiProviderRecoveryNext({ cwd, sourcePath: ".artifacts/agent-run-driver/pi-provider-readiness.json" });
+
+    assert.equal(result.decision, "next-action-ready");
+    assert.deepEqual(result.blockers, []);
+    assert.equal(result.actionStage, "retry-provider-canary");
+    assert.equal(result.actionCount, 0);
+    assert.equal(result.nextAction, null);
+    assert.deepEqual(result.selectedCommandPreview, {
+      command: "pnpm",
+      args: ["run", "agent-run:pi-provider-canary"],
+      shellInterpolationAllowed: false,
+    });
+    assert.match(result.nextActions.join("\n"), /provider recovery is clear/);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("provider recovery next blocks when no recovery plan exists", () => {
   const cwd = workspace("pi-provider-recovery-next-missing-");
   try {
