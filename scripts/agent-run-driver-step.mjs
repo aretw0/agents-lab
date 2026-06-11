@@ -134,6 +134,16 @@ function hasStructuredApproval(value) {
     && value.approval_state === "approved";
 }
 
+function processIsAlive(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return error?.code === "EPERM";
+  }
+}
+
 function parseRunSpec(raw) {
   const row = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
   const preview = row.execution_preview && typeof row.execution_preview === "object" && !Array.isArray(row.execution_preview)
@@ -368,7 +378,8 @@ export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
   if (!runSpec.logPath) blockers.push("log-path-missing");
   if (!runSpec.executionPreview.command) blockers.push("execution-preview-command-missing");
   if (executeRequested && !hasStructuredApproval(payload.operator_approval)) blockers.push("structured-operator-approval-missing");
-  if (executeRequested && existing?.state === "running") blockers.push("run-already-running");
+  const existingRunAlive = existing?.state === "running" && processIsAlive(existing.pid);
+  if (executeRequested && existingRunAlive) blockers.push("run-already-running");
   if (executeRequested && !sameCwd(runCwd, cwd)) blockers.push("execute-cwd-mismatch");
 
   const dispatchAllowed = executeRequested && blockers.length === 0;

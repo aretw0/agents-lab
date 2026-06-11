@@ -65,7 +65,7 @@ test("headless driver step blocks duplicate running run", async () => {
   const registryDir = path.join(cwd, ".pi", "reports");
   mkdirSync(registryDir, { recursive: true });
   writeFileSync(path.join(registryDir, "agent-runs.json"), JSON.stringify({
-    runs: [{ runId: "headless-driver-step-node-version", state: "running", pid: 1234 }],
+    runs: [{ runId: "headless-driver-step-node-version", state: "running", pid: process.pid }],
   }), "utf8");
 
   const result = await runAgentRunDriverStep({
@@ -77,6 +77,30 @@ test("headless driver step blocks duplicate running run", async () => {
   assert.equal(result.decision, "blocked");
   assert.equal(result.dispatchAllowed, false);
   assert.ok(result.blockers.includes("run-already-running"));
+});
+
+test("headless driver step recovers stale running registry rows", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-stale-running-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const registryDir = path.join(cwd, ".pi", "reports");
+  mkdirSync(registryDir, { recursive: true });
+  writeFileSync(path.join(registryDir, "agent-runs.json"), JSON.stringify({
+    runs: [{ runId: "headless-driver-step-node-version", state: "running", pid: 99999999 }],
+  }), "utf8");
+
+  const result = await runAgentRunDriverStep({
+    ...payload(),
+    execute: true,
+    operator_approval: structuredApproval(),
+    follow: true,
+    build_outcome: true,
+    follow_max_wait_ms: 5_000,
+  }, cwd);
+
+  assert.equal(result.decision, "dispatched");
+  assert.equal(result.dispatchAllowed, true);
+  assert.equal(result.follow?.status.state, "completed");
+  assert.equal(result.agentRunOutcomePacket?.contractDecision, "pass");
 });
 
 test("headless driver step blocks cwd mismatch before dispatch", async () => {
