@@ -4,7 +4,12 @@ import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { runAgentRunDriverStep } from "./agent-run-driver-step.mjs";
-import { buildAgentRunPiProviderReadiness } from "./agent-run-pi-provider-readiness.mjs";
+import {
+  buildAgentRunPiProviderReadiness,
+  buildProviderDiagnostics,
+  buildProviderRecoveryPlan,
+  classifyProviderSignals,
+} from "./agent-run-pi-provider-readiness.mjs";
 
 const SCHEMA_VERSION = 1;
 const DEFAULT_PLAN = ".artifacts/agent-run-driver/pi-provider-fanout-plan.json";
@@ -106,6 +111,42 @@ function withExecutionIntent(driverStepCall, execute, operatorApproval) {
 
 function outcomeBlockersFor(agentRunOutcomePacket) {
   return Array.isArray(agentRunOutcomePacket?.blockers) ? agentRunOutcomePacket.blockers : [];
+}
+
+function providerRecoveryFromCurrentExecution({ plan, driverStep }) {
+  const lines = Array.isArray(driverStep?.follow?.lines)
+    ? driverStep.follow.lines.filter((line) => typeof line === "string")
+    : [];
+  const providerSignals = classifyProviderSignals(lines);
+  if (providerSignals.length === 0) {
+    return {
+      providerSignals,
+      providerDiagnostics: [],
+      providerRecoveryPlan: undefined,
+      providerNextActions: [],
+    };
+  }
+  const lastExecution = { driverStep };
+  const providerNetworkCheck = { present: false, decision: "not-applied-to-current-execution" };
+  const providerDiagnostics = buildProviderDiagnostics({
+    providerSignals,
+    plan,
+    lastExecution,
+    providerNetworkCheck,
+  });
+  const hasBlockers = providerDiagnostics.some((diagnostic) => diagnostic.severity === "blocker");
+  const providerRecoveryPlan = buildProviderRecoveryPlan({
+    decision: hasBlockers ? "blocked" : "ready-for-operator-decision",
+    providerDiagnostics,
+  });
+  return {
+    providerSignals,
+    providerDiagnostics,
+    providerRecoveryPlan,
+    providerNextActions: providerDiagnostics
+      .filter((diagnostic) => diagnostic.severity === "blocker")
+      .map((diagnostic) => diagnostic.operatorAction),
+  };
 }
 
 function buildPreview({ plan, planPath, worker, workerIndex, workerId, driverStepCall, blockers }) {
@@ -227,6 +268,8 @@ export async function runAgentRunPiProviderWorkerDispatch(options = {}) {
 
   const driverStep = await runAgentRunDriverStep(driverStepCall, cwd);
   const outcomeBlockers = outcomeBlockersFor(driverStep.agentRunOutcomePacket);
+  const currentProviderRecovery = providerRecoveryFromCurrentExecution({ plan, driverStep });
+  const providerRecoveryBlockers = currentProviderRecovery.providerRecoveryPlan?.blockers ?? [];
   return {
     mode: "agent-run-pi-provider-worker-dispatch",
     schemaVersion: SCHEMA_VERSION,
@@ -250,8 +293,17 @@ export async function runAgentRunPiProviderWorkerDispatch(options = {}) {
     terminalProcessState: driverStep.follow?.status?.state,
     contractDecision: driverStep.agentRunOutcomePacket?.contractDecision,
     outcomeBlockers,
+    providerSignals: currentProviderRecovery.providerSignals,
+    providerDiagnostics: currentProviderRecovery.providerDiagnostics,
+    providerRecoveryPlan: currentProviderRecovery.providerRecoveryPlan,
+    providerNextActions: currentProviderRecovery.providerNextActions,
     blockers: driverStep.blockers ?? [],
-    nextActions: driverStep.agentRunOutcomePacket?.contractDecision === "pass"
+    nextActions: providerRecoveryBlockers.length > 0
+      ? [
+          ...currentProviderRecovery.providerNextActions,
+          "rerun provider readiness after provider recovery actions before selecting any next worker",
+        ]
+      : driverStep.agentRunOutcomePacket?.contractDecision === "pass"
       ? ["record this outcome before selecting another worker; do not fan-in until all required outcomes pass"]
       : ["resolve driver step blockers or outcome blockers before selecting any next worker"],
     summary: `agent-run-pi-provider-worker-dispatch: decision=${driverStep.decision} worker=${workerId} runId=${runIdFor(selected.packet)} dispatch=${driverStep.dispatchAllowed ? "yes" : "no"} contract=${driverStep.agentRunOutcomePacket?.contractDecision ?? "not-built"}`,

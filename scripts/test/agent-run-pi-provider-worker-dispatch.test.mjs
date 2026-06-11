@@ -16,10 +16,10 @@ function workspace(prefix) {
   return cwd;
 }
 
-function failingWorkspace(prefix) {
+function failingWorkspace(prefix, message = "provider missing") {
   const cwd = workspace(prefix);
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
-  writeFileSync(cliPath, "console.error('provider missing'); process.exit(1)\n", "utf8");
+  writeFileSync(cliPath, `console.error(${JSON.stringify(message)}); process.exit(1)\n`, "utf8");
   return cwd;
 }
 
@@ -131,6 +131,35 @@ test("provider worker dispatch surfaces terminal outcome failure at top level", 
     assert.equal(result.contractDecision, "fail");
     assert.deepEqual(result.outcomeBlockers, ["process-state-failed"]);
     assert.match(result.summary, /contract=fail/);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider worker dispatch classifies current provider fetch failure for recovery", async () => {
+  const cwd = failingWorkspace("pi-provider-worker-current-fetch-fail-", "fetch failed");
+  try {
+    plan(cwd);
+    const result = await runAgentRunPiProviderWorkerDispatch({
+      cwd,
+      execute: true,
+      approve: true,
+      skipReadiness: true,
+    });
+
+    assert.equal(result.decision, "dispatched");
+    assert.equal(result.terminalProcessState, "failed");
+    assert.equal(result.contractDecision, "fail");
+    assert.ok(result.providerSignals.includes("provider-fetch-failed"));
+    assert.deepEqual(result.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
+      ["provider-fetch-failed", "network-or-provider", "blocker"],
+    ]);
+    assert.equal(result.providerRecoveryPlan.mode, "agent-run-pi-provider-recovery-plan");
+    assert.equal(result.providerRecoveryPlan.decision, "blocked");
+    assert.deepEqual(result.providerRecoveryPlan.actions.map((item) => [item.diagnosticCode, item.actionCode, item.verificationScript]), [
+      ["provider-fetch-failed", "verify-provider-network", "agent-run:pi-provider-network-check"],
+    ]);
+    assert.ok(result.nextActions.includes("verify network, proxy, and provider endpoint reachability, then rerun readiness"));
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

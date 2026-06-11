@@ -55,7 +55,7 @@ function collectLogLines(execution) {
   return Array.isArray(direct) ? direct.filter((line) => typeof line === "string") : [];
 }
 
-function classifyProviderSignals(lines) {
+export function classifyProviderSignals(lines) {
   const text = lines.join("\n").toLowerCase();
   const signals = [];
   if (text.includes("no api key found")) signals.push("provider-auth-missing");
@@ -78,7 +78,7 @@ function providerNetworkCheckEvidence(payload) {
   };
 }
 
-function buildProviderDiagnostics({ providerSignals, plan, lastExecution, providerNetworkCheck }) {
+export function buildProviderDiagnostics({ providerSignals, plan, lastExecution, providerNetworkCheck }) {
   const diagnostics = [];
   if (!plan) {
     diagnostics.push({
@@ -188,7 +188,7 @@ function providerRecoveryAction(diagnostic) {
   };
 }
 
-function buildProviderRecoveryPlan({ decision, providerDiagnostics }) {
+export function buildProviderRecoveryPlan({ decision, providerDiagnostics }) {
   const blockerDiagnostics = providerDiagnostics.filter((diagnostic) => diagnostic.severity === "blocker");
   const actions = blockerDiagnostics.map(providerRecoveryAction);
   return {

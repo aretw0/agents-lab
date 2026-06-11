@@ -79,6 +79,9 @@ export async function runAgentRunPiProviderCanary(options = {}) {
     ...(providerReadiness.blockers ?? []).map((blocker) => `provider-readiness:${blocker}`),
     ...(workerDispatch.blockers ?? []).map((blocker) => `worker-dispatch:${blocker}`),
   ];
+  const providerDiagnostics = workerDispatch.providerDiagnostics ?? providerReadiness.providerDiagnostics ?? [];
+  const providerRecoveryPlan = workerDispatch.providerRecoveryPlan ?? providerReadiness.providerRecoveryPlan;
+  const providerRecoveryBlocked = (providerRecoveryPlan?.blockers ?? []).length > 0;
 
   return {
     mode: "agent-run-pi-provider-canary",
@@ -105,8 +108,8 @@ export async function runAgentRunPiProviderCanary(options = {}) {
     providerReadiness,
     workerDispatch,
     agentRunOutcomePacket: workerDispatch.agentRunOutcomePacket,
-    providerDiagnostics: workerDispatch.providerDiagnostics ?? providerReadiness.providerDiagnostics ?? [],
-    providerRecoveryPlan: workerDispatch.providerRecoveryPlan ?? providerReadiness.providerRecoveryPlan,
+    providerDiagnostics,
+    providerRecoveryPlan,
     blockers,
     nextActions: decision === "blocked"
       ? [
@@ -115,6 +118,11 @@ export async function runAgentRunPiProviderCanary(options = {}) {
             : workerDispatch.nextActions ?? []),
           "do not select another provider worker until this canary is ready or resolved",
         ]
+      : providerRecoveryBlocked
+        ? [
+            ...(workerDispatch.providerNextActions ?? []),
+            "rerun provider readiness after provider recovery actions before widening provider workers",
+          ]
       : executeRequested
         ? ["record provider canary outcome before widening to more workers"]
         : ["rerun with --execute --approve to dispatch exactly one provider worker canary"],

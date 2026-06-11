@@ -15,6 +15,13 @@ function workspace(prefix) {
   return cwd;
 }
 
+function failingWorkspace(prefix, message = "fetch failed") {
+  const cwd = workspace(prefix);
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  writeFileSync(cliPath, `console.error(${JSON.stringify(message)}); process.exit(1)\n`, "utf8");
+  return cwd;
+}
+
 function writeBlockedReadinessExecution(cwd) {
   const filePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-worker-a-real-execute.json");
   mkdirSync(path.dirname(filePath), { recursive: true });
@@ -95,6 +102,30 @@ test("provider canary executes exactly one worker with approval when readiness i
     assert.equal(registry.runs.length, 1);
     assert.match(registry.runs[0].runId, /worker-b$/);
     assert.equal(registry.runs[0].state, "completed");
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider canary propagates current worker provider recovery diagnostics", async () => {
+  const cwd = failingWorkspace("pi-provider-canary-current-fetch-fail-");
+  try {
+    const result = await runAgentRunPiProviderCanary({ cwd, execute: true, approve: true });
+
+    assert.equal(result.decision, "dispatched");
+    assert.equal(result.dispatchAllowed, true);
+    assert.equal(result.processStartAllowed, true);
+    assert.equal(result.agentRunOutcomePacket?.contractDecision, "fail");
+    assert.deepEqual(result.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
+      ["provider-fetch-failed", "network-or-provider", "blocker"],
+    ]);
+    assert.equal(result.providerRecoveryPlan.mode, "agent-run-pi-provider-recovery-plan");
+    assert.equal(result.providerRecoveryPlan.decision, "blocked");
+    assert.deepEqual(result.providerRecoveryPlan.actions.map((item) => [item.diagnosticCode, item.actionCode, item.verificationScript]), [
+      ["provider-fetch-failed", "verify-provider-network", "agent-run:pi-provider-network-check"],
+    ]);
+    assert.ok(result.workerDispatch.nextActions.includes("verify network, proxy, and provider endpoint reachability, then rerun readiness"));
+    assert.ok(result.nextActions.includes("verify network, proxy, and provider endpoint reachability, then rerun readiness"));
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
