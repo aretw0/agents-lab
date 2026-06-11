@@ -26,6 +26,7 @@ const AGENT_RUN_DRIVER_GATE_TESTS = [
   "scripts/test/agent-run-driver-container-fanout-rehearsal.test.mjs",
   "scripts/test/agent-run-pi-provider-fanout-plan.test.mjs",
   "scripts/test/agent-run-pi-provider-readiness.test.mjs",
+  "scripts/test/agent-run-pi-provider-recovery-next.test.mjs",
   "scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs",
   "scripts/test/agent-run-pi-provider-canary.test.mjs",
   "scripts/test/agent-run-pi-provider-container-canary.test.mjs",
@@ -49,6 +50,10 @@ const AGENT_RUN_DRIVER_OPERATIONAL_SCRIPTS = {
   "agent-run:pi-provider-readiness": [
     "node scripts/agent-run-pi-provider-readiness.mjs",
     ".artifacts/agent-run-driver/pi-provider-readiness.json",
+  ],
+  "agent-run:pi-provider-recovery-next": [
+    "node scripts/agent-run-pi-provider-recovery-next.mjs",
+    ".artifacts/agent-run-driver/pi-provider-recovery-next.json",
   ],
   "agent-run:pi-provider-canary": [
     "node scripts/agent-run-pi-provider-canary.mjs",

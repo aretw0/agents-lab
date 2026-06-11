@@ -1,0 +1,157 @@
+#!/usr/bin/env node
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import process from "node:process";
+import { pathToFileURL } from "node:url";
+
+const SCHEMA_VERSION = 1;
+const DEFAULT_SOURCES = [
+  ".artifacts/agent-run-driver/pi-provider-container-canary-report.json",
+  ".artifacts/agent-run-driver/pi-provider-canary.json",
+  ".artifacts/agent-run-driver/pi-provider-readiness.json",
+];
+
+function parseArgs(argv = process.argv.slice(2)) {
+  const out = {
+    cwd: process.cwd(),
+    sourcePath: "",
+    outPath: "",
+    pretty: false,
+    help: false,
+  };
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
+    else if (arg === "--source") out.sourcePath = argv[++index] ?? "";
+    else if (arg === "--out") out.outPath = argv[++index] ?? "";
+    else if (arg === "--pretty") out.pretty = true;
+    else if (arg === "--help" || arg === "-h") out.help = true;
+    else throw new Error(`Unknown argument: ${arg}`);
+  }
+  return out;
+}
+
+function readJsonIfExists(cwd, relPath) {
+  const fullPath = path.resolve(cwd, relPath);
+  return existsSync(fullPath) ? JSON.parse(readFileSync(fullPath, "utf8")) : undefined;
+}
+
+function writeJson(cwd, relPath, value, pretty = false) {
+  const fullPath = path.resolve(cwd, relPath);
+  mkdirSync(path.dirname(fullPath), { recursive: true });
+  writeFileSync(fullPath, `${JSON.stringify(value, null, pretty ? 2 : 0)}\n`, "utf8");
+}
+
+function recoveryPlanFromPayload(payload) {
+  if (payload?.providerRecoveryPlan && typeof payload.providerRecoveryPlan === "object") return payload.providerRecoveryPlan;
+  if (payload?.canaryReport?.providerRecoveryPlan && typeof payload.canaryReport.providerRecoveryPlan === "object") {
+    return payload.canaryReport.providerRecoveryPlan;
+  }
+  if (payload?.providerReadiness?.providerRecoveryPlan && typeof payload.providerReadiness.providerRecoveryPlan === "object") {
+    return payload.providerReadiness.providerRecoveryPlan;
+  }
+  return undefined;
+}
+
+function commandPreviewFor(scriptName) {
+  return scriptName
+    ? {
+        command: "pnpm",
+        args: ["run", scriptName],
+        shellInterpolationAllowed: false,
+      }
+    : undefined;
+}
+
+export function buildAgentRunPiProviderRecoveryNext(options = {}) {
+  const cwd = path.resolve(options.cwd ?? process.cwd());
+  const sourcePaths = options.sourcePath
+    ? [options.sourcePath]
+    : DEFAULT_SOURCES;
+  const attempts = [];
+  let sourcePath = "";
+  let payload;
+  let providerRecoveryPlan;
+
+  for (const candidate of sourcePaths) {
+    try {
+      const parsed = readJsonIfExists(cwd, candidate);
+      attempts.push({ path: candidate, present: parsed !== undefined });
+      const plan = recoveryPlanFromPayload(parsed);
+      if (plan) {
+        sourcePath = candidate;
+        payload = parsed;
+        providerRecoveryPlan = plan;
+        break;
+      }
+    } catch (error) {
+      attempts.push({ path: candidate, present: true, error: String(error?.message ?? error) });
+    }
+  }
+
+  const actions = Array.isArray(providerRecoveryPlan?.actions) ? providerRecoveryPlan.actions : [];
+  const nextAction = actions[0];
+  const blockers = [
+    ...(providerRecoveryPlan ? [] : ["provider-recovery-plan-missing"]),
+    ...(providerRecoveryPlan && actions.length === 0 ? ["provider-recovery-actions-missing"] : []),
+  ];
+  const decision = blockers.length === 0 ? "next-action-ready" : "blocked";
+  return {
+    mode: "agent-run-pi-provider-recovery-next",
+    schemaVersion: SCHEMA_VERSION,
+    decision,
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    automationAllowed: false,
+    sourcePath,
+    sourceMode: payload?.mode,
+    sourceDecision: payload?.decision,
+    attempts,
+    providerRecoveryPlan: providerRecoveryPlan ?? null,
+    actionCount: actions.length,
+    nextAction: nextAction ?? null,
+    commandPreviews: nextAction
+      ? {
+          verification: commandPreviewFor(nextAction.verificationScript),
+          retryCanary: commandPreviewFor(nextAction.retryCanaryScript),
+          rerunReadiness: commandPreviewFor(nextAction.rerunReadinessScript),
+        }
+      : {},
+    blockers,
+    nextActions: decision === "next-action-ready"
+      ? [
+          `review provider recovery action ${nextAction.actionCode}`,
+          `run ${nextAction.verificationScript} after external remediation`,
+          `retry with ${nextAction.retryCanaryScript} only after verification improves`,
+        ]
+      : ["generate provider readiness/canary evidence with providerRecoveryPlan before selecting a recovery action"],
+    summary: `agent-run-pi-provider-recovery-next: decision=${decision} action=${nextAction?.actionCode ?? "missing"} source=${sourcePath || "missing"} dispatch=no`,
+  };
+}
+
+function printHelp() {
+  process.stdout.write([
+    "Usage: node scripts/agent-run-pi-provider-recovery-next.mjs [--source PATH] [--out PATH] [--pretty]",
+    "",
+    "Report-only selector for the next provider recovery action. It never starts a process.",
+  ].join("\n") + "\n");
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  let args;
+  try {
+    args = parseArgs();
+  } catch (error) {
+    process.stderr.write(`${String(error?.message ?? error)}\n`);
+    process.exit(2);
+  }
+  if (args.help) {
+    printHelp();
+  } else {
+    const result = buildAgentRunPiProviderRecoveryNext(args);
+    if (args.outPath) writeJson(args.cwd, args.outPath, result, args.pretty);
+    process.stdout.write(JSON.stringify(result, null, args.pretty ? 2 : 0));
+    process.stdout.write("\n");
+    if (result.decision === "blocked") process.exit(1);
+  }
+}
