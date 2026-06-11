@@ -62,6 +62,7 @@ export function buildReleaseEvidenceStatus(options = {}) {
   const currentHead = String(options.head ?? runGit(cwd, ["rev-parse", "--short", "HEAD"]).stdout ?? "");
   const blockers = [];
 
+  if (!currentHead) blockers.push("release-current-head-missing");
   if (!refresh) blockers.push("release-evidence-refresh-missing");
   if (refresh && refresh.mode !== "release-evidence-refresh") blockers.push("release-evidence-mode-mismatch");
   if (refresh && refresh.target !== target) blockers.push("release-evidence-target-mismatch");

@@ -105,3 +105,20 @@ test("release evidence status blocks when refresh artifact is absent", () => {
     rmSync(cwd, { recursive: true, force: true });
   }
 });
+
+test("release evidence status blocks when current head is unavailable", () => {
+  const cwd = workspace();
+  try {
+    writeJson(cwd, ".artifacts/release-cut/v0.8.0-evidence-refresh.json", refresh());
+    writeJson(cwd, ".artifacts/release-cut/v0.8.0-final-gate.json", finalGate());
+
+    const result = buildReleaseEvidenceStatus({ cwd, target: "0.8.0", head: "" });
+
+    assert.equal(result.decision, "block");
+    assert.ok(result.blockers.includes("release-current-head-missing"));
+    assert.equal(result.headMatches, false);
+    assert.equal(result.protectedActionsAllowed, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
