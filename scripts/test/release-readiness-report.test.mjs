@@ -791,6 +791,7 @@ test("readiness exposes provider readiness diagnostics when present", () => {
       schemaVersion: 1,
       decision: "blocked",
       model: "openai-codex/gpt-5.3-codex-spark",
+      lastExecutionSource: "provider-canary",
       blockers: ["provider-fetch-failed"],
       providerDiagnostics: [{
         code: "provider-fetch-failed",
@@ -818,6 +819,7 @@ test("readiness exposes provider readiness diagnostics when present", () => {
 
     assert.equal(data.agentRunDrivers.providerReadinessEvidence.present, true);
     assert.equal(data.agentRunDrivers.providerReadinessEvidence.decision, "blocked");
+    assert.equal(data.agentRunDrivers.providerReadinessEvidence.lastExecutionSource, "provider-canary");
     assert.deepEqual(data.agentRunDrivers.providerReadinessEvidence.blockers, ["provider-fetch-failed"]);
     assert.deepEqual(data.agentRunDrivers.providerReadinessEvidence.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
       ["provider-fetch-failed", "network-or-provider", "blocker"],

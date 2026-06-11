@@ -295,6 +295,7 @@ function agentRunProviderReadinessEvidence(cwd) {
       mode: payload.mode,
       schemaVersion: payload.schemaVersion,
       model: payload.model,
+      lastExecutionSource: payload.lastExecutionSource,
       blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
       providerDiagnostics: Array.isArray(payload.providerDiagnostics) ? payload.providerDiagnostics : [],
       providerRecoveryPlan: payload.providerRecoveryPlan && typeof payload.providerRecoveryPlan === "object"
