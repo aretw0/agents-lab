@@ -53,6 +53,21 @@ function recoveryPlanFromPayload(payload) {
   if (payload?.providerReadiness?.providerRecoveryPlan && typeof payload.providerReadiness.providerRecoveryPlan === "object") {
     return payload.providerReadiness.providerRecoveryPlan;
   }
+  const canaryContractPass = payload?.canaryReport?.agentRunOutcomePacket?.contractDecision === "pass"
+    || payload?.agentRunOutcomePacket?.contractDecision === "pass";
+  if ((payload?.mode === "agent-run-pi-provider-container-canary-report" && payload.decision === "pass")
+    || (payload?.mode === "agent-run-pi-provider-canary" && payload.decision === "dispatched" && canaryContractPass)) {
+    return {
+      mode: "agent-run-pi-provider-recovery-plan",
+      decision: "ready",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      automationAllowed: false,
+      blockers: [],
+      actions: [],
+      nextVerification: "provider recovery canary passed; no recovery action is pending",
+    };
+  }
   return undefined;
 }
 

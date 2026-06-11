@@ -265,6 +265,42 @@ test("provider recovery next selects provider canary preview when recovery is cl
   }
 });
 
+test("provider recovery next treats passing container canary as recovery clear", () => {
+  const cwd = workspace("pi-provider-recovery-next-container-pass-");
+  try {
+    const evidencePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-container-canary-report.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, `${JSON.stringify({
+      mode: "agent-run-pi-provider-container-canary-report",
+      decision: "pass",
+      canaryReport: {
+        mode: "agent-run-pi-provider-canary",
+        decision: "dispatched",
+        agentRunOutcomePacket: {
+          mode: "agent-run-outcome-packet",
+          contractDecision: "pass",
+        },
+      },
+      blockers: [],
+    })}\n`, "utf8");
+
+    const result = buildAgentRunPiProviderRecoveryNext({ cwd });
+
+    assert.equal(result.decision, "next-action-ready");
+    assert.equal(result.sourcePath, ".artifacts/agent-run-driver/pi-provider-container-canary-report.json");
+    assert.equal(result.providerRecoveryPlan.decision, "ready");
+    assert.deepEqual(result.providerRecoveryPlan.blockers, []);
+    assert.equal(result.actionStage, "retry-provider-canary");
+    assert.deepEqual(result.selectedCommandPreview, {
+      command: "pnpm",
+      args: ["run", "agent-run:pi-provider-canary"],
+      shellInterpolationAllowed: false,
+    });
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("provider recovery next blocks when no recovery plan exists", () => {
   const cwd = workspace("pi-provider-recovery-next-missing-");
   try {
