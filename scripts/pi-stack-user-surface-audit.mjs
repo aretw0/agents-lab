@@ -161,7 +161,9 @@ const INTERNAL_FAMILIES = new Set([
 	"calibrate",
 	"benchmark",
 	"decoupling",
+	"engine",
 	"list",
+	"package",
 ]);
 
 export function classifyRootScript(name, cmd, shippedExtensions = []) {

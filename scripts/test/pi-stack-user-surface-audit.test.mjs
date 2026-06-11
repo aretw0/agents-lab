@@ -106,6 +106,8 @@ test("classifyRootScript marks scheduler next scripts as autonomy-lane wrappers"
 test("classifyRootScript keeps ci and release scripts internal", () => {
 	assert.equal(classifyRootScript("ci:smoke:gate", "npm run test:smoke", shipped).category, "repo-internal");
 	assert.equal(classifyRootScript("release", "changeset version", shipped).category, "repo-internal");
+	assert.equal(classifyRootScript("package:boundary:audit", "node scripts/package-boundary-audit.mjs", shipped).category, "repo-internal");
+	assert.equal(classifyRootScript("engine:boundary:audit", "node scripts/engine-boundary-audit.mjs", shipped).category, "repo-internal");
 });
 
 test("classifyRootScript marks repo quality audits as stack-sovereignty wrappers", () => {
