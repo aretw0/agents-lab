@@ -30,6 +30,10 @@ function makeWorkspace({
     scripts: {
       "test:agent-run:drivers": agentRunDriverScript,
       "agent-run:driver-canaries": agentRunDriverCanariesScript,
+      "agent-run:driver-fanout-rehearsal": "node scripts/agent-run-driver-fanout-rehearsal.mjs --execute --out .artifacts/agent-run-driver/fanout-rehearsal.json",
+      "agent-run:pi-provider-fanout-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --out .artifacts/agent-run-driver/pi-provider-fanout-plan.json",
+      "agent-run:pi-provider-readiness": "node scripts/agent-run-pi-provider-readiness.mjs --out .artifacts/agent-run-driver/pi-provider-readiness.json",
+      "agent-run:pi-provider-worker-dispatch": "node scripts/agent-run-pi-provider-worker-dispatch.mjs",
       ...rootScripts,
     },
   }, null, 2));
@@ -490,6 +494,29 @@ test("agent-run driver gate requires the executable canary suite script", () => 
   }
 });
 
+test("agent-run driver gate requires operational scripts for scheduler handoff", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+    rootScripts: {
+      "agent-run:pi-provider-readiness": "",
+    },
+  });
+
+  try {
+    const data = gather("0.8.0", workspace);
+    const report = buildReport(data);
+
+    assert.equal(data.agentRunDrivers.ok, false);
+    assert.deepEqual(data.agentRunDrivers.missingOperationalScripts, ["agent-run:pi-provider-readiness"]);
+    assert.equal(report.ready, false);
+    assert.match(report.markdown, /\[ \] agent-run-driver-gate/);
+    assert.match(report.markdown, /missing operational scripts agent-run:pi-provider-readiness/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("agent-run driver gate requires passing canary suite evidence", () => {
   const workspace = makeWorkspace({
     version: "0.8.0",
@@ -556,6 +583,10 @@ test("worktree clean gate blocks release readiness for tracked changes", () => {
       scripts: {
         "test:agent-run:drivers": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs scripts/test/agent-run-driver-container-canary-suite.test.mjs scripts/test/agent-run-driver-fanout-rehearsal.test.mjs scripts/test/agent-run-driver-container-fanout-rehearsal.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs scripts/test/agent-run-pi-provider-readiness.test.mjs scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs",
         "agent-run:driver-canaries": "node scripts/agent-run-driver-canary-suite.mjs --execute --out .artifacts/agent-run-driver/suite.json",
+        "agent-run:driver-fanout-rehearsal": "node scripts/agent-run-driver-fanout-rehearsal.mjs --execute --out .artifacts/agent-run-driver/fanout-rehearsal.json",
+        "agent-run:pi-provider-fanout-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --out .artifacts/agent-run-driver/pi-provider-fanout-plan.json",
+        "agent-run:pi-provider-readiness": "node scripts/agent-run-pi-provider-readiness.mjs --out .artifacts/agent-run-driver/pi-provider-readiness.json",
+        "agent-run:pi-provider-worker-dispatch": "node scripts/agent-run-pi-provider-worker-dispatch.mjs",
       },
       dirtyMarker: true,
     }, null, 2));
@@ -864,6 +895,13 @@ test("cli can write structured json for agents", () => {
       "scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs",
     ]);
     assert.deepEqual(json.agentRunDrivers.missingTests, []);
+    assert.deepEqual(json.agentRunDrivers.missingOperationalScripts, []);
+    assert.deepEqual(json.agentRunDrivers.operationalScripts.map((row) => [row.name, row.present, row.missingMarkers]), [
+      ["agent-run:driver-fanout-rehearsal", true, []],
+      ["agent-run:pi-provider-fanout-plan", true, []],
+      ["agent-run:pi-provider-readiness", true, []],
+      ["agent-run:pi-provider-worker-dispatch", true, []],
+    ]);
     assert.equal(json.agentRunDrivers.providerReadinessEvidence.decision, "missing");
     assert.equal(json.packageSmoke.mode, "release-package-smoke-report");
     assert.equal(json.packageSmoke.decision, "pass");

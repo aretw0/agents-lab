@@ -34,6 +34,24 @@ const AGENT_RUN_DRIVER_CANARY_SCRIPT_MARKERS = [
   "--execute",
   ".artifacts/agent-run-driver/suite.json",
 ];
+const AGENT_RUN_DRIVER_OPERATIONAL_SCRIPTS = {
+  "agent-run:driver-fanout-rehearsal": [
+    "node scripts/agent-run-driver-fanout-rehearsal.mjs",
+    "--execute",
+    ".artifacts/agent-run-driver/fanout-rehearsal.json",
+  ],
+  "agent-run:pi-provider-fanout-plan": [
+    "node scripts/agent-run-pi-provider-fanout-plan.mjs",
+    ".artifacts/agent-run-driver/pi-provider-fanout-plan.json",
+  ],
+  "agent-run:pi-provider-readiness": [
+    "node scripts/agent-run-pi-provider-readiness.mjs",
+    ".artifacts/agent-run-driver/pi-provider-readiness.json",
+  ],
+  "agent-run:pi-provider-worker-dispatch": [
+    "node scripts/agent-run-pi-provider-worker-dispatch.mjs",
+  ],
+};
 
 const BOARD_RELEASE_EVIDENCE = {
   "TASK-BUD-480": {
@@ -125,7 +143,25 @@ function agentRunDriverGateReport(cwd) {
   const scriptPresent = hasRootScript(cwd, "test:agent-run:drivers");
   const missingCanaryScriptMarkers = AGENT_RUN_DRIVER_CANARY_SCRIPT_MARKERS.filter((marker) => !canaryScript.includes(marker));
   const canaryScriptPresent = hasRootScript(cwd, AGENT_RUN_DRIVER_CANARY_SCRIPT);
-  const scriptGateOk = scriptPresent && nodeTest && missingTests.length === 0 && canaryScriptPresent && missingCanaryScriptMarkers.length === 0;
+  const operationalScripts = Object.entries(AGENT_RUN_DRIVER_OPERATIONAL_SCRIPTS).map(([name, markers]) => {
+    const value = rootScript(cwd, name);
+    return {
+      name,
+      present: hasRootScript(cwd, name),
+      script: value,
+      requiredMarkers: markers,
+      missingMarkers: markers.filter((marker) => !value.includes(marker)),
+    };
+  });
+  const missingOperationalScripts = operationalScripts
+    .filter((row) => !row.present || row.missingMarkers.length > 0)
+    .map((row) => row.name);
+  const scriptGateOk = scriptPresent
+    && nodeTest
+    && missingTests.length === 0
+    && canaryScriptPresent
+    && missingCanaryScriptMarkers.length === 0
+    && missingOperationalScripts.length === 0;
   return {
     ok: scriptGateOk,
     scriptGateOk,
@@ -139,6 +175,8 @@ function agentRunDriverGateReport(cwd) {
     canaryScriptPresent,
     requiredCanaryScriptMarkers: AGENT_RUN_DRIVER_CANARY_SCRIPT_MARKERS,
     missingCanaryScriptMarkers,
+    operationalScripts,
+    missingOperationalScripts,
   };
 }
 
@@ -272,6 +310,7 @@ function agentRunDriverGateEvidence(report) {
     ...(report.missingTests.length ? [`missing tests ${report.missingTests.join(", ")}`] : []),
     ...(!report.canaryScriptPresent ? [`missing script ${report.canaryScriptName}`] : []),
     ...(report.missingCanaryScriptMarkers.length ? [`${report.canaryScriptName} missing ${report.missingCanaryScriptMarkers.join(", ")}`] : []),
+    ...(report.missingOperationalScripts?.length ? [`missing operational scripts ${report.missingOperationalScripts.join(", ")}`] : []),
     ...(report.canarySuiteRequired === true && report.canarySuiteGateOk !== true
       ? [`canary suite evidence must pass at ${report.canarySuiteEvidence?.path ?? ".artifacts/agent-run-driver/suite.json"} (decision=${report.canarySuiteEvidence?.decision ?? "missing"})`]
       : []),
