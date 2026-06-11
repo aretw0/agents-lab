@@ -791,6 +791,19 @@ test("readiness exposes provider readiness diagnostics when present", () => {
         category: "network-or-provider",
         severity: "blocker",
       }],
+      providerRecoveryPlan: {
+        mode: "agent-run-pi-provider-recovery-plan",
+        decision: "blocked",
+        dispatchAllowed: false,
+        processStartAllowed: false,
+        automationAllowed: false,
+        blockers: ["provider-fetch-failed"],
+        actions: [{
+          diagnosticCode: "provider-fetch-failed",
+          actionCode: "verify-provider-network",
+          retryCanaryScript: "agent-run:pi-provider-canary:container",
+        }],
+      },
       nextActions: ["verify network, proxy, and provider endpoint reachability, then rerun readiness"],
       summary: "agent-run-pi-provider-readiness: decision=blocked",
     }, null, 2));
@@ -802,6 +815,12 @@ test("readiness exposes provider readiness diagnostics when present", () => {
     assert.deepEqual(data.agentRunDrivers.providerReadinessEvidence.blockers, ["provider-fetch-failed"]);
     assert.deepEqual(data.agentRunDrivers.providerReadinessEvidence.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
       ["provider-fetch-failed", "network-or-provider", "blocker"],
+    ]);
+    assert.equal(data.agentRunDrivers.providerReadinessEvidence.providerRecoveryPlan.mode, "agent-run-pi-provider-recovery-plan");
+    assert.equal(data.agentRunDrivers.providerReadinessEvidence.providerRecoveryPlan.dispatchAllowed, false);
+    assert.equal(data.agentRunDrivers.providerReadinessEvidence.providerRecoveryPlan.automationAllowed, false);
+    assert.deepEqual(data.agentRunDrivers.providerReadinessEvidence.providerRecoveryPlan.actions.map((item) => [item.diagnosticCode, item.actionCode, item.retryCanaryScript]), [
+      ["provider-fetch-failed", "verify-provider-network", "agent-run:pi-provider-canary:container"],
     ]);
     assert.equal(data.agentRunDrivers.ok, true);
   } finally {

@@ -287,6 +287,9 @@ function agentRunProviderReadinessEvidence(cwd) {
       model: payload.model,
       blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
       providerDiagnostics: Array.isArray(payload.providerDiagnostics) ? payload.providerDiagnostics : [],
+      providerRecoveryPlan: payload.providerRecoveryPlan && typeof payload.providerRecoveryPlan === "object"
+        ? payload.providerRecoveryPlan
+        : undefined,
       nextActions: Array.isArray(payload.nextActions) ? payload.nextActions : [],
       summary: payload.summary ?? "provider readiness artifact present",
     };
