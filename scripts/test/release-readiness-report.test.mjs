@@ -908,6 +908,18 @@ test("readiness exposes provider container canary evidence when present", () => 
       dispatchAllowed: false,
       processStartAllowed: false,
       canaryOutPath: ".artifacts/agent-run-driver/pi-provider-container-canary.json",
+      providerRecoveryPlan: {
+        mode: "agent-run-pi-provider-recovery-plan",
+        decision: "blocked",
+        dispatchAllowed: false,
+        processStartAllowed: false,
+        automationAllowed: false,
+        actions: [{
+          diagnosticCode: "provider-fetch-failed",
+          actionCode: "verify-provider-network",
+          retryCanaryScript: "agent-run:pi-provider-canary:container",
+        }],
+      },
       canaryReport: {
         decision: "blocked",
         providerRecoveryPlan: {
@@ -947,6 +959,55 @@ test("readiness exposes provider container canary evidence when present", () => 
     assert.deepEqual(data.agentRunDrivers.providerContainerCanaryEvidence.providerRecoveryPlan.actions.map((item) => [item.diagnosticCode, item.actionCode, item.retryCanaryScript]), [
       ["provider-fetch-failed", "verify-provider-network", "agent-run:pi-provider-canary:container"],
     ]);
+    assert.equal(data.agentRunDrivers.ok, true);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
+test("readiness exposes provider recovery next evidence when present", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const evidencePath = path.join(workspace, ".artifacts", "agent-run-driver", "pi-provider-recovery-next.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, JSON.stringify({
+      mode: "agent-run-pi-provider-recovery-next",
+      schemaVersion: 1,
+      decision: "next-action-ready",
+      sourcePath: ".artifacts/agent-run-driver/pi-provider-container-canary-report.json",
+      sourceDecision: "block",
+      actionCount: 1,
+      nextAction: {
+        diagnosticCode: "provider-fetch-failed",
+        actionCode: "verify-provider-network",
+        retryCanaryScript: "agent-run:pi-provider-canary:container",
+      },
+      commandPreviews: {
+        retryCanary: {
+          command: "pnpm",
+          args: ["run", "agent-run:pi-provider-canary:container"],
+          shellInterpolationAllowed: false,
+        },
+      },
+      blockers: [],
+      summary: "agent-run-pi-provider-recovery-next: decision=next-action-ready action=verify-provider-network dispatch=no",
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+
+    assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.present, true);
+    assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.decision, "next-action-ready");
+    assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.mode, "agent-run-pi-provider-recovery-next");
+    assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.sourceDecision, "block");
+    assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.actionCount, 1);
+    assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.nextAction.actionCode, "verify-provider-network");
+    assert.equal(data.agentRunDrivers.providerRecoveryNextEvidence.nextAction.retryCanaryScript, "agent-run:pi-provider-canary:container");
+    assert.deepEqual(data.agentRunDrivers.providerRecoveryNextEvidence.commandPreviews.retryCanary.args, ["run", "agent-run:pi-provider-canary:container"]);
+    assert.deepEqual(data.agentRunDrivers.providerRecoveryNextEvidence.blockers, []);
     assert.equal(data.agentRunDrivers.ok, true);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
@@ -1061,6 +1122,7 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.agentRunDrivers.providerReadinessEvidence.decision, "missing");
     assert.equal(json.agentRunDrivers.providerCanaryEvidence.decision, "missing");
     assert.equal(json.agentRunDrivers.providerContainerCanaryEvidence.decision, "missing");
+    assert.equal(json.agentRunDrivers.providerRecoveryNextEvidence.decision, "missing");
     assert.equal(json.packageSmoke.mode, "release-package-smoke-report");
     assert.equal(json.packageSmoke.decision, "pass");
     assert.deepEqual(json.packageSmoke.packageBlockers, []);

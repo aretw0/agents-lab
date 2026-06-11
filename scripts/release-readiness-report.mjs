@@ -364,6 +364,11 @@ function agentRunProviderContainerCanaryEvidence(cwd) {
   }
   try {
     const payload = JSON.parse(readFileSync(fullPath, "utf8"));
+    const providerRecoveryPlan = payload.providerRecoveryPlan && typeof payload.providerRecoveryPlan === "object"
+      ? payload.providerRecoveryPlan
+      : payload.canaryReport?.providerRecoveryPlan && typeof payload.canaryReport.providerRecoveryPlan === "object"
+        ? payload.canaryReport.providerRecoveryPlan
+        : undefined;
     return {
       path: relPath,
       present: true,
@@ -378,9 +383,7 @@ function agentRunProviderContainerCanaryEvidence(cwd) {
       canaryPath: payload.canaryOutPath,
       blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
       providerDiagnostics: Array.isArray(payload.providerDiagnostics) ? payload.providerDiagnostics : [],
-      providerRecoveryPlan: payload.canaryReport?.providerRecoveryPlan && typeof payload.canaryReport.providerRecoveryPlan === "object"
-        ? payload.canaryReport.providerRecoveryPlan
-        : undefined,
+      providerRecoveryPlan,
       summary: payload.summary ?? "provider container canary artifact present",
     };
   } catch (error) {
@@ -389,6 +392,47 @@ function agentRunProviderContainerCanaryEvidence(cwd) {
       present: true,
       decision: "invalid-json",
       summary: `could not parse provider container canary artifact: ${String(error?.message ?? error)}`,
+    };
+  }
+}
+
+function agentRunProviderRecoveryNextEvidence(cwd) {
+  const relPath = ".artifacts/agent-run-driver/pi-provider-recovery-next.json";
+  const fullPath = path.join(cwd, relPath);
+  if (!existsSync(fullPath)) {
+    return {
+      path: relPath,
+      present: false,
+      decision: "missing",
+      summary: "no provider recovery next artifact found",
+    };
+  }
+  try {
+    const payload = JSON.parse(readFileSync(fullPath, "utf8"));
+    return {
+      path: relPath,
+      present: true,
+      decision: payload.decision ?? "unknown",
+      mode: payload.mode,
+      schemaVersion: payload.schemaVersion,
+      sourcePath: payload.sourcePath,
+      sourceDecision: payload.sourceDecision,
+      actionCount: payload.actionCount,
+      nextAction: payload.nextAction && typeof payload.nextAction === "object"
+        ? payload.nextAction
+        : undefined,
+      commandPreviews: payload.commandPreviews && typeof payload.commandPreviews === "object"
+        ? payload.commandPreviews
+        : {},
+      blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
+      summary: payload.summary ?? "provider recovery next artifact present",
+    };
+  } catch (error) {
+    return {
+      path: relPath,
+      present: true,
+      decision: "invalid-json",
+      summary: `could not parse provider recovery next artifact: ${String(error?.message ?? error)}`,
     };
   }
 }
@@ -427,6 +471,7 @@ function agentRunDriverGateEvidence(report) {
     "agent-run driver canary suite evidence passed",
     `provider readiness evidence decision=${report.providerReadinessEvidence?.decision ?? "missing"}`,
     `provider container canary evidence decision=${report.providerContainerCanaryEvidence?.decision ?? "missing"}`,
+    `provider recovery next evidence decision=${report.providerRecoveryNextEvidence?.decision ?? "missing"}`,
   ].join("; ");
 }
 
@@ -817,6 +862,7 @@ export function gather(target, cwd = process.cwd()) {
   agentRunDrivers.providerReadinessEvidence = agentRunProviderReadinessEvidence(cwd);
   agentRunDrivers.providerCanaryEvidence = agentRunProviderCanaryEvidence(cwd);
   agentRunDrivers.providerContainerCanaryEvidence = agentRunProviderContainerCanaryEvidence(cwd);
+  agentRunDrivers.providerRecoveryNextEvidence = agentRunProviderRecoveryNextEvidence(cwd);
   agentRunDrivers.canarySuiteRequired = true;
   agentRunDrivers.canarySuiteGateOk = agentRunDrivers.canarySuiteEvidence.decision === "pass";
   agentRunDrivers.currentHead = head;
