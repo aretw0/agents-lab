@@ -80,6 +80,34 @@ export function providerContainerCanaryBlockers({ exitStatus, canaryReport }) {
   ];
 }
 
+export function buildProviderContainerCanaryReport({
+  container,
+  options = {},
+  dockerArgs = [],
+  canaryReport,
+  stderr = "",
+  blockers = [],
+} = {}) {
+  return {
+    mode: "agent-run-pi-provider-container-canary-report",
+    schemaVersion: SCHEMA_VERSION,
+    generatedAtIso: new Date().toISOString(),
+    container,
+    decision: blockers.length === 0 ? "pass" : "block",
+    executeRequested: options.execute === true,
+    dispatchAllowed: canaryReport?.dispatchAllowed === true,
+    processStartAllowed: canaryReport?.processStartAllowed === true,
+    canaryOutPath: toContainerPath(options.canaryOutPath || DEFAULT_CANARY_OUT),
+    dockerArgs,
+    canaryReport: canaryReport ?? null,
+    providerDiagnostics: canaryReport?.providerDiagnostics ?? [],
+    providerRecoveryPlan: canaryReport?.providerRecoveryPlan,
+    stderrPreview: String(stderr ?? "").slice(0, 2000),
+    blockers,
+    summary: `agent-run-pi-provider-container-canary: decision=${blockers.length === 0 ? "pass" : "block"} container=${container} canary=${canaryReport?.decision ?? "missing"}`,
+  };
+}
+
 export function runAgentRunPiProviderContainerCanary(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const container = String(options.container ?? "").trim();
@@ -119,23 +147,14 @@ export function runAgentRunPiProviderContainerCanary(options = {}) {
     exitStatus: result.status,
     canaryReport,
   });
-  const report = {
-    mode: "agent-run-pi-provider-container-canary-report",
-    schemaVersion: SCHEMA_VERSION,
-    generatedAtIso: new Date().toISOString(),
+  const report = buildProviderContainerCanaryReport({
     container,
-    decision: blockers.length === 0 ? "pass" : "block",
-    executeRequested: options.execute === true,
-    dispatchAllowed: canaryReport?.dispatchAllowed === true,
-    processStartAllowed: canaryReport?.processStartAllowed === true,
-    canaryOutPath: toContainerPath(options.canaryOutPath || DEFAULT_CANARY_OUT),
+    options,
     dockerArgs,
-    canaryReport: canaryReport ?? null,
-    providerDiagnostics: canaryReport?.providerDiagnostics ?? [],
-    stderrPreview: String(result.stderr ?? "").slice(0, 2000),
+    canaryReport,
+    stderr: result.stderr,
     blockers,
-    summary: `agent-run-pi-provider-container-canary: decision=${blockers.length === 0 ? "pass" : "block"} container=${container} canary=${canaryReport?.decision ?? "missing"}`,
-  };
+  });
   writeJson(cwd, options.reportOutPath || DEFAULT_REPORT_OUT, report, pretty);
   return report;
 }
