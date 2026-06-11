@@ -165,7 +165,7 @@
     "test:repo:edit": "node --test scripts/test/repo-edit.test.mjs",
     "test:package:boundary": "node --test scripts/test/package-boundary-audit.test.mjs",
     "test:engine:boundary": "node --test scripts/test/engine-boundary-audit.test.mjs",
-    "test:project:task:complete": "node --test scripts/test/project-task-complete.test.mjs",
+    "test:project:task:complete": "node --test scripts/test/project-task-complete.test.mjs scripts/test/board-spec-audit.test.mjs",
     "test:autonomous-scheduler": "node --test scripts/test/autonomous-scheduler.test.mjs",
     "test:repo:bloat:audit": "node --test scripts/test/repo-bloat-audit.test.mjs",
     "test:repo:discourse:audit": "node --test scripts/test/repo-discourse-audit.test.mjs",
@@ -190,6 +190,8 @@
     "project:verification:check": "node scripts/project/backfill-task-verification.mjs --strict",
     "project:verification:backfill": "node scripts/project/backfill-task-verification.mjs --apply",
     "project:task:complete": "node scripts/project/task-complete.mjs",
+    "project:board:spec-audit": "node scripts/project/board-spec-audit.mjs",
+    "project:board:spec-audit:json": "node scripts/project/board-spec-audit.mjs --json --pretty",
     "release:deprecate": "node scripts/deprecate-release.mjs",
     "decoupling:maturity": "node scripts/decoupling-maturity-report.mjs --days 7",
     "decoupling:maturity:json": "node scripts/decoupling-maturity-report.mjs --days 7 --json"
