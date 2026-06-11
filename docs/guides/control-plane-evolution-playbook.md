@@ -115,6 +115,7 @@ Interpretação do readiness report:
 - no JSON, `operatorDecisions[*].releaseVersionDecisionPacket` aparece quando `target-version-ready` está falso; ele inclui `currentVersions`, `recommendedAction` e `requiredApprovalPrompt` sem editar manifestos, tags ou publish;
 - no JSON, `operatorDecisions[*].boardReleaseDispositionPacket` aparece quando o board tem candidatos com evidência de release; ele lista `dispositionRows[*].recommendedAction`, `dispositionRows[*].approvalPrompt` e `requiredApprovalPrompt` sem editar `.project/tasks.json` nem autorizar automação;
 - no JSON, `nextActions[*].boardReleaseDispositionPacket` replica esse packet quando ele for o próximo passo, permitindo consumo direto de `nextActions` sem inferência adicional;
+- no JSON, `nextActions[*].releaseDraftReviewPacket` aparece quando todos os gates estão verdes; ele exige `requiredApprovalPrompt` e mantém `tagAllowed`, `publishAllowed`, `workflowDispatchAllowed` e `processStartAllowed` falsos;
 - no JSON, `operatorDecisions[*].requiresOperatorDecision=true` e `automationAllowed=false` deixam claro que `allowedActions` são opções para operador, não dispatch automático;
 - no JSON, `nextActionCode` e `nextActions` indicam o próximo passo seguro sem autorizar publish automático;
 - no JSON, `automationPermissions` mantém `tagAllowed`, `publishAllowed`, `workflowDispatchAllowed` e `processStartAllowed` falsos; readiness report é sempre report-only;

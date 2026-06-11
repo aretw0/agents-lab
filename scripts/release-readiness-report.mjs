@@ -443,6 +443,18 @@ function operatorDecisionPackets(data, failedChecklist) {
 
 function releaseNextActionPacket({ ready, releaseBlockers, operatorDecisions }) {
   if (ready) {
+    const releaseDraftReviewPacket = {
+      mode: "release-draft-review-packet",
+      decision: "ready-for-operator-decision",
+      allowedActions: ["defer-release", "prepare-draft-release"],
+      requiredApprovalPrompt: "approve release draft prepare-draft-release",
+      automationAllowed: false,
+      tagAllowed: false,
+      publishAllowed: false,
+      workflowDispatchAllowed: false,
+      processStartAllowed: false,
+      summary: "release draft review: readiness green; draft and publish remain operator-gated",
+    };
     return {
       nextActionCode: "review-release-draft",
       nextActions: [{
@@ -451,6 +463,7 @@ function releaseNextActionPacket({ ready, releaseBlockers, operatorDecisions }) 
         allowedActions: ["defer-release", "prepare-draft-release"],
         requiresOperatorDecision: true,
         automationAllowed: false,
+        releaseDraftReviewPacket,
         summary: "release readiness is green; draft and publish remain operator-gated",
       }],
     };

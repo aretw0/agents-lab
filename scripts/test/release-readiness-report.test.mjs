@@ -274,6 +274,14 @@ test("buildReport marks release ready when versions and board gates are clear", 
     assert.deepEqual(report.nextActions[0].allowedActions, ["defer-release", "prepare-draft-release"]);
     assert.equal(report.nextActions[0].requiresOperatorDecision, true);
     assert.equal(report.nextActions[0].automationAllowed, false);
+    assert.equal(report.nextActions[0].releaseDraftReviewPacket.mode, "release-draft-review-packet");
+    assert.equal(report.nextActions[0].releaseDraftReviewPacket.decision, "ready-for-operator-decision");
+    assert.equal(report.nextActions[0].releaseDraftReviewPacket.requiredApprovalPrompt, "approve release draft prepare-draft-release");
+    assert.equal(report.nextActions[0].releaseDraftReviewPacket.automationAllowed, false);
+    assert.equal(report.nextActions[0].releaseDraftReviewPacket.tagAllowed, false);
+    assert.equal(report.nextActions[0].releaseDraftReviewPacket.publishAllowed, false);
+    assert.equal(report.nextActions[0].releaseDraftReviewPacket.workflowDispatchAllowed, false);
+    assert.equal(report.nextActions[0].releaseDraftReviewPacket.processStartAllowed, false);
     assert.deepEqual(report.automationPermissions, {
       tagAllowed: false,
       publishAllowed: false,
