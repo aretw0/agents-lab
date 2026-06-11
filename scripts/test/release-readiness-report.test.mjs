@@ -806,6 +806,49 @@ test("readiness exposes provider readiness diagnostics when present", () => {
   }
 });
 
+test("readiness exposes provider canary evidence when present", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const evidencePath = path.join(workspace, ".artifacts", "agent-run-driver", "pi-provider-canary.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, JSON.stringify({
+      mode: "agent-run-pi-provider-canary",
+      schemaVersion: 1,
+      decision: "blocked",
+      executeRequested: false,
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      workerId: "worker-a",
+      runId: "agent-run-pi-provider-fanout-rehearsal-worker-a",
+      providerDiagnostics: [{
+        code: "provider-fetch-failed",
+        category: "network-or-provider",
+        severity: "blocker",
+      }],
+      blockers: ["provider-readiness:provider-fetch-failed"],
+      summary: "agent-run-pi-provider-canary: decision=blocked",
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+
+    assert.equal(data.agentRunDrivers.providerCanaryEvidence.present, true);
+    assert.equal(data.agentRunDrivers.providerCanaryEvidence.decision, "blocked");
+    assert.equal(data.agentRunDrivers.providerCanaryEvidence.workerId, "worker-a");
+    assert.equal(data.agentRunDrivers.providerCanaryEvidence.dispatchAllowed, false);
+    assert.deepEqual(data.agentRunDrivers.providerCanaryEvidence.blockers, ["provider-readiness:provider-fetch-failed"]);
+    assert.deepEqual(data.agentRunDrivers.providerCanaryEvidence.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
+      ["provider-fetch-failed", "network-or-provider", "blocker"],
+    ]);
+    assert.equal(data.agentRunDrivers.ok, true);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("cli strict exits non-zero when release is not ready", () => {
   const workspace = makeWorkspace({
     version: "0.7.0",
@@ -908,6 +951,7 @@ test("cli can write structured json for agents", () => {
       ["agent-run:pi-provider-worker-dispatch", true, []],
     ]);
     assert.equal(json.agentRunDrivers.providerReadinessEvidence.decision, "missing");
+    assert.equal(json.agentRunDrivers.providerCanaryEvidence.decision, "missing");
     assert.equal(json.packageSmoke.mode, "release-package-smoke-report");
     assert.equal(json.packageSmoke.decision, "pass");
     assert.deepEqual(json.packageSmoke.packageBlockers, []);

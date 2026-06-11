@@ -296,6 +296,46 @@ function agentRunProviderReadinessEvidence(cwd) {
   }
 }
 
+function agentRunProviderCanaryEvidence(cwd) {
+  const relPath = ".artifacts/agent-run-driver/pi-provider-canary.json";
+  const fullPath = path.join(cwd, relPath);
+  if (!existsSync(fullPath)) {
+    return {
+      path: relPath,
+      present: false,
+      decision: "missing",
+      summary: "no provider canary artifact found",
+    };
+  }
+  try {
+    const payload = JSON.parse(readFileSync(fullPath, "utf8"));
+    return {
+      path: relPath,
+      present: true,
+      decision: payload.decision ?? "unknown",
+      mode: payload.mode,
+      schemaVersion: payload.schemaVersion,
+      runId: payload.runId,
+      workerId: payload.workerId,
+      executeRequested: payload.executeRequested === true,
+      dispatchAllowed: payload.dispatchAllowed === true,
+      processStartAllowed: payload.processStartAllowed === true,
+      contractDecision: payload.agentRunOutcomePacket?.contractDecision,
+      blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
+      providerDiagnostics: Array.isArray(payload.providerDiagnostics) ? payload.providerDiagnostics : [],
+      nextActions: Array.isArray(payload.nextActions) ? payload.nextActions : [],
+      summary: payload.summary ?? "provider canary artifact present",
+    };
+  } catch (error) {
+    return {
+      path: relPath,
+      present: true,
+      decision: "invalid-json",
+      summary: `could not parse provider canary artifact: ${String(error?.message ?? error)}`,
+    };
+  }
+}
+
 function releaseGateKind(id) {
   if (id === "target-version-ready") return "operator-decision";
   if (id === "board-release-clear") return "board-state";
@@ -717,6 +757,7 @@ export function gather(target, cwd = process.cwd()) {
   agentRunDrivers.lastCanaryEvidence = agentRunDriverCanaryEvidence(cwd);
   agentRunDrivers.lastMutationCanaryEvidence = agentRunDriverCanaryEvidence(cwd, ".artifacts/agent-run-driver/latest-mutation.json");
   agentRunDrivers.providerReadinessEvidence = agentRunProviderReadinessEvidence(cwd);
+  agentRunDrivers.providerCanaryEvidence = agentRunProviderCanaryEvidence(cwd);
   agentRunDrivers.canarySuiteRequired = true;
   agentRunDrivers.canarySuiteGateOk = agentRunDrivers.canarySuiteEvidence.decision === "pass";
   agentRunDrivers.currentHead = head;
