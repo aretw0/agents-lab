@@ -64,6 +64,12 @@ function protectedFlagsFalse(packet, prefix, blockers) {
   }
 }
 
+function targetTagMatches(packet, prefix, target, tag, blockers) {
+  if (!packet) return;
+  if (String(packet.target) !== target) blockers.push(`${prefix}-target-mismatch`);
+  if (packet.tag !== tag) blockers.push(`${prefix}-tag-mismatch`);
+}
+
 export function buildReleaseEvidenceStatus(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const target = String(options.target ?? "0.8.0");
@@ -90,8 +96,9 @@ export function buildReleaseEvidenceStatus(options = {}) {
   if (refresh?.finalGateHead && finalGate?.head && refresh.finalGateHead !== finalGate.head) blockers.push("release-evidence-final-gate-head-mismatch");
   if (!finalGate) blockers.push("release-final-gate-missing");
   if (finalGate && finalGate.mode !== "release-final-gate") blockers.push("release-final-gate-mode-mismatch");
-  if (finalGate && String(finalGate.target) !== target) blockers.push("release-final-gate-target-mismatch");
-  if (finalGate && finalGate.tag !== tag) blockers.push("release-final-gate-tag-mismatch");
+  targetTagMatches(finalGate, "release-final-gate", target, tag, blockers);
+  targetTagMatches(finalGate?.cutPreview, "release-final-gate-cut-preview", target, tag, blockers);
+  targetTagMatches(finalGate?.artifactAudit, "release-final-gate-artifact-audit", target, tag, blockers);
   if (finalGate && finalGate.decision !== "pass") blockers.push("release-final-gate-not-pass");
   if (finalGate && finalGate.head && currentHead && finalGate.head !== currentHead) blockers.push("release-final-gate-stale-head");
   if (refresh) protectedFlagsFalse(refresh, "release-evidence", blockers);

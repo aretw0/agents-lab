@@ -63,6 +63,14 @@ function finalGate(overrides = {}) {
     publishAllowed: false,
     workflowDispatchAllowed: false,
     processStartAllowed: false,
+    cutPreview: {
+      target: "0.8.0",
+      tag: "v0.8.0",
+    },
+    artifactAudit: {
+      target: "0.8.0",
+      tag: "v0.8.0",
+    },
     ...overrides,
   };
 }
@@ -231,6 +239,26 @@ test("release evidence status blocks final gate target or tag mismatch", () => {
   }
 });
 
+test("release evidence status blocks nested final gate artifact target or tag mismatch", () => {
+  const cwd = workspace();
+  try {
+    writeJson(cwd, ".artifacts/release-cut/v0.8.0-evidence-refresh.json", refresh());
+    writeJson(cwd, ".artifacts/release-cut/v0.8.0-final-gate.json", finalGate({
+      cutPreview: { target: "1.2.3", tag: "v0.8.0" },
+      artifactAudit: { target: "0.8.0", tag: "v1.2.3" },
+    }));
+
+    const result = buildReleaseEvidenceStatus({ cwd, target: "0.8.0", head: "abc1234" });
+
+    assert.equal(result.decision, "block");
+    assert.ok(result.blockers.includes("release-final-gate-cut-preview-target-mismatch"));
+    assert.ok(result.blockers.includes("release-final-gate-artifact-audit-tag-mismatch"));
+    assert.equal(result.tagAllowed, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("release evidence status derives protected prompts from arbitrary release tags", () => {
   const cwd = workspace();
   try {
@@ -250,6 +278,14 @@ test("release evidence status derives protected prompts from arbitrary release t
     writeJson(cwd, ".artifacts/release-cut/v1.2.3-final-gate.json", finalGate({
       target: "1.2.3",
       tag: "v1.2.3",
+      cutPreview: {
+        target: "1.2.3",
+        tag: "v1.2.3",
+      },
+      artifactAudit: {
+        target: "1.2.3",
+        tag: "v1.2.3",
+      },
       requiredApprovalPrompts: [
         "approve release tag create v1.2.3",
         "approve release tag push v1.2.3",
