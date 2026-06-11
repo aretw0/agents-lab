@@ -20,6 +20,7 @@ function makeWorkspace({
   tasks = [],
   agentRunDriverScript = "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs",
   agentRunDriverCanariesScript = "node scripts/agent-run-driver-canary-suite.mjs --execute --out .artifacts/agent-run-driver/suite.json",
+  writeAgentRunDriverCanarySuite = true,
   rootScripts = {},
 } = {}) {
   const root = mkdtempSync(path.join(tmpdir(), "release-readiness-"));
@@ -83,6 +84,21 @@ function makeWorkspace({
   ].join("\n"));
   mkdirSync(path.join(root, ".project"), { recursive: true });
   writeFileSync(path.join(root, ".project", "tasks.json"), JSON.stringify({ tasks }, null, 2));
+  if (writeAgentRunDriverCanarySuite) {
+    const suitePath = path.join(root, ".artifacts", "agent-run-driver", "suite.json");
+    mkdirSync(path.dirname(suitePath), { recursive: true });
+    writeFileSync(suitePath, JSON.stringify({
+      mode: "agent-run-driver-canary-suite-report",
+      schemaVersion: 1,
+      decision: "pass",
+      canaries: {
+        readOnly: { contractDecision: "pass" },
+        mutation: { contractDecision: "pass" },
+      },
+      blockers: [],
+      summary: "agent-run-driver-canary-suite: decision=pass readOnly=pass mutation=pass",
+    }, null, 2));
+  }
   return root;
 }
 
@@ -150,14 +166,13 @@ test("buildReport marks target release not ready until version and board gates a
     assert.equal(data.agentRunDrivers.scriptName, "test:agent-run:drivers");
     assert.equal(data.agentRunDrivers.canaryScriptName, "agent-run:driver-canaries");
     assert.equal(data.agentRunDrivers.canaryScriptPresent, true);
+    assert.equal(data.agentRunDrivers.scriptGateOk, true);
+    assert.equal(data.agentRunDrivers.canarySuiteRequired, true);
+    assert.equal(data.agentRunDrivers.canarySuiteGateOk, true);
     assert.deepEqual(data.agentRunDrivers.missingTests, []);
     assert.deepEqual(data.agentRunDrivers.missingCanaryScriptMarkers, []);
-    assert.deepEqual(data.agentRunDrivers.canarySuiteEvidence, {
-      path: ".artifacts/agent-run-driver/suite.json",
-      present: false,
-      decision: "missing",
-      summary: "no local agent-run driver canary suite artifact found",
-    });
+    assert.equal(data.agentRunDrivers.canarySuiteEvidence.present, true);
+    assert.equal(data.agentRunDrivers.canarySuiteEvidence.decision, "pass");
     assert.deepEqual(data.agentRunDrivers.lastCanaryEvidence, {
       path: ".artifacts/agent-run-driver/latest.json",
       present: false,
@@ -411,6 +426,30 @@ test("agent-run driver gate requires the executable canary suite script", () => 
   }
 });
 
+test("agent-run driver gate requires passing canary suite evidence", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+    writeAgentRunDriverCanarySuite: false,
+  });
+
+  try {
+    const data = gather("0.8.0", workspace);
+    const report = buildReport(data);
+
+    assert.equal(data.agentRunDrivers.scriptGateOk, true);
+    assert.equal(data.agentRunDrivers.canarySuiteRequired, true);
+    assert.equal(data.agentRunDrivers.canarySuiteGateOk, false);
+    assert.equal(data.agentRunDrivers.canarySuiteEvidence.decision, "missing");
+    assert.equal(data.agentRunDrivers.ok, false);
+    assert.equal(report.ready, false);
+    assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.id), ["agent-run-driver-gate"]);
+    assert.match(report.markdown, /canary suite evidence must pass at \.artifacts\/agent-run-driver\/suite\.json \(decision=missing\)/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("package smoke gate blocks release readiness with structured evidence", () => {
   const workspace = makeWorkspace({
     version: "0.8.0",
@@ -636,7 +675,10 @@ test("cli can write structured json for agents", () => {
     assert.deepEqual(json.workflows, { ci: true, publish: true, releaseDraft: true });
     assert.deepEqual(json.gates, { agentRunDrivers: true, packageSmoke: true, userSurface: true });
     assert.equal(json.agentRunDrivers.ok, true);
-    assert.equal(json.agentRunDrivers.canarySuiteEvidence.decision, "missing");
+    assert.equal(json.agentRunDrivers.scriptGateOk, true);
+    assert.equal(json.agentRunDrivers.canarySuiteRequired, true);
+    assert.equal(json.agentRunDrivers.canarySuiteGateOk, true);
+    assert.equal(json.agentRunDrivers.canarySuiteEvidence.decision, "pass");
     assert.equal(json.agentRunDrivers.lastCanaryEvidence.decision, "missing");
     assert.equal(json.agentRunDrivers.lastMutationCanaryEvidence.decision, "missing");
     assert.deepEqual(json.agentRunDrivers.requiredTests, [

@@ -96,8 +96,10 @@ function agentRunDriverGateReport(cwd) {
   const scriptPresent = hasRootScript(cwd, "test:agent-run:drivers");
   const missingCanaryScriptMarkers = AGENT_RUN_DRIVER_CANARY_SCRIPT_MARKERS.filter((marker) => !canaryScript.includes(marker));
   const canaryScriptPresent = hasRootScript(cwd, AGENT_RUN_DRIVER_CANARY_SCRIPT);
+  const scriptGateOk = scriptPresent && nodeTest && missingTests.length === 0 && canaryScriptPresent && missingCanaryScriptMarkers.length === 0;
   return {
-    ok: scriptPresent && nodeTest && missingTests.length === 0 && canaryScriptPresent && missingCanaryScriptMarkers.length === 0,
+    ok: scriptGateOk,
+    scriptGateOk,
     scriptName: "test:agent-run:drivers",
     script,
     nodeTest,
@@ -204,11 +206,15 @@ function agentRunDriverGateEvidence(report) {
     ...(report.missingTests.length ? [`missing tests ${report.missingTests.join(", ")}`] : []),
     ...(!report.canaryScriptPresent ? [`missing script ${report.canaryScriptName}`] : []),
     ...(report.missingCanaryScriptMarkers.length ? [`${report.canaryScriptName} missing ${report.missingCanaryScriptMarkers.join(", ")}`] : []),
+    ...(report.canarySuiteRequired === true && report.canarySuiteGateOk !== true
+      ? [`canary suite evidence must pass at ${report.canarySuiteEvidence?.path ?? ".artifacts/agent-run-driver/suite.json"} (decision=${report.canarySuiteEvidence?.decision ?? "missing"})`]
+      : []),
   ];
   if (blockers.length) return blockers.join("; ");
   return [
     `package.json scripts.test:agent-run:drivers includes ${report.requiredTests.join(", ")}`,
     `${report.canaryScriptName} writes .artifacts/agent-run-driver/suite.json`,
+    "agent-run driver canary suite evidence passed",
   ].join("; ");
 }
 
@@ -531,6 +537,9 @@ export function gather(target, cwd = process.cwd()) {
   agentRunDrivers.canarySuiteEvidence = agentRunDriverCanarySuiteEvidence(cwd);
   agentRunDrivers.lastCanaryEvidence = agentRunDriverCanaryEvidence(cwd);
   agentRunDrivers.lastMutationCanaryEvidence = agentRunDriverCanaryEvidence(cwd, ".artifacts/agent-run-driver/latest-mutation.json");
+  agentRunDrivers.canarySuiteRequired = true;
+  agentRunDrivers.canarySuiteGateOk = agentRunDrivers.canarySuiteEvidence.decision === "pass";
+  agentRunDrivers.ok = agentRunDrivers.scriptGateOk && agentRunDrivers.canarySuiteGateOk;
   const userSurface = userSurfaceReadiness(cwd);
 
   return {
