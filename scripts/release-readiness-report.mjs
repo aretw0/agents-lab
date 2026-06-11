@@ -442,6 +442,45 @@ function agentRunProviderRecoveryNextEvidence(cwd) {
   }
 }
 
+function agentRunProviderNetworkCheckEvidence(cwd) {
+  const relPath = ".artifacts/agent-run-driver/pi-provider-network-check.json";
+  const fullPath = path.join(cwd, relPath);
+  if (!existsSync(fullPath)) {
+    return {
+      path: relPath,
+      present: false,
+      decision: "missing",
+      summary: "no provider network check artifact found",
+    };
+  }
+  try {
+    const payload = JSON.parse(readFileSync(fullPath, "utf8"));
+    return {
+      path: relPath,
+      present: true,
+      decision: payload.decision ?? "unknown",
+      mode: payload.mode,
+      schemaVersion: payload.schemaVersion,
+      executeRequested: payload.executeRequested === true,
+      networkRequestAllowed: payload.networkRequestAllowed === true,
+      endpointHost: payload.endpointHost,
+      timeoutMs: payload.timeoutMs,
+      httpStatus: payload.httpStatus,
+      networkDecision: payload.networkDecision,
+      blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
+      warnings: Array.isArray(payload.warnings) ? payload.warnings : [],
+      summary: payload.summary ?? "provider network check artifact present",
+    };
+  } catch (error) {
+    return {
+      path: relPath,
+      present: true,
+      decision: "invalid-json",
+      summary: `could not parse provider network check artifact: ${String(error?.message ?? error)}`,
+    };
+  }
+}
+
 function releaseGateKind(id) {
   if (id === "target-version-ready") return "operator-decision";
   if (id === "board-release-clear") return "board-state";
@@ -477,6 +516,7 @@ function agentRunDriverGateEvidence(report) {
     `provider readiness evidence decision=${report.providerReadinessEvidence?.decision ?? "missing"}`,
     `provider container canary evidence decision=${report.providerContainerCanaryEvidence?.decision ?? "missing"}`,
     `provider recovery next evidence decision=${report.providerRecoveryNextEvidence?.decision ?? "missing"}`,
+    `provider network check evidence decision=${report.providerNetworkCheckEvidence?.decision ?? "missing"}`,
   ].join("; ");
 }
 
@@ -868,6 +908,7 @@ export function gather(target, cwd = process.cwd()) {
   agentRunDrivers.providerCanaryEvidence = agentRunProviderCanaryEvidence(cwd);
   agentRunDrivers.providerContainerCanaryEvidence = agentRunProviderContainerCanaryEvidence(cwd);
   agentRunDrivers.providerRecoveryNextEvidence = agentRunProviderRecoveryNextEvidence(cwd);
+  agentRunDrivers.providerNetworkCheckEvidence = agentRunProviderNetworkCheckEvidence(cwd);
   agentRunDrivers.canarySuiteRequired = true;
   agentRunDrivers.canarySuiteGateOk = agentRunDrivers.canarySuiteEvidence.decision === "pass";
   agentRunDrivers.currentHead = head;

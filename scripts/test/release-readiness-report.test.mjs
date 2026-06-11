@@ -1017,6 +1017,44 @@ test("readiness exposes provider recovery next evidence when present", () => {
   }
 });
 
+test("readiness exposes provider network check evidence when present", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const evidencePath = path.join(workspace, ".artifacts", "agent-run-driver", "pi-provider-network-check.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, JSON.stringify({
+      mode: "agent-run-pi-provider-network-check",
+      schemaVersion: 1,
+      decision: "ready-for-operator-decision",
+      executeRequested: false,
+      networkRequestAllowed: false,
+      endpointHost: "api.openai.com",
+      timeoutMs: 10000,
+      blockers: [],
+      warnings: [],
+      summary: "agent-run-pi-provider-network-check: decision=ready-for-operator-decision host=api.openai.com execute=no network=no",
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+
+    assert.equal(data.agentRunDrivers.providerNetworkCheckEvidence.present, true);
+    assert.equal(data.agentRunDrivers.providerNetworkCheckEvidence.decision, "ready-for-operator-decision");
+    assert.equal(data.agentRunDrivers.providerNetworkCheckEvidence.mode, "agent-run-pi-provider-network-check");
+    assert.equal(data.agentRunDrivers.providerNetworkCheckEvidence.executeRequested, false);
+    assert.equal(data.agentRunDrivers.providerNetworkCheckEvidence.networkRequestAllowed, false);
+    assert.equal(data.agentRunDrivers.providerNetworkCheckEvidence.endpointHost, "api.openai.com");
+    assert.deepEqual(data.agentRunDrivers.providerNetworkCheckEvidence.blockers, []);
+    assert.deepEqual(data.agentRunDrivers.providerNetworkCheckEvidence.warnings, []);
+    assert.equal(data.agentRunDrivers.ok, true);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("cli strict exits non-zero when release is not ready", () => {
   const workspace = makeWorkspace({
     version: "0.7.0",
@@ -1128,6 +1166,7 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.agentRunDrivers.providerCanaryEvidence.decision, "missing");
     assert.equal(json.agentRunDrivers.providerContainerCanaryEvidence.decision, "missing");
     assert.equal(json.agentRunDrivers.providerRecoveryNextEvidence.decision, "missing");
+    assert.equal(json.agentRunDrivers.providerNetworkCheckEvidence.decision, "missing");
     assert.equal(json.packageSmoke.mode, "release-package-smoke-report");
     assert.equal(json.packageSmoke.decision, "pass");
     assert.deepEqual(json.packageSmoke.packageBlockers, []);
