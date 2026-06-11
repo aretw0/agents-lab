@@ -137,6 +137,53 @@ test("provider recovery next advances to readiness rerun after network check pas
   }
 });
 
+test("provider recovery next retries canary when readiness already used current canary evidence", () => {
+  const cwd = workspace("pi-provider-recovery-next-current-canary-");
+  try {
+    const evidencePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-readiness.json");
+    const networkPath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-network-check.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, `${JSON.stringify({
+      mode: "agent-run-pi-provider-readiness",
+      decision: "blocked",
+      lastExecutionSource: "provider-canary",
+      providerRecoveryPlan: {
+        mode: "agent-run-pi-provider-recovery-plan",
+        decision: "blocked",
+        actions: [{
+          diagnosticCode: "provider-fetch-failed",
+          actionCode: "verify-provider-network",
+          verificationScript: "agent-run:pi-provider-network-check",
+          retryCanaryScript: "agent-run:pi-provider-canary:container",
+          rerunReadinessScript: "agent-run:pi-provider-readiness",
+        }],
+      },
+    })}\n`, "utf8");
+    writeFileSync(networkPath, `${JSON.stringify({
+      mode: "agent-run-pi-provider-network-check",
+      decision: "pass",
+      executeRequested: true,
+      networkRequestAllowed: true,
+      networkDecision: "reachable-auth-required",
+      httpStatus: 401,
+      blockers: [],
+    })}\n`, "utf8");
+
+    const result = buildAgentRunPiProviderRecoveryNext({ cwd, sourcePath: ".artifacts/agent-run-driver/pi-provider-readiness.json" });
+
+    assert.equal(result.decision, "next-action-ready");
+    assert.equal(result.actionStage, "retry-provider-canary");
+    assert.deepEqual(result.selectedCommandPreview, {
+      command: "pnpm",
+      args: ["run", "agent-run:pi-provider-canary:container"],
+      shellInterpolationAllowed: false,
+    });
+    assert.match(result.nextActions.join("\n"), /retry with agent-run:pi-provider-canary:container/);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("provider recovery next keeps network blockers ahead of readiness rerun", () => {
   const cwd = workspace("pi-provider-recovery-next-network-block-");
   try {

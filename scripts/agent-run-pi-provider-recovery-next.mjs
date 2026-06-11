@@ -94,8 +94,11 @@ function networkCheckEvidence(cwd, relPath = DEFAULT_NETWORK_CHECK) {
   }
 }
 
-function nextActionStage({ nextAction, networkEvidence }) {
+function nextActionStage({ nextAction, networkEvidence, payload }) {
   if (nextAction?.actionCode !== "verify-provider-network") return "run-verification";
+  if (networkEvidence?.decision === "pass" && payload?.lastExecutionSource === "provider-canary") {
+    return "retry-provider-canary";
+  }
   if (networkEvidence?.decision === "pass") return "rerun-readiness";
   if (networkEvidence?.decision === "blocked") return "resolve-network-blockers";
   return "run-network-check";
@@ -139,14 +142,14 @@ export function buildAgentRunPiProviderRecoveryNext(options = {}) {
   const actionStage = recoveryReady
     ? "retry-provider-canary"
     : decision === "next-action-ready"
-    ? nextActionStage({ nextAction, networkEvidence: providerNetworkCheck })
+    ? nextActionStage({ nextAction, networkEvidence: providerNetworkCheck, payload })
     : "blocked";
   const selectedCommandPreview = actionStage === "rerun-readiness"
     ? commandPreviewFor(nextAction?.rerunReadinessScript)
     : actionStage === "resolve-network-blockers"
       ? commandPreviewFor(nextAction?.verificationScript)
       : actionStage === "retry-provider-canary"
-        ? commandPreviewFor("agent-run:pi-provider-canary")
+        ? commandPreviewFor(nextAction?.retryCanaryScript ?? "agent-run:pi-provider-canary")
       : providerNetworkCheck.commandPreview ?? commandPreviewFor(nextAction?.verificationScript);
   return {
     mode: "agent-run-pi-provider-recovery-next",
@@ -176,7 +179,9 @@ export function buildAgentRunPiProviderRecoveryNext(options = {}) {
     nextActions: decision === "next-action-ready"
       ? actionStage === "retry-provider-canary"
         ? [
-            "provider recovery is clear; run agent-run:pi-provider-canary preview before any approved execute",
+            nextAction
+              ? `provider network check passed; retry with ${nextAction.retryCanaryScript}`
+              : "provider recovery is clear; run agent-run:pi-provider-canary preview before any approved execute",
             "execute only one provider worker canary after explicit approval",
           ]
         : actionStage === "rerun-readiness"
