@@ -50,6 +50,8 @@
     "release:artifact:audit:json": "node scripts/release-artifact-audit.mjs --pretty",
     "release:final:gate": "node scripts/release-final-gate.mjs",
     "release:final:gate:json": "node scripts/release-final-gate.mjs --pretty",
+    "release:evidence:refresh": "node scripts/release-evidence-refresh.mjs --execute-canaries",
+    "release:evidence:refresh:json": "node scripts/release-evidence-refresh.mjs --execute-canaries --pretty",
     "pi:local": "node scripts/pi-source-switch.mjs local",
     "pi:published": "node scripts/pi-source-switch.mjs published",
     "pi:status": "node scripts/pi-source-switch.mjs status",
