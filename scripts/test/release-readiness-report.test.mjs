@@ -1189,6 +1189,8 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.mode, "release-readiness-report");
     assert.equal(json.schemaVersion, 1);
     assert.match(json.generatedAt, /^\d{4}-\d{2}-\d{2}T/);
+    assert.match(json.markdown, /# Release readiness report v0\.8\.0/);
+    assert.match(json.markdown, /decision: not-ready/);
     assert.equal(json.decision, "not-ready");
     assert.equal(json.ready, false);
     assert.deepEqual(json.versions.map((row) => row.version), ["0.8.0", "0.8.0", "0.8.0", "0.8.0", "0.8.0"]);

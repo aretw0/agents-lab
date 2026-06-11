@@ -1099,13 +1099,8 @@ function main() {
 
   mkdirSync(path.dirname(outPath), { recursive: true });
   if (args.json) {
-    writeFileSync(outPath, `${JSON.stringify({
-      mode: "release-readiness-report",
-      schemaVersion: 1,
-      target: data.target,
-      generatedAt: report.generatedAt,
-      head: data.head,
-      latestTag: data.latestTag,
+    const structuredReport = {
+      ...report,
       versions: data.versions,
       versionsAligned: data.versionsAligned,
       targetVersionReady: data.targetVersionReady,
@@ -1115,16 +1110,9 @@ function main() {
       agentRunDrivers: data.agentRunDrivers,
       packageSmoke: data.packageSmoke,
       userSurface: data.userSurface,
-      decision: report.decision,
-      ready: report.ready,
-      checklist: report.checklist,
-      releaseBlockers: report.releaseBlockers,
-      operatorDecisions: report.operatorDecisions,
-      nextActionCode: report.nextActionCode,
-      nextActions: report.nextActions,
-      automationPermissions: report.automationPermissions,
       board: data.board,
-    }, null, 2)}\n`);
+    };
+    writeFileSync(outPath, `${JSON.stringify(structuredReport, null, 2)}\n`);
   } else {
     writeFileSync(outPath, `${report.markdown}\n`);
   }
