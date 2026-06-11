@@ -18,7 +18,7 @@ const PACKAGES = [
 function makeWorkspace({
   version = "0.7.0",
   tasks = [],
-  agentRunDriverScript = "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs",
+  agentRunDriverScript = "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs scripts/test/agent-run-driver-container-canary-suite.test.mjs scripts/test/agent-run-driver-fanout-rehearsal.test.mjs scripts/test/agent-run-driver-container-fanout-rehearsal.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs scripts/test/agent-run-pi-provider-readiness.test.mjs scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs",
   agentRunDriverCanariesScript = "node scripts/agent-run-driver-canary-suite.mjs --execute --out .artifacts/agent-run-driver/suite.json",
   writeAgentRunDriverCanarySuite = true,
   agentRunDriverCanarySuiteGitHead = "",
@@ -455,6 +455,12 @@ test("agent-run driver gate requires the full driver suite script", () => {
       "scripts/test/agent-run-pi-driver-payload.test.mjs",
       "scripts/test/agent-run-driver-canary.test.mjs",
       "scripts/test/agent-run-driver-canary-suite.test.mjs",
+      "scripts/test/agent-run-driver-container-canary-suite.test.mjs",
+      "scripts/test/agent-run-driver-fanout-rehearsal.test.mjs",
+      "scripts/test/agent-run-driver-container-fanout-rehearsal.test.mjs",
+      "scripts/test/agent-run-pi-provider-fanout-plan.test.mjs",
+      "scripts/test/agent-run-pi-provider-readiness.test.mjs",
+      "scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs",
     ]);
     assert.match(report.markdown, /\[ \] agent-run-driver-gate/);
     assert.match(report.markdown, /agent-run-driver-gate \[technical-gate\]: missing tests scripts\/test\/agent-run-pi-driver\.test\.mjs/);
@@ -548,7 +554,7 @@ test("worktree clean gate blocks release readiness for tracked changes", () => {
     writeFileSync(path.join(workspace, "package.json"), JSON.stringify({
       private: true,
       scripts: {
-        "test:agent-run:drivers": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs",
+        "test:agent-run:drivers": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs scripts/test/agent-run-driver-container-canary-suite.test.mjs scripts/test/agent-run-driver-fanout-rehearsal.test.mjs scripts/test/agent-run-driver-container-fanout-rehearsal.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs scripts/test/agent-run-pi-provider-readiness.test.mjs scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs",
         "agent-run:driver-canaries": "node scripts/agent-run-driver-canary-suite.mjs --execute --out .artifacts/agent-run-driver/suite.json",
       },
       dirtyMarker: true,
@@ -728,6 +734,44 @@ test("readiness exposes agent-run driver canary suite evidence when present", ()
   }
 });
 
+test("readiness exposes provider readiness diagnostics when present", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const evidencePath = path.join(workspace, ".artifacts", "agent-run-driver", "pi-provider-readiness.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, JSON.stringify({
+      mode: "agent-run-pi-provider-readiness",
+      schemaVersion: 1,
+      decision: "blocked",
+      model: "openai-codex/gpt-5.3-codex-spark",
+      blockers: ["provider-fetch-failed"],
+      providerDiagnostics: [{
+        code: "provider-fetch-failed",
+        category: "network-or-provider",
+        severity: "blocker",
+      }],
+      nextActions: ["verify network, proxy, and provider endpoint reachability, then rerun readiness"],
+      summary: "agent-run-pi-provider-readiness: decision=blocked",
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+
+    assert.equal(data.agentRunDrivers.providerReadinessEvidence.present, true);
+    assert.equal(data.agentRunDrivers.providerReadinessEvidence.decision, "blocked");
+    assert.deepEqual(data.agentRunDrivers.providerReadinessEvidence.blockers, ["provider-fetch-failed"]);
+    assert.deepEqual(data.agentRunDrivers.providerReadinessEvidence.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
+      ["provider-fetch-failed", "network-or-provider", "blocker"],
+    ]);
+    assert.equal(data.agentRunDrivers.ok, true);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("cli strict exits non-zero when release is not ready", () => {
   const workspace = makeWorkspace({
     version: "0.7.0",
@@ -812,8 +856,15 @@ test("cli can write structured json for agents", () => {
       "scripts/test/agent-run-pi-driver-payload.test.mjs",
       "scripts/test/agent-run-driver-canary.test.mjs",
       "scripts/test/agent-run-driver-canary-suite.test.mjs",
+      "scripts/test/agent-run-driver-container-canary-suite.test.mjs",
+      "scripts/test/agent-run-driver-fanout-rehearsal.test.mjs",
+      "scripts/test/agent-run-driver-container-fanout-rehearsal.test.mjs",
+      "scripts/test/agent-run-pi-provider-fanout-plan.test.mjs",
+      "scripts/test/agent-run-pi-provider-readiness.test.mjs",
+      "scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs",
     ]);
     assert.deepEqual(json.agentRunDrivers.missingTests, []);
+    assert.equal(json.agentRunDrivers.providerReadinessEvidence.decision, "missing");
     assert.equal(json.packageSmoke.mode, "release-package-smoke-report");
     assert.equal(json.packageSmoke.decision, "pass");
     assert.deepEqual(json.packageSmoke.packageBlockers, []);
