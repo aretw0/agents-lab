@@ -58,6 +58,11 @@ const DISTRIBUTED_WRAPPERS = [
 		reason: "agent-run driver wrappers are distributed through guardrails-agent-run; root scripts remain lab/CI shortcuts and canary evidence commands",
 	},
 	{
+		match: /^colony:inspect$/,
+		surface: "colony-pilot",
+		reason: "colony runtime inspection is read-only lab diagnostics around colony-pilot state; it is not colony dispatch authorization",
+	},
+	{
 		match: /^subagent:readiness/,
 		surface: "subagent-readiness",
 		reason: "readiness already has a distributed extension/tool surface; root script is a lab wrapper",

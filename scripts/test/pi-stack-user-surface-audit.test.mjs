@@ -31,6 +31,14 @@ test("classifyRootScript marks agent-run scripts as guardrails-agent-run wrapper
 	assert.equal(row.recommendedAction, "fold-wrapper-into-extension-or-doc-as-lab-shortcut");
 });
 
+test("classifyRootScript marks colony inspect as read-only colony-pilot diagnostics", () => {
+	const row = classifyRootScript("colony:inspect", "node scripts/colony-runtime-inspect.mjs", [...shipped, "colony-pilot"]);
+
+	assert.equal(row.category, "distributed-wrapper");
+	assert.equal(row.targetSurface, "colony-pilot");
+	assert.match(row.reason, /not colony dispatch authorization/);
+});
+
 test("classifyRootScript marks promoted dev pressure as distributed wrapper", () => {
 	const row = classifyRootScript("pi:dev:pressure", "node scripts/pi-dev-pressure.mjs", shipped);
 
@@ -145,7 +153,7 @@ test("buildUserSurfaceAudit exposes grouped promotion targets", () => {
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:bloat:audit:strict")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:discourse:audit")));
 	assert.deepEqual(audit.promotionGroups, []);
-	assert.deepEqual(audit.labOnlyScripts.map((row) => row.name), ["colony:inspect"]);
+	assert.deepEqual(audit.labOnlyScripts, []);
 });
 
 test("formatUserSurfaceAuditSummary keeps operator output compact", () => {
