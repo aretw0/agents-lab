@@ -77,6 +77,51 @@ function commandPreview(command, args, reason) {
   };
 }
 
+function buildReleaseCutOperatorPacket({ decision, target, tag, targetSha, readiness, draft, draftNotesReview, commandPreviews, blockers }) {
+  const approvalRows = [
+    {
+      action: "create-local-tag",
+      requiredApprovalPrompt: `approve release tag create ${tag}`,
+      commandPreview: commandPreviews.createLocalTag,
+    },
+    {
+      action: "push-tag",
+      requiredApprovalPrompt: `approve release tag push ${tag}`,
+      commandPreview: commandPreviews.pushTag,
+    },
+    {
+      action: "prepare-draft-release",
+      requiredApprovalPrompt: `approve release draft prepare-draft-release ${tag}`,
+      commandPreview: commandPreviews.prepareDraftRelease,
+    },
+    {
+      action: "publish-release",
+      requiredApprovalPrompt: `approve release publish ${tag}`,
+      commandPreview: commandPreviews.publishGate,
+    },
+  ];
+  return {
+    mode: "release-cut-operator-packet",
+    schemaVersion: SCHEMA_VERSION,
+    decision,
+    target,
+    tag,
+    targetSha,
+    readinessDecision: readiness?.decision ?? "missing",
+    readinessReady: readiness?.ready === true,
+    draftDecision: draft?.decision ?? "missing",
+    draftNotesReviewDecision: draftNotesReview?.decision ?? "missing",
+    approvalRows,
+    requiredApprovalPrompts: approvalRows.map((row) => row.requiredApprovalPrompt),
+    tagAllowed: false,
+    publishAllowed: false,
+    workflowDispatchAllowed: false,
+    processStartAllowed: false,
+    blockers: Array.isArray(blockers) ? blockers : [],
+    summary: `release-cut-operator-packet: decision=${decision} tag=${tag} approvals=${approvalRows.length} dispatch=no`,
+  };
+}
+
 export function buildReleaseCutPreview(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const target = String(options.target ?? "0.8.0");
@@ -124,6 +169,17 @@ export function buildReleaseCutPreview(options = {}) {
       processStartAllowed: false,
     },
   };
+  const releaseCutOperatorPacket = buildReleaseCutOperatorPacket({
+    decision,
+    target,
+    tag,
+    targetSha,
+    readiness,
+    draft,
+    draftNotesReview,
+    commandPreviews,
+    blockers,
+  });
 
   return {
     mode: "release-cut-preview",
@@ -144,12 +200,8 @@ export function buildReleaseCutPreview(options = {}) {
     workflowDispatchAllowed: false,
     processStartAllowed: false,
     requiresOperatorDecision: true,
-    requiredApprovalPrompts: [
-      `approve release tag create ${tag}`,
-      `approve release tag push ${tag}`,
-      `approve release draft prepare-draft-release ${tag}`,
-      `approve release publish ${tag}`,
-    ],
+    requiredApprovalPrompts: releaseCutOperatorPacket.requiredApprovalPrompts,
+    releaseCutOperatorPacket,
     commandPreviews,
     protectedActions: [
       "create annotated release tag",

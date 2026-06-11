@@ -104,6 +104,27 @@ test("release cut preview emits protected operator packet when readiness and dra
     assert.equal(result.commandPreviews.createLocalTag.command, "git");
     assert.deepEqual(result.commandPreviews.createLocalTag.args.slice(0, 3), ["tag", "-a", "v0.8.0"]);
     assert.equal(result.commandPreviews.prepareDraftRelease.command, "gh");
+    assert.equal(result.releaseCutOperatorPacket.mode, "release-cut-operator-packet");
+    assert.equal(result.releaseCutOperatorPacket.decision, "ready-for-operator-review");
+    assert.equal(result.releaseCutOperatorPacket.readinessDecision, "ready");
+    assert.equal(result.releaseCutOperatorPacket.draftDecision, "ready-for-operator-review");
+    assert.equal(result.releaseCutOperatorPacket.draftNotesReviewDecision, "ready-for-operator-review");
+    assert.deepEqual(result.releaseCutOperatorPacket.approvalRows.map((row) => row.action), [
+      "create-local-tag",
+      "push-tag",
+      "prepare-draft-release",
+      "publish-release",
+    ]);
+    assert.deepEqual(result.releaseCutOperatorPacket.requiredApprovalPrompts, [
+      "approve release tag create v0.8.0",
+      "approve release tag push v0.8.0",
+      "approve release draft prepare-draft-release v0.8.0",
+      "approve release publish v0.8.0",
+    ]);
+    assert.equal(result.releaseCutOperatorPacket.tagAllowed, false);
+    assert.equal(result.releaseCutOperatorPacket.publishAllowed, false);
+    assert.equal(result.releaseCutOperatorPacket.workflowDispatchAllowed, false);
+    assert.equal(result.releaseCutOperatorPacket.processStartAllowed, false);
     assert.ok(result.requiredApprovalPrompts.includes("approve release tag create v0.8.0"));
     assert.deepEqual(result.blockers, []);
   } finally {
@@ -126,6 +147,8 @@ test("release cut preview blocks ready draft without notes review packet", () =>
 
     assert.equal(result.decision, "blocked");
     assert.ok(result.blockers.includes("release-draft-notes-review-missing"));
+    assert.ok(result.releaseCutOperatorPacket.blockers.includes("release-draft-notes-review-missing"));
+    assert.equal(result.releaseCutOperatorPacket.tagAllowed, false);
     assert.equal(result.tagAllowed, false);
     assert.equal(result.workflowDispatchAllowed, false);
   } finally {
