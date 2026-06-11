@@ -368,6 +368,7 @@ function boardEvidenceDispositionRows(candidateRows) {
     evidencePath: row.evidencePath,
     evidencePresent: row.evidencePresent,
     recommendedAction: row.evidencePresent ? "park-for-target-release" : "require-work",
+    approvalPrompt: `approve board release disposition ${row.evidencePresent ? "park-for-target-release" : "require-work"} ${row.taskId}`,
     allowedActions: ["park-for-target-release", "require-work"],
     automationAllowed: false,
     rationale: row.evidencePresent
@@ -398,6 +399,8 @@ function operatorDecisionPackets(data, failedChecklist) {
   if (failedChecklist.some((item) => item.id === "board-release-clear") && data.board.releaseDecisionReady) {
     const candidateRows = data.board.evidenceCandidateRows;
     const dispositionRows = boardEvidenceDispositionRows(candidateRows);
+    const recommendedBulkAction = dispositionRows.every((row) => row.evidencePresent) ? "park-for-target-release" : "require-work";
+    const requiredApprovalPrompt = `approve board release disposition ${recommendedBulkAction} ${dispositionRows.map((row) => row.taskId).join(",")}`;
     decisions.push({
       id: "decide-board-evidence-candidates",
       kind: "board-state",
@@ -412,9 +415,10 @@ function operatorDecisionPackets(data, failedChecklist) {
         candidateTaskIds: dispositionRows.map((row) => row.taskId),
         dispositionRows,
         allCandidatesHaveEvidence: dispositionRows.every((row) => row.evidencePresent),
-        recommendedBulkAction: dispositionRows.every((row) => row.evidencePresent) ? "park-for-target-release" : "require-work",
+        recommendedBulkAction,
+        requiredApprovalPrompt,
         automationAllowed: false,
-        summary: `board release disposition: candidates=${dispositionRows.length} recommended=${dispositionRows.every((row) => row.evidencePresent) ? "park-for-target-release" : "require-work"}`,
+        summary: `board release disposition: candidates=${dispositionRows.length} recommended=${recommendedBulkAction}`,
       },
       allowedActions: ["park-for-target-release", "require-work"],
       requiresOperatorDecision: true,
