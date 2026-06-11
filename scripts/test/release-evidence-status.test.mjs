@@ -30,7 +30,12 @@ function refresh(overrides = {}) {
     draftDecision: "ready-for-operator-review",
     finalGateDecision: "pass",
     finalGateHead: "abc1234",
-    requiredApprovalPrompts: ["approve release tag create v0.8.0"],
+    requiredApprovalPrompts: [
+      "approve release tag create v0.8.0",
+      "approve release tag push v0.8.0",
+      "approve release draft prepare-draft-release v0.8.0",
+      "approve release publish v0.8.0",
+    ],
     protectedActionsAllowed: false,
     ...overrides,
   };
@@ -43,7 +48,12 @@ function finalGate(overrides = {}) {
     target: "0.8.0",
     tag: "v0.8.0",
     head: "abc1234",
-    requiredApprovalPrompts: ["approve release tag create v0.8.0"],
+    requiredApprovalPrompts: [
+      "approve release tag create v0.8.0",
+      "approve release tag push v0.8.0",
+      "approve release draft prepare-draft-release v0.8.0",
+      "approve release publish v0.8.0",
+    ],
     protectedActionsAllowed: false,
     ...overrides,
   };
@@ -137,6 +147,24 @@ test("release evidence status blocks when refresh final gate head is stale or mi
     assert.ok(result.blockers.includes("release-evidence-final-gate-head-mismatch"));
     assert.equal(result.finalGateHead, "abc1234");
     assert.equal(result.protectedActionsAllowed, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("release evidence status blocks when protected approval prompts are incomplete", () => {
+  const cwd = workspace();
+  try {
+    writeJson(cwd, ".artifacts/release-cut/v0.8.0-evidence-refresh.json", refresh({ requiredApprovalPrompts: [] }));
+    writeJson(cwd, ".artifacts/release-cut/v0.8.0-final-gate.json", finalGate({ requiredApprovalPrompts: [] }));
+
+    const result = buildReleaseEvidenceStatus({ cwd, target: "0.8.0", head: "abc1234" });
+
+    assert.equal(result.decision, "block");
+    assert.equal(result.approvalPromptCount, 0);
+    assert.ok(result.blockers.includes("release-approval-prompt-missing:approve release tag create v0.8.0"));
+    assert.ok(result.blockers.includes("release-approval-prompt-missing:approve release publish v0.8.0"));
+    assert.equal(result.workflowDispatchAllowed, false);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

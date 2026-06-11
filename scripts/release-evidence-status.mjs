@@ -49,6 +49,15 @@ function runGit(cwd, args) {
   };
 }
 
+function expectedApprovalPrompts(tag) {
+  return [
+    `approve release tag create ${tag}`,
+    `approve release tag push ${tag}`,
+    `approve release draft prepare-draft-release ${tag}`,
+    `approve release publish ${tag}`,
+  ];
+}
+
 export function buildReleaseEvidenceStatus(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const target = String(options.target ?? "0.8.0");
@@ -60,6 +69,8 @@ export function buildReleaseEvidenceStatus(options = {}) {
   const finalGateRead = options.finalGate ?? readJson(cwd, finalGatePath);
   const finalGate = finalGateRead.ok === false ? null : (finalGateRead.value ?? finalGateRead);
   const currentHead = String(options.head ?? runGit(cwd, ["rev-parse", "--short", "HEAD"]).stdout ?? "");
+  const approvalPrompts = refresh?.requiredApprovalPrompts ?? finalGate?.requiredApprovalPrompts ?? [];
+  const expectedPrompts = expectedApprovalPrompts(tag);
   const blockers = [];
 
   if (!currentHead) blockers.push("release-current-head-missing");
@@ -77,6 +88,9 @@ export function buildReleaseEvidenceStatus(options = {}) {
   if (finalGate && finalGate.head && currentHead && finalGate.head !== currentHead) blockers.push("release-final-gate-stale-head");
   if (refresh?.protectedActionsAllowed !== false) blockers.push("release-evidence-protected-actions-not-false");
   if (finalGate?.protectedActionsAllowed !== false) blockers.push("release-final-gate-protected-actions-not-false");
+  for (const prompt of expectedPrompts) {
+    if (!approvalPrompts.includes(prompt)) blockers.push(`release-approval-prompt-missing:${prompt}`);
+  }
 
   const decision = blockers.length === 0 ? "pass" : "block";
   return {
@@ -96,7 +110,8 @@ export function buildReleaseEvidenceStatus(options = {}) {
     canarySuiteDecision: refresh?.canarySuiteDecision ?? "missing",
     readinessDecision: refresh?.readinessDecision ?? "missing",
     draftDecision: refresh?.draftDecision ?? "missing",
-    requiredApprovalPrompts: refresh?.requiredApprovalPrompts ?? finalGate?.requiredApprovalPrompts ?? [],
+    approvalPromptCount: approvalPrompts.length,
+    requiredApprovalPrompts: approvalPrompts,
     protectedActionsAllowed: false,
     tagAllowed: false,
     publishAllowed: false,
