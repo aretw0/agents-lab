@@ -205,7 +205,11 @@ test("public 0.8 readiness map matches the canonical release readiness gate", ()
 	assert.match(playbook, /board\.evidenceCandidateRows/);
 	assert.match(readiness, /schemaVersion=1/);
 	assert.match(readiness, /operatorDecisions/);
+	assert.match(readiness, /boardReleaseDispositionPacket/);
 	assert.match(readiness, /releaseDecisionReady/);
+	assert.match(readiness, /worktree/);
+	assert.match(readiness, /userSurface/);
+	assert.match(readiness, /canarySuiteHeadMatches/);
 	assert.match(readiness, /board\.\*Rows/);
 	assert.match(readiness, /board\.evidenceCandidateRows/);
 	assert.doesNotMatch(readiness, /stale colony|colony board items|releaseBlockers: (?!none)/i);
