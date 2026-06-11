@@ -84,6 +84,9 @@ test("release final gate passes coherent readiness and draft without protected a
     assert.equal(result.artifactAuditDecision, "pass");
     assert.equal(result.cutPreviewDecision, "ready-for-operator-review");
     assert.equal(result.cutPreview.artifactAuditDecision, "pass");
+    assert.equal(result.cutPreviewPath, ".artifacts/release-cut/v0.8.0-preview.json");
+    assert.equal(result.artifactAudit.artifacts.cutPath, result.cutPreviewPath);
+    assert.equal(result.releaseArtifactAuditPath, ".artifacts/release-cut/v0.8.0-artifact-audit.json");
     assert.equal(result.protectedActionsAllowed, false);
     assert.equal(result.tagAllowed, false);
     assert.equal(result.publishAllowed, false);

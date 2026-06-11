@@ -70,6 +70,10 @@ function defaultAuditPath(tag) {
   return `.artifacts/release-cut/${tag}-artifact-audit.json`;
 }
 
+function defaultCutPreviewPath(tag) {
+  return `.artifacts/release-cut/${tag}-preview.json`;
+}
+
 export function buildReleaseFinalGate(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const target = String(options.target ?? "0.8.0");
@@ -77,6 +81,7 @@ export function buildReleaseFinalGate(options = {}) {
   const readinessPath = options.readinessPath || defaultReadinessPath(target);
   const draftPath = options.draftPath || defaultDraftPath(tag);
   const auditPath = options.auditPath || defaultAuditPath(tag);
+  const cutPreviewPath = options.cutPreviewPath || defaultCutPreviewPath(tag);
   const head = options.head ?? runGit(cwd, ["rev-parse", "--short", "HEAD"]).stdout;
   const cutBase = buildReleaseCutPreview({
     cwd,
@@ -93,7 +98,7 @@ export function buildReleaseFinalGate(options = {}) {
     tag,
     readinessPath,
     draftPath,
-    cutPath: ".in-memory/release-cut-preview.json",
+    cutPath: cutPreviewPath,
     readiness: options.readiness,
     draft: options.draft,
     cut: cutBase,
@@ -126,6 +131,7 @@ export function buildReleaseFinalGate(options = {}) {
     head,
     releaseReadinessPath: readinessPath,
     draftPreviewPath: draftPath,
+    cutPreviewPath,
     releaseArtifactAuditPath: auditPath,
     cutBaseDecision: cutBase.decision,
     artifactAuditDecision: artifactAudit.decision,
