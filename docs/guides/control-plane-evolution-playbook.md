@@ -82,9 +82,10 @@ Sem esse trio de controles, a recomendação padrão é `defer`.
 
 Fluxo end-to-end recomendado:
 1. preparar versão (`changeset version`) e validar alinhamento de versões nos pacotes;
-2. gerar notas/checklist de readiness (local artifact);
-3. criar **draft release** manual para revisão do operador;
-4. publicar somente após gates canônicos + decisão explícita.
+2. rodar `pnpm run release:evidence:refresh` para atualizar canaries locais, readiness, draft preview e final gate;
+3. revisar o artifact `.artifacts/release-cut/vX.Y.Z-final-gate.json` e os prompts protegidos;
+4. criar **draft release** manual para revisão do operador;
+5. publicar somente após gates canônicos + decisão explícita.
 
 Automação mínima existente:
 - `publish.yml` mantém publish gateado por tag semver + smoke/test/verify/audits;
@@ -95,11 +96,16 @@ Automação mínima existente:
 - `pnpm run release:readiness:strict:json -- --target X.Y.Z` aplica o gate e preserva o artefato estruturado;
 - `pnpm run release:readiness:v0.8.0` gera checklist local canônico em `.artifacts/release-readiness/`.
 - `pnpm run release:readiness:v0.8.0:json` gera o mesmo estado em JSON para agentes e automação local, incluindo `operatorDecisions`.
+- `pnpm run release:evidence:refresh -- --target X.Y.Z` atualiza a cadeia segura local: `agent-run:driver-canaries`, readiness, draft preview e final gate.
+- `pnpm run release:evidence:refresh:json -- --target X.Y.Z` emite o mesmo packet em JSON legível; o resultado esperado antes de revisão humana é `mode=release-evidence-refresh`, `decision=pass`, `finalGateDecision=pass` e `protectedActionsAllowed=false`.
+- `pnpm run release:final:gate -- --target X.Y.Z` recompõe em memória cut preview + artifact audit + cut auditado sem tag, push, workflow dispatch ou publish.
+- `pnpm run release:artifact:audit -- --target X.Y.Z` audita artifacts já gerados quando for necessário inspecionar a cadeia manualmente.
 
 Interpretação do readiness report:
 - `Release Blockers` separa gate técnico, decisão de operador e estado do board;
 - `Operator Decisions` lista as decisões humanas restantes antes do release;
 - no JSON, `mode=release-readiness-report` e `schemaVersion=1` identificam o contrato estruturado;
+- no JSON, `markdown` acompanha o mesmo relatório humano, então agentes não precisam escolher entre contrato estruturado e contexto legível;
 - no JSON, `generatedAt` e `decision` identificam o snapshot e a decisão (`ready` ou `not-ready`) sem parsear Markdown;
 - no JSON, `versions`, `versionsAligned`, `targetVersionReady`, `workflows`, `gates`, `worktree`, `agentRunDrivers`, `packageSmoke` e `userSurface` expõem os gates principais sem parsear `checklist[*].evidence`;
 - no JSON, `gates.worktreeClean` e `worktree.statusLines` bloqueiam readiness quando há mudanças rastreadas locais; arquivos untracked de evidência local não bloqueiam por si só;
@@ -119,6 +125,8 @@ Interpretação do readiness report:
 - no JSON, `operatorDecisions[*].requiresOperatorDecision=true` e `automationAllowed=false` deixam claro que `allowedActions` são opções para operador, não dispatch automático;
 - no JSON, `nextActionCode` e `nextActions` indicam o próximo passo seguro sem autorizar publish automático;
 - no JSON, `automationPermissions` mantém `tagAllowed`, `publishAllowed`, `workflowDispatchAllowed` e `processStartAllowed` falsos; readiness report é sempre report-only;
+- no final gate, `requiredApprovalPrompts` lista as aprovações protegidas (`tag create`, `tag push`, `prepare-draft-release`, `publish-release`) sem executá-las;
+- no refresh, `protectedActionsAllowed=false` confirma que o comando atualiza evidência local e não inicia release real;
 - `Board Evidence Candidates` lista tarefas ainda abertas que já têm evidência local-safe para decisão;
 - no JSON, `board.openP0Rows`, `board.inProgressRows` e `board.blockedRows` expõem o estado do board sem exigir parse de linhas Markdown;
 - no JSON, `board.evidenceCandidateRows` expõe os mesmos candidatos em forma estruturada para agentes;
