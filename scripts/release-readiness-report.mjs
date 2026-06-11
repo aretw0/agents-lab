@@ -56,6 +56,7 @@ const AGENT_RUN_DRIVER_OPERATIONAL_SCRIPTS = {
   "agent-run:pi-provider-protected-board-plan": [
     "node scripts/agent-run-pi-provider-fanout-plan.mjs",
     "--from-board-protected",
+    "--require-local-task-evidence",
     ".artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
   ],
   "agent-run:pi-provider-readiness": [
@@ -521,6 +522,7 @@ function agentRunProviderProtectedBoardPlanEvidence(cwd) {
       source: payload.source,
       batchId: payload.batchId,
       model: payload.model,
+      requireLocalTaskEvidence: payload.requireLocalTaskEvidence === true,
       workerCount: payload.workerCount,
       selectedTaskIds: Array.isArray(payload.boardSelection?.selectedTaskIds) ? payload.boardSelection.selectedTaskIds : [],
       dispatchAllowed: payload.dispatchAllowed === true,

@@ -33,7 +33,7 @@ function makeWorkspace({
       "agent-run:driver-fanout-manifest": "node scripts/agent-run-driver-fanout-manifest.mjs --out .artifacts/agent-run-driver/fanout-manifest.json",
       "agent-run:driver-fanout-rehearsal": "node scripts/agent-run-driver-fanout-rehearsal.mjs --execute --out .artifacts/agent-run-driver/fanout-rehearsal.json",
       "agent-run:pi-provider-fanout-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --out .artifacts/agent-run-driver/pi-provider-fanout-plan.json",
-      "agent-run:pi-provider-protected-board-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --from-board-protected --limit 3 --batch-id protected-board-research-0-8 --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
+      "agent-run:pi-provider-protected-board-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --from-board-protected --require-local-task-evidence --limit 3 --batch-id protected-board-research-0-8 --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
       "agent-run:pi-provider-readiness": "node scripts/agent-run-pi-provider-readiness.mjs --out .artifacts/agent-run-driver/pi-provider-readiness.json",
       "agent-run:pi-provider-recovery-next": "node scripts/agent-run-pi-provider-recovery-next.mjs --out .artifacts/agent-run-driver/pi-provider-recovery-next.json",
       "agent-run:pi-provider-network-check": "node scripts/agent-run-pi-provider-network-check.mjs --out .artifacts/agent-run-driver/pi-provider-network-check.json",
@@ -600,7 +600,7 @@ test("worktree clean gate blocks release readiness for tracked changes", () => {
         "agent-run:driver-fanout-manifest": "node scripts/agent-run-driver-fanout-manifest.mjs --out .artifacts/agent-run-driver/fanout-manifest.json",
         "agent-run:driver-fanout-rehearsal": "node scripts/agent-run-driver-fanout-rehearsal.mjs --execute --out .artifacts/agent-run-driver/fanout-rehearsal.json",
         "agent-run:pi-provider-fanout-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --out .artifacts/agent-run-driver/pi-provider-fanout-plan.json",
-        "agent-run:pi-provider-protected-board-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --from-board-protected --limit 3 --batch-id protected-board-research-0-8 --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
+        "agent-run:pi-provider-protected-board-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --from-board-protected --require-local-task-evidence --limit 3 --batch-id protected-board-research-0-8 --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
         "agent-run:pi-provider-readiness": "node scripts/agent-run-pi-provider-readiness.mjs --out .artifacts/agent-run-driver/pi-provider-readiness.json",
         "agent-run:pi-provider-recovery-next": "node scripts/agent-run-pi-provider-recovery-next.mjs --out .artifacts/agent-run-driver/pi-provider-recovery-next.json",
         "agent-run:pi-provider-network-check": "node scripts/agent-run-pi-provider-network-check.mjs --out .artifacts/agent-run-driver/pi-provider-network-check.json",
@@ -1097,6 +1097,7 @@ test("readiness exposes protected board provider plan evidence when present", ()
       source: "protected-board",
       batchId: "protected-board-research-0-8",
       model: "openai-codex/gpt-5.3-codex-spark",
+      requireLocalTaskEvidence: true,
       workerCount: 3,
       boardSelection: {
         selectedTaskIds: ["TASK-BUD-480", "TASK-BUD-521", "TASK-BUD-676"],
@@ -1116,6 +1117,7 @@ test("readiness exposes protected board provider plan evidence when present", ()
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.source, "protected-board");
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.batchId, "protected-board-research-0-8");
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.model, "openai-codex/gpt-5.3-codex-spark");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.requireLocalTaskEvidence, true);
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.workerCount, 3);
     assert.deepEqual(data.agentRunDrivers.providerProtectedBoardPlanEvidence.selectedTaskIds, ["TASK-BUD-480", "TASK-BUD-521", "TASK-BUD-676"]);
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.dispatchAllowed, false);
