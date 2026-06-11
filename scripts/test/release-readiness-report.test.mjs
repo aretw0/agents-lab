@@ -20,6 +20,7 @@ function makeWorkspace({
   tasks = [],
   agentRunDriverScript = "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs",
   agentRunDriverCanariesScript = "node scripts/agent-run-driver-canary-suite.mjs --execute --out .artifacts/agent-run-driver/suite.json",
+  rootScripts = {},
 } = {}) {
   const root = mkdtempSync(path.join(tmpdir(), "release-readiness-"));
   writeFileSync(path.join(root, "package.json"), JSON.stringify({
@@ -27,6 +28,7 @@ function makeWorkspace({
     scripts: {
       "test:agent-run:drivers": agentRunDriverScript,
       "agent-run:driver-canaries": agentRunDriverCanariesScript,
+      ...rootScripts,
     },
   }, null, 2));
   for (const relPath of PACKAGES) {
@@ -138,6 +140,7 @@ test("buildReport marks target release not ready until version and board gates a
       ["workflow-release-draft", "technical-gate"],
       ["agent-run-driver-gate", "technical-gate"],
       ["release-package-smoke", "technical-gate"],
+      ["pi-stack-user-surface", "technical-gate"],
       ["board-release-clear", "board-state"],
     ]);
     assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.id), ["target-version-ready", "board-release-clear"]);
@@ -167,6 +170,9 @@ test("buildReport marks target release not ready until version and board gates a
       decision: "missing",
       summary: "no local agent-run driver canary artifact found",
     });
+    assert.equal(data.userSurface.ok, true);
+    assert.equal(data.userSurface.labOnlyCount, 0);
+    assert.equal(data.userSurface.distributionCandidateCount, 0);
     assert.deepEqual(report.operatorDecisions.map((decision) => decision.id), ["decide-target-version"]);
     assert.deepEqual(report.operatorDecisions[0].allowedActions, ["defer-release", "bump-tag-release-when-ready"]);
     assert.equal(report.operatorDecisions[0].requiresOperatorDecision, true);
@@ -189,6 +195,7 @@ test("buildReport marks target release not ready until version and board gates a
     assert.match(report.markdown, /\[ \] board-release-clear/);
     assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
     assert.match(report.markdown, /\[x\] release-package-smoke/);
+    assert.match(report.markdown, /\[x\] pi-stack-user-surface/);
     assert.match(report.markdown, /## Release Blockers/);
     assert.match(report.markdown, /## Operator Decisions/);
     assert.match(report.markdown, /decide-target-version: packages are not yet at v0\.8\.0/);
@@ -228,6 +235,7 @@ test("buildReport marks release ready when versions and board gates are clear", 
     assert.match(report.markdown, /\[x\] target-version-ready/);
     assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
     assert.match(report.markdown, /\[x\] release-package-smoke/);
+    assert.match(report.markdown, /\[x\] pi-stack-user-surface/);
     assert.match(report.markdown, /\[x\] board-release-clear/);
     assert.match(report.markdown, /## Release Blockers\n- none/);
   } finally {
@@ -430,6 +438,33 @@ test("package smoke gate blocks release readiness with structured evidence", () 
   }
 });
 
+test("user surface gate blocks release readiness for unclassified root scripts", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+    rootScripts: {
+      "mystery:tool": "node scripts/mystery.mjs",
+    },
+  });
+
+  try {
+    const data = gather("0.8.0", workspace);
+    const report = buildReport(data);
+
+    assert.equal(data.gates.userSurface, false);
+    assert.equal(data.userSurface.ok, false);
+    assert.deepEqual(data.userSurface.labOnlyScripts, ["mystery:tool"]);
+    assert.deepEqual(data.userSurface.distributionCandidates, []);
+    assert.equal(report.ready, false);
+    assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.id), ["pi-stack-user-surface"]);
+    assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.evidence), ["lab-only:mystery:tool"]);
+    assert.match(report.markdown, /\[ \] pi-stack-user-surface/);
+    assert.match(report.markdown, /pi-stack-user-surface \[technical-gate\]: lab-only:mystery:tool/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("readiness exposes last agent-run driver canary evidence when present", () => {
   const workspace = makeWorkspace({
     version: "0.8.0",
@@ -599,7 +634,7 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.versionsAligned, true);
     assert.equal(json.targetVersionReady, true);
     assert.deepEqual(json.workflows, { ci: true, publish: true, releaseDraft: true });
-    assert.deepEqual(json.gates, { agentRunDrivers: true, packageSmoke: true });
+    assert.deepEqual(json.gates, { agentRunDrivers: true, packageSmoke: true, userSurface: true });
     assert.equal(json.agentRunDrivers.ok, true);
     assert.equal(json.agentRunDrivers.canarySuiteEvidence.decision, "missing");
     assert.equal(json.agentRunDrivers.lastCanaryEvidence.decision, "missing");
@@ -615,6 +650,10 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.packageSmoke.mode, "release-package-smoke-report");
     assert.equal(json.packageSmoke.decision, "pass");
     assert.deepEqual(json.packageSmoke.packageBlockers, []);
+    assert.equal(json.userSurface.mode, "pi-stack-user-surface-readiness");
+    assert.equal(json.userSurface.ok, true);
+    assert.equal(json.userSurface.labOnlyCount, 0);
+    assert.equal(json.userSurface.distributionCandidateCount, 0);
     assert.deepEqual(json.checklist.map((item) => [item.id, item.kind]), [
       ["versions-aligned", "technical-gate"],
       ["target-version-ready", "operator-decision"],
@@ -623,6 +662,7 @@ test("cli can write structured json for agents", () => {
       ["workflow-release-draft", "technical-gate"],
       ["agent-run-driver-gate", "technical-gate"],
       ["release-package-smoke", "technical-gate"],
+      ["pi-stack-user-surface", "technical-gate"],
       ["board-release-clear", "board-state"],
     ]);
     assert.deepEqual(json.releaseBlockers.map((blocker) => blocker.id), ["board-release-clear"]);

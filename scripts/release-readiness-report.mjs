@@ -5,6 +5,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { buildReleasePackageSmokeReport } from "./release-package-smoke.mjs";
+import { buildUserSurfaceAudit } from "./pi-stack-user-surface-audit.mjs";
 
 const PACKAGES = [
   "packages/pi-stack/package.json",
@@ -209,6 +210,36 @@ function agentRunDriverGateEvidence(report) {
     `package.json scripts.test:agent-run:drivers includes ${report.requiredTests.join(", ")}`,
     `${report.canaryScriptName} writes .artifacts/agent-run-driver/suite.json`,
   ].join("; ");
+}
+
+function userSurfaceReadiness(cwd) {
+  const audit = buildUserSurfaceAudit(cwd);
+  const labOnlyScripts = audit.labOnlyScripts.map((row) => row.name);
+  const distributionCandidates = audit.distributionCandidates.map((row) => row.name);
+  const ok = labOnlyScripts.length === 0 && distributionCandidates.length === 0;
+  return {
+    mode: "pi-stack-user-surface-readiness",
+    ok,
+    categoryCounts: audit.categoryCounts,
+    labOnlyCount: labOnlyScripts.length,
+    distributionCandidateCount: distributionCandidates.length,
+    distributedWrapperCount: audit.distributedWrappers.length,
+    repoInternalCount: audit.repoInternalScripts.length,
+    wrapperGroupCount: audit.wrapperGroups.length,
+    labOnlyScripts,
+    distributionCandidates,
+    summary: ok
+      ? "pi-stack user surface audit pass: no lab-only or promotion-candidate root scripts"
+      : `pi-stack user surface audit blocked: lab-only=${labOnlyScripts.length} promotion-candidate=${distributionCandidates.length}`,
+  };
+}
+
+function userSurfaceEvidence(report) {
+  if (report.ok) return report.summary;
+  return [
+    ...report.labOnlyScripts.map((name) => `lab-only:${name}`),
+    ...report.distributionCandidates.map((name) => `promotion-candidate:${name}`),
+  ].join(", ");
 }
 
 function normalizeStatus(value) {
@@ -500,6 +531,7 @@ export function gather(target, cwd = process.cwd()) {
   agentRunDrivers.canarySuiteEvidence = agentRunDriverCanarySuiteEvidence(cwd);
   agentRunDrivers.lastCanaryEvidence = agentRunDriverCanaryEvidence(cwd);
   agentRunDrivers.lastMutationCanaryEvidence = agentRunDriverCanaryEvidence(cwd, ".artifacts/agent-run-driver/latest-mutation.json");
+  const userSurface = userSurfaceReadiness(cwd);
 
   return {
     target,
@@ -512,9 +544,11 @@ export function gather(target, cwd = process.cwd()) {
     gates: {
       agentRunDrivers: agentRunDrivers.ok,
       packageSmoke: packageSmoke.ok,
+      userSurface: userSurface.ok,
     },
     agentRunDrivers,
     packageSmoke,
+    userSurface,
     board: summarizeBoard(cwd),
   };
 }
@@ -529,6 +563,7 @@ export function buildReport(data) {
     { id: "workflow-release-draft", ok: data.workflows.releaseDraft, evidence: ".github/workflows/release-draft.yml" },
     { id: "agent-run-driver-gate", ok: data.gates.agentRunDrivers, evidence: agentRunDriverGateEvidence(data.agentRunDrivers) },
     { id: "release-package-smoke", ok: data.packageSmoke.ok, evidence: data.packageSmoke.packageBlockers.length ? data.packageSmoke.packageBlockers.map((blocker) => blocker.id).join(", ") : "release package smoke report pass" },
+    { id: "pi-stack-user-surface", ok: data.gates.userSurface, evidence: userSurfaceEvidence(data.userSurface) },
     { id: "board-release-clear", ok: data.board.releaseReady, evidence: data.board.blockers.length ? data.board.blockers.join(", ") : "no open P0/in-progress/blocked tasks" },
   ].map((item) => ({ ...item, kind: releaseGateKind(item.id) }));
   const ready = checklist.every((item) => item.ok);
@@ -627,6 +662,7 @@ function main() {
       gates: data.gates,
       agentRunDrivers: data.agentRunDrivers,
       packageSmoke: data.packageSmoke,
+      userSurface: data.userSurface,
       decision: report.decision,
       ready: report.ready,
       checklist: report.checklist,

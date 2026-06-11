@@ -101,11 +101,12 @@ Interpretação do readiness report:
 - `Operator Decisions` lista as decisões humanas restantes antes do release;
 - no JSON, `mode=release-readiness-report` e `schemaVersion=1` identificam o contrato estruturado;
 - no JSON, `generatedAt` e `decision` identificam o snapshot e a decisão (`ready` ou `not-ready`) sem parsear Markdown;
-- no JSON, `versions`, `versionsAligned`, `targetVersionReady`, `workflows`, `gates`, `agentRunDrivers` e `packageSmoke` expõem os gates principais sem parsear `checklist[*].evidence`;
+- no JSON, `versions`, `versionsAligned`, `targetVersionReady`, `workflows`, `gates`, `agentRunDrivers`, `packageSmoke` e `userSurface` expõem os gates principais sem parsear `checklist[*].evidence`;
 - no JSON, `agentRunDrivers.canaryScriptName` e `missingCanaryScriptMarkers` expõem se o comando local agregado `agent-run:driver-canaries` está registrado para materializar evidência;
 - no JSON, `agentRunDrivers.canarySuiteEvidence` pode apontar `.artifacts/agent-run-driver/suite.json` como evidência local agregada dos canários do driver;
 - no JSON, `agentRunDrivers.lastCanaryEvidence` pode apontar `.artifacts/agent-run-driver/latest.json` como evidência local advisory; ausência desse arquivo não bloqueia release por si só;
 - no JSON, `agentRunDrivers.lastMutationCanaryEvidence` pode apontar `.artifacts/agent-run-driver/latest-mutation.json` como evidência local advisory de `file_contract=mutation`;
+- no JSON, `userSurface` resume a auditoria `pi-stack:user-surface` e bloqueia readiness se houver scripts raiz `lab-only` ou `promotion-candidate` sem assimilação explícita;
 - `pnpm run agent-run:driver-canary` produz essa evidência local com um canário bounded de `node --version`, sem provider real, sem fan-in e sem colônia;
 - no JSON, `checklist[*].kind` classifica cada gate como `technical-gate`, `operator-decision` ou `board-state`;
 - no JSON, `releaseBlockers` expõe os mesmos bloqueios do Markdown com `id`, `kind` e `evidence`;
