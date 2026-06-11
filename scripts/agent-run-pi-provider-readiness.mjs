@@ -61,6 +61,56 @@ function classifyProviderSignals(lines) {
   return signals;
 }
 
+function buildProviderDiagnostics({ providerSignals, plan, lastExecution }) {
+  const diagnostics = [];
+  if (!plan) {
+    diagnostics.push({
+      code: "provider-fanout-plan-missing",
+      category: "plan",
+      severity: "blocker",
+      evidence: "provider fanout plan artifact is missing",
+      operatorAction: "generate the provider fanout plan before checking readiness",
+    });
+  }
+  if (!lastExecution) {
+    diagnostics.push({
+      code: "last-provider-execution-missing",
+      category: "evidence",
+      severity: "warning",
+      evidence: "no prior provider execution artifact was found",
+      operatorAction: "run a single approved provider canary when all plan-level blockers are clear",
+    });
+  }
+  if (providerSignals.includes("provider-auth-missing")) {
+    diagnostics.push({
+      code: "provider-auth-missing",
+      category: "auth",
+      severity: "blocker",
+      evidence: "last execution log reported missing provider API key",
+      operatorAction: "configure provider credentials for the selected model before executing provider workers",
+    });
+  }
+  if (providerSignals.includes("provider-fetch-failed")) {
+    diagnostics.push({
+      code: "provider-fetch-failed",
+      category: "network-or-provider",
+      severity: "blocker",
+      evidence: "last execution log reported fetch failed",
+      operatorAction: "verify network, proxy, and provider endpoint reachability, then rerun readiness",
+    });
+  }
+  if (providerSignals.includes("provider-global-settings-lock-error")) {
+    diagnostics.push({
+      code: "provider-global-settings-lock-error",
+      category: "sandbox-or-settings",
+      severity: "blocker",
+      evidence: "last execution log referenced settings.json.lock EPERM",
+      operatorAction: "use an isolated PI_CODING_AGENT_DIR writable by the worker process",
+    });
+  }
+  return diagnostics;
+}
+
 export function buildAgentRunPiProviderReadiness(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const planPath = path.resolve(cwd, options.planPath || DEFAULT_PLAN);
@@ -86,6 +136,10 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
   if (providerSignals.includes("provider-auth-missing")) blockers.push("provider-auth-missing");
   if (providerSignals.includes("provider-fetch-failed")) blockers.push("provider-fetch-failed");
   if (!lastExecution) warnings.push("last-provider-execution-missing");
+  const providerDiagnostics = buildProviderDiagnostics({ providerSignals, plan, lastExecution });
+  const operatorActions = providerDiagnostics
+    .filter((diagnostic) => diagnostic.severity === "blocker")
+    .map((diagnostic) => diagnostic.operatorAction);
 
   const decision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   return {
@@ -109,13 +163,14 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
       envKeys: lastExecution.driverStep?.registryEntry?.envKeys ?? [],
     } : undefined,
     providerSignals,
+    providerDiagnostics,
     blockers,
     warnings,
     nextActions: decision === "blocked"
-      ? [
-          "resolve provider auth/connectivity before executing another provider worker",
+      ? [...new Set([
+          ...operatorActions,
           "keep using preview-only worker dispatch until readiness is clear",
-        ]
+        ])]
       : [
           "execute exactly one provider worker through agent-run-pi-provider-worker-dispatch",
           "require agentRunOutcomePacket pass before selecting another worker",

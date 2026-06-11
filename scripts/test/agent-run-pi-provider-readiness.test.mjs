@@ -44,6 +44,13 @@ test("provider readiness is ready when plan is isolated and no failing prior exe
     assert.equal(result.processStartAllowed, false);
     assert.equal(result.workerEnvKeys[0].includes("PI_CODING_AGENT_DIR"), true);
     assert.ok(result.warnings.includes("last-provider-execution-missing"));
+    assert.deepEqual(result.providerDiagnostics.find((item) => item.code === "last-provider-execution-missing"), {
+      code: "last-provider-execution-missing",
+      category: "evidence",
+      severity: "warning",
+      evidence: "no prior provider execution artifact was found",
+      operatorAction: "run a single approved provider canary when all plan-level blockers are clear",
+    });
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
@@ -81,6 +88,12 @@ test("provider readiness blocks known provider auth and fetch failures", () => {
     assert.ok(result.providerSignals.includes("provider-fetch-failed"));
     assert.ok(result.blockers.includes("provider-auth-missing"));
     assert.ok(result.blockers.includes("provider-fetch-failed"));
+    assert.deepEqual(result.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
+      ["provider-auth-missing", "auth", "blocker"],
+      ["provider-fetch-failed", "network-or-provider", "blocker"],
+    ]);
+    assert.ok(result.nextActions.includes("configure provider credentials for the selected model before executing provider workers"));
+    assert.ok(result.nextActions.includes("verify network, proxy, and provider endpoint reachability, then rerun readiness"));
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
@@ -96,6 +109,9 @@ test("provider readiness blocks global settings lock regression", () => {
 
     assert.equal(result.decision, "blocked");
     assert.ok(result.blockers.includes("provider-global-settings-lock-error"));
+    assert.deepEqual(result.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
+      ["provider-global-settings-lock-error", "sandbox-or-settings", "blocker"],
+    ]);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
