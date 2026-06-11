@@ -92,6 +92,13 @@ function asMarkerResults(value) {
     }));
 }
 
+function outputHasFailMarker(lines = []) {
+  return lines
+    .filter((line) => typeof line === "string")
+    .map((line) => line.trim())
+    .some((line) => /^FAIL(?::|\b)/i.test(line));
+}
+
 function normalizeTimeoutMs(value) {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.floor(value) : 90_000;
 }
@@ -219,7 +226,7 @@ async function followRun(cwd, runId, maxWaitMs, pollIntervalMs, maxLines) {
   };
 }
 
-function buildOutcome({ runId, entry, outputBytes, fileContract, touchedFiles = [], markerResults = [], mutationTargetFiles = [] }) {
+function buildOutcome({ runId, entry, outputBytes, fileContract, touchedFiles = [], markerResults = [], mutationTargetFiles = [], outputLines = [] }) {
   const found = !!entry;
   const processState = entry?.state ?? "unknown";
   const declaredFiles = asStringArray(entry?.declaredFiles);
@@ -229,6 +236,7 @@ function buildOutcome({ runId, entry, outputBytes, fileContract, touchedFiles = 
     ? expectedTouched.filter((file) => !touchedFiles.includes(file))
     : [];
   const markerFailures = markerResults.filter((marker) => marker?.ok === false).map((marker, index) => asString(marker.label) || `marker-${index + 1}`);
+  const workerOutputFail = outputHasFailMarker(outputLines);
   const blockers = [];
   if (!found) blockers.push("run-not-found");
   if (found && processState !== "completed") blockers.push(`process-state-${processState}`);
@@ -237,6 +245,7 @@ function buildOutcome({ runId, entry, outputBytes, fileContract, touchedFiles = 
   if (unexpectedFiles.length > 0) blockers.push("unexpected-files");
   if (fileContract !== "read-only" && touchedFiles.length > 0 && missingDeclaredFiles.length > 0) blockers.push("declared-files-missing");
   if (markerFailures.length > 0) blockers.push("marker-failures");
+  if (workerOutputFail) blockers.push("worker-output-fail");
   const mutationMissingEvidence = found
     && processState === "completed"
     && outputBytes > 0
@@ -260,7 +269,7 @@ function buildOutcome({ runId, entry, outputBytes, fileContract, touchedFiles = 
     touchedFiles,
     missingDeclaredFiles,
     unexpectedFiles,
-    markerFailures,
+    markerFailures: workerOutputFail ? [...markerFailures, "worker-output-fail"] : markerFailures,
     blockers,
   };
 }
@@ -423,6 +432,7 @@ export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
     touchedFiles,
     markerResults,
     mutationTargetFiles,
+    outputLines: follow.lines,
   }) : undefined;
   return {
     mode: executeRequested ? "agent-run-driver-step-dispatch" : "agent-run-driver-step-packet",
