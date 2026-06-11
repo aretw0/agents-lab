@@ -53,6 +53,36 @@ function writeProviderCanary(cwd, lines) {
   }, null, 2)}\n`, "utf8");
 }
 
+function writeProviderContainerCanaryPass(cwd) {
+  const filePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-container-canary-report.json");
+  mkdirSync(path.dirname(filePath), { recursive: true });
+  writeFileSync(filePath, `${JSON.stringify({
+    mode: "agent-run-pi-provider-container-canary-report",
+    decision: "pass",
+    canaryReport: {
+      mode: "agent-run-pi-provider-canary",
+      decision: "dispatched",
+      workerDispatch: {
+        mode: "agent-run-pi-provider-worker-dispatch",
+        decision: "dispatched",
+        terminalProcessState: "completed",
+        contractDecision: "pass",
+        driverStep: {
+          registryEntry: { envKeys: ["PI_CODING_AGENT_DIR"] },
+          follow: { lines: ["PASS", "Blockers: None."] },
+        },
+      },
+      agentRunOutcomePacket: {
+        mode: "agent-run-outcome-packet",
+        processState: "completed",
+        contractDecision: "pass",
+        blockers: [],
+      },
+    },
+    blockers: [],
+  }, null, 2)}\n`, "utf8");
+}
+
 function writeNetworkCheck(cwd, payload) {
   const filePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-network-check.json");
   mkdirSync(path.dirname(filePath), { recursive: true });
@@ -208,6 +238,36 @@ test("provider readiness blocks current provider canary fetch failure even when 
     assert.equal(result.providerRecoveryPlan.decision, "blocked");
     assert.deepEqual(result.providerRecoveryPlan.blockers, ["provider-fetch-failed"]);
     assert.ok(result.nextActions.includes("verify network, proxy, and provider endpoint reachability, then rerun readiness"));
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider readiness prefers passing container canary over older local canary failure", () => {
+  const cwd = workspace("pi-provider-readiness-container-pass-");
+  try {
+    writeAgentRunPiProviderFanoutPlan({ cwd, outPath: ".artifacts/agent-run-driver/pi-provider-fanout-plan.json" });
+    writeProviderCanary(cwd, ["fetch failed"]);
+    writeProviderContainerCanaryPass(cwd);
+    writeNetworkCheck(cwd, {
+      decision: "pass",
+      executeRequested: true,
+      networkRequestAllowed: true,
+      networkDecision: "reachable-auth-required",
+      httpStatus: 401,
+      blockers: [],
+    });
+
+    const result = buildAgentRunPiProviderReadiness({ cwd });
+
+    assert.equal(result.decision, "ready-for-operator-decision");
+    assert.equal(result.lastExecutionSource, "provider-container-canary");
+    assert.deepEqual(result.providerSignals, []);
+    assert.deepEqual(result.blockers, []);
+    assert.deepEqual(result.providerDiagnostics, []);
+    assert.equal(result.providerRecoveryPlan.decision, "ready");
+    assert.deepEqual(result.providerRecoveryPlan.blockers, []);
+    assert.deepEqual(result.providerRecoveryPlan.actions, []);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

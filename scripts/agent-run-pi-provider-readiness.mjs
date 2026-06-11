@@ -9,6 +9,7 @@ const DEFAULT_PLAN = ".artifacts/agent-run-driver/pi-provider-fanout-plan.json";
 const DEFAULT_LAST_EXECUTION = ".artifacts/agent-run-driver/pi-provider-worker-a-real-execute.json";
 const DEFAULT_NETWORK_CHECK = ".artifacts/agent-run-driver/pi-provider-network-check.json";
 const DEFAULT_PROVIDER_CANARY = ".artifacts/agent-run-driver/pi-provider-canary.json";
+const DEFAULT_PROVIDER_CONTAINER_CANARY = ".artifacts/agent-run-driver/pi-provider-container-canary-report.json";
 
 function parseArgs(argv = process.argv.slice(2)) {
   const out = {
@@ -17,6 +18,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     lastExecutionPath: DEFAULT_LAST_EXECUTION,
     networkCheckPath: DEFAULT_NETWORK_CHECK,
     providerCanaryPath: DEFAULT_PROVIDER_CANARY,
+    providerContainerCanaryPath: DEFAULT_PROVIDER_CONTAINER_CANARY,
     outPath: "",
     pretty: false,
     help: false,
@@ -28,6 +30,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--last-execution") out.lastExecutionPath = argv[++index] ?? out.lastExecutionPath;
     else if (arg === "--network-check") out.networkCheckPath = argv[++index] ?? out.networkCheckPath;
     else if (arg === "--provider-canary") out.providerCanaryPath = argv[++index] ?? out.providerCanaryPath;
+    else if (arg === "--provider-container-canary") out.providerContainerCanaryPath = argv[++index] ?? out.providerContainerCanaryPath;
     else if (arg === "--out") out.outPath = argv[++index] ?? "";
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
@@ -62,6 +65,15 @@ function providerCanaryExecution(payload) {
   if (!payload || typeof payload !== "object") return undefined;
   if (payload.workerDispatch?.driverStep) return payload.workerDispatch;
   return payload.driverStep ? payload : undefined;
+}
+
+function providerContainerCanaryExecution(payload) {
+  if (!payload || typeof payload !== "object") return undefined;
+  if (payload.mode !== "agent-run-pi-provider-container-canary-report") return undefined;
+  if (payload.decision !== "pass") return undefined;
+  const canaryReport = payload.canaryReport && typeof payload.canaryReport === "object" ? payload.canaryReport : undefined;
+  if (canaryReport?.agentRunOutcomePacket?.contractDecision !== "pass") return undefined;
+  return canaryReport.workerDispatch?.driverStep ? canaryReport.workerDispatch : canaryReport;
 }
 
 export function classifyProviderSignals(lines) {
@@ -220,14 +232,17 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
   const lastExecutionPath = path.resolve(cwd, options.lastExecutionPath || DEFAULT_LAST_EXECUTION);
   const networkCheckPath = path.resolve(cwd, options.networkCheckPath || DEFAULT_NETWORK_CHECK);
   const providerCanaryPath = path.resolve(cwd, options.providerCanaryPath || DEFAULT_PROVIDER_CANARY);
+  const providerContainerCanaryPath = path.resolve(cwd, options.providerContainerCanaryPath || DEFAULT_PROVIDER_CONTAINER_CANARY);
   const blockers = [];
   const warnings = [];
   const plan = readJsonIfExists(planPath);
   const legacyLastExecution = readJsonIfExists(lastExecutionPath);
+  const providerContainerCanary = readJsonIfExists(providerContainerCanaryPath);
   const providerCanary = readJsonIfExists(providerCanaryPath);
+  const containerCanaryExecution = providerContainerCanaryExecution(providerContainerCanary);
   const canaryExecution = providerCanaryExecution(providerCanary);
-  const lastExecution = canaryExecution ?? legacyLastExecution;
-  const lastExecutionSource = canaryExecution ? "provider-canary" : "last-execution";
+  const lastExecution = containerCanaryExecution ?? canaryExecution ?? legacyLastExecution;
+  const lastExecutionSource = containerCanaryExecution ? "provider-container-canary" : canaryExecution ? "provider-canary" : "last-execution";
   const providerNetworkCheck = providerNetworkCheckEvidence(readJsonIfExists(networkCheckPath));
   const diagnosticNetworkCheck = lastExecutionSource === "provider-canary"
     ? { ...providerNetworkCheck, decision: "not-applied-to-current-canary" }
@@ -275,6 +290,7 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
     planPath: path.relative(cwd, planPath) || planPath,
     lastExecutionPath: path.relative(cwd, lastExecutionPath) || lastExecutionPath,
     providerCanaryPath: path.relative(cwd, providerCanaryPath) || providerCanaryPath,
+    providerContainerCanaryPath: path.relative(cwd, providerContainerCanaryPath) || providerContainerCanaryPath,
     lastExecutionSource,
     networkCheckPath: path.relative(cwd, networkCheckPath) || networkCheckPath,
     model: plan?.model,
@@ -308,7 +324,7 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-pi-provider-readiness.mjs [--plan PATH] [--last-execution PATH] [--provider-canary PATH] [--out PATH] [--pretty]",
+    "Usage: node scripts/agent-run-pi-provider-readiness.mjs [--plan PATH] [--last-execution PATH] [--provider-canary PATH] [--provider-container-canary PATH] [--out PATH] [--pretty]",
     "",
     "Report-only readiness gate for provider-backed pi workers. It never starts a process.",
   ].join("\n") + "\n");
