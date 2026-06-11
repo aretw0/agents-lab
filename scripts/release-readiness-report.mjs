@@ -53,6 +53,11 @@ const AGENT_RUN_DRIVER_OPERATIONAL_SCRIPTS = {
     "node scripts/agent-run-pi-provider-fanout-plan.mjs",
     ".artifacts/agent-run-driver/pi-provider-fanout-plan.json",
   ],
+  "agent-run:pi-provider-protected-board-plan": [
+    "node scripts/agent-run-pi-provider-fanout-plan.mjs",
+    "--from-board-protected",
+    ".artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
+  ],
   "agent-run:pi-provider-readiness": [
     "node scripts/agent-run-pi-provider-readiness.mjs",
     ".artifacts/agent-run-driver/pi-provider-readiness.json",
