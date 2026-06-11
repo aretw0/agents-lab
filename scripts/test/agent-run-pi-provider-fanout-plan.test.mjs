@@ -144,12 +144,48 @@ test("provider fanout plan narrows protected board files to local task evidence 
       cwd,
       fromBoardProtected: true,
       batchId: "protected-research",
+      requireLocalTaskEvidence: true,
     });
 
     assert.equal(report.decision, "ready-for-operator-decision");
+    assert.equal(report.requireLocalTaskEvidence, true);
     assert.equal(report.workerPackets[0].declaredFilesSource, "local-task-evidence");
     assert.deepEqual(report.workerPackets[0].payload.run_spec.declared_files, ["docs/research/task-protected-1-local-canary.md"]);
     assert.match(report.workerPackets[0].payload.run_spec.execution_preview.args.join(" "), /@docs\/research\/task-protected-1-local-canary\.md/);
+    assert.equal(report.dispatchAllowed, false);
+    assert.equal(report.processStartAllowed, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider fanout plan blocks when local task evidence is required but missing", () => {
+  const cwd = workspace("pi-provider-fanout-plan-protected-board-required-evidence-");
+  try {
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-PROTECTED-1",
+          status: "planned",
+          priority: "p3",
+          milestone: "parked-for-0.8.0",
+          description: "Evaluate https://example.test later",
+          files: ["docs/research/"],
+          acceptance_criteria: ["Keep protected"],
+        },
+      ],
+    }, null, 2)}\n`, "utf8");
+
+    const report = buildAgentRunPiProviderFanoutPlan({
+      cwd,
+      fromBoardProtected: true,
+      requireLocalTaskEvidence: true,
+    });
+
+    assert.equal(report.decision, "blocked");
+    assert.equal(report.requireLocalTaskEvidence, true);
+    assert.ok(report.blockers.includes("local-task-evidence-missing:TASK-PROTECTED-1"));
     assert.equal(report.dispatchAllowed, false);
     assert.equal(report.processStartAllowed, false);
   } finally {

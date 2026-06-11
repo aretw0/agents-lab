@@ -21,6 +21,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     fromBoardProtected: false,
     boardPath: DEFAULT_BOARD,
     limit: 3,
+    requireLocalTaskEvidence: false,
     execute: false,
     pretty: false,
     help: false,
@@ -35,6 +36,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--from-board-protected") out.fromBoardProtected = true;
     else if (arg === "--board") out.boardPath = argv[++index] ?? out.boardPath;
     else if (arg === "--limit") out.limit = Number(argv[++index] ?? out.limit);
+    else if (arg === "--require-local-task-evidence") out.requireLocalTaskEvidence = true;
     else if (arg === "--execute") out.execute = true;
     else if (arg === "--preview") out.execute = false;
     else if (arg === "--pretty") out.pretty = true;
@@ -195,6 +197,7 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
   const batchId = String(options.batchId || "agent-run-pi-provider-fanout-rehearsal").trim();
   const model = String(options.model || DEFAULT_MODEL).trim();
   const fromBoardProtected = options.fromBoardProtected === true;
+  const requireLocalTaskEvidence = options.requireLocalTaskEvidence === true;
   const boardPath = String(options.boardPath || DEFAULT_BOARD);
   const limit = normalizeLimit(options.limit ?? 3);
   const boardSelection = fromBoardProtected ? selectProtectedBoardTasks({ cwd, boardPath, limit }) : undefined;
@@ -232,6 +235,11 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
     ...(fromBoardProtected && !boardSelection?.board ? ["board-missing"] : []),
     ...(fromBoardProtected && limit === 0 ? ["board-limit-invalid"] : []),
     ...(fromBoardProtected && boardSelection?.selected.length === 0 ? ["protected-board-workers-missing"] : []),
+    ...(fromBoardProtected && requireLocalTaskEvidence
+      ? (boardSelection?.selected ?? [])
+          .filter((task) => task.declaredFilesSource !== "local-task-evidence")
+          .map((task) => `local-task-evidence-missing:${task.taskId}`)
+      : []),
     ...packetBlockers,
   ];
   const decision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
@@ -246,6 +254,7 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
     source: fromBoardProtected ? "protected-board" : "manual",
     ...(fromBoardProtected ? {
       boardPath,
+      requireLocalTaskEvidence,
       boardSelection: {
         limit,
         scannedTaskCount: boardSelection?.tasks.length ?? 0,
@@ -294,6 +303,7 @@ function printHelp() {
     "",
     "Builds a report-only two-worker pi --print provider/model rehearsal plan.",
     "Use --from-board-protected to prepare protected board research-planning workers without dispatch.",
+    "Use --require-local-task-evidence with --from-board-protected to fail closed unless each selected task resolves to a local task-specific evidence file.",
     "It never starts a process; execute requests are blocked here and must go through agent-run driver-step.",
     `Default model: ${DEFAULT_MODEL}`,
     `Default output path: ${DEFAULT_OUT}`,
