@@ -1,0 +1,74 @@
+import assert from "node:assert/strict";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import test from "node:test";
+
+import {
+  buildAgentRunPiProviderFanoutPlan,
+  writeAgentRunPiProviderFanoutPlan,
+} from "../agent-run-pi-provider-fanout-plan.mjs";
+
+function workspace(prefix) {
+  const cwd = mkdtempSync(path.join(tmpdir(), prefix));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+  writeFileSync(path.join(cwd, "package.json"), "{}\n", "utf8");
+  return cwd;
+}
+
+test("provider fanout plan prepares two report-only pi print workers", () => {
+  const cwd = workspace("pi-provider-fanout-plan-");
+  try {
+    const report = buildAgentRunPiProviderFanoutPlan({ cwd });
+
+    assert.equal(report.mode, "agent-run-pi-provider-fanout-plan");
+    assert.equal(report.decision, "ready-for-operator-decision");
+    assert.equal(report.model, "openai-codex/gpt-5.3-codex-spark");
+    assert.equal(report.dispatchAllowed, false);
+    assert.equal(report.processStartAllowed, false);
+    assert.equal(report.workerDispatchAllowed, false);
+    assert.equal(report.batchExecutionAllowed, false);
+    assert.equal(report.workerCount, 2);
+    assert.deepEqual(report.workerPackets.map((packet) => packet.decision), ["ready-for-driver-step", "ready-for-driver-step"]);
+    assert.deepEqual(report.workerPackets.map((packet) => packet.payload.run_spec.file_contract), ["read-only", "read-only"]);
+    assert.deepEqual(report.workerPackets.map((packet) => packet.payload.run_spec.provider_model_ref), [
+      "openai-codex/gpt-5.3-codex-spark",
+      "openai-codex/gpt-5.3-codex-spark",
+    ]);
+    assert.equal(report.workerPackets[0].driverStepCall.tool, "agent_run_driver_step_dispatch");
+    assert.equal(report.workerPackets[0].driverStepCall.params.execute, undefined);
+    assert.match(report.workerPackets[0].payload.run_spec.execution_preview.args.join(" "), /--print/);
+    assert.match(report.workerPackets[0].payload.run_spec.execution_preview.args.join(" "), /--no-session/);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider fanout plan blocks direct execute requests", () => {
+  const cwd = workspace("pi-provider-fanout-plan-execute-");
+  try {
+    const report = buildAgentRunPiProviderFanoutPlan({ cwd, execute: true });
+
+    assert.equal(report.decision, "blocked");
+    assert.ok(report.blockers.includes("execute-not-supported-by-provider-fanout-plan"));
+    assert.equal(report.dispatchAllowed, false);
+    assert.equal(report.processStartAllowed, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider fanout plan writes evidence artifact", () => {
+  const cwd = workspace("pi-provider-fanout-plan-write-");
+  try {
+    const report = writeAgentRunPiProviderFanoutPlan({ cwd, outPath: ".artifacts/agent-run-driver/pi-provider-fanout-plan.json" });
+    const outPath = path.join(cwd, ".artifacts/agent-run-driver/pi-provider-fanout-plan.json");
+
+    assert.equal(existsSync(outPath), true);
+    assert.deepEqual(JSON.parse(readFileSync(outPath, "utf8")), report);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
