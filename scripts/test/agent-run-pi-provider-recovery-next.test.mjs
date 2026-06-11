@@ -24,7 +24,7 @@ test("provider recovery next selects first recovery action from container canary
         actions: [{
           diagnosticCode: "provider-fetch-failed",
           actionCode: "verify-provider-network",
-          verificationScript: "agent-run:pi-provider-readiness",
+          verificationScript: "agent-run:pi-provider-network-check",
           retryCanaryScript: "agent-run:pi-provider-canary:container",
           rerunReadinessScript: "agent-run:pi-provider-readiness",
         }],
@@ -40,6 +40,11 @@ test("provider recovery next selects first recovery action from container canary
     assert.equal(result.automationAllowed, false);
     assert.equal(result.sourcePath, ".artifacts/agent-run-driver/pi-provider-container-canary-report.json");
     assert.equal(result.nextAction.actionCode, "verify-provider-network");
+    assert.deepEqual(result.commandPreviews.verification, {
+      command: "pnpm",
+      args: ["run", "agent-run:pi-provider-network-check"],
+      shellInterpolationAllowed: false,
+    });
     assert.deepEqual(result.commandPreviews.retryCanary, {
       command: "pnpm",
       args: ["run", "agent-run:pi-provider-canary:container"],

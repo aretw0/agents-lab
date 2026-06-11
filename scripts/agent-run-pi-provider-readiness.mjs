@@ -134,7 +134,7 @@ function providerRecoveryAction(diagnostic) {
     return {
       ...base,
       actionCode: "verify-provider-network",
-      verificationScript: "agent-run:pi-provider-readiness",
+      verificationScript: "agent-run:pi-provider-network-check",
       retryCanaryScript: "agent-run:pi-provider-canary:container",
     };
   }
