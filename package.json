@@ -48,6 +48,8 @@
     "release:readiness:v0.8.0:json": "node scripts/release-readiness-report.mjs --target 0.8.0 --json",
     "release:artifact:audit": "node scripts/release-artifact-audit.mjs",
     "release:artifact:audit:json": "node scripts/release-artifact-audit.mjs --pretty",
+    "release:final:gate": "node scripts/release-final-gate.mjs",
+    "release:final:gate:json": "node scripts/release-final-gate.mjs --pretty",
     "pi:local": "node scripts/pi-source-switch.mjs local",
     "pi:published": "node scripts/pi-source-switch.mjs published",
     "pi:status": "node scripts/pi-source-switch.mjs status",
