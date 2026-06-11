@@ -18,6 +18,7 @@ do estado do host. Use este guia como checklist antes de portar aprendizados par
 
 2. O wrapper de entrada é parte da fábrica.
    - Deve funcionar para operador e agente.
+   - Deve oferecer modo headless sem pseudo-TTY para agentes e canários.
    - Deve corrigir `HOME`, `USER`, locale, workdir e PATH.
    - Deve incluir `node_modules/.bin`, `PNPM_HOME`, npm global e CLIs locais.
    - Deve funcionar quando chamado como `root` e quando já estiver no usuário alvo.

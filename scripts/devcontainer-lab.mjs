@@ -13,7 +13,7 @@ function printHelp() {
 		"devcontainer-lab — entrada simplificada para anexar no container",
 		"",
 		"Uso:",
-		"  node scripts/devcontainer-lab.mjs <container> [-- <comando>]",
+		"  node scripts/devcontainer-lab.mjs [--headless] <container> [-- <comando>]",
 		"",
 		"Exemplos:",
 		"  node scripts/devcontainer-lab.mjs agents-lab-dev -- pwd",
@@ -23,24 +23,28 @@ function printHelp() {
 		"  - entra pelo comando lab versionado no container",
 		"  - força operador=vscode",
 		"  - força workdir=/workspaces/agents-lab",
+		"  - use --headless para automação/agentes sem pseudo-TTY",
 	].join("\n"));
 }
 
 function parseArgs(argv) {
 	const args = argv.slice(2);
 	if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
-		return { help: true, container: undefined, command: [] };
+		return { help: true, headless: false, container: undefined, command: [] };
 	}
 
-	const sep = args.indexOf("--");
+	const headless = args.includes("--headless");
+	const positional = args.filter((arg) => arg !== "--headless");
+	const sep = positional.indexOf("--");
 	if (sep === -1) {
-		return { help: false, container: args[0], command: ["bash"] };
+		return { help: false, headless, container: positional[0], command: ["bash"] };
 	}
 
-	const container = args[0];
-	const command = args.slice(sep + 1);
+	const container = positional[0];
+	const command = positional.slice(sep + 1);
 	return {
 		help: false,
+		headless,
 		container,
 		command: command.length > 0 ? command : ["bash"],
 	};
@@ -49,7 +53,7 @@ function parseArgs(argv) {
 export function buildDockerExecArgs(parsed) {
 	return [
 		"exec",
-		"-it",
+		...(parsed.headless ? [] : ["-it"]),
 		"--user",
 		"root",
 		parsed.container,

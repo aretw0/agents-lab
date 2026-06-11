@@ -66,6 +66,7 @@
     "pi:loop:resume": "node scripts/pi-loop-pause.mjs --resume",
     "pi:loop:status": "node scripts/pi-loop-pause.mjs --status",
     "devcontainer:lab": "node scripts/devcontainer-lab.mjs",
+    "devcontainer:lab:headless": "node scripts/devcontainer-lab.mjs --headless",
     "devcontainer:lab:pi": "node scripts/devcontainer-lab.mjs agents-lab-dev -- pnpm run pi:isolated",
     "pi:parity": "node scripts/pi-parity.mjs --scope user --profile strict-curated",
     "pi:parity:full": "node scripts/pi-parity.mjs --scope user --profile stack-full",

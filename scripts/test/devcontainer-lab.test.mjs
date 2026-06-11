@@ -69,6 +69,7 @@ test("devcontainer lab helper enters through the versioned lab command", () => {
 	assert.match(lab, /exec bash -lc "\. '\$INIT_FILE'; \$\{command_text\}"/);
 	assert.deepEqual(
 		buildDockerExecArgs({
+			headless: false,
 			container: "agents-lab-dev",
 			command: ["pnpm", "run", "pi:isolated"],
 		}),
@@ -84,6 +85,27 @@ test("devcontainer lab helper enters through the versioned lab command", () => {
 			"pnpm",
 			"run",
 			"pi:isolated",
+		],
+	);
+});
+
+test("devcontainer lab helper supports headless agent execution without tty", () => {
+	assert.deepEqual(
+		buildDockerExecArgs({
+			headless: true,
+			container: "agents-lab-dev",
+			command: ["node", "--version"],
+		}),
+		[
+			"exec",
+			"--user",
+			"root",
+			"agents-lab-dev",
+			"lab",
+			"vscode",
+			"/workspaces/agents-lab",
+			"node",
+			"--version",
 		],
 	);
 });
