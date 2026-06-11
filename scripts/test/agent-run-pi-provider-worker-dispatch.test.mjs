@@ -152,6 +152,11 @@ test("provider worker dispatch blocks execute when readiness is blocked", async 
     assert.equal(result.processStartAllowed, false);
     assert.ok(result.blockers.includes("provider-readiness:provider-fetch-failed"));
     assert.equal(result.providerReadiness.decision, "blocked");
+    assert.deepEqual(result.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
+      ["provider-fetch-failed", "network-or-provider", "blocker"],
+    ]);
+    assert.ok(result.providerNextActions.includes("verify network, proxy, and provider endpoint reachability, then rerun readiness"));
+    assert.ok(result.nextActions.includes("verify network, proxy, and provider endpoint reachability, then rerun readiness"));
     assert.equal(existsSync(path.join(cwd, ".pi", "reports", "agent-runs.json")), false);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
