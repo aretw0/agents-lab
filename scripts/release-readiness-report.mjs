@@ -454,6 +454,7 @@ function releaseNextActionPacket({ ready, releaseBlockers, operatorDecisions }) 
         automationAllowed: decision.automationAllowed,
         target: decision.target,
         candidateTaskIds: decision.candidateTaskIds ?? [],
+        ...(decision.boardReleaseDispositionPacket ? { boardReleaseDispositionPacket: decision.boardReleaseDispositionPacket } : {}),
         summary: decision.summary,
       })),
     };

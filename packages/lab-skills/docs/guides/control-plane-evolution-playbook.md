@@ -113,6 +113,7 @@ Interpretação do readiness report:
 - no JSON, `releaseBlockers` expõe os mesmos bloqueios do Markdown com `id`, `kind` e `evidence`;
 - no JSON, `operatorDecisions[*]` inclui payload acionável por decisão, como `allowedActions`, versões atuais e `candidateTaskIds`;
 - no JSON, `operatorDecisions[*].boardReleaseDispositionPacket` aparece quando o board tem candidatos com evidência de release; ele lista `dispositionRows[*].recommendedAction`, `dispositionRows[*].approvalPrompt` e `requiredApprovalPrompt` sem editar `.project/tasks.json` nem autorizar automação;
+- no JSON, `nextActions[*].boardReleaseDispositionPacket` replica esse packet quando ele for o próximo passo, permitindo consumo direto de `nextActions` sem inferência adicional;
 - no JSON, `operatorDecisions[*].requiresOperatorDecision=true` e `automationAllowed=false` deixam claro que `allowedActions` são opções para operador, não dispatch automático;
 - no JSON, `nextActionCode` e `nextActions` indicam o próximo passo seguro sem autorizar publish automático;
 - no JSON, `automationPermissions` mantém `tagAllowed`, `publishAllowed`, `workflowDispatchAllowed` e `processStartAllowed` falsos; readiness report é sempre report-only;

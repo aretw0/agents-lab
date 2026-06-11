@@ -835,6 +835,8 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.nextActionCode, "resolve-operator-decisions");
     assert.deepEqual(json.nextActions.map((action) => action.id), ["decide-board-evidence-candidates"]);
     assert.deepEqual(json.nextActions[0].allowedActions, ["park-for-target-release", "require-work"]);
+    assert.equal(json.nextActions[0].boardReleaseDispositionPacket.mode, "board-release-disposition-packet");
+    assert.equal(json.nextActions[0].boardReleaseDispositionPacket.requiredApprovalPrompt, "approve board release disposition park-for-target-release TASK-BUD-521");
     assert.equal(json.nextActions[0].requiresOperatorDecision, true);
     assert.equal(json.nextActions[0].automationAllowed, false);
     assert.deepEqual(json.automationPermissions, {
