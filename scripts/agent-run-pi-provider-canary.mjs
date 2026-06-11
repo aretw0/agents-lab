@@ -106,6 +106,7 @@ export async function runAgentRunPiProviderCanary(options = {}) {
     workerDispatch,
     agentRunOutcomePacket: workerDispatch.agentRunOutcomePacket,
     providerDiagnostics: workerDispatch.providerDiagnostics ?? providerReadiness.providerDiagnostics ?? [],
+    providerRecoveryPlan: workerDispatch.providerRecoveryPlan ?? providerReadiness.providerRecoveryPlan,
     blockers,
     nextActions: decision === "blocked"
       ? [

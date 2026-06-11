@@ -67,6 +67,11 @@ test("provider canary blocks execute when readiness is blocked", async () => {
     assert.deepEqual(result.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
       ["provider-fetch-failed", "network-or-provider", "blocker"],
     ]);
+    assert.equal(result.providerRecoveryPlan.mode, "agent-run-pi-provider-recovery-plan");
+    assert.equal(result.providerRecoveryPlan.processStartAllowed, false);
+    assert.deepEqual(result.providerRecoveryPlan.actions.map((item) => [item.diagnosticCode, item.actionCode, item.retryCanaryScript]), [
+      ["provider-fetch-failed", "verify-provider-network", "agent-run:pi-provider-canary:container"],
+    ]);
     assert.ok(result.nextActions.includes("verify network, proxy, and provider endpoint reachability, then rerun readiness"));
     assert.equal(existsSync(path.join(cwd, ".pi", "reports", "agent-runs.json")), false);
   } finally {

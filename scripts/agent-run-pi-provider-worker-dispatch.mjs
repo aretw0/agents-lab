@@ -163,6 +163,7 @@ function buildReadinessBlocked({ plan, planPath, worker, workerIndex, workerId, 
     driverStepCall,
     providerReadiness: readiness,
     providerDiagnostics: readiness.providerDiagnostics ?? [],
+    providerRecoveryPlan: readiness.providerRecoveryPlan,
     providerNextActions: readiness.nextActions ?? [],
     blockers: (readiness.blockers ?? []).map((blocker) => `provider-readiness:${blocker}`),
     nextActions: [
