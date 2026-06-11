@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
@@ -14,6 +14,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     outPath: DEFAULT_OUT,
     batchId: "agent-run-driver-local-fanout-rehearsal",
     execute: true,
+    manifestPath: "",
     maxConcurrency: 2,
     pretty: false,
     help: false,
@@ -23,6 +24,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
     else if (arg === "--out") out.outPath = argv[++index] ?? out.outPath;
     else if (arg === "--batch-id") out.batchId = argv[++index] ?? out.batchId;
+    else if (arg === "--manifest") out.manifestPath = argv[++index] ?? "";
     else if (arg === "--max-concurrency") out.maxConcurrency = Number(argv[++index] ?? out.maxConcurrency);
     else if (arg === "--preview") out.execute = false;
     else if (arg === "--execute") out.execute = true;
@@ -31,6 +33,11 @@ function parseArgs(argv = process.argv.slice(2)) {
     else throw new Error(`Unknown argument: ${arg}`);
   }
   return out;
+}
+
+function readJson(relOrAbsPath, cwd) {
+  const filePath = path.resolve(cwd, relOrAbsPath);
+  return JSON.parse(readFileSync(filePath, "utf8"));
 }
 
 function structuredApproval(workerId) {
@@ -42,7 +49,11 @@ function structuredApproval(workerId) {
   };
 }
 
-function workerPayload({ cwd, batchId, workerId, execute }) {
+function defaultWorkerSpecs() {
+  return [{ workerId: "worker-a" }, { workerId: "worker-b" }];
+}
+
+function workerPayload({ cwd, batchId, workerId, execute, runSpec }) {
   const runId = `${batchId}-${workerId}`;
   return {
     run_spec: {
@@ -57,6 +68,7 @@ function workerPayload({ cwd, batchId, workerId, execute }) {
         command: process.execPath,
         args: ["-e", `console.log(${JSON.stringify(`fanout-rehearsal:${workerId}`)})`],
       },
+      ...(runSpec ?? {}),
     },
     execute,
     ...(execute ? { operator_approval: structuredApproval(workerId) } : {}),
@@ -66,6 +78,51 @@ function workerPayload({ cwd, batchId, workerId, execute }) {
     follow_poll_interval_ms: 100,
     follow_max_lines: 20,
   };
+}
+
+function normalizeManifestWorkers(options, cwd) {
+  const source = options.workerSpecs
+    ?? options.workers
+    ?? (options.manifestPath ? readJson(options.manifestPath, cwd) : undefined);
+  const rawWorkers = Array.isArray(source) ? source : Array.isArray(source?.workerSpecs) ? source.workerSpecs : Array.isArray(source?.workers) ? source.workers : undefined;
+  const workers = rawWorkers ?? defaultWorkerSpecs();
+  return workers.map((worker, index) => {
+    const workerId = typeof worker?.workerId === "string" && worker.workerId.trim()
+      ? worker.workerId.trim()
+      : typeof worker?.worker_id === "string" && worker.worker_id.trim()
+        ? worker.worker_id.trim()
+        : "";
+    const runSpec = worker?.runSpec && typeof worker.runSpec === "object"
+      ? worker.runSpec
+      : worker?.run_spec && typeof worker.run_spec === "object"
+        ? worker.run_spec
+        : undefined;
+    return {
+      workerId,
+      index,
+      runSpec,
+      manifestSource: rawWorkers ? "custom" : "default",
+    };
+  });
+}
+
+function validateWorkerSpecs(workerSpecs, batchId) {
+  const blockers = [];
+  if (workerSpecs.length === 0) blockers.push("workers-missing");
+  const workerIds = new Set();
+  const runIds = new Set();
+  for (const worker of workerSpecs) {
+    if (!worker.workerId) {
+      blockers.push(`worker-id-missing:${worker.index}`);
+      continue;
+    }
+    if (workerIds.has(worker.workerId)) blockers.push(`duplicate-worker-id:${worker.workerId}`);
+    workerIds.add(worker.workerId);
+    const runId = String(worker.runSpec?.run_id ?? worker.runSpec?.runId ?? `${batchId}-${worker.workerId}`);
+    if (runIds.has(runId)) blockers.push(`duplicate-run-id:${runId}`);
+    runIds.add(runId);
+  }
+  return blockers;
 }
 
 function workerPassed(worker) {
@@ -109,18 +166,20 @@ export async function runAgentRunDriverFanoutRehearsal(options = {}) {
   const execute = options.execute !== false;
   const maxConcurrency = normalizeMaxConcurrency(options.maxConcurrency ?? 2);
   const pretty = options.pretty === true;
-  const workerIds = ["worker-a", "worker-b"];
+  const workerSpecs = normalizeManifestWorkers(options, cwd);
+  const manifestSource = workerSpecs.some((worker) => worker.manifestSource === "custom") ? "custom" : "default";
   const setupBlockers = [
     ...(maxConcurrency > 0 ? [] : ["max-concurrency-invalid"]),
+    ...validateWorkerSpecs(workerSpecs, batchId),
   ];
   const workerResults = setupBlockers.length === 0
-    ? await runBounded(workerIds, maxConcurrency, (workerId) => runAgentRunDriverStep(
-      workerPayload({ cwd, batchId, workerId, execute }),
+    ? await runBounded(workerSpecs, maxConcurrency, (workerSpec) => runAgentRunDriverStep(
+      workerPayload({ cwd, batchId, workerId: workerSpec.workerId, execute, runSpec: workerSpec.runSpec }),
       cwd,
     ))
     : [];
   const workerSummaries = workerResults.map((worker, index) => ({
-    workerId: workerIds[index],
+    workerId: workerSpecs[index].workerId,
     runId: worker.runSpec.runId,
     decision: worker.decision,
     dispatchAllowed: worker.dispatchAllowed,
@@ -150,6 +209,7 @@ export async function runAgentRunDriverFanoutRehearsal(options = {}) {
     batchId,
     decision,
     executeRequested: execute,
+    manifestSource,
     maxConcurrency,
     dispatchAllowed: workerResults.some((worker) => worker.dispatchAllowed === true),
     processStartAllowed: workerResults.some((worker) => worker.processStartAllowed === true),
@@ -183,9 +243,9 @@ export async function runAgentRunDriverFanoutRehearsal(options = {}) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-driver-fanout-rehearsal.mjs [--execute|--preview] [--cwd DIR] [--batch-id ID] [--max-concurrency N] [--out PATH] [--pretty]",
+    "Usage: node scripts/agent-run-driver-fanout-rehearsal.mjs [--execute|--preview] [--cwd DIR] [--batch-id ID] [--manifest PATH] [--max-concurrency N] [--out PATH] [--pretty]",
     "",
-    "Runs two bounded local read-only driver workers and aggregates a fail-closed batch outcome.",
+    "Runs bounded local driver workers from a manifest, or two default read-only workers, and aggregates a fail-closed batch outcome.",
     `Default output path: ${DEFAULT_OUT}`,
   ].join("\n") + "\n");
 }
