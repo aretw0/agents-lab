@@ -330,6 +330,9 @@ function agentRunProviderCanaryEvidence(cwd) {
       contractDecision: payload.agentRunOutcomePacket?.contractDecision,
       blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
       providerDiagnostics: Array.isArray(payload.providerDiagnostics) ? payload.providerDiagnostics : [],
+      providerRecoveryPlan: payload.providerRecoveryPlan && typeof payload.providerRecoveryPlan === "object"
+        ? payload.providerRecoveryPlan
+        : undefined,
       nextActions: Array.isArray(payload.nextActions) ? payload.nextActions : [],
       summary: payload.summary ?? "provider canary artifact present",
     };
@@ -370,6 +373,9 @@ function agentRunProviderContainerCanaryEvidence(cwd) {
       canaryPath: payload.canaryOutPath,
       blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
       providerDiagnostics: Array.isArray(payload.providerDiagnostics) ? payload.providerDiagnostics : [],
+      providerRecoveryPlan: payload.canaryReport?.providerRecoveryPlan && typeof payload.canaryReport.providerRecoveryPlan === "object"
+        ? payload.canaryReport.providerRecoveryPlan
+        : undefined,
       summary: payload.summary ?? "provider container canary artifact present",
     };
   } catch (error) {

@@ -851,6 +851,18 @@ test("readiness exposes provider canary evidence when present", () => {
         category: "network-or-provider",
         severity: "blocker",
       }],
+      providerRecoveryPlan: {
+        mode: "agent-run-pi-provider-recovery-plan",
+        decision: "blocked",
+        dispatchAllowed: false,
+        processStartAllowed: false,
+        automationAllowed: false,
+        actions: [{
+          diagnosticCode: "provider-fetch-failed",
+          actionCode: "verify-provider-network",
+          retryCanaryScript: "agent-run:pi-provider-canary:container",
+        }],
+      },
       blockers: ["provider-readiness:provider-fetch-failed"],
       summary: "agent-run-pi-provider-canary: decision=blocked",
     }, null, 2));
@@ -864,6 +876,10 @@ test("readiness exposes provider canary evidence when present", () => {
     assert.deepEqual(data.agentRunDrivers.providerCanaryEvidence.blockers, ["provider-readiness:provider-fetch-failed"]);
     assert.deepEqual(data.agentRunDrivers.providerCanaryEvidence.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
       ["provider-fetch-failed", "network-or-provider", "blocker"],
+    ]);
+    assert.equal(data.agentRunDrivers.providerCanaryEvidence.providerRecoveryPlan.mode, "agent-run-pi-provider-recovery-plan");
+    assert.deepEqual(data.agentRunDrivers.providerCanaryEvidence.providerRecoveryPlan.actions.map((item) => [item.diagnosticCode, item.actionCode, item.retryCanaryScript]), [
+      ["provider-fetch-failed", "verify-provider-network", "agent-run:pi-provider-canary:container"],
     ]);
     assert.equal(data.agentRunDrivers.ok, true);
   } finally {
@@ -891,6 +907,18 @@ test("readiness exposes provider container canary evidence when present", () => 
       canaryOutPath: ".artifacts/agent-run-driver/pi-provider-container-canary.json",
       canaryReport: {
         decision: "blocked",
+        providerRecoveryPlan: {
+          mode: "agent-run-pi-provider-recovery-plan",
+          decision: "blocked",
+          dispatchAllowed: false,
+          processStartAllowed: false,
+          automationAllowed: false,
+          actions: [{
+            diagnosticCode: "provider-fetch-failed",
+            actionCode: "verify-provider-network",
+            retryCanaryScript: "agent-run:pi-provider-canary:container",
+          }],
+        },
       },
       providerDiagnostics: [{
         code: "provider-fetch-failed",
@@ -911,6 +939,10 @@ test("readiness exposes provider container canary evidence when present", () => 
     assert.deepEqual(data.agentRunDrivers.providerContainerCanaryEvidence.blockers, ["container-provider-canary-blocked"]);
     assert.deepEqual(data.agentRunDrivers.providerContainerCanaryEvidence.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
       ["provider-fetch-failed", "network-or-provider", "blocker"],
+    ]);
+    assert.equal(data.agentRunDrivers.providerContainerCanaryEvidence.providerRecoveryPlan.mode, "agent-run-pi-provider-recovery-plan");
+    assert.deepEqual(data.agentRunDrivers.providerContainerCanaryEvidence.providerRecoveryPlan.actions.map((item) => [item.diagnosticCode, item.actionCode, item.retryCanaryScript]), [
+      ["provider-fetch-failed", "verify-provider-network", "agent-run:pi-provider-canary:container"],
     ]);
     assert.equal(data.agentRunDrivers.ok, true);
   } finally {
