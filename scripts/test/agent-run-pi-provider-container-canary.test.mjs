@@ -6,6 +6,7 @@ import test from "node:test";
 
 import {
   buildProviderContainerCanaryDockerArgs,
+  providerContainerCanaryBlockers,
   runAgentRunPiProviderContainerCanary,
 } from "../agent-run-pi-provider-container-canary.mjs";
 
@@ -59,6 +60,19 @@ test("provider container canary blocks without a container name and does not wri
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
+});
+
+test("provider container canary treats parsed blocked canary as semantic block not docker failure", () => {
+  assert.deepEqual(
+    providerContainerCanaryBlockers({
+      exitStatus: 1,
+      canaryReport: {
+        mode: "agent-run-pi-provider-canary",
+        decision: "blocked",
+      },
+    }),
+    ["container-provider-canary-blocked"],
+  );
 });
 
 test("provider container canary script documents the headless lab wrapper", () => {

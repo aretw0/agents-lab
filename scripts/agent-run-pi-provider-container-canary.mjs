@@ -71,6 +71,15 @@ function writeJson(cwd, relPath, value, pretty = false) {
   writeFileSync(outPath, `${JSON.stringify(value, null, pretty ? 2 : 0)}\n`, "utf8");
 }
 
+export function providerContainerCanaryBlockers({ exitStatus, canaryReport }) {
+  const parsedCanary = canaryReport && typeof canaryReport === "object";
+  return [
+    ...(exitStatus === 0 || parsedCanary ? [] : [`docker-exec-failed:${exitStatus ?? "unknown"}`]),
+    ...(parsedCanary ? [] : ["container-provider-canary-json-missing"]),
+    ...(parsedCanary && canaryReport.decision !== "blocked" ? [] : ["container-provider-canary-blocked"]),
+  ];
+}
+
 export function runAgentRunPiProviderContainerCanary(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const container = String(options.container ?? "").trim();
@@ -106,11 +115,10 @@ export function runAgentRunPiProviderContainerCanary(options = {}) {
   } catch {
     canaryReport = undefined;
   }
-  const blockers = [
-    ...(result.status === 0 ? [] : [`docker-exec-failed:${result.status ?? "unknown"}`]),
-    ...(canaryReport ? [] : ["container-provider-canary-json-missing"]),
-    ...(canaryReport && canaryReport.decision !== "blocked" ? [] : ["container-provider-canary-blocked"]),
-  ];
+  const blockers = providerContainerCanaryBlockers({
+    exitStatus: result.status,
+    canaryReport,
+  });
   const report = {
     mode: "agent-run-pi-provider-container-canary-report",
     schemaVersion: SCHEMA_VERSION,
