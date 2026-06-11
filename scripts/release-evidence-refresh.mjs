@@ -52,6 +52,8 @@ function pathsFor(target, tag) {
     canarySuitePath: ".artifacts/agent-run-driver/suite.json",
     readinessPath: `.artifacts/release-readiness/latest-ready-final-${target}.json`,
     draftPath: `.artifacts/release-draft/${tag}-preview.json`,
+    cutPreviewPath: `.artifacts/release-cut/${tag}-preview.json`,
+    artifactAuditPath: `.artifacts/release-cut/${tag}-artifact-audit.json`,
     finalGatePath: `.artifacts/release-cut/${tag}-final-gate.json`,
   };
 }
@@ -91,6 +93,8 @@ export async function runReleaseEvidenceRefresh(options = {}) {
     readiness,
     draft,
   });
+  writeJson(cwd, paths.cutPreviewPath, finalGate.cutPreview, pretty);
+  writeJson(cwd, paths.artifactAuditPath, finalGate.artifactAudit, pretty);
   writeJson(cwd, paths.finalGatePath, finalGate, pretty);
 
   const blockers = [

@@ -72,9 +72,14 @@ test("release evidence refresh writes canary, readiness, draft, and final gate a
     assert.equal(existsSync(path.join(cwd, result.paths.canarySuitePath)), true);
     assert.equal(existsSync(path.join(cwd, result.paths.readinessPath)), true);
     assert.equal(existsSync(path.join(cwd, result.paths.draftPath)), true);
+    assert.equal(existsSync(path.join(cwd, result.paths.cutPreviewPath)), true);
+    assert.equal(existsSync(path.join(cwd, result.paths.artifactAuditPath)), true);
     assert.equal(existsSync(path.join(cwd, result.paths.finalGatePath)), true);
     assert.deepEqual(JSON.parse(readFileSync(path.join(cwd, ".artifacts/release-cut/refresh.json"), "utf8")), result);
     assert.equal(JSON.parse(readFileSync(path.join(cwd, result.paths.readinessPath), "utf8")).mode, "release-readiness-report");
+    const finalGate = JSON.parse(readFileSync(path.join(cwd, result.paths.finalGatePath), "utf8"));
+    assert.deepEqual(JSON.parse(readFileSync(path.join(cwd, result.paths.cutPreviewPath), "utf8")), finalGate.cutPreview);
+    assert.deepEqual(JSON.parse(readFileSync(path.join(cwd, result.paths.artifactAuditPath), "utf8")), finalGate.artifactAudit);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

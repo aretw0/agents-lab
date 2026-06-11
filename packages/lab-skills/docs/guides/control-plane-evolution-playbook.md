@@ -96,7 +96,7 @@ Automação mínima existente:
 - `pnpm run release:readiness:strict:json -- --target X.Y.Z` aplica o gate e preserva o artefato estruturado;
 - `pnpm run release:readiness:v0.8.0` gera checklist local canônico em `.artifacts/release-readiness/`.
 - `pnpm run release:readiness:v0.8.0:json` gera o mesmo estado em JSON para agentes e automação local, incluindo `operatorDecisions`.
-- `pnpm run release:evidence:refresh -- --target X.Y.Z` atualiza a cadeia segura local: `agent-run:driver-canaries`, readiness, draft preview e final gate.
+- `pnpm run release:evidence:refresh -- --target X.Y.Z` atualiza a cadeia segura local: `agent-run:driver-canaries`, readiness, draft preview, cut preview auditado, artifact audit e final gate.
 - `pnpm run release:evidence:refresh:json -- --target X.Y.Z` emite o mesmo packet em JSON legível; o resultado esperado antes de revisão humana é `mode=release-evidence-refresh`, `decision=pass`, `finalGateDecision=pass` e `protectedActionsAllowed=false`.
 - `pnpm run release:final:gate -- --target X.Y.Z` recompõe em memória cut preview + artifact audit + cut auditado sem tag, push, workflow dispatch ou publish.
 - `pnpm run release:artifact:audit -- --target X.Y.Z` audita artifacts já gerados quando for necessário inspecionar a cadeia manualmente.
