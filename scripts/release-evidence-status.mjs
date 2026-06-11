@@ -90,6 +90,8 @@ export function buildReleaseEvidenceStatus(options = {}) {
   if (refresh?.finalGateHead && finalGate?.head && refresh.finalGateHead !== finalGate.head) blockers.push("release-evidence-final-gate-head-mismatch");
   if (!finalGate) blockers.push("release-final-gate-missing");
   if (finalGate && finalGate.mode !== "release-final-gate") blockers.push("release-final-gate-mode-mismatch");
+  if (finalGate && String(finalGate.target) !== target) blockers.push("release-final-gate-target-mismatch");
+  if (finalGate && finalGate.tag !== tag) blockers.push("release-final-gate-tag-mismatch");
   if (finalGate && finalGate.decision !== "pass") blockers.push("release-final-gate-not-pass");
   if (finalGate && finalGate.head && currentHead && finalGate.head !== currentHead) blockers.push("release-final-gate-stale-head");
   if (refresh) protectedFlagsFalse(refresh, "release-evidence", blockers);
