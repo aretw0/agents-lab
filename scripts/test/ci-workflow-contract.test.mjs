@@ -22,6 +22,7 @@ test("ci workflow keeps the local parity gate canonical", () => {
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run docs:package:check/);
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run repo:discourse:audit/);
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run test:release:package:smoke/);
+	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run test:release:evidence/);
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run test:autonomous-scheduler/);
 	assert.match(packageJson.scripts["ci:smoke:gate"], /pnpm run release:package:smoke/);
 	assert.match(workflow, /name: Smoke Tests/);
