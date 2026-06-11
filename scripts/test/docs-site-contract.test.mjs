@@ -182,6 +182,9 @@ test("public 0.8 readiness map matches the canonical release readiness gate", ()
 	assert.equal(boardReleaseClear, true, "board release gate should be green");
 	assert.match(readiness, /`board-release-clear` est[aá] verde/i);
 	assert.match(readiness, /`target-version-ready` est[aá] verde/i);
+	assert.match(readiness, /release:evidence:refresh/);
+	assert.match(readiness, /finalGateDecision=pass/);
+	assert.match(readiness, /protectedActionsAllowed=false/);
 	assert.equal(pkg.scripts["release:readiness"], "node scripts/release-readiness-report.mjs");
 	assert.equal(pkg.scripts["release:readiness:json"], "node scripts/release-readiness-report.mjs --json");
 	assert.equal(pkg.scripts["release:readiness:strict"], "node scripts/release-readiness-report.mjs --strict");
@@ -208,6 +211,7 @@ test("public 0.8 readiness map matches the canonical release readiness gate", ()
 	assert.match(playbook, /board\.inProgressRows/);
 	assert.match(playbook, /board\.evidenceCandidateRows/);
 	assert.match(readiness, /schemaVersion=1/);
+	assert.match(readiness, /markdown/);
 	assert.match(readiness, /releaseBlockers: (none|\[\])/);
 	assert.match(readiness, /operatorDecisions/);
 	assert.match(readiness, /providerProtectedBoardPlanEvidence/);
