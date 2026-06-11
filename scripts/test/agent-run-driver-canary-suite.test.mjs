@@ -21,6 +21,8 @@ test("agent-run driver canary suite previews both canaries without dispatch", as
 
   assert.equal(report.mode, "agent-run-driver-canary-suite-report");
   assert.equal(report.schemaVersion, 1);
+  assert.match(report.generatedAtIso, /^\d{4}-\d{2}-\d{2}T/);
+  assert.equal(report.gitHead, "");
   assert.equal(report.decision, "block");
   assert.equal(report.executeRequested, false);
   assert.equal(report.dispatchAllowed, false);
@@ -36,6 +38,8 @@ test("agent-run driver canary suite executes read-only and mutation evidence", a
 
   assert.equal(report.mode, "agent-run-driver-canary-suite-report");
   assert.equal(report.schemaVersion, 1);
+  assert.match(report.generatedAtIso, /^\d{4}-\d{2}-\d{2}T/);
+  assert.equal(report.gitHead, "");
   assert.equal(report.decision, "pass");
   assert.equal(report.dispatchAllowed, true);
   assert.equal(report.processStartAllowed, true);
@@ -62,5 +66,7 @@ test("agent-run driver canary suite CLI writes suite artifact", () => {
 
   assert.equal(existsSync(writtenPath), true);
   assert.deepEqual(JSON.parse(readFileSync(writtenPath, "utf8")), report);
+  assert.match(report.generatedAtIso, /^\d{4}-\d{2}-\d{2}T/);
+  assert.equal(report.gitHead, "");
   assert.equal(report.decision, "pass");
 });

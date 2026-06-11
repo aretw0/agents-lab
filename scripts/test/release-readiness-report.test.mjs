@@ -21,6 +21,7 @@ function makeWorkspace({
   agentRunDriverScript = "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs",
   agentRunDriverCanariesScript = "node scripts/agent-run-driver-canary-suite.mjs --execute --out .artifacts/agent-run-driver/suite.json",
   writeAgentRunDriverCanarySuite = true,
+  agentRunDriverCanarySuiteGitHead = "",
   rootScripts = {},
 } = {}) {
   const root = mkdtempSync(path.join(tmpdir(), "release-readiness-"));
@@ -90,6 +91,8 @@ function makeWorkspace({
     writeFileSync(suitePath, JSON.stringify({
       mode: "agent-run-driver-canary-suite-report",
       schemaVersion: 1,
+      generatedAtIso: "2026-06-10T00:00:00.000Z",
+      gitHead: agentRunDriverCanarySuiteGitHead,
       decision: "pass",
       canaries: {
         readOnly: { contractDecision: "pass" },
@@ -100,6 +103,21 @@ function makeWorkspace({
     }, null, 2));
   }
   return root;
+}
+
+function initGitWorkspace(workspace) {
+  assert.equal(spawnSync("git", ["init"], { cwd: workspace, encoding: "utf8" }).status, 0);
+  assert.equal(spawnSync("git", ["add", "."], { cwd: workspace, encoding: "utf8" }).status, 0);
+  assert.equal(spawnSync("git", [
+    "-c",
+    "user.name=Release Readiness Test",
+    "-c",
+    "user.email=release-readiness@example.test",
+    "commit",
+    "-m",
+    "init",
+  ], { cwd: workspace, encoding: "utf8" }).status, 0);
+  return spawnSync("git", ["rev-parse", "--short", "HEAD"], { cwd: workspace, encoding: "utf8" }).stdout.trim();
 }
 
 test("summarizeBoard normalizes active release blockers", () => {
@@ -169,6 +187,7 @@ test("buildReport marks target release not ready until version and board gates a
     assert.equal(data.agentRunDrivers.scriptGateOk, true);
     assert.equal(data.agentRunDrivers.canarySuiteRequired, true);
     assert.equal(data.agentRunDrivers.canarySuiteGateOk, true);
+    assert.equal(data.agentRunDrivers.canarySuiteHeadMatches, true);
     assert.deepEqual(data.agentRunDrivers.missingTests, []);
     assert.deepEqual(data.agentRunDrivers.missingCanaryScriptMarkers, []);
     assert.equal(data.agentRunDrivers.canarySuiteEvidence.present, true);
@@ -440,11 +459,39 @@ test("agent-run driver gate requires passing canary suite evidence", () => {
     assert.equal(data.agentRunDrivers.scriptGateOk, true);
     assert.equal(data.agentRunDrivers.canarySuiteRequired, true);
     assert.equal(data.agentRunDrivers.canarySuiteGateOk, false);
+    assert.equal(data.agentRunDrivers.canarySuiteHeadMatches, true);
     assert.equal(data.agentRunDrivers.canarySuiteEvidence.decision, "missing");
     assert.equal(data.agentRunDrivers.ok, false);
     assert.equal(report.ready, false);
     assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.id), ["agent-run-driver-gate"]);
     assert.match(report.markdown, /canary suite evidence must pass at \.artifacts\/agent-run-driver\/suite\.json \(decision=missing\)/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
+test("agent-run driver gate rejects stale canary suite evidence when git head is available", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+    agentRunDriverCanarySuiteGitHead: "stale-head",
+  });
+
+  try {
+    const head = initGitWorkspace(workspace);
+    const data = gather("0.8.0", workspace);
+    const report = buildReport(data);
+
+    assert.notEqual(head, "stale-head");
+    assert.equal(data.head, head);
+    assert.equal(data.agentRunDrivers.scriptGateOk, true);
+    assert.equal(data.agentRunDrivers.canarySuiteGateOk, true);
+    assert.equal(data.agentRunDrivers.canarySuiteHeadMatches, false);
+    assert.equal(data.agentRunDrivers.ok, false);
+    assert.equal(report.ready, false);
+    assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.id), ["agent-run-driver-gate"]);
+    assert.match(report.markdown, /canary suite evidence is stale for head/);
+    assert.match(report.markdown, /artifact=stale-head/);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }
@@ -678,6 +725,7 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.agentRunDrivers.scriptGateOk, true);
     assert.equal(json.agentRunDrivers.canarySuiteRequired, true);
     assert.equal(json.agentRunDrivers.canarySuiteGateOk, true);
+    assert.equal(json.agentRunDrivers.canarySuiteHeadMatches, true);
     assert.equal(json.agentRunDrivers.canarySuiteEvidence.decision, "pass");
     assert.equal(json.agentRunDrivers.lastCanaryEvidence.decision, "missing");
     assert.equal(json.agentRunDrivers.lastMutationCanaryEvidence.decision, "missing");

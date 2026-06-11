@@ -172,6 +172,8 @@ function agentRunDriverCanarySuiteEvidence(cwd) {
       decision: payload.decision === "pass" ? "pass" : "review",
       mode: payload.mode,
       schemaVersion: payload.schemaVersion,
+      generatedAtIso: payload.generatedAtIso,
+      gitHead: payload.gitHead,
       readOnlyDecision: payload.canaries?.readOnly?.contractDecision,
       mutationDecision: payload.canaries?.mutation?.contractDecision,
       blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
@@ -208,6 +210,9 @@ function agentRunDriverGateEvidence(report) {
     ...(report.missingCanaryScriptMarkers.length ? [`${report.canaryScriptName} missing ${report.missingCanaryScriptMarkers.join(", ")}`] : []),
     ...(report.canarySuiteRequired === true && report.canarySuiteGateOk !== true
       ? [`canary suite evidence must pass at ${report.canarySuiteEvidence?.path ?? ".artifacts/agent-run-driver/suite.json"} (decision=${report.canarySuiteEvidence?.decision ?? "missing"})`]
+      : []),
+    ...(report.canarySuiteRequired === true && report.canarySuiteHeadMatches !== true
+      ? [`canary suite evidence is stale for head ${report.currentHead || "unknown"} (artifact=${report.canarySuiteEvidence?.gitHead || "missing"})`]
       : []),
   ];
   if (blockers.length) return blockers.join("; ");
@@ -539,7 +544,9 @@ export function gather(target, cwd = process.cwd()) {
   agentRunDrivers.lastMutationCanaryEvidence = agentRunDriverCanaryEvidence(cwd, ".artifacts/agent-run-driver/latest-mutation.json");
   agentRunDrivers.canarySuiteRequired = true;
   agentRunDrivers.canarySuiteGateOk = agentRunDrivers.canarySuiteEvidence.decision === "pass";
-  agentRunDrivers.ok = agentRunDrivers.scriptGateOk && agentRunDrivers.canarySuiteGateOk;
+  agentRunDrivers.currentHead = head;
+  agentRunDrivers.canarySuiteHeadMatches = !head || agentRunDrivers.canarySuiteEvidence.gitHead === head;
+  agentRunDrivers.ok = agentRunDrivers.scriptGateOk && agentRunDrivers.canarySuiteGateOk && agentRunDrivers.canarySuiteHeadMatches;
   const userSurface = userSurfaceReadiness(cwd);
 
   return {

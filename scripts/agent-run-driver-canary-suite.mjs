@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { mkdirSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
@@ -45,10 +46,18 @@ function canaryPassed(report) {
     && report.blockers.length === 0;
 }
 
+function gitHead(cwd) {
+  const out = spawnSync("git", ["rev-parse", "--short", "HEAD"], { cwd, encoding: "utf8", stdio: "pipe" });
+  if (out.status !== 0) return "";
+  return String(out.stdout ?? "").trim();
+}
+
 export async function runAgentRunDriverCanarySuite(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const execute = options.execute !== false;
   const pretty = options.pretty === true;
+  const generatedAtIso = new Date().toISOString();
+  const head = gitHead(cwd);
   const readOnly = await runAgentRunDriverCanary({
     cwd,
     execute,
@@ -72,6 +81,8 @@ export async function runAgentRunDriverCanarySuite(options = {}) {
   const report = {
     mode: "agent-run-driver-canary-suite-report",
     schemaVersion: SCHEMA_VERSION,
+    generatedAtIso,
+    gitHead: head,
     decision: blockers.length === 0 ? "pass" : "block",
     executeRequested: execute,
     dispatchAllowed: readOnly.dispatchAllowed === true || mutation.dispatchAllowed === true,
