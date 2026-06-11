@@ -182,6 +182,32 @@ test("headless driver step passes allowed run_spec env to subprocess", async () 
   assert.match(log, /unset/);
 });
 
+test("headless driver step replaces log content for each dispatch", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-log-replace-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const logPath = path.join(cwd, ".pi", "reports", "headless-driver-step-log-replace.log");
+  mkdirSync(path.dirname(logPath), { recursive: true });
+  writeFileSync(logPath, "stale previous run\n", "utf8");
+
+  const result = await runAgentRunDriverStep({
+    run_spec: {
+      ...payload().run_spec,
+      run_id: "headless-driver-step-log-replace",
+      log_path: ".pi/reports/headless-driver-step-log-replace.log",
+    },
+    execute: true,
+    operator_approval: structuredApproval(),
+    follow: true,
+    build_outcome: true,
+    follow_max_wait_ms: 5_000,
+  }, cwd);
+
+  assert.equal(result.decision, "dispatched");
+  const log = readFileSync(logPath, "utf8");
+  assert.doesNotMatch(log, /stale previous run/);
+  assert.match(log, /^\[agent-runner\] starting command=/);
+});
+
 test("headless driver step accepts next driver step call wrapper", async () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-call-wrapper-"));
   writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");

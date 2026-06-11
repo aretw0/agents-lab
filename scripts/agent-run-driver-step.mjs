@@ -312,7 +312,7 @@ async function dispatchRun(cwd, runSpec) {
   };
   writeRegistryEntry(cwd, planned);
   const startedAtMs = Date.now();
-  const logStream = createWriteStream(logPath, { flags: "a" });
+  const logStream = createWriteStream(logPath, { flags: "w" });
   logStream.write(`[agent-runner] starting command=${runSpec.executionPreview.command} source=preview-command cwd=${cwd}\n`);
   logStream.write(`[agent-runner] argv=${JSON.stringify(runSpec.executionPreview.args)}\n`);
   logStream.write(`[agent-runner] preflight platform=${process.platform} node=${process.version} cwdExists=${existsSync(cwd) ? "yes" : "no"}\n`);
