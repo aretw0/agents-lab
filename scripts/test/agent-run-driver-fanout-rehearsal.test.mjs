@@ -20,6 +20,7 @@ test("fanout rehearsal previews fail-closed without starting workers", async () 
     assert.equal(report.mode, "agent-run-driver-fanout-rehearsal-report");
     assert.equal(report.decision, "block");
     assert.equal(report.executeRequested, false);
+    assert.equal(report.maxConcurrency, 2);
     assert.equal(report.dispatchAllowed, false);
     assert.equal(report.processStartAllowed, false);
     assert.ok(report.blockers.includes("execute-not-requested"));
@@ -30,14 +31,15 @@ test("fanout rehearsal previews fail-closed without starting workers", async () 
   }
 });
 
-test("fanout rehearsal runs two local read-only workers and aggregates pass", async () => {
+test("fanout rehearsal runs two local read-only workers with bounded concurrency and aggregates pass", async () => {
   const cwd = workspace("agent-run-driver-fanout-execute-");
   try {
-    const report = await runAgentRunDriverFanoutRehearsal({ cwd });
+    const report = await runAgentRunDriverFanoutRehearsal({ cwd, maxConcurrency: 1 });
 
     assert.equal(report.decision, "pass");
     assert.equal(report.dispatchAllowed, true);
     assert.equal(report.processStartAllowed, true);
+    assert.equal(report.maxConcurrency, 1);
     assert.equal(report.workerCount, 2);
     assert.equal(report.passedWorkerCount, 2);
     assert.deepEqual(report.blockers, []);
@@ -45,11 +47,28 @@ test("fanout rehearsal runs two local read-only workers and aggregates pass", as
     assert.deepEqual(report.workerSummaries.map((worker) => worker.followTerminal), [true, true]);
     assert.equal(report.batchOutcomePacket.mode, "agent-run-batch-outcome-packet");
     assert.equal(report.batchOutcomePacket.decision, "pass");
+    assert.equal(report.batchOutcomePacket.maxConcurrency, 1);
     assert.equal(existsSync(path.join(cwd, ".artifacts/agent-run-driver/fanout-rehearsal.json")), true);
 
     const registry = JSON.parse(readFileSync(path.join(cwd, ".pi/reports/agent-runs.json"), "utf8"));
     assert.equal(registry.runs.length, 2);
     assert.deepEqual(registry.runs.map((run) => run.state).sort(), ["completed", "completed"]);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("fanout rehearsal blocks invalid concurrency before dispatch", async () => {
+  const cwd = workspace("agent-run-driver-fanout-invalid-concurrency-");
+  try {
+    const report = await runAgentRunDriverFanoutRehearsal({ cwd, maxConcurrency: 0 });
+
+    assert.equal(report.decision, "block");
+    assert.equal(report.workerCount, 0);
+    assert.equal(report.dispatchAllowed, false);
+    assert.equal(report.processStartAllowed, false);
+    assert.ok(report.blockers.includes("max-concurrency-invalid"));
+    assert.equal(existsSync(path.join(cwd, ".pi/reports/agent-runs.json")), false);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

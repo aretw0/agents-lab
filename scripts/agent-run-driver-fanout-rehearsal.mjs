@@ -14,6 +14,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     outPath: DEFAULT_OUT,
     batchId: "agent-run-driver-local-fanout-rehearsal",
     execute: true,
+    maxConcurrency: 2,
     pretty: false,
     help: false,
   };
@@ -22,6 +23,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
     else if (arg === "--out") out.outPath = argv[++index] ?? out.outPath;
     else if (arg === "--batch-id") out.batchId = argv[++index] ?? out.batchId;
+    else if (arg === "--max-concurrency") out.maxConcurrency = Number(argv[++index] ?? out.maxConcurrency);
     else if (arg === "--preview") out.execute = false;
     else if (arg === "--execute") out.execute = true;
     else if (arg === "--pretty") out.pretty = true;
@@ -76,6 +78,25 @@ function workerPassed(worker) {
     && worker.agentRunOutcomePacket.blockers.length === 0;
 }
 
+function normalizeMaxConcurrency(value) {
+  return Number.isInteger(value) && value > 0 ? value : 0;
+}
+
+async function runBounded(items, maxConcurrency, workerFn) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const workerCount = Math.min(maxConcurrency, items.length);
+  const runners = Array.from({ length: workerCount }, async () => {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await workerFn(items[index], index);
+    }
+  });
+  await Promise.all(runners);
+  return results;
+}
+
 function writeJson(cwd, relPath, value, pretty = false) {
   const outPath = path.resolve(cwd, relPath);
   mkdirSync(path.dirname(outPath), { recursive: true });
@@ -86,12 +107,18 @@ export async function runAgentRunDriverFanoutRehearsal(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const batchId = String(options.batchId || "agent-run-driver-local-fanout-rehearsal").trim();
   const execute = options.execute !== false;
+  const maxConcurrency = normalizeMaxConcurrency(options.maxConcurrency ?? 2);
   const pretty = options.pretty === true;
   const workerIds = ["worker-a", "worker-b"];
-  const workerResults = await Promise.all(workerIds.map((workerId) => runAgentRunDriverStep(
-    workerPayload({ cwd, batchId, workerId, execute }),
-    cwd,
-  )));
+  const setupBlockers = [
+    ...(maxConcurrency > 0 ? [] : ["max-concurrency-invalid"]),
+  ];
+  const workerResults = setupBlockers.length === 0
+    ? await runBounded(workerIds, maxConcurrency, (workerId) => runAgentRunDriverStep(
+      workerPayload({ cwd, batchId, workerId, execute }),
+      cwd,
+    ))
+    : [];
   const workerSummaries = workerResults.map((worker, index) => ({
     workerId: workerIds[index],
     runId: worker.runSpec.runId,
@@ -108,6 +135,7 @@ export async function runAgentRunDriverFanoutRehearsal(options = {}) {
     ],
   }));
   const blockers = [
+    ...setupBlockers,
     ...(!execute ? ["execute-not-requested"] : []),
     ...workerSummaries.flatMap((worker) => worker.blockers.map((blocker) => `${worker.workerId}:${blocker}`)),
     ...workerSummaries.filter((worker) => worker.contractDecision !== "pass").map((worker) => `${worker.workerId}:contract-not-pass:${worker.contractDecision}`),
@@ -122,6 +150,7 @@ export async function runAgentRunDriverFanoutRehearsal(options = {}) {
     batchId,
     decision,
     executeRequested: execute,
+    maxConcurrency,
     dispatchAllowed: workerResults.some((worker) => worker.dispatchAllowed === true),
     processStartAllowed: workerResults.some((worker) => worker.processStartAllowed === true),
     workerCount: workerResults.length,
@@ -134,6 +163,7 @@ export async function runAgentRunDriverFanoutRehearsal(options = {}) {
       recommendation: decision === "pass" ? "stop" : "block",
       recommendationCode: decision === "pass" ? "agent-run-batch-outcome-pass" : "agent-run-batch-outcome-block",
       batchId,
+      maxConcurrency,
       workerCount: workerResults.length,
       passedWorkerCount,
       workerSummaries: workerSummaries.map((worker) => ({
@@ -153,7 +183,7 @@ export async function runAgentRunDriverFanoutRehearsal(options = {}) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-driver-fanout-rehearsal.mjs [--execute|--preview] [--cwd DIR] [--batch-id ID] [--out PATH] [--pretty]",
+    "Usage: node scripts/agent-run-driver-fanout-rehearsal.mjs [--execute|--preview] [--cwd DIR] [--batch-id ID] [--max-concurrency N] [--out PATH] [--pretty]",
     "",
     "Runs two bounded local read-only driver workers and aggregates a fail-closed batch outcome.",
     `Default output path: ${DEFAULT_OUT}`,
