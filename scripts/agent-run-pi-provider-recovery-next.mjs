@@ -10,11 +10,13 @@ const DEFAULT_SOURCES = [
   ".artifacts/agent-run-driver/pi-provider-canary.json",
   ".artifacts/agent-run-driver/pi-provider-readiness.json",
 ];
+const DEFAULT_NETWORK_CHECK = ".artifacts/agent-run-driver/pi-provider-network-check.json";
 
 function parseArgs(argv = process.argv.slice(2)) {
   const out = {
     cwd: process.cwd(),
     sourcePath: "",
+    networkCheckPath: DEFAULT_NETWORK_CHECK,
     outPath: "",
     pretty: false,
     help: false,
@@ -23,6 +25,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     const arg = argv[index];
     if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
     else if (arg === "--source") out.sourcePath = argv[++index] ?? "";
+    else if (arg === "--network-check") out.networkCheckPath = argv[++index] ?? out.networkCheckPath;
     else if (arg === "--out") out.outPath = argv[++index] ?? "";
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
@@ -63,6 +66,38 @@ function commandPreviewFor(scriptName) {
     : undefined;
 }
 
+function networkCheckEvidence(cwd, relPath = DEFAULT_NETWORK_CHECK) {
+  try {
+    const payload = readJsonIfExists(cwd, relPath);
+    if (!payload) return { path: relPath, present: false, decision: "missing" };
+    return {
+      path: relPath,
+      present: true,
+      decision: payload.decision ?? "unknown",
+      executeRequested: payload.executeRequested === true,
+      networkRequestAllowed: payload.networkRequestAllowed === true,
+      networkDecision: payload.networkDecision,
+      httpStatus: payload.httpStatus,
+      blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
+      summary: payload.summary ?? "provider network check artifact present",
+    };
+  } catch (error) {
+    return {
+      path: relPath,
+      present: true,
+      decision: "invalid-json",
+      error: String(error?.message ?? error),
+    };
+  }
+}
+
+function nextActionStage({ nextAction, networkEvidence }) {
+  if (nextAction?.actionCode !== "verify-provider-network") return "run-verification";
+  if (networkEvidence?.decision === "pass") return "rerun-readiness";
+  if (networkEvidence?.decision === "blocked") return "resolve-network-blockers";
+  return "run-network-check";
+}
+
 export function buildAgentRunPiProviderRecoveryNext(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const sourcePaths = options.sourcePath
@@ -91,11 +126,20 @@ export function buildAgentRunPiProviderRecoveryNext(options = {}) {
 
   const actions = Array.isArray(providerRecoveryPlan?.actions) ? providerRecoveryPlan.actions : [];
   const nextAction = actions[0];
+  const providerNetworkCheck = networkCheckEvidence(cwd, options.networkCheckPath || DEFAULT_NETWORK_CHECK);
   const blockers = [
     ...(providerRecoveryPlan ? [] : ["provider-recovery-plan-missing"]),
     ...(providerRecoveryPlan && actions.length === 0 ? ["provider-recovery-actions-missing"] : []),
   ];
   const decision = blockers.length === 0 ? "next-action-ready" : "blocked";
+  const actionStage = decision === "next-action-ready"
+    ? nextActionStage({ nextAction, networkEvidence: providerNetworkCheck })
+    : "blocked";
+  const selectedCommandPreview = actionStage === "rerun-readiness"
+    ? commandPreviewFor(nextAction?.rerunReadinessScript)
+    : actionStage === "resolve-network-blockers"
+      ? commandPreviewFor(nextAction?.verificationScript)
+      : commandPreviewFor(nextAction?.verificationScript);
   return {
     mode: "agent-run-pi-provider-recovery-next",
     schemaVersion: SCHEMA_VERSION,
@@ -108,8 +152,11 @@ export function buildAgentRunPiProviderRecoveryNext(options = {}) {
     sourceDecision: payload?.decision,
     attempts,
     providerRecoveryPlan: providerRecoveryPlan ?? null,
+    providerNetworkCheck,
     actionCount: actions.length,
     nextAction: nextAction ?? null,
+    actionStage,
+    selectedCommandPreview,
     commandPreviews: nextAction
       ? {
           verification: commandPreviewFor(nextAction.verificationScript),
@@ -119,19 +166,29 @@ export function buildAgentRunPiProviderRecoveryNext(options = {}) {
       : {},
     blockers,
     nextActions: decision === "next-action-ready"
-      ? [
-          `review provider recovery action ${nextAction.actionCode}`,
-          `run ${nextAction.verificationScript} after external remediation`,
-          `retry with ${nextAction.retryCanaryScript} only after verification improves`,
-        ]
+      ? actionStage === "rerun-readiness"
+        ? [
+            "provider network check passed; rerun agent-run:pi-provider-readiness",
+            `retry with ${nextAction.retryCanaryScript} only after readiness improves`,
+          ]
+        : actionStage === "resolve-network-blockers"
+          ? [
+              "provider network check is blocked; resolve network reachability before retrying readiness",
+              `rerun ${nextAction.verificationScript} after remediation`,
+            ]
+          : [
+              `review provider recovery action ${nextAction.actionCode}`,
+              `run ${nextAction.verificationScript} after external remediation`,
+              `retry with ${nextAction.retryCanaryScript} only after verification improves`,
+            ]
       : ["generate provider readiness/canary evidence with providerRecoveryPlan before selecting a recovery action"],
-    summary: `agent-run-pi-provider-recovery-next: decision=${decision} action=${nextAction?.actionCode ?? "missing"} source=${sourcePath || "missing"} dispatch=no`,
+    summary: `agent-run-pi-provider-recovery-next: decision=${decision} action=${nextAction?.actionCode ?? "missing"} stage=${actionStage} source=${sourcePath || "missing"} dispatch=no`,
   };
 }
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-pi-provider-recovery-next.mjs [--source PATH] [--out PATH] [--pretty]",
+    "Usage: node scripts/agent-run-pi-provider-recovery-next.mjs [--source PATH] [--network-check PATH] [--out PATH] [--pretty]",
     "",
     "Report-only selector for the next provider recovery action. It never starts a process.",
   ].join("\n") + "\n");

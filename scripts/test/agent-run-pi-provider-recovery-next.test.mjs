@@ -40,6 +40,17 @@ test("provider recovery next selects first recovery action from container canary
     assert.equal(result.automationAllowed, false);
     assert.equal(result.sourcePath, ".artifacts/agent-run-driver/pi-provider-container-canary-report.json");
     assert.equal(result.nextAction.actionCode, "verify-provider-network");
+    assert.equal(result.actionStage, "run-network-check");
+    assert.deepEqual(result.providerNetworkCheck, {
+      path: ".artifacts/agent-run-driver/pi-provider-network-check.json",
+      present: false,
+      decision: "missing",
+    });
+    assert.deepEqual(result.selectedCommandPreview, {
+      command: "pnpm",
+      args: ["run", "agent-run:pi-provider-network-check"],
+      shellInterpolationAllowed: false,
+    });
     assert.deepEqual(result.commandPreviews.verification, {
       command: "pnpm",
       args: ["run", "agent-run:pi-provider-network-check"],
@@ -50,6 +61,101 @@ test("provider recovery next selects first recovery action from container canary
       args: ["run", "agent-run:pi-provider-canary:container"],
       shellInterpolationAllowed: false,
     });
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider recovery next advances to readiness rerun after network check passes", () => {
+  const cwd = workspace("pi-provider-recovery-next-network-pass-");
+  try {
+    const evidencePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-readiness.json");
+    const networkPath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-network-check.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, `${JSON.stringify({
+      mode: "agent-run-pi-provider-readiness",
+      decision: "blocked",
+      providerRecoveryPlan: {
+        mode: "agent-run-pi-provider-recovery-plan",
+        decision: "blocked",
+        actions: [{
+          diagnosticCode: "provider-fetch-failed",
+          actionCode: "verify-provider-network",
+          verificationScript: "agent-run:pi-provider-network-check",
+          retryCanaryScript: "agent-run:pi-provider-canary:container",
+          rerunReadinessScript: "agent-run:pi-provider-readiness",
+        }],
+      },
+    })}\n`, "utf8");
+    writeFileSync(networkPath, `${JSON.stringify({
+      mode: "agent-run-pi-provider-network-check",
+      decision: "pass",
+      executeRequested: true,
+      networkRequestAllowed: true,
+      networkDecision: "reachable-auth-required",
+      httpStatus: 401,
+      blockers: [],
+    })}\n`, "utf8");
+
+    const result = buildAgentRunPiProviderRecoveryNext({ cwd, sourcePath: ".artifacts/agent-run-driver/pi-provider-readiness.json" });
+
+    assert.equal(result.decision, "next-action-ready");
+    assert.equal(result.actionStage, "rerun-readiness");
+    assert.equal(result.providerNetworkCheck.decision, "pass");
+    assert.equal(result.providerNetworkCheck.networkDecision, "reachable-auth-required");
+    assert.deepEqual(result.selectedCommandPreview, {
+      command: "pnpm",
+      args: ["run", "agent-run:pi-provider-readiness"],
+      shellInterpolationAllowed: false,
+    });
+    assert.match(result.nextActions.join("\n"), /rerun agent-run:pi-provider-readiness/);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider recovery next keeps network blockers ahead of readiness rerun", () => {
+  const cwd = workspace("pi-provider-recovery-next-network-block-");
+  try {
+    const evidencePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-readiness.json");
+    const networkPath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-network-check.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, `${JSON.stringify({
+      mode: "agent-run-pi-provider-readiness",
+      decision: "blocked",
+      providerRecoveryPlan: {
+        mode: "agent-run-pi-provider-recovery-plan",
+        decision: "blocked",
+        actions: [{
+          diagnosticCode: "provider-fetch-failed",
+          actionCode: "verify-provider-network",
+          verificationScript: "agent-run:pi-provider-network-check",
+          retryCanaryScript: "agent-run:pi-provider-canary:container",
+          rerunReadinessScript: "agent-run:pi-provider-readiness",
+        }],
+      },
+    })}\n`, "utf8");
+    writeFileSync(networkPath, `${JSON.stringify({
+      mode: "agent-run-pi-provider-network-check",
+      decision: "blocked",
+      executeRequested: true,
+      networkRequestAllowed: true,
+      networkDecision: "provider-network-failed",
+      blockers: ["provider-network-failed"],
+    })}\n`, "utf8");
+
+    const result = buildAgentRunPiProviderRecoveryNext({ cwd, sourcePath: ".artifacts/agent-run-driver/pi-provider-readiness.json" });
+
+    assert.equal(result.decision, "next-action-ready");
+    assert.equal(result.actionStage, "resolve-network-blockers");
+    assert.equal(result.providerNetworkCheck.decision, "blocked");
+    assert.deepEqual(result.providerNetworkCheck.blockers, ["provider-network-failed"]);
+    assert.deepEqual(result.selectedCommandPreview, {
+      command: "pnpm",
+      args: ["run", "agent-run:pi-provider-network-check"],
+      shellInterpolationAllowed: false,
+    });
+    assert.match(result.nextActions.join("\n"), /resolve network reachability/);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
