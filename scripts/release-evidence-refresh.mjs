@@ -17,7 +17,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     cwd: process.cwd(),
     target: "0.8.0",
     tag: "",
-    outPath: ".artifacts/release-cut/v0.8.0-evidence-refresh.json",
+    outPath: "",
     pretty: false,
     executeCanaries: true,
     help: false,

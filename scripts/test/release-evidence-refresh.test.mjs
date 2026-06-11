@@ -107,3 +107,24 @@ test("release evidence refresh blocks when canary suite or readiness are not rea
     rmSync(cwd, { recursive: true, force: true });
   }
 });
+
+test("release evidence refresh defaults output path from arbitrary target tag", async () => {
+  const cwd = workspace();
+  try {
+    const gitHead = head(cwd);
+    const result = await runReleaseEvidenceRefresh({
+      cwd,
+      target: "1.2.3",
+      canarySuite: canarySuite(),
+      readiness: readiness(gitHead),
+    });
+
+    assert.equal(result.target, "1.2.3");
+    assert.equal(result.tag, "v1.2.3");
+    assert.equal(result.decision, "pass");
+    assert.equal(existsSync(path.join(cwd, ".artifacts/release-cut/v1.2.3-evidence-refresh.json")), true);
+    assert.equal(existsSync(path.join(cwd, ".artifacts/release-cut/v0.8.0-evidence-refresh.json")), false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
