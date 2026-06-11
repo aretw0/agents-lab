@@ -148,6 +148,7 @@ const PROMOTION_CANDIDATES = [
 ];
 
 const INTERNAL_FAMILIES = new Set([
+	"actions",
 	"test",
 	"ci",
 	"gate",
@@ -163,7 +164,15 @@ const INTERNAL_FAMILIES = new Set([
 	"decoupling",
 	"engine",
 	"list",
+	"mermaid",
+	"offload",
 	"package",
+	"pi-stack",
+	"project",
+	"repo",
+	"run",
+	"security",
+	"substrate",
 ]);
 
 export function classifyRootScript(name, cmd, shippedExtensions = []) {

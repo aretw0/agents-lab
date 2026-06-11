@@ -108,6 +108,15 @@ test("classifyRootScript keeps ci and release scripts internal", () => {
 	assert.equal(classifyRootScript("release", "changeset version", shipped).category, "repo-internal");
 	assert.equal(classifyRootScript("package:boundary:audit", "node scripts/package-boundary-audit.mjs", shipped).category, "repo-internal");
 	assert.equal(classifyRootScript("engine:boundary:audit", "node scripts/engine-boundary-audit.mjs", shipped).category, "repo-internal");
+	assert.equal(classifyRootScript("actions:pins", "node scripts/ci/check-github-action-pins.mjs", shipped).category, "repo-internal");
+	assert.equal(classifyRootScript("mermaid:check", "node scripts/mermaid-check.mjs", shipped).category, "repo-internal");
+	assert.equal(classifyRootScript("security:audit", "pnpm audit --audit-level=high --prod", shipped).category, "repo-internal");
+	assert.equal(classifyRootScript("substrate:check", "node scripts/check-substrate.mjs", shipped).category, "repo-internal");
+	assert.equal(classifyRootScript("run:isolated", "node scripts/run-with-isolated-runtime.mjs", shipped).category, "repo-internal");
+	assert.equal(classifyRootScript("offload:evidence:template", "node scripts/offload-evidence-template.mjs", shipped).category, "repo-internal");
+	assert.equal(classifyRootScript("pi-stack:user-surface", "node scripts/pi-stack-user-surface-audit.mjs", shipped).category, "repo-internal");
+	assert.equal(classifyRootScript("project:task:complete", "node scripts/project/task-complete.mjs", shipped).category, "repo-internal");
+	assert.equal(classifyRootScript("repo:edit", "node scripts/repo-edit.mjs", shipped).category, "repo-internal");
 });
 
 test("classifyRootScript marks repo quality audits as stack-sovereignty wrappers", () => {
@@ -136,6 +145,7 @@ test("buildUserSurfaceAudit exposes grouped promotion targets", () => {
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:bloat:audit:strict")));
 	assert.ok(audit.wrapperGroups.some((group) => group.targetSurface === "stack-sovereignty" && group.scripts.includes("repo:discourse:audit")));
 	assert.deepEqual(audit.promotionGroups, []);
+	assert.deepEqual(audit.labOnlyScripts.map((row) => row.name), ["colony:inspect"]);
 });
 
 test("formatUserSurfaceAuditSummary keeps operator output compact", () => {
