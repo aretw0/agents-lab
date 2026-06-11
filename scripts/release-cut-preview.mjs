@@ -15,6 +15,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     tag: "",
     readinessPath: "",
     draftPath: "",
+    auditPath: "",
     outPath: "",
     pretty: false,
     help: false,
@@ -26,6 +27,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--tag") out.tag = argv[++index] ?? "";
     else if (arg === "--readiness") out.readinessPath = argv[++index] ?? "";
     else if (arg === "--draft") out.draftPath = argv[++index] ?? "";
+    else if (arg === "--audit") out.auditPath = argv[++index] ?? "";
     else if (arg === "--out") out.outPath = argv[++index] ?? "";
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
@@ -130,6 +132,8 @@ export function buildReleaseCutPreview(options = {}) {
   const draftPath = options.draftPath || defaultDraftPath(tag);
   const readiness = options.readiness ?? readJsonIfExists(cwd, readinessPath);
   const draft = options.draft ?? readJsonIfExists(cwd, draftPath);
+  const auditPath = options.auditPath || "";
+  const artifactAudit = options.artifactAudit ?? (auditPath ? readJsonIfExists(cwd, auditPath) : undefined);
   const head = runGit(cwd, ["rev-parse", "--short", "HEAD"]).stdout;
   const status = runGit(cwd, ["status", "--short"]).stdout;
   const blockers = [];
@@ -147,6 +151,14 @@ export function buildReleaseCutPreview(options = {}) {
   if (draft?.target && String(draft.target) !== target) blockers.push("draft-target-mismatch");
   if (readiness?.head && readiness.head !== head) blockers.push("release-readiness-stale-head");
   if (draft?.targetSha && draft.targetSha !== head) blockers.push("release-draft-stale-head");
+  if (auditPath && !artifactAudit) blockers.push("release-artifact-audit-missing");
+  if (artifactAudit && artifactAudit.decision !== "pass") blockers.push("release-artifact-audit-not-pass");
+  if (artifactAudit?.target && String(artifactAudit.target) !== target) blockers.push("release-artifact-audit-target-mismatch");
+  if (artifactAudit?.tag && artifactAudit.tag !== tag) blockers.push("release-artifact-audit-tag-mismatch");
+  if (artifactAudit?.head && artifactAudit.head !== head) blockers.push("release-artifact-audit-stale-head");
+  if (artifactAudit?.blockers && Array.isArray(artifactAudit.blockers) && artifactAudit.blockers.length > 0) {
+    blockers.push("release-artifact-audit-has-blockers");
+  }
   if (status) blockers.push("worktree-not-clean");
 
   const decision = blockers.length === 0 ? "ready-for-operator-review" : "blocked";
@@ -191,6 +203,8 @@ export function buildReleaseCutPreview(options = {}) {
     previousTag,
     releaseReadinessPath: readinessPath,
     draftPreviewPath: draftPath,
+    releaseArtifactAuditPath: auditPath || null,
+    artifactAuditDecision: artifactAudit?.decision ?? (auditPath ? "missing" : "not-required"),
     readinessReady: readiness?.ready === true,
     readinessDecision: readiness?.decision ?? "missing",
     draftDecision: draft?.decision ?? "missing",
@@ -216,7 +230,7 @@ export function buildReleaseCutPreview(options = {}) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/release-cut-preview.mjs [--target 0.8.0] [--tag v0.8.0] [--readiness PATH] [--draft PATH] [--out PATH] [--pretty]",
+    "Usage: node scripts/release-cut-preview.mjs [--target 0.8.0] [--tag v0.8.0] [--readiness PATH] [--draft PATH] [--audit PATH] [--out PATH] [--pretty]",
     "",
     "Builds a protected release cut operator packet. It never creates tags, pushes, publishes, or dispatches workflows.",
   ].join("\n") + "\n");

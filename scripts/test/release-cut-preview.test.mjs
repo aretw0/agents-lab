@@ -74,6 +74,17 @@ function readyDraft(gitHead) {
   };
 }
 
+function readyArtifactAudit(gitHead) {
+  return {
+    mode: "release-artifact-audit",
+    decision: "pass",
+    target: "0.8.0",
+    tag: "v0.8.0",
+    head: gitHead,
+    blockers: [],
+  };
+}
+
 test("release cut preview emits protected operator packet when readiness and draft match head", () => {
   const cwd = workspace();
   try {
@@ -232,6 +243,58 @@ test("release cut preview writes output artifact when requested", () => {
     assert.equal(result.decision, "ready-for-operator-review");
     assert.equal(result.releaseReadinessPath, ".artifacts/release-readiness/latest-ready-final-0.8.0.json");
     assert.equal(result.draftPreviewPath, ".artifacts/release-draft/v0.8.0-preview.json");
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("release cut preview accepts a passing artifact audit when provided", () => {
+  const cwd = workspace();
+  try {
+    const gitHead = head(cwd);
+    const result = buildReleaseCutPreview({
+      cwd,
+      target: "0.8.0",
+      auditPath: ".artifacts/release-cut/v0.8.0-artifact-audit.json",
+      readiness: readyReadiness(gitHead),
+      draft: readyDraft(gitHead),
+      artifactAudit: readyArtifactAudit(gitHead),
+    });
+
+    assert.equal(result.decision, "ready-for-operator-review");
+    assert.equal(result.releaseArtifactAuditPath, ".artifacts/release-cut/v0.8.0-artifact-audit.json");
+    assert.equal(result.artifactAuditDecision, "pass");
+    assert.deepEqual(result.blockers, []);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("release cut preview blocks stale or failing artifact audit when provided", () => {
+  const cwd = workspace();
+  try {
+    const gitHead = head(cwd);
+    const audit = {
+      ...readyArtifactAudit("oldsha"),
+      decision: "block",
+      blockers: ["release-cut-stale-head"],
+    };
+    const result = buildReleaseCutPreview({
+      cwd,
+      target: "0.8.0",
+      auditPath: ".artifacts/release-cut/v0.8.0-artifact-audit.json",
+      readiness: readyReadiness(gitHead),
+      draft: readyDraft(gitHead),
+      artifactAudit: audit,
+    });
+
+    assert.equal(result.decision, "blocked");
+    assert.equal(result.artifactAuditDecision, "block");
+    assert.ok(result.blockers.includes("release-artifact-audit-not-pass"));
+    assert.ok(result.blockers.includes("release-artifact-audit-stale-head"));
+    assert.ok(result.blockers.includes("release-artifact-audit-has-blockers"));
+    assert.equal(result.releaseCutOperatorPacket.tagAllowed, false);
+    assert.equal(result.workflowDispatchAllowed, false);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
