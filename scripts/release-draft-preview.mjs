@@ -99,6 +99,57 @@ function buildNotes({ tag, version, targetSha, previousTag, readiness, changes }
   ].join("\n");
 }
 
+function realChangeCount(changes) {
+  if (!Array.isArray(changes)) return 0;
+  return changes.filter((line) => typeof line === "string" && line.trim() && line.trim() !== "- none").length;
+}
+
+function buildReleaseDraftNotesReviewPacket({ decision, tag, target, targetSha, previousTag, notesOutPath, notesWritten, readiness, changes, blockers }) {
+  const changeCount = realChangeCount(changes);
+  const reviewChecklist = [
+    {
+      id: "readiness-green",
+      ok: readiness?.ready === true && readiness?.decision === "ready",
+      evidence: `readinessDecision=${readiness?.decision ?? "missing"}`,
+    },
+    {
+      id: "notes-written",
+      ok: notesWritten === true,
+      evidence: notesOutPath,
+    },
+    {
+      id: "changes-present",
+      ok: changeCount > 0,
+      evidence: `changeCount=${changeCount}`,
+    },
+    {
+      id: "operator-review-required",
+      ok: true,
+      evidence: "draft notes require operator review before tag, workflow dispatch, or publish",
+    },
+  ];
+  return {
+    mode: "release-draft-notes-review-packet",
+    schemaVersion: SCHEMA_VERSION,
+    decision,
+    target,
+    tag,
+    targetSha,
+    previousTag: previousTag || null,
+    notesOutPath,
+    notesWritten: notesWritten === true,
+    changeCount,
+    reviewChecklist,
+    requiredApprovalPrompt: "approve release draft prepare-draft-release",
+    tagAllowed: false,
+    publishAllowed: false,
+    workflowDispatchAllowed: false,
+    processStartAllowed: false,
+    blockers: Array.isArray(blockers) ? blockers : [],
+    summary: `release-draft-notes-review-packet: decision=${decision} tag=${tag} changes=${changeCount} notesWritten=${notesWritten === true ? "yes" : "no"} dispatch=no`,
+  };
+}
+
 export function buildReleaseDraftPreview(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const target = String(options.target ?? "0.8.0");
@@ -118,6 +169,19 @@ export function buildReleaseDraftPreview(options = {}) {
   const notes = buildNotes({ tag, version: target, targetSha: head, previousTag, readiness: readiness ?? {}, changes });
   const decision = blockers.length === 0 ? "ready-for-operator-review" : "blocked";
   if (decision === "ready-for-operator-review") writeText(cwd, notesOutPath, notes);
+  const notesWritten = decision === "ready-for-operator-review";
+  const releaseDraftNotesReviewPacket = buildReleaseDraftNotesReviewPacket({
+    decision,
+    tag,
+    target,
+    targetSha: head,
+    previousTag,
+    notesOutPath,
+    notesWritten,
+    readiness,
+    changes,
+    blockers,
+  });
   return {
     mode: "release-draft-preview",
     schemaVersion: SCHEMA_VERSION,
@@ -127,7 +191,8 @@ export function buildReleaseDraftPreview(options = {}) {
     previousTag: previousTag || null,
     targetSha: head,
     notesOutPath,
-    notesWritten: decision === "ready-for-operator-review",
+    notesWritten,
+    releaseDraftNotesReviewPacket,
     tagAllowed: false,
     publishAllowed: false,
     workflowDispatchAllowed: false,

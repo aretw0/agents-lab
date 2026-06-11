@@ -58,6 +58,22 @@ test("release draft preview writes local notes when readiness is green", () => {
     assert.equal(result.decision, "ready-for-operator-review");
     assert.equal(result.previousTag, "v0.7.0");
     assert.equal(result.notesWritten, true);
+    assert.equal(result.releaseDraftNotesReviewPacket.mode, "release-draft-notes-review-packet");
+    assert.equal(result.releaseDraftNotesReviewPacket.decision, "ready-for-operator-review");
+    assert.equal(result.releaseDraftNotesReviewPacket.notesOutPath, result.notesOutPath);
+    assert.equal(result.releaseDraftNotesReviewPacket.notesWritten, true);
+    assert.equal(result.releaseDraftNotesReviewPacket.changeCount, 1);
+    assert.equal(result.releaseDraftNotesReviewPacket.requiredApprovalPrompt, "approve release draft prepare-draft-release");
+    assert.equal(result.releaseDraftNotesReviewPacket.tagAllowed, false);
+    assert.equal(result.releaseDraftNotesReviewPacket.publishAllowed, false);
+    assert.equal(result.releaseDraftNotesReviewPacket.workflowDispatchAllowed, false);
+    assert.equal(result.releaseDraftNotesReviewPacket.processStartAllowed, false);
+    assert.deepEqual(result.releaseDraftNotesReviewPacket.reviewChecklist.map((row) => [row.id, row.ok]), [
+      ["readiness-green", true],
+      ["notes-written", true],
+      ["changes-present", true],
+      ["operator-review-required", true],
+    ]);
     assert.equal(result.tagAllowed, false);
     assert.equal(result.publishAllowed, false);
     assert.equal(result.workflowDispatchAllowed, false);
@@ -82,6 +98,16 @@ test("release draft preview blocks when readiness is not green", () => {
     assert.equal(result.decision, "blocked");
     assert.ok(result.blockers.includes("release-readiness-not-ready"));
     assert.equal(result.notesWritten, false);
+    assert.equal(result.releaseDraftNotesReviewPacket.mode, "release-draft-notes-review-packet");
+    assert.equal(result.releaseDraftNotesReviewPacket.decision, "blocked");
+    assert.equal(result.releaseDraftNotesReviewPacket.notesWritten, false);
+    assert.ok(result.releaseDraftNotesReviewPacket.blockers.includes("release-readiness-not-ready"));
+    assert.deepEqual(result.releaseDraftNotesReviewPacket.reviewChecklist.map((row) => [row.id, row.ok]), [
+      ["readiness-green", false],
+      ["notes-written", false],
+      ["changes-present", true],
+      ["operator-review-required", true],
+    ]);
     assert.equal(existsSync(path.join(cwd, result.notesOutPath)), false);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
