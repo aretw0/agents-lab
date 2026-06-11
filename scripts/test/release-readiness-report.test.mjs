@@ -107,6 +107,7 @@ function makeWorkspace({
 
 function initGitWorkspace(workspace) {
   assert.equal(spawnSync("git", ["init"], { cwd: workspace, encoding: "utf8" }).status, 0);
+  writeFileSync(path.join(workspace, ".gitignore"), ".artifacts/\n");
   assert.equal(spawnSync("git", ["add", "."], { cwd: workspace, encoding: "utf8" }).status, 0);
   assert.equal(spawnSync("git", [
     "-c",
@@ -118,6 +119,13 @@ function initGitWorkspace(workspace) {
     "init",
   ], { cwd: workspace, encoding: "utf8" }).status, 0);
   return spawnSync("git", ["rev-parse", "--short", "HEAD"], { cwd: workspace, encoding: "utf8" }).stdout.trim();
+}
+
+function rewriteCanarySuiteHead(workspace, gitHead) {
+  const suitePath = path.join(workspace, ".artifacts", "agent-run-driver", "suite.json");
+  const suite = JSON.parse(readFileSync(suitePath, "utf8"));
+  suite.gitHead = gitHead;
+  writeFileSync(suitePath, JSON.stringify(suite, null, 2));
 }
 
 test("summarizeBoard normalizes active release blockers", () => {
@@ -169,6 +177,7 @@ test("buildReport marks target release not ready until version and board gates a
     assert.deepEqual(report.checklist.map((item) => [item.id, item.kind]), [
       ["versions-aligned", "technical-gate"],
       ["target-version-ready", "operator-decision"],
+      ["git-worktree-clean", "technical-gate"],
       ["workflow-ci", "technical-gate"],
       ["workflow-publish", "technical-gate"],
       ["workflow-release-draft", "technical-gate"],
@@ -226,6 +235,7 @@ test("buildReport marks target release not ready until version and board gates a
     });
     assert.match(report.markdown, /decision: not-ready/);
     assert.match(report.markdown, /\[ \] target-version-ready/);
+    assert.match(report.markdown, /\[x\] git-worktree-clean/);
     assert.match(report.markdown, /\[ \] board-release-clear/);
     assert.match(report.markdown, /\[x\] agent-run-driver-gate/);
     assert.match(report.markdown, /\[x\] release-package-smoke/);
@@ -497,6 +507,42 @@ test("agent-run driver gate rejects stale canary suite evidence when git head is
   }
 });
 
+test("worktree clean gate blocks release readiness for tracked changes", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const head = initGitWorkspace(workspace);
+    rewriteCanarySuiteHead(workspace, head);
+    writeFileSync(path.join(workspace, "package.json"), JSON.stringify({
+      private: true,
+      scripts: {
+        "test:agent-run:drivers": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs",
+        "agent-run:driver-canaries": "node scripts/agent-run-driver-canary-suite.mjs --execute --out .artifacts/agent-run-driver/suite.json",
+      },
+      dirtyMarker: true,
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+    const report = buildReport(data);
+
+    assert.equal(data.head, head);
+    assert.equal(data.gates.worktreeClean, false);
+    assert.equal(data.worktree.clean, false);
+    assert.equal(data.worktree.trackedChangeCount, 1);
+    assert.ok(data.worktree.statusLines.some((line) => line.includes("package.json")));
+    assert.equal(data.agentRunDrivers.canarySuiteHeadMatches, true);
+    assert.equal(report.ready, false);
+    assert.deepEqual(report.releaseBlockers.map((blocker) => blocker.id), ["git-worktree-clean"]);
+    assert.match(report.markdown, /\[ \] git-worktree-clean/);
+    assert.match(report.markdown, /package\.json/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("package smoke gate blocks release readiness with structured evidence", () => {
   const workspace = makeWorkspace({
     version: "0.8.0",
@@ -720,7 +766,9 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.versionsAligned, true);
     assert.equal(json.targetVersionReady, true);
     assert.deepEqual(json.workflows, { ci: true, publish: true, releaseDraft: true });
-    assert.deepEqual(json.gates, { agentRunDrivers: true, packageSmoke: true, userSurface: true });
+    assert.deepEqual(json.gates, { worktreeClean: true, agentRunDrivers: true, packageSmoke: true, userSurface: true });
+    assert.equal(json.worktree.clean, true);
+    assert.equal(json.worktree.trackedChangeCount, 0);
     assert.equal(json.agentRunDrivers.ok, true);
     assert.equal(json.agentRunDrivers.scriptGateOk, true);
     assert.equal(json.agentRunDrivers.canarySuiteRequired, true);
@@ -747,6 +795,7 @@ test("cli can write structured json for agents", () => {
     assert.deepEqual(json.checklist.map((item) => [item.id, item.kind]), [
       ["versions-aligned", "technical-gate"],
       ["target-version-ready", "operator-decision"],
+      ["git-worktree-clean", "technical-gate"],
       ["workflow-ci", "technical-gate"],
       ["workflow-publish", "technical-gate"],
       ["workflow-release-draft", "technical-gate"],

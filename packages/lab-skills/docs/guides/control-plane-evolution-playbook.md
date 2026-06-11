@@ -101,7 +101,8 @@ Interpretação do readiness report:
 - `Operator Decisions` lista as decisões humanas restantes antes do release;
 - no JSON, `mode=release-readiness-report` e `schemaVersion=1` identificam o contrato estruturado;
 - no JSON, `generatedAt` e `decision` identificam o snapshot e a decisão (`ready` ou `not-ready`) sem parsear Markdown;
-- no JSON, `versions`, `versionsAligned`, `targetVersionReady`, `workflows`, `gates`, `agentRunDrivers`, `packageSmoke` e `userSurface` expõem os gates principais sem parsear `checklist[*].evidence`;
+- no JSON, `versions`, `versionsAligned`, `targetVersionReady`, `workflows`, `gates`, `worktree`, `agentRunDrivers`, `packageSmoke` e `userSurface` expõem os gates principais sem parsear `checklist[*].evidence`;
+- no JSON, `gates.worktreeClean` e `worktree.statusLines` bloqueiam readiness quando há mudanças rastreadas locais; arquivos untracked de evidência local não bloqueiam por si só;
 - no JSON, `agentRunDrivers.canaryScriptName` e `missingCanaryScriptMarkers` expõem se o comando local agregado `agent-run:driver-canaries` está registrado para materializar evidência;
 - no JSON, `agentRunDrivers.canarySuiteEvidence` aponta `.artifacts/agent-run-driver/suite.json`; para readiness de release, essa suíte agregada precisa existir, retornar `decision=pass` e, quando `HEAD` Git estiver disponível, carregar `gitHead` igual ao `head` do relatório;
 - no JSON, `agentRunDrivers.lastCanaryEvidence` pode apontar `.artifacts/agent-run-driver/latest.json` como evidência local advisory; ausência desse arquivo não bloqueia release por si só;

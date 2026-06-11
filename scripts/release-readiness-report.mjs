@@ -60,6 +60,29 @@ function runGit(args, cwd = process.cwd()) {
   return String(out.stdout ?? "").trim();
 }
 
+function gitWorktreeStatus(cwd, head) {
+  if (!head) {
+    return {
+      gitAvailable: false,
+      clean: true,
+      trackedChangeCount: 0,
+      statusLines: [],
+      summary: "git head unavailable; worktree clean gate not applicable",
+    };
+  }
+  const status = runGit(["status", "--short", "--untracked-files=no"], cwd);
+  const statusLines = status ? status.split(/\r?\n/).filter(Boolean) : [];
+  return {
+    gitAvailable: true,
+    clean: statusLines.length === 0,
+    trackedChangeCount: statusLines.length,
+    statusLines,
+    summary: statusLines.length === 0
+      ? "tracked worktree clean"
+      : `tracked worktree has ${statusLines.length} change(s)`,
+  };
+}
+
 function readJson(cwd, relPath) {
   return JSON.parse(readFileSync(path.join(cwd, relPath), "utf8"));
 }
@@ -251,6 +274,11 @@ function userSurfaceEvidence(report) {
     ...report.labOnlyScripts.map((name) => `lab-only:${name}`),
     ...report.distributionCandidates.map((name) => `promotion-candidate:${name}`),
   ].join(", ");
+}
+
+function gitWorktreeEvidence(worktree) {
+  if (worktree.clean) return worktree.summary;
+  return worktree.statusLines.join(", ");
 }
 
 function normalizeStatus(value) {
@@ -531,6 +559,7 @@ export function gather(target, cwd = process.cwd()) {
 
   const latestTag = runGit(["describe", "--tags", "--abbrev=0"], cwd);
   const head = runGit(["rev-parse", "--short", "HEAD"], cwd);
+  const worktree = gitWorktreeStatus(cwd, head);
 
   const workflows = {
     ci: existsSync(path.join(cwd, ".github", "workflows", "ci.yml")),
@@ -558,10 +587,12 @@ export function gather(target, cwd = process.cwd()) {
     targetVersionReady,
     workflows,
     gates: {
+      worktreeClean: worktree.clean,
       agentRunDrivers: agentRunDrivers.ok,
       packageSmoke: packageSmoke.ok,
       userSurface: userSurface.ok,
     },
+    worktree,
     agentRunDrivers,
     packageSmoke,
     userSurface,
@@ -574,6 +605,7 @@ export function buildReport(data) {
   const checklist = [
     { id: "versions-aligned", ok: data.versionsAligned, evidence: data.versions.map((v) => `${v.pkg}:${v.version}`).join(", ") },
     { id: "target-version-ready", ok: data.targetVersionReady, evidence: `target=v${data.target}` },
+    { id: "git-worktree-clean", ok: data.gates.worktreeClean, evidence: gitWorktreeEvidence(data.worktree) },
     { id: "workflow-ci", ok: data.workflows.ci, evidence: ".github/workflows/ci.yml" },
     { id: "workflow-publish", ok: data.workflows.publish, evidence: ".github/workflows/publish.yml" },
     { id: "workflow-release-draft", ok: data.workflows.releaseDraft, evidence: ".github/workflows/release-draft.yml" },
@@ -676,6 +708,7 @@ function main() {
       targetVersionReady: data.targetVersionReady,
       workflows: data.workflows,
       gates: data.gates,
+      worktree: data.worktree,
       agentRunDrivers: data.agentRunDrivers,
       packageSmoke: data.packageSmoke,
       userSurface: data.userSurface,
