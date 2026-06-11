@@ -16,6 +16,13 @@ function workspace(prefix) {
   return cwd;
 }
 
+function failingWorkspace(prefix) {
+  const cwd = workspace(prefix);
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  writeFileSync(cliPath, "console.error('provider missing'); process.exit(1)\n", "utf8");
+  return cwd;
+}
+
 function plan(cwd) {
   return writeAgentRunPiProviderFanoutPlan({
     cwd,
@@ -85,6 +92,27 @@ test("provider worker dispatch executes only one selected worker with approval",
     assert.equal(registry.runs[0].runId, report.workerPackets[1].payload.run_spec.run_id);
     assert.equal(registry.runs[0].state, "completed");
     assert.equal(registry.runs.some((run) => run.runId === report.workerPackets[0].payload.run_spec.run_id), false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider worker dispatch surfaces terminal outcome failure at top level", async () => {
+  const cwd = failingWorkspace("pi-provider-worker-fail-");
+  try {
+    plan(cwd);
+    const result = await runAgentRunPiProviderWorkerDispatch({
+      cwd,
+      execute: true,
+      approve: true,
+    });
+
+    assert.equal(result.decision, "dispatched");
+    assert.equal(result.dispatchAllowed, true);
+    assert.equal(result.terminalProcessState, "failed");
+    assert.equal(result.contractDecision, "fail");
+    assert.deepEqual(result.outcomeBlockers, ["process-state-failed"]);
+    assert.match(result.summary, /contract=fail/);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

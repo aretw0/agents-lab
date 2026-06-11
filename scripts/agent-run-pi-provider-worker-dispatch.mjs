@@ -101,6 +101,10 @@ function withExecutionIntent(driverStepCall, execute, operatorApproval) {
   };
 }
 
+function outcomeBlockersFor(agentRunOutcomePacket) {
+  return Array.isArray(agentRunOutcomePacket?.blockers) ? agentRunOutcomePacket.blockers : [];
+}
+
 function buildPreview({ plan, planPath, worker, workerIndex, workerId, driverStepCall, blockers }) {
   const runId = runIdFor(worker);
   const decision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
@@ -168,6 +172,7 @@ export async function runAgentRunPiProviderWorkerDispatch(options = {}) {
   }
 
   const driverStep = await runAgentRunDriverStep(driverStepCall, cwd);
+  const outcomeBlockers = outcomeBlockersFor(driverStep.agentRunOutcomePacket);
   return {
     mode: "agent-run-pi-provider-worker-dispatch",
     schemaVersion: SCHEMA_VERSION,
@@ -188,11 +193,14 @@ export async function runAgentRunPiProviderWorkerDispatch(options = {}) {
     driverStepCall,
     driverStep,
     agentRunOutcomePacket: driverStep.agentRunOutcomePacket,
+    terminalProcessState: driverStep.follow?.status?.state,
+    contractDecision: driverStep.agentRunOutcomePacket?.contractDecision,
+    outcomeBlockers,
     blockers: driverStep.blockers ?? [],
     nextActions: driverStep.agentRunOutcomePacket?.contractDecision === "pass"
       ? ["record this outcome before selecting another worker; do not fan-in until all required outcomes pass"]
       : ["resolve driver step blockers or outcome blockers before selecting any next worker"],
-    summary: `agent-run-pi-provider-worker-dispatch: decision=${driverStep.decision} worker=${workerId} runId=${runIdFor(selected.packet)} dispatch=${driverStep.dispatchAllowed ? "yes" : "no"}`,
+    summary: `agent-run-pi-provider-worker-dispatch: decision=${driverStep.decision} worker=${workerId} runId=${runIdFor(selected.packet)} dispatch=${driverStep.dispatchAllowed ? "yes" : "no"} contract=${driverStep.agentRunOutcomePacket?.contractDecision ?? "not-built"}`,
   };
 }
 
