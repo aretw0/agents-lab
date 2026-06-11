@@ -134,7 +134,11 @@ test("fanout manifest can derive local-safe workers from the board", () => {
     assert.equal(report.decision, "ready-for-operator-decision");
     assert.equal(report.source, "board");
     assert.equal(report.workerCount, 2);
+    assert.equal(report.boardSelection.scannedTaskCount, 3);
+    assert.equal(report.boardSelection.eligibleCount, 2);
     assert.deepEqual(report.boardSelection.selectedTaskIds, ["TASK-LOCAL-1", "TASK-LOCAL-2"]);
+    assert.equal(report.boardSelection.skippedProtected, 1);
+    assert.equal(report.boardSelection.skippedByReason["protected-scope"], 1);
     assert.deepEqual(report.workerSpecs.map((worker) => worker.workerId), ["task-local-1", "task-local-2"]);
     assert.deepEqual(report.workerSpecs.map((worker) => worker.runSpec.declared_files), [["scripts/example-one.mjs"], ["docs/example.md"]]);
     assert.equal(report.dispatchAllowed, false);
@@ -162,9 +166,58 @@ test("fanout manifest blocks board mode with no local-safe workers", () => {
 
     assert.equal(report.decision, "blocked");
     assert.ok(report.blockers.includes("board-workers-missing"));
+    assert.equal(report.boardSelection.scannedTaskCount, 1);
+    assert.equal(report.boardSelection.eligibleCount, 0);
+    assert.equal(report.boardSelection.skippedProtected, 1);
+    assert.equal(report.boardSelection.skippedByReason["protected-scope"], 1);
+    assert.deepEqual(report.boardSelection.skippedSamples.map((item) => item.taskId), ["TASK-PROTECTED"]);
     assert.equal(report.workerCount, 0);
     assert.equal(report.dispatchAllowed, false);
     assert.equal(report.processStartAllowed, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("fanout manifest explains board skip reasons", () => {
+  const cwd = workspace("agent-run-driver-fanout-manifest-board-skips-");
+  try {
+    writeBoard(cwd, [
+      {
+        id: "TASK-DONE",
+        status: "done",
+        priority: "p1",
+        files: ["docs/done.md"],
+      },
+      {
+        id: "TASK-P2",
+        status: "planned",
+        priority: "p2",
+        files: ["docs/p2.md"],
+      },
+      {
+        id: "TASK-NO-FILES",
+        status: "planned",
+        priority: "p1",
+        files: [],
+      },
+      {
+        id: "TASK-FILE-PROTECTED",
+        status: "planned",
+        priority: "p1",
+        files: [".github/workflows/release.yml"],
+      },
+    ]);
+
+    const report = buildAgentRunDriverFanoutManifest({ cwd, fromBoard: true, priority: "p1" });
+
+    assert.equal(report.decision, "blocked");
+    assert.ok(report.blockers.includes("board-workers-missing"));
+    assert.equal(report.boardSelection.skippedByReason["status-not-eligible:done"], 1);
+    assert.equal(report.boardSelection.skippedByReason["priority-mismatch:p2"], 1);
+    assert.equal(report.boardSelection.skippedByReason["files-missing"], 1);
+    assert.equal(report.boardSelection.skippedByReason["files-protected"], 1);
+    assert.equal(report.boardSelection.skippedSamples.length, 4);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

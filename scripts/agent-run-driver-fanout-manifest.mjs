@@ -6,6 +6,7 @@ import { pathToFileURL } from "node:url";
 
 const SCHEMA_VERSION = 1;
 const DEFAULT_OUT = ".artifacts/agent-run-driver/fanout-manifest.json";
+const PROTECTED_BOARD_SIGNAL_RE = /https?:\/\/|\.github\/|\.obsidian\/|\.pi\/settings\.json|\bgithub actions\b|\bremote\b|\bpublish\b|\bcredential\b|\bsecret\b|\btoken\b/i;
 
 function parseArgs(argv = process.argv.slice(2)) {
   const out = {
@@ -87,7 +88,21 @@ function isProtectedTask(task) {
     task?.notes,
     ...taskFiles(task),
   ].join("\n");
-  return /https?:\/\/|\.github\/|\.obsidian\/|\.pi\/settings\.json|\bgithub actions\b|\bremote\b|\bpublish\b|\bcredential\b|\bsecret\b|\btoken\b/i.test(haystack);
+  return PROTECTED_BOARD_SIGNAL_RE.test(haystack);
+}
+
+function isProtectedTaskMetadata(task) {
+  const haystack = [
+    task?.id,
+    task?.description,
+    task?.milestone,
+    task?.notes,
+  ].join("\n");
+  return PROTECTED_BOARD_SIGNAL_RE.test(haystack);
+}
+
+function isProtectedPath(value) {
+  return PROTECTED_BOARD_SIGNAL_RE.test(String(value || ""));
 }
 
 function sanitizeWorkerId(value) {
@@ -99,28 +114,68 @@ function sanitizeWorkerId(value) {
     .slice(0, 80);
 }
 
+function countByReason(skipped) {
+  return skipped.reduce((counts, item) => {
+    counts[item.reason] = (counts[item.reason] ?? 0) + 1;
+    return counts;
+  }, {});
+}
+
+function skipSample(task, reason) {
+  return {
+    taskId: String(task?.id || "").trim() || null,
+    reason,
+    status: normalizeStatus(task?.status) || null,
+    priority: normalizePriority(task?.priority) || null,
+  };
+}
+
 function selectBoardTasks({ cwd, boardPath, limit, priority }) {
   const board = readJsonIfExists(cwd, boardPath);
   const tasks = Array.isArray(board?.tasks) ? board.tasks : [];
   const priorityFilter = normalizePriority(priority);
   const selected = [];
+  const skipped = [];
   for (const task of tasks) {
     const status = normalizeStatus(task?.status);
-    if (status !== "planned" && status !== "in-progress") continue;
-    if (priorityFilter && normalizePriority(task?.priority) !== priorityFilter) continue;
-    if (isProtectedTask(task)) continue;
-    const files = taskFiles(task).filter((file) => !isProtectedTask({ files: [file] }));
-    if (files.length === 0) continue;
+    if (status !== "planned" && status !== "in-progress") {
+      skipped.push(skipSample(task, `status-not-eligible:${status || "missing"}`));
+      continue;
+    }
+    const taskPriority = normalizePriority(task?.priority);
+    if (priorityFilter && taskPriority !== priorityFilter) {
+      skipped.push(skipSample(task, `priority-mismatch:${taskPriority || "missing"}`));
+      continue;
+    }
+    if (isProtectedTaskMetadata(task)) {
+      skipped.push(skipSample(task, "protected-scope"));
+      continue;
+    }
+    const taskId = String(task?.id || "").trim();
+    if (!taskId) {
+      skipped.push(skipSample(task, "task-id-missing"));
+      continue;
+    }
+    const rawFiles = taskFiles(task);
+    if (rawFiles.length === 0) {
+      skipped.push(skipSample(task, "files-missing"));
+      continue;
+    }
+    const files = taskFiles(task).filter((file) => !isProtectedPath(file));
+    if (files.length === 0) {
+      skipped.push(skipSample(task, "files-protected"));
+      continue;
+    }
     selected.push({
-      taskId: String(task?.id || "").trim(),
+      taskId,
       description: String(task?.description || "").trim(),
-      priority: normalizePriority(task?.priority) || "unknown",
+      priority: taskPriority || "unknown",
       status,
       files,
     });
     if (selected.length >= limit) break;
   }
-  return { board, tasks, selected };
+  return { board, tasks, selected, skipped };
 }
 
 function writeJson(cwd, relPath, value, pretty = false) {
@@ -187,8 +242,12 @@ export function buildAgentRunDriverFanoutManifest(options = {}) {
       boardSelection: {
         limit,
         priority: normalizePriority(options.priority) || null,
+        scannedTaskCount: boardSelection?.tasks.length ?? 0,
+        eligibleCount: boardSelection?.selected.length ?? 0,
         selectedTaskIds: (boardSelection?.selected ?? []).map((task) => task.taskId),
-        skippedProtected: (boardSelection?.tasks ?? []).filter((task) => isProtectedTask(task)).length,
+        skippedProtected: (boardSelection?.skipped ?? []).filter((task) => task.reason === "protected-scope" || task.reason === "files-protected").length,
+        skippedByReason: countByReason(boardSelection?.skipped ?? []),
+        skippedSamples: (boardSelection?.skipped ?? []).slice(0, 10),
       },
     } : {}),
     dispatchAllowed: false,
