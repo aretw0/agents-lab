@@ -4,6 +4,7 @@ import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { runAgentRunDriverStep } from "./agent-run-driver-step.mjs";
+import { buildAgentRunPiProviderReadiness } from "./agent-run-pi-provider-readiness.mjs";
 
 const SCHEMA_VERSION = 1;
 const DEFAULT_PLAN = ".artifacts/agent-run-driver/pi-provider-fanout-plan.json";
@@ -15,6 +16,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     workerIndex: 0,
     workerId: "",
     execute: false,
+    skipReadiness: false,
     approve: false,
     operatorApprovalFile: "",
     outPath: "",
@@ -29,6 +31,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--worker-id") out.workerId = argv[++index] ?? "";
     else if (arg === "--execute") out.execute = true;
     else if (arg === "--preview") out.execute = false;
+    else if (arg === "--skip-readiness") out.skipReadiness = true;
     else if (arg === "--approve") out.approve = true;
     else if (arg === "--operator-approval-file") out.operatorApprovalFile = argv[++index] ?? "";
     else if (arg === "--out") out.outPath = argv[++index] ?? "";
@@ -138,6 +141,36 @@ function buildPreview({ plan, planPath, worker, workerIndex, workerId, driverSte
   };
 }
 
+function buildReadinessBlocked({ plan, planPath, worker, workerIndex, workerId, driverStepCall, readiness }) {
+  const runId = runIdFor(worker);
+  return {
+    mode: "agent-run-pi-provider-worker-dispatch",
+    schemaVersion: SCHEMA_VERSION,
+    decision: "blocked",
+    recommendation: "resolve-provider-readiness-blockers",
+    planPath,
+    batchId: plan?.batchId,
+    model: plan?.model,
+    workerIndex,
+    workerId,
+    workerCount: worker ? 1 : 0,
+    runId,
+    executeRequested: true,
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    batchExecutionAllowed: false,
+    singleRunOnly: true,
+    driverStepCall,
+    providerReadiness: readiness,
+    blockers: (readiness.blockers ?? []).map((blocker) => `provider-readiness:${blocker}`),
+    nextActions: [
+      "resolve provider readiness blockers before executing this worker",
+      "rerun provider readiness after provider auth/connectivity changes",
+    ],
+    summary: `agent-run-pi-provider-worker-dispatch: decision=blocked worker=${workerId || "missing"} runId=${runId || "missing"} readiness=blocked dispatch=no`,
+  };
+}
+
 export async function runAgentRunPiProviderWorkerDispatch(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const planPath = path.resolve(cwd, options.planPath || DEFAULT_PLAN);
@@ -168,6 +201,24 @@ export async function runAgentRunPiProviderWorkerDispatch(options = {}) {
       workerId,
       driverStepCall,
       blockers,
+    });
+  }
+
+  const readiness = options.skipReadiness === true
+    ? undefined
+    : buildAgentRunPiProviderReadiness({
+        cwd,
+        planPath: path.relative(cwd, planPath) || planPath,
+      });
+  if (readiness?.decision === "blocked") {
+    return buildReadinessBlocked({
+      plan,
+      planPath: path.relative(cwd, planPath) || planPath,
+      worker: selected.packet,
+      workerIndex: selected.index,
+      workerId,
+      driverStepCall,
+      readiness,
     });
   }
 

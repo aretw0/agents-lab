@@ -30,6 +30,22 @@ function plan(cwd) {
   });
 }
 
+function writeBlockedReadinessExecution(cwd) {
+  const filePath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-worker-a-real-execute.json");
+  mkdirSync(path.dirname(filePath), { recursive: true });
+  writeFileSync(filePath, `${JSON.stringify({
+    mode: "agent-run-pi-provider-worker-dispatch",
+    decision: "dispatched",
+    terminalProcessState: "failed",
+    contractDecision: "fail",
+    outcomeBlockers: ["process-state-failed"],
+    driverStep: {
+      registryEntry: { envKeys: ["PI_CODING_AGENT_DIR"] },
+      follow: { lines: ["fetch failed"] },
+    },
+  })}\n`, "utf8");
+}
+
 test("provider worker dispatch previews one selected worker without dispatch", async () => {
   const cwd = workspace("pi-provider-worker-preview-");
   try {
@@ -77,6 +93,7 @@ test("provider worker dispatch executes only one selected worker with approval",
       workerId: "worker-b",
       execute: true,
       approve: true,
+      skipReadiness: true,
     });
 
     assert.equal(result.decision, "dispatched");
@@ -105,6 +122,7 @@ test("provider worker dispatch surfaces terminal outcome failure at top level", 
       cwd,
       execute: true,
       approve: true,
+      skipReadiness: true,
     });
 
     assert.equal(result.decision, "dispatched");
@@ -113,6 +131,28 @@ test("provider worker dispatch surfaces terminal outcome failure at top level", 
     assert.equal(result.contractDecision, "fail");
     assert.deepEqual(result.outcomeBlockers, ["process-state-failed"]);
     assert.match(result.summary, /contract=fail/);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider worker dispatch blocks execute when readiness is blocked", async () => {
+  const cwd = workspace("pi-provider-worker-readiness-blocked-");
+  try {
+    plan(cwd);
+    writeBlockedReadinessExecution(cwd);
+    const result = await runAgentRunPiProviderWorkerDispatch({
+      cwd,
+      execute: true,
+      approve: true,
+    });
+
+    assert.equal(result.decision, "blocked");
+    assert.equal(result.dispatchAllowed, false);
+    assert.equal(result.processStartAllowed, false);
+    assert.ok(result.blockers.includes("provider-readiness:provider-fetch-failed"));
+    assert.equal(result.providerReadiness.decision, "blocked");
+    assert.equal(existsSync(path.join(cwd, ".pi", "reports", "agent-runs.json")), false);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
