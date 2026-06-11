@@ -340,6 +340,45 @@ function agentRunProviderCanaryEvidence(cwd) {
   }
 }
 
+function agentRunProviderContainerCanaryEvidence(cwd) {
+  const relPath = ".artifacts/agent-run-driver/pi-provider-container-canary-report.json";
+  const fullPath = path.join(cwd, relPath);
+  if (!existsSync(fullPath)) {
+    return {
+      path: relPath,
+      present: false,
+      decision: "missing",
+      summary: "no provider container canary artifact found",
+    };
+  }
+  try {
+    const payload = JSON.parse(readFileSync(fullPath, "utf8"));
+    return {
+      path: relPath,
+      present: true,
+      decision: payload.decision ?? "unknown",
+      mode: payload.mode,
+      schemaVersion: payload.schemaVersion,
+      container: payload.container,
+      executeRequested: payload.executeRequested === true,
+      dispatchAllowed: payload.dispatchAllowed === true,
+      processStartAllowed: payload.processStartAllowed === true,
+      canaryDecision: payload.canaryReport?.decision,
+      canaryPath: payload.canaryOutPath,
+      blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
+      providerDiagnostics: Array.isArray(payload.providerDiagnostics) ? payload.providerDiagnostics : [],
+      summary: payload.summary ?? "provider container canary artifact present",
+    };
+  } catch (error) {
+    return {
+      path: relPath,
+      present: true,
+      decision: "invalid-json",
+      summary: `could not parse provider container canary artifact: ${String(error?.message ?? error)}`,
+    };
+  }
+}
+
 function releaseGateKind(id) {
   if (id === "target-version-ready") return "operator-decision";
   if (id === "board-release-clear") return "board-state";
@@ -373,6 +412,7 @@ function agentRunDriverGateEvidence(report) {
     `${report.canaryScriptName} writes .artifacts/agent-run-driver/suite.json`,
     "agent-run driver canary suite evidence passed",
     `provider readiness evidence decision=${report.providerReadinessEvidence?.decision ?? "missing"}`,
+    `provider container canary evidence decision=${report.providerContainerCanaryEvidence?.decision ?? "missing"}`,
   ].join("; ");
 }
 
@@ -762,6 +802,7 @@ export function gather(target, cwd = process.cwd()) {
   agentRunDrivers.lastMutationCanaryEvidence = agentRunDriverCanaryEvidence(cwd, ".artifacts/agent-run-driver/latest-mutation.json");
   agentRunDrivers.providerReadinessEvidence = agentRunProviderReadinessEvidence(cwd);
   agentRunDrivers.providerCanaryEvidence = agentRunProviderCanaryEvidence(cwd);
+  agentRunDrivers.providerContainerCanaryEvidence = agentRunProviderContainerCanaryEvidence(cwd);
   agentRunDrivers.canarySuiteRequired = true;
   agentRunDrivers.canarySuiteGateOk = agentRunDrivers.canarySuiteEvidence.decision === "pass";
   agentRunDrivers.currentHead = head;

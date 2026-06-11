@@ -852,6 +852,53 @@ test("readiness exposes provider canary evidence when present", () => {
   }
 });
 
+test("readiness exposes provider container canary evidence when present", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const evidencePath = path.join(workspace, ".artifacts", "agent-run-driver", "pi-provider-container-canary-report.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, JSON.stringify({
+      mode: "agent-run-pi-provider-container-canary-report",
+      schemaVersion: 1,
+      decision: "block",
+      container: "goofy_nightingale",
+      executeRequested: false,
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      canaryOutPath: ".artifacts/agent-run-driver/pi-provider-container-canary.json",
+      canaryReport: {
+        decision: "blocked",
+      },
+      providerDiagnostics: [{
+        code: "provider-fetch-failed",
+        category: "network-or-provider",
+        severity: "blocker",
+      }],
+      blockers: ["container-provider-canary-blocked"],
+      summary: "agent-run-pi-provider-container-canary: decision=block",
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+
+    assert.equal(data.agentRunDrivers.providerContainerCanaryEvidence.present, true);
+    assert.equal(data.agentRunDrivers.providerContainerCanaryEvidence.decision, "block");
+    assert.equal(data.agentRunDrivers.providerContainerCanaryEvidence.container, "goofy_nightingale");
+    assert.equal(data.agentRunDrivers.providerContainerCanaryEvidence.canaryDecision, "blocked");
+    assert.equal(data.agentRunDrivers.providerContainerCanaryEvidence.dispatchAllowed, false);
+    assert.deepEqual(data.agentRunDrivers.providerContainerCanaryEvidence.blockers, ["container-provider-canary-blocked"]);
+    assert.deepEqual(data.agentRunDrivers.providerContainerCanaryEvidence.providerDiagnostics.map((item) => [item.code, item.category, item.severity]), [
+      ["provider-fetch-failed", "network-or-provider", "blocker"],
+    ]);
+    assert.equal(data.agentRunDrivers.ok, true);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("cli strict exits non-zero when release is not ready", () => {
   const workspace = makeWorkspace({
     version: "0.7.0",
@@ -957,6 +1004,7 @@ test("cli can write structured json for agents", () => {
     ]);
     assert.equal(json.agentRunDrivers.providerReadinessEvidence.decision, "missing");
     assert.equal(json.agentRunDrivers.providerCanaryEvidence.decision, "missing");
+    assert.equal(json.agentRunDrivers.providerContainerCanaryEvidence.decision, "missing");
     assert.equal(json.packageSmoke.mode, "release-package-smoke-report");
     assert.equal(json.packageSmoke.decision, "pass");
     assert.deepEqual(json.packageSmoke.packageBlockers, []);
