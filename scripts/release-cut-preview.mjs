@@ -94,6 +94,9 @@ export function buildReleaseCutPreview(options = {}) {
   if (readiness && readiness.ready !== true) blockers.push("release-readiness-not-ready");
   if (readiness && readiness.decision !== "ready") blockers.push("release-readiness-decision-not-ready");
   if (draft && draft.decision !== "ready-for-operator-review") blockers.push("release-draft-not-ready-for-operator-review");
+  if (draft?.decision === "ready-for-operator-review" && draft.releaseDraftNotesReviewPacket?.decision !== "ready-for-operator-review") {
+    blockers.push("release-draft-notes-review-missing");
+  }
   if (tag !== `v${target}`) blockers.push("tag-target-mismatch");
   if (draft?.tag && draft.tag !== tag) blockers.push("draft-tag-mismatch");
   if (draft?.target && String(draft.target) !== target) blockers.push("draft-target-mismatch");
@@ -104,6 +107,9 @@ export function buildReleaseCutPreview(options = {}) {
   const decision = blockers.length === 0 ? "ready-for-operator-review" : "blocked";
   const previousTag = draft?.previousTag ?? null;
   const targetSha = head || draft?.targetSha || readiness?.head || "";
+  const draftNotesReview = draft?.releaseDraftNotesReviewPacket && typeof draft.releaseDraftNotesReviewPacket === "object"
+    ? draft.releaseDraftNotesReviewPacket
+    : undefined;
   const tagMessage = `Release ${tag}`;
   const commandPreviews = {
     createLocalTag: commandPreview("git", ["tag", "-a", tag, targetSha, "-m", tagMessage], "protected local tag creation"),
@@ -132,6 +138,7 @@ export function buildReleaseCutPreview(options = {}) {
     readinessReady: readiness?.ready === true,
     readinessDecision: readiness?.decision ?? "missing",
     draftDecision: draft?.decision ?? "missing",
+    draftNotesReview,
     tagAllowed: false,
     publishAllowed: false,
     workflowDispatchAllowed: false,

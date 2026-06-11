@@ -51,6 +51,26 @@ function readyDraft(gitHead) {
     tag: "v0.8.0",
     previousTag: "v0.7.0",
     targetSha: gitHead,
+    releaseDraftNotesReviewPacket: {
+      mode: "release-draft-notes-review-packet",
+      decision: "ready-for-operator-review",
+      tag: "v0.8.0",
+      targetSha: gitHead,
+      notesOutPath: ".artifacts/release-draft/v0.8.0-notes.md",
+      notesWritten: true,
+      changeCount: 3,
+      reviewChecklist: [
+        { id: "readiness-green", ok: true },
+        { id: "notes-written", ok: true },
+        { id: "changes-present", ok: true },
+        { id: "operator-review-required", ok: true },
+      ],
+      tagAllowed: false,
+      publishAllowed: false,
+      workflowDispatchAllowed: false,
+      processStartAllowed: false,
+      blockers: [],
+    },
   };
 }
 
@@ -73,11 +93,41 @@ test("release cut preview emits protected operator packet when readiness and dra
     assert.equal(result.publishAllowed, false);
     assert.equal(result.workflowDispatchAllowed, false);
     assert.equal(result.processStartAllowed, false);
+    assert.equal(result.draftNotesReview.mode, "release-draft-notes-review-packet");
+    assert.equal(result.draftNotesReview.changeCount, 3);
+    assert.deepEqual(result.draftNotesReview.reviewChecklist.map((row) => [row.id, row.ok]), [
+      ["readiness-green", true],
+      ["notes-written", true],
+      ["changes-present", true],
+      ["operator-review-required", true],
+    ]);
     assert.equal(result.commandPreviews.createLocalTag.command, "git");
     assert.deepEqual(result.commandPreviews.createLocalTag.args.slice(0, 3), ["tag", "-a", "v0.8.0"]);
     assert.equal(result.commandPreviews.prepareDraftRelease.command, "gh");
     assert.ok(result.requiredApprovalPrompts.includes("approve release tag create v0.8.0"));
     assert.deepEqual(result.blockers, []);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("release cut preview blocks ready draft without notes review packet", () => {
+  const cwd = workspace();
+  try {
+    const gitHead = head(cwd);
+    const draft = readyDraft(gitHead);
+    delete draft.releaseDraftNotesReviewPacket;
+    const result = buildReleaseCutPreview({
+      cwd,
+      target: "0.8.0",
+      readiness: readyReadiness(gitHead),
+      draft,
+    });
+
+    assert.equal(result.decision, "blocked");
+    assert.ok(result.blockers.includes("release-draft-notes-review-missing"));
+    assert.equal(result.tagAllowed, false);
+    assert.equal(result.workflowDispatchAllowed, false);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
