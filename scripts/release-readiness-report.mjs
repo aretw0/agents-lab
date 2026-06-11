@@ -22,6 +22,7 @@ const AGENT_RUN_DRIVER_GATE_TESTS = [
   "scripts/test/agent-run-driver-canary.test.mjs",
   "scripts/test/agent-run-driver-canary-suite.test.mjs",
   "scripts/test/agent-run-driver-container-canary-suite.test.mjs",
+  "scripts/test/agent-run-driver-fanout-manifest.test.mjs",
   "scripts/test/agent-run-driver-fanout-rehearsal.test.mjs",
   "scripts/test/agent-run-driver-container-fanout-rehearsal.test.mjs",
   "scripts/test/agent-run-pi-provider-fanout-plan.test.mjs",
@@ -39,6 +40,10 @@ const AGENT_RUN_DRIVER_CANARY_SCRIPT_MARKERS = [
   ".artifacts/agent-run-driver/suite.json",
 ];
 const AGENT_RUN_DRIVER_OPERATIONAL_SCRIPTS = {
+  "agent-run:driver-fanout-manifest": [
+    "node scripts/agent-run-driver-fanout-manifest.mjs",
+    ".artifacts/agent-run-driver/fanout-manifest.json",
+  ],
   "agent-run:driver-fanout-rehearsal": [
     "node scripts/agent-run-driver-fanout-rehearsal.mjs",
     "--execute",
