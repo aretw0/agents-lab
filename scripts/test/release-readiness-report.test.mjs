@@ -210,6 +210,8 @@ test("buildReport marks target release not ready until version and board gates a
     assert.equal(data.agentRunDrivers.canarySuiteRequired, true);
     assert.equal(data.agentRunDrivers.canarySuiteGateOk, true);
     assert.equal(data.agentRunDrivers.canarySuiteHeadMatches, true);
+    assert.equal(data.agentRunDrivers.protectedBoardPlanStrictRequired, true);
+    assert.equal(data.agentRunDrivers.protectedBoardPlanStrictGateOk, true);
     assert.deepEqual(data.agentRunDrivers.missingTests, []);
     assert.deepEqual(data.agentRunDrivers.missingCanaryScriptMarkers, []);
     assert.equal(data.agentRunDrivers.canarySuiteEvidence.present, true);
@@ -1124,7 +1126,55 @@ test("readiness exposes protected board provider plan evidence when present", ()
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.processStartAllowed, false);
     assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.batchExecutionAllowed, false);
     assert.deepEqual(data.agentRunDrivers.providerProtectedBoardPlanEvidence.blockers, []);
+    assert.equal(data.agentRunDrivers.protectedBoardPlanStrictRequired, true);
+    assert.equal(data.agentRunDrivers.protectedBoardPlanStrictGateOk, true);
     assert.equal(data.agentRunDrivers.ok, true);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
+test("agent-run driver gate rejects protected board plan evidence without local task evidence", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const evidencePath = path.join(workspace, ".artifacts", "agent-run-driver", "pi-provider-protected-board-fanout-plan.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, JSON.stringify({
+      mode: "agent-run-pi-provider-fanout-plan",
+      schemaVersion: 1,
+      decision: "ready-for-operator-decision",
+      source: "protected-board",
+      batchId: "protected-board-research-0-8",
+      model: "openai-codex/gpt-5.3-codex-spark",
+      requireLocalTaskEvidence: false,
+      workerCount: 3,
+      boardSelection: {
+        selectedTaskIds: ["TASK-BUD-480", "TASK-BUD-521", "TASK-BUD-676"],
+      },
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      batchExecutionAllowed: false,
+      blockers: [],
+      summary: "agent-run-pi-provider-fanout-plan: decision=ready-for-operator-decision source=protected-board workers=3 dispatch=no",
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+    const report = buildReport(data);
+
+    assert.equal(data.agentRunDrivers.scriptGateOk, true);
+    assert.equal(data.agentRunDrivers.canarySuiteGateOk, true);
+    assert.equal(data.agentRunDrivers.protectedBoardPlanStrictRequired, true);
+    assert.equal(data.agentRunDrivers.protectedBoardPlanStrictGateOk, false);
+    assert.equal(data.agentRunDrivers.ok, false);
+    assert.ok(report.checklist.some((item) => item.id === "agent-run-driver-gate" && item.ok === false));
+    assert.match(
+      report.checklist.find((item) => item.id === "agent-run-driver-gate").evidence,
+      /protected board provider plan evidence must require local task evidence/,
+    );
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }

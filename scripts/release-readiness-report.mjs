@@ -567,6 +567,9 @@ function agentRunDriverGateEvidence(report) {
     ...(report.canarySuiteRequired === true && report.canarySuiteHeadMatches !== true
       ? [`canary suite evidence is stale for head ${report.currentHead || "unknown"} (artifact=${report.canarySuiteEvidence?.gitHead || "missing"})`]
       : []),
+    ...(report.protectedBoardPlanStrictRequired === true && report.protectedBoardPlanStrictGateOk !== true
+      ? [`protected board provider plan evidence must require local task evidence at ${report.providerProtectedBoardPlanEvidence?.path ?? ".artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json"}`]
+      : []),
   ];
   if (blockers.length) return blockers.join("; ");
   return [
@@ -975,7 +978,13 @@ export function gather(target, cwd = process.cwd()) {
   agentRunDrivers.canarySuiteGateOk = agentRunDrivers.canarySuiteEvidence.decision === "pass";
   agentRunDrivers.currentHead = head;
   agentRunDrivers.canarySuiteHeadMatches = !head || agentRunDrivers.canarySuiteEvidence.gitHead === head;
-  agentRunDrivers.ok = agentRunDrivers.scriptGateOk && agentRunDrivers.canarySuiteGateOk && agentRunDrivers.canarySuiteHeadMatches;
+  agentRunDrivers.protectedBoardPlanStrictRequired = true;
+  agentRunDrivers.protectedBoardPlanStrictGateOk = agentRunDrivers.providerProtectedBoardPlanEvidence.present !== true
+    || agentRunDrivers.providerProtectedBoardPlanEvidence.requireLocalTaskEvidence === true;
+  agentRunDrivers.ok = agentRunDrivers.scriptGateOk
+    && agentRunDrivers.canarySuiteGateOk
+    && agentRunDrivers.canarySuiteHeadMatches
+    && agentRunDrivers.protectedBoardPlanStrictGateOk;
   const userSurface = userSurfaceReadiness(cwd);
 
   return {
