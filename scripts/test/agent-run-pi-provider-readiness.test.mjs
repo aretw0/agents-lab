@@ -92,6 +92,16 @@ test("provider readiness blocks known provider auth and fetch failures", () => {
       ["provider-auth-missing", "auth", "blocker"],
       ["provider-fetch-failed", "network-or-provider", "blocker"],
     ]);
+    assert.equal(result.providerRecoveryPlan.mode, "agent-run-pi-provider-recovery-plan");
+    assert.equal(result.providerRecoveryPlan.decision, "blocked");
+    assert.equal(result.providerRecoveryPlan.dispatchAllowed, false);
+    assert.equal(result.providerRecoveryPlan.processStartAllowed, false);
+    assert.equal(result.providerRecoveryPlan.automationAllowed, false);
+    assert.deepEqual(result.providerRecoveryPlan.blockers, ["provider-auth-missing", "provider-fetch-failed"]);
+    assert.deepEqual(result.providerRecoveryPlan.actions.map((item) => [item.diagnosticCode, item.actionCode, item.retryCanaryScript]), [
+      ["provider-auth-missing", "configure-provider-credentials", "agent-run:pi-provider-canary"],
+      ["provider-fetch-failed", "verify-provider-network", "agent-run:pi-provider-canary:container"],
+    ]);
     assert.ok(result.nextActions.includes("configure provider credentials for the selected model before executing provider workers"));
     assert.ok(result.nextActions.includes("verify network, proxy, and provider endpoint reachability, then rerun readiness"));
   } finally {

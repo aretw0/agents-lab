@@ -111,6 +111,74 @@ function buildProviderDiagnostics({ providerSignals, plan, lastExecution }) {
   return diagnostics;
 }
 
+function providerRecoveryAction(diagnostic) {
+  const code = diagnostic?.code;
+  const base = {
+    diagnosticCode: code,
+    category: diagnostic?.category ?? "unknown",
+    severity: diagnostic?.severity ?? "warning",
+    operatorAction: diagnostic?.operatorAction ?? "review provider readiness diagnostic",
+    automationAllowed: false,
+    processStartAllowed: false,
+    rerunReadinessScript: "agent-run:pi-provider-readiness",
+  };
+  if (code === "provider-auth-missing") {
+    return {
+      ...base,
+      actionCode: "configure-provider-credentials",
+      verificationScript: "agent-run:pi-provider-readiness",
+      retryCanaryScript: "agent-run:pi-provider-canary",
+    };
+  }
+  if (code === "provider-fetch-failed") {
+    return {
+      ...base,
+      actionCode: "verify-provider-network",
+      verificationScript: "agent-run:pi-provider-readiness",
+      retryCanaryScript: "agent-run:pi-provider-canary:container",
+    };
+  }
+  if (code === "provider-global-settings-lock-error") {
+    return {
+      ...base,
+      actionCode: "repair-provider-settings-isolation",
+      verificationScript: "agent-run:pi-provider-readiness",
+      retryCanaryScript: "agent-run:pi-provider-canary",
+    };
+  }
+  if (code === "provider-fanout-plan-missing") {
+    return {
+      ...base,
+      actionCode: "generate-provider-fanout-plan",
+      verificationScript: "agent-run:pi-provider-fanout-plan",
+      retryCanaryScript: "agent-run:pi-provider-readiness",
+    };
+  }
+  return {
+    ...base,
+    actionCode: `review-${code ?? "provider-diagnostic"}`,
+    verificationScript: "agent-run:pi-provider-readiness",
+    retryCanaryScript: "agent-run:pi-provider-canary",
+  };
+}
+
+function buildProviderRecoveryPlan({ decision, providerDiagnostics }) {
+  const blockerDiagnostics = providerDiagnostics.filter((diagnostic) => diagnostic.severity === "blocker");
+  const actions = blockerDiagnostics.map(providerRecoveryAction);
+  return {
+    mode: "agent-run-pi-provider-recovery-plan",
+    decision: decision === "blocked" ? "blocked" : "ready",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    automationAllowed: false,
+    blockers: blockerDiagnostics.map((diagnostic) => diagnostic.code),
+    actions,
+    nextVerification: decision === "blocked"
+      ? "resolve recovery actions, then rerun agent-run:pi-provider-readiness before provider dispatch"
+      : "execute exactly one provider canary through agent-run:pi-provider-canary",
+  };
+}
+
 export function buildAgentRunPiProviderReadiness(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const planPath = path.resolve(cwd, options.planPath || DEFAULT_PLAN);
@@ -137,11 +205,12 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
   if (providerSignals.includes("provider-fetch-failed")) blockers.push("provider-fetch-failed");
   if (!lastExecution) warnings.push("last-provider-execution-missing");
   const providerDiagnostics = buildProviderDiagnostics({ providerSignals, plan, lastExecution });
+  const decision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
+  const providerRecoveryPlan = buildProviderRecoveryPlan({ decision, providerDiagnostics });
   const operatorActions = providerDiagnostics
     .filter((diagnostic) => diagnostic.severity === "blocker")
     .map((diagnostic) => diagnostic.operatorAction);
 
-  const decision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   return {
     mode: "agent-run-pi-provider-readiness",
     schemaVersion: SCHEMA_VERSION,
@@ -164,6 +233,7 @@ export function buildAgentRunPiProviderReadiness(options = {}) {
     } : undefined,
     providerSignals,
     providerDiagnostics,
+    providerRecoveryPlan,
     blockers,
     warnings,
     nextActions: decision === "blocked"
