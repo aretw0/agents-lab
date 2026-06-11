@@ -7,11 +7,11 @@ import { pathToFileURL } from "node:url";
 import { buildDockerExecArgs } from "./devcontainer-lab.mjs";
 
 const SCHEMA_VERSION = 1;
-const DEFAULT_REPORT_OUT = ".artifacts/agent-run-driver/container-suite-report.json";
-const DEFAULT_SUITE_OUT = ".artifacts/agent-run-driver/container-suite.json";
+const DEFAULT_REPORT_OUT = ".artifacts/agent-run-driver/container-fanout-rehearsal-report.json";
+const DEFAULT_REHEARSAL_OUT = ".artifacts/agent-run-driver/container-fanout-rehearsal.json";
 
 function toContainerPath(relPath) {
-  return String(relPath || DEFAULT_SUITE_OUT).replace(/\\/g, "/");
+  return String(relPath || DEFAULT_REHEARSAL_OUT).replace(/\\/g, "/");
 }
 
 export function parseArgs(argv = process.argv.slice(2)) {
@@ -19,7 +19,8 @@ export function parseArgs(argv = process.argv.slice(2)) {
     container: "",
     cwd: process.cwd(),
     reportOutPath: DEFAULT_REPORT_OUT,
-    suiteOutPath: DEFAULT_SUITE_OUT,
+    rehearsalOutPath: DEFAULT_REHEARSAL_OUT,
+    batchId: "agent-run-driver-container-fanout-rehearsal",
     execute: true,
     pretty: false,
     help: false,
@@ -29,7 +30,8 @@ export function parseArgs(argv = process.argv.slice(2)) {
     if (arg === "--container") out.container = argv[++index] ?? "";
     else if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
     else if (arg === "--out") out.reportOutPath = argv[++index] ?? out.reportOutPath;
-    else if (arg === "--suite-out") out.suiteOutPath = argv[++index] ?? out.suiteOutPath;
+    else if (arg === "--rehearsal-out") out.rehearsalOutPath = argv[++index] ?? out.rehearsalOutPath;
+    else if (arg === "--batch-id") out.batchId = argv[++index] ?? out.batchId;
     else if (arg === "--preview") out.execute = false;
     else if (arg === "--execute") out.execute = true;
     else if (arg === "--pretty") out.pretty = true;
@@ -39,13 +41,15 @@ export function parseArgs(argv = process.argv.slice(2)) {
   return out;
 }
 
-export function buildContainerCanaryDockerArgs(options) {
+export function buildContainerFanoutDockerArgs(options) {
   const command = [
     "node",
-    "scripts/agent-run-driver-canary-suite.mjs",
+    "scripts/agent-run-driver-fanout-rehearsal.mjs",
     options.execute === false ? "--preview" : "--execute",
+    "--batch-id",
+    options.batchId || "agent-run-driver-container-fanout-rehearsal",
     "--out",
-    toContainerPath(options.suiteOutPath || DEFAULT_SUITE_OUT),
+    toContainerPath(options.rehearsalOutPath || DEFAULT_REHEARSAL_OUT),
   ];
   if (options.pretty === true) command.push("--pretty");
   return buildDockerExecArgs({
@@ -61,58 +65,59 @@ function writeJson(cwd, relPath, value, pretty = false) {
   writeFileSync(outPath, `${JSON.stringify(value, null, pretty ? 2 : 0)}\n`, "utf8");
 }
 
-export function runAgentRunDriverContainerCanarySuite(options = {}) {
+export function runAgentRunDriverContainerFanoutRehearsal(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const container = String(options.container ?? "").trim();
   const pretty = options.pretty === true;
   if (!container) {
     return {
-      mode: "agent-run-driver-container-canary-suite-report",
+      mode: "agent-run-driver-container-fanout-rehearsal-report",
       schemaVersion: SCHEMA_VERSION,
       decision: "block",
       container,
       executeRequested: options.execute !== false,
       dispatchAllowed: false,
       processStartAllowed: false,
-      suiteOutPath: options.suiteOutPath || DEFAULT_SUITE_OUT,
+      rehearsalOutPath: toContainerPath(options.rehearsalOutPath || DEFAULT_REHEARSAL_OUT),
       blockers: ["container-missing"],
-      summary: "agent-run-driver-container-canary-suite: decision=block blocker=container-missing",
+      summary: "agent-run-driver-container-fanout-rehearsal: decision=block blocker=container-missing",
     };
   }
 
-  const dockerArgs = buildContainerCanaryDockerArgs({
+  const dockerArgs = buildContainerFanoutDockerArgs({
     container,
-    suiteOutPath: toContainerPath(options.suiteOutPath || DEFAULT_SUITE_OUT),
+    batchId: options.batchId || "agent-run-driver-container-fanout-rehearsal",
+    rehearsalOutPath: options.rehearsalOutPath || DEFAULT_REHEARSAL_OUT,
     execute: options.execute !== false,
     pretty,
   });
   const result = spawnSync("docker", dockerArgs, { cwd, encoding: "utf8", stdio: "pipe" });
-  let suiteReport;
+  let rehearsalReport;
   try {
-    suiteReport = JSON.parse(String(result.stdout ?? "").trim());
+    rehearsalReport = JSON.parse(String(result.stdout ?? "").trim());
   } catch {
-    suiteReport = undefined;
+    rehearsalReport = undefined;
   }
   const blockers = [
     ...(result.status === 0 ? [] : [`docker-exec-failed:${result.status ?? "unknown"}`]),
-    ...(suiteReport ? [] : ["container-suite-json-missing"]),
-    ...(suiteReport?.decision === "pass" ? [] : ["container-suite-not-pass"]),
+    ...(rehearsalReport ? [] : ["container-fanout-json-missing"]),
+    ...(rehearsalReport?.decision === "pass" ? [] : ["container-fanout-not-pass"]),
   ];
   const report = {
-    mode: "agent-run-driver-container-canary-suite-report",
+    mode: "agent-run-driver-container-fanout-rehearsal-report",
     schemaVersion: SCHEMA_VERSION,
     generatedAtIso: new Date().toISOString(),
     container,
     decision: blockers.length === 0 ? "pass" : "block",
     executeRequested: options.execute !== false,
-    dispatchAllowed: suiteReport?.dispatchAllowed === true,
-    processStartAllowed: suiteReport?.processStartAllowed === true,
-    suiteOutPath: toContainerPath(options.suiteOutPath || DEFAULT_SUITE_OUT),
+    dispatchAllowed: rehearsalReport?.dispatchAllowed === true,
+    processStartAllowed: rehearsalReport?.processStartAllowed === true,
+    rehearsalOutPath: toContainerPath(options.rehearsalOutPath || DEFAULT_REHEARSAL_OUT),
     dockerArgs,
-    suiteReport: suiteReport ?? null,
+    rehearsalReport: rehearsalReport ?? null,
     stderrPreview: String(result.stderr ?? "").slice(0, 2000),
     blockers,
-    summary: `agent-run-driver-container-canary-suite: decision=${blockers.length === 0 ? "pass" : "block"} container=${container} suite=${suiteReport?.decision ?? "missing"}`,
+    summary: `agent-run-driver-container-fanout-rehearsal: decision=${blockers.length === 0 ? "pass" : "block"} container=${container} rehearsal=${rehearsalReport?.decision ?? "missing"}`,
   };
   writeJson(cwd, options.reportOutPath || DEFAULT_REPORT_OUT, report, pretty);
   return report;
@@ -120,11 +125,11 @@ export function runAgentRunDriverContainerCanarySuite(options = {}) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-driver-container-canary-suite.mjs --container NAME [--execute|--preview] [--out PATH] [--suite-out PATH] [--pretty]",
+    "Usage: node scripts/agent-run-driver-container-fanout-rehearsal.mjs --container NAME [--execute|--preview] [--out PATH] [--rehearsal-out PATH] [--batch-id ID] [--pretty]",
     "",
-    "Runs the agent-run driver canary suite inside the devcontainer through the headless lab wrapper.",
+    "Runs the two-worker local fan-out rehearsal inside the devcontainer through the headless lab wrapper.",
     `Default wrapper report: ${DEFAULT_REPORT_OUT}`,
-    `Default in-container suite artifact: ${DEFAULT_SUITE_OUT}`,
+    `Default in-container rehearsal artifact: ${DEFAULT_REHEARSAL_OUT}`,
   ].join("\n") + "\n");
 }
 
@@ -139,7 +144,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   if (args.help) {
     printHelp();
   } else {
-    const report = runAgentRunDriverContainerCanarySuite(args);
+    const report = runAgentRunDriverContainerFanoutRehearsal(args);
     process.stdout.write(JSON.stringify(report, null, args.pretty ? 2 : 0));
     process.stdout.write("\n");
     if (report.decision === "block") process.exit(1);
