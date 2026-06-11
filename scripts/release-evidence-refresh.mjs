@@ -71,7 +71,10 @@ export async function runReleaseEvidenceRefresh(options = {}) {
     pretty,
   });
   if (options.canarySuite) writeJson(cwd, paths.canarySuitePath, canarySuite, pretty);
-  const readiness = options.readiness ?? buildReport(gather(target, cwd));
+  const readiness = {
+    mode: "release-readiness-report",
+    ...(options.readiness ?? buildReport(gather(target, cwd))),
+  };
   writeJson(cwd, paths.readinessPath, readiness, pretty);
   const draft = buildReleaseDraftPreview({
     cwd,
