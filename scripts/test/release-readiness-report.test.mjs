@@ -1078,6 +1078,53 @@ test("readiness exposes provider network check evidence when present", () => {
   }
 });
 
+test("readiness exposes protected board provider plan evidence when present", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const evidencePath = path.join(workspace, ".artifacts", "agent-run-driver", "pi-provider-protected-board-fanout-plan.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, JSON.stringify({
+      mode: "agent-run-pi-provider-fanout-plan",
+      schemaVersion: 1,
+      decision: "ready-for-operator-decision",
+      source: "protected-board",
+      batchId: "protected-board-research-0-8",
+      model: "openai-codex/gpt-5.3-codex-spark",
+      workerCount: 3,
+      boardSelection: {
+        selectedTaskIds: ["TASK-BUD-480", "TASK-BUD-521", "TASK-BUD-676"],
+      },
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      batchExecutionAllowed: false,
+      blockers: [],
+      summary: "agent-run-pi-provider-fanout-plan: decision=ready-for-operator-decision source=protected-board model=openai-codex/gpt-5.3-codex-spark workers=3 dispatch=no",
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+
+    assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.present, true);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.decision, "ready-for-operator-decision");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.mode, "agent-run-pi-provider-fanout-plan");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.source, "protected-board");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.batchId, "protected-board-research-0-8");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.model, "openai-codex/gpt-5.3-codex-spark");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.workerCount, 3);
+    assert.deepEqual(data.agentRunDrivers.providerProtectedBoardPlanEvidence.selectedTaskIds, ["TASK-BUD-480", "TASK-BUD-521", "TASK-BUD-676"]);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.dispatchAllowed, false);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.processStartAllowed, false);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardPlanEvidence.batchExecutionAllowed, false);
+    assert.deepEqual(data.agentRunDrivers.providerProtectedBoardPlanEvidence.blockers, []);
+    assert.equal(data.agentRunDrivers.ok, true);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("cli strict exits non-zero when release is not ready", () => {
   const workspace = makeWorkspace({
     version: "0.7.0",
@@ -1193,6 +1240,7 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.agentRunDrivers.providerContainerCanaryEvidence.decision, "missing");
     assert.equal(json.agentRunDrivers.providerRecoveryNextEvidence.decision, "missing");
     assert.equal(json.agentRunDrivers.providerNetworkCheckEvidence.decision, "missing");
+    assert.equal(json.agentRunDrivers.providerProtectedBoardPlanEvidence.decision, "missing");
     assert.equal(json.packageSmoke.mode, "release-package-smoke-report");
     assert.equal(json.packageSmoke.decision, "pass");
     assert.deepEqual(json.packageSmoke.packageBlockers, []);
