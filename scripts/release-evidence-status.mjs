@@ -110,6 +110,13 @@ export function buildReleaseEvidenceStatus(options = {}) {
   }
 
   const decision = blockers.length === 0 ? "pass" : "block";
+  const protectedRecoveryPrompt = refresh?.protectedBoardRecoveryApprovalDecision === "approval-required"
+    ? String(refresh?.protectedBoardRecoveryApprovalPrompt ?? "")
+    : "";
+  const protectedReviewPrompts = [
+    ...(protectedRecoveryPrompt ? [protectedRecoveryPrompt] : []),
+    ...approvalPrompts,
+  ];
   return {
     mode: "release-evidence-status",
     schemaVersion: SCHEMA_VERSION,
@@ -133,6 +140,8 @@ export function buildReleaseEvidenceStatus(options = {}) {
     draftDecision: refresh?.draftDecision ?? "missing",
     approvalPromptCount: approvalPrompts.length,
     requiredApprovalPrompts: approvalPrompts,
+    protectedReviewPromptCount: protectedReviewPrompts.length,
+    protectedReviewPrompts,
     protectedActionsAllowed: false,
     tagAllowed: false,
     publishAllowed: false,

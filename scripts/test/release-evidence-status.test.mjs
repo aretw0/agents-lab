@@ -99,6 +99,15 @@ test("release evidence status passes coherent materialized evidence without runn
     assert.equal(result.protectedBoardRecoveryApprovalPrompt, "approve recovery rerun protected-board-task");
     assert.equal(result.protectedBoardRecoveryApprovalSelectedWorkerId, "task-bud-480");
     assert.equal(result.protectedBoardRecoveryApprovalScope, "protected-or-external-scope");
+    assert.equal(result.approvalPromptCount, 4);
+    assert.equal(result.protectedReviewPromptCount, 5);
+    assert.deepEqual(result.protectedReviewPrompts, [
+      "approve recovery rerun protected-board-task",
+      "approve release tag create v0.8.0",
+      "approve release tag push v0.8.0",
+      "approve release draft prepare-draft-release v0.8.0",
+      "approve release publish v0.8.0",
+    ]);
     assert.match(result.summary, /protectedRecoveryApproval=approval-required/);
     assert.deepEqual(result.blockers, []);
     assert.equal(result.protectedActionsAllowed, false);
