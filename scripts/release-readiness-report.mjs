@@ -68,6 +68,7 @@ const AGENT_RUN_DRIVER_OPERATIONAL_SCRIPTS = {
     "node scripts/agent-run-driver-fanout-outcome.mjs",
     ".artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
     ".artifacts/agent-run-driver/pi-provider-protected-board-fanout-outcome.json",
+    "--exit-zero-on-block",
   ],
   "agent-run:pi-provider-readiness": [
     "node scripts/agent-run-pi-provider-readiness.mjs",

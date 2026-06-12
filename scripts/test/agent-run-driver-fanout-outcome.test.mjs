@@ -1,10 +1,14 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import { runAgentRunDriverFanoutOutcome } from "../agent-run-driver-fanout-outcome.mjs";
+
+const cliPath = fileURLToPath(new URL("../agent-run-driver-fanout-outcome.mjs", import.meta.url));
 
 function workspace(prefix) {
   const cwd = mkdtempSync(path.join(tmpdir(), prefix));
@@ -136,6 +140,38 @@ test("fanout outcome blocks missing plan without dispatch", async () => {
     assert.equal(report.dispatchAllowed, false);
     assert.equal(report.processStartAllowed, false);
     assert.ok(report.blockers.includes("fanout-plan-missing"));
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("fanout outcome CLI can write blocked evidence with zero exit when requested", () => {
+  const cwd = workspace("agent-run-driver-fanout-outcome-cli-exit-zero-");
+  try {
+    const workers = [
+      workerPacket({ workerId: "worker-a", runId: "fanout-outcome-cli-worker-a" }),
+    ];
+    const planPath = writePlanAndRegistry(cwd, workers, [
+      writeCompletedRun(cwd, "fanout-outcome-cli-worker-a", "PASS/FAIL: **FAIL (blocked)**\n"),
+    ]);
+    const outPath = ".artifacts/agent-run-driver/blocked-outcome.json";
+    const result = spawnSync(process.execPath, [
+      cliPath,
+      "--cwd",
+      cwd,
+      "--plan",
+      planPath,
+      "--out",
+      outPath,
+      "--exit-zero-on-block",
+    ], { cwd, encoding: "utf8" });
+
+    assert.equal(result.status, 0);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision, "block");
+    assert.equal(report.dispatchAllowed, false);
+    assert.equal(report.processStartAllowed, false);
+    assert.deepEqual(JSON.parse(readFileSync(path.join(cwd, outPath), "utf8")).decision, "block");
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

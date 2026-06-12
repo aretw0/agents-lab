@@ -15,6 +15,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     planPath: DEFAULT_PLAN,
     outPath: DEFAULT_OUT,
     followMaxLines: 80,
+    exitZeroOnBlock: false,
     pretty: false,
     help: false,
   };
@@ -24,6 +25,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--plan") out.planPath = argv[++index] ?? out.planPath;
     else if (arg === "--out") out.outPath = argv[++index] ?? out.outPath;
     else if (arg === "--follow-max-lines") out.followMaxLines = Number(argv[++index] ?? out.followMaxLines);
+    else if (arg === "--exit-zero-on-block") out.exitZeroOnBlock = true;
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else throw new Error(`Unknown argument: ${arg}`);
@@ -186,7 +188,7 @@ export async function runAgentRunDriverFanoutOutcome(options = {}) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-driver-fanout-outcome.mjs [--cwd DIR] [--plan PATH] [--out PATH] [--follow-max-lines N] [--pretty]",
+    "Usage: node scripts/agent-run-driver-fanout-outcome.mjs [--cwd DIR] [--plan PATH] [--out PATH] [--follow-max-lines N] [--exit-zero-on-block] [--pretty]",
     "",
     "Re-evaluates existing fanout worker registry/log evidence through agent-run-driver-step without dispatching processes.",
     `Default plan: ${DEFAULT_PLAN}`,
@@ -208,6 +210,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     const report = await runAgentRunDriverFanoutOutcome(args);
     process.stdout.write(JSON.stringify(report, null, args.pretty ? 2 : 0));
     process.stdout.write("\n");
-    if (report.decision === "block") process.exit(1);
+    if (report.decision === "block" && args.exitZeroOnBlock !== true) process.exit(1);
   }
 }

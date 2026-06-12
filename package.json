@@ -99,7 +99,7 @@
     "agent-run:driver-fanout-rehearsal:container": "node scripts/agent-run-driver-container-fanout-rehearsal.mjs",
     "agent-run:pi-provider-fanout-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --out .artifacts/agent-run-driver/pi-provider-fanout-plan.json",
     "agent-run:pi-provider-protected-board-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --from-board-protected --require-local-task-evidence --limit 3 --batch-id protected-board-research-0-8 --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
-    "agent-run:pi-provider-protected-board-outcome": "node scripts/agent-run-driver-fanout-outcome.mjs --plan .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-outcome.json",
+    "agent-run:pi-provider-protected-board-outcome": "node scripts/agent-run-driver-fanout-outcome.mjs --plan .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-outcome.json --exit-zero-on-block",
     "agent-run:pi-provider-readiness": "node scripts/agent-run-pi-provider-readiness.mjs --out .artifacts/agent-run-driver/pi-provider-readiness.json",
     "agent-run:pi-provider-recovery-next": "node scripts/agent-run-pi-provider-recovery-next.mjs --out .artifacts/agent-run-driver/pi-provider-recovery-next.json",
     "agent-run:pi-provider-network-check": "node scripts/agent-run-pi-provider-network-check.mjs --out .artifacts/agent-run-driver/pi-provider-network-check.json",
