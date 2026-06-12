@@ -4,6 +4,7 @@ import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { buildPiPrintReadonlyDriverStepPayload } from "./agent-run-pi-driver-payload.mjs";
+import { buildAgentWorkerStepQueue } from "./agent-worker-step-queue.mjs";
 
 const SCHEMA_VERSION = 1;
 const DEFAULT_MODEL = "openai-codex/gpt-5.3-codex-spark";
@@ -297,6 +298,16 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
       followMaxLines: 80,
     });
   });
+  const workerStepQueue = buildAgentWorkerStepQueue({
+    queueId: batchId,
+    cwd,
+    steps: workerPackets.map((packet, index) => ({
+      stepId: workerSpecs[index]?.workerId,
+      sourceAdapter: fromBoardProtected ? "protected-board-pi-provider" : fromBoardLocalSafe ? "local-safe-board-pi-provider" : "manual-pi-provider",
+      runSpec: packet.payload?.run_spec,
+      driverStepCall: packet.driverStepCall,
+    })),
+  });
   const packetBlockers = workerPackets.flatMap((packet, index) => (
     packet.decision === "blocked"
       ? (packet.blockers ?? []).map((blocker) => `${workerSpecs[index]?.workerId ?? index}:${blocker}`)
@@ -317,6 +328,7 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
           .map((task) => `local-task-evidence-missing:${task.taskId}`)
       : []),
     ...packetBlockers,
+    ...workerStepQueue.blockers.map((blocker) => `worker-step-queue:${blocker}`),
   ];
   const decision = blockers.length === 0 ? "ready-for-operator-decision" : "blocked";
   return {
@@ -352,6 +364,7 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
     workerDispatchAllowed: false,
     batchExecutionAllowed: false,
     workerCount: workerPackets.length,
+    workerStepQueue,
     workerPackets: workerPackets.map((packet, index) => ({
       ...(fromBoardProtected || fromBoardLocalSafe ? {
         taskId: workerSpecs[index]?.taskId,

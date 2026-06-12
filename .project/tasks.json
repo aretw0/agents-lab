@@ -416,7 +416,7 @@
     {
       "id": "TASK-BUD-1106",
       "description": "[P1] Definir fila agnóstica de worker steps para atacar tasks do board sem depender de colony ou release.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1105"
@@ -424,9 +424,13 @@
       "files": [
         "docs/primitives/agent-worker-envelope.md",
         "docs/primitives/agent-worker-isolation.md",
+        "scripts/agent-worker-step-queue.mjs",
         "scripts/agent-run-driver-step.mjs",
         "scripts/agent-worker-isolation.mjs",
-        "scripts/test/agent-run-driver-step.test.mjs"
+        "scripts/agent-run-pi-provider-fanout-plan.mjs",
+        "scripts/test/agent-worker-step-queue.test.mjs",
+        "scripts/test/agent-run-driver-step.test.mjs",
+        "scripts/test/agent-run-pi-provider-fanout-plan.test.mjs"
       ],
       "acceptance_criteria": [
         "Fila descreve cada step por runSpec/handoff genérico, sem termos colony no contrato core.",
@@ -437,7 +441,8 @@
         "Manter a proposta local-safe e revisável antes de editar .project/tasks.json."
       ],
       "milestone": "0.8-worker-orchestration",
-      "notes": "[provenance:system] source_task=TASK-BUD-1105 reason=Materializada a primeira proposta de .artifacts/board-next-scope-intake.json: TASK-BUD-DRAFT-CORE-WORKER-QUEUE. Core/primitives: worker envelope agnóstico, driver step single-run, isolamento de cwd/files/log/env. Adapter extensions: Pi provider opcional e board fanout como consumidor."
+      "notes": "[provenance:system] source_task=TASK-BUD-1105 reason=Materializada a primeira proposta de .artifacts/board-next-scope-intake.json: TASK-BUD-DRAFT-CORE-WORKER-QUEUE. Core/primitives: worker envelope agnóstico, driver step single-run, isolamento de cwd/files/log/env. Adapter extensions: Pi provider opcional e board fanout como consumidor.\n2026-06-12: implementado agent-worker-step-queue como fila core agnóstica; fanout Pi/board agora publica workerStepQueue sem alterar payload legado. Worker gpt-5.3-codex-spark local-safe-board-worker-queue-task-bud-1106 retornou PASS com filesTouched=[].",
+      "verification": "node --test scripts/test/agent-worker-step-queue.test.mjs scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs"
     }
   ]
 }

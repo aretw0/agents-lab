@@ -104,4 +104,10 @@ The current local reference surface is `agent_run_driver_step_dispatch`:
 - optional bounded follow;
 - optional embedded `agent-run-outcome-packet` when terminal.
 
+`agent-worker-step-queue` is the current local reference for a bounded queue
+of these single-worker envelopes. It normalizes each step to `runSpec` plus
+`driverStepCall`, keeps `dispatchAllowed=false` and `processStartAllowed=false`
+at queue/step level, and lets adapters such as board fanout or Pi provider
+publish their worker steps without changing the portable envelope.
+
 The provider/model qualification evidence is tracked separately. A model passing one envelope does not inherit trust for another model or stronger envelope.

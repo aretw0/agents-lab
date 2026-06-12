@@ -31,6 +31,14 @@ test("provider fanout plan prepares two report-only pi print workers", () => {
     assert.equal(report.workerDispatchAllowed, false);
     assert.equal(report.batchExecutionAllowed, false);
     assert.equal(report.workerCount, 2);
+    assert.equal(report.workerStepQueue.mode, "agent-worker-step-queue");
+    assert.equal(report.workerStepQueue.decision, "ready-for-operator-decision");
+    assert.equal(report.workerStepQueue.workerCount, 2);
+    assert.equal(report.workerStepQueue.dispatchAllowed, false);
+    assert.equal(report.workerStepQueue.processStartAllowed, false);
+    assert.deepEqual(report.workerStepQueue.steps.map((step) => step.stepId), ["worker-a", "worker-b"]);
+    assert.equal(report.workerStepQueue.steps[0].sourceAdapter, "manual-pi-provider");
+    assert.equal(report.workerStepQueue.steps[0].driverStepCall.tool, "agent_run_driver_step_dispatch");
     assert.deepEqual(report.workerPackets.map((packet) => packet.decision), ["ready-for-driver-step", "ready-for-driver-step"]);
     assert.deepEqual(report.workerPackets.map((packet) => packet.payload.run_spec.file_contract), ["read-only", "read-only"]);
     assert.deepEqual(report.workerPackets.map((packet) => packet.payload.run_spec.provider_model_ref), [
@@ -180,6 +188,10 @@ test("provider fanout plan derives local-safe board workers and respects depende
     assert.equal(report.workerPackets[0].workerId, "task-local-1");
     assert.equal(report.workerPackets[0].taskId, "TASK-LOCAL-1");
     assert.equal(report.workerPackets[0].declaredFilesSource, "task-files");
+    assert.equal(report.workerStepQueue.mode, "agent-worker-step-queue");
+    assert.equal(report.workerStepQueue.steps[0].stepId, "task-local-1");
+    assert.equal(report.workerStepQueue.steps[0].sourceAdapter, "local-safe-board-pi-provider");
+    assert.deepEqual(report.workerStepQueue.steps[0].runSpec.declaredFiles, ["package.json"]);
     assert.match(report.workerPackets[0].payload.run_spec.execution_preview.args.join(" "), /Local-safe board worker contract/);
     assert.ok(report.boardSelection.skippedSamples.some((item) => item.taskId === "TASK-BLOCKED-DEP" && item.reason.includes("dependencies-not-completed")));
     assert.equal(report.dispatchAllowed, false);
