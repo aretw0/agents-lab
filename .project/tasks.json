@@ -443,6 +443,33 @@
       "milestone": "0.8-worker-orchestration",
       "notes": "[provenance:system] source_task=TASK-BUD-1105 reason=Materializada a primeira proposta de .artifacts/board-next-scope-intake.json: TASK-BUD-DRAFT-CORE-WORKER-QUEUE. Core/primitives: worker envelope agnóstico, driver step single-run, isolamento de cwd/files/log/env. Adapter extensions: Pi provider opcional e board fanout como consumidor.\n2026-06-12: implementado agent-worker-step-queue como fila core agnóstica; fanout Pi/board agora publica workerStepQueue sem alterar payload legado. Worker gpt-5.3-codex-spark local-safe-board-worker-queue-task-bud-1106 retornou PASS com filesTouched=[].",
       "verification": "node --test scripts/test/agent-worker-step-queue.test.mjs scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs"
+    },
+    {
+      "id": "TASK-BUD-1107",
+      "description": "[P1] Transformar tasks acionáveis do board em fanout local-safe com critérios de fan-in parent-side.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1106"
+      ],
+      "files": [
+        "scripts/project/board-spec-audit.mjs",
+        "scripts/project/board-next-scope-intake.mjs",
+        "scripts/agent-run-pi-provider-fanout-plan.mjs",
+        "scripts/agent-run-pi-provider-worker-dispatch.mjs",
+        "scripts/test/board-spec-audit.test.mjs",
+        "scripts/test/agent-run-pi-provider-fanout-plan.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "Fanout plan seleciona apenas tasks local-safe acionáveis e declara arquivos/criteria por worker.",
+        "Resultado de workers vira evidência parent-side antes de materializar novas tasks.",
+        "Protected/parked tasks aparecem como gated, não como dispatch candidates.",
+        "Não promover protected/parked tasks sem decisão explícita do operador.",
+        "Não autorizar release tag, publish, workflow dispatch, process start ou agent dispatch.",
+        "Manter a proposta local-safe e revisável antes de editar .project/tasks.json."
+      ],
+      "milestone": "0.8-potential-completeness",
+      "notes": "[provenance:system] source_task=TASK-BUD-1105 reason=Materializada a proposta remanescente de .artifacts/board-next-scope-intake.json: TASK-BUD-DRAFT-BOARD-FANOUT-ASSIMILATION. Core/primitives: task readiness, bounded fanout manifest, parent-side outcome aggregation. Adapter extensions: Pi worker dispatch adapter e board-specific task selection."
     }
   ]
 }
