@@ -19,6 +19,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     model: DEFAULT_MODEL,
     files: ["package.json"],
     fromBoardProtected: false,
+    fromBoardLocalSafe: false,
     boardPath: DEFAULT_BOARD,
     limit: 3,
     requireLocalTaskEvidence: false,
@@ -34,6 +35,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--model") out.model = argv[++index] ?? out.model;
     else if (arg === "--file") out.files.push(argv[++index] ?? "");
     else if (arg === "--from-board-protected") out.fromBoardProtected = true;
+    else if (arg === "--from-board-local-safe") out.fromBoardLocalSafe = true;
     else if (arg === "--board") out.boardPath = argv[++index] ?? out.boardPath;
     else if (arg === "--limit") out.limit = Number(argv[++index] ?? out.limit);
     else if (arg === "--require-local-task-evidence") out.requireLocalTaskEvidence = true;
@@ -63,6 +65,10 @@ function taskCriteria(task) {
   return Array.isArray(task?.acceptance_criteria)
     ? task.acceptance_criteria.map((item) => String(item || "").trim()).filter(Boolean)
     : [];
+}
+
+function taskDependsOn(task) {
+  return Array.isArray(task?.depends_on) ? task.depends_on.map((item) => String(item || "").trim()).filter(Boolean) : [];
 }
 
 function normalizeRelPath(value) {
@@ -169,11 +175,73 @@ function selectProtectedBoardTasks({ cwd, boardPath, limit }) {
   return { board, tasks, selected, skipped };
 }
 
-function promptFor(workerId, task) {
-  if (task) {
+function selectLocalSafeBoardTasks({ cwd, boardPath, limit }) {
+  const board = readJsonIfExists(cwd, boardPath);
+  const tasks = Array.isArray(board?.tasks) ? board.tasks : [];
+  const statusById = new Map(tasks.map((task) => [String(task?.id || "").trim(), normalizeStatus(task?.status)]));
+  const selected = [];
+  const skipped = [];
+  for (const task of tasks) {
+    const taskId = String(task?.id || "").trim();
+    const status = normalizeStatus(task?.status);
+    if (!taskId) {
+      skipped.push({ taskId: null, reason: "task-id-missing" });
+      continue;
+    }
+    if (status !== "planned" && status !== "in-progress") {
+      skipped.push({ taskId, reason: `status-not-eligible:${status || "missing"}` });
+      continue;
+    }
+    if (isProtectedTask(task)) {
+      skipped.push({ taskId, reason: "protected-or-parked" });
+      continue;
+    }
+    const files = taskFiles(task);
+    if (files.length === 0) {
+      skipped.push({ taskId, reason: "files-missing" });
+      continue;
+    }
+    const acceptanceCriteria = taskCriteria(task);
+    if (acceptanceCriteria.length === 0) {
+      skipped.push({ taskId, reason: "acceptance-criteria-missing" });
+      continue;
+    }
+    const incompleteDeps = taskDependsOn(task).filter((depId) => statusById.get(depId) !== "completed");
+    if (incompleteDeps.length > 0) {
+      skipped.push({ taskId, reason: `dependencies-not-completed:${incompleteDeps.join(",")}` });
+      continue;
+    }
+    selected.push({
+      taskId,
+      workerId: sanitizeWorkerId(taskId),
+      description: String(task?.description || "").trim(),
+      priority: normalizePriority(task?.priority) || "unknown",
+      status,
+      milestone: String(task?.milestone || "").trim(),
+      files,
+      declaredFilesSource: "task-files",
+      acceptanceCriteria,
+    });
+    if (selected.length >= limit) break;
+  }
+  return { board, tasks, selected, skipped };
+}
+
+function promptFor(workerId, task, source = "manual") {
+  if (task && source === "protected-board") {
     return [
       "Protected research planning contract: do not browse, do not call external URLs, do not edit files, and do not launch other agents.",
       "Use only the task metadata and declared local files as evidence. Produce a concise PASS/FAIL research-readiness assessment, safe next step, blockers, and filesTouched.",
+      `Task ${task.taskId}: ${task.description}`,
+      `Milestone: ${task.milestone || "n/a"}`,
+      `Acceptance criteria: ${task.acceptanceCriteria.length ? task.acceptanceCriteria.join(" | ") : "missing"}`,
+      "Keep output under 30 lines.",
+    ].join("\n");
+  }
+  if (task && source === "local-safe-board") {
+    return [
+      "Local-safe board worker contract: use only declared files; do not edit files; do not launch other agents; do not call external URLs.",
+      "Use the task metadata and declared local files as evidence. Produce a concise PASS/FAIL task-readiness assessment, smallest next implementation slice, blockers, and filesTouched.",
       `Task ${task.taskId}: ${task.description}`,
       `Milestone: ${task.milestone || "n/a"}`,
       `Acceptance criteria: ${task.acceptanceCriteria.length ? task.acceptanceCriteria.join(" | ") : "missing"}`,
@@ -197,14 +265,18 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
   const batchId = String(options.batchId || "agent-run-pi-provider-fanout-rehearsal").trim();
   const model = String(options.model || DEFAULT_MODEL).trim();
   const fromBoardProtected = options.fromBoardProtected === true;
+  const fromBoardLocalSafe = options.fromBoardLocalSafe === true;
   const requireLocalTaskEvidence = options.requireLocalTaskEvidence === true;
   const boardPath = String(options.boardPath || DEFAULT_BOARD);
   const limit = normalizeLimit(options.limit ?? 3);
   const boardSelection = fromBoardProtected ? selectProtectedBoardTasks({ cwd, boardPath, limit }) : undefined;
+  const localBoardSelection = fromBoardLocalSafe ? selectLocalSafeBoardTasks({ cwd, boardPath, limit }) : undefined;
   const files = Array.isArray(options.files) ? options.files.filter(Boolean) : ["package.json"];
   const executeRequested = options.execute === true;
   const workerSpecs = fromBoardProtected
     ? (boardSelection?.selected ?? [])
+    : fromBoardLocalSafe
+      ? (localBoardSelection?.selected ?? [])
     : ["worker-a", "worker-b"].map((workerId) => ({ workerId, files, task: undefined }));
   const workerPackets = workerSpecs.map((workerSpec) => {
     const workerId = workerSpec.workerId;
@@ -215,7 +287,7 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
       runId,
       model,
       files: declaredFiles,
-      prompt: promptFor(workerId, fromBoardProtected ? workerSpec : undefined),
+      prompt: promptFor(workerId, fromBoardProtected || fromBoardLocalSafe ? workerSpec : undefined, fromBoardProtected ? "protected-board" : fromBoardLocalSafe ? "local-safe-board" : "manual"),
       tools: ["read", "grep", "find", "ls"],
       execute: false,
       follow: true,
@@ -232,9 +304,13 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
   ));
   const blockers = [
     ...(executeRequested ? ["execute-not-supported-by-provider-fanout-plan"] : []),
+    ...(fromBoardProtected && fromBoardLocalSafe ? ["board-source-conflict"] : []),
     ...(fromBoardProtected && !boardSelection?.board ? ["board-missing"] : []),
+    ...(fromBoardLocalSafe && !localBoardSelection?.board ? ["board-missing"] : []),
     ...(fromBoardProtected && limit === 0 ? ["board-limit-invalid"] : []),
+    ...(fromBoardLocalSafe && limit === 0 ? ["board-limit-invalid"] : []),
     ...(fromBoardProtected && boardSelection?.selected.length === 0 ? ["protected-board-workers-missing"] : []),
+    ...(fromBoardLocalSafe && localBoardSelection?.selected.length === 0 ? ["local-safe-board-workers-missing"] : []),
     ...(fromBoardProtected && requireLocalTaskEvidence
       ? (boardSelection?.selected ?? [])
           .filter((task) => task.declaredFilesSource !== "local-task-evidence")
@@ -251,7 +327,7 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
     model,
     decision,
     executeRequested,
-    source: fromBoardProtected ? "protected-board" : "manual",
+    source: fromBoardProtected ? "protected-board" : fromBoardLocalSafe ? "local-safe-board" : "manual",
     ...(fromBoardProtected ? {
       boardPath,
       requireLocalTaskEvidence,
@@ -262,13 +338,22 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
         skippedSamples: (boardSelection?.skipped ?? []).slice(0, 10),
       },
     } : {}),
+    ...(fromBoardLocalSafe ? {
+      boardPath,
+      boardSelection: {
+        limit,
+        scannedTaskCount: localBoardSelection?.tasks.length ?? 0,
+        selectedTaskIds: (localBoardSelection?.selected ?? []).map((task) => task.taskId),
+        skippedSamples: (localBoardSelection?.skipped ?? []).slice(0, 10),
+      },
+    } : {}),
     dispatchAllowed: false,
     processStartAllowed: false,
     workerDispatchAllowed: false,
     batchExecutionAllowed: false,
     workerCount: workerPackets.length,
     workerPackets: workerPackets.map((packet, index) => ({
-      ...(fromBoardProtected ? {
+      ...(fromBoardProtected || fromBoardLocalSafe ? {
         taskId: workerSpecs[index]?.taskId,
         taskPriority: workerSpecs[index]?.priority,
         taskStatus: workerSpecs[index]?.status,
@@ -286,7 +371,7 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
         ]
       : ["resolve blockers before preparing provider/model rehearsal"],
     blockers,
-    summary: `agent-run-pi-provider-fanout-plan: decision=${decision} source=${fromBoardProtected ? "protected-board" : "manual"} model=${model} workers=${workerPackets.length} dispatch=no`,
+    summary: `agent-run-pi-provider-fanout-plan: decision=${decision} source=${fromBoardProtected ? "protected-board" : fromBoardLocalSafe ? "local-safe-board" : "manual"} model=${model} workers=${workerPackets.length} dispatch=no`,
   };
 }
 
@@ -303,6 +388,7 @@ function printHelp() {
     "",
     "Builds a report-only two-worker pi --print provider/model rehearsal plan.",
     "Use --from-board-protected to prepare protected board research-planning workers without dispatch.",
+    "Use --from-board-local-safe to prepare actionable local-safe board workers without dispatch.",
     "Use --require-local-task-evidence with --from-board-protected to fail closed unless each selected task resolves to a local task-specific evidence file.",
     "It never starts a process; execute requests are blocked here and must go through agent-run driver-step.",
     `Default model: ${DEFAULT_MODEL}`,

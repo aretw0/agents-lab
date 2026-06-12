@@ -120,6 +120,113 @@ test("provider fanout plan derives protected board research workers without disp
   }
 });
 
+test("provider fanout plan derives local-safe board workers and respects dependencies", () => {
+  const cwd = workspace("pi-provider-fanout-plan-local-board-");
+  try {
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-DONE",
+          status: "completed",
+          priority: "p1",
+          milestone: "done",
+          description: "Done",
+          files: ["package.json"],
+          acceptance_criteria: ["Done"],
+        },
+        {
+          id: "TASK-LOCAL-1",
+          status: "planned",
+          priority: "p1",
+          milestone: "worker",
+          description: "Assimilate local evidence",
+          depends_on: ["TASK-DONE"],
+          files: ["package.json"],
+          acceptance_criteria: ["Read local files only"],
+        },
+        {
+          id: "TASK-BLOCKED-DEP",
+          status: "planned",
+          priority: "p1",
+          milestone: "worker",
+          description: "Wait for dependency",
+          depends_on: ["TASK-LOCAL-1"],
+          files: ["package.json"],
+          acceptance_criteria: ["Wait"],
+        },
+        {
+          id: "TASK-PROTECTED",
+          status: "planned",
+          priority: "p3",
+          milestone: "parked-for-0.8.0",
+          description: "Evaluate https://example.test later",
+          files: ["docs/research/"],
+          acceptance_criteria: ["Keep protected"],
+        },
+      ],
+    }, null, 2)}\n`, "utf8");
+
+    const report = buildAgentRunPiProviderFanoutPlan({
+      cwd,
+      fromBoardLocalSafe: true,
+      batchId: "local-safe-board",
+    });
+
+    assert.equal(report.decision, "ready-for-operator-decision");
+    assert.equal(report.source, "local-safe-board");
+    assert.equal(report.workerCount, 1);
+    assert.deepEqual(report.boardSelection.selectedTaskIds, ["TASK-LOCAL-1"]);
+    assert.equal(report.workerPackets[0].workerId, "task-local-1");
+    assert.equal(report.workerPackets[0].taskId, "TASK-LOCAL-1");
+    assert.equal(report.workerPackets[0].declaredFilesSource, "task-files");
+    assert.match(report.workerPackets[0].payload.run_spec.execution_preview.args.join(" "), /Local-safe board worker contract/);
+    assert.ok(report.boardSelection.skippedSamples.some((item) => item.taskId === "TASK-BLOCKED-DEP" && item.reason.includes("dependencies-not-completed")));
+    assert.equal(report.dispatchAllowed, false);
+    assert.equal(report.processStartAllowed, false);
+    assert.equal(report.batchExecutionAllowed, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("provider fanout plan blocks local-safe board mode when no actionable workers exist", () => {
+  const cwd = workspace("pi-provider-fanout-plan-local-board-empty-");
+  try {
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-PROTECTED",
+          status: "planned",
+          priority: "p3",
+          milestone: "parked-for-0.8.0",
+          description: "Evaluate https://example.test later",
+          files: ["docs/research/"],
+          acceptance_criteria: ["Keep protected"],
+        },
+        {
+          id: "TASK-MISSING-SPEC",
+          status: "planned",
+          priority: "p1",
+          milestone: "worker",
+          description: "Missing spec",
+        },
+      ],
+    }, null, 2)}\n`, "utf8");
+
+    const report = buildAgentRunPiProviderFanoutPlan({ cwd, fromBoardLocalSafe: true });
+
+    assert.equal(report.decision, "blocked");
+    assert.ok(report.blockers.includes("local-safe-board-workers-missing"));
+    assert.equal(report.workerCount, 0);
+    assert.equal(report.dispatchAllowed, false);
+    assert.equal(report.processStartAllowed, false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("provider fanout plan narrows protected board files to local task evidence when present", () => {
   const cwd = workspace("pi-provider-fanout-plan-protected-board-evidence-");
   try {

@@ -272,12 +272,12 @@
       "files": [
         "docs/research/task-bud-480-local-agent-patterns-canary-2026-06.md",
         "docs/research/worker-provider-model-arena-2026-05.md",
-        "docs/primitives/agent-worker-envelope.md",
         "scripts/agent-run-pi-provider-fanout-plan.mjs",
         "scripts/agent-run-pi-provider-worker-dispatch.mjs"
       ],
       "acceptance_criteria": [
         "Contrato usa nomes agnósticos de runtime e não exige colony/ant_colony.",
+        "Entrega docs/primitives/agent-worker-envelope.md como contrato distribuível novo ou atualizado.",
         "Define o envelope single-worker como padrão 0.8: declared files, approval, registry, log, follow, outcome e touchedFiles.",
         "Diferencia contrato distribuível de adapter Pi/provider.",
         "Documenta o que ainda não está promovido: multi-file mutation, unattended fanout, protected scope e swarm."
@@ -296,13 +296,13 @@
       ],
       "files": [
         "docs/research/task-bud-521-local-isolation-canary-2026-06.md",
-        "docs/primitives/agent-worker-isolation.md",
         "scripts/agent-run-driver-step.mjs",
         "scripts/agent-run-pi-provider-worker-dispatch.mjs",
         "scripts/test/agent-run-driver-step.test.mjs",
         "scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs"
       ],
       "acceptance_criteria": [
+        "Entrega docs/primitives/agent-worker-isolation.md como requisitos de isolamento local.",
         "Documento de requisitos traduz isolamento local em regras de cwd, declaredFiles, envKeys, logPath e registry.",
         "Driver/dispatch bloqueia ou reporta mismatch de isolamento antes de spawn.",
         "Requisitos preservam executor adapter separado do contrato core.",
