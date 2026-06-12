@@ -59,6 +59,21 @@ function statusFromOptions(options, cwd) {
   });
 }
 
+function approvalValidationCommandPreview({ target, tag, evidencePath, requiredApprovalPrompt }) {
+  const args = ["scripts/release-protected-review-approval.mjs"];
+  if (target) args.push("--target", target);
+  if (tag) args.push("--tag", tag);
+  if (evidencePath) args.push("--evidence", evidencePath);
+  args.push("--operator-approval", requiredApprovalPrompt);
+  return {
+    command: "node",
+    args,
+    shellInterpolationAllowed: false,
+    dispatchAllowed: false,
+    processStartAllowed: false,
+  };
+}
+
 export function buildReleaseProtectedReviewApproval(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const status = statusFromOptions(options, cwd);
@@ -74,16 +89,39 @@ export function buildReleaseProtectedReviewApproval(options = {}) {
   ];
   const approvalMatched = blockers.length === 0 && operatorApproval === requiredApprovalPrompt;
   const decision = blockers.length > 0 ? "blocked" : approvalMatched ? "approved-for-next-protected-review" : "approval-required";
+  const target = status?.target ?? String(options.target ?? "0.8.0");
+  const tag = status?.tag ?? String(options.tag || `v${String(options.target ?? "0.8.0")}`);
+  const approvalValidationPreview = requiredApprovalPrompt
+    ? approvalValidationCommandPreview({
+        target,
+        tag,
+        evidencePath: options.evidencePath,
+        requiredApprovalPrompt,
+      })
+    : undefined;
   const report = {
     mode: "release-protected-review-approval",
     schemaVersion: SCHEMA_VERSION,
     decision,
-    target: status?.target ?? String(options.target ?? "0.8.0"),
-    tag: status?.tag ?? String(options.tag || `v${String(options.target ?? "0.8.0")}`),
+    target,
+    tag,
     statusDecision: status?.decision ?? "missing",
     nextProtectedReviewRow: nextRow,
     requiredApprovalPrompt,
     operatorApprovalMatched: approvalMatched,
+    approvalValidationCommandPreview: approvalValidationPreview,
+    approvedHandoff: approvalMatched
+      ? {
+          source: nextRow?.source ?? "",
+          action: nextRow?.action ?? "",
+          selectedWorkerId: nextRow?.selectedWorkerId ?? "",
+          approvalScope: nextRow?.approvalScope ?? "",
+          requiredApprovalPrompt,
+          dispatchAllowed: false,
+          processStartAllowed: false,
+          nextActionCode: "use-source-specific-gate",
+        }
+      : null,
     dispatchAllowed: false,
     processStartAllowed: false,
     protectedActionsAllowed: false,

@@ -43,6 +43,22 @@ test("protected review approval requires exact prompt without dispatch", () => {
   assert.equal(result.dispatchAllowed, false);
   assert.equal(result.processStartAllowed, false);
   assert.equal(result.protectedActionsAllowed, false);
+  assert.deepEqual(result.approvalValidationCommandPreview, {
+    command: "node",
+    args: [
+      "scripts/release-protected-review-approval.mjs",
+      "--target",
+      "0.8.0",
+      "--tag",
+      "v0.8.0",
+      "--operator-approval",
+      "approve recovery rerun protected-board-task",
+    ],
+    shellInterpolationAllowed: false,
+    dispatchAllowed: false,
+    processStartAllowed: false,
+  });
+  assert.equal(result.approvedHandoff, null);
   assert.deepEqual(result.blockers, []);
 });
 
@@ -55,6 +71,16 @@ test("protected review approval accepts the next protected review prompt", () =>
   assert.equal(result.decision, "approved-for-next-protected-review");
   assert.equal(result.operatorApprovalMatched, true);
   assert.equal(result.nextProtectedReviewRow.selectedWorkerId, "task-bud-480");
+  assert.deepEqual(result.approvedHandoff, {
+    source: "protected-board-recovery-approval",
+    action: "rerun-protected-recovery-worker",
+    selectedWorkerId: "task-bud-480",
+    approvalScope: "protected-or-external-scope",
+    requiredApprovalPrompt: "approve recovery rerun protected-board-task",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    nextActionCode: "use-source-specific-gate",
+  });
   assert.equal(result.dispatchAllowed, false);
   assert.equal(result.processStartAllowed, false);
 });
