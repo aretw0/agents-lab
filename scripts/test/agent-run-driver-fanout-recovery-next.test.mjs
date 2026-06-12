@@ -75,7 +75,7 @@ test("fanout recovery next selects the first failed worker without dispatch", ()
     assert.equal(report.selectedWorker.workerId, "worker-a");
     assert.equal(report.selectedWorker.runId, "fanout-worker-a");
     assert.equal(report.selectedWorker.logPath, ".pi/reports/fanout-worker-a.log");
-    assert.equal(report.failureKind, "worker-output-fail");
+    assert.equal(report.failureKind, "worker-contract-gap");
     assert.deepEqual(report.selectedCommandPreview.args, [
       "scripts/agent-run-driver-fanout-outcome.mjs",
       "--plan",
@@ -85,7 +85,8 @@ test("fanout recovery next selects the first failed worker without dispatch", ()
       "--exit-zero-on-block",
     ]);
     assert.match(report.nextActions.join("\n"), /\.pi\/reports\/fanout-worker-a\.log/);
-    assert.match(report.nextActions.join("\n"), /resolve the declared FAIL/);
+    assert.match(report.nextActions.join("\n"), /repair the missing contract or acceptance criteria/);
+    assert.match(report.nextActions.join("\n"), /do not rerun this worker until the source task\/spec has explicit local acceptance criteria/);
     assert.equal(report.selectedWorkerLogTail.logPath, ".pi/reports/fanout-worker-a.log");
     assert.equal(report.selectedWorkerLogTail.maxLines, 12);
     assert.equal(report.selectedWorkerLogTail.lineCount, 4);

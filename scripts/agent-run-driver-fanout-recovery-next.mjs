@@ -66,9 +66,17 @@ function failedWorkers(payload) {
     .filter((worker) => worker?.contractDecision !== "pass" || asArray(worker?.blockers).length > 0 || worker?.followTerminal === false);
 }
 
-function classifyFailure(worker) {
+function hasContractGapSignal(lines) {
+  const text = asArray(lines).map(String).join("\n").toLowerCase();
+  return /missing acceptance criteria|acceptance criteria.*missing|crit[eé]rios? de aceita[cç][aã]o ausentes?|acceptance criteria ausentes?|contrato can[oô]nico|canonical contract|reten[cç][aã]o\/expira[cç][aã]o|retention\/expiration/.test(text);
+}
+
+function classifyFailure(worker, logTailLines = []) {
   const blockers = asArray(worker?.blockers).map(String);
   const markerFailures = asArray(worker?.markerFailures).map(String);
+  if (hasContractGapSignal(logTailLines)) {
+    return "worker-contract-gap";
+  }
   if (blockers.some((blocker) => blocker.includes("worker-output-fail")) || markerFailures.includes("worker-output-fail")) {
     return "worker-output-fail";
   }
@@ -98,6 +106,13 @@ function refreshCommandFor(sourcePath, planPath) {
 
 function nextActionsFor(failureKind, worker) {
   const logHint = worker.logPath ? ` at ${worker.logPath}` : "";
+  if (failureKind === "worker-contract-gap") {
+    return [
+      `inspect the worker log for ${worker.runId || worker.workerId || "selected worker"}${logHint} and repair the missing contract or acceptance criteria before any rerun`,
+      "do not rerun this worker until the source task/spec has explicit local acceptance criteria and bounded review policy",
+      "after the contract is repaired, request explicit operator approval before rerunning exactly this worker",
+    ];
+  }
   if (failureKind === "worker-output-fail") {
     return [
       `inspect the worker log for ${worker.runId || worker.workerId || "selected worker"}${logHint} and resolve the declared FAIL/blockers before rerun`,
@@ -130,10 +145,10 @@ export function buildAgentRunDriverFanoutRecoveryNext(options = {}) {
   const workersNeedingRecovery = blockers.length === 0 ? failedWorkers(payload) : [];
   const selectedWorker = workersNeedingRecovery[0];
   const complete = blockers.length === 0 && payload?.decision === "pass" && workersNeedingRecovery.length === 0;
-  const failureKind = selectedWorker ? classifyFailure(selectedWorker) : "";
   const decision = blockers.length > 0 ? "blocked" : complete ? "complete" : selectedWorker ? "next-action-ready" : "blocked";
   const logTailMaxLines = normalizeLogTailLines(options.logTailLines);
   const selectedWorkerLogTailLines = selectedWorker ? readLogTail(cwd, selectedWorker.logPath, logTailMaxLines) : [];
+  const failureKind = selectedWorker ? classifyFailure(selectedWorker, selectedWorkerLogTailLines) : "";
   const derivedBlockers = [
     ...blockers,
     ...(blockers.length === 0 && !complete && !selectedWorker ? ["fanout-recovery-worker-missing"] : []),
