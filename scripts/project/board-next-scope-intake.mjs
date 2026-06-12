@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -144,15 +144,37 @@ function buildProposedTasks(audit) {
   ];
 }
 
+function readBoardTasks(cwd, boardPath) {
+  const fullPath = path.resolve(cwd, boardPath);
+  if (!existsSync(fullPath)) return [];
+  const board = JSON.parse(readFileSync(fullPath, "utf8"));
+  return Array.isArray(board?.tasks) ? board.tasks : [];
+}
+
+function materializedDraftIds(tasks) {
+  const haystack = tasks.map((task) => [
+    task?.id,
+    task?.description,
+    task?.notes,
+  ].join("\n")).join("\n");
+  return new Set([...haystack.matchAll(/TASK-BUD-DRAFT-[A-Z0-9-]+/g)].map((match) => match[0]));
+}
+
+function filterAlreadyMaterializedProposals(tasks, proposedTasks) {
+  const materialized = materializedDraftIds(tasks);
+  return proposedTasks.filter((task) => !materialized.has(task.id));
+}
+
 export function buildBoardNextScopeIntake(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const boardPath = String(options.boardPath || DEFAULT_BOARD_PATH);
   const audit = buildBoardSpecAudit({ cwd, boardPath });
+  const boardTasks = readBoardTasks(cwd, boardPath);
   const blockers = [];
   if (audit.decision === "blocked") blockers.push(...audit.blockers);
 
   const proposedBoardTasks = audit.decision === "no-local-safe-work" && blockers.length === 0
-    ? buildProposedTasks(audit)
+    ? filterAlreadyMaterializedProposals(boardTasks, buildProposedTasks(audit))
     : [];
   const decision = blockers.length > 0
     ? "blocked"

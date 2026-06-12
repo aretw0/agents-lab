@@ -84,3 +84,31 @@ test("board next scope intake defers when local-safe board work already exists",
   assert.equal(report.dispatchAllowed, false);
   assert.equal(report.processStartAllowed, false);
 }));
+
+test("board next scope intake skips proposals already materialized in the board", () => withBoard([
+  {
+    id: "TASK-DONE",
+    status: "completed",
+    priority: "p1",
+    description: "Done",
+    milestone: "0.8-board",
+  },
+  {
+    id: "TASK-MATERIALIZED",
+    status: "completed",
+    priority: "p1",
+    description: "Implemented worker queue",
+    milestone: "0.8-worker-orchestration",
+    notes: "Materialized from TASK-BUD-DRAFT-CORE-WORKER-QUEUE.",
+  },
+], (cwd) => {
+  const report = buildBoardNextScopeIntake({ cwd });
+
+  assert.equal(report.decision, "ready-for-operator-decision");
+  assert.deepEqual(report.proposedBoardTasks.map((task) => task.id), [
+    "TASK-BUD-DRAFT-BOARD-FANOUT-ASSIMILATION",
+    "TASK-BUD-DRAFT-OPERATIONAL-MEMORY-GATE",
+  ]);
+  assert.equal(report.dispatchAllowed, false);
+  assert.equal(report.processStartAllowed, false);
+}));
