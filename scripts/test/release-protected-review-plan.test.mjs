@@ -55,8 +55,14 @@ test("protected review plan starts with one protected worker approval required",
   assert.equal(result.decision, "single-worker-approval-required");
   assert.equal(result.requiredApprovalPrompt, "approve recovery rerun protected-board-task");
   assert.equal(result.maxConcurrentProtectedWorkersAllowedNow, 1);
+  assert.equal(result.approvedProtectedWorkerSlotsNow, 0);
+  assert.equal(result.pendingApprovalProtectedWorkerSlots, 1);
+  assert.equal(result.maxProtectedWorkerSlotsAfterApproval, 1);
   assert.equal(result.workerVolumeAllowedNow, false);
   assert.equal(result.singleWorkerAllowedAfterApproval, false);
+  assert.equal(result.protectedReviewExecutionGate.decision, "approval-required");
+  assert.equal(result.protectedReviewExecutionGate.approvedProtectedWorkerSlotsNow, 0);
+  assert.equal(result.protectedReviewExecutionGate.pendingApprovalProtectedWorkerSlots, 1);
   assert.equal(result.dispatchAllowed, false);
   assert.equal(result.processStartAllowed, false);
   assert.equal(result.protectedRamp[0].stage, "single-protected-worker");
@@ -73,8 +79,12 @@ test("protected review plan recognizes one approved protected action without ena
 
   assert.equal(result.decision, "single-worker-approved");
   assert.equal(result.maxConcurrentProtectedWorkersAllowedNow, 1);
+  assert.equal(result.approvedProtectedWorkerSlotsNow, 1);
+  assert.equal(result.pendingApprovalProtectedWorkerSlots, 0);
   assert.equal(result.workerVolumeAllowedNow, false);
   assert.equal(result.singleWorkerAllowedAfterApproval, true);
+  assert.equal(result.protectedReviewExecutionGate.decision, "single-worker-approved");
+  assert.equal(result.protectedReviewExecutionGate.approvedProtectedWorkerSlotsNow, 1);
   assert.match(result.nextActions.join("\n"), /run only the approved source-specific path/);
 });
 
@@ -87,6 +97,9 @@ test("protected review plan blocks when status is not pass", () => {
   assert.equal(result.decision, "blocked");
   assert.ok(result.blockers.includes("release-evidence-status-not-pass:block"));
   assert.equal(result.maxConcurrentProtectedWorkersAllowedNow, 0);
+  assert.equal(result.approvedProtectedWorkerSlotsNow, 0);
+  assert.equal(result.pendingApprovalProtectedWorkerSlots, 0);
+  assert.equal(result.protectedReviewExecutionGate.decision, "blocked");
   assert.equal(result.dispatchAllowed, false);
 });
 

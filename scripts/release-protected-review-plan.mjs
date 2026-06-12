@@ -98,6 +98,24 @@ function rampRows(nextRow) {
   ];
 }
 
+function protectedReviewExecutionGate({ approved, blockers, nextRow, requiredApprovalPrompt }) {
+  const blocked = blockers.length > 0;
+  return {
+    mode: "protected-review-execution-gate",
+    decision: blocked ? "blocked" : approved ? "single-worker-approved" : "approval-required",
+    selectedWorkerId: nextRow?.selectedWorkerId ?? "",
+    approvalScope: nextRow?.approvalScope ?? "",
+    requiredApprovalPrompt,
+    approvedProtectedWorkerSlotsNow: blocked ? 0 : approved ? 1 : 0,
+    pendingApprovalProtectedWorkerSlots: blocked || approved ? 0 : 1,
+    maxProtectedWorkerSlotsAfterApproval: blocked ? 0 : 1,
+    workerVolumeAllowedNow: false,
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    protectedActionsAllowed: false,
+  };
+}
+
 export function buildReleaseProtectedReviewPlan(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const status = statusFromOptions(options, cwd);
@@ -113,11 +131,18 @@ export function buildReleaseProtectedReviewPlan(options = {}) {
     ...(status && !nextRow ? ["next-protected-review-row-missing"] : []),
   ];
   const approved = approval?.decision === "approved-for-next-protected-review";
+  const requiredApprovalPrompt = approval?.requiredApprovalPrompt ?? nextRow?.requiredApprovalPrompt ?? "";
   const decision = blockers.length > 0
     ? "blocked"
     : approved
       ? "single-worker-approved"
       : "single-worker-approval-required";
+  const executionGate = protectedReviewExecutionGate({
+    approved,
+    blockers,
+    nextRow,
+    requiredApprovalPrompt,
+  });
   const plan = {
     mode: "release-protected-review-plan",
     schemaVersion: SCHEMA_VERSION,
@@ -127,10 +152,14 @@ export function buildReleaseProtectedReviewPlan(options = {}) {
     statusDecision: status?.decision ?? "missing",
     approvalDecision: approval?.decision ?? "missing",
     nextProtectedReviewRow: nextRow,
-    requiredApprovalPrompt: approval?.requiredApprovalPrompt ?? nextRow?.requiredApprovalPrompt ?? "",
+    requiredApprovalPrompt,
     maxConcurrentProtectedWorkersAllowedNow: blockers.length === 0 ? 1 : 0,
+    approvedProtectedWorkerSlotsNow: executionGate.approvedProtectedWorkerSlotsNow,
+    pendingApprovalProtectedWorkerSlots: executionGate.pendingApprovalProtectedWorkerSlots,
+    maxProtectedWorkerSlotsAfterApproval: executionGate.maxProtectedWorkerSlotsAfterApproval,
     workerVolumeAllowedNow: false,
     singleWorkerAllowedAfterApproval: approved,
+    protectedReviewExecutionGate: executionGate,
     protectedRamp: rampRows(nextRow),
     dispatchAllowed: false,
     processStartAllowed: false,
