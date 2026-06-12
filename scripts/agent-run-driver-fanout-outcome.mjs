@@ -46,6 +46,10 @@ function asString(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function displayPath(value) {
+  return asString(value).replace(/\\/g, "/");
+}
+
 function asWorkers(plan) {
   if (Array.isArray(plan?.workerPackets)) return plan.workerPackets;
   if (Array.isArray(plan?.workerSpecs)) return plan.workerSpecs;
@@ -150,7 +154,7 @@ export async function runAgentRunDriverFanoutOutcome(options = {}) {
     mode: "agent-run-driver-fanout-outcome-report",
     schemaVersion: SCHEMA_VERSION,
     generatedAtIso: new Date().toISOString(),
-    planPath: path.relative(cwd, planPath) || planPath,
+    planPath: displayPath(path.relative(cwd, planPath) || planPath),
     batchId: plan?.batchId,
     sourceMode: plan?.mode,
     decision,
