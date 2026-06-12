@@ -657,6 +657,49 @@ function agentRunProviderProtectedBoardRecoveryNextEvidence(cwd) {
   }
 }
 
+function agentRunProviderProtectedBoardRecoveryApprovalEvidence(cwd) {
+  const relPath = ".artifacts/agent-run-driver/pi-provider-protected-board-recovery-approval.json";
+  const fullPath = path.join(cwd, relPath);
+  if (!existsSync(fullPath)) {
+    return {
+      path: relPath,
+      present: false,
+      decision: "missing",
+      summary: "no protected board provider recovery approval artifact found",
+    };
+  }
+  try {
+    const payload = JSON.parse(readFileSync(fullPath, "utf8"));
+    return {
+      path: relPath,
+      present: true,
+      decision: payload.decision ?? "unknown",
+      mode: payload.mode,
+      schemaVersion: payload.schemaVersion,
+      sourceDecision: payload.sourceDecision,
+      approvalScope: payload.approvalScope,
+      selectedWorkerId: payload.selectedWorker?.workerId,
+      selectedRunId: payload.selectedWorker?.runId,
+      failureKind: payload.selectedWorker?.failureKind,
+      requiredApprovalPrompt: payload.requiredApprovalPrompt,
+      operatorApprovalMatched: payload.operatorApprovalMatched === true,
+      singleRunOnly: payload.singleRunOnly === true,
+      dispatchAllowed: payload.dispatchAllowed === true,
+      processStartAllowed: payload.processStartAllowed === true,
+      automationAllowed: payload.automationAllowed === true,
+      blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
+      summary: payload.summary ?? "protected board provider recovery approval artifact present",
+    };
+  } catch (error) {
+    return {
+      path: relPath,
+      present: true,
+      decision: "invalid-json",
+      summary: `could not parse protected board provider recovery approval artifact: ${String(error?.message ?? error)}`,
+    };
+  }
+}
+
 function releaseGateKind(id) {
   if (id === "target-version-ready") return "operator-decision";
   if (id === "board-release-clear") return "board-state";
@@ -699,6 +742,7 @@ function agentRunDriverGateEvidence(report) {
     `protected board provider plan decision=${report.providerProtectedBoardPlanEvidence?.decision ?? "missing"} workers=${report.providerProtectedBoardPlanEvidence?.workerCount ?? 0}`,
     `protected board provider outcome decision=${report.providerProtectedBoardOutcomeEvidence?.decision ?? "missing"} passed=${report.providerProtectedBoardOutcomeEvidence?.passedWorkerCount ?? 0}/${report.providerProtectedBoardOutcomeEvidence?.workerCount ?? 0}`,
     `protected board recovery next decision=${report.providerProtectedBoardRecoveryNextEvidence?.decision ?? "missing"} selected=${report.providerProtectedBoardRecoveryNextEvidence?.selectedWorkerId ?? "none"}`,
+    `protected board recovery approval decision=${report.providerProtectedBoardRecoveryApprovalEvidence?.decision ?? "missing"} prompt=${report.providerProtectedBoardRecoveryApprovalEvidence?.requiredApprovalPrompt ?? "none"}`,
   ].join("; ");
 }
 
@@ -1094,6 +1138,7 @@ export function gather(target, cwd = process.cwd()) {
   agentRunDrivers.providerProtectedBoardPlanEvidence = agentRunProviderProtectedBoardPlanEvidence(cwd);
   agentRunDrivers.providerProtectedBoardOutcomeEvidence = agentRunProviderProtectedBoardOutcomeEvidence(cwd);
   agentRunDrivers.providerProtectedBoardRecoveryNextEvidence = agentRunProviderProtectedBoardRecoveryNextEvidence(cwd);
+  agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence = agentRunProviderProtectedBoardRecoveryApprovalEvidence(cwd);
   agentRunDrivers.canarySuiteRequired = true;
   agentRunDrivers.canarySuiteGateOk = agentRunDrivers.canarySuiteEvidence.decision === "pass";
   agentRunDrivers.currentHead = head;

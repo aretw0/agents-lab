@@ -1262,6 +1262,59 @@ test("readiness exposes protected board recovery next evidence when present", ()
   }
 });
 
+test("readiness exposes protected board recovery approval evidence when present", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const evidencePath = path.join(workspace, ".artifacts", "agent-run-driver", "pi-provider-protected-board-recovery-approval.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, JSON.stringify({
+      mode: "agent-run-driver-fanout-recovery-approval",
+      schemaVersion: 1,
+      decision: "approval-required",
+      sourceDecision: "next-action-ready",
+      approvalScope: "protected-or-external-scope",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      automationAllowed: false,
+      selectedWorker: {
+        workerId: "task-bud-480",
+        runId: "protected-board-research-0-8-task-bud-480",
+        failureKind: "worker-output-fail",
+      },
+      requiredApprovalPrompt: "approve recovery rerun protected-board-research-0-8-task-bud-480",
+      operatorApprovalMatched: false,
+      singleRunOnly: true,
+      blockers: [],
+      summary: "agent-run-driver-fanout-recovery-approval: decision=approval-required source=.artifacts/agent-run-driver/pi-provider-protected-board-recovery-next.json selected=task-bud-480 dispatch=no",
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.present, true);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.decision, "approval-required");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.mode, "agent-run-driver-fanout-recovery-approval");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.sourceDecision, "next-action-ready");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.approvalScope, "protected-or-external-scope");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.selectedWorkerId, "task-bud-480");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.selectedRunId, "protected-board-research-0-8-task-bud-480");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.failureKind, "worker-output-fail");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.requiredApprovalPrompt, "approve recovery rerun protected-board-research-0-8-task-bud-480");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.operatorApprovalMatched, false);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.singleRunOnly, true);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.dispatchAllowed, false);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.processStartAllowed, false);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.automationAllowed, false);
+    assert.deepEqual(data.agentRunDrivers.providerProtectedBoardRecoveryApprovalEvidence.blockers, []);
+    assert.equal(data.agentRunDrivers.ok, true);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("agent-run driver gate rejects protected board plan workers without local evidence source", () => {
   const workspace = makeWorkspace({
     version: "0.8.0",
