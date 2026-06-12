@@ -96,6 +96,7 @@ export async function runReleaseEvidenceRefresh(options = {}) {
   writeJson(cwd, paths.cutPreviewPath, finalGate.cutPreview, pretty);
   writeJson(cwd, paths.artifactAuditPath, finalGate.artifactAudit, pretty);
   writeJson(cwd, paths.finalGatePath, finalGate, pretty);
+  const protectedRecoveryApproval = readiness?.agentRunDrivers?.providerProtectedBoardRecoveryApprovalEvidence;
 
   const blockers = [
     ...(canarySuite.decision !== "pass" ? ["canary-suite-not-pass"] : []),
@@ -116,6 +117,10 @@ export async function runReleaseEvidenceRefresh(options = {}) {
     canarySuiteDecision: canarySuite.decision,
     readinessDecision: readiness.decision,
     readinessReady: readiness.ready === true,
+    protectedBoardRecoveryApprovalDecision: protectedRecoveryApproval?.decision ?? "missing",
+    protectedBoardRecoveryApprovalPrompt: protectedRecoveryApproval?.requiredApprovalPrompt ?? "",
+    protectedBoardRecoveryApprovalSelectedWorkerId: protectedRecoveryApproval?.selectedWorkerId ?? "",
+    protectedBoardRecoveryApprovalScope: protectedRecoveryApproval?.approvalScope ?? "",
     draftDecision: draft.decision,
     finalGateDecision: finalGate.decision,
     finalGateHead: finalGate.head,

@@ -126,6 +126,10 @@ export function buildReleaseEvidenceStatus(options = {}) {
     finalGateDecision: finalGate?.decision ?? "missing",
     canarySuiteDecision: refresh?.canarySuiteDecision ?? "missing",
     readinessDecision: refresh?.readinessDecision ?? "missing",
+    protectedBoardRecoveryApprovalDecision: refresh?.protectedBoardRecoveryApprovalDecision ?? "missing",
+    protectedBoardRecoveryApprovalPrompt: refresh?.protectedBoardRecoveryApprovalPrompt ?? "",
+    protectedBoardRecoveryApprovalSelectedWorkerId: refresh?.protectedBoardRecoveryApprovalSelectedWorkerId ?? "",
+    protectedBoardRecoveryApprovalScope: refresh?.protectedBoardRecoveryApprovalScope ?? "",
     draftDecision: refresh?.draftDecision ?? "missing",
     approvalPromptCount: approvalPrompts.length,
     requiredApprovalPrompts: approvalPrompts,
@@ -135,7 +139,7 @@ export function buildReleaseEvidenceStatus(options = {}) {
     workflowDispatchAllowed: false,
     processStartAllowed: false,
     blockers,
-    summary: `release-evidence-status: decision=${decision} target=${target} tag=${tag} refresh=${refresh?.decision ?? "missing"} finalGate=${finalGate?.decision ?? "missing"} protectedActionsAllowed=no`,
+    summary: `release-evidence-status: decision=${decision} target=${target} tag=${tag} refresh=${refresh?.decision ?? "missing"} finalGate=${finalGate?.decision ?? "missing"} protectedRecoveryApproval=${refresh?.protectedBoardRecoveryApprovalDecision ?? "missing"} protectedActionsAllowed=no`,
   };
 }
 

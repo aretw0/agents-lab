@@ -27,6 +27,10 @@ function refresh(overrides = {}) {
     },
     canarySuiteDecision: "pass",
     readinessDecision: "ready",
+    protectedBoardRecoveryApprovalDecision: "approval-required",
+    protectedBoardRecoveryApprovalPrompt: "approve recovery rerun protected-board-task",
+    protectedBoardRecoveryApprovalSelectedWorkerId: "task-bud-480",
+    protectedBoardRecoveryApprovalScope: "protected-or-external-scope",
     draftDecision: "ready-for-operator-review",
     finalGateDecision: "pass",
     finalGateHead: "abc1234",
@@ -91,6 +95,11 @@ test("release evidence status passes coherent materialized evidence without runn
     assert.equal(result.headMatches, true);
     assert.equal(result.refreshDecision, "pass");
     assert.equal(result.finalGateDecision, "pass");
+    assert.equal(result.protectedBoardRecoveryApprovalDecision, "approval-required");
+    assert.equal(result.protectedBoardRecoveryApprovalPrompt, "approve recovery rerun protected-board-task");
+    assert.equal(result.protectedBoardRecoveryApprovalSelectedWorkerId, "task-bud-480");
+    assert.equal(result.protectedBoardRecoveryApprovalScope, "protected-or-external-scope");
+    assert.match(result.summary, /protectedRecoveryApproval=approval-required/);
     assert.deepEqual(result.blockers, []);
     assert.equal(result.protectedActionsAllowed, false);
     assert.equal(result.processStartAllowed, false);

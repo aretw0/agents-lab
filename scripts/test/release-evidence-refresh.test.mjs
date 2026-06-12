@@ -43,6 +43,14 @@ function readiness(gitHead, ready = true) {
     ready,
     decision: ready ? "ready" : "not-ready",
     head: gitHead,
+    agentRunDrivers: {
+      providerProtectedBoardRecoveryApprovalEvidence: {
+        decision: "approval-required",
+        requiredApprovalPrompt: "approve recovery rerun protected-board-task",
+        selectedWorkerId: "task-bud-480",
+        approvalScope: "protected-or-external-scope",
+      },
+    },
     blockers: [],
   };
 }
@@ -63,6 +71,10 @@ test("release evidence refresh writes canary, readiness, draft, and final gate a
     assert.equal(result.decision, "pass");
     assert.equal(result.canarySuiteDecision, "pass");
     assert.equal(result.readinessDecision, "ready");
+    assert.equal(result.protectedBoardRecoveryApprovalDecision, "approval-required");
+    assert.equal(result.protectedBoardRecoveryApprovalPrompt, "approve recovery rerun protected-board-task");
+    assert.equal(result.protectedBoardRecoveryApprovalSelectedWorkerId, "task-bud-480");
+    assert.equal(result.protectedBoardRecoveryApprovalScope, "protected-or-external-scope");
     assert.equal(result.draftDecision, "ready-for-operator-review");
     assert.equal(result.finalGateDecision, "pass");
     assert.equal(result.protectedActionsAllowed, false);
