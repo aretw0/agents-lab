@@ -319,7 +319,7 @@
     {
       "id": "TASK-BUD-1102",
       "description": "[P2] Transformar o contrato de memória operacional do TASK-BUD-676 em schema/canary local executável, sem recall externo e sem provider remoto.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-1099"
@@ -337,7 +337,8 @@
         "Teste cobre memória stale/sem provenance como bloqueio."
       ],
       "milestone": "0.8-operational-memory",
-      "notes": "[provenance:operator] source_task=TASK-BUD-676 reason=Worker aprovou a evidência local, mas apontou falta de schema/canary executável como próximo passo seguro."
+      "notes": "[provenance:operator] source_task=TASK-BUD-676 reason=Worker aprovou a evidência local, mas apontou falta de schema/canary executável como próximo passo seguro.\n2026-06-12: concluída com validação local de memoryPacket em scripts/context-preload-consume.mjs; saída report-only inclui memoryTypes/memoryTypeCounts e teste cobre item sem provenance como fallback-canonical.",
+      "verification": "node --test scripts/test/context-preload-consume.test.mjs"
     }
   ]
 }

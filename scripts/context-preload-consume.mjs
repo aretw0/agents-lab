@@ -10,6 +10,14 @@ const CANONICAL_PATHS = [
   ".project/verification.json",
 ];
 
+const MEMORY_TYPES = [
+  "operational-state",
+  "execution-evidence",
+  "operator-preference",
+  "project-fact",
+  "external-influence",
+];
+
 function parseArgs(argv) {
   const out = {
     workspace: process.cwd(),
@@ -83,6 +91,52 @@ function resolveProfile(preloadPack, requested) {
   return { profile: "control-plane-core", paths: Array.isArray(profileMap["control-plane-core"]) ? profileMap["control-plane-core"] : [] };
 }
 
+function emptyMemoryTypeCounts() {
+  return Object.fromEntries(MEMORY_TYPES.map((type) => [type, 0]));
+}
+
+function validateMemoryPacket(memoryPacket, nowMs = Date.now()) {
+  const counts = emptyMemoryTypeCounts();
+  const staleReasons = [];
+  if (memoryPacket === undefined) {
+    return {
+      present: false,
+      itemCount: 0,
+      memoryTypes: MEMORY_TYPES,
+      counts,
+      staleReasons,
+    };
+  }
+
+  const items = Array.isArray(memoryPacket?.items) ? memoryPacket.items : [];
+  if (!Array.isArray(memoryPacket?.items)) staleReasons.push("memory-packet-items-missing");
+
+  for (const item of items) {
+    const type = String(item?.type ?? "").trim();
+    if (MEMORY_TYPES.includes(type)) counts[type] += 1;
+    else staleReasons.push("memory-type-invalid");
+
+    const requiredFields = ["source", "timestamp", "freshness", "scope", "retention", "expiresAt"];
+    if (requiredFields.some((field) => !String(item?.[field] ?? "").trim())) {
+      staleReasons.push("memory-provenance-missing");
+    }
+
+    const timestampMs = Date.parse(String(item?.timestamp ?? ""));
+    const expiresAtMs = Date.parse(String(item?.expiresAt ?? ""));
+    if (!Number.isFinite(timestampMs)) staleReasons.push("memory-timestamp-invalid");
+    if (!Number.isFinite(expiresAtMs)) staleReasons.push("memory-expiration-invalid");
+    else if (expiresAtMs <= nowMs) staleReasons.push("memory-expired");
+  }
+
+  return {
+    present: true,
+    itemCount: items.length,
+    memoryTypes: MEMORY_TYPES,
+    counts,
+    staleReasons: [...new Set(staleReasons)],
+  };
+}
+
 function buildReport(args) {
   const workspace = path.resolve(args.workspace);
   const defaultPackPath = path.join(workspace, ".sandbox", "pi-agent", "preload", "context-preload-pack.json");
@@ -118,6 +172,9 @@ function buildReport(args) {
     }
   }
 
+  const memoryValidation = validateMemoryPacket(pack?.memoryPacket);
+  staleReasons.push(...memoryValidation.staleReasons);
+
   const resolved = resolveProfile(pack?.preloadPack, args.profile);
   const packEmpty = resolved.paths.length === 0;
   if (pack && packEmpty) staleReasons.push("profile-pack-empty");
@@ -138,6 +195,9 @@ function buildReport(args) {
     selectedPaths,
     fallbackPaths: CANONICAL_PATHS,
     staleReasons,
+    memoryTypes: MEMORY_TYPES,
+    memoryTypeCounts: memoryValidation.counts,
+    memoryValidation,
     currentCanonicalState,
     summary: [
       "context-preload-consume:",

@@ -51,12 +51,38 @@ function runConsume({ workspace, profile = "control-plane-core", packPath }) {
   return JSON.parse(result.stdout);
 }
 
+function validMemoryPacket() {
+  return {
+    items: [
+      {
+        type: "operational-state",
+        source: ".project/handoff.json",
+        timestamp: new Date().toISOString(),
+        freshness: "fresh",
+        scope: "workspace",
+        retention: "while-task-active",
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      },
+      {
+        type: "execution-evidence",
+        source: ".pi/reports/agent-runs.json",
+        timestamp: new Date().toISOString(),
+        freshness: "fresh",
+        scope: "run",
+        retention: "while-artifact-referenced",
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      },
+    ],
+  };
+}
+
 test("uses preload pack when canonical state is fresh", () => {
   const workspace = makeWorkspace();
   try {
     const packPath = path.join(workspace, ".sandbox", "pi-agent", "preload", "context-preload-pack.json");
     const pack = {
       generatedAtIso: new Date().toISOString(),
+      memoryPacket: validMemoryPacket(),
       preloadPack: {
         controlPlaneCore: [".project/handoff.json", ".project/tasks.json"],
         agentWorkerLean: [".project/handoff.json"],
@@ -72,6 +98,9 @@ test("uses preload pack when canonical state is fresh", () => {
     assert.equal(report.decision, "use-pack");
     assert.deepEqual(report.selectedPaths, [".project/handoff.json", ".project/tasks.json"]);
     assert.deepEqual(report.staleReasons, []);
+    assert.equal(report.memoryValidation.present, true);
+    assert.equal(report.memoryTypeCounts["operational-state"], 1);
+    assert.equal(report.memoryTypeCounts["execution-evidence"], 1);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }
@@ -83,6 +112,7 @@ test("falls back to canonical when canonical state changes after pack generation
     const packPath = path.join(workspace, ".sandbox", "pi-agent", "preload", "context-preload-pack.json");
     const pack = {
       generatedAtIso: new Date().toISOString(),
+      memoryPacket: validMemoryPacket(),
       preloadPack: {
         controlPlaneCore: [".project/handoff.json", ".project/tasks.json"],
         agentWorkerLean: [".project/handoff.json"],
@@ -115,6 +145,41 @@ test("falls back to canonical when canonical state changes after pack generation
     const report = runConsume({ workspace, packPath });
     assert.equal(report.decision, "fallback-canonical");
     assert.ok(report.staleReasons.includes("canonical-state-changed"));
+    assert.deepEqual(report.selectedPaths, CANONICAL_PATHS);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
+test("falls back to canonical when memory packet item lacks provenance", () => {
+  const workspace = makeWorkspace();
+  try {
+    const packPath = path.join(workspace, ".sandbox", "pi-agent", "preload", "context-preload-pack.json");
+    const pack = {
+      generatedAtIso: new Date().toISOString(),
+      memoryPacket: {
+        items: [
+          {
+            type: "operator-preference",
+            freshness: "fresh",
+            retention: "until-revoked",
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+          },
+        ],
+      },
+      preloadPack: {
+        controlPlaneCore: [".project/handoff.json", ".project/tasks.json"],
+      },
+      canonicalState: {
+        fingerprint: canonicalFingerprint(workspace),
+      },
+    };
+    writeFileSync(packPath, JSON.stringify(pack, null, 2));
+
+    const report = runConsume({ workspace, packPath });
+    assert.equal(report.decision, "fallback-canonical");
+    assert.ok(report.staleReasons.includes("memory-provenance-missing"));
+    assert.equal(report.memoryTypeCounts["operator-preference"], 1);
     assert.deepEqual(report.selectedPaths, CANONICAL_PATHS);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
