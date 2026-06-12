@@ -363,6 +363,29 @@
       "milestone": "0.8-potential-completeness",
       "notes": "[provenance:operator] source_task=none reason=Após concluir TASK-BUD-1100..1102, o board ficou sem trabalho local-safe e devolvia cola manual ao operador.\n2026-06-12: concluída adicionando nextScopeCandidates em project-board-spec-audit quando decision=no-local-safe-work.",
       "verification": "node --test scripts/test/board-spec-audit.test.mjs"
+    },
+    {
+      "id": "TASK-BUD-1104",
+      "description": "[P1] Materializar um packet report-only de next-scope intake a partir dos candidatos do board audit, sem editar o board automaticamente.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1103"
+      ],
+      "files": [
+        "scripts/project/board-next-scope-intake.mjs",
+        "scripts/test/board-next-scope-intake.test.mjs",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Script report-only gera proposedBoardTasks quando audit=no-local-safe-work.",
+        "Script defere para trabalho existente quando o board já tem task acionável ou needs-spec.",
+        "Saída bloqueia dispatch, process start, workflow dispatch, tag e publish.",
+        "Teste cobre proposta local-safe e defer para board existente."
+      ],
+      "milestone": "0.8-potential-completeness",
+      "notes": "[provenance:operator] source_task=TASK-BUD-1103 reason=O audit passou a emitir candidatos; faltava packet que transformasse isso em proposta de task revisável sem mutar o board.",
+      "verification": "node --test scripts/test/board-next-scope-intake.test.mjs"
     }
   ]
 }
