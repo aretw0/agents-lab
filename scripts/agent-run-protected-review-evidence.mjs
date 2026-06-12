@@ -82,7 +82,8 @@ export function buildAgentRunProtectedReviewEvidence(options = {}) {
   const recoveryNext = readJsonIfExists(cwd, options.recoveryNextPath || DEFAULT_RECOVERY_NEXT);
   const recoveryApproval = readJsonIfExists(cwd, options.recoveryApprovalPath || DEFAULT_RECOVERY_APPROVAL);
   const selectedWorker = driverStep ? selectedWorkerFrom(driverStep) : null;
-  const nextWorker = recoveryApproval?.selectedWorker ?? recoveryNext?.selectedWorker ?? null;
+  const fanoutComplete = fanoutOutcome?.decision === "pass" && Number(fanoutOutcome?.passedWorkerCount ?? 0) === Number(fanoutOutcome?.workerCount ?? -1);
+  const nextWorker = fanoutComplete ? null : (recoveryApproval?.selectedWorker ?? recoveryNext?.selectedWorker ?? null);
   const blockers = [
     ...(driverStep ? [] : ["driver-step-result-missing"]),
     ...(driverStep && driverStep.mode !== "agent-run-driver-step-dispatch" ? ["driver-step-result-mode-invalid"] : []),
@@ -111,6 +112,7 @@ export function buildAgentRunProtectedReviewEvidence(options = {}) {
           decision: fanoutOutcome.decision ?? "missing",
           workerCount: fanoutOutcome.workerCount ?? 0,
           passedWorkerCount: fanoutOutcome.passedWorkerCount ?? 0,
+          complete: fanoutComplete,
           blockers: asArray(fanoutOutcome.blockers),
         }
       : undefined,
@@ -129,7 +131,9 @@ export function buildAgentRunProtectedReviewEvidence(options = {}) {
     protectedActionsAllowed: false,
     blockers,
     nextActions: decision === "pass"
-      ? [`present approval prompt exactly: ${recoveryApproval?.requiredApprovalPrompt ?? ""}`]
+      ? fanoutComplete
+        ? ["protected review fanout is complete; no recovery approval is pending"]
+        : [`present approval prompt exactly: ${recoveryApproval?.requiredApprovalPrompt ?? ""}`]
       : ["rebuild driver-step/fanout/recovery artifacts before asking for another protected approval"],
     summary: `agent-run-protected-review-evidence: decision=${decision} approved=${selectedWorker?.workerId ?? "none"} fanout=${fanoutOutcome?.passedWorkerCount ?? 0}/${fanoutOutcome?.workerCount ?? 0} next=${nextWorker?.workerId ?? "none"} dispatch=no`,
   };

@@ -119,6 +119,33 @@ test("protected review evidence blocks failed approved worker outcome", () => {
   }
 });
 
+test("protected review evidence does not request recovery after fanout passes", () => {
+  const cwd = workspace();
+  try {
+    seed(cwd);
+    writeJson(cwd, "fanout-outcome.json", {
+      mode: "agent-run-driver-fanout-outcome-report",
+      decision: "pass",
+      workerCount: 3,
+      passedWorkerCount: 3,
+      blockers: [],
+    });
+    writeJson(cwd, "recovery-next.json", {
+      mode: "agent-run-driver-fanout-recovery-next",
+      decision: "complete",
+      selectedWorker: null,
+    });
+    const result = build(cwd);
+
+    assert.equal(result.decision, "pass");
+    assert.equal(result.fanoutProgress.complete, true);
+    assert.equal(result.nextProtectedReview, undefined);
+    assert.deepEqual(result.nextActions, ["protected review fanout is complete; no recovery approval is pending"]);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("protected review evidence CLI writes report artifact", () => {
   const cwd = workspace();
   try {
