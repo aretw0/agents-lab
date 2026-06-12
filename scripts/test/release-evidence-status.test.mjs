@@ -108,6 +108,22 @@ test("release evidence status passes coherent materialized evidence without runn
       "approve release draft prepare-draft-release v0.8.0",
       "approve release publish v0.8.0",
     ]);
+    assert.deepEqual(result.protectedReviewRows[0], {
+      action: "rerun-protected-recovery-worker",
+      source: "protected-board-recovery-approval",
+      requiredApprovalPrompt: "approve recovery rerun protected-board-task",
+      selectedWorkerId: "task-bud-480",
+      approvalScope: "protected-or-external-scope",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+    });
+    assert.deepEqual(result.protectedReviewRows[1], {
+      action: "tag create v0.8.0",
+      source: "release-final-gate",
+      requiredApprovalPrompt: "approve release tag create v0.8.0",
+      dispatchAllowed: false,
+      processStartAllowed: false,
+    });
     assert.match(result.summary, /protectedRecoveryApproval=approval-required/);
     assert.deepEqual(result.blockers, []);
     assert.equal(result.protectedActionsAllowed, false);

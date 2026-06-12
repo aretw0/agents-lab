@@ -117,6 +117,26 @@ export function buildReleaseEvidenceStatus(options = {}) {
     ...(protectedRecoveryPrompt ? [protectedRecoveryPrompt] : []),
     ...approvalPrompts,
   ];
+  const protectedReviewRows = [
+    ...(protectedRecoveryPrompt
+      ? [{
+          action: "rerun-protected-recovery-worker",
+          source: "protected-board-recovery-approval",
+          requiredApprovalPrompt: protectedRecoveryPrompt,
+          selectedWorkerId: refresh?.protectedBoardRecoveryApprovalSelectedWorkerId ?? "",
+          approvalScope: refresh?.protectedBoardRecoveryApprovalScope ?? "",
+          dispatchAllowed: false,
+          processStartAllowed: false,
+        }]
+      : []),
+    ...expectedPrompts.map((prompt) => ({
+      action: prompt.replace(/^approve release /, ""),
+      source: "release-final-gate",
+      requiredApprovalPrompt: prompt,
+      dispatchAllowed: false,
+      processStartAllowed: false,
+    })),
+  ];
   return {
     mode: "release-evidence-status",
     schemaVersion: SCHEMA_VERSION,
@@ -142,6 +162,7 @@ export function buildReleaseEvidenceStatus(options = {}) {
     requiredApprovalPrompts: approvalPrompts,
     protectedReviewPromptCount: protectedReviewPrompts.length,
     protectedReviewPrompts,
+    protectedReviewRows,
     protectedActionsAllowed: false,
     tagAllowed: false,
     publishAllowed: false,
