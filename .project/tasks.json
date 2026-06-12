@@ -236,6 +236,104 @@
       "milestone": "0.8-runtime-health-dogfooding",
       "notes": "Criada a partir do dogfooding no Pi: prompts simples estavam gerando `Performance watchdog critical` e safe-mode automático com event-loop max acima de 800ms/1200ms. A fatia não altera thresholds e não reduz alertas; ela melhora a classificação de output colado para diferenciar pico isolado, recorrência/severidade e evidência que exige investigação.",
       "verification": "verify-task-bud-1098-watchdog-output-recurrence"
+    },
+    {
+      "id": "TASK-BUD-1099",
+      "description": "[P1] Criar um mapa de completude 0.8 agnóstico que converta o roadmap e as evidências atuais em lanes executáveis por workers local-safe.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "ROADMAP.md",
+        "docs/research/0-8-readiness-map.md",
+        "docs/research/0-8-potential-completeness-map-2026-06.md",
+        "docs/research/task-bud-480-local-agent-patterns-canary-2026-06.md",
+        "docs/research/task-bud-521-local-isolation-canary-2026-06.md",
+        "docs/research/task-bud-676-local-memory-canary-2026-06.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Documento de completude separa release gate de trabalho real do board.",
+        "Cada lane candidata declara objetivo, arquivos primários, critérios de aceite e se é local-safe ou protected.",
+        "O mapa preserva agnosticismo de engine: core/primitives separados de adapters Pi.",
+        "A próxima fatia executável local-safe fica clara sem exigir release tag."
+      ],
+      "milestone": "0.8-potential-completeness",
+      "notes": "[provenance:operator] source_task=none reason=Operador corrigiu a direção: não iniciar release agora; usar o board e workers para provar robustez antes de considerar 0.8.0 perto.\n2026-06-12: concluido com docs/research/0-8-potential-completeness-map-2026-06.md; mapa separa release gate de trabalho real do board e define as lanes TASK-BUD-1100..1102 como proximas frentes local-safe.",
+      "verification": "verify-task-bud-1099-potential-completeness-map"
+    },
+    {
+      "id": "TASK-BUD-1100",
+      "description": "[P1] Assimilar a evidência do TASK-BUD-480 em um contrato distribuível de worker envelope agent-first, sem depender de semântica de colônia.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1099"
+      ],
+      "files": [
+        "docs/research/task-bud-480-local-agent-patterns-canary-2026-06.md",
+        "docs/research/worker-provider-model-arena-2026-05.md",
+        "docs/primitives/agent-worker-envelope.md",
+        "scripts/agent-run-pi-provider-fanout-plan.mjs",
+        "scripts/agent-run-pi-provider-worker-dispatch.mjs"
+      ],
+      "acceptance_criteria": [
+        "Contrato usa nomes agnósticos de runtime e não exige colony/ant_colony.",
+        "Define o envelope single-worker como padrão 0.8: declared files, approval, registry, log, follow, outcome e touchedFiles.",
+        "Diferencia contrato distribuível de adapter Pi/provider.",
+        "Documenta o que ainda não está promovido: multi-file mutation, unattended fanout, protected scope e swarm."
+      ],
+      "milestone": "0.8-worker-orchestration",
+      "notes": "[provenance:operator] source_task=TASK-BUD-480 reason=Worker aprovou a evidência local de padrões de agentes; próximo passo real é promover o contrato single-worker para primitive distribuível, não criar abstração de colônia."
+    },
+    {
+      "id": "TASK-BUD-1101",
+      "description": "[P1] Assimilar a evidência do TASK-BUD-521 em requisitos executáveis de isolamento para worker/driver local-safe.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1099",
+        "TASK-BUD-1100"
+      ],
+      "files": [
+        "docs/research/task-bud-521-local-isolation-canary-2026-06.md",
+        "docs/primitives/agent-worker-isolation.md",
+        "scripts/agent-run-driver-step.mjs",
+        "scripts/agent-run-pi-provider-worker-dispatch.mjs",
+        "scripts/test/agent-run-driver-step.test.mjs",
+        "scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "Documento de requisitos traduz isolamento local em regras de cwd, declaredFiles, envKeys, logPath e registry.",
+        "Driver/dispatch bloqueia ou reporta mismatch de isolamento antes de spawn.",
+        "Requisitos preservam executor adapter separado do contrato core.",
+        "Teste cobre pelo menos um bloqueio de isolamento local-safe sem chamar provider remoto.",
+        "Nenhuma mudança habilita protected scope, ant_colony ou execução unattended."
+      ],
+      "milestone": "0.8-worker-orchestration",
+      "notes": "[provenance:operator] source_task=TASK-BUD-521 reason=Worker aprovou a evidência local de isolamento/sandboxing; próximo passo real é converter isso em requisitos/testes de driver."
+    },
+    {
+      "id": "TASK-BUD-1102",
+      "description": "[P2] Transformar o contrato de memória operacional do TASK-BUD-676 em schema/canary local executável, sem recall externo e sem provider remoto.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-1099"
+      ],
+      "files": [
+        "docs/research/task-bud-676-local-memory-canary-2026-06.md",
+        "scripts/context-preload-pack.mjs",
+        "scripts/context-preload-consume.mjs",
+        "scripts/test/context-preload-consume.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "Schema/canary valida source, timestamp, freshness, scope, retention e expiration para memória operacional.",
+        "Canário não consulta rede, não aplica recall automaticamente e não escreve preferências inferidas.",
+        "Saída report-only diferencia operational-state, execution-evidence, operator-preference, project-fact e external-influence.",
+        "Teste cobre memória stale/sem provenance como bloqueio."
+      ],
+      "milestone": "0.8-operational-memory",
+      "notes": "[provenance:operator] source_task=TASK-BUD-676 reason=Worker aprovou a evidência local, mas apontou falta de schema/canary executável como próximo passo seguro."
     }
   ]
 }
