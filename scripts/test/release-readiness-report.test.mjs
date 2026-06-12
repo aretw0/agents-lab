@@ -36,6 +36,7 @@ function makeWorkspace({
       "agent-run:pi-provider-fanout-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --out .artifacts/agent-run-driver/pi-provider-fanout-plan.json",
       "agent-run:pi-provider-protected-board-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --from-board-protected --require-local-task-evidence --limit 3 --batch-id protected-board-research-0-8 --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
       "agent-run:pi-provider-protected-board-outcome": "node scripts/agent-run-driver-fanout-outcome.mjs --plan .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-outcome.json --exit-zero-on-block",
+      "agent-run:pi-provider-protected-board-recovery-next": "node scripts/agent-run-driver-fanout-recovery-next.mjs --source .artifacts/agent-run-driver/pi-provider-protected-board-fanout-outcome.json --out .artifacts/agent-run-driver/pi-provider-protected-board-recovery-next.json",
       "agent-run:pi-provider-readiness": "node scripts/agent-run-pi-provider-readiness.mjs --out .artifacts/agent-run-driver/pi-provider-readiness.json",
       "agent-run:pi-provider-recovery-next": "node scripts/agent-run-pi-provider-recovery-next.mjs --out .artifacts/agent-run-driver/pi-provider-recovery-next.json",
       "agent-run:pi-provider-network-check": "node scripts/agent-run-pi-provider-network-check.mjs --out .artifacts/agent-run-driver/pi-provider-network-check.json",
@@ -608,6 +609,7 @@ test("worktree clean gate blocks release readiness for tracked changes", () => {
         "agent-run:pi-provider-fanout-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --out .artifacts/agent-run-driver/pi-provider-fanout-plan.json",
         "agent-run:pi-provider-protected-board-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --from-board-protected --require-local-task-evidence --limit 3 --batch-id protected-board-research-0-8 --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
       "agent-run:pi-provider-protected-board-outcome": "node scripts/agent-run-driver-fanout-outcome.mjs --plan .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-outcome.json --exit-zero-on-block",
+      "agent-run:pi-provider-protected-board-recovery-next": "node scripts/agent-run-driver-fanout-recovery-next.mjs --source .artifacts/agent-run-driver/pi-provider-protected-board-fanout-outcome.json --out .artifacts/agent-run-driver/pi-provider-protected-board-recovery-next.json",
         "agent-run:pi-provider-readiness": "node scripts/agent-run-pi-provider-readiness.mjs --out .artifacts/agent-run-driver/pi-provider-readiness.json",
         "agent-run:pi-provider-recovery-next": "node scripts/agent-run-pi-provider-recovery-next.mjs --out .artifacts/agent-run-driver/pi-provider-recovery-next.json",
         "agent-run:pi-provider-network-check": "node scripts/agent-run-pi-provider-network-check.mjs --out .artifacts/agent-run-driver/pi-provider-network-check.json",
@@ -1203,6 +1205,55 @@ test("readiness exposes protected board provider outcome evidence when present",
   }
 });
 
+test("readiness exposes protected board recovery next evidence when present", () => {
+  const workspace = makeWorkspace({
+    version: "0.8.0",
+    tasks: [],
+  });
+
+  try {
+    const evidencePath = path.join(workspace, ".artifacts", "agent-run-driver", "pi-provider-protected-board-recovery-next.json");
+    mkdirSync(path.dirname(evidencePath), { recursive: true });
+    writeFileSync(evidencePath, JSON.stringify({
+      mode: "agent-run-driver-fanout-recovery-next",
+      schemaVersion: 1,
+      decision: "next-action-ready",
+      sourceDecision: "block",
+      batchId: "protected-board-research-0-8",
+      failedWorkerCount: 2,
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      automationAllowed: false,
+      selectedWorker: {
+        workerId: "task-bud-480",
+        runId: "protected-board-research-0-8-task-bud-480",
+      },
+      failureKind: "worker-output-fail",
+      blockers: [],
+      summary: "agent-run-driver-fanout-recovery-next: decision=next-action-ready source=.artifacts/agent-run-driver/pi-provider-protected-board-fanout-outcome.json failed=2 selected=task-bud-480 dispatch=no",
+    }, null, 2));
+
+    const data = gather("0.8.0", workspace);
+
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.present, true);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.decision, "next-action-ready");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.mode, "agent-run-driver-fanout-recovery-next");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.batchId, "protected-board-research-0-8");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.sourceDecision, "block");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.failedWorkerCount, 2);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.selectedWorkerId, "task-bud-480");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.selectedRunId, "protected-board-research-0-8-task-bud-480");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.failureKind, "worker-output-fail");
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.dispatchAllowed, false);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.processStartAllowed, false);
+    assert.equal(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.automationAllowed, false);
+    assert.deepEqual(data.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.blockers, []);
+    assert.equal(data.agentRunDrivers.ok, true);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("agent-run driver gate rejects protected board plan workers without local evidence source", () => {
   const workspace = makeWorkspace({
     version: "0.8.0",
@@ -1409,6 +1460,7 @@ test("cli can write structured json for agents", () => {
       ["agent-run:pi-provider-fanout-plan", true, []],
       ["agent-run:pi-provider-protected-board-plan", true, []],
       ["agent-run:pi-provider-protected-board-outcome", true, []],
+      ["agent-run:pi-provider-protected-board-recovery-next", true, []],
       ["agent-run:pi-provider-readiness", true, []],
       ["agent-run:pi-provider-recovery-next", true, []],
       ["agent-run:pi-provider-network-check", true, []],
@@ -1423,6 +1475,7 @@ test("cli can write structured json for agents", () => {
     assert.equal(json.agentRunDrivers.providerNetworkCheckEvidence.decision, "missing");
     assert.equal(json.agentRunDrivers.providerProtectedBoardPlanEvidence.decision, "missing");
     assert.equal(json.agentRunDrivers.providerProtectedBoardOutcomeEvidence.decision, "missing");
+    assert.equal(json.agentRunDrivers.providerProtectedBoardRecoveryNextEvidence.decision, "missing");
     assert.equal(json.packageSmoke.mode, "release-package-smoke-report");
     assert.equal(json.packageSmoke.decision, "pass");
     assert.deepEqual(json.packageSmoke.packageBlockers, []);
