@@ -97,6 +97,20 @@ test("protected review approval blocks mismatched operator approval", () => {
   assert.equal(result.dispatchAllowed, false);
 });
 
+test("protected review approval explains refresh passed as status", () => {
+  const result = buildReleaseProtectedReviewApproval({
+    status: {
+      mode: "release-evidence-refresh",
+      decision: "pass",
+    },
+  });
+
+  assert.equal(result.decision, "blocked");
+  assert.ok(result.blockers.includes("release-evidence-status-mode-invalid"));
+  assert.match(result.nextActions.join("\n"), /rerun with --evidence PATH/);
+  assert.equal(result.dispatchAllowed, false);
+});
+
 test("protected review approval CLI writes report artifact", () => {
   const cwd = workspace();
   try {

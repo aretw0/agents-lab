@@ -89,6 +89,7 @@ export function buildReleaseProtectedReviewApproval(options = {}) {
     ...(status && !nextRow ? ["next-protected-review-row-missing"] : []),
     ...(operatorApproval && operatorApproval !== requiredApprovalPrompt ? ["operator-approval-mismatch"] : []),
   ];
+  const statusMode = status?.mode ?? "";
   const approvalMatched = blockers.length === 0 && operatorApproval === requiredApprovalPrompt;
   const decision = blockers.length > 0 ? "blocked" : approvalMatched ? "approved-for-next-protected-review" : "approval-required";
   const target = status?.target ?? String(options.target ?? "0.8.0");
@@ -135,7 +136,9 @@ export function buildReleaseProtectedReviewApproval(options = {}) {
       ? [`present approval prompt exactly: ${requiredApprovalPrompt}`]
       : decision === "approved-for-next-protected-review"
         ? ["approval matched; use the row source-specific dispatch path under its own gates"]
-        : ["refresh or repair release evidence status before protected approval"],
+        : statusMode === "release-evidence-refresh"
+          ? ["received release-evidence-refresh as --status; rerun with --evidence PATH or pass a release-evidence-status artifact to --status"]
+          : ["refresh or repair release evidence status before protected approval"],
     summary: `release-protected-review-approval: decision=${decision} next=${nextRow?.action ?? "none"} dispatch=no`,
   };
   if (options.outPath) writeJson(cwd, options.outPath, report, options.pretty === true);
