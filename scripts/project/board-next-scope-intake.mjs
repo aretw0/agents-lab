@@ -31,29 +31,117 @@ function parseArgs(argv = process.argv.slice(2)) {
   return out;
 }
 
-function buildProposedTask(audit) {
-  return {
-    id: "TASK-BUD-DRAFT-NEXT-LOCAL-SCOPE",
-    description: "[P1] Propor a próxima lane local-safe a partir do board/readiness atual, sem abrir protected scope nem release.",
-    status: "planned",
-    priority: "p1",
-    files: [
-      "scripts/project/board-spec-audit.mjs",
-      "scripts/project/board-next-scope-intake.mjs",
-      "scripts/test/board-next-scope-intake.test.mjs",
-      "scripts/release-readiness-report.mjs",
-      "docs/research/0-8-potential-completeness-map-2026-06.md",
-      ".project/tasks.json",
-    ],
-    acceptance_criteria: [
-      "Gerar 2-3 propostas de tasks local-safe com arquivos e critérios de aceite, sem editar o board automaticamente.",
-      "Não promover protected/parked tasks sem decisão explícita do operador.",
-      "Não autorizar release tag, publish, workflow dispatch, process start ou agent dispatch.",
-      "Cada proposta diferencia core/primitives de adapters e aponta validação focal.",
-    ],
-    milestone: "0.8-potential-completeness",
-    notes: `Draft gerado por board-next-scope-intake quando audit=${audit.decision}; revisar antes de materializar no board.`,
-  };
+function buildProposedTasks(audit) {
+  const commonGuards = [
+    "Não promover protected/parked tasks sem decisão explícita do operador.",
+    "Não autorizar release tag, publish, workflow dispatch, process start ou agent dispatch.",
+    "Manter a proposta local-safe e revisável antes de editar .project/tasks.json.",
+  ];
+  const provenance = `Draft gerado por board-next-scope-intake quando audit=${audit.decision}; revisar antes de materializar no board.`;
+
+  return [
+    {
+      id: "TASK-BUD-DRAFT-CORE-WORKER-QUEUE",
+      description: "[P1] Definir fila agnóstica de worker steps para atacar tasks do board sem depender de colony ou release.",
+      status: "planned",
+      priority: "p1",
+      files: [
+        "docs/primitives/agent-worker-envelope.md",
+        "docs/primitives/agent-worker-isolation.md",
+        "scripts/agent-run-driver-step.mjs",
+        "scripts/agent-worker-isolation.mjs",
+        "scripts/test/agent-run-driver-step.test.mjs",
+      ],
+      corePrimitives: [
+        "worker envelope agnóstico",
+        "driver step single-run",
+        "isolamento de cwd/files/log/env",
+      ],
+      adapterExtensions: [
+        "Pi provider como executor opcional",
+        "board fanout como consumidor de fila",
+      ],
+      validationFocus: [
+        "node --test scripts/test/agent-run-driver-step.test.mjs",
+        "node scripts/agent-run-driver-canary-suite.mjs --execute --out .artifacts/agent-run-driver/suite.json",
+      ],
+      acceptance_criteria: [
+        "Fila descreve cada step por runSpec/handoff genérico, sem termos colony no contrato core.",
+        "Cada step mantém singleRunOnly, cwd/files/logPath e approval gates antes de dispatch.",
+        "Adapters Pi/board consomem a fila sem alterar o contrato core.",
+        ...commonGuards,
+      ],
+      milestone: "0.8-worker-orchestration",
+      notes: provenance,
+    },
+    {
+      id: "TASK-BUD-DRAFT-BOARD-FANOUT-ASSIMILATION",
+      description: "[P1] Transformar tasks acionáveis do board em fanout local-safe com critérios de fan-in parent-side.",
+      status: "planned",
+      priority: "p1",
+      files: [
+        "scripts/project/board-spec-audit.mjs",
+        "scripts/project/board-next-scope-intake.mjs",
+        "scripts/agent-run-pi-provider-fanout-plan.mjs",
+        "scripts/agent-run-pi-provider-worker-dispatch.mjs",
+        "scripts/test/board-spec-audit.test.mjs",
+        "scripts/test/agent-run-pi-provider-fanout-plan.test.mjs",
+      ],
+      corePrimitives: [
+        "task readiness",
+        "bounded fanout manifest",
+        "parent-side outcome aggregation",
+      ],
+      adapterExtensions: [
+        "Pi worker dispatch adapter",
+        "board-specific task selection",
+      ],
+      validationFocus: [
+        "node --test scripts/test/board-spec-audit.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs",
+        "node scripts/project/board-spec-audit.mjs --json",
+      ],
+      acceptance_criteria: [
+        "Fanout plan seleciona apenas tasks local-safe acionáveis e declara arquivos/criteria por worker.",
+        "Resultado de workers vira evidência parent-side antes de materializar novas tasks.",
+        "Protected/parked tasks aparecem como gated, não como dispatch candidates.",
+        ...commonGuards,
+      ],
+      milestone: "0.8-potential-completeness",
+      notes: provenance,
+    },
+    {
+      id: "TASK-BUD-DRAFT-OPERATIONAL-MEMORY-GATE",
+      description: "[P2] Usar memória operacional validada para reduzir cola manual sem introduzir recall implícito ou provider-specific.",
+      status: "planned",
+      priority: "p2",
+      files: [
+        "scripts/context-preload-consume.mjs",
+        "scripts/test/context-preload-consume.test.mjs",
+        "docs/primitives/agent-worker-envelope.md",
+        "docs/research/0-8-potential-completeness-map-2026-06.md",
+      ],
+      corePrimitives: [
+        "memory packet com provenance/freshness",
+        "context preload validado",
+        "expiration/fail-closed",
+      ],
+      adapterExtensions: [
+        "Pi prompt preload",
+        "board/report artifact producer",
+      ],
+      validationFocus: [
+        "node --test scripts/test/context-preload-consume.test.mjs",
+      ],
+      acceptance_criteria: [
+        "Memória operacional só entra quando possui provenance, timestamp e freshness válidos.",
+        "Memórias expiradas ou sem provenance tornam o preload stale sem bloquear trabalho local-safe simples.",
+        "Adapters podem anexar memória, mas o core preserva o contrato agnóstico.",
+        ...commonGuards,
+      ],
+      milestone: "0.8-operational-memory",
+      notes: provenance,
+    },
+  ];
 }
 
 export function buildBoardNextScopeIntake(options = {}) {
@@ -64,7 +152,7 @@ export function buildBoardNextScopeIntake(options = {}) {
   if (audit.decision === "blocked") blockers.push(...audit.blockers);
 
   const proposedBoardTasks = audit.decision === "no-local-safe-work" && blockers.length === 0
-    ? [buildProposedTask(audit)]
+    ? buildProposedTasks(audit)
     : [];
   const decision = blockers.length > 0
     ? "blocked"

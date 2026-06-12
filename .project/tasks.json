@@ -390,7 +390,7 @@
     {
       "id": "TASK-BUD-1105",
       "description": "[P1] Propor a próxima lane local-safe a partir do board/readiness atual, sem abrir protected scope nem release.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1104"
@@ -410,7 +410,8 @@
         "Cada proposta diferencia core/primitives de adapters e aponta validação focal."
       ],
       "milestone": "0.8-potential-completeness",
-      "notes": "[provenance:system] source_task=TASK-BUD-1104 reason=board-next-scope-intake gerou proposedBoardTasks[0] em .artifacts/board-next-scope-intake.json; materializada como task local-safe planejada para próximo ciclo de worker."
+      "notes": "[provenance:system] source_task=TASK-BUD-1104 reason=board-next-scope-intake gerou proposedBoardTasks[0] em .artifacts/board-next-scope-intake.json; materializada como task local-safe planejada para próximo ciclo de worker.\n2026-06-12: worker local-safe local-safe-board-next-scope-task-bud-1105 apontou FAIL por o intake gerar apenas 1 proposta e não distinguir core/primitives de adapters. Correção aplicada: board-next-scope-intake agora gera 3 propostas report-only com corePrimitives, adapterExtensions e validationFocus; validação focal passou.",
+      "verification": "node --test scripts/test/board-next-scope-intake.test.mjs scripts/test/board-spec-audit.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs"
     }
   ]
 }

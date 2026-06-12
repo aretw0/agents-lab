@@ -45,8 +45,22 @@ test("board next scope intake proposes report-only task when no local-safe work 
   assert.equal(report.workflowDispatchAllowed, false);
   assert.equal(report.tagAllowed, false);
   assert.equal(report.publishAllowed, false);
-  assert.equal(report.proposedBoardTasks.length, 1);
-  assert.equal(report.proposedBoardTasks[0].id, "TASK-BUD-DRAFT-NEXT-LOCAL-SCOPE");
+  assert.ok(report.proposedBoardTasks.length >= 2);
+  assert.ok(report.proposedBoardTasks.length <= 3);
+  assert.deepEqual(report.proposedBoardTasks.map((task) => task.id), [
+    "TASK-BUD-DRAFT-CORE-WORKER-QUEUE",
+    "TASK-BUD-DRAFT-BOARD-FANOUT-ASSIMILATION",
+    "TASK-BUD-DRAFT-OPERATIONAL-MEMORY-GATE",
+  ]);
+  for (const task of report.proposedBoardTasks) {
+    assert.ok(Array.isArray(task.corePrimitives));
+    assert.ok(task.corePrimitives.length > 0);
+    assert.ok(Array.isArray(task.adapterExtensions));
+    assert.ok(task.adapterExtensions.length > 0);
+    assert.ok(Array.isArray(task.validationFocus));
+    assert.ok(task.validationFocus.length > 0);
+    assert.ok(task.acceptance_criteria.some((criterion) => criterion.includes("release tag")));
+  }
   assert.deepEqual(report.protectedTaskIds, ["TASK-PARKED"]);
   assert.match(report.summary, /dispatch=no/);
 }));
