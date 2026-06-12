@@ -73,7 +73,8 @@ export async function runReleaseEvidenceRefresh(options = {}) {
     pretty,
   });
   if (options.canarySuite) writeJson(cwd, paths.canarySuitePath, canarySuite, pretty);
-  const readiness = options.readiness ?? buildReport(gather(target, cwd));
+  const gatheredReadinessData = options.readiness ? undefined : gather(target, cwd);
+  const readiness = options.readiness ?? buildReport(gatheredReadinessData);
   if (!readiness.mode) readiness.mode = "release-readiness-report";
   writeJson(cwd, paths.readinessPath, readiness, pretty);
   const draft = buildReleaseDraftPreview({
@@ -96,7 +97,8 @@ export async function runReleaseEvidenceRefresh(options = {}) {
   writeJson(cwd, paths.cutPreviewPath, finalGate.cutPreview, pretty);
   writeJson(cwd, paths.artifactAuditPath, finalGate.artifactAudit, pretty);
   writeJson(cwd, paths.finalGatePath, finalGate, pretty);
-  const protectedRecoveryApproval = readiness?.agentRunDrivers?.providerProtectedBoardRecoveryApprovalEvidence;
+  const protectedRecoveryApproval = readiness?.agentRunDrivers?.providerProtectedBoardRecoveryApprovalEvidence
+    ?? gatheredReadinessData?.agentRunDrivers?.providerProtectedBoardRecoveryApprovalEvidence;
 
   const blockers = [
     ...(canarySuite.decision !== "pass" ? ["canary-suite-not-pass"] : []),

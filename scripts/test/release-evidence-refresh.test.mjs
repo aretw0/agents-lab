@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -53,6 +53,76 @@ function readiness(gitHead, ready = true) {
     },
     blockers: [],
   };
+}
+
+function writeMinimalReleaseWorkspace(cwd, gitHead) {
+  const packageJson = {
+    private: true,
+    scripts: {
+      "test:agent-run:drivers": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-driver-canary.test.mjs scripts/test/agent-run-driver-canary-suite.test.mjs scripts/test/agent-run-driver-container-canary-suite.test.mjs scripts/test/agent-run-driver-fanout-manifest.test.mjs scripts/test/agent-run-driver-fanout-rehearsal.test.mjs scripts/test/agent-run-driver-fanout-outcome.test.mjs scripts/test/agent-run-driver-fanout-recovery-next.test.mjs scripts/test/agent-run-driver-fanout-recovery-approval.test.mjs scripts/test/agent-run-driver-container-fanout-rehearsal.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs scripts/test/agent-run-pi-provider-readiness.test.mjs scripts/test/agent-run-pi-provider-recovery-next.test.mjs scripts/test/agent-run-pi-provider-network-check.test.mjs scripts/test/agent-run-pi-provider-worker-dispatch.test.mjs scripts/test/agent-run-pi-provider-canary.test.mjs scripts/test/agent-run-pi-provider-container-canary.test.mjs",
+      "agent-run:driver-canaries": "node scripts/agent-run-driver-canary-suite.mjs --execute --out .artifacts/agent-run-driver/suite.json",
+      "agent-run:driver-fanout-manifest": "node scripts/agent-run-driver-fanout-manifest.mjs --out .artifacts/agent-run-driver/fanout-manifest.json",
+      "agent-run:driver-fanout-rehearsal": "node scripts/agent-run-driver-fanout-rehearsal.mjs --execute --out .artifacts/agent-run-driver/fanout-rehearsal.json",
+      "agent-run:driver-fanout-outcome": "node scripts/agent-run-driver-fanout-outcome.mjs --out .artifacts/agent-run-driver/fanout-outcome.json",
+      "agent-run:driver-fanout-recovery-next": "node scripts/agent-run-driver-fanout-recovery-next.mjs --out .artifacts/agent-run-driver/fanout-recovery-next.json",
+      "agent-run:driver-fanout-recovery-approval": "node scripts/agent-run-driver-fanout-recovery-approval.mjs --out .artifacts/agent-run-driver/fanout-recovery-approval.json",
+      "agent-run:driver-fanout-rehearsal:container": "node scripts/agent-run-driver-container-fanout-rehearsal.mjs",
+      "agent-run:pi-provider-fanout-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --out .artifacts/agent-run-driver/pi-provider-fanout-plan.json",
+      "agent-run:pi-provider-protected-board-plan": "node scripts/agent-run-pi-provider-fanout-plan.mjs --from-board-protected --require-local-task-evidence --limit 3 --batch-id protected-board-research-0-8 --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
+      "agent-run:pi-provider-protected-board-outcome": "node scripts/agent-run-driver-fanout-outcome.mjs --plan .artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json --out .artifacts/agent-run-driver/pi-provider-protected-board-fanout-outcome.json --exit-zero-on-block",
+      "agent-run:pi-provider-protected-board-recovery-next": "node scripts/agent-run-driver-fanout-recovery-next.mjs --source .artifacts/agent-run-driver/pi-provider-protected-board-fanout-outcome.json --out .artifacts/agent-run-driver/pi-provider-protected-board-recovery-next.json",
+      "agent-run:pi-provider-protected-board-recovery-approval": "node scripts/agent-run-driver-fanout-recovery-approval.mjs --source .artifacts/agent-run-driver/pi-provider-protected-board-recovery-next.json --out .artifacts/agent-run-driver/pi-provider-protected-board-recovery-approval.json",
+      "agent-run:pi-provider-readiness": "node scripts/agent-run-pi-provider-readiness.mjs --out .artifacts/agent-run-driver/pi-provider-readiness.json",
+      "agent-run:pi-provider-recovery-next": "node scripts/agent-run-pi-provider-recovery-next.mjs --out .artifacts/agent-run-driver/pi-provider-recovery-next.json",
+      "agent-run:pi-provider-network-check": "node scripts/agent-run-pi-provider-network-check.mjs --out .artifacts/agent-run-driver/pi-provider-network-check.json",
+      "agent-run:pi-provider-canary": "node scripts/agent-run-pi-provider-canary.mjs --out .artifacts/agent-run-driver/pi-provider-canary.json",
+      "agent-run:pi-provider-canary:container": "node scripts/agent-run-pi-provider-container-canary.mjs",
+      "agent-run:pi-provider-worker-dispatch": "node scripts/agent-run-pi-provider-worker-dispatch.mjs",
+    },
+  };
+  writeFileSync(path.join(cwd, "package.json"), JSON.stringify(packageJson, null, 2));
+  for (const relPath of [
+    "packages/pi-stack/package.json",
+    "packages/git-skills/package.json",
+    "packages/web-skills/package.json",
+    "packages/pi-skills/package.json",
+    "packages/lab-skills/package.json",
+  ]) {
+    const fullPath = path.join(cwd, relPath);
+    const packageDir = path.dirname(relPath).replace(/\\/g, "/");
+    mkdirSync(path.dirname(fullPath), { recursive: true });
+    writeFileSync(fullPath, JSON.stringify({
+      name: `@aretw0/${path.basename(packageDir)}`,
+      version: "0.8.0",
+      private: false,
+      repository: { type: "git", url: "https://github.com/aretw0/agents-lab.git", directory: packageDir },
+      files: ["dist", "README.md"],
+    }, null, 2));
+  }
+  for (const relPath of [".github/workflows/ci.yml", ".github/workflows/publish.yml", ".github/workflows/release-draft.yml"]) {
+    const fullPath = path.join(cwd, relPath);
+    mkdirSync(path.dirname(fullPath), { recursive: true });
+    writeFileSync(fullPath, "name: test\n");
+  }
+  const changesetPath = path.join(cwd, ".changeset", "config.json");
+  mkdirSync(path.dirname(changesetPath), { recursive: true });
+  writeFileSync(changesetPath, JSON.stringify({ access: "public", baseBranch: "main" }, null, 2));
+  const suitePath = path.join(cwd, ".artifacts", "agent-run-driver", "suite.json");
+  mkdirSync(path.dirname(suitePath), { recursive: true });
+  writeFileSync(suitePath, JSON.stringify({ mode: "agent-run-driver-canary-suite-report", decision: "pass", gitHead }, null, 2));
+  const approvalPath = path.join(cwd, ".artifacts", "agent-run-driver", "pi-provider-protected-board-recovery-approval.json");
+  writeFileSync(approvalPath, JSON.stringify({
+    mode: "agent-run-driver-fanout-recovery-approval",
+    decision: "approval-required",
+    selectedWorker: { workerId: "task-bud-480", runId: "protected-board-task-bud-480", failureKind: "worker-output-fail" },
+    requiredApprovalPrompt: "approve recovery rerun protected-board-task-bud-480",
+    approvalScope: "protected-or-external-scope",
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    automationAllowed: false,
+    singleRunOnly: true,
+    blockers: [],
+  }, null, 2));
 }
 
 test("release evidence refresh writes canary, readiness, draft, and final gate artifacts", async () => {
@@ -136,6 +206,41 @@ test("release evidence refresh defaults output path from arbitrary target tag", 
     assert.equal(result.decision, "pass");
     assert.equal(existsSync(path.join(cwd, ".artifacts/release-cut/v1.2.3-evidence-refresh.json")), true);
     assert.equal(existsSync(path.join(cwd, ".artifacts/release-cut/v0.8.0-evidence-refresh.json")), false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("release evidence refresh preserves protected recovery approval from internally built readiness", async () => {
+  const cwd = workspace();
+  try {
+    const gitHead = head(cwd);
+    writeMinimalReleaseWorkspace(cwd, gitHead);
+    assert.equal(spawnSync("git", ["add", "."], { cwd, encoding: "utf8" }).status, 0);
+    assert.equal(spawnSync("git", [
+      "-c",
+      "user.name=Release Evidence Refresh Test",
+      "-c",
+      "user.email=release-evidence-refresh@example.test",
+      "commit",
+      "-m",
+      "release workspace",
+    ], { cwd, encoding: "utf8" }).status, 0);
+    const currentHead = head(cwd);
+    const suitePath = path.join(cwd, ".artifacts", "agent-run-driver", "suite.json");
+    writeFileSync(suitePath, JSON.stringify({ mode: "agent-run-driver-canary-suite-report", decision: "pass", gitHead: currentHead }, null, 2));
+
+    const result = await runReleaseEvidenceRefresh({
+      cwd,
+      target: "0.8.0",
+      canarySuite: canarySuite(),
+      executeCanaries: false,
+    });
+
+    assert.equal(result.protectedBoardRecoveryApprovalDecision, "approval-required");
+    assert.equal(result.protectedBoardRecoveryApprovalPrompt, "approve recovery rerun protected-board-task-bud-480");
+    assert.equal(result.protectedBoardRecoveryApprovalSelectedWorkerId, "task-bud-480");
+    assert.equal(result.protectedBoardRecoveryApprovalScope, "protected-or-external-scope");
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
