@@ -386,6 +386,31 @@
       "milestone": "0.8-potential-completeness",
       "notes": "[provenance:operator] source_task=TASK-BUD-1103 reason=O audit passou a emitir candidatos; faltava packet que transformasse isso em proposta de task revisável sem mutar o board.",
       "verification": "node --test scripts/test/board-next-scope-intake.test.mjs"
+    },
+    {
+      "id": "TASK-BUD-1105",
+      "description": "[P1] Propor a próxima lane local-safe a partir do board/readiness atual, sem abrir protected scope nem release.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1104"
+      ],
+      "files": [
+        "scripts/project/board-spec-audit.mjs",
+        "scripts/project/board-next-scope-intake.mjs",
+        "scripts/test/board-next-scope-intake.test.mjs",
+        "scripts/release-readiness-report.mjs",
+        "docs/research/0-8-potential-completeness-map-2026-06.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Gerar 2-3 propostas de tasks local-safe com arquivos e critérios de aceite, sem editar o board automaticamente.",
+        "Não promover protected/parked tasks sem decisão explícita do operador.",
+        "Não autorizar release tag, publish, workflow dispatch, process start ou agent dispatch.",
+        "Cada proposta diferencia core/primitives de adapters e aponta validação focal."
+      ],
+      "milestone": "0.8-potential-completeness",
+      "notes": "[provenance:system] source_task=TASK-BUD-1104 reason=board-next-scope-intake gerou proposedBoardTasks[0] em .artifacts/board-next-scope-intake.json; materializada como task local-safe planejada para próximo ciclo de worker."
     }
   ]
 }
