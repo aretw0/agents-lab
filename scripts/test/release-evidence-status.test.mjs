@@ -124,6 +124,7 @@ test("release evidence status passes coherent materialized evidence without runn
       dispatchAllowed: false,
       processStartAllowed: false,
     });
+    assert.deepEqual(result.nextProtectedReviewRow, result.protectedReviewRows[0]);
     assert.match(result.summary, /protectedRecoveryApproval=approval-required/);
     assert.deepEqual(result.blockers, []);
     assert.equal(result.protectedActionsAllowed, false);

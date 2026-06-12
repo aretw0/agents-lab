@@ -137,6 +137,7 @@ export function buildReleaseEvidenceStatus(options = {}) {
       processStartAllowed: false,
     })),
   ];
+  const nextProtectedReviewRow = protectedReviewRows[0] ?? null;
   return {
     mode: "release-evidence-status",
     schemaVersion: SCHEMA_VERSION,
@@ -163,6 +164,7 @@ export function buildReleaseEvidenceStatus(options = {}) {
     protectedReviewPromptCount: protectedReviewPrompts.length,
     protectedReviewPrompts,
     protectedReviewRows,
+    nextProtectedReviewRow,
     protectedActionsAllowed: false,
     tagAllowed: false,
     publishAllowed: false,
