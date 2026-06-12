@@ -26,6 +26,12 @@ function refresh(overrides = {}) {
       finalGatePath: ".artifacts/release-cut/v0.8.0-final-gate.json",
     },
     canarySuiteDecision: "pass",
+    protectedReviewEvidenceDecision: "pass",
+    protectedReviewEvidenceApprovedWorkerId: "task-bud-480",
+    protectedReviewEvidenceApprovedRunId: "protected-board-research-0-8-task-bud-480",
+    protectedReviewEvidenceApprovedContractDecision: "pass",
+    protectedReviewEvidenceFanoutPassedWorkerCount: 2,
+    protectedReviewEvidenceFanoutWorkerCount: 3,
     readinessDecision: "ready",
     protectedBoardRecoveryApprovalDecision: "approval-required",
     protectedBoardRecoveryApprovalPrompt: "approve recovery rerun protected-board-task",
@@ -95,6 +101,12 @@ test("release evidence status passes coherent materialized evidence without runn
     assert.equal(result.headMatches, true);
     assert.equal(result.refreshDecision, "pass");
     assert.equal(result.finalGateDecision, "pass");
+    assert.equal(result.protectedReviewEvidenceDecision, "pass");
+    assert.equal(result.protectedReviewEvidenceApprovedWorkerId, "task-bud-480");
+    assert.equal(result.protectedReviewEvidenceApprovedRunId, "protected-board-research-0-8-task-bud-480");
+    assert.equal(result.protectedReviewEvidenceApprovedContractDecision, "pass");
+    assert.equal(result.protectedReviewEvidenceFanoutPassedWorkerCount, 2);
+    assert.equal(result.protectedReviewEvidenceFanoutWorkerCount, 3);
     assert.equal(result.protectedBoardRecoveryApprovalDecision, "approval-required");
     assert.equal(result.protectedBoardRecoveryApprovalPrompt, "approve recovery rerun protected-board-task");
     assert.equal(result.protectedBoardRecoveryApprovalSelectedWorkerId, "task-bud-480");

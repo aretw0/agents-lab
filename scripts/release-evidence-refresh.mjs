@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
@@ -47,9 +47,15 @@ function writeJson(cwd, relPath, value, pretty = false) {
   writeText(cwd, relPath, `${JSON.stringify(value, null, pretty ? 2 : 0)}\n`);
 }
 
+function readJsonIfExists(cwd, relPath) {
+  const fullPath = path.resolve(cwd, relPath);
+  return existsSync(fullPath) ? JSON.parse(readFileSync(fullPath, "utf8")) : undefined;
+}
+
 function pathsFor(target, tag) {
   return {
     canarySuitePath: ".artifacts/agent-run-driver/suite.json",
+    protectedReviewEvidencePath: ".artifacts/agent-run-driver/protected-review-evidence.json",
     readinessPath: `.artifacts/release-readiness/latest-ready-final-${target}.json`,
     draftPath: `.artifacts/release-draft/${tag}-preview.json`,
     cutPreviewPath: `.artifacts/release-cut/${tag}-preview.json`,
@@ -99,6 +105,8 @@ export async function runReleaseEvidenceRefresh(options = {}) {
   writeJson(cwd, paths.finalGatePath, finalGate, pretty);
   const protectedRecoveryApproval = readiness?.agentRunDrivers?.providerProtectedBoardRecoveryApprovalEvidence
     ?? gatheredReadinessData?.agentRunDrivers?.providerProtectedBoardRecoveryApprovalEvidence;
+  const protectedReviewEvidence = options.protectedReviewEvidence
+    ?? readJsonIfExists(cwd, paths.protectedReviewEvidencePath);
 
   const blockers = [
     ...(canarySuite.decision !== "pass" ? ["canary-suite-not-pass"] : []),
@@ -117,6 +125,12 @@ export async function runReleaseEvidenceRefresh(options = {}) {
     executeCanaries,
     paths,
     canarySuiteDecision: canarySuite.decision,
+    protectedReviewEvidenceDecision: protectedReviewEvidence?.decision ?? "missing",
+    protectedReviewEvidenceApprovedWorkerId: protectedReviewEvidence?.approvedWorker?.workerId ?? "",
+    protectedReviewEvidenceApprovedRunId: protectedReviewEvidence?.approvedWorker?.runId ?? "",
+    protectedReviewEvidenceApprovedContractDecision: protectedReviewEvidence?.approvedWorker?.contractDecision ?? "",
+    protectedReviewEvidenceFanoutPassedWorkerCount: protectedReviewEvidence?.fanoutProgress?.passedWorkerCount ?? 0,
+    protectedReviewEvidenceFanoutWorkerCount: protectedReviewEvidence?.fanoutProgress?.workerCount ?? 0,
     readinessDecision: readiness.decision,
     readinessReady: readiness.ready === true,
     protectedBoardRecoveryApprovalDecision: protectedRecoveryApproval?.decision ?? "missing",

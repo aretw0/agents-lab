@@ -140,6 +140,7 @@ test("release evidence refresh writes canary, readiness, draft, and final gate a
     assert.equal(result.mode, "release-evidence-refresh");
     assert.equal(result.decision, "pass");
     assert.equal(result.canarySuiteDecision, "pass");
+    assert.equal(result.protectedReviewEvidenceDecision, "missing");
     assert.equal(result.readinessDecision, "ready");
     assert.equal(result.protectedBoardRecoveryApprovalDecision, "approval-required");
     assert.equal(result.protectedBoardRecoveryApprovalPrompt, "approve recovery rerun protected-board-task");
@@ -162,6 +163,44 @@ test("release evidence refresh writes canary, readiness, draft, and final gate a
     const finalGate = JSON.parse(readFileSync(path.join(cwd, result.paths.finalGatePath), "utf8"));
     assert.deepEqual(JSON.parse(readFileSync(path.join(cwd, result.paths.cutPreviewPath), "utf8")), finalGate.cutPreview);
     assert.deepEqual(JSON.parse(readFileSync(path.join(cwd, result.paths.artifactAuditPath), "utf8")), finalGate.artifactAudit);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("release evidence refresh surfaces optional protected review evidence", async () => {
+  const cwd = workspace();
+  try {
+    const gitHead = head(cwd);
+    const result = await runReleaseEvidenceRefresh({
+      cwd,
+      target: "0.8.0",
+      canarySuite: canarySuite(),
+      readiness: readiness(gitHead),
+      protectedReviewEvidence: {
+        mode: "agent-run-protected-review-evidence",
+        decision: "pass",
+        approvedWorker: {
+          workerId: "task-bud-480",
+          runId: "protected-board-research-0-8-task-bud-480",
+          contractDecision: "pass",
+        },
+        fanoutProgress: {
+          passedWorkerCount: 2,
+          workerCount: 3,
+        },
+      },
+    });
+
+    assert.equal(result.decision, "pass");
+    assert.equal(result.paths.protectedReviewEvidencePath, ".artifacts/agent-run-driver/protected-review-evidence.json");
+    assert.equal(result.protectedReviewEvidenceDecision, "pass");
+    assert.equal(result.protectedReviewEvidenceApprovedWorkerId, "task-bud-480");
+    assert.equal(result.protectedReviewEvidenceApprovedRunId, "protected-board-research-0-8-task-bud-480");
+    assert.equal(result.protectedReviewEvidenceApprovedContractDecision, "pass");
+    assert.equal(result.protectedReviewEvidenceFanoutPassedWorkerCount, 2);
+    assert.equal(result.protectedReviewEvidenceFanoutWorkerCount, 3);
+    assert.equal(result.processStartAllowed, false);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
