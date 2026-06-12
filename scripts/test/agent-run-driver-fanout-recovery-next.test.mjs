@@ -55,6 +55,14 @@ test("fanout recovery next selects the first failed worker without dispatch", ()
         },
       ],
     });
+    const logPath = path.join(cwd, ".pi/reports/fanout-worker-a.log");
+    mkdirSync(path.dirname(logPath), { recursive: true });
+    writeFileSync(logPath, [
+      "[agent-runner] starting command=pi",
+      "worker output line before failure",
+      "PASS/FAIL: **FAIL (blocked)**",
+      "Blockers: missing acceptance criteria",
+    ].join("\n"), "utf8");
 
     const report = buildAgentRunDriverFanoutRecoveryNext({ cwd, sourcePath });
 
@@ -78,6 +86,10 @@ test("fanout recovery next selects the first failed worker without dispatch", ()
     ]);
     assert.match(report.nextActions.join("\n"), /\.pi\/reports\/fanout-worker-a\.log/);
     assert.match(report.nextActions.join("\n"), /resolve the declared FAIL/);
+    assert.equal(report.selectedWorkerLogTail.logPath, ".pi/reports/fanout-worker-a.log");
+    assert.equal(report.selectedWorkerLogTail.maxLines, 12);
+    assert.equal(report.selectedWorkerLogTail.lineCount, 4);
+    assert.match(report.selectedWorkerLogTail.lines.join("\n"), /PASS\/FAIL: \*\*FAIL/);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

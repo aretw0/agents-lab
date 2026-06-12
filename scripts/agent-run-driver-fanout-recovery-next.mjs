@@ -7,6 +7,8 @@ import { pathToFileURL } from "node:url";
 const SCHEMA_VERSION = 1;
 const DEFAULT_SOURCE = ".artifacts/agent-run-driver/fanout-outcome.json";
 const DEFAULT_OUT = ".artifacts/agent-run-driver/fanout-recovery-next.json";
+const DEFAULT_LOG_TAIL_LINES = 12;
+const MAX_LOG_TAIL_LINES = 80;
 
 function parseArgs(argv = process.argv.slice(2)) {
   const out = {
@@ -21,6 +23,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
     else if (arg === "--source") out.sourcePath = argv[++index] ?? out.sourcePath;
     else if (arg === "--out") out.outPath = argv[++index] ?? out.outPath;
+    else if (arg === "--log-tail-lines") out.logTailLines = argv[++index] ?? out.logTailLines;
     else if (arg === "--pretty") out.pretty = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else throw new Error(`Unknown argument: ${arg}`);
@@ -41,6 +44,21 @@ function writeJson(cwd, relPath, value, pretty = false) {
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
+}
+
+function normalizeLogTailLines(value) {
+  const numeric = Number.parseInt(String(value ?? DEFAULT_LOG_TAIL_LINES), 10);
+  if (!Number.isFinite(numeric) || numeric < 0) return DEFAULT_LOG_TAIL_LINES;
+  return Math.min(numeric, MAX_LOG_TAIL_LINES);
+}
+
+function readLogTail(cwd, logPath, maxLines) {
+  if (!logPath || maxLines <= 0) return [];
+  const fullPath = path.isAbsolute(logPath) ? logPath : path.resolve(cwd, logPath);
+  if (!existsSync(fullPath)) return [];
+  const lines = readFileSync(fullPath, "utf8").split(/\r?\n/);
+  if (lines.at(-1) === "") lines.pop();
+  return lines.slice(-maxLines);
 }
 
 function failedWorkers(payload) {
@@ -114,6 +132,8 @@ export function buildAgentRunDriverFanoutRecoveryNext(options = {}) {
   const complete = blockers.length === 0 && payload?.decision === "pass" && workersNeedingRecovery.length === 0;
   const failureKind = selectedWorker ? classifyFailure(selectedWorker) : "";
   const decision = blockers.length > 0 ? "blocked" : complete ? "complete" : selectedWorker ? "next-action-ready" : "blocked";
+  const logTailMaxLines = normalizeLogTailLines(options.logTailLines);
+  const selectedWorkerLogTailLines = selectedWorker ? readLogTail(cwd, selectedWorker.logPath, logTailMaxLines) : [];
   const derivedBlockers = [
     ...blockers,
     ...(blockers.length === 0 && !complete && !selectedWorker ? ["fanout-recovery-worker-missing"] : []),
@@ -143,6 +163,14 @@ export function buildAgentRunDriverFanoutRecoveryNext(options = {}) {
           markerFailures: asArray(selectedWorker.markerFailures),
         }
       : null,
+    selectedWorkerLogTail: selectedWorker
+      ? {
+          logPath: selectedWorker.logPath,
+          maxLines: logTailMaxLines,
+          lineCount: selectedWorkerLogTailLines.length,
+          lines: selectedWorkerLogTailLines,
+        }
+      : undefined,
     failureKind,
     selectedCommandPreview: selectedWorker ? refreshCommandFor(sourcePath, payload?.planPath) : undefined,
     blockers: derivedBlockers,
@@ -159,7 +187,7 @@ export function buildAgentRunDriverFanoutRecoveryNext(options = {}) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/agent-run-driver-fanout-recovery-next.mjs [--cwd DIR] [--source PATH] [--out PATH] [--pretty]",
+    "Usage: node scripts/agent-run-driver-fanout-recovery-next.mjs [--cwd DIR] [--source PATH] [--out PATH] [--log-tail-lines N] [--pretty]",
     "",
     "Selects the next report-only recovery action from an existing agent-run fanout outcome artifact.",
     `Default source: ${DEFAULT_SOURCE}`,
