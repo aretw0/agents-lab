@@ -81,6 +81,36 @@ Antes de pesquisar fora, fortalecer a lacuna local mais barata:
 3. manter `.project/` como adapter inicial, mas documentar que a primitive deve aceitar adapters equivalentes;
 4. manter recall como report-only ate haver aprovacao para aplicar mudanca.
 
+## Contrato local de aceite
+
+Para `TASK-BUD-676`, a avaliacao protegida deve passar sem pesquisa externa
+somente quando estes criterios locais estiverem explicitos:
+
+- contrato local-first de memoria/sessao definido antes de consultar qualquer
+  referencia externa;
+- pesquisa externa e aplicacao automatica de recall exigem consentimento
+  explicito do operador;
+- toda memoria promovida carrega `source`, `timestamp`, `freshness`, `scope`,
+  politica de retencao e criterio de expiracao;
+- tipos de memoria sao classificados antes do uso:
+  - `operational-state`;
+  - `execution-evidence`;
+  - `operator-preference`;
+  - `project-fact`;
+  - `external-influence`;
+- recall e comparacao de influencia externa permanecem report-only ate
+  aprovacao humana explicita.
+
+Retencao canonica minima:
+
+| Tipo | Retencao | Expiracao |
+|---|---|---|
+| `operational-state` | enquanto o run/task estiver ativo | quando houver outcome terminal ou handoff substituto |
+| `execution-evidence` | enquanto o artefato de release/canario referenciar o run | quando o artefato for arquivado ou supersedido |
+| `operator-preference` | somente com consentimento explicito | quando revogada, stale ou fora do escopo declarado |
+| `project-fact` | enquanto a fonte versionada existir | quando a fonte mudar ou a evidencia ficar stale |
+| `external-influence` | parked/protected por padrao | quando assimilada, rejeitada ou revalidada com aprovacao |
+
 ## Decisao de release
 
 `TASK-BUD-676` nao precisa bloquear a 0.8.0 por falta de pesquisa externa se esta decisao for aceita:

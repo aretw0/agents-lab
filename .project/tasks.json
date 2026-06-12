@@ -37,6 +37,15 @@
       "description": "Influência externa parked: avaliar futuramente https://github.com/aretw0/claude-mem como referência de memória/sessão para continuidade com governança local-first.",
       "status": "planned",
       "priority": "p3",
+      "files": [
+        "docs/research/"
+      ],
+      "acceptance_criteria": [
+        "Definir contrato local-first de memória/sessão antes de qualquer consulta externa.",
+        "Exigir consentimento explícito do operador para pesquisa externa ou aplicação automática de recall.",
+        "Documentar provenance, timestamp, freshness, scope, retenção e expiração para memórias promovidas.",
+        "Manter recall e comparação de influência externa em modo report-only até aprovação humana explícita."
+      ],
       "milestone": "parked-for-0.8.0",
       "notes": "[rationale:risk-control] Pesquisa externa fica parked/protected para não contaminar execução local-safe contínua sem decisão explícita do operador.\n[provenance:human] source_task=none reason=Pedido explícito do operador para adicionar claude-mem no backlog de influências para estudo futuro.\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Primeiro experimento do pipeline de dogfood progressivo.\n2026-06-11: board release disposition = park-for-target-release for 0.8.0; local evidence accepted for release gating; external research remains parked/protected."
     },
