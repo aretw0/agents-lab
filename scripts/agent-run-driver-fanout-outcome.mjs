@@ -100,12 +100,17 @@ function workerIdFor(worker, plan, index) {
   return prefix && runId.startsWith(prefix) ? runId.slice(prefix.length) : `worker-${index}`;
 }
 
-function summarizeWorker({ worker, plan, index, driverStep }) {
+function summarizeWorker({ worker, plan, index, driverStep, cwd }) {
   const runSpec = runSpecFrom(worker);
   const outcome = driverStep?.agentRunOutcomePacket;
+  const rawLogPath = driverStep?.follow?.logPath || driverStep?.runSpec?.logPath || asString(runSpec?.log_path);
+  const logPath = rawLogPath
+    ? displayPath(path.isAbsolute(rawLogPath) ? path.relative(cwd, rawLogPath) || rawLogPath : rawLogPath)
+    : "";
   return {
     workerId: workerIdFor(worker, plan, index),
     runId: driverStep?.runSpec?.runId || asString(runSpec?.run_id),
+    logPath,
     decision: driverStep?.decision ?? "missing",
     dispatchAllowed: false,
     processStartAllowed: false,
@@ -141,6 +146,7 @@ export async function runAgentRunDriverFanoutOutcome(options = {}) {
     plan,
     index,
     driverStep,
+    cwd,
   }));
   const aggregateBlockers = [
     ...blockers,
@@ -176,6 +182,7 @@ export async function runAgentRunDriverFanoutOutcome(options = {}) {
       passedWorkerCount,
       workerSummaries: workerSummaries.map((worker) => ({
         runId: worker.runId,
+        logPath: worker.logPath,
         processState: worker.processState,
         contractDecision: worker.contractDecision,
         touchedFileCount: worker.touchedFiles.length,

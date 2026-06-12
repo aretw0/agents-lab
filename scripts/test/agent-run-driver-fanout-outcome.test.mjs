@@ -93,6 +93,7 @@ test("fanout outcome re-evaluates existing registry and blocks failed worker out
     assert.equal(report.workerCount, 2);
     assert.equal(report.passedWorkerCount, 1);
     assert.equal(report.workerSummaries[1].contractDecision, "fail");
+    assert.equal(report.workerSummaries[1].logPath, ".pi/reports/fanout-outcome-worker-b.log");
     assert.ok(report.workerSummaries[1].markerFailures.includes("worker-output-fail"));
     assert.ok(report.blockers.includes("worker-b:worker-output-fail"));
     assert.ok(report.blockers.includes("worker-b:contract-not-pass:fail"));
@@ -121,6 +122,10 @@ test("fanout outcome passes when all existing worker outcomes pass", async () =>
     assert.equal(report.passedWorkerCount, 2);
     assert.deepEqual(report.blockers, []);
     assert.deepEqual(report.workerSummaries.map((worker) => worker.contractDecision), ["pass", "pass"]);
+    assert.deepEqual(report.batchOutcomePacket.workerSummaries.map((worker) => worker.logPath), [
+      ".pi/reports/fanout-outcome-pass-worker-a.log",
+      ".pi/reports/fanout-outcome-pass-worker-b.log",
+    ]);
     assert.equal(report.batchOutcomePacket.decision, "pass");
   } finally {
     rmSync(cwd, { recursive: true, force: true });

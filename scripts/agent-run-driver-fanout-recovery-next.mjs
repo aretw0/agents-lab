@@ -79,16 +79,17 @@ function refreshCommandFor(sourcePath, planPath) {
 }
 
 function nextActionsFor(failureKind, worker) {
+  const logHint = worker.logPath ? ` at ${worker.logPath}` : "";
   if (failureKind === "worker-output-fail") {
     return [
-      `inspect the worker log for ${worker.runId || worker.workerId || "selected worker"} and resolve the declared FAIL/blockers before rerun`,
+      `inspect the worker log for ${worker.runId || worker.workerId || "selected worker"}${logHint} and resolve the declared FAIL/blockers before rerun`,
       "rerun only this worker after explicit operator approval if the fix requires fresh evidence",
       "rebuild fanout outcome after the worker contract passes",
     ];
   }
   if (failureKind === "worker-not-terminal") {
     return [
-      `check registry/log state for ${worker.runId || worker.workerId || "selected worker"}`,
+      `check registry/log state for ${worker.runId || worker.workerId || "selected worker"}${logHint}`,
       "do not select another worker until this run is terminal or explicitly abandoned",
       "rebuild fanout outcome after registry state is corrected",
     ];
@@ -135,6 +136,7 @@ export function buildAgentRunDriverFanoutRecoveryNext(options = {}) {
       ? {
           workerId: selectedWorker.workerId,
           runId: selectedWorker.runId,
+          logPath: selectedWorker.logPath,
           processState: selectedWorker.processState,
           contractDecision: selectedWorker.contractDecision,
           blockers: asArray(selectedWorker.blockers),

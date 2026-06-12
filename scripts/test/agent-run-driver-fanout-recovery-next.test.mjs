@@ -39,6 +39,7 @@ test("fanout recovery next selects the first failed worker without dispatch", ()
         {
           workerId: "worker-a",
           runId: "fanout-worker-a",
+          logPath: ".pi/reports/fanout-worker-a.log",
           processState: "completed",
           contractDecision: "fail",
           blockers: ["worker-output-fail"],
@@ -65,6 +66,7 @@ test("fanout recovery next selects the first failed worker without dispatch", ()
     assert.equal(report.failedWorkerCount, 1);
     assert.equal(report.selectedWorker.workerId, "worker-a");
     assert.equal(report.selectedWorker.runId, "fanout-worker-a");
+    assert.equal(report.selectedWorker.logPath, ".pi/reports/fanout-worker-a.log");
     assert.equal(report.failureKind, "worker-output-fail");
     assert.deepEqual(report.selectedCommandPreview.args, [
       "scripts/agent-run-driver-fanout-outcome.mjs",
@@ -74,6 +76,7 @@ test("fanout recovery next selects the first failed worker without dispatch", ()
       sourcePath,
       "--exit-zero-on-block",
     ]);
+    assert.match(report.nextActions.join("\n"), /\.pi\/reports\/fanout-worker-a\.log/);
     assert.match(report.nextActions.join("\n"), /resolve the declared FAIL/);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
