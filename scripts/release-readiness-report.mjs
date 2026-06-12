@@ -64,6 +64,11 @@ const AGENT_RUN_DRIVER_OPERATIONAL_SCRIPTS = {
     "--require-local-task-evidence",
     ".artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
   ],
+  "agent-run:pi-provider-protected-board-outcome": [
+    "node scripts/agent-run-driver-fanout-outcome.mjs",
+    ".artifacts/agent-run-driver/pi-provider-protected-board-fanout-plan.json",
+    ".artifacts/agent-run-driver/pi-provider-protected-board-fanout-outcome.json",
+  ],
   "agent-run:pi-provider-readiness": [
     "node scripts/agent-run-pi-provider-readiness.mjs",
     ".artifacts/agent-run-driver/pi-provider-readiness.json",
@@ -549,6 +554,47 @@ function agentRunProviderProtectedBoardPlanEvidence(cwd) {
   }
 }
 
+function agentRunProviderProtectedBoardOutcomeEvidence(cwd) {
+  const relPath = ".artifacts/agent-run-driver/pi-provider-protected-board-fanout-outcome.json";
+  const fullPath = path.join(cwd, relPath);
+  if (!existsSync(fullPath)) {
+    return {
+      path: relPath,
+      present: false,
+      decision: "missing",
+      summary: "no protected board provider fanout outcome artifact found",
+    };
+  }
+  try {
+    const payload = JSON.parse(readFileSync(fullPath, "utf8"));
+    return {
+      path: relPath,
+      present: true,
+      decision: payload.decision ?? "unknown",
+      mode: payload.mode,
+      schemaVersion: payload.schemaVersion,
+      batchId: payload.batchId,
+      workerCount: payload.workerCount,
+      passedWorkerCount: payload.passedWorkerCount,
+      dispatchAllowed: payload.dispatchAllowed === true,
+      processStartAllowed: payload.processStartAllowed === true,
+      batchExecutionAllowed: payload.batchExecutionAllowed === true,
+      workerContractDecisions: Array.isArray(payload.workerSummaries)
+        ? payload.workerSummaries.map((worker) => String(worker?.contractDecision ?? "unknown"))
+        : [],
+      blockers: Array.isArray(payload.blockers) ? payload.blockers : [],
+      summary: payload.summary ?? "protected board provider fanout outcome artifact present",
+    };
+  } catch (error) {
+    return {
+      path: relPath,
+      present: true,
+      decision: "invalid-json",
+      summary: `could not parse protected board provider fanout outcome artifact: ${String(error?.message ?? error)}`,
+    };
+  }
+}
+
 function releaseGateKind(id) {
   if (id === "target-version-ready") return "operator-decision";
   if (id === "board-release-clear") return "board-state";
@@ -589,6 +635,7 @@ function agentRunDriverGateEvidence(report) {
     `provider recovery next evidence decision=${report.providerRecoveryNextEvidence?.decision ?? "missing"}`,
     `provider network check evidence decision=${report.providerNetworkCheckEvidence?.decision ?? "missing"}`,
     `protected board provider plan decision=${report.providerProtectedBoardPlanEvidence?.decision ?? "missing"} workers=${report.providerProtectedBoardPlanEvidence?.workerCount ?? 0}`,
+    `protected board provider outcome decision=${report.providerProtectedBoardOutcomeEvidence?.decision ?? "missing"} passed=${report.providerProtectedBoardOutcomeEvidence?.passedWorkerCount ?? 0}/${report.providerProtectedBoardOutcomeEvidence?.workerCount ?? 0}`,
   ].join("; ");
 }
 
@@ -982,6 +1029,7 @@ export function gather(target, cwd = process.cwd()) {
   agentRunDrivers.providerRecoveryNextEvidence = agentRunProviderRecoveryNextEvidence(cwd);
   agentRunDrivers.providerNetworkCheckEvidence = agentRunProviderNetworkCheckEvidence(cwd);
   agentRunDrivers.providerProtectedBoardPlanEvidence = agentRunProviderProtectedBoardPlanEvidence(cwd);
+  agentRunDrivers.providerProtectedBoardOutcomeEvidence = agentRunProviderProtectedBoardOutcomeEvidence(cwd);
   agentRunDrivers.canarySuiteRequired = true;
   agentRunDrivers.canarySuiteGateOk = agentRunDrivers.canarySuiteEvidence.decision === "pass";
   agentRunDrivers.currentHead = head;
