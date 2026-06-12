@@ -290,7 +290,7 @@
     {
       "id": "TASK-BUD-1101",
       "description": "[P1] Assimilar a evidência do TASK-BUD-521 em requisitos executáveis de isolamento para worker/driver local-safe.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1099",
@@ -313,7 +313,8 @@
         "Nenhuma mudança habilita protected scope, ant_colony ou execução unattended."
       ],
       "milestone": "0.8-worker-orchestration",
-      "notes": "[provenance:operator] source_task=TASK-BUD-521 reason=Worker aprovou a evidência local de isolamento/sandboxing; próximo passo real é converter isso em requisitos/testes de driver.\n2026-06-12: contrato arquitetural iniciado em docs/primitives/agent-worker-isolation.md; mantido status planned porque ainda falta validador/teste executável consumindo blockers portáveis sem acoplar política ao adapter."
+      "notes": "[provenance:operator] source_task=TASK-BUD-521 reason=Worker aprovou a evidência local de isolamento/sandboxing; próximo passo real é converter isso em requisitos/testes de driver.\n2026-06-12: contrato arquitetural iniciado em docs/primitives/agent-worker-isolation.md; validador reutilizável scripts/agent-worker-isolation.mjs consumido pelo driver; teste local-safe cobre blockers portáveis sem provider remoto.",
+      "verification": "node --test scripts/test/agent-run-driver-step.test.mjs"
     },
     {
       "id": "TASK-BUD-1102",

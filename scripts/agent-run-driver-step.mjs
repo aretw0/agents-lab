@@ -3,6 +3,7 @@ import { createWriteStream, existsSync, mkdirSync, readFileSync, statSync, write
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { validateAgentWorkerIsolation } from "./agent-worker-isolation.mjs";
 
 const SCHEMA_VERSION = 1;
 
@@ -134,11 +135,6 @@ function logByteCount(logPath) {
 function readLogTail(logPath, maxLines) {
   if (!logPath || !existsSync(logPath)) return [];
   return readFileSync(logPath, "utf8").split(/\r?\n/).slice(-Math.max(1, Math.min(500, maxLines)));
-}
-
-function sameCwd(a, b) {
-  return path.resolve(a || "").replace(/\\/g, "/").replace(/\/+$/, "").toLowerCase()
-    === path.resolve(b || "").replace(/\\/g, "/").replace(/\/+$/, "").toLowerCase();
 }
 
 function hasStructuredApproval(value) {
@@ -406,7 +402,14 @@ export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
   if (executeRequested && !hasStructuredApproval(payload.operator_approval)) blockers.push("structured-operator-approval-missing");
   const existingRunAlive = existing?.state === "running" && processIsAlive(existing.pid);
   if (executeRequested && existingRunAlive) blockers.push("run-already-running");
-  if (executeRequested && !sameCwd(runCwd, cwd)) blockers.push("execute-cwd-mismatch");
+  const isolation = validateAgentWorkerIsolation({
+    workspaceRoot: cwd,
+    runCwd,
+    declaredFiles: runSpec.declaredFiles,
+    logPath: runSpec.logPath,
+    envKeys: Object.keys(runSpec.env),
+  });
+  if (executeRequested) blockers.push(...isolation.blockers);
 
   const dispatchAllowed = executeRequested && blockers.length === 0;
   let dispatch;
@@ -447,6 +450,7 @@ export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
     runSpec,
     executeRequested,
     structuredOperatorApproval: hasStructuredApproval(payload.operator_approval),
+    isolation,
     followRequested,
     pid: dispatch?.pid,
     registryEntry: dispatch?.registryEntry,

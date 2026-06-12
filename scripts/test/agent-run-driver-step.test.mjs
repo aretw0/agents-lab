@@ -6,6 +6,7 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { runAgentRunDriverStep } from "../agent-run-driver-step.mjs";
+import { validateAgentWorkerIsolation } from "../agent-worker-isolation.mjs";
 
 const cliPath = fileURLToPath(new URL("../agent-run-driver-step.mjs", import.meta.url));
 
@@ -116,6 +117,45 @@ test("headless driver step blocks cwd mismatch before dispatch", async () => {
   assert.equal(result.dispatchAllowed, false);
   assert.equal(result.processStartAllowed, false);
   assert.ok(result.blockers.includes("execute-cwd-mismatch"));
+  assert.equal(result.isolation.level, "unknown");
+  assert.ok(result.isolation.blockers.includes("execute-cwd-mismatch"));
+});
+
+test("agent worker isolation checker blocks paths outside workspace", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "agent-worker-isolation-"));
+  const result = validateAgentWorkerIsolation({
+    workspaceRoot: cwd,
+    runCwd: cwd,
+    declaredFiles: ["README.md", "../outside.md"],
+    logPath: path.join(tmpdir(), "outside.log"),
+    envKeys: ["PI_CODING_AGENT_DIR"],
+  });
+
+  assert.equal(result.mode, "agent-worker-isolation-check");
+  assert.equal(result.level, "unknown");
+  assert.ok(result.blockers.includes("declared-file-outside-workspace"));
+  assert.ok(result.blockers.includes("log-path-outside-workspace"));
+});
+
+test("headless driver step blocks log path outside workspace before dispatch", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-log-outside-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const outsideLogPath = path.join(tmpdir(), "headless-driver-outside.log");
+  const result = await runAgentRunDriverStep({
+    run_spec: {
+      ...payload().run_spec,
+      log_path: outsideLogPath,
+    },
+    execute: true,
+    operator_approval: structuredApproval(),
+  }, cwd);
+
+  assert.equal(result.decision, "blocked");
+  assert.equal(result.dispatchAllowed, false);
+  assert.equal(result.processStartAllowed, false);
+  assert.ok(result.blockers.includes("log-path-outside-workspace"));
+  assert.equal(result.registryEntry, undefined);
+  assert.equal(existsSync(outsideLogPath), false);
 });
 
 test("headless driver step executes local process and materializes outcome", async () => {
