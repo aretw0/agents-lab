@@ -298,6 +298,7 @@
       ],
       "files": [
         "docs/research/task-bud-521-local-isolation-canary-2026-06.md",
+        "docs/primitives/agent-worker-isolation.md",
         "scripts/agent-run-driver-step.mjs",
         "scripts/agent-run-pi-provider-worker-dispatch.mjs",
         "scripts/test/agent-run-driver-step.test.mjs",
@@ -312,7 +313,7 @@
         "Nenhuma mudança habilita protected scope, ant_colony ou execução unattended."
       ],
       "milestone": "0.8-worker-orchestration",
-      "notes": "[provenance:operator] source_task=TASK-BUD-521 reason=Worker aprovou a evidência local de isolamento/sandboxing; próximo passo real é converter isso em requisitos/testes de driver."
+      "notes": "[provenance:operator] source_task=TASK-BUD-521 reason=Worker aprovou a evidência local de isolamento/sandboxing; próximo passo real é converter isso em requisitos/testes de driver.\n2026-06-12: contrato arquitetural iniciado em docs/primitives/agent-worker-isolation.md; mantido status planned porque ainda falta validador/teste executável consumindo blockers portáveis sem acoplar política ao adapter."
     },
     {
       "id": "TASK-BUD-1102",
