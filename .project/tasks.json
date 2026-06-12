@@ -339,6 +339,30 @@
       "milestone": "0.8-operational-memory",
       "notes": "[provenance:operator] source_task=TASK-BUD-676 reason=Worker aprovou a evidência local, mas apontou falta de schema/canary executável como próximo passo seguro.\n2026-06-12: concluída com validação local de memoryPacket em scripts/context-preload-consume.mjs; saída report-only inclui memoryTypes/memoryTypeCounts e teste cobre item sem provenance como fallback-canonical.",
       "verification": "node --test scripts/test/context-preload-consume.test.mjs"
+    },
+    {
+      "id": "TASK-BUD-1103",
+      "description": "[P1] Reduzir cola manual quando o board não tem mais trabalho local-safe acionável, emitindo candidatos report-only de próximo escopo.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1100",
+        "TASK-BUD-1101",
+        "TASK-BUD-1102"
+      ],
+      "files": [
+        "scripts/project/board-spec-audit.mjs",
+        "scripts/test/board-spec-audit.test.mjs",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Quando não houver local-safe work restante, o audit retorna nextScopeCandidates report-only.",
+        "Candidatos locais não autorizam dispatch, process start, workflow dispatch, tag ou publish.",
+        "Tasks protected/parked continuam exigindo decisão explícita do operador e não viram work local-safe automaticamente."
+      ],
+      "milestone": "0.8-potential-completeness",
+      "notes": "[provenance:operator] source_task=none reason=Após concluir TASK-BUD-1100..1102, o board ficou sem trabalho local-safe e devolvia cola manual ao operador.\n2026-06-12: concluída adicionando nextScopeCandidates em project-board-spec-audit quando decision=no-local-safe-work.",
+      "verification": "node --test scripts/test/board-spec-audit.test.mjs"
     }
   ]
 }

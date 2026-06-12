@@ -93,10 +93,16 @@ test("board spec audit reports no local-safe work when only closed and parked ta
   const report = buildBoardSpecAudit({ cwd });
 
   assert.equal(report.decision, "no-local-safe-work");
-  assert.equal(report.nextActionCode, "request-protected-or-new-local-scope");
+  assert.equal(report.nextActionCode, "review-next-scope-candidates");
   assert.deepEqual(report.actionableTaskIds, []);
   assert.deepEqual(report.specMaturationTaskIds, []);
   assert.deepEqual(report.protectedTaskIds, ["TASK-PARKED"]);
+  assert.equal(report.nextScopeCandidates.length, 2);
+  assert.equal(report.nextScopeCandidates[0].candidateId, "local-safe-board-next-scope-intake");
+  assert.equal(report.nextScopeCandidates[0].dispatchAllowed, false);
+  assert.equal(report.nextScopeCandidates[0].processStartAllowed, false);
+  assert.equal(report.nextScopeCandidates[1].category, "operator-decision");
+  assert.deepEqual(report.nextScopeCandidates[1].protectedTaskIds, ["TASK-PARKED"]);
 }));
 
 test("board spec audit parseArgs accepts report options", () => {

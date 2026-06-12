@@ -94,6 +94,45 @@ function countRows(rows, key) {
   }, {});
 }
 
+function buildNextScopeCandidates({ decision, protectedTaskIds }) {
+  if (decision !== "no-local-safe-work") return [];
+  const candidates = [
+    {
+      candidateId: "local-safe-board-next-scope-intake",
+      category: "local-safe",
+      title: "Generate next local-safe board scope from current evidence",
+      rationale: "The board has no actionable local-safe work; the next safe move is a report-only scope-intake task that proposes new concrete tasks without release, publish, protected research or dispatch.",
+      files: [
+        "scripts/project/board-spec-audit.mjs",
+        "scripts/test/board-spec-audit.test.mjs",
+        ".project/tasks.json",
+      ],
+      acceptanceCriteria: [
+        "When no local-safe work remains, the audit emits report-only nextScopeCandidates.",
+        "Candidates never authorize dispatch, process start, workflow dispatch, tag or publish.",
+        "Protected/parked tasks remain listed as requiring explicit operator decision.",
+      ],
+      dispatchAllowed: false,
+      processStartAllowed: false,
+    },
+  ];
+
+  if (protectedTaskIds.length > 0) {
+    candidates.push({
+      candidateId: "protected-parked-operator-decision",
+      category: "operator-decision",
+      title: "Ask for explicit protected parked focus or defer release",
+      rationale: "Only protected/parked tasks remain; they require explicit operator focus and must not be promoted by the local-safe audit.",
+      protectedTaskIds,
+      allowedActions: ["keep-parked", "approve-protected-focus", "defer-release"],
+      dispatchAllowed: false,
+      processStartAllowed: false,
+    });
+  }
+
+  return candidates;
+}
+
 export function buildBoardSpecAudit(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const boardPath = String(options.boardPath || DEFAULT_BOARD_PATH);
@@ -135,8 +174,9 @@ export function buildBoardSpecAudit(options = {}) {
     : decision === "needs-spec"
       ? "mature-board-specs"
       : decision === "no-local-safe-work"
-        ? "request-protected-or-new-local-scope"
+        ? "review-next-scope-candidates"
         : "resolve-board-blockers";
+  const nextScopeCandidates = buildNextScopeCandidates({ decision, protectedTaskIds });
 
   return {
     mode: "project-board-spec-audit",
@@ -158,6 +198,7 @@ export function buildBoardSpecAudit(options = {}) {
     actionableTaskIds,
     specMaturationTaskIds,
     protectedTaskIds,
+    nextScopeCandidates,
     taskSpecs,
     blockers,
     summary: `project-board-spec-audit: decision=${decision} tasks=${taskSpecs.length} actionable=${actionableTaskIds.length} needsSpec=${specMaturationTaskIds.length} protected=${protectedTaskIds.length} dispatch=no`,
