@@ -16,6 +16,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     target: "0.8.0",
     tag: "",
     evidencePath: "",
+    statusPath: "",
     operatorApproval: "",
     outPath: "",
     pretty: false,
@@ -27,6 +28,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     else if (arg === "--target") out.target = argv[++index] ?? out.target;
     else if (arg === "--tag") out.tag = argv[++index] ?? "";
     else if (arg === "--evidence") out.evidencePath = argv[++index] ?? "";
+    else if (arg === "--status") out.statusPath = argv[++index] ?? "";
     else if (arg === "--operator-approval") out.operatorApproval = argv[++index] ?? "";
     else if (arg === "--out") out.outPath = argv[++index] ?? "";
     else if (arg === "--pretty") out.pretty = true;
@@ -142,7 +144,7 @@ export function buildReleaseProtectedReviewApproval(options = {}) {
 
 function printHelp() {
   process.stdout.write([
-    "Usage: node scripts/release-protected-review-approval.mjs [--target 0.8.0] [--tag v0.8.0] [--evidence PATH] [--operator-approval TEXT] [--out PATH] [--pretty]",
+    "Usage: node scripts/release-protected-review-approval.mjs [--target 0.8.0] [--tag v0.8.0] [--evidence PATH] [--status PATH] [--operator-approval TEXT] [--out PATH] [--pretty]",
     "",
     "Validates the next protected review approval prompt from materialized release evidence. It never starts processes, creates tags, pushes, publishes, dispatches workflows, or reruns workers.",
   ].join("\n") + "\n");

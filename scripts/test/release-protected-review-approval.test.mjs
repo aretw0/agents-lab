@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -116,6 +116,33 @@ test("protected review approval CLI writes report artifact", () => {
     const report = JSON.parse(result.stdout);
     assert.equal(report.decision, "blocked");
     assert.equal(JSON.parse(readFileSync(path.join(cwd, outPath), "utf8")).decision, "blocked");
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("protected review approval CLI can read materialized status evidence", () => {
+  const cwd = workspace();
+  try {
+    const statusPath = ".artifacts/release-cut/status.json";
+    const fullStatusPath = path.join(cwd, statusPath);
+    mkdirSync(path.dirname(fullStatusPath), { recursive: true });
+    writeFileSync(fullStatusPath, `${JSON.stringify(status(), null, 2)}\n`, "utf8");
+    const result = spawnSync(process.execPath, [
+      cliPath,
+      "--cwd",
+      cwd,
+      "--status",
+      statusPath,
+      "--operator-approval",
+      "approve recovery rerun protected-board-task",
+    ], { cwd, encoding: "utf8" });
+
+    assert.equal(result.status, 0);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision, "approved-for-next-protected-review");
+    assert.equal(report.operatorApprovalMatched, true);
+    assert.equal(report.approvedHandoff.selectedWorkerId, "task-bud-480");
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
