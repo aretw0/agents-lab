@@ -269,6 +269,33 @@ test("headless driver step fails outcome when PASS/FAIL FAIL marker has decorate
   assert.ok(result.agentRunOutcomePacket?.markerFailures.includes("worker-output-fail"));
 });
 
+test("headless driver step fails outcome when PASS/FAIL marker includes assessment text", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-pass-fail-assessment-output-fail-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const result = await runAgentRunDriverStep({
+    run_spec: {
+      ...payload().run_spec,
+      run_id: "headless-driver-step-pass-fail-assessment-output-fail",
+      log_path: ".pi/reports/headless-driver-step-pass-fail-assessment-output-fail.log",
+      execution_preview: {
+        command: "node",
+        args: ["-e", "console.log('PASS/FAIL task-readiness assessment: **FAIL**'); console.log('Blockers: missing gate')"],
+      },
+    },
+    execute: true,
+    operator_approval: structuredApproval(),
+    follow: true,
+    build_outcome: true,
+    follow_max_wait_ms: 5_000,
+  }, cwd);
+
+  assert.equal(result.decision, "dispatched");
+  assert.equal(result.follow?.status.state, "completed");
+  assert.equal(result.agentRunOutcomePacket?.contractDecision, "fail");
+  assert.ok(result.agentRunOutcomePacket?.blockers.includes("worker-output-fail"));
+  assert.ok(result.agentRunOutcomePacket?.markerFailures.includes("worker-output-fail"));
+});
+
 test("headless driver step passes allowed run_spec env to subprocess", async () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-env-"));
   writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");

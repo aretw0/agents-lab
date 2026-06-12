@@ -108,6 +108,7 @@ function protectedTaskFiles(cwd, taskId, files) {
 }
 
 function isProtectedTask(task) {
+  if (/parked/i.test(String(task?.milestone || ""))) return true;
   const haystack = [
     task?.id,
     task?.description,
@@ -380,6 +381,7 @@ export function buildAgentRunPiProviderFanoutPlan(options = {}) {
           "review each workerPackets[*].driverStepCall before approval",
           "execute at most one worker first through agent_run_driver_step_dispatch",
           "after each terminal run, require agent_run_outcome_packet pass before fan-in",
+          ...(fromBoardLocalSafe ? ["aggregate local-safe worker dispatch reports with agent-run-pi-provider-local-safe-fanout-outcome before editing .project/tasks.json"] : []),
           "only after all required pass outcomes, aggregate with fail-closed batch/fan-in",
         ]
       : ["resolve blockers before preparing provider/model rehearsal"],

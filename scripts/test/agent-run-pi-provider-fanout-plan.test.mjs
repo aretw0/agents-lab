@@ -172,6 +172,15 @@ test("provider fanout plan derives local-safe board workers and respects depende
           files: ["docs/research/"],
           acceptance_criteria: ["Keep protected"],
         },
+        {
+          id: "TASK-PARKED-NO-URL",
+          status: "planned",
+          priority: "p3",
+          milestone: "parked-for-0.8.0",
+          description: "Parked without URL signal",
+          files: ["package.json"],
+          acceptance_criteria: ["Keep parked"],
+        },
       ],
     }, null, 2)}\n`, "utf8");
 
@@ -194,9 +203,11 @@ test("provider fanout plan derives local-safe board workers and respects depende
     assert.deepEqual(report.workerStepQueue.steps[0].runSpec.declaredFiles, ["package.json"]);
     assert.match(report.workerPackets[0].payload.run_spec.execution_preview.args.join(" "), /Local-safe board worker contract/);
     assert.ok(report.boardSelection.skippedSamples.some((item) => item.taskId === "TASK-BLOCKED-DEP" && item.reason.includes("dependencies-not-completed")));
+    assert.ok(report.boardSelection.skippedSamples.some((item) => item.taskId === "TASK-PARKED-NO-URL" && item.reason === "protected-or-parked"));
     assert.equal(report.dispatchAllowed, false);
     assert.equal(report.processStartAllowed, false);
     assert.equal(report.batchExecutionAllowed, false);
+    assert.ok(report.nextActions.some((action) => action.includes("agent-run-pi-provider-local-safe-fanout-outcome")));
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

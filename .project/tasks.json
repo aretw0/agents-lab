@@ -447,7 +447,7 @@
     {
       "id": "TASK-BUD-1107",
       "description": "[P1] Transformar tasks acionáveis do board em fanout local-safe com critérios de fan-in parent-side.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1106"
@@ -457,8 +457,12 @@
         "scripts/project/board-next-scope-intake.mjs",
         "scripts/agent-run-pi-provider-fanout-plan.mjs",
         "scripts/agent-run-pi-provider-worker-dispatch.mjs",
+        "scripts/agent-run-pi-provider-local-safe-fanout-outcome.mjs",
+        "scripts/agent-run-driver-step.mjs",
         "scripts/test/board-spec-audit.test.mjs",
-        "scripts/test/agent-run-pi-provider-fanout-plan.test.mjs"
+        "scripts/test/agent-run-pi-provider-fanout-plan.test.mjs",
+        "scripts/test/agent-run-pi-provider-local-safe-fanout-outcome.test.mjs",
+        "scripts/test/agent-run-driver-step.test.mjs"
       ],
       "acceptance_criteria": [
         "Fanout plan seleciona apenas tasks local-safe acionáveis e declara arquivos/criteria por worker.",
@@ -469,7 +473,8 @@
         "Manter a proposta local-safe e revisável antes de editar .project/tasks.json."
       ],
       "milestone": "0.8-potential-completeness",
-      "notes": "[provenance:system] source_task=TASK-BUD-1105 reason=Materializada a proposta remanescente de .artifacts/board-next-scope-intake.json: TASK-BUD-DRAFT-BOARD-FANOUT-ASSIMILATION. Core/primitives: task readiness, bounded fanout manifest, parent-side outcome aggregation. Adapter extensions: Pi worker dispatch adapter e board-specific task selection."
+      "notes": "[provenance:system] source_task=TASK-BUD-1105 reason=Materializada a proposta remanescente de .artifacts/board-next-scope-intake.json: TASK-BUD-DRAFT-BOARD-FANOUT-ASSIMILATION. Core/primitives: task readiness, bounded fanout manifest, parent-side outcome aggregation. Adapter extensions: Pi worker dispatch adapter e board-specific task selection.\n2026-06-12: implementado wrapper agent-run-pi-provider-local-safe-fanout-outcome para agregar dispatch reports local-safe antes de materialização do board. Também corrigido gate de milestone parked no fanout local-safe e detector PASS/FAIL com texto de assessment. Worker gpt-5.3-codex-spark local-safe-board-fanin-assimilation-task-bud-1107 retornou PASS; fanout outcome retornou decision=pass, passedWorkerCount=1, blockers=[].",
+      "verification": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-provider-local-safe-fanout-outcome.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs scripts/test/board-spec-audit.test.mjs"
     }
   ]
 }

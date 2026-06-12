@@ -98,7 +98,7 @@ function outputHasFailMarker(lines = []) {
     .filter((line) => typeof line === "string")
     .map((line) => line.trim())
     .some((line) => /^[\s*_`>#-]*FAIL(?::|\b)/i.test(line)
-      || /^[\s*_`>#-]*PASS\/FAIL(?:\s*\([^)]*\))?\s*:\s*[\s*_`>#-]*FAIL\b/i.test(line));
+      || /^[\s*_`>#-]*PASS\/FAIL(?:\s+\w[\w -]*)?(?:\s*\([^)]*\))?\s*:\s*[\s*_`>#-]*FAIL\b/i.test(line));
 }
 
 function normalizeTimeoutMs(value) {
