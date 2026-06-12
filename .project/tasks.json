@@ -264,7 +264,7 @@
     {
       "id": "TASK-BUD-1100",
       "description": "[P1] Assimilar a evidência do TASK-BUD-480 em um contrato distribuível de worker envelope agent-first, sem depender de semântica de colônia.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1099"
@@ -272,6 +272,7 @@
       "files": [
         "docs/research/task-bud-480-local-agent-patterns-canary-2026-06.md",
         "docs/research/worker-provider-model-arena-2026-05.md",
+        "docs/primitives/agent-worker-envelope.md",
         "scripts/agent-run-pi-provider-fanout-plan.mjs",
         "scripts/agent-run-pi-provider-worker-dispatch.mjs"
       ],
@@ -283,7 +284,8 @@
         "Documenta o que ainda não está promovido: multi-file mutation, unattended fanout, protected scope e swarm."
       ],
       "milestone": "0.8-worker-orchestration",
-      "notes": "[provenance:operator] source_task=TASK-BUD-480 reason=Worker aprovou a evidência local de padrões de agentes; próximo passo real é promover o contrato single-worker para primitive distribuível, não criar abstração de colônia."
+      "notes": "[provenance:operator] source_task=TASK-BUD-480 reason=Worker aprovou a evidência local de padrões de agentes; próximo passo real é promover o contrato single-worker para primitive distribuível, não criar abstração de colônia.\n2026-06-12: TASK-BUD-1100 concluída com docs/primitives/agent-worker-envelope.md; evidência do worker local-safe local-safe-board-0-8-task-bud-1100 passou com contractDecision=pass, touchedFiles=[] e recomendou exatamente esta primitive.",
+      "verification": "verify-task-bud-1100-agent-worker-envelope"
     },
     {
       "id": "TASK-BUD-1101",
