@@ -63,12 +63,61 @@ test("protected review plan starts with one protected worker approval required",
   assert.equal(result.protectedReviewExecutionGate.decision, "approval-required");
   assert.equal(result.protectedReviewExecutionGate.approvedProtectedWorkerSlotsNow, 0);
   assert.equal(result.protectedReviewExecutionGate.pendingApprovalProtectedWorkerSlots, 1);
+  assert.equal(result.protectedReviewProgress.evidenceDecision, "missing");
+  assert.equal(result.protectedReviewProgress.fanoutPassedWorkerCount, 0);
+  assert.equal(result.protectedReviewProgress.dispatchAllowed, false);
   assert.equal(result.dispatchAllowed, false);
   assert.equal(result.processStartAllowed, false);
   assert.equal(result.protectedRamp[0].stage, "single-protected-worker");
   assert.equal(result.protectedRamp[0].allowedNow, true);
   assert.equal(result.protectedRamp[1].allowedNow, false);
   assert.match(result.nextActions.join("\n"), /approve exactly one protected action first/);
+});
+
+test("protected review plan surfaces protected review progress evidence", () => {
+  const result = buildReleaseProtectedReviewPlan({
+    status: status({
+      protectedReviewEvidenceDecision: "pass",
+      protectedReviewEvidenceApprovedWorkerId: "task-bud-480",
+      protectedReviewEvidenceApprovedRunId: "protected-board-research-0-8-task-bud-480",
+      protectedReviewEvidenceApprovedContractDecision: "pass",
+      protectedReviewEvidenceFanoutPassedWorkerCount: 2,
+      protectedReviewEvidenceFanoutWorkerCount: 3,
+      nextProtectedReviewRow: {
+        action: "rerun-protected-recovery-worker",
+        source: "protected-board-recovery-approval",
+        requiredApprovalPrompt: "approve recovery rerun protected-board-task-bud-676",
+        selectedWorkerId: "task-bud-676",
+        approvalScope: "protected-or-external-scope",
+        dispatchAllowed: false,
+        processStartAllowed: false,
+      },
+    }),
+    approval: approval({
+      requiredApprovalPrompt: "approve recovery rerun protected-board-task-bud-676",
+      nextProtectedReviewRow: {
+        action: "rerun-protected-recovery-worker",
+        source: "protected-board-recovery-approval",
+        requiredApprovalPrompt: "approve recovery rerun protected-board-task-bud-676",
+        selectedWorkerId: "task-bud-676",
+        approvalScope: "protected-or-external-scope",
+        dispatchAllowed: false,
+        processStartAllowed: false,
+      },
+    }),
+  });
+
+  assert.equal(result.decision, "single-worker-approval-required");
+  assert.equal(result.nextProtectedReviewRow.selectedWorkerId, "task-bud-676");
+  assert.equal(result.protectedReviewProgress.evidenceDecision, "pass");
+  assert.equal(result.protectedReviewProgress.approvedWorkerId, "task-bud-480");
+  assert.equal(result.protectedReviewProgress.approvedRunId, "protected-board-research-0-8-task-bud-480");
+  assert.equal(result.protectedReviewProgress.approvedContractDecision, "pass");
+  assert.equal(result.protectedReviewProgress.fanoutPassedWorkerCount, 2);
+  assert.equal(result.protectedReviewProgress.fanoutWorkerCount, 3);
+  assert.equal(result.protectedReviewProgress.complete, false);
+  assert.equal(result.workerVolumeAllowedNow, false);
+  assert.match(result.summary, /progress=2\/3/);
 });
 
 test("protected review plan recognizes one approved protected action without enabling volume", () => {

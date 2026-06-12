@@ -116,6 +116,24 @@ function protectedReviewExecutionGate({ approved, blockers, nextRow, requiredApp
   };
 }
 
+function protectedReviewProgress(status) {
+  const passed = Number(status?.protectedReviewEvidenceFanoutPassedWorkerCount ?? 0);
+  const total = Number(status?.protectedReviewEvidenceFanoutWorkerCount ?? 0);
+  return {
+    mode: "protected-review-progress",
+    evidenceDecision: status?.protectedReviewEvidenceDecision ?? "missing",
+    approvedWorkerId: status?.protectedReviewEvidenceApprovedWorkerId ?? "",
+    approvedRunId: status?.protectedReviewEvidenceApprovedRunId ?? "",
+    approvedContractDecision: status?.protectedReviewEvidenceApprovedContractDecision ?? "",
+    fanoutPassedWorkerCount: Number.isFinite(passed) ? passed : 0,
+    fanoutWorkerCount: Number.isFinite(total) ? total : 0,
+    complete: total > 0 && passed === total,
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    protectedActionsAllowed: false,
+  };
+}
+
 export function buildReleaseProtectedReviewPlan(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const status = statusFromOptions(options, cwd);
@@ -143,6 +161,7 @@ export function buildReleaseProtectedReviewPlan(options = {}) {
     nextRow,
     requiredApprovalPrompt,
   });
+  const progress = protectedReviewProgress(status);
   const plan = {
     mode: "release-protected-review-plan",
     schemaVersion: SCHEMA_VERSION,
@@ -160,6 +179,7 @@ export function buildReleaseProtectedReviewPlan(options = {}) {
     workerVolumeAllowedNow: false,
     singleWorkerAllowedAfterApproval: approved,
     protectedReviewExecutionGate: executionGate,
+    protectedReviewProgress: progress,
     protectedRamp: rampRows(nextRow),
     dispatchAllowed: false,
     processStartAllowed: false,
@@ -170,7 +190,7 @@ export function buildReleaseProtectedReviewPlan(options = {}) {
       : decision === "single-worker-approved"
         ? ["run only the approved source-specific path for one protected worker, then rebuild outcome/recovery/status before increasing volume"]
         : ["repair protected review status/approval evidence before planning protected worker volume"],
-    summary: `release-protected-review-plan: decision=${decision} maxProtectedNow=${blockers.length === 0 ? 1 : 0} volume=no dispatch=no`,
+    summary: `release-protected-review-plan: decision=${decision} maxProtectedNow=${blockers.length === 0 ? 1 : 0} progress=${progress.fanoutPassedWorkerCount}/${progress.fanoutWorkerCount} volume=no dispatch=no`,
   };
   if (options.outPath) writeJson(cwd, options.outPath, plan, options.pretty === true);
   return plan;
