@@ -1,5 +1,7 @@
 import path from "node:path";
 
+const ALLOWED_ENV_KEYS = new Set(["PI_CODING_AGENT_DIR"]);
+
 function normalizePathForCompare(value) {
   return path.resolve(value || "").replace(/\\/g, "/").replace(/\/+$/, "").toLowerCase();
 }
@@ -20,6 +22,7 @@ export function validateAgentWorkerIsolation({
   declaredFiles = [],
   logPath = "",
   envKeys = [],
+  executionPreview = {},
 } = {}) {
   const root = path.resolve(workspaceRoot || ".");
   const blockers = [];
@@ -45,6 +48,16 @@ export function validateAgentWorkerIsolation({
     if (!pathIsInside(root, resolvedLogPath)) {
       blockers.push("log-path-outside-workspace");
     }
+  }
+
+  for (const key of envKeys) {
+    if (!ALLOWED_ENV_KEYS.has(String(key || "").trim())) {
+      blockers.push("env-key-not-allowed");
+    }
+  }
+
+  if (executionPreview?.shell === true || executionPreview?.shellInterpolationAllowed === true) {
+    blockers.push("execution-preview-shell-interpolation");
   }
 
   return {

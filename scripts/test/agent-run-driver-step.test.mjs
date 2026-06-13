@@ -306,11 +306,10 @@ test("headless driver step passes allowed run_spec env to subprocess", async () 
       log_path: ".pi/reports/headless-driver-step-env.log",
       env: {
         PI_CODING_AGENT_DIR: path.join(cwd, ".sandbox", "pi-agent"),
-        SHOULD_NOT_PASS: "no",
       },
       execution_preview: {
         command: "node",
-        args: ["-e", "console.log(process.env.PI_CODING_AGENT_DIR); console.log(process.env.SHOULD_NOT_PASS || 'unset')"],
+        args: ["-e", "console.log(process.env.PI_CODING_AGENT_DIR)"],
       },
     },
     execute: true,
@@ -323,12 +322,67 @@ test("headless driver step passes allowed run_spec env to subprocess", async () 
   assert.equal(result.decision, "dispatched");
   assert.equal(result.agentRunOutcomePacket?.contractDecision, "pass");
   assert.equal(result.runSpec.env.PI_CODING_AGENT_DIR, path.join(cwd, ".sandbox", "pi-agent"));
-  assert.equal(result.runSpec.env.SHOULD_NOT_PASS, undefined);
   assert.deepEqual(result.registryEntry.envKeys, ["PI_CODING_AGENT_DIR"]);
   const log = readFileSync(path.join(cwd, ".pi", "reports", "headless-driver-step-env.log"), "utf8");
   assert.match(log, /PI_CODING_AGENT_DIR/);
   assert.match(log, /\.sandbox/);
-  assert.match(log, /unset/);
+});
+
+test("headless driver step blocks non-allowlisted env keys before dispatch", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-env-block-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const result = await runAgentRunDriverStep({
+    run_spec: {
+      ...payload().run_spec,
+      run_id: "headless-driver-step-env-block",
+      log_path: ".pi/reports/headless-driver-step-env-block.log",
+      env: {
+        PI_CODING_AGENT_DIR: path.join(cwd, ".sandbox", "pi-agent"),
+        SHOULD_NOT_PASS: "no",
+      },
+    },
+    execute: true,
+    operator_approval: structuredApproval(),
+    follow: true,
+    build_outcome: true,
+    follow_max_wait_ms: 5_000,
+  }, cwd);
+
+  assert.equal(result.decision, "blocked");
+  assert.equal(result.dispatchAllowed, false);
+  assert.equal(result.processStartAllowed, false);
+  assert.ok(result.blockers.includes("env-key-not-allowed"));
+  assert.equal(result.registryEntry, undefined);
+  assert.equal(existsSync(path.join(cwd, ".pi", "reports", "headless-driver-step-env-block.log")), false);
+});
+
+test("headless driver step blocks shell interpolation before dispatch", async () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "headless-driver-shell-block-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const result = await runAgentRunDriverStep({
+    run_spec: {
+      ...payload().run_spec,
+      run_id: "headless-driver-step-shell-block",
+      log_path: ".pi/reports/headless-driver-step-shell-block.log",
+      execution_preview: {
+        command: "node",
+        args: ["--version"],
+        shell_interpolation_allowed: true,
+      },
+    },
+    execute: true,
+    operator_approval: structuredApproval(),
+    follow: true,
+    build_outcome: true,
+    follow_max_wait_ms: 5_000,
+  }, cwd);
+
+  assert.equal(result.decision, "blocked");
+  assert.equal(result.dispatchAllowed, false);
+  assert.equal(result.processStartAllowed, false);
+  assert.ok(result.blockers.includes("execution-preview-shell-interpolation"));
+  assert.equal(result.registryEntry, undefined);
+  assert.equal(existsSync(path.join(cwd, ".pi", "reports", "headless-driver-step-shell-block.log")), false);
 });
 
 test("headless driver step replaces log content for each dispatch", async () => {

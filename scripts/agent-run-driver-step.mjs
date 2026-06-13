@@ -79,6 +79,12 @@ function asEnv(value) {
     .map(([key, entry]) => [key, entry.trim()]));
 }
 
+function envBlockers(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+  const allowed = new Set(["PI_CODING_AGENT_DIR"]);
+  return Object.keys(value).some((key) => !allowed.has(key)) ? ["env-key-not-allowed"] : [];
+}
+
 function asFileContract(value) {
   return value === "mutation" ? "mutation" : "read-only";
 }
@@ -170,9 +176,11 @@ function parseRunSpec(raw) {
     timeoutMs: normalizeTimeoutMs(row.timeout_ms),
     fileContract: asFileContract(row.file_contract),
     env: asEnv(row.env),
+    envBlockers: envBlockers(row.env),
     executionPreview: {
       command: asString(preview.command),
       args: asStringArray(preview.args),
+      shellInterpolationAllowed: preview.shell_interpolation_allowed === true || preview.shellInterpolationAllowed === true || preview.shell === true,
     },
   };
 }
@@ -399,6 +407,7 @@ export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
   if (runSpec.declaredFiles.length === 0) blockers.push("declared-files-missing");
   if (!runSpec.logPath) blockers.push("log-path-missing");
   if (!runSpec.executionPreview.command) blockers.push("execution-preview-command-missing");
+  blockers.push(...runSpec.envBlockers);
   if (executeRequested && !hasStructuredApproval(payload.operator_approval)) blockers.push("structured-operator-approval-missing");
   const existingRunAlive = existing?.state === "running" && processIsAlive(existing.pid);
   if (executeRequested && existingRunAlive) blockers.push("run-already-running");
@@ -408,6 +417,7 @@ export async function runAgentRunDriverStep(payload, cwd = process.cwd()) {
     declaredFiles: runSpec.declaredFiles,
     logPath: runSpec.logPath,
     envKeys: Object.keys(runSpec.env),
+    executionPreview: runSpec.executionPreview,
   });
   if (executeRequested) blockers.push(...isolation.blockers);
 

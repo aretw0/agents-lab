@@ -19,7 +19,7 @@
     {
       "id": "TASK-BUD-521",
       "description": "Influência externa parked: avaliar futuramente `mattpocock/sandcastle` como referência de isolamento/sandboxing quando a trilha background->spawn estiver madura.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "files": [
         "docs/research/"
@@ -30,7 +30,8 @@
         "Sem execução/pesquisa externa automática nesta fatia."
       ],
       "milestone": "parked-for-0.8.0",
-      "notes": "[rationale:risk-control] influência externa útil, mas deve entrar só após maturidade local-safe da trilha background/spawn. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito. https://github.com/mattpocock/sandcastle\n[provenance:human] source_task=TASK-BUD-520 reason=nova influência externa fornecida pelo operador para assimilação futura\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Segundo experimento do pipeline de dogfood progressivo.\n2026-06-11: board release disposition = park-for-target-release for 0.8.0; local evidence accepted for release gating; external research remains parked/protected."
+      "notes": "[rationale:risk-control] influência externa útil, mas deve entrar só após maturidade local-safe da trilha background/spawn. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito. https://github.com/mattpocock/sandcastle\n[provenance:human] source_task=TASK-BUD-520 reason=nova influência externa fornecida pelo operador para assimilação futura\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Segundo experimento do pipeline de dogfood progressivo.\n2026-06-11: board release disposition = park-for-target-release for 0.8.0; local evidence accepted for release gating; external research remains parked/protected.\n2026-06-13: protected focus local-first executado sem pesquisa externa, sem URL fetch, sem clone, sem release/publish/workflow dispatch e sem ant_colony. Reforçada validação de isolamento lógico com blocker explícito para env não allowlisted e shell/interpolação antes de spawn. Worker gpt-5.3-codex-spark via agent-run-driver-step retornou PASS; agentRunOutcomePacket contractDecision=pass, touchedFiles=[], blockers=[]. Fechada como baseline local-first de isolamento lógico verificado; workspace/worktree/container/network sandboxing permanece follow-up protegido separado.",
+      "verification": "node --test scripts/test/agent-run-driver-step.test.mjs; node scripts/agent-run-driver-step.mjs --input .artifacts/agent-run-driver/protected-focus-task-bud-521-local-first-preflight-input.json --out .artifacts/agent-run-driver/protected-focus-task-bud-521-local-first-preflight-result.json --pretty"
     },
     {
       "id": "TASK-BUD-676",
