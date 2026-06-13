@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
+import { validateAgentWorkerIsolation } from "./agent-worker-isolation.mjs";
 
 const SCHEMA_VERSION = 1;
 
@@ -214,6 +215,16 @@ export function buildPiPrintReadonlyDriverStepPayload(options = {}) {
   if (!prompt) blockers.push("prompt-missing");
   if (prompt.startsWith("-")) blockers.push("prompt-leading-dash");
   if (declaredFiles.length === 0) blockers.push("declared-files-missing");
+  if (declaredFiles.length > 0) {
+    blockers.push(...validateAgentWorkerIsolation({
+      workspaceRoot: cwd,
+      runCwd: cwd,
+      declaredFiles,
+      logPath,
+      envKeys: ["PI_CODING_AGENT_DIR"],
+      executionPreview: {},
+    }).blockers.map((blocker) => `isolation:${blocker}`));
+  }
 
   if (blockers.length > 0) {
     return {

@@ -508,7 +508,7 @@
     {
       "id": "TASK-BUD-1109",
       "description": "[P1] Endurecer validação de declaredFiles para workers local-safe, bloqueando URLs, protocolos, caminhos inválidos e arquivos ausentes antes de qualquer dispatch.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1106",
@@ -517,8 +517,10 @@
       "files": [
         "scripts/agent-worker-isolation.mjs",
         "scripts/agent-run-driver-step.mjs",
+        "scripts/agent-run-pi-driver-payload.mjs",
         "scripts/agent-run-pi-provider-fanout-plan.mjs",
         "scripts/test/agent-run-driver-step.test.mjs",
+        "scripts/test/agent-run-pi-driver-payload.test.mjs",
         "scripts/test/agent-run-pi-provider-fanout-plan.test.mjs"
       ],
       "acceptance_criteria": [
@@ -530,8 +532,8 @@
         "Teste cobre pelo menos URL-like declared file, arquivo ausente e caminho fora do workspace."
       ],
       "milestone": "0.8-worker-orchestration",
-      "notes": "[provenance:worker] source_task=scope-discovery-0-8-worker-runtime reason=Worker runtime retornou FAIL útil: URL-like entries podem normalizar para paths locais e passar; isso enfraquece segurança para escalar workers em volume no container. Materializada como próxima task local-safe sem pesquisa externa.",
-      "verification": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs"
+      "notes": "[provenance:worker] source_task=scope-discovery-0-8-worker-runtime reason=Worker runtime retornou FAIL útil: URL-like entries podem normalizar para paths locais e passar; isso enfraquece segurança para escalar workers em volume no container. Materializada como próxima task local-safe sem pesquisa externa.\n2026-06-13: concluída reforçando validateAgentWorkerIsolation com blockers para declared-file-invalid e declared-file-missing por arquivo inexistente. buildPiPrintReadonlyDriverStepPayload agora bloqueia payload/fanout antes de emitir worker pronto quando declaredFiles são inválidos. Testes cobrem URL-like, arquivo ausente e fanout local-safe com arquivo inexistente.",
+      "verification": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-driver-payload.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs"
     },
     {
       "id": "TASK-BUD-1110",

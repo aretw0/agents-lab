@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import path from "node:path";
 
 const ALLOWED_ENV_KEYS = new Set(["PI_CODING_AGENT_DIR"]);
@@ -14,6 +15,16 @@ function pathIsInside(parent, candidate) {
 
 function resolveFromWorkspace(workspaceRoot, value) {
   return path.isAbsolute(value) ? path.resolve(value) : path.resolve(workspaceRoot, value);
+}
+
+function hasProtocolLikePath(value) {
+  const clean = String(value || "").trim();
+  return /^[a-z][a-z0-9+.-]*:\/\//i.test(clean) || /^file:/i.test(clean);
+}
+
+function hasInvalidPathShape(value) {
+  const clean = String(value || "");
+  return clean.includes("\0") || clean.trim() !== clean || clean.trim() === "";
 }
 
 export function validateAgentWorkerIsolation({
@@ -37,9 +48,17 @@ export function validateAgentWorkerIsolation({
       blockers.push("declared-file-missing");
       continue;
     }
+    if (hasInvalidPathShape(file) || hasProtocolLikePath(file)) {
+      blockers.push("declared-file-invalid");
+      continue;
+    }
     const resolvedFile = resolveFromWorkspace(root, file);
     if (!pathIsInside(root, resolvedFile)) {
       blockers.push("declared-file-outside-workspace");
+      continue;
+    }
+    if (!existsSync(resolvedFile)) {
+      blockers.push("declared-file-missing");
     }
   }
 

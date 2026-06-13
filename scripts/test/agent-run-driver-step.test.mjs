@@ -57,8 +57,9 @@ test("headless driver step blocks execute without structured approval", async ()
   assert.equal(result.decision, "blocked");
   assert.equal(result.dispatchAllowed, false);
   assert.ok(result.blockers.includes("structured-operator-approval-missing"));
+  assert.ok(result.blockers.includes("declared-file-missing"));
   assert.match(result.summary, /decision=blocked/);
-  assert.match(result.summary, /blockers=1/);
+  assert.match(result.summary, /blockers=2/);
 });
 
 test("headless driver step blocks duplicate running run", async () => {
@@ -135,6 +136,22 @@ test("agent worker isolation checker blocks paths outside workspace", () => {
   assert.equal(result.level, "unknown");
   assert.ok(result.blockers.includes("declared-file-outside-workspace"));
   assert.ok(result.blockers.includes("log-path-outside-workspace"));
+});
+
+test("agent worker isolation checker blocks URL-like and missing declared files", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "agent-worker-isolation-declared-files-"));
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
+  const result = validateAgentWorkerIsolation({
+    workspaceRoot: cwd,
+    runCwd: cwd,
+    declaredFiles: ["README.md", "https://example.test/file.md", "missing.md"],
+    logPath: ".pi/reports/worker.log",
+    envKeys: ["PI_CODING_AGENT_DIR"],
+  });
+
+  assert.equal(result.level, "unknown");
+  assert.ok(result.blockers.includes("declared-file-invalid"));
+  assert.ok(result.blockers.includes("declared-file-missing"));
 });
 
 test("headless driver step blocks log path outside workspace before dispatch", async () => {

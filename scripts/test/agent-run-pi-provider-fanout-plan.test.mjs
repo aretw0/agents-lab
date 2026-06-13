@@ -85,6 +85,7 @@ test("provider fanout plan derives protected board research workers without disp
   const cwd = workspace("pi-provider-fanout-plan-protected-board-");
   try {
     mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    mkdirSync(path.join(cwd, "docs", "research"), { recursive: true });
     writeFileSync(path.join(cwd, ".project", "tasks.json"), `${JSON.stringify({
       tasks: [
         {
@@ -250,6 +251,40 @@ test("provider fanout plan blocks local-safe board mode when no actionable worke
   }
 });
 
+test("provider fanout plan blocks local-safe board workers with missing declared files", () => {
+  const cwd = workspace("pi-provider-fanout-plan-local-board-missing-file-");
+  try {
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-MISSING-FILE",
+          status: "planned",
+          priority: "p1",
+          milestone: "worker",
+          description: "Uses a missing file",
+          files: ["missing.md"],
+          acceptance_criteria: ["Read local files only"],
+        },
+      ],
+    }, null, 2)}\n`, "utf8");
+
+    const report = buildAgentRunPiProviderFanoutPlan({
+      cwd,
+      fromBoardLocalSafe: true,
+      batchId: "local-safe-board",
+    });
+
+    assert.equal(report.decision, "blocked");
+    assert.ok(report.blockers.includes("task-missing-file:isolation:declared-file-missing"));
+    assert.equal(report.dispatchAllowed, false);
+    assert.equal(report.processStartAllowed, false);
+    assert.equal(report.workerPackets[0].decision, "blocked");
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("provider fanout plan narrows protected board files to local task evidence when present", () => {
   const cwd = workspace("pi-provider-fanout-plan-protected-board-evidence-");
   try {
@@ -353,6 +388,7 @@ test("provider fanout plan uses research docs fallback for protected tasks witho
   const cwd = workspace("pi-provider-fanout-plan-protected-board-fallback-");
   try {
     mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    mkdirSync(path.join(cwd, "docs", "research"), { recursive: true });
     writeFileSync(path.join(cwd, ".project", "tasks.json"), `${JSON.stringify({
       tasks: [{
         id: "TASK-PROTECTED-NO-FILES",

@@ -119,6 +119,7 @@ test("builds a print-readonly payload with isolated pi flags", () => {
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
   mkdirSync(path.dirname(cliPath), { recursive: true });
   writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
 
   const result = buildPiPrintReadonlyDriverStepPayload({
     cwd,
@@ -161,6 +162,7 @@ test("builds a print payload with mutation file contract when requested", () => 
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
   mkdirSync(path.dirname(cliPath), { recursive: true });
   writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
 
   const result = buildPiPrintReadonlyDriverStepPayload({
     cwd,
@@ -180,6 +182,7 @@ test("builds a driver-step call with mutation evidence", () => {
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
   mkdirSync(path.dirname(cliPath), { recursive: true });
   writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
 
   const result = buildPiPrintReadonlyDriverStepPayload({
     cwd,
@@ -291,6 +294,7 @@ test("payload CLI emits mutation evidence for driver-step outcome", () => {
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
   mkdirSync(path.dirname(cliPath), { recursive: true });
   writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
 
   const stdout = execFileSync(process.execPath, [
     payloadCliPath,
@@ -554,6 +558,7 @@ test("blocks incomplete print-readonly payloads", () => {
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
   mkdirSync(path.dirname(cliPath), { recursive: true });
   writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
 
   const result = buildPiPrintReadonlyDriverStepPayload({ cwd, runId: "pi-print-blocked" });
 
@@ -568,6 +573,7 @@ test("blocks print-readonly prompts that look like flags", () => {
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
   mkdirSync(path.dirname(cliPath), { recursive: true });
   writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
 
   const result = buildPiPrintReadonlyDriverStepPayload({
     cwd,
@@ -581,11 +587,33 @@ test("blocks print-readonly prompts that look like flags", () => {
   assert.ok(result.blockers.includes("prompt-leading-dash"));
 });
 
+test("blocks print-readonly payloads with invalid or missing declared files", () => {
+  const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-print-invalid-files-"));
+  const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
+  mkdirSync(path.dirname(cliPath), { recursive: true });
+  writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+
+  const result = buildPiPrintReadonlyDriverStepPayload({
+    cwd,
+    runId: "pi-print-invalid-files",
+    model: "local/test-model",
+    files: ["https://example.test/file.md", "missing.md"],
+    prompt: "Return PASS.",
+  });
+
+  assert.equal(result.decision, "blocked");
+  assert.ok(result.blockers.includes("isolation:declared-file-invalid"));
+  assert.ok(result.blockers.includes("isolation:declared-file-missing"));
+  assert.equal(result.dispatchAllowed, false);
+  assert.equal(result.processStartAllowed, false);
+});
+
 test("dispatches builder by payload mode", () => {
   const cwd = mkdtempSync(path.join(tmpdir(), "pi-driver-mode-"));
   const cliPath = path.join(cwd, "node_modules", "@earendil-works", "pi-coding-agent", "dist", "cli.js");
   mkdirSync(path.dirname(cliPath), { recursive: true });
   writeFileSync(cliPath, "console.log('pi')\n", "utf8");
+  writeFileSync(path.join(cwd, "README.md"), "fixture\n", "utf8");
 
   const help = buildPiDriverStepPayload({ cwd, mode: "help", runId: "mode-help" });
   const printReadonly = buildPiDriverStepPayload({
