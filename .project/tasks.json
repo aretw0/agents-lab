@@ -565,7 +565,7 @@
     {
       "id": "TASK-BUD-1111",
       "description": "[P1] Fazer o board-next-scope-intake emitir novos candidatos locais quando o escopo conhecido estiver esgotado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1103",
@@ -587,7 +587,7 @@
         "Não usar release, publish, workflow dispatch, external research, URL fetch ou ant_colony."
       ],
       "milestone": "0.8-potential-completeness",
-      "notes": "[provenance:worker] source_task=scope-discovery-0-8-board-autonomy-compact reason=Worker board/autonomy recomendou reduzir cola após scope-exhausted com candidatos locais concretos. Esta task mantém o board report-only até revisão parent-side.",
+      "notes": "[provenance:worker] source_task=scope-discovery-0-8-board-autonomy-compact reason=Worker board/autonomy recomendou reduzir cola após scope-exhausted com candidatos locais concretos. Esta task mantém o board report-only até revisão parent-side.\n2026-06-13: concluída fazendo board-next-scope-intake retornar 2 nextScopeCandidates concretos quando known proposals estão todos materializados. Cada candidato carrega files, acceptanceCriteria, validationCommands, blockers, filesTouched=[] e flags de dispatch/process/workflow/tag/publish false. Doutrina atualizada para deixar explícito que scope-exhausted gera proposta revisável, não edição automática do board.",
       "verification": "node --test scripts/test/board-next-scope-intake.test.mjs; node scripts/project/board-next-scope-intake.mjs --json --pretty"
     },
     {

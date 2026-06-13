@@ -165,6 +165,89 @@ function filterAlreadyMaterializedProposals(tasks, proposedTasks) {
   return proposedTasks.filter((task) => !materialized.has(task.id));
 }
 
+function buildExhaustedScopeCandidates({ materializedProposalCount, protectedTaskIds }) {
+  const commonBlockers = [
+    "operator-review-required-before-board-edit",
+    "protected-scope-remains-gated",
+  ];
+  const candidates = [
+    {
+      candidateId: "local-safe-external-influence-assimilation",
+      category: "local-safe",
+      title: "Assimilate approved external influence artifacts into local docs/tests",
+      rationale: "Known board proposals are already materialized; the next safe move is to convert approved research artifacts into bounded local tasks without more URL fetches.",
+      files: [
+        ".project/reports/external-influence-fanin-0-8.json",
+        "docs/primitives/agent-worker-envelope.md",
+        "docs/primitives/agent-worker-isolation.md",
+        "scripts/context-preload-consume.mjs",
+        "scripts/test/context-preload-consume.test.mjs",
+      ],
+      acceptanceCriteria: [
+        "Use only existing local fan-in artifacts; do not fetch URLs, clone repositories, install dependencies or execute external code.",
+        "Separate 0.8-candidate influence from post-0.8 hardening so sandbox or swarm claims do not expand the release promise.",
+        "Produce board-ready tasks with files, validation commands and explicit non-goals before any code changes.",
+      ],
+      validationCommands: [
+        "node scripts/project/board-spec-audit.mjs --json",
+        "node --test scripts/test/context-preload-consume.test.mjs",
+      ],
+      blockers: commonBlockers,
+      filesTouched: [],
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      workflowDispatchAllowed: false,
+      tagAllowed: false,
+      publishAllowed: false,
+    },
+    {
+      candidateId: "local-safe-worker-volume-canary",
+      category: "local-safe",
+      title: "Define a worker-volume canary from current board tasks using agnostic driver steps",
+      rationale: "The board can keep proving coordination by selecting multiple actionable local-safe tasks and requiring parent-side fan-in before mutation.",
+      files: [
+        "scripts/agent-run-driver-fanout-rehearsal.mjs",
+        "scripts/agent-run-driver-fanout-manifest.mjs",
+        "scripts/agent-run-driver-fanout-outcome.mjs",
+        "scripts/project/board-spec-audit.mjs",
+        "scripts/test/agent-run-driver-fanout-rehearsal.test.mjs",
+      ],
+      acceptanceCriteria: [
+        "Generate a bounded worker manifest from actionable local-safe board tasks without using ant_colony or provider-specific semantics.",
+        "Require each worker outcome to be present, terminal and parent-side validated before any board mutation.",
+        "Keep release, publish, workflow dispatch and protected scope disabled throughout the rehearsal.",
+      ],
+      validationCommands: [
+        "node --test scripts/test/agent-run-driver-fanout-rehearsal.test.mjs",
+        "node scripts/project/board-spec-audit.mjs --json",
+      ],
+      blockers: commonBlockers,
+      filesTouched: [],
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      workflowDispatchAllowed: false,
+      tagAllowed: false,
+      publishAllowed: false,
+    },
+  ];
+
+  if (protectedTaskIds.length > 0) {
+    return candidates.map((candidate) => ({
+      ...candidate,
+      protectedTaskIds,
+      blockers: [
+        ...candidate.blockers,
+        "protected-task-operator-decision-required",
+      ],
+    }));
+  }
+
+  return candidates.map((candidate) => ({
+    ...candidate,
+    materializedProposalCount,
+  }));
+}
+
 export function buildBoardNextScopeIntake(options = {}) {
   const cwd = path.resolve(options.cwd ?? process.cwd());
   const boardPath = String(options.boardPath || DEFAULT_BOARD_PATH);
@@ -192,6 +275,13 @@ export function buildBoardNextScopeIntake(options = {}) {
       : decision === "scope-exhausted"
         ? "board-next-scope-intake-scope-exhausted"
         : "board-next-scope-intake-blocked";
+  const materializedProposalCount = proposalMode ? knownProposals.length - proposedBoardTasks.length : 0;
+  const nextScopeCandidates = decision === "scope-exhausted"
+    ? buildExhaustedScopeCandidates({
+        materializedProposalCount,
+        protectedTaskIds: audit.protectedTaskIds,
+      })
+    : audit.nextScopeCandidates;
 
   return {
     mode: "board-next-scope-intake",
@@ -208,9 +298,9 @@ export function buildBoardNextScopeIntake(options = {}) {
     automationAllowed: false,
     auditDecision: audit.decision,
     protectedTaskIds: audit.protectedTaskIds,
-    nextScopeCandidates: audit.nextScopeCandidates,
+    nextScopeCandidates,
     proposedBoardTasks,
-    materializedProposalCount: proposalMode ? knownProposals.length - proposedBoardTasks.length : 0,
+    materializedProposalCount,
     blockers,
     nextActions: proposedBoardTasks.length > 0
       ? [

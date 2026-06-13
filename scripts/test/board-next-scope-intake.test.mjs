@@ -155,5 +155,23 @@ test("board next scope intake reports exhausted scope when every known proposal 
   assert.equal(report.dispatchAllowed, false);
   assert.equal(report.processStartAllowed, false);
   assert.equal(report.workflowDispatchAllowed, false);
+  assert.equal(report.automationAllowed, false);
+  assert.equal(report.nextScopeCandidates.length, 2);
+  assert.deepEqual(report.nextScopeCandidates.map((candidate) => candidate.candidateId), [
+    "local-safe-external-influence-assimilation",
+    "local-safe-worker-volume-canary",
+  ]);
+  for (const candidate of report.nextScopeCandidates) {
+    assert.ok(candidate.files.length > 0);
+    assert.ok(candidate.acceptanceCriteria.length > 0);
+    assert.ok(candidate.validationCommands.length > 0);
+    assert.ok(candidate.blockers.includes("operator-review-required-before-board-edit"));
+    assert.deepEqual(candidate.filesTouched, []);
+    assert.equal(candidate.dispatchAllowed, false);
+    assert.equal(candidate.processStartAllowed, false);
+    assert.equal(candidate.workflowDispatchAllowed, false);
+    assert.equal(candidate.tagAllowed, false);
+    assert.equal(candidate.publishAllowed, false);
+  }
   assert.ok(report.nextActions.some((action) => action.includes("define a new local-safe scope")));
 }));
