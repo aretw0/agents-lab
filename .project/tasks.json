@@ -784,6 +784,31 @@
       "milestone": "0.8-potential-completeness",
       "notes": "[provenance:operator] reason=Operador corrigiu a interpretacao de readiness: 0.8 nao deve lancar apenas porque gates estao verdes; o projeto deve continuar atacando o board e curando referencias world-class com workers agnosticos ate provar robustez por uso.\n2026-06-13: concluida com mapa curatorial world-class target-agnostic que separa release readiness de decisao de lancamento, classifica referencias pi/refarm, agent/tool envelope, memoria/sessao, isolamento/sandbox e engenharia agentica, e define como workers agnosticos devem pesquisar/assimilar referencias com gates explicitos. O ciclo 0.8 e tratado como target corrente, nao como dependencia semantica; o contrato deve servir a releases futuras, pi/refarm e agentes externos. Sem URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
       "verification": "node scripts/project/board-spec-audit.mjs --json; node -e \"const fs=require('fs'); const p='docs/research/world-class-agentic-engineering-reference-map-2026-06.md'; const s=fs.readFileSync(p,'utf8'); for (const term of ['Release readiness verde nao significa release agora','World-class reference','workers agnosticos','sem URL fetch','Invariante target-agnostic']) if (!s.includes(term)) throw new Error('missing '+term); console.log('world-class-reference-map-ok')\""
+    },
+    {
+      "id": "TASK-BUD-1119",
+      "description": "[P1] Fazer board-next-scope-intake propor curadoria target-agnostic quando o mapa world-class existir.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1118"
+      ],
+      "files": [
+        "scripts/project/board-next-scope-intake.mjs",
+        "scripts/test/board-next-scope-intake.test.mjs",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Quando known proposals e exhausted-scope candidates antigos ja estiverem materializados e o mapa world-class existir, o intake propoe candidato local-safe target-agnostic.",
+        "O candidato declara files, acceptanceCriteria, validationCommands, blockers, filesTouched=[] e flags de dispatch/process/workflow/tag/publish false.",
+        "O candidato e suprimido por source_candidate quando materializado no board.",
+        "Nao criar runner, primitive, surface ou semantica dependente de 0.8.",
+        "Nao usar URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
+        "Teste focal de board-next-scope-intake deve passar."
+      ],
+      "milestone": "0.8-potential-completeness",
+      "notes": "[provenance:board-next-scope-intake] source_candidate=local-safe-target-agnostic-reference-curation reason=Depois de registrar o mapa world-class target-agnostic, o intake precisava transformar scope-exhausted em candidato concreto sem depender de release ou de 0.8. 2026-06-13: concluida adicionando candidato local-safe-target-agnostic-reference-curation quando o mapa world-class existe, com files/criteria/validation/blockers/flags seguros e teste focal. Sem URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
+      "verification": "node --test scripts/test/board-next-scope-intake.test.mjs; node scripts/project/board-next-scope-intake.mjs --json; node scripts/project/board-spec-audit.mjs --json"
     }
   ]
 }

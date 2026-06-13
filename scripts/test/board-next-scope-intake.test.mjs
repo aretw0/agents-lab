@@ -233,3 +233,79 @@ test("board next scope intake suppresses exhausted-scope candidates already mate
   assert.equal(report.dispatchAllowed, false);
   assert.equal(report.processStartAllowed, false);
 }));
+
+test("board next scope intake proposes target-agnostic reference curation when local map exists", () => withBoard([
+  {
+    id: "TASK-DONE",
+    status: "completed",
+    priority: "p1",
+    description: "Done",
+    milestone: "target-current",
+  },
+  {
+    id: "TASK-QUEUE",
+    status: "completed",
+    priority: "p1",
+    description: "Implemented worker queue",
+    milestone: "target-current",
+    notes: "Materialized from TASK-BUD-DRAFT-CORE-WORKER-QUEUE.",
+  },
+  {
+    id: "TASK-FANOUT",
+    status: "completed",
+    priority: "p1",
+    description: "Implemented board fanout",
+    milestone: "target-current",
+    notes: "Materialized from TASK-BUD-DRAFT-BOARD-FANOUT-ASSIMILATION.",
+  },
+  {
+    id: "TASK-MEMORY",
+    status: "completed",
+    priority: "p2",
+    description: "Implemented operational memory gate",
+    milestone: "target-current",
+    notes: "Materialized from TASK-BUD-DRAFT-OPERATIONAL-MEMORY-GATE.",
+  },
+  {
+    id: "TASK-INFLUENCE",
+    status: "completed",
+    priority: "p2",
+    description: "Assimilated external influence",
+    milestone: "target-current",
+    notes: "source_candidate=local-safe-external-influence-assimilation",
+  },
+  {
+    id: "TASK-VOLUME",
+    status: "completed",
+    priority: "p1",
+    description: "Implemented worker volume canary",
+    milestone: "target-current",
+    notes: "source_candidate=local-safe-worker-volume-canary",
+  },
+], (cwd) => {
+  mkdirSync(path.join(cwd, "docs", "research"), { recursive: true });
+  writeFileSync(
+    path.join(cwd, "docs", "research", "world-class-agentic-engineering-reference-map-2026-06.md"),
+    "# World-class agentic engineering reference map\n\n## Invariante target-agnostic\n",
+    "utf8",
+  );
+
+  const report = buildBoardNextScopeIntake({ cwd });
+
+  assert.equal(report.decision, "scope-exhausted");
+  assert.deepEqual(report.proposedBoardTasks, []);
+  assert.deepEqual(report.nextScopeCandidates.map((candidate) => candidate.candidateId), [
+    "local-safe-target-agnostic-reference-curation",
+  ]);
+  const [candidate] = report.nextScopeCandidates;
+  assert.equal(candidate.category, "local-safe");
+  assert.ok(candidate.files.includes("docs/research/world-class-agentic-engineering-reference-map-2026-06.md"));
+  assert.ok(candidate.acceptanceCriteria.some((criterion) => criterion.includes("target-agnostic")));
+  assert.ok(candidate.validationCommands.includes("node --test scripts/test/board-next-scope-intake.test.mjs"));
+  assert.deepEqual(candidate.filesTouched, []);
+  assert.equal(candidate.dispatchAllowed, false);
+  assert.equal(candidate.processStartAllowed, false);
+  assert.equal(candidate.workflowDispatchAllowed, false);
+  assert.equal(candidate.tagAllowed, false);
+  assert.equal(candidate.publishAllowed, false);
+}));

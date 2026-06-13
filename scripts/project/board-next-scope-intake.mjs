@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { buildBoardSpecAudit } from "./board-spec-audit.mjs";
 
 const DEFAULT_BOARD_PATH = ".project/tasks.json";
+const WORLD_CLASS_REFERENCE_MAP = "docs/research/world-class-agentic-engineering-reference-map-2026-06.md";
 
 function parseArgs(argv = process.argv.slice(2)) {
   const out = {
@@ -169,12 +170,16 @@ function materializedSourceCandidateIds(tasks) {
   return new Set([...haystack.matchAll(/source_candidate=([a-z0-9._-]+)/gi)].map((match) => match[1]));
 }
 
+function hasWorldClassReferenceMap(cwd) {
+  return existsSync(path.resolve(cwd, WORLD_CLASS_REFERENCE_MAP));
+}
+
 function filterAlreadyMaterializedProposals(tasks, proposedTasks) {
   const materialized = materializedDraftIds(tasks);
   return proposedTasks.filter((task) => !materialized.has(task.id));
 }
 
-function buildExhaustedScopeCandidates({ boardTasks, materializedProposalCount, protectedTaskIds }) {
+function buildExhaustedScopeCandidates({ cwd, boardTasks, materializedProposalCount, protectedTaskIds }) {
   const commonBlockers = [
     "operator-review-required-before-board-edit",
     "protected-scope-remains-gated",
@@ -238,6 +243,35 @@ function buildExhaustedScopeCandidates({ boardTasks, materializedProposalCount, 
       tagAllowed: false,
       publishAllowed: false,
     },
+    ...(hasWorldClassReferenceMap(cwd) ? [{
+      candidateId: "local-safe-target-agnostic-reference-curation",
+      category: "local-safe",
+      title: "Convert the target-agnostic reference map into worker-ready board tasks",
+      rationale: "The board has exhausted known local-safe candidates, but the world-class reference map defines a reusable target-agnostic contract for turning references into intakes, workers, outcomes and parent-side fan-in.",
+      files: [
+        WORLD_CLASS_REFERENCE_MAP,
+        "docs/primitives/external-influence-intake-template.md",
+        "scripts/project/board-next-scope-intake.mjs",
+        "scripts/test/board-next-scope-intake.test.mjs",
+        ".project/tasks.json",
+      ],
+      acceptanceCriteria: [
+        "Use the target-agnostic reference map as local evidence; do not fetch URLs, clone repositories, install dependencies or execute external code.",
+        "Materialize at most one worker-suitable board task with files, acceptance criteria, validation commands and explicit non-goals.",
+        "Keep the contract reusable for future targets, pi/refarm and external agents rather than making it specific to 0.8.",
+      ],
+      validationCommands: [
+        "node --test scripts/test/board-next-scope-intake.test.mjs",
+        "node scripts/project/board-spec-audit.mjs --json",
+      ],
+      blockers: commonBlockers,
+      filesTouched: [],
+      dispatchAllowed: false,
+      processStartAllowed: false,
+      workflowDispatchAllowed: false,
+      tagAllowed: false,
+      publishAllowed: false,
+    }] : []),
   ];
 
   const materializedCandidates = materializedSourceCandidateIds(boardTasks);
@@ -290,6 +324,7 @@ export function buildBoardNextScopeIntake(options = {}) {
   const materializedProposalCount = proposalMode ? knownProposals.length - proposedBoardTasks.length : 0;
   const nextScopeCandidates = decision === "scope-exhausted"
     ? buildExhaustedScopeCandidates({
+        cwd,
         boardTasks,
         materializedProposalCount,
         protectedTaskIds: audit.protectedTaskIds,
