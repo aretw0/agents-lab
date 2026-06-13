@@ -834,6 +834,31 @@
       "milestone": "0.8-potential-completeness",
       "notes": "[provenance:target-agnostic-curation] reason=Depois de generalizar o mapa world-class, o template de intake precisava carregar campos que transformam referencias em trabalho worker-ready para qualquer target. 2026-06-13: concluida adicionando target_scope, intended_consumer, applicable/non-applicable patterns, worker_suitable_slice, fan_in_contract e non_goals. Sem URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
       "verification": "node scripts/project/board-spec-audit.mjs --json; node -e \"const fs=require('fs'); const s=fs.readFileSync('docs/primitives/external-influence-intake-template.md','utf8'); for (const term of ['target_scope','intended_consumer','worker_suitable_slice','fan_in_contract','non_goals','target-agnostic']) if (!s.includes(term)) throw new Error('missing '+term); console.log('external-influence-intake-template-ok')\""
+    },
+    {
+      "id": "TASK-BUD-1121",
+      "description": "[P1] Adicionar validador report-only para external influence intake target-agnostic.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1120"
+      ],
+      "files": [
+        "scripts/project/external-influence-intake-validate.mjs",
+        "scripts/test/external-influence-intake-validate.test.mjs",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Validador report-only lê intake Markdown e retorna schemaVersion, decision, blockers, warnings e flags perigosas false.",
+        "Validador bloqueia campos obrigatórios ausentes, placeholders, enums inválidos e non_goals incompletos.",
+        "Validador extrai declaredFiles e requiredOutcomes para preparar worker/fan-in parent-side.",
+        "CLI nunca autoriza URL fetch, clone, install, provider remoto, workflow dispatch, release, publish, tag ou ant_colony.",
+        "Teste focal cobre intake válido e bloqueios sem executar rede ou worker.",
+        "Board audit continua sem trabalho local-safe pendente após materialização."
+      ],
+      "milestone": "0.8-potential-completeness",
+      "notes": "[provenance:target-agnostic-curation] reason=Template worker-ready precisava de uma checagem local antes de virar board task ou worker. 2026-06-13: concluida com scripts/project/external-influence-intake-validate.mjs e testes; valida placeholders, enums, non_goals, declaredFiles e requiredOutcomes. Sem URL fetch, clone, install, provider remoto, workflow dispatch, release, publish, tag ou ant_colony.",
+      "verification": "node --test scripts/test/external-influence-intake-validate.test.mjs; node scripts/project/board-spec-audit.mjs --json"
     }
   ]
 }
