@@ -3,7 +3,7 @@
     {
       "id": "TASK-BUD-480",
       "description": "Pesquisa futura (externa) de influências: analisar https://github.com/nousresearch/hermes-agent e sintetizar padrões reaproveitáveis para o control-plane local-first.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "files": [
         "docs/research/"
@@ -14,7 +14,8 @@
         "Registrar riscos/custos e proposta de experimento bounded."
       ],
       "milestone": "parked-for-0.8.0",
-      "notes": "[rationale:risk-control] registrar influência cedo evita perda de contexto sem interromper lane ativa. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n[provenance:human] source_task=none reason=unspecified\n2026-05-01: packet protected-focus (report-only) => decision=ready-for-human-decision, recommendedOption=promote, code=protected-focus-promote-canary, risk=medium, value=low. Classificação protected: protected-external-url|protected-external-research|protected-parked-milestone.\n2026-05-01: decisão humana explícita = defer. Manter em protected-parked-legacy; sem promoção de escopo nesta rodada.\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Terceiro experimento do pipeline de dogfood progressivo.\n2026-06-11: board release disposition = park-for-target-release for 0.8.0; local evidence accepted for release gating; external research remains parked/protected."
+      "notes": "[rationale:risk-control] registrar influência cedo evita perda de contexto sem interromper lane ativa. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n[provenance:human] source_task=none reason=unspecified\n2026-05-01: packet protected-focus (report-only) => decision=ready-for-human-decision, recommendedOption=promote, code=protected-focus-promote-canary, risk=medium, value=low. Classificação protected: protected-external-url|protected-external-research|protected-parked-milestone.\n2026-05-01: decisão humana explícita = defer. Manter em protected-parked-legacy; sem promoção de escopo nesta rodada.\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Terceiro experimento do pipeline de dogfood progressivo.\n2026-06-11: board release disposition = park-for-target-release for 0.8.0; local evidence accepted for release gating; external research remains parked/protected.\n2026-06-13: protected focus local-first executado sem pesquisa externa, sem URL fetch, sem clone, sem release/publish/workflow dispatch e sem ant_colony. Worker gpt-5.3-codex-spark via agent-run-driver-step leu apenas evidência local e retornou PASS; agentRunOutcomePacket contractDecision=pass, touchedFiles=[], blockers=[]. Fechada como assimilação local-first de padrões agent-first/worker-envelope; pesquisa externa hermes-agent permanece follow-up protegido separado.",
+      "verification": "node scripts/agent-run-driver-step.mjs --input .artifacts/agent-run-driver/protected-focus-task-bud-480-local-first-preflight-input.json --out .artifacts/agent-run-driver/protected-focus-task-bud-480-local-first-preflight-result.json --pretty; node --test scripts/test/agent-run-driver-step.test.mjs"
     },
     {
       "id": "TASK-BUD-521",
