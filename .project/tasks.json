@@ -698,6 +698,36 @@
       "milestone": "post-0.8-hardening",
       "notes": "[provenance:external-fanin] source=mattpocock/sandcastle reason=Pesquisa externa aprovada trouxe vocabulario util para isolamento, mas o fan-in classificou como post-0.8/protected follow-up para evitar over-promise de sandbox forte antes de testes locais.\n2026-06-13: concluída registrando comparação externa em agent-worker-isolation sem elevar a claim da 0.8 acima de logical workspace isolation. Teste local confirma bloqueio de URL-like declared files, missing files, cwd/log/env/shell blockers e fluxo driver-step sem ant_colony.",
       "verification": "node --test scripts/test/agent-run-driver-step.test.mjs; node scripts/project/board-spec-audit.mjs --json"
+    },
+    {
+      "id": "TASK-BUD-1116",
+      "description": "[P1] Criar canary de volume local-safe para múltiplos workers usando somente agent_run_driver_step agnóstico e fan-in parent-side.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1110",
+        "TASK-BUD-1111",
+        "TASK-BUD-1112"
+      ],
+      "files": [
+        "scripts/agent-run-driver-fanout-rehearsal.mjs",
+        "scripts/agent-run-driver-fanout-manifest.mjs",
+        "scripts/agent-run-driver-fanout-outcome.mjs",
+        "scripts/project/board-spec-audit.mjs",
+        "scripts/test/agent-run-driver-fanout-rehearsal.test.mjs",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Gerar ou fortalecer um rehearsal local-safe de 3+ workers usando agent_run_driver_step/runSpec generico, sem termos colony no contrato core.",
+        "Cada worker deve ter declaredFiles, timeout/logPath, fileContract e expected outcome parent-side antes de qualquer mutacao de board.",
+        "O fan-in deve bloquear se qualquer worker faltar, falhar, tocar arquivo inesperado ou nao produzir evidencia terminal.",
+        "O rehearsal deve usar subprocessos locais/mockados e nao provider remoto.",
+        "Nao usar release tag, publish, workflow dispatch, URL fetch, clone, install, provider remoto ou ant_colony.",
+        "Validacao local do rehearsal e do board audit deve passar."
+      ],
+      "milestone": "0.8-worker-orchestration",
+      "notes": "[provenance:board-next-scope-intake] source_candidate=local-safe-worker-volume-canary reason=Depois de fechar todas as tasks actionable, board-next-scope-intake retornou scope-exhausted com candidato para provar coordenacao em volume usando primitives agnosticas. Materializada uma unica task local-safe para manter continuidade sem editar protected scope.",
+      "verification": "node --test scripts/test/agent-run-driver-fanout-rehearsal.test.mjs; node scripts/project/board-spec-audit.mjs --json"
     }
   ]
 }
