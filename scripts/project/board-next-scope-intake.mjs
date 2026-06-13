@@ -173,19 +173,25 @@ export function buildBoardNextScopeIntake(options = {}) {
   const blockers = [];
   if (audit.decision === "blocked") blockers.push(...audit.blockers);
 
-  const proposedBoardTasks = audit.decision === "no-local-safe-work" && blockers.length === 0
-    ? filterAlreadyMaterializedProposals(boardTasks, buildProposedTasks(audit))
+  const knownProposals = buildProposedTasks(audit);
+  const proposalMode = audit.decision === "no-local-safe-work" && blockers.length === 0;
+  const proposedBoardTasks = proposalMode
+    ? filterAlreadyMaterializedProposals(boardTasks, knownProposals)
     : [];
   const decision = blockers.length > 0
     ? "blocked"
     : proposedBoardTasks.length > 0
       ? "ready-for-operator-decision"
-      : "defer-to-existing-board-work";
+      : audit.decision === "no-local-safe-work"
+        ? "scope-exhausted"
+        : "defer-to-existing-board-work";
   const recommendationCode = decision === "ready-for-operator-decision"
     ? "board-next-scope-intake-ready"
     : decision === "defer-to-existing-board-work"
       ? "board-next-scope-intake-defer-existing-work"
-      : "board-next-scope-intake-blocked";
+      : decision === "scope-exhausted"
+        ? "board-next-scope-intake-scope-exhausted"
+        : "board-next-scope-intake-blocked";
 
   return {
     mode: "board-next-scope-intake",
@@ -204,6 +210,7 @@ export function buildBoardNextScopeIntake(options = {}) {
     protectedTaskIds: audit.protectedTaskIds,
     nextScopeCandidates: audit.nextScopeCandidates,
     proposedBoardTasks,
+    materializedProposalCount: proposalMode ? knownProposals.length - proposedBoardTasks.length : 0,
     blockers,
     nextActions: proposedBoardTasks.length > 0
       ? [
@@ -211,6 +218,12 @@ export function buildBoardNextScopeIntake(options = {}) {
           "materialize at most one local-safe task with explicit files and acceptance criteria",
           "keep protected/parked tasks gated by explicit operator decision",
         ]
+      : decision === "scope-exhausted"
+        ? [
+            "define a new local-safe scope candidate before editing .project/tasks.json",
+            "keep protected/parked tasks gated by explicit operator decision",
+            "do not dispatch workers, release, publish or start processes from this packet",
+          ]
       : [
           "continue existing actionable/spec-maturation board work before generating new scope",
         ],

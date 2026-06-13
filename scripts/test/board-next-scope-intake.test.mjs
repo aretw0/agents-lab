@@ -112,3 +112,48 @@ test("board next scope intake skips proposals already materialized in the board"
   assert.equal(report.dispatchAllowed, false);
   assert.equal(report.processStartAllowed, false);
 }));
+
+test("board next scope intake reports exhausted scope when every known proposal is materialized", () => withBoard([
+  {
+    id: "TASK-DONE",
+    status: "completed",
+    priority: "p1",
+    description: "Done",
+    milestone: "0.8-board",
+  },
+  {
+    id: "TASK-QUEUE",
+    status: "completed",
+    priority: "p1",
+    description: "Implemented worker queue",
+    milestone: "0.8-worker-orchestration",
+    notes: "Materialized from TASK-BUD-DRAFT-CORE-WORKER-QUEUE.",
+  },
+  {
+    id: "TASK-FANOUT",
+    status: "completed",
+    priority: "p1",
+    description: "Implemented board fanout",
+    milestone: "0.8-potential-completeness",
+    notes: "Materialized from TASK-BUD-DRAFT-BOARD-FANOUT-ASSIMILATION.",
+  },
+  {
+    id: "TASK-MEMORY",
+    status: "completed",
+    priority: "p2",
+    description: "Implemented operational memory gate",
+    milestone: "0.8-operational-memory",
+    notes: "Materialized from TASK-BUD-DRAFT-OPERATIONAL-MEMORY-GATE.",
+  },
+], (cwd) => {
+  const report = buildBoardNextScopeIntake({ cwd });
+
+  assert.equal(report.decision, "scope-exhausted");
+  assert.equal(report.recommendationCode, "board-next-scope-intake-scope-exhausted");
+  assert.deepEqual(report.proposedBoardTasks, []);
+  assert.equal(report.materializedProposalCount, 3);
+  assert.equal(report.dispatchAllowed, false);
+  assert.equal(report.processStartAllowed, false);
+  assert.equal(report.workflowDispatchAllowed, false);
+  assert.ok(report.nextActions.some((action) => action.includes("define a new local-safe scope")));
+}));
