@@ -728,6 +728,32 @@
       "milestone": "0.8-worker-orchestration",
       "notes": "[provenance:board-next-scope-intake] source_candidate=local-safe-worker-volume-canary reason=Depois de fechar todas as tasks actionable, board-next-scope-intake retornou scope-exhausted com candidato para provar coordenacao em volume usando primitives agnosticas. Materializada uma unica task local-safe para manter continuidade sem editar protected scope.\n2026-06-13: concluída fortalecendo agent-run-driver-fanout-rehearsal para repassar touched_files, marker_results e mutation_target_files ao driver step. Testes cobrem 3 workers custom, 5 workers concorrentes preservando registry, fail-closed por output PASS/FAIL: FAIL e fail-closed por touched files em read-only. Sem provider remoto, ant_colony, release, publish, workflow dispatch, URL fetch, clone ou install.",
       "verification": "node --test scripts/test/agent-run-driver-fanout-rehearsal.test.mjs; node scripts/project/board-spec-audit.mjs --json"
+    },
+    {
+      "id": "TASK-BUD-1117",
+      "description": "[P1] Enriquecer release-readiness-report com board audit e next-scope intake sem criar primitive nova.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1111",
+        "TASK-BUD-1116"
+      ],
+      "files": [
+        "scripts/release-readiness-report.mjs",
+        "scripts/test/release-readiness-report.test.mjs",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "release-readiness-report inclui boardSpecAudit com decision, actionableTaskIds, specMaturationTaskIds, protectedTaskIds e blockers.",
+        "release-readiness-report inclui boardNextScopeIntake com decision, recommendationCode e nextScopeCandidateIds.",
+        "Quando board release-clear estiver verde mas boardSpecAudit estiver no-local-safe-work, o report diferencia boardExhausted de releaseReady.",
+        "Nenhum nome novo de primitive/surface e nenhum script novo de readiness 0.8 e criado.",
+        "Permissoes perigosas continuam false: tagAllowed, publishAllowed, workflowDispatchAllowed e processStartAllowed.",
+        "Nao usar URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony."
+      ],
+      "milestone": "0.8-readiness",
+      "notes": "[provenance:architecture-correction] reason=Evitar primitive nova tipo gauntlet; a semantica correta e fortalecer release-readiness-report para responder se board vazio significa release-ready ou apenas falta de novo escopo local-safe.",
+      "verification": "node --test scripts/test/release-readiness-report.test.mjs; node scripts/project/board-spec-audit.mjs --json"
     }
   ]
 }
