@@ -885,6 +885,31 @@
       "milestone": "0.8-potential-completeness",
       "notes": "[provenance:target-agnostic-curation] reason=O validador existia, mas precisava ficar descobrivel por agentes e humanos sem depender da conversa. 2026-06-13: concluida atualizando template, catalogo de primitives e doutrina operacional com comando de validacao e bloqueios explicitos. Sem URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
       "verification": "node scripts/project/board-spec-audit.mjs --json; node -e \"const fs=require('fs'); for (const [p, terms] of Object.entries({'docs/primitives/external-influence-intake-template.md':['external-influence-intake-validate.mjs','block'], 'docs/primitives/README.md':['target-agnostic','worker-ready'], 'docs/guides/control-plane-operating-doctrine.md':['external-influence-intake-validate.mjs','worker_suitable_slice','fan_in_contract']})) { const s=fs.readFileSync(p,'utf8'); for (const term of terms) if (!s.includes(term)) throw new Error(p+' missing '+term); } console.log('external-influence-discovery-ok')\""
+    },
+    {
+      "id": "TASK-BUD-1123",
+      "description": "[P2] Cobrir a CLI do validador de external influence intake com testes de contrato operacional.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-1121",
+        "TASK-BUD-1122"
+      ],
+      "files": [
+        "scripts/test/external-influence-intake-validate.test.mjs",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Teste da CLI valida que intake completo retorna JSON parseável, decision pass e exit code 0.",
+        "Teste da CLI valida que intake bloqueado retorna JSON parseável, decision block e exit code 1.",
+        "Testes confirmam flags perigosas false no caminho CLI, incluindo dispatchAllowed/processStartAllowed/workflowDispatchAllowed/publishAllowed.",
+        "Nao criar nova primitive, surface, runner ou semantica dependente de release especifica.",
+        "Nao usar URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
+        "Validacao local do teste focal, JSON do board e board audit deve passar."
+      ],
+      "milestone": "0.8-potential-completeness",
+      "notes": "[provenance:target-agnostic-curation] reason=Depois de documentar o validador, o contrato operacional da CLI precisava ser coberto para agentes e humanos dependerem dela sem cola manual. 2026-06-13: concluida adicionando testes de exit code e JSON para caminhos pass/block da CLI, preservando flags perigosas false. Sem URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
+      "verification": "node --test scripts/test/external-influence-intake-validate.test.mjs; node -e \"JSON.parse(require('fs').readFileSync('.project/tasks.json','utf8')); console.log('tasks-json-ok')\"; node scripts/project/board-spec-audit.mjs --json"
     }
   ]
 }
