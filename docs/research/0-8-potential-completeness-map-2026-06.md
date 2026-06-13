@@ -36,7 +36,7 @@ robusta por uso, nao apenas por checklist.
 | Operational memory | `TASK-BUD-1102` | Assimilar `TASK-BUD-676` em schema/canary local | local-safe | validacao de memoria operacional sem recall externo |
 | External agent/tool influence | `TASK-BUD-1113` | Assimilar vocabulario externo aprovado no envelope agnostico | local-safe | influencia documentada sem promessa de swarm |
 | External memory vocabulary | `TASK-BUD-1114` | Comparar vocabulario de memoria/sessao com schema local | local-safe | sem recall implicito |
-| Sandbox comparison | `TASK-BUD-1115` | Registrar comparacao de isolamento sem prometer sandbox forte | post-0.8 | hardening futuro nao bloqueante |
+| Sandbox comparison | `TASK-BUD-1115` | Registrar comparacao de isolamento sem prometer sandbox forte sem evidencia | local-safe 0.8 hardening | hardening da 0.8 com claim evidence-gated |
 
 ## External influence fan-in de 2026-06-13
 
@@ -48,11 +48,17 @@ converteu tres fontes externas aprovadas em trabalho local:
 - `aretw0/claude-mem`: influencia de memoria/sessao aplicavel a provenance,
   timestamp e freshness, sem recall implicito;
 - `mattpocock/sandcastle`: vocabulario util para isolamento, classificado como
-  comparacao post-0.8 ate existir teste local para sandbox forte.
+  hardening da 0.8; a claim de sandbox forte continua bloqueada ate existir
+  teste local suficiente.
 
 Essa assimilacao nao adiciona dependencias externas e nao autoriza nova rede,
 clone, install, execucao de codigo externo, release, publish, workflow dispatch
 ou `ant_colony`.
+
+Clarificacao de escopo: "nao prometer" nao significa "adiar para depois da
+0.8". O trabalho pode e deve entrar no board da 0.8 quando for local-safe; o
+que fica bloqueado e apenas a afirmacao publica de capacidade forte sem
+evidencia local.
 
 Memoria operacional para influencia externa deve usar `type:
 external-influence` e `applicationMode` explicito. Modos aceitos:

@@ -19,8 +19,8 @@
     {
       "source": "mattpocock/sandcastle",
       "artifact": ".artifacts/external-influence-research/sandcastle.json",
-      "affects": "post-0.8-or-protected-follow-up",
-      "decision": "post-0.8-comparison-task"
+      "affects": "0.8-hardening-candidate",
+      "decision": "local-hardening-task"
     },
     {
       "source": "aretw0/claude-mem",
@@ -43,7 +43,7 @@
   "recommendation": "materialize-local-board-tasks",
   "blockers": [],
   "warnings": [
-    "Sandcastle influence is useful as isolation vocabulary, but strong sandbox claims remain post-0.8 unless backed by local tests.",
+    "Sandcastle influence is useful as isolation vocabulary for 0.8 hardening, but strong sandbox claims require local tests before being advertised.",
     "Hermes-agent influence must not expand 0.8 into a broad swarm promise; keep default local worker semantics agnostic and bounded.",
     "Claude-mem influence must not introduce implicit recall; keep provenance, timestamp and freshness explicit."
   ],
