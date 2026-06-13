@@ -538,7 +538,7 @@
     {
       "id": "TASK-BUD-1110",
       "description": "[P1] Tornar o registry de agent-run seguro contra concorrência para fanout local-safe com múltiplos workers.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1106",
@@ -559,7 +559,7 @@
         "Teste de stress local usa subprocessos mockados/locais e não chama provider remoto."
       ],
       "milestone": "0.8-worker-orchestration",
-      "notes": "[provenance:worker] source_task=scope-discovery-0-8-worker-runtime reason=Worker runtime apontou read-modify-write race no registry como blocker para confiar em fanout/concurrency. Esta task preserva agnosticismo e atua na primitive de driver, não em semântica de colônia.",
+      "notes": "[provenance:worker] source_task=scope-discovery-0-8-worker-runtime reason=Worker runtime apontou read-modify-write race no registry como blocker para confiar em fanout/concurrency. Esta task preserva agnosticismo e atua na primitive de driver, não em semântica de colônia.\n2026-06-13: concluída com lock local por diretório em .pi/reports/agent-runs.lock e escrita atômica via arquivo temporário + rename. Teste de fanout concorrente com 5 workers valida que o registry preserva exatamente uma linha completed por runId.",
       "verification": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-driver-fanout-rehearsal.test.mjs"
     },
     {

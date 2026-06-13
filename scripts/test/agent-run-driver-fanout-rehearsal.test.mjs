@@ -96,6 +96,42 @@ test("fanout rehearsal runs custom manifest workers with bounded concurrency", a
   }
 });
 
+test("fanout rehearsal preserves registry rows under concurrent worker completion", async () => {
+  const cwd = workspace("agent-run-driver-fanout-registry-concurrent-");
+  try {
+    const workerIds = ["alpha", "beta", "gamma", "delta", "epsilon"];
+    const report = await runAgentRunDriverFanoutRehearsal({
+      cwd,
+      maxConcurrency: workerIds.length,
+      workerSpecs: workerIds.map((workerId) => ({
+        workerId,
+        runSpec: {
+          provider_model_ref: "local/process",
+          cwd,
+          declared_files: ["package.json"],
+          log_path: `.pi/reports/concurrent-${workerId}.log`,
+          timeout_ms: 30_000,
+          file_contract: "read-only",
+          execution_preview: {
+            command: process.execPath,
+            args: ["-e", `setTimeout(() => console.log(${JSON.stringify(`concurrent:${workerId}`)}), 50)`],
+          },
+        },
+      })),
+    });
+
+    assert.equal(report.decision, "pass");
+    assert.equal(report.workerCount, workerIds.length);
+    assert.equal(report.passedWorkerCount, workerIds.length);
+    const registry = JSON.parse(readFileSync(path.join(cwd, ".pi/reports/agent-runs.json"), "utf8"));
+    assert.equal(registry.runs.length, workerIds.length);
+    assert.deepEqual(registry.runs.map((run) => run.runId).sort(), workerIds.map((workerId) => `agent-run-driver-local-fanout-rehearsal-${workerId}`).sort());
+    assert.deepEqual(registry.runs.map((run) => run.state).sort(), Array.from({ length: workerIds.length }, () => "completed"));
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("fanout rehearsal blocks duplicate manifest run ids before dispatch", async () => {
   const cwd = workspace("agent-run-driver-fanout-duplicate-run-");
   try {

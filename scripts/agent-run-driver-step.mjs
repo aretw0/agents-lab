@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { createWriteStream, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { createWriteStream, existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -115,6 +115,15 @@ function registryPath(cwd) {
   return path.join(cwd, ".pi", "reports", "agent-runs.json");
 }
 
+function registryLockPath(cwd) {
+  return path.join(cwd, ".pi", "reports", "agent-runs.lock");
+}
+
+function sleepSync(ms) {
+  const signal = new Int32Array(new SharedArrayBuffer(4));
+  Atomics.wait(signal, 0, 0, ms);
+}
+
 function readRegistryRows(cwd) {
   const filePath = registryPath(cwd);
   if (!existsSync(filePath)) return [];
@@ -126,12 +135,37 @@ function readRegistryEntry(cwd, runId) {
   return readRegistryRows(cwd).find((row) => row?.runId === runId);
 }
 
+function withRegistryLock(cwd, fn) {
+  const lockPath = registryLockPath(cwd);
+  mkdirSync(path.dirname(lockPath), { recursive: true });
+  const deadline = Date.now() + 5_000;
+  while (true) {
+    try {
+      mkdirSync(lockPath);
+      break;
+    } catch (error) {
+      if (error?.code !== "EEXIST") throw error;
+      if (Date.now() >= deadline) throw new Error("agent-run-registry-lock-timeout");
+      sleepSync(25);
+    }
+  }
+  try {
+    return fn();
+  } finally {
+    rmSync(lockPath, { recursive: true, force: true });
+  }
+}
+
 function writeRegistryEntry(cwd, entry) {
-  const filePath = registryPath(cwd);
-  const rows = readRegistryRows(cwd).filter((row) => row?.runId !== entry.runId);
-  rows.push(entry);
-  mkdirSync(path.dirname(filePath), { recursive: true });
-  writeFileSync(filePath, JSON.stringify({ runs: rows }, null, 2), "utf8");
+  return withRegistryLock(cwd, () => {
+    const filePath = registryPath(cwd);
+    const rows = readRegistryRows(cwd).filter((row) => row?.runId !== entry.runId);
+    rows.push(entry);
+    mkdirSync(path.dirname(filePath), { recursive: true });
+    const tmpPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+    writeFileSync(tmpPath, JSON.stringify({ runs: rows }, null, 2), "utf8");
+    renameSync(tmpPath, filePath);
+  });
 }
 
 function logByteCount(logPath) {
