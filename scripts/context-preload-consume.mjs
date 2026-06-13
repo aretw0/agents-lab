@@ -18,6 +18,13 @@ const MEMORY_TYPES = [
   "external-influence",
 ];
 
+const MEMORY_FRESHNESS_VALUES = [
+  "fresh",
+  "stale",
+  "unknown",
+  "not-required",
+];
+
 function parseArgs(argv) {
   const out = {
     workspace: process.cwd(),
@@ -121,6 +128,11 @@ function validateMemoryPacket(memoryPacket, nowMs = Date.now()) {
       staleReasons.push("memory-provenance-missing");
     }
 
+    const freshness = String(item?.freshness ?? "").trim();
+    if (freshness && !MEMORY_FRESHNESS_VALUES.includes(freshness)) {
+      staleReasons.push("memory-freshness-invalid");
+    }
+
     const timestampMs = Date.parse(String(item?.timestamp ?? ""));
     const expiresAtMs = Date.parse(String(item?.expiresAt ?? ""));
     if (!Number.isFinite(timestampMs)) staleReasons.push("memory-timestamp-invalid");
@@ -132,6 +144,7 @@ function validateMemoryPacket(memoryPacket, nowMs = Date.now()) {
     present: true,
     itemCount: items.length,
     memoryTypes: MEMORY_TYPES,
+    memoryFreshnessValues: MEMORY_FRESHNESS_VALUES,
     counts,
     staleReasons: [...new Set(staleReasons)],
   };
@@ -196,6 +209,7 @@ function buildReport(args) {
     fallbackPaths: CANONICAL_PATHS,
     staleReasons,
     memoryTypes: MEMORY_TYPES,
+    memoryFreshnessValues: MEMORY_FRESHNESS_VALUES,
     memoryTypeCounts: memoryValidation.counts,
     memoryValidation,
     currentCanonicalState,

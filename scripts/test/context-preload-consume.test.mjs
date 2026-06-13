@@ -185,3 +185,42 @@ test("falls back to canonical when memory packet item lacks provenance", () => {
     rmSync(workspace, { recursive: true, force: true });
   }
 });
+
+test("falls back to canonical when memory freshness value is invalid", () => {
+  const workspace = makeWorkspace();
+  try {
+    const packPath = path.join(workspace, ".sandbox", "pi-agent", "preload", "context-preload-pack.json");
+    const pack = {
+      generatedAtIso: new Date().toISOString(),
+      memoryPacket: {
+        items: [
+          {
+            type: "project-fact",
+            source: ".project/tasks.json",
+            timestamp: new Date().toISOString(),
+            freshness: "provider-says-ok",
+            scope: "workspace",
+            retention: "while-task-active",
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+          },
+        ],
+      },
+      preloadPack: {
+        controlPlaneCore: [".project/handoff.json", ".project/tasks.json"],
+      },
+      canonicalState: {
+        fingerprint: canonicalFingerprint(workspace),
+      },
+    };
+    writeFileSync(packPath, JSON.stringify(pack, null, 2));
+
+    const report = runConsume({ workspace, packPath });
+    assert.equal(report.decision, "fallback-canonical");
+    assert.ok(report.staleReasons.includes("memory-freshness-invalid"));
+    assert.equal(report.memoryTypeCounts["project-fact"], 1);
+    assert.ok(report.memoryFreshnessValues.includes("fresh"));
+    assert.deepEqual(report.selectedPaths, CANONICAL_PATHS);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});

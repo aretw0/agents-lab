@@ -479,7 +479,7 @@
     {
       "id": "TASK-BUD-1108",
       "description": "[P2] Usar memória operacional validada para reduzir cola manual sem introduzir recall implícito ou provider-specific.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-1107"
@@ -499,7 +499,8 @@
         "Manter a proposta local-safe e revisável antes de editar .project/tasks.json."
       ],
       "milestone": "0.8-operational-memory",
-      "notes": "[provenance:system] source_task=TASK-BUD-1105 reason=Materializada a proposta remanescente de .artifacts/board-next-scope-intake.json: TASK-BUD-DRAFT-OPERATIONAL-MEMORY-GATE. Core/primitives: memory packet com provenance/freshness, context preload validado, expiration/fail-closed. Adapter extensions: Pi prompt preload e board/report artifact producer."
+      "notes": "[provenance:system] source_task=TASK-BUD-1105 reason=Materializada a proposta remanescente de .artifacts/board-next-scope-intake.json: TASK-BUD-DRAFT-OPERATIONAL-MEMORY-GATE. Core/primitives: memory packet com provenance/freshness, context preload validado, expiration/fail-closed. Adapter extensions: Pi prompt preload e board/report artifact producer.\n2026-06-12: adicionada validação explícita de freshness em scripts/context-preload-consume.mjs. Freshness fora do vocabulário permitido gera memory-freshness-invalid e força fallback-canonical sem bloquear trabalho local-safe simples. Worker gpt-5.3-codex-spark via agent-run-driver-step compacto retornou PASS; agentRunOutcomePacket contractDecision=pass, blockers=[].",
+      "verification": "node --test scripts/test/context-preload-consume.test.mjs; node scripts/agent-run-driver-step.mjs --input .artifacts/agent-run-driver/local-safe-operational-memory-task-bud-1108-compact-driver-input.json --out .artifacts/agent-run-driver/local-safe-operational-memory-task-bud-1108-compact-driver-result.json --pretty"
     }
   ]
 }
