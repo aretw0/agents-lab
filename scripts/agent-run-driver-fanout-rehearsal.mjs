@@ -55,6 +55,9 @@ function defaultWorkerSpecs() {
 
 function workerPayload({ cwd, batchId, workerId, execute, runSpec }) {
   const runId = `${batchId}-${workerId}`;
+  const touchedFiles = Array.isArray(runSpec?.touched_files) ? runSpec.touched_files : [];
+  const markerResults = Array.isArray(runSpec?.marker_results) ? runSpec.marker_results : [];
+  const mutationTargetFiles = Array.isArray(runSpec?.mutation_target_files) ? runSpec.mutation_target_files : [];
   return {
     run_spec: {
       run_id: runId,
@@ -74,6 +77,9 @@ function workerPayload({ cwd, batchId, workerId, execute, runSpec }) {
     ...(execute ? { operator_approval: structuredApproval(workerId) } : {}),
     follow: true,
     build_outcome: true,
+    ...(touchedFiles.length > 0 ? { touched_files: touchedFiles } : {}),
+    ...(markerResults.length > 0 ? { marker_results: markerResults } : {}),
+    ...(mutationTargetFiles.length > 0 ? { mutation_target_files: mutationTargetFiles } : {}),
     follow_max_wait_ms: 5_000,
     follow_poll_interval_ms: 100,
     follow_max_lines: 20,

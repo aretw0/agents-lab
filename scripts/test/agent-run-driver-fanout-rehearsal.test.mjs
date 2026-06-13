@@ -96,6 +96,94 @@ test("fanout rehearsal runs custom manifest workers with bounded concurrency", a
   }
 });
 
+test("fanout rehearsal blocks when any terminal worker reports FAIL output", async () => {
+  const cwd = workspace("agent-run-driver-fanout-worker-fail-");
+  try {
+    const report = await runAgentRunDriverFanoutRehearsal({
+      cwd,
+      maxConcurrency: 2,
+      workerSpecs: [
+        {
+          workerId: "pass-worker",
+          runSpec: {
+            provider_model_ref: "local/process",
+            cwd,
+            declared_files: ["package.json"],
+            log_path: ".pi/reports/pass-worker.log",
+            timeout_ms: 30_000,
+            file_contract: "read-only",
+            execution_preview: {
+              command: process.execPath,
+              args: ["-e", "console.log('PASS/FAIL: PASS')"],
+            },
+          },
+        },
+        {
+          workerId: "fail-worker",
+          runSpec: {
+            provider_model_ref: "local/process",
+            cwd,
+            declared_files: ["package.json"],
+            log_path: ".pi/reports/fail-worker.log",
+            timeout_ms: 30_000,
+            file_contract: "read-only",
+            execution_preview: {
+              command: process.execPath,
+              args: ["-e", "console.log('PASS/FAIL: FAIL')"],
+            },
+          },
+        },
+      ],
+    });
+
+    assert.equal(report.decision, "block");
+    assert.equal(report.workerCount, 2);
+    assert.equal(report.passedWorkerCount, 1);
+    assert.ok(report.blockers.includes("fail-worker:worker-output-fail"));
+    assert.ok(report.blockers.includes("fail-worker:contract-not-pass:fail"));
+    assert.equal(report.batchOutcomePacket.decision, "block");
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("fanout rehearsal blocks read-only workers that report touched files", async () => {
+  const cwd = workspace("agent-run-driver-fanout-readonly-touched-");
+  try {
+    const report = await runAgentRunDriverFanoutRehearsal({
+      cwd,
+      maxConcurrency: 1,
+      workerSpecs: [
+        {
+          workerId: "readonly-touch",
+          runSpec: {
+            provider_model_ref: "local/process",
+            cwd,
+            declared_files: ["package.json"],
+            log_path: ".pi/reports/readonly-touch.log",
+            timeout_ms: 30_000,
+            file_contract: "read-only",
+            touched_files: ["package.json"],
+            execution_preview: {
+              command: process.execPath,
+              args: ["-e", "console.log('read-only touched evidence')"],
+            },
+          },
+        },
+      ],
+    });
+
+    assert.equal(report.decision, "block");
+    assert.equal(report.workerCount, 1);
+    assert.equal(report.passedWorkerCount, 0);
+    assert.ok(report.blockers.includes("readonly-touch:read-only-touched-files"));
+    assert.ok(report.blockers.includes("readonly-touch:contract-not-pass:fail"));
+    assert.equal(report.batchOutcomePacket.decision, "block");
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("fanout rehearsal preserves registry rows under concurrent worker completion", async () => {
   const cwd = workspace("agent-run-driver-fanout-registry-concurrent-");
   try {

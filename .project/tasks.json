@@ -702,7 +702,7 @@
     {
       "id": "TASK-BUD-1116",
       "description": "[P1] Criar canary de volume local-safe para múltiplos workers usando somente agent_run_driver_step agnóstico e fan-in parent-side.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1110",
@@ -726,7 +726,7 @@
         "Validacao local do rehearsal e do board audit deve passar."
       ],
       "milestone": "0.8-worker-orchestration",
-      "notes": "[provenance:board-next-scope-intake] source_candidate=local-safe-worker-volume-canary reason=Depois de fechar todas as tasks actionable, board-next-scope-intake retornou scope-exhausted com candidato para provar coordenacao em volume usando primitives agnosticas. Materializada uma unica task local-safe para manter continuidade sem editar protected scope.",
+      "notes": "[provenance:board-next-scope-intake] source_candidate=local-safe-worker-volume-canary reason=Depois de fechar todas as tasks actionable, board-next-scope-intake retornou scope-exhausted com candidato para provar coordenacao em volume usando primitives agnosticas. Materializada uma unica task local-safe para manter continuidade sem editar protected scope.\n2026-06-13: concluída fortalecendo agent-run-driver-fanout-rehearsal para repassar touched_files, marker_results e mutation_target_files ao driver step. Testes cobrem 3 workers custom, 5 workers concorrentes preservando registry, fail-closed por output PASS/FAIL: FAIL e fail-closed por touched files em read-only. Sem provider remoto, ant_colony, release, publish, workflow dispatch, URL fetch, clone ou install.",
       "verification": "node --test scripts/test/agent-run-driver-fanout-rehearsal.test.mjs; node scripts/project/board-spec-audit.mjs --json"
     }
   ]
