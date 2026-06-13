@@ -757,7 +757,7 @@
     },
     {
       "id": "TASK-BUD-1118",
-      "description": "[P1] Definir trilha curatorial world-class para referencias agenticas sem transformar readiness verde em release.",
+      "description": "[P1] Definir trilha curatorial world-class target-agnostic para referencias agenticas sem transformar readiness verde em release.",
       "status": "completed",
       "priority": "p1",
       "depends_on": [
@@ -774,6 +774,7 @@
       ],
       "acceptance_criteria": [
         "Documento separa release readiness de continuidade do board e declara que readiness verde nao implica lancamento.",
+        "Documento declara que 0.8 e apenas o target corrente; o contrato deve funcionar para qualquer release, pi/refarm ou agente externo.",
         "Mapa curatorial lista fontes ja assimiladas, lacunas de referencia e criterios para novas pesquisas externas por aprovacao explicita.",
         "Classificar referencias em pi/refarm, agent/tool envelope, memoria/sessao, isolamento/sandbox e engenharia de software agentica.",
         "Definir como workers agnosticos podem atacar cada referencia: escopo, artefato esperado, fan-in e criterios de bloqueio.",
@@ -781,8 +782,8 @@
         "Validacao local do board audit e do documento deve passar."
       ],
       "milestone": "0.8-potential-completeness",
-      "notes": "[provenance:operator] reason=Operador corrigiu a interpretacao de readiness: 0.8 nao deve lancar apenas porque gates estao verdes; o projeto deve continuar atacando o board e curando referencias world-class com workers agnosticos ate provar robustez por uso.\n2026-06-13: concluida com mapa curatorial world-class que separa release readiness de decisao de lancamento, classifica referencias pi/refarm, agent/tool envelope, memoria/sessao, isolamento/sandbox e engenharia agentica, e define como workers agnosticos devem pesquisar/assimilar referencias com gates explicitos. Sem URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
-      "verification": "node scripts/project/board-spec-audit.mjs --json; node -e \"const fs=require('fs'); const p='docs/research/world-class-agentic-engineering-reference-map-2026-06.md'; const s=fs.readFileSync(p,'utf8'); for (const term of ['Release readiness verde nao significa release agora','world-class reference','workers agnosticos','sem URL fetch']) if (!s.includes(term)) throw new Error('missing '+term); console.log('world-class-reference-map-ok')\""
+      "notes": "[provenance:operator] reason=Operador corrigiu a interpretacao de readiness: 0.8 nao deve lancar apenas porque gates estao verdes; o projeto deve continuar atacando o board e curando referencias world-class com workers agnosticos ate provar robustez por uso.\n2026-06-13: concluida com mapa curatorial world-class target-agnostic que separa release readiness de decisao de lancamento, classifica referencias pi/refarm, agent/tool envelope, memoria/sessao, isolamento/sandbox e engenharia agentica, e define como workers agnosticos devem pesquisar/assimilar referencias com gates explicitos. O ciclo 0.8 e tratado como target corrente, nao como dependencia semantica; o contrato deve servir a releases futuras, pi/refarm e agentes externos. Sem URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
+      "verification": "node scripts/project/board-spec-audit.mjs --json; node -e \"const fs=require('fs'); const p='docs/research/world-class-agentic-engineering-reference-map-2026-06.md'; const s=fs.readFileSync(p,'utf8'); for (const term of ['Release readiness verde nao significa release agora','World-class reference','workers agnosticos','sem URL fetch','Invariante target-agnostic']) if (!s.includes(term)) throw new Error('missing '+term); console.log('world-class-reference-map-ok')\""
     }
   ]
 }

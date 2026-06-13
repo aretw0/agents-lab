@@ -1,6 +1,6 @@
 ---
 title: World-class agentic engineering reference map
-description: Curatorial map for continuing 0.8 work with agnostic workers and explicit external-research gates.
+description: Target-agnostic curatorial map for continuing board work with agnostic workers and explicit external-research gates.
 ---
 
 # World-class agentic engineering reference map
@@ -15,6 +15,24 @@ O estado `release-readiness-report: ready` deve ser lido como baseline
 tecnica limpa, nao como decisao de lancamento. A direcao ativa continua sendo
 usar o board para provar robustez por trabalho real, com workers agnosticos,
 evidencia local e fan-in parent-side antes de qualquer promocao.
+
+## Invariante target-agnostic
+
+O ciclo 0.8 e apenas o alvo corrente de prova. Nada neste mapa deve depender de
+uma espera pela 0.8, de um nome de release, de uma surface de colony, ou de um
+provider especifico.
+
+O contrato reutilizavel e:
+
+- referencia vira intake;
+- intake vira trabalho local;
+- trabalho local vira worker agnostico ou patch humano;
+- worker produz artifact/outcome;
+- parent-side fan-in decide promocao;
+- release continua uma decisao separada.
+
+Esse contrato deve funcionar para 0.8, 0.9, refarm, pi-stack, agentes externos
+ou qualquer consumidor que so tenha acesso ao board, aos docs e aos artifacts.
 
 ## World-class reference, sem dependencia implicita
 
@@ -69,9 +87,9 @@ Exemplos de slices adequadas:
 | Preparar nova pesquisa externa | report-only worker | intake preenchido | bloquear sem aprovacao literal de fonte |
 | Assimilar pesquisa aprovada | read-only synthesis worker | task local com files/criteria/tests | bloquear clone/install/execucao externa |
 
-## Criterios para 0.8 continuar aberta
+## Criterios para manter qualquer target aberto
 
-Manter a 0.8 aberta enquanto uma destas condicoes for verdadeira:
+Manter o target corrente aberto enquanto uma destas condicoes for verdadeira:
 
 1. existe referencia aprovada sem assimilacao local;
 2. existe claim publica maior que a evidencia local;
@@ -79,13 +97,15 @@ Manter a 0.8 aberta enquanto uma destas condicoes for verdadeira:
 4. existe task protegida que pode ser destravada com intake local-safe;
 5. existe teste/canary local que ainda nao prova o volume desejado.
 
-Fechar a 0.8 so deve voltar a ser considerado quando o board estiver limpo e
-essas condicoes forem revisadas explicitamente, nao apenas quando o release
-readiness estiver verde.
+Fechar um target so deve voltar a ser considerado quando o board estiver limpo
+e essas condicoes forem revisadas explicitamente, nao apenas quando o release
+readiness estiver verde. Para o ciclo atual, isso significa manter a 0.8 aberta
+enquanto ainda estivermos usando o proprio projeto para provar robustez e
+assimilar referencias.
 
 ## Nao objetivos
 
-- transformar 0.8 em promessa de swarm amplo;
+- transformar qualquer target em promessa de swarm amplo;
 - acoplar a arquitetura a colony;
 - usar pesquisa externa como recall automatico;
 - criar primitive nova quando um report/intake existente resolve;
