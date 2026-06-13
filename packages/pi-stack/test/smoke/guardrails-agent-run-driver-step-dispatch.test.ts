@@ -5,6 +5,7 @@ import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerAgentRunDriverStepSurface } from "../../extensions/guardrails-core-agent-run-driver-step-surface";
 import { buildAgentRunTaskStartPacket } from "../../extensions/guardrails-core-agent-run-start";
+import guardrailsAgentRun from "../../extensions/guardrails-agent-run";
 
 const spawnMock = vi.hoisted(() => vi.fn());
 
@@ -85,6 +86,16 @@ function getTool(): RegisteredTool {
   return tool;
 }
 
+function collectDistributedAgentRunTools(): RegisteredTool[] {
+  const tools: RegisteredTool[] = [];
+  guardrailsAgentRun({
+    registerTool(tool: unknown) {
+      tools.push(tool as RegisteredTool);
+    },
+  } as never);
+  return tools;
+}
+
 describe("agent run driver step dispatch", () => {
   beforeEach(() => {
     spawnMock.mockReset();
@@ -119,6 +130,35 @@ describe("agent run driver step dispatch", () => {
     expect(tool.parameters?.properties).toHaveProperty("touched_files");
     expect(tool.parameters?.properties).toHaveProperty("marker_results");
     expect(tool.parameters?.properties).toHaveProperty("mutation_target_files");
+  });
+
+  it("registers agent_run_driver_step_dispatch once through the distributed agent-run surface", () => {
+    const tools = collectDistributedAgentRunTools();
+    const matches = tools.filter((row) => row.name === "agent_run_driver_step_dispatch");
+    const tool = matches[0] as RegisteredTool & {
+      parameters?: {
+        properties?: {
+          execute?: unknown;
+          follow?: unknown;
+          build_outcome?: unknown;
+          touched_files?: unknown;
+          marker_results?: unknown;
+          mutation_target_files?: unknown;
+          run_spec?: {
+            properties?: Record<string, unknown>;
+          };
+        };
+      };
+    };
+
+    expect(matches).toHaveLength(1);
+    expect(tool.parameters?.properties).toHaveProperty("execute");
+    expect(tool.parameters?.properties).toHaveProperty("follow");
+    expect(tool.parameters?.properties).toHaveProperty("build_outcome");
+    expect(tool.parameters?.properties).toHaveProperty("touched_files");
+    expect(tool.parameters?.properties).toHaveProperty("marker_results");
+    expect(tool.parameters?.properties).toHaveProperty("mutation_target_files");
+    expect(tool.parameters?.properties?.run_spec?.properties).toHaveProperty("file_contract");
   });
 
   it("blocks execute=true without structured operator approval", async () => {

@@ -593,7 +593,7 @@
     {
       "id": "TASK-BUD-1112",
       "description": "[P2] Validar que agent_run_driver_step_dispatch está disponível pela superfície distribuída do pacote pi-stack sem duplicação de tool.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-1100",
@@ -614,8 +614,8 @@
         "Se a tool já estiver registrada indiretamente, o teste documenta esse caminho e garante compatibilidade."
       ],
       "milestone": "0.8-worker-orchestration",
-      "notes": "[provenance:worker] source_task=scope-discovery-0-8-surface-package-compact reason=Worker surface/package apontou lacuna entre scripts/primitives e superfície distribuída do pacote. Esta task valida disponibilidade para consumidores sem acoplar a colônia.",
-      "verification": "pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-agent-run-driver-step-dispatch.test.ts"
+      "notes": "[provenance:worker] source_task=scope-discovery-0-8-surface-package-compact reason=Worker surface/package apontou lacuna entre scripts/primitives e superfície distribuída do pacote. Esta task valida disponibilidade para consumidores sem acoplar a colônia.\n2026-06-13: concluída adicionando smoke que registra a entrada distribuída guardrails-agent-run e prova agent_run_driver_step_dispatch exatamente uma vez, com schema preservando execute, follow, build_outcome, file_contract, touched_files, mutation_target_files e marker_results. Validação via pnpm exec encontrou EPERM de relink em node_modules no Windows; validação efetiva passou via node node_modules/vitest/vitest.mjs.",
+      "verification": "node node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/guardrails-agent-run-driver-step-dispatch.test.ts"
     },
     {
       "id": "TASK-BUD-1113",
