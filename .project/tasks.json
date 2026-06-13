@@ -35,7 +35,7 @@
     {
       "id": "TASK-BUD-676",
       "description": "Influência externa parked: avaliar futuramente https://github.com/aretw0/claude-mem como referência de memória/sessão para continuidade com governança local-first.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "files": [
         "docs/research/"
@@ -47,7 +47,8 @@
         "Manter recall e comparação de influência externa em modo report-only até aprovação humana explícita."
       ],
       "milestone": "parked-for-0.8.0",
-      "notes": "[rationale:risk-control] Pesquisa externa fica parked/protected para não contaminar execução local-safe contínua sem decisão explícita do operador.\n[provenance:human] source_task=none reason=Pedido explícito do operador para adicionar claude-mem no backlog de influências para estudo futuro.\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Primeiro experimento do pipeline de dogfood progressivo.\n2026-06-11: board release disposition = park-for-target-release for 0.8.0; local evidence accepted for release gating; external research remains parked/protected."
+      "notes": "[rationale:risk-control] Pesquisa externa fica parked/protected para não contaminar execução local-safe contínua sem decisão explícita do operador.\n[provenance:human] source_task=none reason=Pedido explícito do operador para adicionar claude-mem no backlog de influências para estudo futuro.\n2026-05-29: promovida para colony-experiment-phase1 por decisão DEC-BUD-048. Primeiro experimento do pipeline de dogfood progressivo.\n2026-06-11: board release disposition = park-for-target-release for 0.8.0; local evidence accepted for release gating; external research remains parked/protected.\n2026-06-12: protected focus aprovado pelo operador para preflight local-first apenas, sem pesquisa externa, sem URL fetch, sem recall, sem release/publish/workflow dispatch e sem ant_colony. Worker gpt-5.3-codex-spark via agent-run-driver-step leu apenas evidência local e retornou PASS; agentRunOutcomePacket contractDecision=pass, touchedFiles=[], blockers=[]. Fechada como assimilação local-first de contrato memória/sessão; integração/pesquisa externa permanece follow-up separado e protegido.",
+      "verification": "node scripts/agent-run-driver-step.mjs --input .artifacts/agent-run-driver/protected-focus-task-bud-676-local-first-preflight-input.json --out .artifacts/agent-run-driver/protected-focus-task-bud-676-local-first-preflight-result.json --pretty; node --test scripts/test/context-preload-consume.test.mjs"
     },
     {
       "id": "TASK-BUD-1069",
