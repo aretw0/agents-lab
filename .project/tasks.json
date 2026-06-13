@@ -475,6 +475,31 @@
       "milestone": "0.8-potential-completeness",
       "notes": "[provenance:system] source_task=TASK-BUD-1105 reason=Materializada a proposta remanescente de .artifacts/board-next-scope-intake.json: TASK-BUD-DRAFT-BOARD-FANOUT-ASSIMILATION. Core/primitives: task readiness, bounded fanout manifest, parent-side outcome aggregation. Adapter extensions: Pi worker dispatch adapter e board-specific task selection.\n2026-06-12: implementado wrapper agent-run-pi-provider-local-safe-fanout-outcome para agregar dispatch reports local-safe antes de materialização do board. Também corrigido gate de milestone parked no fanout local-safe e detector PASS/FAIL com texto de assessment. Worker gpt-5.3-codex-spark local-safe-board-fanin-assimilation-task-bud-1107 retornou PASS; fanout outcome retornou decision=pass, passedWorkerCount=1, blockers=[].",
       "verification": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-provider-local-safe-fanout-outcome.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs scripts/test/board-spec-audit.test.mjs"
+    },
+    {
+      "id": "TASK-BUD-1108",
+      "description": "[P2] Usar memória operacional validada para reduzir cola manual sem introduzir recall implícito ou provider-specific.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-1107"
+      ],
+      "files": [
+        "scripts/context-preload-consume.mjs",
+        "scripts/test/context-preload-consume.test.mjs",
+        "docs/primitives/agent-worker-envelope.md",
+        "docs/research/0-8-potential-completeness-map-2026-06.md"
+      ],
+      "acceptance_criteria": [
+        "Memória operacional só entra quando possui provenance, timestamp e freshness válidos.",
+        "Memórias expiradas ou sem provenance tornam o preload stale sem bloquear trabalho local-safe simples.",
+        "Adapters podem anexar memória, mas o core preserva o contrato agnóstico.",
+        "Não promover protected/parked tasks sem decisão explícita do operador.",
+        "Não autorizar release tag, publish, workflow dispatch, process start ou agent dispatch.",
+        "Manter a proposta local-safe e revisável antes de editar .project/tasks.json."
+      ],
+      "milestone": "0.8-operational-memory",
+      "notes": "[provenance:system] source_task=TASK-BUD-1105 reason=Materializada a proposta remanescente de .artifacts/board-next-scope-intake.json: TASK-BUD-DRAFT-OPERATIONAL-MEMORY-GATE. Core/primitives: memory packet com provenance/freshness, context preload validado, expiration/fail-closed. Adapter extensions: Pi prompt preload e board/report artifact producer."
     }
   ]
 }
