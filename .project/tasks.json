@@ -859,6 +859,32 @@
       "milestone": "0.8-potential-completeness",
       "notes": "[provenance:target-agnostic-curation] reason=Template worker-ready precisava de uma checagem local antes de virar board task ou worker. 2026-06-13: concluida com scripts/project/external-influence-intake-validate.mjs e testes; valida placeholders, enums, non_goals, declaredFiles e requiredOutcomes. Sem URL fetch, clone, install, provider remoto, workflow dispatch, release, publish, tag ou ant_colony.",
       "verification": "node --test scripts/test/external-influence-intake-validate.test.mjs; node scripts/project/board-spec-audit.mjs --json"
+    },
+    {
+      "id": "TASK-BUD-1122",
+      "description": "[P2] Tornar o validador de external influence intake descobrível no catálogo e na doutrina.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-1121"
+      ],
+      "files": [
+        "docs/primitives/external-influence-intake-template.md",
+        "docs/primitives/README.md",
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Template documenta o comando de validação report-only antes de materializar task, worker ou pesquisa protected.",
+        "Catálogo de primitives descreve o intake como target-agnostic, validável e worker-ready.",
+        "Doutrina operacional exige validação do intake e lista explicitamente bloqueios de URL fetch, clone, install, release, publish, workflow dispatch e ant_colony.",
+        "Nenhuma nova primitive, surface ou runner e criada.",
+        "Nao usar URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
+        "Validacao local do board audit e dos termos de descoberta deve passar."
+      ],
+      "milestone": "0.8-potential-completeness",
+      "notes": "[provenance:target-agnostic-curation] reason=O validador existia, mas precisava ficar descobrivel por agentes e humanos sem depender da conversa. 2026-06-13: concluida atualizando template, catalogo de primitives e doutrina operacional com comando de validacao e bloqueios explicitos. Sem URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
+      "verification": "node scripts/project/board-spec-audit.mjs --json; node -e \"const fs=require('fs'); for (const [p, terms] of Object.entries({'docs/primitives/external-influence-intake-template.md':['external-influence-intake-validate.mjs','block'], 'docs/primitives/README.md':['target-agnostic','worker-ready'], 'docs/guides/control-plane-operating-doctrine.md':['external-influence-intake-validate.mjs','worker_suitable_slice','fan_in_contract']})) { const s=fs.readFileSync(p,'utf8'); for (const term of terms) if (!s.includes(term)) throw new Error(p+' missing '+term); } console.log('external-influence-discovery-ok')\""
     }
   ]
 }

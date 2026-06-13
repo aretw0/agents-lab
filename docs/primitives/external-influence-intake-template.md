@@ -56,6 +56,20 @@ worker-ready sem nova pesquisa externa.
 - `board-next-scope-intake`: pode transformar referencias locais em candidatos report-only sem dispatch.
 - `world-class-agentic-engineering-reference-map-2026-06`: define o contrato referencia -> intake -> trabalho local -> worker/outcome -> fan-in -> promocao.
 
+## Validacao local
+
+Antes de materializar uma referencia em task, worker ou pesquisa protected,
+validar o intake:
+
+```bash
+node scripts/project/external-influence-intake-validate.mjs --file docs/research/<intake>.md --json --pretty
+```
+
+O validador e report-only. Ele nao faz URL fetch, clone, install, dispatch,
+tag, publish, workflow dispatch, provider remoto ou `ant_colony`. Um resultado
+`decision: "block"` deve ser tratado como lacuna de especificacao, nao como
+falha do worker.
+
 ## Invariantes
 
 1. Intake é preparação; não executa pesquisa externa por si.
