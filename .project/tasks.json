@@ -732,7 +732,7 @@
     {
       "id": "TASK-BUD-1117",
       "description": "[P1] Enriquecer release-readiness-report com board audit e next-scope intake sem criar primitive nova.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-1111",
@@ -752,7 +752,7 @@
         "Nao usar URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony."
       ],
       "milestone": "0.8-readiness",
-      "notes": "[provenance:architecture-correction] reason=Evitar primitive nova tipo gauntlet; a semantica correta e fortalecer release-readiness-report para responder se board vazio significa release-ready ou apenas falta de novo escopo local-safe.",
+      "notes": "[provenance:architecture-correction] reason=Evitar primitive nova tipo gauntlet; a semantica correta e fortalecer release-readiness-report para responder se board vazio significa release-ready ou apenas falta de novo escopo local-safe.\n2026-06-13: concluida fortalecendo release-readiness-report com boardSpecAudit, boardNextScopeIntake e boardExhausted. Teste focal cobre board sem escopo local-safe pendente sem marcar release como ready. Nao cria primitive nova, nao usa URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
       "verification": "node --test scripts/test/release-readiness-report.test.mjs; node scripts/project/board-spec-audit.mjs --json"
     }
   ]

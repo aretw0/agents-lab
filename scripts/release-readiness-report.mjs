@@ -6,6 +6,8 @@ import { spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { buildReleasePackageSmokeReport } from "./release-package-smoke.mjs";
 import { buildUserSurfaceAudit } from "./pi-stack-user-surface-audit.mjs";
+import { buildBoardSpecAudit } from "./project/board-spec-audit.mjs";
+import { buildBoardNextScopeIntake } from "./project/board-next-scope-intake.mjs";
 
 const PACKAGES = [
   "packages/pi-stack/package.json",
@@ -1126,6 +1128,8 @@ export function gather(target, cwd = process.cwd()) {
     releaseDraft: existsSync(path.join(cwd, ".github", "workflows", "release-draft.yml")),
   };
   const packageSmoke = buildReleasePackageSmokeReport({ cwd, runPack: false });
+  const boardSpecAudit = buildBoardSpecAudit({ cwd });
+  const boardNextScopeIntake = buildBoardNextScopeIntake({ cwd });
   const agentRunDrivers = agentRunDriverGateReport(cwd);
   agentRunDrivers.canarySuiteEvidence = agentRunDriverCanarySuiteEvidence(cwd);
   agentRunDrivers.lastCanaryEvidence = agentRunDriverCanaryEvidence(cwd);
@@ -1176,6 +1180,8 @@ export function gather(target, cwd = process.cwd()) {
     agentRunDrivers,
     packageSmoke,
     userSurface,
+    boardSpecAudit,
+    boardNextScopeIntake,
     board: summarizeBoard(cwd),
   };
 }
@@ -1225,6 +1231,8 @@ export function buildReport(data) {
     `- byPriority: ${Object.entries(data.board.byPriority).map(([k, v]) => `${k}=${v}`).join(", ") || "none"}`,
     `- releaseBlockers: ${data.board.blockers.length ? data.board.blockers.join(", ") : "none"}`,
     `- releaseDecisionReady: ${data.board.releaseDecisionReady ? "yes" : "no"}`,
+    `- specAudit: ${data.boardSpecAudit?.decision ?? "unknown"}`,
+    `- nextScopeIntake: ${data.boardNextScopeIntake?.decision ?? "unknown"}`,
     "",
     "### Open P0",
     ...(data.board.openP0Rows.length ? data.board.openP0Rows.map((row) => `- ${taskRowOneLine(row)}`) : ["- none"]),
@@ -1260,6 +1268,22 @@ export function buildReport(data) {
     head: data.head,
     latestTag: data.latestTag,
     decision,
+    boardExhausted: data.boardSpecAudit?.decision === "no-local-safe-work",
+    boardSpecAudit: data.boardSpecAudit ? {
+      decision: data.boardSpecAudit.decision,
+      actionableTaskIds: data.boardSpecAudit.actionableTaskIds,
+      specMaturationTaskIds: data.boardSpecAudit.specMaturationTaskIds,
+      protectedTaskIds: data.boardSpecAudit.protectedTaskIds,
+      blockers: data.boardSpecAudit.blockers,
+      summary: data.boardSpecAudit.summary,
+    } : undefined,
+    boardNextScopeIntake: data.boardNextScopeIntake ? {
+      decision: data.boardNextScopeIntake.decision,
+      recommendationCode: data.boardNextScopeIntake.recommendationCode,
+      nextScopeCandidateIds: (data.boardNextScopeIntake.nextScopeCandidates ?? []).map((candidate) => candidate.candidateId),
+      blockers: data.boardNextScopeIntake.blockers,
+      summary: data.boardNextScopeIntake.summary,
+    } : undefined,
     checklist,
     ready,
     releaseBlockers,

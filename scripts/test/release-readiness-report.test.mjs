@@ -1262,6 +1262,33 @@ test("readiness exposes protected board recovery next evidence when present", ()
   }
 });
 
+test("buildReport distinguishes exhausted board scope from release readiness", () => {
+  const workspace = makeWorkspace({
+    version: "0.7.0",
+    tasks: [
+      { id: "TASK-DONE", status: "completed", priority: "p1", description: "done" },
+    ],
+  });
+
+  try {
+    const report = buildReport(gather("0.8.0", workspace));
+
+    assert.equal(report.mode, "release-readiness-report");
+    assert.equal(report.ready, false);
+    assert.equal(report.decision, "not-ready");
+    assert.equal(report.boardExhausted, true);
+    assert.equal(report.boardSpecAudit.decision, "no-local-safe-work");
+    assert.deepEqual(report.boardSpecAudit.actionableTaskIds, []);
+    assert.equal(report.boardNextScopeIntake.decision, "ready-for-operator-decision");
+    assert.ok(Array.isArray(report.boardNextScopeIntake.nextScopeCandidateIds));
+    assert.ok(report.releaseBlockers.some((blocker) => blocker.id === "target-version-ready"));
+    assert.match(report.markdown, /specAudit: no-local-safe-work/);
+    assert.match(report.markdown, /nextScopeIntake: ready-for-operator-decision/);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("readiness exposes protected board recovery approval evidence when present", () => {
   const workspace = makeWorkspace({
     version: "0.8.0",
