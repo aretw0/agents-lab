@@ -1,0 +1,56 @@
+{
+  "mode": "external-influence-fanin-packet",
+  "activation": "none",
+  "authorization": "operator-approved-url-fetch-selected-sources",
+  "dispatchAllowed": false,
+  "processStartAllowed": false,
+  "workflowDispatchAllowed": false,
+  "tagAllowed": false,
+  "publishAllowed": false,
+  "antColonyAllowed": false,
+  "provenanceTimestamp": "2026-06-13T00:00:00-03:00",
+  "sources": [
+    {
+      "source": "nousresearch/hermes-agent",
+      "artifact": ".artifacts/external-influence-research/hermes-agent.json",
+      "affects": "0.8-candidate",
+      "decision": "local-task"
+    },
+    {
+      "source": "mattpocock/sandcastle",
+      "artifact": ".artifacts/external-influence-research/sandcastle.json",
+      "affects": "post-0.8-or-protected-follow-up",
+      "decision": "post-0.8-comparison-task"
+    },
+    {
+      "source": "aretw0/claude-mem",
+      "artifact": ".artifacts/external-influence-research/claude-mem.json",
+      "affects": "0.8-candidate",
+      "decision": "local-task"
+    }
+  ],
+  "containment": {
+    "cloneUsed": false,
+    "installUsed": false,
+    "externalCodeExecuted": false,
+    "releaseUsed": false,
+    "publishUsed": false,
+    "workflowDispatchUsed": false,
+    "antColonyUsed": false,
+    "workersUsed": "agnostic agent_run_driver_step only"
+  },
+  "decision": "pass",
+  "recommendation": "materialize-local-board-tasks",
+  "blockers": [],
+  "warnings": [
+    "Sandcastle influence is useful as isolation vocabulary, but strong sandbox claims remain post-0.8 unless backed by local tests.",
+    "Hermes-agent influence must not expand 0.8 into a broad swarm promise; keep default local worker semantics agnostic and bounded.",
+    "Claude-mem influence must not introduce implicit recall; keep provenance, timestamp and freshness explicit."
+  ],
+  "materializedTaskIds": [
+    "TASK-BUD-1113",
+    "TASK-BUD-1114",
+    "TASK-BUD-1115"
+  ],
+  "summary": "External influence fan-in passed for 3 selected public sources. Results are converted into local-safe board tasks before code changes."
+}

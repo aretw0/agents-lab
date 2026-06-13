@@ -616,6 +616,88 @@
       "milestone": "0.8-worker-orchestration",
       "notes": "[provenance:worker] source_task=scope-discovery-0-8-surface-package-compact reason=Worker surface/package apontou lacuna entre scripts/primitives e superfície distribuída do pacote. Esta task valida disponibilidade para consumidores sem acoplar a colônia.",
       "verification": "pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-agent-run-driver-step-dispatch.test.ts"
+    },
+    {
+      "id": "TASK-BUD-1113",
+      "description": "[P2] Assimilar padrões externos de agent/tool no envelope agnóstico de worker sem ampliar a promessa multi-agent da 0.8.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-1100",
+        "TASK-BUD-1112"
+      ],
+      "files": [
+        "docs/primitives/agent-worker-envelope.md",
+        "docs/research/0-8-potential-completeness-map-2026-06.md",
+        ".project/reports/external-influence-fanin-0-8.json",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar vocabulario externo de agent/tool como influencia comparativa, nao como requisito de runtime.",
+        "Preservar o contrato agnostico de single worker, driver step e validacao parent-side como default da 0.8.",
+        "Listar explicitamente padroes nao aplicaveis a 0.8, incluindo swarm amplo, auto-orquestracao e execucao sem aprovacao.",
+        "Referenciar a evidencia local do fan-in externo sem novo URL fetch, clone, install ou execucao de codigo externo.",
+        "Nao autorizar release tag, publish, workflow dispatch, provider remoto ou ant_colony.",
+        "Validacao local deve passar no board-spec-audit."
+      ],
+      "milestone": "0.8-worker-orchestration",
+      "notes": "[provenance:external-fanin] sources=nousresearch/hermes-agent,aretw0/claude-mem reason=Pesquisa externa aprovada por URL fetch selecionado convergiu em vocabulario de agent/tool aplicavel ao envelope agnostico. A assimilacao deve fortalecer contrato local, nao transformar 0.8 em promessa de swarm.",
+      "verification": "node scripts/project/board-spec-audit.mjs --json"
+    },
+    {
+      "id": "TASK-BUD-1114",
+      "description": "[P2] Assimilar vocabulario externo de memoria/sessao no contrato local sem recall implicito.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-1108"
+      ],
+      "files": [
+        "scripts/context-preload-consume.mjs",
+        "scripts/test/context-preload-consume.test.mjs",
+        "docs/research/0-8-potential-completeness-map-2026-06.md",
+        ".project/reports/external-influence-fanin-0-8.json",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Comparar vocabulario externo de memoria/sessao com o schema local existente usando somente evidencia ja capturada no fan-in.",
+        "Manter provenance, timestamp e freshness como campos obrigatorios para qualquer memoria operacional consumida.",
+        "Garantir que influencia externa nao habilita recall implicito nem aplicacao automatica de memoria sem validacao local.",
+        "Atualizar teste local quando houver lacuna concreta no consumo de contexto ou registrar que o contrato atual ja cobre o caso.",
+        "Nao usar novo URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
+        "Validacao local de context preload deve passar."
+      ],
+      "milestone": "0.8-operational-memory",
+      "notes": "[provenance:external-fanin] source=aretw0/claude-mem reason=Pesquisa externa aprovada indicou oportunidade de alinhar vocabulario de memoria/sessao sem mudar o principio local: memoria operacional e explicita, versionada por provenance/freshness e nao vira recall automatico.",
+      "verification": "node --test scripts/test/context-preload-consume.test.mjs; node scripts/project/board-spec-audit.mjs --json"
+    },
+    {
+      "id": "TASK-BUD-1115",
+      "description": "[P3] Registrar comparacao de isolamento inspirada em sandbox externo sem prometer sandbox forte na 0.8.",
+      "status": "planned",
+      "priority": "p3",
+      "depends_on": [
+        "TASK-BUD-1109",
+        "TASK-BUD-1110"
+      ],
+      "files": [
+        "docs/primitives/agent-worker-isolation.md",
+        "scripts/agent-worker-isolation.mjs",
+        "scripts/test/agent-run-driver-step.test.mjs",
+        ".project/reports/external-influence-fanin-0-8.json",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Registrar que a influencia de sandbox externo fica como comparacao local e nao como requisito bloqueante da 0.8.",
+        "Separar claramente isolamento atual validado por declaredFiles/registry/logs de sandbox forte ainda nao prometido.",
+        "Adicionar ou confirmar teste local que prova bloqueio antes de dispatch para escopo de arquivo invalido quando aplicavel.",
+        "Manter a primitive agnostica, sem acoplamento a colony, provider especifico ou ferramenta externa.",
+        "Nao usar novo URL fetch, clone, install, execucao de codigo externo, release, publish, workflow dispatch ou ant_colony.",
+        "Validacao local do driver step deve passar."
+      ],
+      "milestone": "post-0.8-hardening",
+      "notes": "[provenance:external-fanin] source=mattpocock/sandcastle reason=Pesquisa externa aprovada trouxe vocabulario util para isolamento, mas o fan-in classificou como post-0.8/protected follow-up para evitar over-promise de sandbox forte antes de testes locais.",
+      "verification": "node --test scripts/test/agent-run-driver-step.test.mjs; node scripts/project/board-spec-audit.mjs --json"
     }
   ]
 }
