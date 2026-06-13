@@ -160,12 +160,21 @@ function materializedDraftIds(tasks) {
   return new Set([...haystack.matchAll(/TASK-BUD-DRAFT-[A-Z0-9-]+/g)].map((match) => match[0]));
 }
 
+function materializedSourceCandidateIds(tasks) {
+  const haystack = tasks.map((task) => [
+    task?.id,
+    task?.description,
+    task?.notes,
+  ].join("\n")).join("\n");
+  return new Set([...haystack.matchAll(/source_candidate=([a-z0-9._-]+)/gi)].map((match) => match[1]));
+}
+
 function filterAlreadyMaterializedProposals(tasks, proposedTasks) {
   const materialized = materializedDraftIds(tasks);
   return proposedTasks.filter((task) => !materialized.has(task.id));
 }
 
-function buildExhaustedScopeCandidates({ materializedProposalCount, protectedTaskIds }) {
+function buildExhaustedScopeCandidates({ boardTasks, materializedProposalCount, protectedTaskIds }) {
   const commonBlockers = [
     "operator-review-required-before-board-edit",
     "protected-scope-remains-gated",
@@ -231,8 +240,11 @@ function buildExhaustedScopeCandidates({ materializedProposalCount, protectedTas
     },
   ];
 
+  const materializedCandidates = materializedSourceCandidateIds(boardTasks);
+  const unmaterializedCandidates = candidates.filter((candidate) => !materializedCandidates.has(candidate.candidateId));
+
   if (protectedTaskIds.length > 0) {
-    return candidates.map((candidate) => ({
+    return unmaterializedCandidates.map((candidate) => ({
       ...candidate,
       protectedTaskIds,
       blockers: [
@@ -242,7 +254,7 @@ function buildExhaustedScopeCandidates({ materializedProposalCount, protectedTas
     }));
   }
 
-  return candidates.map((candidate) => ({
+  return unmaterializedCandidates.map((candidate) => ({
     ...candidate,
     materializedProposalCount,
   }));
@@ -278,6 +290,7 @@ export function buildBoardNextScopeIntake(options = {}) {
   const materializedProposalCount = proposalMode ? knownProposals.length - proposedBoardTasks.length : 0;
   const nextScopeCandidates = decision === "scope-exhausted"
     ? buildExhaustedScopeCandidates({
+        boardTasks,
         materializedProposalCount,
         protectedTaskIds: audit.protectedTaskIds,
       })

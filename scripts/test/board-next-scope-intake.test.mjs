@@ -175,3 +175,61 @@ test("board next scope intake reports exhausted scope when every known proposal 
   }
   assert.ok(report.nextActions.some((action) => action.includes("define a new local-safe scope")));
 }));
+
+test("board next scope intake suppresses exhausted-scope candidates already materialized", () => withBoard([
+  {
+    id: "TASK-DONE",
+    status: "completed",
+    priority: "p1",
+    description: "Done",
+    milestone: "0.8-board",
+  },
+  {
+    id: "TASK-QUEUE",
+    status: "completed",
+    priority: "p1",
+    description: "Implemented worker queue",
+    milestone: "0.8-worker-orchestration",
+    notes: "Materialized from TASK-BUD-DRAFT-CORE-WORKER-QUEUE.",
+  },
+  {
+    id: "TASK-FANOUT",
+    status: "completed",
+    priority: "p1",
+    description: "Implemented board fanout",
+    milestone: "0.8-potential-completeness",
+    notes: "Materialized from TASK-BUD-DRAFT-BOARD-FANOUT-ASSIMILATION.",
+  },
+  {
+    id: "TASK-MEMORY",
+    status: "completed",
+    priority: "p2",
+    description: "Implemented operational memory gate",
+    milestone: "0.8-operational-memory",
+    notes: "Materialized from TASK-BUD-DRAFT-OPERATIONAL-MEMORY-GATE.",
+  },
+  {
+    id: "TASK-INFLUENCE",
+    status: "completed",
+    priority: "p2",
+    description: "Assimilated external influence",
+    milestone: "0.8-worker-orchestration",
+    notes: "source_candidate=local-safe-external-influence-assimilation",
+  },
+  {
+    id: "TASK-VOLUME",
+    status: "completed",
+    priority: "p1",
+    description: "Implemented worker volume canary",
+    milestone: "0.8-worker-orchestration",
+    notes: "source_candidate=local-safe-worker-volume-canary",
+  },
+], (cwd) => {
+  const report = buildBoardNextScopeIntake({ cwd });
+
+  assert.equal(report.decision, "scope-exhausted");
+  assert.deepEqual(report.proposedBoardTasks, []);
+  assert.deepEqual(report.nextScopeCandidates, []);
+  assert.equal(report.dispatchAllowed, false);
+  assert.equal(report.processStartAllowed, false);
+}));

@@ -641,7 +641,7 @@
         "Validacao local deve passar no board-spec-audit."
       ],
       "milestone": "0.8-worker-orchestration",
-      "notes": "[provenance:external-fanin] sources=nousresearch/hermes-agent,aretw0/claude-mem reason=Pesquisa externa aprovada por URL fetch selecionado convergiu em vocabulario de agent/tool aplicavel ao envelope agnostico. A assimilacao deve fortalecer contrato local, nao transformar 0.8 em promessa de swarm.\n2026-06-13: concluída documentando a assimilação em agent-worker-envelope como vocabulário de influência, não dependência/runtime. O mapa 0.8 registra o fan-in externo e separa agent/tool e memory como candidatos 0.8; sandbox comparison também entra como hardening 0.8, com claim forte evidence-gated. Não houve novo URL fetch, clone, install, provider remoto, release, publish, workflow dispatch ou ant_colony.",
+      "notes": "[provenance:external-fanin] source_candidate=local-safe-external-influence-assimilation sources=nousresearch/hermes-agent,aretw0/claude-mem reason=Pesquisa externa aprovada por URL fetch selecionado convergiu em vocabulario de agent/tool aplicavel ao envelope agnostico. A assimilacao deve fortalecer contrato local, nao transformar 0.8 em promessa de swarm.\n2026-06-13: concluída documentando a assimilação em agent-worker-envelope como vocabulário de influência, não dependência/runtime. O mapa 0.8 registra o fan-in externo e separa agent/tool e memory como candidatos 0.8; sandbox comparison também entra como hardening 0.8, com claim forte evidence-gated. Não houve novo URL fetch, clone, install, provider remoto, release, publish, workflow dispatch ou ant_colony.",
       "verification": "node scripts/project/board-spec-audit.mjs --json"
     },
     {
@@ -668,7 +668,7 @@
         "Validacao local de context preload deve passar."
       ],
       "milestone": "0.8-operational-memory",
-      "notes": "[provenance:external-fanin] source=aretw0/claude-mem reason=Pesquisa externa aprovada indicou oportunidade de alinhar vocabulario de memoria/sessao sem mudar o principio local: memoria operacional e explicita, versionada por provenance/freshness e nao vira recall automatico.\n2026-06-13: concluída adicionando applicationMode para memory items do tipo external-influence. Modos aceitos: reference-only, operator-reviewed, local-task-seed e none; implicit-recall gera stale reason e fallback-canonical. Testes cobrem caminho permitido e bloqueio de recall implícito.",
+      "notes": "[provenance:external-fanin] source_candidate=local-safe-external-influence-assimilation source=aretw0/claude-mem reason=Pesquisa externa aprovada indicou oportunidade de alinhar vocabulario de memoria/sessao sem mudar o principio local: memoria operacional e explicita, versionada por provenance/freshness e nao vira recall automatico.\n2026-06-13: concluída adicionando applicationMode para memory items do tipo external-influence. Modos aceitos: reference-only, operator-reviewed, local-task-seed e none; implicit-recall gera stale reason e fallback-canonical. Testes cobrem caminho permitido e bloqueio de recall implícito.",
       "verification": "node --test scripts/test/context-preload-consume.test.mjs; node scripts/project/board-spec-audit.mjs --json"
     },
     {
@@ -696,7 +696,7 @@
         "Validacao local do driver step deve passar."
       ],
       "milestone": "0.8-worker-hardening",
-      "notes": "[provenance:external-fanin] source=mattpocock/sandcastle reason=Pesquisa externa aprovada trouxe vocabulario util para isolamento. A leitura correta e 0.8 hardening: atacar no board da 0.8, mas nao anunciar sandbox forte antes de testes locais suficientes.\n2026-06-13: concluída registrando comparação externa em agent-worker-isolation sem elevar a claim da 0.8 acima de logical workspace isolation. Teste local confirma bloqueio de URL-like declared files, missing files, cwd/log/env/shell blockers e fluxo driver-step sem ant_colony.",
+      "notes": "[provenance:external-fanin] source_candidate=local-safe-external-influence-assimilation source=mattpocock/sandcastle reason=Pesquisa externa aprovada trouxe vocabulario util para isolamento. A leitura correta e 0.8 hardening: atacar no board da 0.8, mas nao anunciar sandbox forte antes de testes locais suficientes.\n2026-06-13: concluída registrando comparação externa em agent-worker-isolation sem elevar a claim da 0.8 acima de logical workspace isolation. Teste local confirma bloqueio de URL-like declared files, missing files, cwd/log/env/shell blockers e fluxo driver-step sem ant_colony.",
       "verification": "node --test scripts/test/agent-run-driver-step.test.mjs; node scripts/project/board-spec-audit.mjs --json"
     },
     {
