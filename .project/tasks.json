@@ -754,6 +754,35 @@
       "milestone": "0.8-readiness",
       "notes": "[provenance:architecture-correction] reason=Evitar primitive nova tipo gauntlet; a semantica correta e fortalecer release-readiness-report para responder se board vazio significa release-ready ou apenas falta de novo escopo local-safe.\n2026-06-13: concluida fortalecendo release-readiness-report com boardSpecAudit, boardNextScopeIntake e boardExhausted. Teste focal cobre board sem escopo local-safe pendente sem marcar release como ready. Nao cria primitive nova, nao usa URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
       "verification": "node --test scripts/test/release-readiness-report.test.mjs; node scripts/project/board-spec-audit.mjs --json"
+    },
+    {
+      "id": "TASK-BUD-1118",
+      "description": "[P1] Definir trilha curatorial world-class para referencias agenticas sem transformar readiness verde em release.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1113",
+        "TASK-BUD-1114",
+        "TASK-BUD-1115",
+        "TASK-BUD-1117"
+      ],
+      "files": [
+        "docs/research/world-class-agentic-engineering-reference-map-2026-06.md",
+        "docs/primitives/external-influence-intake-template.md",
+        "docs/research/0-8-potential-completeness-map-2026-06.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Documento separa release readiness de continuidade do board e declara que readiness verde nao implica lancamento.",
+        "Mapa curatorial lista fontes ja assimiladas, lacunas de referencia e criterios para novas pesquisas externas por aprovacao explicita.",
+        "Classificar referencias em pi/refarm, agent/tool envelope, memoria/sessao, isolamento/sandbox e engenharia de software agentica.",
+        "Definir como workers agnosticos podem atacar cada referencia: escopo, artefato esperado, fan-in e criterios de bloqueio.",
+        "Nao criar runtime/primitive nova, nao usar URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
+        "Validacao local do board audit e do documento deve passar."
+      ],
+      "milestone": "0.8-potential-completeness",
+      "notes": "[provenance:operator] reason=Operador corrigiu a interpretacao de readiness: 0.8 nao deve lancar apenas porque gates estao verdes; o projeto deve continuar atacando o board e curando referencias world-class com workers agnosticos ate provar robustez por uso.\n2026-06-13: concluida com mapa curatorial world-class que separa release readiness de decisao de lancamento, classifica referencias pi/refarm, agent/tool envelope, memoria/sessao, isolamento/sandbox e engenharia agentica, e define como workers agnosticos devem pesquisar/assimilar referencias com gates explicitos. Sem URL fetch, clone, install, provider remoto, workflow dispatch, release, publish ou ant_colony.",
+      "verification": "node scripts/project/board-spec-audit.mjs --json; node -e \"const fs=require('fs'); const p='docs/research/world-class-agentic-engineering-reference-map-2026-06.md'; const s=fs.readFileSync(p,'utf8'); for (const term of ['Release readiness verde nao significa release agora','world-class reference','workers agnosticos','sem URL fetch']) if (!s.includes(term)) throw new Error('missing '+term); console.log('world-class-reference-map-ok')\""
     }
   ]
 }
