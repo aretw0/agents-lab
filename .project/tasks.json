@@ -504,6 +504,116 @@
       "milestone": "0.8-operational-memory",
       "notes": "[provenance:system] source_task=TASK-BUD-1105 reason=Materializada a proposta remanescente de .artifacts/board-next-scope-intake.json: TASK-BUD-DRAFT-OPERATIONAL-MEMORY-GATE. Core/primitives: memory packet com provenance/freshness, context preload validado, expiration/fail-closed. Adapter extensions: Pi prompt preload e board/report artifact producer.\n2026-06-12: adicionada validação explícita de freshness em scripts/context-preload-consume.mjs. Freshness fora do vocabulário permitido gera memory-freshness-invalid e força fallback-canonical sem bloquear trabalho local-safe simples. Worker gpt-5.3-codex-spark via agent-run-driver-step compacto retornou PASS; agentRunOutcomePacket contractDecision=pass, blockers=[].",
       "verification": "node --test scripts/test/context-preload-consume.test.mjs; node scripts/agent-run-driver-step.mjs --input .artifacts/agent-run-driver/local-safe-operational-memory-task-bud-1108-compact-driver-input.json --out .artifacts/agent-run-driver/local-safe-operational-memory-task-bud-1108-compact-driver-result.json --pretty"
+    },
+    {
+      "id": "TASK-BUD-1109",
+      "description": "[P1] Endurecer validação de declaredFiles para workers local-safe, bloqueando URLs, protocolos, caminhos inválidos e arquivos ausentes antes de qualquer dispatch.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1106",
+        "TASK-BUD-1107"
+      ],
+      "files": [
+        "scripts/agent-worker-isolation.mjs",
+        "scripts/agent-run-driver-step.mjs",
+        "scripts/agent-run-pi-provider-fanout-plan.mjs",
+        "scripts/test/agent-run-driver-step.test.mjs",
+        "scripts/test/agent-run-pi-provider-fanout-plan.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "Declared files com URL/protocolo, caminho malformado ou arquivo ausente geram blocker explícito antes de dispatch.",
+        "O fanout local-safe não emite workers com declaredFiles inválidos ou inexistentes.",
+        "A mudança preserva contrato agnóstico core e mantém adapters Pi como consumidores.",
+        "Não promover protected/parked tasks sem decisão explícita do operador.",
+        "Não autorizar release tag, publish, workflow dispatch, process start automático ou ant_colony.",
+        "Teste cobre pelo menos URL-like declared file, arquivo ausente e caminho fora do workspace."
+      ],
+      "milestone": "0.8-worker-orchestration",
+      "notes": "[provenance:worker] source_task=scope-discovery-0-8-worker-runtime reason=Worker runtime retornou FAIL útil: URL-like entries podem normalizar para paths locais e passar; isso enfraquece segurança para escalar workers em volume no container. Materializada como próxima task local-safe sem pesquisa externa.",
+      "verification": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-pi-provider-fanout-plan.test.mjs"
+    },
+    {
+      "id": "TASK-BUD-1110",
+      "description": "[P1] Tornar o registry de agent-run seguro contra concorrência para fanout local-safe com múltiplos workers.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1106",
+        "TASK-BUD-1107"
+      ],
+      "files": [
+        "scripts/agent-run-driver-step.mjs",
+        "scripts/agent-run-driver-fanout-rehearsal.mjs",
+        "scripts/test/agent-run-driver-step.test.mjs",
+        "scripts/test/agent-run-driver-fanout-rehearsal.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "Starts/completions concorrentes não perdem nem sobrescrevem linhas de outros runIds em .pi/reports/agent-runs.json.",
+        "O registry mantém exatamente uma entrada por runId com estado terminal correto após fanout de 3+ workers.",
+        "Falhas de escrita ou conflito retornam blocker/erro auditável em vez de corromper JSON.",
+        "Não promover protected/parked tasks sem decisão explícita do operador.",
+        "Não autorizar release tag, publish, workflow dispatch, process start automático ou ant_colony.",
+        "Teste de stress local usa subprocessos mockados/locais e não chama provider remoto."
+      ],
+      "milestone": "0.8-worker-orchestration",
+      "notes": "[provenance:worker] source_task=scope-discovery-0-8-worker-runtime reason=Worker runtime apontou read-modify-write race no registry como blocker para confiar em fanout/concurrency. Esta task preserva agnosticismo e atua na primitive de driver, não em semântica de colônia.",
+      "verification": "node --test scripts/test/agent-run-driver-step.test.mjs scripts/test/agent-run-driver-fanout-rehearsal.test.mjs"
+    },
+    {
+      "id": "TASK-BUD-1111",
+      "description": "[P1] Fazer o board-next-scope-intake emitir novos candidatos locais quando o escopo conhecido estiver esgotado.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-1103",
+        "TASK-BUD-1104",
+        "TASK-BUD-1108"
+      ],
+      "files": [
+        "scripts/project/board-next-scope-intake.mjs",
+        "scripts/test/board-next-scope-intake.test.mjs",
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Quando decision=scope-exhausted, o intake retorna 2 propostas locais concretas com files, acceptance criteria, validation commands, blockers e filesTouched.",
+        "As propostas não materializam board automaticamente e mantêm dispatchAllowed/processStartAllowed/workflowDispatchAllowed/tagAllowed/publishAllowed=false.",
+        "Protected/parked scope continua gated por decisão explícita e nunca vira proposta automática.",
+        "O output diferencia propostas novas de propostas já materializadas por materializedProposalCount.",
+        "Teste cobre escopo esgotado com propostas novas e escopo esgotado sem autorização de automação.",
+        "Não usar release, publish, workflow dispatch, external research, URL fetch ou ant_colony."
+      ],
+      "milestone": "0.8-potential-completeness",
+      "notes": "[provenance:worker] source_task=scope-discovery-0-8-board-autonomy-compact reason=Worker board/autonomy recomendou reduzir cola após scope-exhausted com candidatos locais concretos. Esta task mantém o board report-only até revisão parent-side.",
+      "verification": "node --test scripts/test/board-next-scope-intake.test.mjs; node scripts/project/board-next-scope-intake.mjs --json --pretty"
+    },
+    {
+      "id": "TASK-BUD-1112",
+      "description": "[P2] Validar que agent_run_driver_step_dispatch está disponível pela superfície distribuída do pacote pi-stack sem duplicação de tool.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-1100",
+        "TASK-BUD-1106"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-agent-run.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-run-driver-step-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-run-driver-step-dispatch.test.ts",
+        "packages/pi-stack/package.json"
+      ],
+      "acceptance_criteria": [
+        "Teste prova que a entrada distribuída de agent-run registra agent_run_driver_step_dispatch.",
+        "Schema exposto preserva execute, follow, build_outcome, file_contract, touched_files, mutation_target_files e marker_results.",
+        "A surface não registra a mesma tool duas vezes.",
+        "A validação não executa release, publish, workflow dispatch, provider remoto ou ant_colony.",
+        "A task mantém separação entre primitive agnóstica e adapter/surface Pi.",
+        "Se a tool já estiver registrada indiretamente, o teste documenta esse caminho e garante compatibilidade."
+      ],
+      "milestone": "0.8-worker-orchestration",
+      "notes": "[provenance:worker] source_task=scope-discovery-0-8-surface-package-compact reason=Worker surface/package apontou lacuna entre scripts/primitives e superfície distribuída do pacote. Esta task valida disponibilidade para consumidores sem acoplar a colônia.",
+      "verification": "pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-agent-run-driver-step-dispatch.test.ts"
     }
   ]
 }
