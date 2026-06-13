@@ -674,7 +674,7 @@
     {
       "id": "TASK-BUD-1115",
       "description": "[P3] Registrar comparacao de isolamento inspirada em sandbox externo sem prometer sandbox forte na 0.8.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "depends_on": [
         "TASK-BUD-1109",
@@ -696,7 +696,7 @@
         "Validacao local do driver step deve passar."
       ],
       "milestone": "post-0.8-hardening",
-      "notes": "[provenance:external-fanin] source=mattpocock/sandcastle reason=Pesquisa externa aprovada trouxe vocabulario util para isolamento, mas o fan-in classificou como post-0.8/protected follow-up para evitar over-promise de sandbox forte antes de testes locais.",
+      "notes": "[provenance:external-fanin] source=mattpocock/sandcastle reason=Pesquisa externa aprovada trouxe vocabulario util para isolamento, mas o fan-in classificou como post-0.8/protected follow-up para evitar over-promise de sandbox forte antes de testes locais.\n2026-06-13: concluída registrando comparação externa em agent-worker-isolation sem elevar a claim da 0.8 acima de logical workspace isolation. Teste local confirma bloqueio de URL-like declared files, missing files, cwd/log/env/shell blockers e fluxo driver-step sem ant_colony.",
       "verification": "node --test scripts/test/agent-run-driver-step.test.mjs; node scripts/project/board-spec-audit.mjs --json"
     }
   ]

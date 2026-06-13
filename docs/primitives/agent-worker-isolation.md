@@ -91,6 +91,28 @@ This primitive does not promote:
 
 Those are stronger envelopes and need dedicated canaries.
 
+## External Sandbox Comparison
+
+The approved external influence pass included `mattpocock/sandcastle` as a
+comparison source for sandbox vocabulary. Parent-side fan-in classified this
+source as `post-0.8-or-protected-follow-up` in
+`.project/reports/external-influence-fanin-0-8.json`.
+
+Applicable comparison vocabulary:
+
+- isolate worker intent from host execution side effects;
+- make filesystem, process and network claims explicit;
+- require local tests before promoting a stronger isolation level.
+
+Current 0.8 claim remains narrower: `logical` workspace isolation. The project
+can currently prove path, cwd, declared-file, log and registry checks before
+dispatch. It does not yet claim strong sandboxing for process, network,
+credentials, CPU, memory or filesystem mutation outside those checks.
+
+Promotion rule: external sandbox patterns may seed post-0.8 hardening tasks,
+but they do not upgrade the isolation level until local canaries prove the
+stronger boundary and parent-side outcome validation records the evidence.
+
 ## Reference Relationship
 
 `agent_run_driver_step_dispatch` currently implements the `logical` level for local process execution:
