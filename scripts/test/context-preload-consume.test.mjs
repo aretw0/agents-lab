@@ -224,3 +224,81 @@ test("falls back to canonical when memory freshness value is invalid", () => {
     rmSync(workspace, { recursive: true, force: true });
   }
 });
+
+test("uses external influence memory only as explicit reference material", () => {
+  const workspace = makeWorkspace();
+  try {
+    const packPath = path.join(workspace, ".sandbox", "pi-agent", "preload", "context-preload-pack.json");
+    const pack = {
+      generatedAtIso: new Date().toISOString(),
+      memoryPacket: {
+        items: [
+          {
+            type: "external-influence",
+            source: ".project/reports/external-influence-fanin-0-8.json",
+            timestamp: new Date().toISOString(),
+            freshness: "not-required",
+            scope: "workspace",
+            retention: "while-artifact-referenced",
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+            applicationMode: "reference-only",
+          },
+        ],
+      },
+      preloadPack: {
+        controlPlaneCore: [".project/handoff.json", ".project/tasks.json"],
+      },
+      canonicalState: {
+        fingerprint: canonicalFingerprint(workspace),
+      },
+    };
+    writeFileSync(packPath, JSON.stringify(pack, null, 2));
+
+    const report = runConsume({ workspace, packPath });
+    assert.equal(report.decision, "use-pack");
+    assert.deepEqual(report.staleReasons, []);
+    assert.equal(report.memoryTypeCounts["external-influence"], 1);
+    assert.ok(report.memoryApplicationModes.includes("reference-only"));
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
+test("falls back to canonical when external influence requests implicit recall", () => {
+  const workspace = makeWorkspace();
+  try {
+    const packPath = path.join(workspace, ".sandbox", "pi-agent", "preload", "context-preload-pack.json");
+    const pack = {
+      generatedAtIso: new Date().toISOString(),
+      memoryPacket: {
+        items: [
+          {
+            type: "external-influence",
+            source: ".project/reports/external-influence-fanin-0-8.json",
+            timestamp: new Date().toISOString(),
+            freshness: "not-required",
+            scope: "workspace",
+            retention: "while-artifact-referenced",
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+            applicationMode: "implicit-recall",
+          },
+        ],
+      },
+      preloadPack: {
+        controlPlaneCore: [".project/handoff.json", ".project/tasks.json"],
+      },
+      canonicalState: {
+        fingerprint: canonicalFingerprint(workspace),
+      },
+    };
+    writeFileSync(packPath, JSON.stringify(pack, null, 2));
+
+    const report = runConsume({ workspace, packPath });
+    assert.equal(report.decision, "fallback-canonical");
+    assert.ok(report.staleReasons.includes("external-influence-implicit-recall"));
+    assert.equal(report.memoryTypeCounts["external-influence"], 1);
+    assert.deepEqual(report.selectedPaths, CANONICAL_PATHS);
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});

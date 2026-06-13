@@ -647,7 +647,7 @@
     {
       "id": "TASK-BUD-1114",
       "description": "[P2] Assimilar vocabulario externo de memoria/sessao no contrato local sem recall implicito.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-1108"
@@ -668,7 +668,7 @@
         "Validacao local de context preload deve passar."
       ],
       "milestone": "0.8-operational-memory",
-      "notes": "[provenance:external-fanin] source=aretw0/claude-mem reason=Pesquisa externa aprovada indicou oportunidade de alinhar vocabulario de memoria/sessao sem mudar o principio local: memoria operacional e explicita, versionada por provenance/freshness e nao vira recall automatico.",
+      "notes": "[provenance:external-fanin] source=aretw0/claude-mem reason=Pesquisa externa aprovada indicou oportunidade de alinhar vocabulario de memoria/sessao sem mudar o principio local: memoria operacional e explicita, versionada por provenance/freshness e nao vira recall automatico.\n2026-06-13: concluída adicionando applicationMode para memory items do tipo external-influence. Modos aceitos: reference-only, operator-reviewed, local-task-seed e none; implicit-recall gera stale reason e fallback-canonical. Testes cobrem caminho permitido e bloqueio de recall implícito.",
       "verification": "node --test scripts/test/context-preload-consume.test.mjs; node scripts/project/board-spec-audit.mjs --json"
     },
     {

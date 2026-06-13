@@ -54,6 +54,12 @@ Essa assimilacao nao adiciona dependencias externas e nao autoriza nova rede,
 clone, install, execucao de codigo externo, release, publish, workflow dispatch
 ou `ant_colony`.
 
+Memoria operacional para influencia externa deve usar `type:
+external-influence` e `applicationMode` explicito. Modos aceitos:
+`reference-only`, `operator-reviewed`, `local-task-seed` e `none`.
+`implicit-recall` e blocker semantico: a influencia pode orientar revisao local, mas nao
+autoriza recuperar ou aplicar contexto automaticamente.
+
 ## Como usar workers daqui para frente
 
 Workers devem ser usados para tarefas reais quando o board ja declarar:

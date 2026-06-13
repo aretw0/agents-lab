@@ -25,6 +25,13 @@ const MEMORY_FRESHNESS_VALUES = [
   "not-required",
 ];
 
+const MEMORY_APPLICATION_MODES = [
+  "reference-only",
+  "operator-reviewed",
+  "local-task-seed",
+  "none",
+];
+
 function parseArgs(argv) {
   const out = {
     workspace: process.cwd(),
@@ -133,6 +140,13 @@ function validateMemoryPacket(memoryPacket, nowMs = Date.now()) {
       staleReasons.push("memory-freshness-invalid");
     }
 
+    const applicationMode = String(item?.applicationMode ?? item?.application_mode ?? "").trim();
+    if (type === "external-influence") {
+      if (!applicationMode) staleReasons.push("external-influence-application-mode-missing");
+      else if (applicationMode === "implicit-recall") staleReasons.push("external-influence-implicit-recall");
+      else if (!MEMORY_APPLICATION_MODES.includes(applicationMode)) staleReasons.push("external-influence-application-mode-invalid");
+    }
+
     const timestampMs = Date.parse(String(item?.timestamp ?? ""));
     const expiresAtMs = Date.parse(String(item?.expiresAt ?? ""));
     if (!Number.isFinite(timestampMs)) staleReasons.push("memory-timestamp-invalid");
@@ -210,6 +224,7 @@ function buildReport(args) {
     staleReasons,
     memoryTypes: MEMORY_TYPES,
     memoryFreshnessValues: MEMORY_FRESHNESS_VALUES,
+    memoryApplicationModes: MEMORY_APPLICATION_MODES,
     memoryTypeCounts: memoryValidation.counts,
     memoryValidation,
     currentCanonicalState,
