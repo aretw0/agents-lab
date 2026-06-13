@@ -620,7 +620,7 @@
     {
       "id": "TASK-BUD-1113",
       "description": "[P2] Assimilar padrões externos de agent/tool no envelope agnóstico de worker sem ampliar a promessa multi-agent da 0.8.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-1100",
@@ -641,7 +641,7 @@
         "Validacao local deve passar no board-spec-audit."
       ],
       "milestone": "0.8-worker-orchestration",
-      "notes": "[provenance:external-fanin] sources=nousresearch/hermes-agent,aretw0/claude-mem reason=Pesquisa externa aprovada por URL fetch selecionado convergiu em vocabulario de agent/tool aplicavel ao envelope agnostico. A assimilacao deve fortalecer contrato local, nao transformar 0.8 em promessa de swarm.",
+      "notes": "[provenance:external-fanin] sources=nousresearch/hermes-agent,aretw0/claude-mem reason=Pesquisa externa aprovada por URL fetch selecionado convergiu em vocabulario de agent/tool aplicavel ao envelope agnostico. A assimilacao deve fortalecer contrato local, nao transformar 0.8 em promessa de swarm.\n2026-06-13: concluída documentando a assimilação em agent-worker-envelope como vocabulário de influência, não dependência/runtime. O mapa 0.8 registra o fan-in externo e separa agent/tool e memory como candidatos 0.8 de sandbox comparison como post-0.8. Não houve novo URL fetch, clone, install, provider remoto, release, publish, workflow dispatch ou ant_colony.",
       "verification": "node scripts/project/board-spec-audit.mjs --json"
     },
     {

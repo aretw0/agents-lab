@@ -34,6 +34,25 @@ robusta por uso, nao apenas por checklist.
 | Agent patterns | `TASK-BUD-1100` | Assimilar `TASK-BUD-480` em primitive de worker envelope | local-safe | contrato distribuivel de single-worker |
 | Isolation | `TASK-BUD-1101` | Assimilar `TASK-BUD-521` em requisitos/testes de isolamento | local-safe | requisitos executaveis para driver/spawn |
 | Operational memory | `TASK-BUD-1102` | Assimilar `TASK-BUD-676` em schema/canary local | local-safe | validacao de memoria operacional sem recall externo |
+| External agent/tool influence | `TASK-BUD-1113` | Assimilar vocabulario externo aprovado no envelope agnostico | local-safe | influencia documentada sem promessa de swarm |
+| External memory vocabulary | `TASK-BUD-1114` | Comparar vocabulario de memoria/sessao com schema local | local-safe | sem recall implicito |
+| Sandbox comparison | `TASK-BUD-1115` | Registrar comparacao de isolamento sem prometer sandbox forte | post-0.8 | hardening futuro nao bloqueante |
+
+## External influence fan-in de 2026-06-13
+
+O fan-in local em `.project/reports/external-influence-fanin-0-8.json`
+converteu tres fontes externas aprovadas em trabalho local:
+
+- `nousresearch/hermes-agent`: influencia de agent/tool flow aplicavel ao
+  envelope agnostico, sem virar promessa de swarm na 0.8;
+- `aretw0/claude-mem`: influencia de memoria/sessao aplicavel a provenance,
+  timestamp e freshness, sem recall implicito;
+- `mattpocock/sandcastle`: vocabulario util para isolamento, classificado como
+  comparacao post-0.8 ate existir teste local para sandbox forte.
+
+Essa assimilacao nao adiciona dependencias externas e nao autoriza nova rede,
+clone, install, execucao de codigo externo, release, publish, workflow dispatch
+ou `ant_colony`.
 
 ## Como usar workers daqui para frente
 

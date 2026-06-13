@@ -65,6 +65,36 @@ Adapters must not weaken the envelope. In particular, an adapter cannot turn mis
 
 Repository scripts such as `agent-run-pi-provider-fanout-plan.mjs` and `agent-run-pi-provider-worker-dispatch.mjs` are local adapters and canaries for this contract. They are not the portable API by themselves.
 
+## External Influence Assimilation
+
+The approved 2026-06 external influence pass used local `agent_run_driver_step`
+workers to fetch summaries for `nousresearch/hermes-agent` and
+`aretw0/claude-mem`. The parent-side fan-in is recorded in
+`.project/reports/external-influence-fanin-0-8.json`.
+
+Applicable vocabulary for this envelope:
+
+- agent/tool flow: map external "agent uses tools" language to the existing
+  `runSpec`, `toolAllowlist`, `executionPreview` and parent-side outcome
+  fields;
+- session/memory context: keep provenance, timestamp and freshness outside the
+  worker's authority; context can be attached by an adapter, but the worker does
+  not get implicit recall privileges;
+- handoff evidence: require stable `runId`, declared files, logs and outcome
+  packets before any parent promotion.
+
+Non-applicable to the 0.8 default envelope:
+
+- broad swarm orchestration as the default execution model;
+- worker-initiated next-worker dispatch;
+- agent self-promotion of board/task state;
+- implicit memory recall without provenance/freshness checks;
+- execution without structured approval when `execute=true`.
+
+These external patterns are influence material, not runtime dependencies. They
+do not authorize URL fetch, clone, install, provider calls, release, publish,
+workflow dispatch or `ant_colony`.
+
 ## Touched Files Policy
 
 For `fileContract=read-only`:
