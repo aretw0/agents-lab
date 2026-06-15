@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
@@ -83,7 +83,13 @@ export async function runAgentRunDriverCanary(options = {}) {
   const runId = options.runId || DEFAULT_RUN_ID;
   const execute = options.execute !== false;
   const mode = options.mode === "mutation" ? "mutation" : "read-only";
-  if (mode === "mutation") mkdirSync(path.dirname(path.join(cwd, DEFAULT_MUTATION_TARGET)), { recursive: true });
+  if (mode === "mutation") {
+    const mutationPath = path.join(cwd, DEFAULT_MUTATION_TARGET);
+    mkdirSync(path.dirname(mutationPath), { recursive: true });
+    if (!existsSync(mutationPath) || execute) {
+      writeFileSync(mutationPath, "", "utf8");
+    }
+  }
   const driverStep = await runAgentRunDriverStep(buildCanaryPayload({ cwd, runId, execute, mode }), cwd);
   const outcome = driverStep.agentRunOutcomePacket;
   const report = {

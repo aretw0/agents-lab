@@ -32,6 +32,7 @@
     "../packages/pi-skills",
     "../packages/lab-skills",
     "npm:@ifi/oh-pi-ant-colony",
+    "npm:@ifi/pi-web-remote",
     {
       "source": "npm:@ifi/oh-pi-extensions",
       "extensions": [
