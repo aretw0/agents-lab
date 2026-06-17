@@ -41,6 +41,33 @@ do estado do host. Use este guia como checklist antes de portar aprendizados par
    - Teste que release/publish continuam preservando registry/provenance quando
      passam pela action compartilhada.
 
+## Diagnóstico De Namespace
+
+O post-start do `agents-lab` verifica se `bubblewrap` está instalado e consegue
+criar namespaces com `bwrap --ro-bind / / true`. Se o host ou o runtime do
+container negar namespaces sem privilégio, o log esperado é:
+
+```text
+[agents-lab-devcontainer][warn] bubblewrap is installed but cannot create namespaces.
+[agents-lab-devcontainer][warn] Host/container policy denies unprivileged namespaces; devcontainer stays usable, but bwrap isolation is unavailable.
+[agents-lab-devcontainer][warn] Rebuild/reopen the devcontainer, or enable unprivileged user namespaces on the host.
+```
+
+Interpretação operacional:
+
+- `bubblewrap` foi instalado pela imagem, então não é falta de pacote.
+- O devcontainer continua válido para desenvolvimento, docs, testes e comandos
+  `lab pi`.
+- A sandbox forte baseada em namespace não deve ser assumida enquanto o warning
+  persistir.
+- Primeiro tente rebuild/reopen para aplicar `runArgs` e lifecycle scripts.
+- Se persistir, a correção é no host ou no runtime Docker: habilitar
+  unprivileged user namespaces ou executar em um ambiente Linux/container que
+  permita essa primitiva.
+
+Não silencie esse aviso sem registrar evidência de que `bwrap --ro-bind / /
+true` passou no ambiente corrente.
+
 ## Checklist De Portabilidade
 
 Antes de aplicar este contrato em outro repositório:

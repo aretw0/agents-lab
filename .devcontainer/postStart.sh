@@ -121,6 +121,7 @@ check_agent_sandbox_tools() {
   if command -v bwrap >/dev/null 2>&1; then
     if ! bwrap --ro-bind / / true >/dev/null 2>&1; then
       echo "[agents-lab-devcontainer][warn] bubblewrap is installed but cannot create namespaces."
+      echo "[agents-lab-devcontainer][warn] Host/container policy denies unprivileged namespaces; devcontainer stays usable, but bwrap isolation is unavailable."
       echo "[agents-lab-devcontainer][warn] Rebuild/reopen the devcontainer, or enable unprivileged user namespaces on the host."
     fi
   fi

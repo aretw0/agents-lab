@@ -193,6 +193,20 @@ test("devcontainer provides the baseline sandbox tools expected by agents", () =
 	assert.match(postStart, /check_agent_sandbox_tools\(\)/);
 	assert.match(postStart, /for tool in bwrap fd gh jq rg shellcheck shfmt tree uv; do/);
 	assert.match(postStart, /Missing sandbox tools/);
+	assert.match(postStart, /bubblewrap is installed but cannot create namespaces/);
+	assert.match(postStart, /Host\/container policy denies unprivileged namespaces/);
+	assert.match(postStart, /bwrap isolation is unavailable/);
+});
+
+test("devcontainer contract documents the bubblewrap namespace warning", () => {
+	const guide = readFileSync("docs/guides/devcontainer-factory-contract.md", "utf8");
+
+	assert.match(guide, /## Diagnóstico De Namespace/);
+	assert.match(guide, /bwrap --ro-bind \/ \/ true/);
+	assert.match(guide, /bubblewrap is installed but cannot create namespaces/);
+	assert.match(guide, /Host\/container policy denies unprivileged namespaces/);
+	assert.match(guide, /devcontainer continua válido/);
+	assert.match(guide, /sandbox forte baseada em namespace não deve ser assumida/);
 });
 
 test("devcontainer lifecycle scripts use pnpm-facing operator commands", () => {
