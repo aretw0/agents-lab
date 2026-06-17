@@ -4,6 +4,8 @@ Práticas para reduzir consumo de tokens em sessões com Pi, com foco em workflo
 
 Baseado no experimento [202604-token-efficiency-calibration](https://github.com/aretw0/agents-lab/blob/main/experiments/202604-token-efficiency-calibration/README.md).
 
+A regra atual para contexto é: nenhuma técnica de cache, preload, compactação ou sumarização vira default permanente sem calibração. Use a primitiva [Calibração de Economia de Contexto]({{ '/primitives/context-economy-calibration.html' | relative_url }}) para registrar hipótese, baseline, variante, métricas, validade e rollback.
+
 ---
 
 ## Diretiva Global — Eficiência de Tokens (`APPEND_SYSTEM.md`)
@@ -50,6 +52,28 @@ Bloco recomendado para adicionar logo após a diretiva de tokens:
 
 ---
 
+## Calibração De Contexto, Cache E Compactação
+
+Técnicas de contexto são model-aware e application-aware. Não promova uma técnica só porque reduziu tokens em uma sessão. Ela precisa preservar qualidade e evidência.
+
+Contrato mínimo para mudança de contexto:
+
+1. declare o escopo: runtime, provider/model, tipo de tarefa e aplicação;
+2. compare baseline e variante com métrica de custo e qualidade;
+3. defina `validUntil` por data, versão de runtime ou troca de modelo;
+4. registre rollback simples;
+5. mantenha em report-only quando houver dúvida.
+
+Preferência de desenho:
+
+- reduzir payload de tools com summaries antes de adicionar memória externa;
+- usar selectors e leituras bounded antes de preload amplo;
+- tratar compactação como preservação de progresso, não como otimização isolada;
+- recalibrar após troca de modelo, provider, prompt base ou runtime;
+- remover técnica que aumenta retrabalho, falso positivo ou perda de evidência.
+
+Neste repositório, use `context_watch_status`, `context_watch_freshness_status`, `quota-visibility`, `session-analytics` e `scripts/benchmarks/run-context-economy-ab.mjs` como fontes de evidência. Em outros projetos, use superfícies equivalentes antes de promover defaults.
+
 ## Calibração de Monitores
 
 ### 1) Classificadores com `role: sensor` → modelo leve
@@ -92,4 +116,4 @@ Revisar padrões `"source": "learned"` em arquivos `*.patterns.json` de monitor,
 2. Remova `conversation_history` do hedge por padrão.
 3. Leia menos, localize antes, edite cirurgicamente.
 4. Mantenha segurança: sem `sudo` por padrão.
-5. Audite consumo real com [`quota-visibility.md`](./quota-visibility.md) para validar impacto das otimizações na cota.
+5. Audite consumo real com [`quota-visibility.md`](./quota-visibility.md) e calibre mudanças de contexto com a primitiva de economia de contexto antes de promover defaults.

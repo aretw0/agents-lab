@@ -32,7 +32,7 @@ Guias práticos para usar, operar, manter e distribuir a stack. Para escolher po
 
 | Guia | Descrição |
 |------|-----------|
-| [token-efficiency.md]({{ '/guides/token-efficiency.html' | relative_url }}) | Diretivas de eficiência de tokens (T1–T11), segurança (S1–S3) e calibração de monitores |
+| [token-efficiency.md]({{ '/guides/token-efficiency.html' | relative_url }}) | Eficiência de tokens com calibração evidence-first para contexto/cache/compactação, segurança e monitores |
 | [consumption-visibility-surfaces.md]({{ '/guides/consumption-visibility-surfaces.html' | relative_url }}) | Mapa das superfícies reais de consumo/quota na stack completa (usage, session-breakdown, quota-visibility) |
 | [budget-governance.md]({{ '/guides/budget-governance.html' | relative_url }}) | Budget envelope por execução, governança de colônia com `maxCost`, paridade e isolamento |
 | [quota-visibility.md]({{ '/guides/quota-visibility.html' | relative_url }}) | Como auditar consumo/cota local, projetar burn semanal e exportar evidência para contestação |
