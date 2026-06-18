@@ -312,6 +312,24 @@ describe("project-board-surface", () => {
       expect(ready.evidence[0]).toMatchObject({ verificationId: "VER-1", status: "passed" });
       expect(ready.summary).toContain("ask operator");
 
+      createProjectTaskBoard(cwd, {
+        id: "TASK-D",
+        description: "Slice concluído para verificação",
+        status: "completed",
+      });
+      appendProjectVerificationBoard(cwd, {
+        id: "VER-D",
+        target: "TASK-D",
+        status: "passed",
+        method: "inspection",
+        evidence: "Task completed with all checks passed",
+      });
+
+      const completed = buildProjectTaskDecisionPacket(cwd, "TASK-D");
+      expect(completed.readyForOperatorDecision).toBe(true);
+      expect(completed.recommendedDecision).toBe("close");
+      expect(completed.blockers).toHaveLength(0);
+
       const blocked = buildProjectTaskDecisionPacket(cwd, "TASK-B");
       expect(blocked.readyForOperatorDecision).toBe(false);
       expect(blocked.recommendedDecision).toBe("defer");

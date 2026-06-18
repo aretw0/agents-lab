@@ -580,6 +580,20 @@ describe("context-watchdog", () => {
 		expect(unknownPrompt).not.toContain("next: keep current lane intent");
 	});
 
+	it("adds focus task mnemonics when task mnemonic map is provided", () => {
+		const prompt = buildAutoResumePromptFromHandoff({
+			current_tasks: ["TASK-BUD-190", "TASK-BUD-191"],
+			next_actions: ["Consolidar TASK-BUD-190 and prepare handoff snapshot"],
+		} as any, 5 * 60 * 1000, Date.parse("2026-06-16T15:00:00.000Z"), {
+			taskMnemonicsById: {
+				"TASK-BUD-190": "TASK-BUD-190: fix resume diagnostics formatting",
+				"task-bud-191": "TASK-BUD-191: add task mnemonic bridge",
+			},
+		});
+		expect(prompt).toContain("focusTasks: TASK-BUD-190, TASK-BUD-191");
+		expect(prompt).toContain("focusMnemonics: TASK-BUD-190: fix resume diagnostics formatting, TASK-BUD-191: add task mnemonic bridge");
+	});
+
 	it("resume prompt stays execution-focused even when context events are present", () => {
 		const nowMs = Date.parse("2026-04-21T20:30:00.000Z");
 		const prompt = buildAutoResumePromptFromHandoff({

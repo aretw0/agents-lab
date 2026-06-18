@@ -319,4 +319,68 @@ describe("colony-pilot model propagation contract", () => {
 			}
 		}
 	});
+
+	it("valida sucesso quando o estado já persiste modelOverrides por caste", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "colony-propagation-runtime-"));
+		const mirrorCandidates: string[] = [];
+		try {
+			writeColonyPilotSettings(cwd);
+			const { pi, ctx } = bootstrapColonyPilot(cwd);
+			const colonyId = "contract-runtime-shape";
+			mirrorCandidates.push(
+				...writeMirrorState(cwd, colonyId, {
+					modelOverrides: {
+						scoutModel: BASE_MODELS.scout,
+						worker: BASE_MODELS.worker,
+						soldier: BASE_MODELS.soldier,
+					},
+					ants: [
+						{ caste: "worker", model: BASE_MODELS.worker },
+						{ caste: "scout", model: BASE_MODELS.scout },
+						{ caste: "soldier", model: BASE_MODELS.soldier },
+					],
+				}),
+			);
+
+			const toolCall = pi.handlers.get("tool_call");
+			expect(toolCall).toBeTypeOf("function");
+			await (toolCall as any)(
+				{
+					toolName: "ant_colony",
+					toolCallId: "tc-runtime-shape-1",
+					input: {
+						goal: "Validação de shape persistido",
+						scoutModel: BASE_MODELS.scout,
+						workerModel: BASE_MODELS.worker,
+						soldierModel: BASE_MODELS.soldier,
+					},
+				},
+				ctx,
+			);
+
+			const messageEnd = pi.handlers.get("message_end");
+			expect(messageEnd).toBeTypeOf("function");
+			messageEnd?.(
+				{
+					message: {
+						content: [
+							{
+								type: "text",
+								text: `[COLONY_SIGNAL:LAUNCHED] [${colonyId}]`,
+							},
+						],
+					},
+				},
+				ctx,
+			);
+
+			expect(pi.appendEntry).not.toHaveBeenCalled();
+			expect(ctx.ui.notify).not.toHaveBeenCalled();
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+			for (const mirror of mirrorCandidates) {
+				rmSync(mirror, { recursive: true, force: true });
+			}
+		}
+	});
 });

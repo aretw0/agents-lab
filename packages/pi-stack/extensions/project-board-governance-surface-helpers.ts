@@ -98,7 +98,6 @@ export function buildProjectTaskDecisionPacket(cwd: string, taskIdInput: string)
   if (!linkedVerificationId && evidenceRows.length === 0) blockers.push("missing-verification-evidence");
   if (linkedVerificationId && !linkedVerification) blockers.push("linked-verification-not-found");
   if (evidenceRows.length > 0 && !hasPassedVerification) blockers.push("no-passed-verification");
-  if (task.status === "completed") blockers.push("task-already-completed");
 
   const risks: string[] = [];
   if (isRationaleSensitiveTask(task) && !hasTaskRationale(task, verificationsById)) risks.push("missing-rationale-for-sensitive-task");

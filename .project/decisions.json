@@ -347,6 +347,22 @@
       "rationale": "O factory está estável e o scheduler está intencionalmente vazio. Usar a colônia nativa Pi para executar as tasks P3 de research prova o valor da stack antes da release v0.8.0, gerando evidência interna (.project/reports/) e externa (docs/guides/colony-self-use.md). Evolução de DEC-BUD-005.",
       "status": "decided",
       "context": "Pipeline de dogfood progressivo pré-v0.8.0. Spec: docs/superpowers/specs/2026-05-29-colony-dogfood-design.md"
+    },
+    {
+      "id": "DEC-BUD-049",
+      "decision": "Padronizar resposta de progresso para operadores com contexto explícito por task (ID + descrição + evidência + próximos passos), persistindo a preferência em estado canônico para não depender de memória de sessão.",
+      "rationale": "A cada slice, operadores precisam rastrear intenção, escopo e evidência com baixo custo cognitivo; resposta por apenas IDs reduz entendimento e aumenta atrito em continuidades técnicas.",
+      "status": "decided",
+      "context": "Pedido explícito do usuário para persistir regra de resposta entre sessões sem depender de lembretes manuais.",
+      "task": "TASK-BUD-1144"
+    },
+    {
+      "id": "DEC-BUD-050",
+      "status": "decided",
+      "decision": "Registrar falha operativa de colônia c5 em domínio de lock-test: ciclo failed por ausência de tarefas worker/execução (no_pending_worker_tasks), sem evidência adicional para fechar decisão de fechamento; manter TASK-LOCK-3101 sob bloqueio de decisão até execução canônica com worker ou ajuste explícito de governança.",
+      "rationale": "c5 falhou em 2 rounds de recuperação sem gerar ants worker; o estado é isolado e não constitui evidência de correção. A divergência de board_decision_packet vs quality_gate permanece tratada por regra de governança atualizada e necessita validação do operador.",
+      "context": "Falha de execução da colônia c5 (colony-mqhiu9tp-1zyew).",
+      "task": "TASK-LOCK-3101"
     }
   ]
 }

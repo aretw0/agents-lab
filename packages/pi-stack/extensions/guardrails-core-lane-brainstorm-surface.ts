@@ -9,6 +9,7 @@ import { buildLaneBrainstormPacket, buildLaneBrainstormSeedPreview } from "./lan
 import { buildLaneBrainstormParameters } from "./guardrails-core-autonomy-lane-tool-schemas";
 import { resolveTaskSelection } from "./guardrails-core-autonomy-lane-surface-helpers";
 import { createProjectTaskBoard } from "./project-board-mutations";
+import { queryProjectTasks } from "./project-board-query";
 import { hasStructuredOperatorApproval } from "./guardrails-core-operator-approval";
 import { operatorApprovalParameter } from "./guardrails-core-operator-approval-schema";
 import { GUARDRAILS_AUTHORIZATION_EXPLICIT_OPERATOR, GUARDRAILS_AUTHORIZATION_NONE } from "./guardrails-core-authorization";
@@ -29,6 +30,58 @@ function hasExplicitBrainstormIdeas(value: unknown): boolean {
     const record = item as { theme?: unknown };
     return typeof record.theme === "string" && record.theme.trim().length > 0;
   });
+}
+
+interface SeedDecisionTaskSummaryItem {
+  id: string;
+  description: string;
+  milestone?: string;
+  proposalId?: string;
+  sourceTaskLabel?: string;
+}
+
+function parseSeedSourceTaskId(value: string): string | undefined {
+  const match = /execute bounded slice for\s+(.+)$/i.exec(value.trim());
+  if (!match) return undefined;
+  const raw = match[1]?.trim();
+  return raw.length > 0 ? raw : undefined;
+}
+
+function buildSeedSourceTaskLabelLookup(cwd: string): Map<string, string> {
+  const rows = queryProjectTasks(cwd, { limit: 200 }).rows;
+  const map = new Map<string, string>();
+  for (const row of rows) {
+    const id = String(row.id ?? "").trim();
+    const description = String(row.description ?? "").trim();
+    if (id && description) map.set(id, `${id} • ${description}`);
+  }
+  return map;
+}
+
+function resolveSeedSourceTaskLabel(
+  proposalTitle: string,
+  sourceTaskLabelById: Map<string, string>,
+  taskLabelCache: Map<string, string | undefined>,
+): string | undefined {
+  const sourceTaskId = parseSeedSourceTaskId(proposalTitle);
+  if (!sourceTaskId) return undefined;
+
+  const cached = taskLabelCache.get(sourceTaskId);
+  if (cached !== undefined) return cached;
+
+  const label = sourceTaskLabelById.get(sourceTaskId) ?? sourceTaskId;
+  taskLabelCache.set(sourceTaskId, label);
+  return label;
+}
+function buildSeedDecisionSummaryEntries(tasks: SeedDecisionTaskSummaryItem[], maxItems = 3): string {
+  return tasks
+    .slice(0, maxItems)
+    .map((task, index) => {
+      const proposalPrefix = task.proposalId ? `${task.proposalId} -> ` : "";
+      const sourceContext = task.sourceTaskLabel ? ` (${task.sourceTaskLabel})` : "";
+      return `#${index + 1} ${proposalPrefix}${task.id} ${task.description}${sourceContext}`;
+    })
+    .join(" | ");
 }
 
 function buildSeedDecisionBlockedNextAction(blockers: string[]): string {
@@ -137,6 +190,8 @@ export function registerGuardrailsLaneBrainstormSurface(pi: ExtensionAPI): void 
       const priority = typeof p.priority === "string" && p.priority.trim() ? p.priority.trim() : "p1";
       const milestone = typeof p.milestone === "string" && p.milestone.trim() ? p.milestone.trim() : undefined;
       const blockers: string[] = [];
+      const sourceTaskLabelCache = new Map<string, string | undefined>();
+      const sourceTaskLabelById = buildSeedSourceTaskLabelLookup(ctx.cwd);
 
       if (preview.decision !== "needs-operator-seeding-decision") blockers.push("preview-blocked");
       if (selected.length === 0) blockers.push("no-selected-proposals");
@@ -147,6 +202,7 @@ export function registerGuardrailsLaneBrainstormSurface(pi: ExtensionAPI): void 
 
       const plannedTasks = selected.map((proposal, index) => ({
         id: taskIds[index] ?? `TASK-SEED-PREVIEW-${index + 1}`,
+        proposalId: proposal.id,
         description: proposal.title,
         status: "planned",
         priority,
@@ -156,19 +212,22 @@ export function registerGuardrailsLaneBrainstormSurface(pi: ExtensionAPI): void 
         provenance_origin: preview.source,
         source_task_id: proposal.sourceSliceId,
         source_reason: "lane brainstorm seed decision",
+        sourceTaskLabel: resolveSeedSourceTaskLabel(proposal.title, sourceTaskLabelById, sourceTaskLabelCache),
       }));
 
       if (blockers.length > 0 || !apply) {
         const decision = blockers.length > 0 ? "blocked" : "needs-operator-seeding-decision";
+        const summaryMap = buildSeedDecisionSummaryEntries(plannedTasks);
         return buildOperatorVisibleToolResponse({
           label: "lane_brainstorm_seed_decision",
-          summary: `lane-brainstorm-seed-decision: decision=${decision} proposals=${selected.length} apply=no blockers=${blockers.length}`,
+          summary: `lane-brainstorm-seed-decision: decision=${decision} proposals=${selected.length} apply=no blockers=${blockers.length}${summaryMap ? ` plan=${summaryMap}` : ""}`,
           details: {
             decision,
             recommendationCode: blockers.length > 0 ? "brainstorm-seeding-decision-blocked" : "brainstorm-seeding-decision-preview",
             nextAction: blockers.length > 0 ? buildSeedDecisionBlockedNextAction(blockers) : "operator may approve apply=true with explicit task_ids.",
             plannedTasks,
             blockers,
+            plannedTaskSummary: plannedTasks,
             recoveryRoute: blockers.includes("missing-seed-preview-proposals")
               ? ["lane_brainstorm_packet", "lane_brainstorm_seed_preview", "lane_brainstorm_seed_decision"]
               : undefined,
@@ -193,14 +252,16 @@ export function registerGuardrailsLaneBrainstormSurface(pi: ExtensionAPI): void 
         sourceReason: task.source_reason,
       }));
       const failed = created.filter((result) => !result.ok);
+      const summaryMap = buildSeedDecisionSummaryEntries(plannedTasks);
       return buildOperatorVisibleToolResponse({
         label: "lane_brainstorm_seed_decision",
-        summary: `lane-brainstorm-seed-decision: decision=${failed.length > 0 ? "partial" : "applied"} created=${created.length - failed.length}/${created.length} apply=yes`,
+        summary: `lane-brainstorm-seed-decision: decision=${failed.length > 0 ? "partial" : "applied"} created=${created.length - failed.length}/${created.length} apply=yes${summaryMap ? ` plan=${summaryMap}` : ""}`,
         details: {
           decision: failed.length > 0 ? "partial" : "applied",
           recommendationCode: failed.length > 0 ? "brainstorm-seeding-apply-partial" : "brainstorm-seeding-applied",
           created,
           plannedTasks,
+          plannedTaskSummary: plannedTasks,
           apply: true,
           mutationAllowed: true,
           dispatchAllowed: false,

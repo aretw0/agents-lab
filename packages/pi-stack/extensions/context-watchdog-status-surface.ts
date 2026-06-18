@@ -15,7 +15,7 @@ import { registerContextWatchdogCheckpointBootstrapSurface } from "./context-wat
 import { extractAutoResumePromptValue, readContextWatchFreshnessSignals, summarizeFocusMnemonicsForPreview } from "./context-watchdog-freshness";
 import { contextWatchEventAgeMs, latestContextWatchEvent, resolveCompactCheckpointPersistence, summarizeContextWatchEvent, type ContextWatchHandoffReason } from "./context-watchdog-handoff-events";
 import { buildAutoResumePromptEnvelopeFromHandoff, formatAutoResumeReloadHintShort, handoffFreshnessAdvice, handoffRefreshMode, resolveHandoffFreshness, summarizeAutoResumePromptDiagnostics, toAgeSec, type AutoResumePromptDiagnostics } from "./context-watchdog-handoff";
-import { buildContextWatchOperatorBrief, readProjectPreferredActiveTaskIds, readProjectProtectedAutoResumeTaskIds, readProjectTaskDescriptionById, readProjectTaskStatusById, toOperatorTaskMnemonic } from "./context-watchdog-operator-brief";
+import { buildContextWatchOperatorBrief, readProjectPreferredActiveTaskIds, readProjectProtectedAutoResumeTaskIds, readProjectTaskMnemonicById, readProjectTaskStatusById } from "./context-watchdog-operator-brief";
 import { describeContextWatchDeterministicStopHint, formatContextWatchSteeringStatus, resolveAutoCompactTimeoutPressureGuard, resolveContextWatchAutoCompactTriggerOrigin, resolveContextWatchDeterministicStopSignal, resolveContextWatchOperatingCadence, resolveContextWatchOperatorActionPlan, resolveContextWatchOperatorSignal, resolveContextWatchSignalNoiseExcessive, type ContextWatchAssessment, type ContextWatchdogLevel } from "./context-watchdog-operator-signals";
 import { resolveContextWatchCompactStage } from "./context-watchdog-policy";
 import { reconcileAutoResumeHandoffFocus, resolveAntiParalysisDispatch, resolveCheckpointEvidenceReadyForCalmClose, resolveContextEconomySignal, resolvePreCompactCalmCloseSignal, resolveProgressPreservationSignal, summarizeContextEconomySignal, summarizeProgressPreservationSignal } from "./context-watchdog-progress-signals";
@@ -479,11 +479,12 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 			const contextPressureActive = typeof (ctx as { getContextUsage?: unknown }).getContextUsage === "function"
 				? runtime.buildAssessment(ctx).level !== "ok"
 				: false;
+			const taskMnemonicsById = readProjectTaskMnemonicById(ctx.cwd);
 			const envelope = buildAutoResumePromptEnvelopeFromHandoff(
 				readHandoffJson(ctx.cwd),
 				runtime.getConfig().handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), reloadRequired, contextPressureActive },
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), taskMnemonicsById, reloadRequired, contextPressureActive },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(envelope.diagnostics);
 			const focusTaskIds = Array.isArray(envelope.diagnostics.focusTasksListed)
@@ -493,9 +494,7 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 				? focusTaskIds.join(", ")
 				: extractAutoResumePromptValue(envelope.prompt, "focusTasks", "none-listed");
 			const focusMnemonics = summarizeFocusMnemonicsForPreview(
-				focusTaskIds.map((taskId) => (
-					toOperatorTaskMnemonic(taskId, readProjectTaskDescriptionById(ctx.cwd, taskId)) ?? taskId
-				)),
+				focusTaskIds.map((taskId) => taskMnemonicsById[taskId.toUpperCase()] ?? taskMnemonicsById[taskId.toLowerCase()] ?? taskId),
 			);
 			const staleFocus = extractAutoResumePromptValue(envelope.prompt, "staleFocus", "none");
 			const staleFocusCount = envelope.diagnostics.staleFocusTasks?.length ?? 0;

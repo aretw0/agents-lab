@@ -290,6 +290,7 @@ export type AutoResumePromptOptions = {
 	excludedTaskIds?: string[];
 	reloadRequired?: boolean;
 	contextPressureActive?: boolean;
+	taskMnemonicsById?: Record<string, string>;
 };
 
 export type HandoffBoardReconciliationReason = "fresh" | "stale-hand-off" | "missing-task" | "completed-focus" | "board-handoff-divergence";
@@ -538,12 +539,48 @@ function extractOperationalFocusHints(values: string[], limit = 3): string[] {
 	return hints;
 }
 
+function normalizeTaskMnemonicLookupId(taskId: string): string {
+	return String(taskId).trim().toUpperCase();
+}
+
+function resolveTaskMnemonicLabel(rawTaskId: string, taskMnemonicsById?: Record<string, string>): string | undefined {
+	if (!rawTaskId || !taskMnemonicsById) return undefined;
+	const normalized = normalizeTaskMnemonicLookupId(rawTaskId);
+	const exact = taskMnemonicsById[normalized];
+	if (typeof exact === "string" && exact.trim()) return exact.trim();
+	const lower = taskMnemonicsById[rawTaskId.toLowerCase()];
+	if (typeof lower === "string" && lower.trim()) return lower.trim();
+	return undefined;
+}
+
+function resolveTaskMnemonics(values: string[], taskMnemonicsById?: Record<string, string>): string[] {
+	if (!Array.isArray(values) || values.length === 0 || !taskMnemonicsById) return [];
+	const seen = new Set<string>();
+	const output: string[] = [];
+	for (const value of values) {
+		for (const taskId of String(value ?? "").toUpperCase().match(/TASK-[A-Z0-9-]*\d[A-Z0-9-]*/g) ?? []) {
+			const mnemonic = resolveTaskMnemonicLabel(taskId, taskMnemonicsById);
+			if (!mnemonic || seen.has(mnemonic)) continue;
+			seen.add(mnemonic);
+			output.push(mnemonic);
+		}
+	}
+	return output;
+}
+
 function formatPromptList(values: string[], droppedByLimitCount: number, fallback: string, separator: string): string {
 	if (values.length <= 0) return fallback;
 	const base = values.join(separator);
 	return droppedByLimitCount > 0 ? `${base} (+${droppedByLimitCount} more)` : base;
 }
 
+function formatPromptListWithMnemonics(values: string[], droppedByLimitCount: number, fallback: string, separator: string, taskMnemonicsById?: Record<string, string>): string {
+	const mnemonics = resolveTaskMnemonics(values, taskMnemonicsById);
+	if (mnemonics.length > 0) {
+		return formatPromptList(mnemonics, droppedByLimitCount, fallback, separator);
+	}
+	return formatPromptList(values, droppedByLimitCount, fallback, separator);
+}
 function isAutoResumeActiveTaskStatus(status: string | undefined): boolean {
 	return status === undefined || status === "in-progress" || status === "planned";
 }
@@ -696,6 +733,16 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 		`previousStop: ${summarizeHandoffStopState(handoff)}`,
 		`focusTasks: ${formatPromptList(tasksPrepared.values, tasksPrepared.diagnostics.droppedByLimitCount, "none-listed", ", ")}`,
 	];
+	const focusMnemonics = formatPromptListWithMnemonics(
+		tasksPrepared.values,
+		tasksPrepared.diagnostics.droppedByLimitCount,
+		"none",
+		", ",
+		options?.taskMnemonicsById,
+	);
+	if (focusMnemonics !== "none") {
+		lines.push(`focusMnemonics: ${focusMnemonics}`);
+	}
 	if (filteredCurrentTasks.stale.length > 0) {
 		lines.push(`staleFocus: ${formatPromptList(filteredCurrentTasks.stale.slice(0, 2), Math.max(0, filteredCurrentTasks.stale.length - 2), "none", ", ")}`);
 	}

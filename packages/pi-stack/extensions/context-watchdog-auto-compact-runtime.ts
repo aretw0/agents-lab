@@ -13,6 +13,7 @@ import {
 import {
 	readProjectPreferredActiveTaskIds,
 	readProjectProtectedAutoResumeTaskIds,
+	readProjectTaskMnemonicById,
 	readProjectTaskStatusById,
 } from "./context-watchdog-operator-brief";
 import {
@@ -78,6 +79,7 @@ export function handleAutoCompactComplete(params: {
 		maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
 	});
 	const taskStatusById = readProjectTaskStatusById(ctx.cwd);
+	const taskMnemonicsById = readProjectTaskMnemonicById(ctx.cwd);
 	const preferredTaskIds = readProjectPreferredActiveTaskIds(ctx.cwd, 3);
 	const excludedTaskIds = readProjectProtectedAutoResumeTaskIds(ctx.cwd);
 	let handoffBoardReconciliation = resolveHandoffBoardReconciliation({
@@ -160,7 +162,7 @@ export function handleAutoCompactComplete(params: {
 			handoffAfterCompact,
 			config.handoffFreshMaxAgeMs,
 			Date.now(),
-			{ taskStatusById, preferredTaskIds: preferredTaskIds.slice(0, 1), excludedTaskIds },
+			{ taskStatusById, preferredTaskIds: preferredTaskIds.slice(0, 1), excludedTaskIds, taskMnemonicsById },
 		);
 		autoResumeSnapshot.promptDiagnostics = resumeEnvelope.diagnostics;
 		(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(

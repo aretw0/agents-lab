@@ -1,48 +1,27 @@
 {
-  "timestamp": "2026-05-26T18:22:00.000Z",
-  "context": "External stabilization session for agents-lab 0.8 readiness. The factory is currently healthy: full local parity passed in the devcontainer, runtime health preflight returns continue, repo bloat/discourse/complexity gates are clean, and git is expected to be clean after this checkpoint. The default scheduler remains intentionally drained: only P3 parked/low-priority work should remain out of normal local-safe selection unless the operator explicitly chooses that lane. The remaining v0.8.0 readiness blocker is deliberate versioning only: packages are still 0.7.0, so target-version-ready stays false until the operator explicitly chooses the bump/tag/release lane. Recent work hardened runtime health, pi parity, cold capability handling for pi-lens, model-neutral colony policy, optional doctor auth checks, empty-queue scheduler guidance, provider-neutral distributed doctrine, local-stop intake guidance, seeded lane status guidance, model-neutral arena fixture coverage, and the /hatch/control-plane-continuity path so report-only read-only intent plans can run without redundant textual confirmation, shelling TUI slash commands, preparing workers before readiness, asking broad questions when the operator explicitly requests next local-safe seed material, or guessing inputs for dependent report-only route steps.",
+  "timestamp": "2026-06-17T23:40:00.000Z",
+  "context": "Consolidacao pos-devcontainer warning e triagem de bloat. O warning de bubblewrap foi documentado como condicao amarela: devcontainer segue utilizavel, mas bwrap namespace isolation nao deve ser assumido enquanto o host negar unprivileged namespaces. A disciplina de contexto/cache/compactacao foi promovida para primitiva evidence-first: tecnicas de economia de contexto exigem hipotese, baseline, variante, metricas, validade e rollback antes de virarem default. Board de release esta sem tasks ativas abertas; colonies experimentais foram canceladas como evidencia retida, nao promovida. Readiness v0.8.0 esta verde em todos os gates exceto git-worktree-clean, esperado enquanto este WIP nao for commitado.",
   "current_tasks": [],
   "next_actions": [
-    "Do not bump/tag/publish v0.8.0 without explicit operator release decision.",
-    "Before any long Pi runtime, run pnpm run pi:runtime:health or the equivalent environment_runtime_health_status gate in the current environment.",
-    "Keep the remaining planned external-influence tasks parked unless the operator explicitly selects a research lane with --priority p3 --include-protected or equivalent intent.",
-    "If continuing local-safe work while scheduler:next has no eligible task, route through operator_intent_intake_packet -> lane_brainstorm_packet -> lane_brainstorm_seed_preview in report-only mode before materializing any board task.",
-    "Prefer local-safe slices that improve packaging, docs contracts, engine boundaries, runtime pressure observability, first-party Pi stack distribution, or worker/intent contracts without dispatch."
+    "Separar commits pequenos: devcontainer warning, context economy calibration, board/colony consolidation, runtime WIP anterior.",
+    "Decidir se .pi/settings.json relaxado de colony model policy e configuracao experimental local ou baseline commitavel; nao esconder isso em commit de runtime.",
+    "Antes de release/tag, rerun release readiness after worktree clean and operator release approval.",
+    "Para novas tecnicas de contexto/cache/preload/compactacao, usar docs/primitives/context-economy-calibration.md e manter report-only ate evidencia comparavel."
   ],
   "blockers": [
-    "target-version-ready: false by design until packages are intentionally bumped from 0.7.0 to 0.8.0",
-    "scheduler-default-queue: no eligible tasks because the remaining planned work is P3 parked/low-priority and intentionally excluded from default local-safe selection"
+    "tracked-worktree-dirty-until-commit",
+    "bwrap-unprivileged-namespace-denied-on-current-host",
+    "operator-decision-needed-for-pi-settings-model-policy"
   ],
   "recent_validation": [
-    "docker exec -u vscode 0deb9b8a1983 pnpm run ci:local:parity passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm run pi:runtime:health returned decision=continue",
-    "docker exec -u vscode 0deb9b8a1983 pnpm run test:monitor:smoke passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts packages/pi-stack/test/smoke/guardrails-tool-call-guard.test.ts packages/pi-stack/test/smoke/control-plane-continuity-skill.test.ts passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts packages/pi-stack/test/smoke/control-plane-continuity-skill.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/subagent-readiness.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts packages/pi-stack/test/smoke/autonomy-lane-brainstorm-surface.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/control-plane-continuity-skill.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts packages/pi-stack/test/smoke/pi-skills-prompts.test.ts packages/pi-stack/test/smoke/control-plane-continuity-skill.test.ts passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm exec vitest run packages/pi-stack/test/smoke/project-intake-primitive.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm run docs:package:check passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm run repo:discourse:audit passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm run repo:bloat:audit:strict passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm run repo:complexity:strict passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm exec vitest run packages/pi-stack/test/smoke/environment-doctor-surface.test.ts packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts packages/pi-stack/test/smoke/model-neutrality.test.ts passed",
-    "docker exec -u vscode 0deb9b8a1983 node scripts/pi-parity.mjs --scope both --profile strict-curated --strict passed",
-    "docker exec -u vscode 0deb9b8a1983 git diff --check passed",
-    "docker exec -u vscode 0deb9b8a1983 node --test scripts/test/autonomous-scheduler.test.mjs passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm exec vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/model-neutrality.test.ts passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm run docs:package:check && pnpm run pi:runtime:health passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm exec vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm exec vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-material-packets.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm exec vitest run packages/pi-stack/test/smoke/model-neutrality.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk-arena.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk-arena-fan-in.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-sdk.test.ts packages/pi-stack/test/smoke/guardrails-agent-run-task-packets.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts passed",
-    "git diff --check passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm run pi:runtime:health returned decision=continue",
-    "docker exec -u vscode 0deb9b8a1983 node --test scripts/test/pi-runtime-health.test.mjs passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm run test:pi:dev:pressure passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts packages/pi-stack/test/smoke/guardrails-shell-routing.test.ts packages/pi-stack/test/smoke/guardrails-tool-call-guard.test.ts packages/pi-stack/test/smoke/control-plane-continuity-skill.test.ts passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm exec vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts packages/pi-stack/test/smoke/guardrails-shell-routing.test.ts packages/pi-stack/test/smoke/guardrails-tool-call-guard.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm run test:ci:workflow passed",
-    "docker exec -u vscode 0deb9b8a1983 pnpm run test:package:boundary passed"
+    "node --test scripts/test/devcontainer-lab.test.mjs passed 12/12",
+    "node --test scripts/test/docs-site-contract.test.mjs passed 38/38",
+    "pnpm run docs:package:check passed",
+    "pnpm exec vitest run packages/pi-stack/test/smoke/model-neutrality.test.ts passed 7/7",
+    "pnpm run agent-run:driver-canaries passed for gitHead 59f90475",
+    "node scripts/release-readiness-report.mjs --target 0.8.0 --json: all gates green except git-worktree-clean",
+    "JSON parse ok for .project/tasks.json, .project/verification.json, .project/handoff.json; open-active 0",
+    "git diff --check passed with existing CRLF warning for context-watchdog-continuation.ts"
   ],
   "recent_commits": [
     "ca780daf test(control-plane): cover tui slash policy reexport",
@@ -102,16 +81,16 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-26T13:46:27.000Z",
+    "generatedAtIso": "2026-06-17T23:40:00.000Z",
     "level": "ok",
     "percent": 0,
-    "action": "choose-next-lane-explicitly",
-    "recommendation": "Repository readiness is stable, runtime health preflight is green, and the default scheduler queue is intentionally empty. For new local-safe work, use report-only intake/brainstorm/seed-preview before materializing a bounded task unless the operator explicitly chooses release, publish, provider routing, remote/offload, or external research."
+    "action": "commit-or-review-wip",
+    "recommendation": "Board and release gates are consolidated. Commit/review the WIP in small groups; do not start new colony or context-cache work until .pi settings and runtime WIP are explicitly accepted."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-26T13:46:27.000Z",
-      "reason": "hatch-brainstorm-preview-inventory-checkpoint",
+      "atIso": "2026-06-17T23:40:00.000Z",
+      "reason": "manual-consolidation-checkpoint",
       "level": "ok",
       "percent": 0,
       "thresholds": {
@@ -119,8 +98,8 @@
         "checkpointPct": 55,
         "compactPct": 65
       },
-      "action": "choose-next-lane-explicitly",
-      "recommendation": "Use runtime health preflight, strict-curated parity, first-hatch inventory coverage for brainstorm preview tools, intent execution plans with inputHint/consumesPreviousStepOutput, and the exported runtime/worker/brainstorm intent inference as the next-session anchor."
+      "action": "commit-or-review-wip",
+      "recommendation": "Proceed with small commits or explicit review of remaining runtime/model-policy WIP."
     }
   ]
 }

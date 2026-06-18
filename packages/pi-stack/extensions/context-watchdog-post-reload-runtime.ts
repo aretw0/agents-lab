@@ -14,6 +14,7 @@ import {
 import {
 	readProjectPreferredActiveTaskIds,
 	readProjectProtectedAutoResumeTaskIds,
+	readProjectTaskMnemonicById,
 	readProjectTaskStatusById,
 } from "./context-watchdog-operator-brief";
 import {
@@ -162,6 +163,7 @@ export function handlePostReloadAutoResume(params: {
 	const loopPaused = loopRuntimeState.mode === "paused" || loopRuntimeState.stopCondition === "manual-pause";
 	let handoffForDispatch = handoffForPostReloadResume;
 	const taskStatusById = readProjectTaskStatusById(ctx.cwd);
+	const taskMnemonicsById = readProjectTaskMnemonicById(ctx.cwd);
 	const preferredTaskIds = readProjectPreferredActiveTaskIds(ctx.cwd, 3);
 	const excludedTaskIds = readProjectProtectedAutoResumeTaskIds(ctx.cwd);
 	let handoffBoardReconciliation = resolveHandoffBoardReconciliation({
@@ -228,7 +230,7 @@ export function handlePostReloadAutoResume(params: {
 			handoffForDispatch,
 			config.handoffFreshMaxAgeMs,
 			nowMs,
-			{ taskStatusById, preferredTaskIds: preferredTaskIds.slice(0, 1), excludedTaskIds, reloadRequired: false, contextPressureActive: false },
+			{ taskStatusById, preferredTaskIds: preferredTaskIds.slice(0, 1), excludedTaskIds, taskMnemonicsById, reloadRequired: false, contextPressureActive: false },
 		);
 		autoResumeSnapshot.promptDiagnostics = resumeEnvelope.diagnostics;
 		const clearedHandoff = clearAutoResumeAfterReloadIntent(handoffForDispatch);

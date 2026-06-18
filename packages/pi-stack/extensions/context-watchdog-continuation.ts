@@ -275,6 +275,7 @@ export function formatContextWatchAutoResumePreviewSummary(input: {
 export function formatContextWatchContinuationReadinessSummary(input: {
   ready: boolean;
   focusTasks: string;
+  focusMnemonics?: string;
   localAuditDecision: string;
   staleFocusCount: number;
   localAuditReasons?: string[];
@@ -284,6 +285,7 @@ export function formatContextWatchContinuationReadinessSummary(input: {
     "context-watch-continuation-readiness:",
     `ready=${input.ready ? "yes" : "no"}`,
     `focus=${input.focusTasks.replace(/\s+/g, "_")}`,
+    input.focusMnemonics ? `focusMnemonics=${input.focusMnemonics.replace(/\s+/g, "_")}` : undefined,
     `audit=${input.localAuditDecision}`,
     input.localAuditReasons && input.localAuditReasons.length > 0 ? `reasons=${input.localAuditReasons.slice(0, 3).join("|")}` : undefined,
     input.protectedPaths && input.protectedPaths.length > 0 ? `protected=${input.protectedPaths.slice(0, 3).join("|")}` : undefined,

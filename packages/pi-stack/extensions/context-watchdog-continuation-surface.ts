@@ -37,6 +37,7 @@ import {
 import {
 	readProjectPreferredActiveTaskIds,
 	readProjectProtectedAutoResumeTaskIds,
+	readProjectTaskMnemonicById,
 	readProjectTaskStatusById,
 } from "./context-watchdog-operator-brief";
 import { readHandoffJson } from "./context-watchdog-storage";
@@ -228,14 +229,16 @@ export function registerContextWatchdogContinuationSurface(
 					freshness: handoffFreshness,
 				}
 				: undefined;
+			const taskMnemonicsById = readProjectTaskMnemonicById(ctx.cwd);
 			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 				handoff,
 				config.handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), reloadRequired: currentReloadRequired(runtime) },
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), taskMnemonicsById, reloadRequired: currentReloadRequired(runtime) },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics);
 			const focusTasks = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusTasks", "none-listed");
+			const focusMnemonics = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusMnemonics", "");
 			const staleFocus = extractAutoResumePromptValue(resumeEnvelope.prompt, "staleFocus", "none");
 			const staleFocusCount = resumeEnvelope.diagnostics.staleFocusTasks?.length ?? 0;
 			const localAudit = buildLocalContinuityAudit(ctx.cwd);
@@ -276,6 +279,7 @@ export function registerContextWatchdogContinuationSurface(
 			const readinessSummary = formatContextWatchContinuationReadinessSummary({
 				ready,
 				focusTasks,
+				focusMnemonics: focusMnemonics || undefined,
 				localAuditDecision,
 				localAuditReasons,
 				protectedPaths,
@@ -300,6 +304,7 @@ export function registerContextWatchdogContinuationSurface(
 					summary,
 					ready,
 					focusTasks,
+					focusMnemonics: focusMnemonics || undefined,
 					staleFocus,
 					staleFocusCount,
 					diagnosticsSummary,
@@ -390,13 +395,15 @@ export function registerContextWatchdogContinuationSurface(
 					freshness: handoffFreshness,
 				}
 				: undefined;
+			const taskMnemonicsById = readProjectTaskMnemonicById(ctx.cwd);
 			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 				handoff,
 				config.handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), reloadRequired: currentReloadRequired(runtime) },
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), taskMnemonicsById, reloadRequired: currentReloadRequired(runtime) },
 			);
 			const focusTasks = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusTasks", "none-listed");
+			const focusMnemonics = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusMnemonics", "");
 			const staleFocusCount = resumeEnvelope.diagnostics.staleFocusTasks?.length ?? 0;
 			const localAudit = buildLocalContinuityAudit(ctx.cwd);
 			const localAuditReasons = localContinuityAuditReasons(localAudit);
@@ -430,6 +437,7 @@ export function registerContextWatchdogContinuationSurface(
 				details: {
 					...packet,
 					focusTasks,
+					focusMnemonics: focusMnemonics || undefined,
 					staleFocusCount,
 					localAuditReasons,
 					directionPromptCanonical: TURN_BOUNDARY_DIRECTION_PROMPT,
@@ -452,16 +460,18 @@ export function registerContextWatchdogContinuationSurface(
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const config = runtime.getConfig();
 			const taskStatusById = readProjectTaskStatusById(ctx.cwd);
+			const taskMnemonicsById = readProjectTaskMnemonicById(ctx.cwd);
 			const handoff = readHandoffJson(ctx.cwd);
 			const postReloadResumeIntent = readAutoResumeAfterReloadIntent(handoff);
 			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 				handoff,
 				config.handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById, preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), reloadRequired: currentReloadRequired(runtime) },
+				{ taskStatusById, preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), taskMnemonicsById, reloadRequired: currentReloadRequired(runtime) },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics);
 			const focusTasks = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusTasks", "none-listed");
+			const focusMnemonics = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusMnemonics", "");
 			const localAudit = buildLocalContinuityAudit(ctx.cwd);
 			const localAuditReasons = localContinuityAuditReasons(localAudit);
 			const protectedPaths = localContinuityProtectedPaths(localAudit);
@@ -514,6 +524,7 @@ export function registerContextWatchdogContinuationSurface(
 					plan,
 					decisionPacket,
 					focusTasks,
+					focusMnemonics: focusMnemonics || undefined,
 					focusStatus,
 					diagnosticsSummary,
 					postReloadResumePending: Boolean(postReloadResumeIntent),
@@ -541,14 +552,16 @@ export function registerContextWatchdogContinuationSurface(
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const config = runtime.getConfig();
 			const taskStatusById = readProjectTaskStatusById(ctx.cwd);
+			const taskMnemonicsById = readProjectTaskMnemonicById(ctx.cwd);
 			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 				readHandoffJson(ctx.cwd),
 				config.handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById, preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), reloadRequired: currentReloadRequired(runtime) },
+				{ taskStatusById, preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1), excludedTaskIds: readProjectProtectedAutoResumeTaskIds(ctx.cwd), taskMnemonicsById, reloadRequired: currentReloadRequired(runtime) },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics);
 			const focusTasks = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusTasks", "none-listed");
+			const focusMnemonics = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusMnemonics", "");
 			const localAudit = buildLocalContinuityAudit(ctx.cwd);
 			const localAuditReasons = localContinuityAuditReasons(localAudit);
 			const protectedPaths = localContinuityProtectedPaths(localAudit);
@@ -618,6 +631,7 @@ export function registerContextWatchdogContinuationSurface(
 					decisionPacket,
 					contractReview,
 					focusTasks,
+					focusMnemonics: focusMnemonics || undefined,
 					focusStatus,
 					diagnosticsSummary,
 					localContinuitySummary,

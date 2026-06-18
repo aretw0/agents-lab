@@ -209,6 +209,72 @@ describe("project-board tool surfaces", () => {
     }
   });
 
+  it("board_decision_packet marks completed task with passed verification as operator-ready", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-decision-complete-"));
+    mkdirSync(join(cwd, ".project"), { recursive: true });
+    writeFileSync(
+      join(cwd, ".project", "tasks.json"),
+      `${JSON.stringify(
+        {
+          tasks: [
+            {
+              id: "TASK-COMPLETE",
+              description: "Task concluída local-safe",
+              status: "completed",
+              verification: "VER-COMPLETE",
+            },
+          ],
+        },
+        null,
+        2,
+      )}\n`,
+      "utf8",
+    );
+    writeFileSync(
+      join(cwd, ".project", "verification.json"),
+      `${JSON.stringify(
+        {
+          verifications: [
+            {
+              id: "VER-COMPLETE",
+              target: "TASK-COMPLETE",
+              status: "passed",
+              method: "inspection",
+              timestamp: "2026-06-17T04:20:00Z",
+              evidence: "evidência de conclusão",
+            },
+          ],
+        },
+        null,
+        2,
+      )}\n`,
+      "utf8",
+    );
+
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const packetTool = getTool(pi, "board_decision_packet");
+
+      const result = await packetTool.execute(
+        "tc-board-decision-packet-completed",
+        { task_id: "TASK-COMPLETE" },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.noAutoClose).toBe(true);
+      expect((result.details as any)?.readyForOperatorDecision).toBe(true);
+      expect((result.details as any)?.recommendedDecision).toBe("close");
+      expect((result.details as any)?.blockers).toHaveLength(0);
+      expect((result.details as any)?.evidence?.[0]?.verificationId).toBe("VER-COMPLETE");
+      expect(String((result as any)?.content?.[0]?.text ?? "")).toContain("has passed verification evidence");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("board_task_create tool creates bounded tasks", async () => {
     const cwd = seedWorkspace();
     try {

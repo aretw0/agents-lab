@@ -50,6 +50,23 @@ export function readProjectTaskDescriptionById(cwd: string, taskId?: string): st
 	return undefined;
 }
 
+export function readProjectTaskMnemonicById(cwd: string): Record<string, string> {
+	const out: Record<string, string> = {};
+	for (const task of readProjectTasksArray(cwd)) {
+		const id = (task as { id?: unknown }).id;
+		if (typeof id !== "string" || !id.trim()) continue;
+		const description = typeof (task as { description?: unknown }).description === "string"
+			? String((task as { description?: unknown }).description).trim()
+			: undefined;
+		const mnemonic = toOperatorTaskMnemonic(id.trim(), description);
+		if (!mnemonic) continue;
+		out[id.trim()] = mnemonic;
+		out[id.trim().toUpperCase()] = mnemonic;
+		out[id.trim().toLowerCase()] = mnemonic;
+	}
+	return out;
+}
+
 export function toOperatorTaskMnemonic(taskId?: string, description?: string): string | undefined {
 	if (!taskId) return undefined;
 	const cleaned = typeof description === "string"

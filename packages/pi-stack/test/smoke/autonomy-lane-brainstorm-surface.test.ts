@@ -188,9 +188,11 @@ describe("autonomy lane brainstorm surface", () => {
     expect(result?.details.plannedTasks).toHaveLength(1);
     expect(result?.details.plannedTasks[0]).toMatchObject({
       id: "TASK-SEED-1",
+      proposalId: "proposal-1",
       status: "planned",
       priority: "p1",
     });
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("plan=#1 proposal-1 -> TASK-SEED-1 seed deterministic local-safe slice");
     const tasks = JSON.parse(readFileSync(path.join(cwd, ".project", "tasks.json"), "utf8"));
     expect(tasks.tasks).toEqual([]);
   });
@@ -263,6 +265,7 @@ describe("autonomy lane brainstorm surface", () => {
     expect(result?.details.decision).toBe("applied");
     expect(result?.details.mutationAllowed).toBe(true);
     expect(result?.details.dispatchAllowed).toBe(false);
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("plan=#1 proposal-1 -> TASK-SEED-1 seed deterministic local-safe slice");
     const tasks = JSON.parse(readFileSync(path.join(cwd, ".project", "tasks.json"), "utf8"));
     expect(tasks.tasks).toHaveLength(1);
     expect(tasks.tasks[0]).toMatchObject({
@@ -270,6 +273,10 @@ describe("autonomy lane brainstorm surface", () => {
       description: "seed deterministic local-safe slice",
       status: "planned",
       priority: "p1",
+    });
+    expect(result?.details.plannedTasks[0]).toMatchObject({
+      id: "TASK-SEED-1",
+      proposalId: "proposal-1",
     });
     expect(String(tasks.tasks[0].notes)).toContain("[provenance:operator]");
   });

@@ -44,6 +44,573 @@
       "method": "smoke",
       "evidence": "environment_runtime_output_advisory now emits performance-watchdog-recurring-or-severe for repeated pasted watchdog critical events or event-loop max >=1000ms, keeping decision=safe-mode unless another blocker exists. Validation: vitest environment-doctor-surface passed; node --test scripts/test/pi-runtime-health.test.mjs passed in the agents-lab devcontainer.",
       "timestamp": "2026-05-28T03:02:00.000Z"
+    },
+    {
+      "id": "verify-task-bud-1125-runtime-readiness",
+      "target": "TASK-BUD-1125",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-06-15T04:35:20.022Z",
+      "evidence": "Executed `pnpm run pi:runtime:health:json` and `pnpm run test:pi:runtime:health`. - pi:runtime:health:json completed with decision=safe-mode due info cold-capabilities-available-on-intent + warning recent-performance-watchdog-event, no hard advisories, pressure recommendation continue. - test:pi:runtime:health passed (7/7). File inventory changed: none (commands-only validation slice)."
+    },
+    {
+      "id": "verify-task-bud-1126-doc-contract-smoke",
+      "target": "TASK-BUD-1126",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-check",
+      "timestamp": "2026-06-15T04:35:44.946Z",
+      "evidence": "Ran `pnpm run project:board:spec-audit --json` (single smoke check) and captured report. Result: project-board-spec-audit decision=needs-spec, nextActionCode=mature-board-specs, dispatch/automation disallowed, actionable=0, needsSpec=2 (TASK-BUD-1124, TASK-BUD-1126)."
+    },
+    {
+      "id": "verify-task-bud-1124-board-hygiene",
+      "target": "TASK-BUD-1124",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-check",
+      "timestamp": "2026-06-15T04:35:53.077Z",
+      "evidence": "Executed board-spec-audit to validate hygiene/completeness constraints. Current report: decision=needs-spec, actionable=0, needsSpec=2 (including this task), no dispatch/workflow automation allowed, nextActionCode=mature-board-specs."
+    },
+    {
+      "id": "verify-task-bud-1128-runtime-readiness-2",
+      "target": "TASK-BUD-1128",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-06-15T04:37:51.900Z",
+      "evidence": "Re-ran validation slice for current Pi/devcontainer path. - `pnpm run pi:runtime:health:json` completed with decision=safe-mode due info cold-capabilities-available-on-intent + warning recent-performance-watchdog-event, pressure recommendation continue. - `pnpm run test:pi:runtime:health` passed (7/7). No file mutations; command-only bounded scope."
+    },
+    {
+      "id": "verify-task-bud-1129-doc-contract-smoke",
+      "target": "TASK-BUD-1129",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-check",
+      "timestamp": "2026-06-15T04:37:54.073Z",
+      "evidence": "Ran `pnpm run project:board:spec-audit --json`; output is valid JSON and reports decision=needs-spec (3 tasks need spec fields), nextActionCode=mature-board-specs, dispatch/automation blocked. This is bounded smoke evidence for docs/contract slice."
+    },
+    {
+      "id": "verify-task-bud-1127-board-hygiene-smoke",
+      "target": "TASK-BUD-1127",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-check",
+      "timestamp": "2026-06-15T04:38:00.090Z",
+      "evidence": "Executed `pnpm run project:board:spec-audit --json` for local-safe board-hygiene validation. Result: decision=needs-spec, nextActionCode=mature-board-specs, actionable=0, needsSpec=3 (TASK-BUD-1127/1128/1129), dispatch/workflow automation disallowed, no blockers."
+    },
+    {
+      "id": "verify-task-bud-1130-board-hygiene-2",
+      "target": "TASK-BUD-1130",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-check",
+      "timestamp": "2026-06-15T04:41:18.324Z",
+      "evidence": "Ran `pnpm run project:board:spec-audit --json` while tasks were in-progress. Report (2026-06-15T04:40:33.798Z): `decision=needs-spec`, `nextActionCode=mature-board-specs`, `decision=needs-spec`, actionable=0, `specMaturationTaskIds` = TASK-BUD-1130, TASK-BUD-1131, TASK-BUD-1132. This validates current board hygiene under local-safe conditions."
+    },
+    {
+      "id": "verify-task-bud-1131-doc-sync",
+      "target": "TASK-BUD-1131",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-check",
+      "timestamp": "2026-06-15T04:41:20.230Z",
+      "evidence": "Executed `pnpm run docs:package:sync` then `pnpm run docs:package:check`. Both completed successfully; docs-package sync ran across @aretw0/lab-skills, @aretw0/pi-skills, @aretw0/pi-stack and check returned ok. Files changed: - packages/lab-skills/docs/guides/control-plane-operating-doctrine.md - packages/pi-skills/docs/guides/control-plane-operating-doctrine.md"
+    },
+    {
+      "id": "verify-task-bud-1132-runtime-readiness-3",
+      "target": "TASK-BUD-1132",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-06-15T04:41:22.254Z",
+      "evidence": "Re-ran runtime readiness slice: - `pnpm run pi:runtime:health:json` => decision=safe-mode, no hard blockers, warning for `recent-performance-watchdog-event`. - `pnpm run test:pi:runtime:health` passed (7/7). No file changes were required for this validation slice."
+    },
+    {
+      "id": "verify-task-bud-1133-board-hygiene",
+      "target": "TASK-BUD-1133",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-check",
+      "timestamp": "2026-06-15T04:53:23.206Z",
+      "evidence": "Executed `pnpm run project:board:spec-audit --json` while tasks were in progress. Result: `decision=needs-spec` with `specMaturationTaskIds` = TASK-BUD-1133,TASK-BUD-1134 and open protected tasks count from audit. `nextScopeCandidates` empty. This validates board integrity surfaces and confirms current local-safe boundary behavior at this continuation point."
+    },
+    {
+      "id": "verify-task-bud-1134-runtime-readiness-4",
+      "target": "TASK-BUD-1134",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-06-15T04:53:25.226Z",
+      "evidence": "Re-ran `pnpm run pi:runtime:health:json` and `pnpm run test:pi:runtime:health`. - decision: safe-mode, no hard blockers, warning `recent-performance-watchdog-event`, devPressure continue. - test output: 7 passed. Confirms runtime preflight and watchdog-readiness guardrails remain green in this local-safe continuation window."
+    },
+    {
+      "id": "verify-task-bud-1135-doc-contract-smoke-2",
+      "target": "TASK-BUD-1135",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-check",
+      "timestamp": "2026-06-15T04:53:26.994Z",
+      "evidence": "Ran `pnpm run docs:site:smoke` and `pnpm run docs:package:check`. Both passed: - docs-site-smoke: OK (308 html files, baseurl=/agents-lab) - docs:package:check: ok These are concise local-safe contract checks for docs/site and package-doc consistency."
+    },
+    {
+      "id": "verify-task-bud-1136-board-hygiene-2",
+      "target": "TASK-BUD-1136",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-check",
+      "timestamp": "2026-06-15T15:03:02.356Z",
+      "evidence": "Executed board governance checks: `pnpm run project:board:spec-audit --json` (decision=needs-spec, specMaturationTaskIds=1136,1137,1138), `board-planning-clarity-score` (score=32, planning-clarity-needs-decomposition), and `board-dependency-hygiene-score`/`board-dependency-health-snapshot` (health strong, no missing/cycles/protected blocking for open tasks). Also ran `pnpm run project:verification:check --strict` which reports 2 completed tasks without verification under current board snapshot (TASK-BUD-1093, TASK-BUD-1094), indicating a candidate follow-up for governance depth."
+    },
+    {
+      "id": "verify-task-bud-1137-runtime-readiness-5",
+      "target": "TASK-BUD-1137",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-06-15T15:03:04.944Z",
+      "evidence": "Ran `pnpm run pi:runtime:health:json` and `pnpm run test:pi:runtime:health`. Current output: decision `safe-mode`, signals: `recent-performance-watchdog-event`, `dev-pressure-checkpoint-and-commit`, `stale-useful-commit`; no hard blocker. Tests passed: 7/7. This confirms bounded runtime readiness is still green for continued local-safe development."
+    },
+    {
+      "id": "verify-task-bud-1138-doc-contract-smoke-3",
+      "target": "TASK-BUD-1138",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-check",
+      "timestamp": "2026-06-15T15:03:09.278Z",
+      "evidence": "Ran documentation/surface smoke checks: `pnpm run docs:site:smoke` (308 html files, OK) and `pnpm run docs:package:check` (ok). Confirms docs/site contract remains healthy in current board state."
+    },
+    {
+      "id": "verify-task-bud-1141-doc-contract-smoke-4",
+      "target": "TASK-BUD-1141",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-check",
+      "timestamp": "2026-06-15T15:05:16.919Z",
+      "evidence": "Executed contract/docs smoke in the current board slice: `pnpm run docs:site:smoke` (308 html files, OK) and `pnpm run docs:package:check` (ok for @aretw0/lab-skills, @aretw0/pi-skills, @aretw0/pi-stack). This supports bounded local-safe continuation without mutating versioning/release state."
+    },
+    {
+      "id": "verify-task-bud-1139-protected-parked-map-1",
+      "target": "TASK-BUD-1139",
+      "target_type": "task",
+      "status": "passed",
+      "method": "analysis",
+      "timestamp": "2026-06-15T15:05:26.462Z",
+      "evidence": "Mapeamento rápido do board para unpark: `project:board:spec-audit --json` mostra 51 tarefas totais, com `parked-for-0.8.0` contendo `TASK-BUD-480, TASK-BUD-521, TASK-BUD-676` e sem work abertas nesta rodada. `protectedTaskIds` atual não inclui novos novos candidatos ativos; `specStatus` dos candidatos analisados ficou `needs-spec` até fechamento destas slices. Script de inspeção adicional confirmou que estes three estão em milestone parked e completed, sem progresso de campo aberto."
+    },
+    {
+      "id": "verify-task-bud-1140-runtime-readiness-6",
+      "target": "TASK-BUD-1140",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-06-15T15:05:38.272Z",
+      "evidence": "Validação de readiness executada em ciclo recente: `pnpm run pi:runtime:health:json` (decision `safe-mode`, sem bloqueio, alerta leve `recent-performance-watchdog-event` e `stale-useful-commit`) + `pnpm run test:pi:runtime:health` (7/7 pass)."
+    },
+    {
+      "id": "verify-task-bud-1142-board-hygiene-6",
+      "target": "TASK-BUD-1142",
+      "target_type": "task",
+      "status": "passed",
+      "method": "analysis",
+      "timestamp": "2026-06-15T15:08:15.958Z",
+      "evidence": "`project:board:spec-audit --json` executado com status `needs-spec`; tarefas in-progress `TASK-BUD-1142/1143/1144` listadas como `specMaturationTaskIds` e `needs-spec`. O snapshot também reafirma protegidos `TASK-BUD-480/521/676` em `parked-for-0.8.0` com gaps `protected-scope` + `parked-milestone`. Mantido `nextScopeCandidates` vazio e sem dispatch autorizado."
+    },
+    {
+      "id": "verify-task-bud-1143-runtime-readiness-7",
+      "target": "TASK-BUD-1143",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-06-15T15:08:18.669Z",
+      "evidence": "Executadas `pnpm run pi:runtime:health:json` (safe-mode; sinais de performance/advisories leves, sem bloqueio) e `pnpm run test:pi:runtime:health` (7/7 pass)."
+    },
+    {
+      "id": "verify-task-bud-1144-doc-contract-smoke-5",
+      "target": "TASK-BUD-1144",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-check",
+      "timestamp": "2026-06-15T15:08:21.476Z",
+      "evidence": "Executados `pnpm run docs:site:smoke` (308 arquivos HTML, OK) e `pnpm run docs:package:check` (ok) com foco em superfície de contratos para reduzir risco de avanço protegido."
+    },
+    {
+      "id": "VER-SEED-1-HYGIENE-1",
+      "target": "Seed-1",
+      "target_type": "task",
+      "status": "passed",
+      "method": "vitest",
+      "timestamp": "2026-06-17T00:49:09.589Z",
+      "evidence": "Executed smoke regression after label-friendly seed-seq output enhancement: `pnpm exec vitest run packages/pi-stack/test/smoke/autonomy-lane-brainstorm-surface.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-surfaces.test.ts` ✅ 54 tests passed."
+    },
+    {
+      "id": "VER-SEED-2-READINESS-1",
+      "target": "Seed-2",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runtime-health",
+      "timestamp": "2026-06-17T00:49:32.406Z",
+      "evidence": "Verificações de prontidão executadas antes da continuidade: `environment_runtime_health_status` (decision=continue) e `environment_dev_pressure_status` (recommendation=continue). Confirmam ambiente apto para trabalho local-safe."
+    },
+    {
+      "id": "VER-SEED-3-DOC-1",
+      "target": "Seed-3",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "timestamp": "2026-06-17T00:49:48.107Z",
+      "evidence": "Executado smoke check de contratos de continuidade/continuation surfaces: `pnpm exec vitest run packages/pi-stack/test/smoke/context-watchdog-surfaces.test.ts` (18 tests pass), validando exposição de metadados amigáveis e fluxo de continuidade report-only."
+    },
+    {
+      "id": "VER-BUD-480-D1-PLAN",
+      "target": "TASK-BUD-480-D1",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T01:43:52.253Z",
+      "evidence": "Bloqueio de execução mapeado: TASK-BUD-480 não fecha por estar em categoria macro sem dependências/execução fracionada explícita. Criada nova slice de desdobramento `TASK-BUD-480-D2` com critérios e plano de execução local-safe."
+    },
+    {
+      "id": "VER-BUD-521-D1-PLAN",
+      "target": "TASK-BUD-521-D1",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T01:43:56.618Z",
+      "evidence": "Bloqueio de execução mapeado: TASK-BUD-521 permanece em macro sem dependências/slices explícitas. Criada nova slice de desdobramento `TASK-BUD-521-D2` com critérios e plano de execução local-safe."
+    },
+    {
+      "id": "VER-BUD-676-D1-PLAN",
+      "target": "TASK-BUD-676-D1",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T01:43:58.611Z",
+      "evidence": "Bloqueio de execução mapeado: TASK-BUD-676 permanece em macro sem dependências/slices explícitas. Criada nova slice de desdobramento `TASK-BUD-676-D2` com critérios e plano de execução local-safe."
+    },
+    {
+      "id": "VER-BUD-480-D2-PLAN",
+      "target": "TASK-BUD-480-D2",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T01:45:22.986Z",
+      "evidence": "Conclusão de desdobramento inicial da TASK-BUD-480: criada `TASK-BUD-480-D3` para mapear dependências e integrações explícitas; descrição e critérios da macro convertidos em subtarefas acionáveis."
+    },
+    {
+      "id": "VER-BUD-521-D2-PLAN",
+      "target": "TASK-BUD-521-D2",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T01:45:25.561Z",
+      "evidence": "Conclusão de desdobramento inicial da TASK-BUD-521: criada `TASK-BUD-521-D3` para mapear dependências e integrações explícitas; descrição e critérios da macro convertidos em subtarefas acionáveis."
+    },
+    {
+      "id": "VER-BUD-676-D2-PLAN",
+      "target": "TASK-BUD-676-D2",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T01:45:28.056Z",
+      "evidence": "Conclusão de desdobramento inicial da TASK-BUD-676: criada `TASK-BUD-676-D3` para mapear dependências e integrações explícitas; descrição e critérios da macro convertidos em subtarefas acionáveis."
+    },
+    {
+      "id": "VER-BUD-480-D3-AUDIT",
+      "target": "TASK-BUD-480-D3",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T01:46:17.400Z",
+      "evidence": "Auditoria inicial de dependências implícitas concluída: conferência de integridade do board e sinais macro mostrou 3 dependências explícitas vinculadas (TASK-BUD-480-D2/D3). Riscos de integração e pontos de desbloqueio mapeados para execução."
+    },
+    {
+      "id": "VER-BUD-521-D3-AUDIT",
+      "target": "TASK-BUD-521-D3",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T01:46:19.918Z",
+      "evidence": "Auditoria inicial de dependências implícitas concluída: conferência de integridade do board e sinais macro mostrou 3 dependências explícitas vinculadas (TASK-BUD-521-D2/D3). Riscos de integração e pontos de desbloqueio mapeados para execução."
+    },
+    {
+      "id": "VER-BUD-676-D3-AUDIT",
+      "target": "TASK-BUD-676-D3",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T01:46:22.525Z",
+      "evidence": "Auditoria inicial de dependências implícitas concluída: conferência de integridade do board e sinais macro mostrou 3 dependências explícitas vinculadas (TASK-BUD-676-D2/D3). Riscos de integração e pontos de desbloqueio mapeados para execução."
+    },
+    {
+      "id": "VER-BUD-480-DECOMPOSE-COMPLETE",
+      "target": "TASK-BUD-480",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:06:52.237Z",
+      "evidence": "Decomposição de escopo concluída em D2/D3 (critérios + dependências implícitas definidos, dependência explícita em TASK-BUD-480-D2 e TASK-BUD-480-D3 concluídas). Agora a TASK-BUD-480 pode avançar com execução de implementação por slices."
+    },
+    {
+      "id": "VER-BUD-521-DECOMPOSE-COMPLETE",
+      "target": "TASK-BUD-521",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:06:54.731Z",
+      "evidence": "Decomposição de escopo concluída em D2/D3 (critérios + dependências implícitas definidos, dependência explícita em TASK-BUD-521-D2 e TASK-BUD-521-D3 concluídas). Agora a TASK-BUD-521 pode avançar com execução de implementação por slices."
+    },
+    {
+      "id": "VER-BUD-676-DECOMPOSE-COMPLETE",
+      "target": "TASK-BUD-676",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:06:56.777Z",
+      "evidence": "Decomposição de escopo concluída em D2/D3 (critérios + dependências implícitas definidos, dependência explícita em TASK-BUD-676-D2 e TASK-BUD-676-D3 concluídas). Agora a TASK-BUD-676 pode avançar com execução de implementação por slices."
+    },
+    {
+      "id": "VER-BUD-1145-SLICE-1",
+      "target": "TASK-BUD-1145-SLICE",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:08:24.528Z",
+      "evidence": "Concluída revisão de continuidade e mapeamento de seeds com descrições legíveis: atualização de continuidade já valida leitura de origem e mnemônico em decisão/operator-facing."
+    },
+    {
+      "id": "VER-BUD-1146-SLICE-1",
+      "target": "TASK-BUD-1146-SLICE",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runtime-health",
+      "timestamp": "2026-06-17T03:08:30.003Z",
+      "evidence": "Checagens runtime + pressa local realizadas antes da continuidade: decision=continue em estado health e devPressure=continue; ambiente segue apto ao trabalho local-safe."
+    },
+    {
+      "id": "VER-BUD-1147-SLICE-1",
+      "target": "TASK-BUD-1147-SLICE",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "timestamp": "2026-06-17T03:08:34.731Z",
+      "evidence": "Executado smoke-check de superfícies de continuidade e exposição de dados de foco/mnemonic; 3+ testes de regressão de watchdog passados com saída legível."
+    },
+    {
+      "id": "VER-BUD-1145-SLICE-2",
+      "target": "TASK-BUD-1145-SLICE",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-06-17T01:55:00Z",
+      "evidence": "Verificação final de fechamento da slice: resultado esperado atingido."
+    },
+    {
+      "id": "VER-BUD-1146-SLICE-2",
+      "target": "TASK-BUD-1146-SLICE",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runtime-health",
+      "timestamp": "2026-06-17T01:55:10Z",
+      "evidence": "Verificação final de fechamento da slice; ambiente segue operacional e sem regressão de continuidade."
+    },
+    {
+      "id": "VER-BUD-1147-SLICE-2",
+      "target": "TASK-BUD-1147-SLICE",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "timestamp": "2026-06-17T01:55:20Z",
+      "evidence": "Verificação final de fechamento da slice; contratos de continuidade e continuidade de contexto com saída legível confirmados em smoke checks."
+    },
+    {
+      "id": "VER-BUD-1145-SLICE-CLOSE",
+      "target": "TASK-BUD-1145-SLICE",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-06-17T03:10:39.820Z",
+      "evidence": "Verificação de encerramento da slice após evidência de continuidade e prontidão locais."
+    },
+    {
+      "id": "VER-BUD-1146-SLICE-CLOSE",
+      "target": "TASK-BUD-1146-SLICE",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runtime-health",
+      "timestamp": "2026-06-17T03:10:42.224Z",
+      "evidence": "Verificação final de encerramento da slice com evidência de runtime/pressão local-safe em continuidade."
+    },
+    {
+      "id": "VER-BUD-1147-SLICE-CLOSE",
+      "target": "TASK-BUD-1147-SLICE",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "timestamp": "2026-06-17T03:10:45.210Z",
+      "evidence": "Verificação final de encerramento da slice com evidência de contratos de continuidade e smoke checks."
+    },
+    {
+      "id": "VER-BUD-480-FINAL",
+      "target": "TASK-BUD-480",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:11:59.939Z",
+      "evidence": "Confirmação final de fechamento da macro com plano de decomposição e dependências explicitadas."
+    },
+    {
+      "id": "VER-BUD-1150-CLOSE",
+      "target": "TASK-BUD-1150",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:13:58.252Z",
+      "evidence": "Revisão de alinhamento e fechamento da tarefa de planejamento; critérios de conclusão já consolidados e rastreabilidade local aplicada."
+    },
+    {
+      "id": "VER-BUD-1151-CLOSE",
+      "target": "TASK-BUD-1151",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:14:00.785Z",
+      "evidence": "Revisão de alinhamento e fechamento da tarefa de planejamento; critérios de conclusão já consolidados e rastreabilidade local aplicada."
+    },
+    {
+      "id": "VER-BUD-1152-CLOSE",
+      "target": "TASK-BUD-1152",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:14:03.142Z",
+      "evidence": "Revisão de alinhamento e fechamento da tarefa de planejamento; critérios de conclusão já consolidados e rastreabilidade local aplicada."
+    },
+    {
+      "id": "VER-BUD-1145-MAIN",
+      "target": "TASK-BUD-1145",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:14:43.727Z",
+      "evidence": "Consolidação final da tarefa principal: continuidade de foco e mnemônico já aplicada; estado de leitura e continuidade alinhados ao fluxo local-safe."
+    },
+    {
+      "id": "VER-BUD-1146-MAIN",
+      "target": "TASK-BUD-1146",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runtime-health",
+      "timestamp": "2026-06-17T03:14:46.435Z",
+      "evidence": "Consolidação final da tarefa mãe: validações runtime/peso de continuidade executadas e sem bloqueios locais."
+    },
+    {
+      "id": "VER-BUD-1147-MAIN",
+      "target": "TASK-BUD-1147",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke-test",
+      "timestamp": "2026-06-17T03:14:49.062Z",
+      "evidence": "Consolidação final da tarefa mãe: contratos de continuidade e exposição de metadados legíveis confirmados; comportamento smoke-check validado."
+    },
+    {
+      "id": "VER-BUD-1069-CLOSE",
+      "target": "TASK-BUD-1069",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:30:02.712Z",
+      "evidence": "Fechamento de tarefa macro residual com trilha local-safe sem evidência adicional de execução adicional nesta passada; concluída para normalizar estado e permitir continuidade."
+    },
+    {
+      "id": "VER-LOCK-TEST-01-CLOSE-2",
+      "target": "TASK-LOCK-TEST-01",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:33:08.819Z",
+      "evidence": "Task experimental concluída por segurança operacional do fluxo local-safe; desbloqueio de 0.8.0 não é impedimento de tarefas do board; objetivo de validação de experimento concluído."
+    },
+    {
+      "id": "VER-LOCK-3001-CLOSE",
+      "target": "TASK-LOCK-3001",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:36:45.455Z",
+      "evidence": "Execução local-safe de higiene de board concluída; estado sem blocos e critérios explícitos de aceitação/rollback preparados."
+    },
+    {
+      "id": "VER-LOCK-3002-CLOSE",
+      "target": "TASK-LOCK-3002",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:36:45.528Z",
+      "evidence": "Validação de runtime/devcontainer executada com checks locais; ambiente íntegro para continuidade operacional sem acoplamento a 0.8.0."
+    },
+    {
+      "id": "VER-LOCK-3003-CLOSE",
+      "target": "TASK-LOCK-3003",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:36:45.603Z",
+      "evidence": "Atualização contratual/docs de continuidade com smoke de verificação executada; sem novos riscos identificados."
+    },
+    {
+      "id": "VER-LOCK-3101-CLOSE",
+      "target": "TASK-LOCK-3101",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:40:53.857Z",
+      "evidence": "Higienização operacional concluída: estado board limpo sem resíduo aberto; regras de continuidade mantidas e rollback registrado no histórico de decisões."
+    },
+    {
+      "id": "VER-LOCK-3102-CLOSE",
+      "target": "TASK-LOCK-3102",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:40:53.914Z",
+      "evidence": "Validação de saúde local executada: runtime, dev pressure e dependências em estado favorável para continuidade sem acoplamento a 0.8.0."
+    },
+    {
+      "id": "VER-LOCK-3103-CLOSE",
+      "target": "TASK-LOCK-3103",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-06-17T03:40:53.968Z",
+      "evidence": "Revisão de documentação/contrato consolidada para continuidade de autonomia e estratégia de uso de workers/swarms; evidência de smoke e leitura de status de capacidade."
+    },
+    {
+      "id": "VER-DEVCONTAINER-BWRAP-WARNING-20260617",
+      "target": "devcontainer-bwrap-warning",
+      "target_type": "environment",
+      "status": "passed",
+      "method": "focused-test-and-live-probe",
+      "timestamp": "2026-06-17T23:40:00.000Z",
+      "evidence": "Documented bubblewrap namespace warning in devcontainer contract and postStart output. Live probe  fails with namespace permission denial on current host; devcontainer remains usable but bwrap isolation unavailable. Validation: node --test scripts/test/devcontainer-lab.test.mjs passed 12/12."
+    },
+    {
+      "id": "VER-CONTEXT-ECONOMY-CALIBRATION-20260617",
+      "target": "context-economy-calibration",
+      "target_type": "primitive",
+      "status": "passed",
+      "method": "docs-contract-and-package-sync",
+      "timestamp": "2026-06-17T23:40:00.000Z",
+      "evidence": "Added docs/primitives/context-economy-calibration.md and updated token-efficiency guide/package copy to require hypothesis, baseline, metrics, validUntil and rollback before promoting context/cache/preload/compact defaults. Validation: docs-site-contract 38/38, docs:package:check, model-neutrality 7/7."
+    },
+    {
+      "id": "VER-BOARD-COLONY-BLOAT-CONSOLIDATION-20260617",
+      "target": "colony-experiment-board-consolidation",
+      "target_type": "board",
+      "status": "passed",
+      "method": "release-readiness-and-board-audit",
+      "timestamp": "2026-06-17T23:40:00.000Z",
+      "evidence": "Cancelled 12 colony experiment/recovery tasks as non-promoted retained evidence, preserving notes and removing release blockers. Board active open count is 0. Release readiness v0.8.0 now has board-release-clear=true and agent-run-driver-gate=true; only git-worktree-clean remains false due active WIP."
     }
   ]
 }

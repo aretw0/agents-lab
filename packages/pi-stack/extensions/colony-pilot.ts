@@ -13,13 +13,26 @@
  * - Tracks state heuristically from emitted messages and tool outputs
  */
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type {
 	ExtensionAPI,
 	ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
 import { isToolCallEventType } from "@earendil-works/pi-coding-agent";
+import { Type } from "@sinclair/typebox";
+import { createUsageLimitsTracker, runColony } from "@ifi/oh-pi-ant-colony/extensions/ant-colony/queen.js";
+import {
+	antIcon,
+	checkMark,
+	crossMark,
+	formatCost,
+} from "@ifi/oh-pi-ant-colony/extensions/ant-colony/ui.js";
+import { prepareColonyWorkspace } from "@ifi/oh-pi-ant-colony/extensions/ant-colony/worktree.js";
+import {
+	getColonyStateParentDir,
+	resolveColonyStorageOptions,
+} from "@ifi/oh-pi-ant-colony/extensions/ant-colony/storage.js";
 import {
 	captureColonyRuntimeSnapshot,
 	persistColonyRetentionRecord,
@@ -289,6 +302,26 @@ function collectExplicitModelOverrides(
 	return overrides;
 }
 
+function resolveToolModelOverrides(
+	toolInput: AntColonyToolInput,
+	modelPolicyConfig: ColonyPilotModelPolicyConfig,
+	modelRegistry: any,
+	currentModelRef: string | undefined,
+	goal?: string,
+): ColonyModelPropagationContract["expectedRoleModel"] {
+	const injectedInput = { ...toolInput } as AntColonyToolInput;
+	if (modelPolicyConfig.enabled) {
+		evaluateAntColonyModelPolicy(
+			injectedInput,
+			currentModelRef,
+			modelRegistry,
+			modelPolicyConfig,
+			goal,
+		);
+	}
+	return collectExplicitModelOverrides(injectedInput);
+}
+
 function readColonyRuntimeState(
 	cwd: string,
 	signalColonyId: string,
@@ -361,6 +394,290 @@ function collectObservedModelOverrides(
 	}
 
 	return out;
+}
+
+function buildColonyOverrideStatePath(
+	cwd: string,
+	colonyId: string,
+	storageOptions?: ReturnType<typeof resolveColonyStorageOptions>,
+): string {
+	return path.join(getColonyStateParentDir(cwd, storageOptions), colonyId, "state.json");
+}
+
+function persistModelOverridesInRuntimeState(
+	cwd: string,
+	colonyId: string,
+	storageOptions: ReturnType<typeof resolveColonyStorageOptions>,
+	modelOverrides: Partial<Record<string, string>>,
+): void {
+	if (Object.keys(modelOverrides).length === 0) {
+		return;
+	}
+
+	const statePath = buildColonyOverrideStatePath(cwd, colonyId, storageOptions);
+	if (!existsSync(statePath)) {
+		return;
+	}
+
+	try {
+		const state = JSON.parse(readFileSync(statePath, "utf8")) as {
+			modelOverrides?: Record<string, string>;
+			[key: string]: unknown;
+		};
+		if (!state || typeof state !== "object") return;
+
+		const current =
+			state.modelOverrides && typeof state.modelOverrides === "object"
+				? (state.modelOverrides as Record<string, string>)
+				: {};
+		state.modelOverrides = {
+			...current,
+			...modelOverrides,
+		};
+		writeFileSync(statePath, JSON.stringify(state, null, 2), "utf8");
+	} catch {
+		// best effort
+	}
+}
+
+function registerAntColonyToolOverride(
+	pi: ExtensionAPI,
+	modelPolicyConfig: ColonyPilotModelPolicyConfig,
+): void {
+	const toolName = "ant_colony";
+
+	pi.registerTool({
+		name: toolName,
+		description:
+			"Run an ant colony with explicit model overrides and emit COLONY_SIGNAL telemetry to pi.",
+		parameters: Type.Object(
+			{
+				goal: Type.String({ minLength: 1 }),
+				maxAnts: Type.Optional(
+					Type.Integer({ minimum: 1, maximum: 16, description: "Optional maximum number of parallel ants." }),
+				),
+				maxCost: Type.Optional(
+					Type.Number({ minimum: 0.01, description: "Optional max-cost ceiling in USD." }),
+				),
+				scoutModel: Type.Optional(Type.String()),
+				workerModel: Type.Optional(Type.String()),
+				soldierModel: Type.Optional(Type.String()),
+				designWorkerModel: Type.Optional(Type.String()),
+				multimodalWorkerModel: Type.Optional(Type.String()),
+				backendWorkerModel: Type.Optional(Type.String()),
+				reviewWorkerModel: Type.Optional(Type.String()),
+				deliveryMode: Type.Optional(Type.String()),
+			},
+			{ additionalProperties: true },
+		),
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			const toolInput = params as AntColonyToolInput;
+			const goal = normalizeText(toolInput.goal);
+			if (!goal) {
+				return {
+					content: [
+						{
+							type: "text",
+							text: "Colony could not start: goal is required.",
+						},
+					],
+					isError: true,
+				};
+			}
+			const currentModel = ctx.model
+				? `${ctx.model.provider}/${ctx.model.id}`
+				: undefined;
+			if (!currentModel) {
+				return {
+					content: [
+						{
+							type: "text",
+							text: "Colony could not start: current model is unavailable in session context.",
+						},
+					],
+					isError: true,
+				};
+			}
+			const explicitModelOverrides = resolveToolModelOverrides(
+				toolInput,
+				modelPolicyConfig,
+				ctx.modelRegistry,
+				currentModel,
+				goal,
+			);
+
+			const storageOptions = resolveColonyStorageOptions();
+			const workspace = prepareColonyWorkspace({
+				cwd: ctx.cwd,
+				runtimeId: `antcolony-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+				goal,
+				sessionFile: ctx.sessionManager?.getSessionFile?.() ?? undefined,
+				storageOptions,
+			});
+
+			let runtimeColonyId: string | undefined;
+			let startedWithNoId = false;
+			let runError: unknown;
+			const launchDeferred = (() => {
+				let resolve: (value: string | undefined) => void = () => {};
+				const promise = new Promise<string | undefined>((_resolve) => {
+					resolve = _resolve;
+				});
+				return { promise, resolve };
+			})();
+
+			const emitSignal = (
+				phase: string,
+				details: string,
+				colonyId: string,
+				cost?: number,
+			) => {
+				if (!colonyId) return;
+				const budgetHint =
+					typeof cost === "number" ? ` · spend=${formatCost(cost)}` : "";
+				pi.sendMessage(
+					{
+						customType: "ant-colony-progress",
+						content: `[COLONY_SIGNAL:${phase}] ${antIcon()}[${colonyId}] ${details}${budgetHint}`,
+						display: true,
+					},
+					{
+						deliverAs: "followUp",
+						triggerTurn: false,
+					},
+				);
+			};
+
+			const runPromise = runColony({
+				goal,
+				maxAnts: toolInput.maxAnts,
+				maxCost: toolInput.maxCost,
+				currentModel,
+				modelOverrides: explicitModelOverrides,
+				cwd: ctx.cwd,
+				executionCwd: workspace.executionCwd,
+				modelRegistry: ctx.modelRegistry,
+				workspace,
+				eventBus: pi.events,
+				usageLimitsTracker: createUsageLimitsTracker(pi.events),
+				storageOptions,
+				callbacks: {
+					onSignal: (signal) => {
+						if (signal.colonyId && !runtimeColonyId) {
+							runtimeColonyId = signal.colonyId;
+							launchDeferred.resolve(signal.colonyId);
+						}
+						if (!signal.colonyId) {
+							return;
+						}
+						persistModelOverridesInRuntimeState(
+							ctx.cwd,
+							signal.colonyId,
+							storageOptions,
+							explicitModelOverrides,
+						);
+						emitSignal(signal.phase.toUpperCase(), signal.message, signal.colonyId, signal.cost);
+					},
+					onAntDone(ant, task) {
+						if (!runtimeColonyId) return;
+						emitSignal(
+							"TASK_DONE",
+							`${checkMark()} ${ant.caste} ${task.title.slice(0, 90)}`,
+							runtimeColonyId,
+						);
+					},
+					onProgress: (metrics) => {
+						if (!runtimeColonyId) return;
+						emitSignal(
+							"RUNNING",
+							`${metrics.tasksDone}/${metrics.tasksTotal} tasks done`,
+							runtimeColonyId,
+							metrics.totalCost,
+						);
+					},
+					onComplete(state) {
+						persistModelOverridesInRuntimeState(
+							ctx.cwd,
+							state.id,
+							storageOptions,
+							explicitModelOverrides,
+						);
+						const finalPhase =
+							state.status === "done" || state.status === "complete"
+								? "COMPLETED"
+								: state.status === "failed"
+								? "FAILED"
+								: state.status.toUpperCase();
+						emitSignal(
+							finalPhase,
+							`${state.metrics.tasksDone}/${state.metrics.tasksTotal} tasks done (${formatCost(
+								state.metrics.totalCost,
+							)})`,
+							state.id,
+							state.metrics.totalCost,
+						);
+					},
+				},
+			});
+
+			void runPromise.catch((error: unknown) => {
+				runError = error;
+				const failedId = runtimeColonyId ?? "pending";
+				emitSignal("FAILED", `${crossMark()} ${String(error)}`, failedId);
+				launchDeferred.resolve(runtimeColonyId);
+			});
+
+			let launchId = await Promise.race<string | undefined>([
+				launchDeferred.promise,
+				new Promise<string | undefined>((resolve) => {
+					setTimeout(() => {
+						resolve(undefined);
+					}, 5000);
+				}),
+			]).catch(() => undefined);
+
+			if (!launchId && !runtimeColonyId && runError) {
+				return {
+					content: [
+						{
+							type: "text",
+							text: `Colony execution failed to start: ${String(runError)}`,
+						},
+					],
+					isError: true,
+				};
+			}
+
+			if (!launchId) {
+				startedWithNoId = true;
+				launchId = `colony-${Date.now().toString(36)}`;
+				emitSignal(
+					"LAUNCHED",
+					"id ainda não disponível para estado rastreável",
+					launchId,
+				);
+			}
+
+			runtimeColonyId = runtimeColonyId ?? launchId;
+			persistModelOverridesInRuntimeState(
+				ctx.cwd,
+				runtimeColonyId,
+				storageOptions,
+				explicitModelOverrides,
+			);
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: `[COLONY_SIGNAL:LAUNCHED] ${antIcon()}[${runtimeColonyId}] Colony execution started.${
+							startedWithNoId ? " (identificador rastreável pendente)" : ""
+						}`,
+					},
+				],
+			};
+		},
+	});
 }
 
 function validateModelPropagationContract(
@@ -475,6 +792,7 @@ export default function (pi: ExtensionAPI) {
 		);
 		preflightCache = undefined;
 		providerBudgetGateCache = undefined;
+		registerAntColonyToolOverride(pi, modelPolicyConfig);
 
 		updateStatusUIImpl(ctx, state);
 	});
@@ -968,7 +1286,13 @@ export default function (pi: ExtensionAPI) {
 			: undefined;
 		const goal =
 			typeof toolInput.goal === "string" ? toolInput.goal.trim() : "";
-		const explicitModelOverrides = collectExplicitModelOverrides(toolInput);
+		const explicitModelOverrides = resolveToolModelOverrides(
+			toolInput,
+			modelPolicyConfig,
+			ctx.modelRegistry,
+			currentModelRef,
+			goal,
+		);
 
 		if (modelPolicyConfig.enabled) {
 			const evaluation = evaluateAntColonyModelPolicy(
