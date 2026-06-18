@@ -82,9 +82,9 @@
       },
       "modelPolicy": {
         "enabled": true,
-        "allowMixedProviders": false,
+        "allowMixedProviders": true,
         "allowedProviders": [],
-        "requireExplicitRoleModels": true,
+        "requireExplicitRoleModels": false,
         "roleModels": {
           "scout": "openai-codex/gpt-5.3-codex-spark",
           "worker": "openai-codex/gpt-5.3-codex-spark",
@@ -192,10 +192,10 @@
       "userNotifyFromLevel": "compact",
       "status": true,
       "autoCheckpoint": true,
-      "autoCompact": true,
+      "autoCompact": false,
       "autoCompactCooldownMs": 1200000,
       "autoCompactRequireIdle": true,
-      "autoResumeAfterCompact": true,
+      "autoResumeAfterCompact": false,
       "autoResumeCooldownMs": 30000,
       "handoffFreshMaxAgeMs": 1800000
     },
