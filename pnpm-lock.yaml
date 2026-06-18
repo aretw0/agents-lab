@@ -38,6 +38,9 @@ importers:
 
   packages/pi-stack:
     dependencies:
+      '@ifi/oh-pi-ant-colony':
+        specifier: '*'
+        version: 0.5.1(@mariozechner/pi-agent-core@0.70.6(ws@8.21.0)(zod@4.4.3))(@mariozechner/pi-ai@0.70.6(ws@8.21.0)(zod@4.4.3))(@mariozechner/pi-coding-agent@0.70.6(ws@8.21.0)(zod@4.4.3))(@mariozechner/pi-tui@0.70.6)(@sinclair/typebox@0.34.49)
       '@sinclair/typebox':
         specifier: 0.34.49
         version: 0.34.49
@@ -45,12 +48,12 @@ importers:
       '@davidorex/pi-project-workflows':
         specifier: '*'
         version: 0.14.6(ws@8.21.0)(zod@4.4.3)
-      '@ifi/oh-pi-ant-colony':
-        specifier: '*'
-        version: 0.5.1(@mariozechner/pi-agent-core@0.70.6(ws@8.21.0)(zod@4.4.3))(@mariozechner/pi-ai@0.70.6(ws@8.21.0)(zod@4.4.3))(@mariozechner/pi-coding-agent@0.70.6(ws@8.21.0)(zod@4.4.3))(@mariozechner/pi-tui@0.70.6)(@sinclair/typebox@0.34.49)
       '@ifi/oh-pi-extensions':
         specifier: '*'
         version: 0.5.1(@mariozechner/pi-agent-core@0.70.6(ws@8.21.0)(zod@4.4.3))(@mariozechner/pi-ai@0.70.6(ws@8.21.0)(zod@4.4.3))(@mariozechner/pi-coding-agent@0.70.6(ws@8.21.0)(zod@4.4.3))(@mariozechner/pi-tui@0.70.6)(@sinclair/typebox@0.34.49)
+      '@ifi/oh-pi-prompts':
+        specifier: '*'
+        version: 0.5.1
       '@ifi/oh-pi-skills':
         specifier: '*'
         version: 0.5.1
@@ -500,6 +503,9 @@ packages:
       '@mariozechner/pi-coding-agent': '>=0.56.1'
       '@mariozechner/pi-tui': '>=0.56.1'
       '@sinclair/typebox': '*'
+
+  '@ifi/oh-pi-prompts@0.5.1':
+    resolution: {integrity: sha512-8ZgWirWOhLpTJQ2fTAovYbtEQt6p4XTfvVj+eOoZpUhwy7Ze3Fqr9+I0J1J2AzE8omJMxqNAvv3Lvsm/f57zCA==}
 
   '@ifi/oh-pi-skills@0.5.1':
     resolution: {integrity: sha512-kzJvQ0PjOg68oR/XAgK9fHidLcAYr8jCEzT7yJKm4muR8el+eYtRIHfqbjs+GdEhzbrXXq5O4ofxkKM4n6cztA==}
@@ -3122,6 +3128,8 @@ snapshots:
       '@mariozechner/pi-tui': 0.70.6
       '@sinclair/typebox': 0.34.49
       croner: 10.0.1
+
+  '@ifi/oh-pi-prompts@0.5.1': {}
 
   '@ifi/oh-pi-skills@0.5.1': {}
 

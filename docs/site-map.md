@@ -14,11 +14,13 @@ This site keeps the public entrypoint small while the repository can continue to
 | Start | [Start Here]({{ '/start-here.html' | relative_url }}) | Route readers by role before they open long docs. |
 | Use the Stack | [Recommended pi-stack]({{ '/guides/recommended-pi-stack.html' | relative_url }}) | Explain the installable `@aretw0/pi-stack` surface. |
 | Develop and Release | [CI governance]({{ '/guides/ci-governance.html' | relative_url }}) | Keep CI, release and package docs governance discoverable. |
+| Information Architecture | [Information architecture curation]({{ '/guides/information-architecture-curation.html' | relative_url }}) | Explain what belongs on the site, in package docs, in research, or in archive. |
 | Control Plane | [Control-plane operating doctrine]({{ '/guides/control-plane-operating-doctrine.html' | relative_url }}) | Document the daily operating model without making it the only use case. |
 | Architecture | [Architecture]({{ '/architecture/' | relative_url }}) | Surface accepted decisions and ownership. |
 | Primitives | [Primitives]({{ '/primitives/' | relative_url }}) | Surface reusable contracts before raw research. |
 | Roadmap | [Roadmap]({{ site.repo_url }}/blob/main/ROADMAP.md) | Keep planned direction separate from daily board state and raw research. |
 | Selected Evidence | [0.8 readiness map]({{ '/research/0-8-readiness-map.html' | relative_url }}) | Keep readiness evidence available without making research the homepage path. |
+| Selected Evidence | [0.8 evidence snapshot]({{ '/research/0-8-evidence-snapshot-2026-06-18.html' | relative_url }}) | Keep the first 0.8.x evidence set discoverable without promoting all research. |
 
 ## Publication Rules
 
@@ -27,6 +29,8 @@ This site keeps the public entrypoint small while the repository can continue to
 - Keep raw evidence in `docs/research/`; link selected readiness or evidence pages from `start-here` or `site-map`, not the homepage.
 - Do not publish `docs/research/data/` or archived handoffs through Jekyll.
 - Prefer repository links for package implementation details instead of mirroring package internals into the site.
+- Treat package docs as a separate shipped surface: include only guides needed by installed skills, commands, tools, configuration, troubleshooting or safety boundaries.
+- Use [Information architecture curation]({{ '/guides/information-architecture-curation.html' | relative_url }}) when deciding whether to promote, package, unfeature or archive docs.
 
 ## Local Validation
 

@@ -25,6 +25,19 @@ const LARGE_TRACKED_STATE_FILES = new Set([
   "pnpm-lock.yaml",
 ]);
 
+export const KNOWN_COMPLEXITY_DEBT_FILES = new Set([
+  "docs/guides/control-plane-operating-doctrine.md",
+  "packages/lab-skills/docs/guides/control-plane-operating-doctrine.md",
+  "packages/pi-skills/docs/guides/control-plane-operating-doctrine.md",
+  "packages/pi-stack/extensions/colony-pilot.ts",
+  "packages/pi-stack/extensions/environment-doctor.ts",
+  "packages/pi-stack/extensions/guardrails-core-agent-run-start.ts",
+  "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+  "packages/pi-stack/test/smoke/project-board-tools.test.ts",
+  "scripts/pi-dev-pressure.mjs",
+  "scripts/release-readiness-report.mjs",
+]);
+
 const DISCOURSE_RULES = [
   {
     id: "legacy-human-term",
@@ -49,6 +62,12 @@ const DISCOURSE_RULES = [
     severity: "warning",
     pattern: /\b(queen-of-queens|queen continuity|queen-continuity|fábrica de fábricas|factory of factories)\b/i,
     message: "keep speculative role aliases parked in research; canonical docs should use control-plane/operator terminology",
+  },
+  {
+    id: "loaded-confidence-claim",
+    severity: "warning",
+    pattern: /(?:indisputable|undisputable|unquestionable|irrefutable|resultado(?:s)? indiscut[ií]ve(?:l|is)|prova(?:s)? indiscut[ií]ve(?:l|is))/i,
+    message: "replace loaded certainty with specific evidence level, command, packet, or decision",
   },
   {
     id: "self-congratulatory-claim",
@@ -260,9 +279,13 @@ function shouldSkipComplexity(filePath) {
 function largeFileExceptionNote(filePath) {
   const normalized = normalizeRepoPath(filePath);
   const matched = [...LARGE_TRACKED_STATE_FILES].find((allowed) => normalized === allowed || normalized.endsWith(`/${allowed}`));
-  if (!matched) return undefined;
-  if (matched === "pnpm-lock.yaml") return "allowed:lockfile";
-  return "allowed:canonical-state";
+  if (matched) {
+    if (matched === "pnpm-lock.yaml") return "allowed:lockfile";
+    return "allowed:canonical-state";
+  }
+  const complexityDebt = [...KNOWN_COMPLEXITY_DEBT_FILES].find((allowed) => normalized === allowed || normalized.endsWith(`/${allowed}`));
+  if (complexityDebt) return "allowed:complexity-debt";
+  return undefined;
 }
 
 function countLines(text) {

@@ -97,16 +97,16 @@ Automação mínima existente:
 - `pnpm run release:readiness:v0.8.0` gera checklist local canônico em `.artifacts/release-readiness/`.
 - `pnpm run release:readiness:v0.8.0:json` gera o mesmo estado em JSON para agentes e automação local, incluindo `operatorDecisions`.
 - `pnpm run release:evidence:refresh -- --target X.Y.Z` atualiza a cadeia segura local: `agent-run:driver-canaries`, readiness, draft preview, cut preview auditado, artifact audit e final gate.
-- `pnpm run release:evidence:refresh:json -- --target X.Y.Z` emite o mesmo packet em JSON legível; o resultado esperado antes de revisão humana é `mode=release-evidence-refresh`, `decision=pass`, `finalGateDecision=pass` e `protectedActionsAllowed=false`.
+- `pnpm run release:evidence:refresh:json -- --target X.Y.Z` emite o mesmo packet em JSON legível; o resultado esperado antes de revisão do operador é `mode=release-evidence-refresh`, `decision=pass`, `finalGateDecision=pass` e `protectedActionsAllowed=false`.
 - `pnpm run release:evidence:status -- --target X.Y.Z` lê a evidência já materializada e retorna um resumo `release-evidence-status` sem rodar canários, sem escrever artefatos e sem ações protegidas.
 - `pnpm run release:final:gate -- --target X.Y.Z` recompõe em memória cut preview + artifact audit + cut auditado sem tag, push, workflow dispatch ou publish.
 - `pnpm run release:artifact:audit -- --target X.Y.Z` audita artifacts já gerados quando for necessário inspecionar a cadeia manualmente.
 
 Interpretação do readiness report:
 - `Release Blockers` separa gate técnico, decisão de operador e estado do board;
-- `Operator Decisions` lista as decisões humanas restantes antes do release;
+- `Operator Decisions` lista as decisões do operador restantes antes do release;
 - no JSON, `mode=release-readiness-report` e `schemaVersion=1` identificam o contrato estruturado;
-- no JSON, `markdown` acompanha o mesmo relatório humano, então agentes não precisam escolher entre contrato estruturado e contexto legível;
+- no JSON, `markdown` acompanha o mesmo relatório legível para operador, então agentes não precisam escolher entre contrato estruturado e contexto legível;
 - no JSON, `generatedAt` e `decision` identificam o snapshot e a decisão (`ready` ou `not-ready`) sem parsear Markdown;
 - no JSON, `versions`, `versionsAligned`, `targetVersionReady`, `workflows`, `gates`, `worktree`, `agentRunDrivers`, `packageSmoke` e `userSurface` expõem os gates principais sem parsear `checklist[*].evidence`;
 - no JSON, `gates.worktreeClean` e `worktree.statusLines` bloqueiam readiness quando há mudanças rastreadas locais; arquivos untracked de evidência local não bloqueiam por si só;

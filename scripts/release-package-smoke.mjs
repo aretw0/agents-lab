@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { THIRD_PARTY } from "../packages/pi-stack/package-list.mjs";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const RELEASE_PACKAGES = [
@@ -190,6 +191,16 @@ export function buildReleasePackageSmokeReport(options = {}) {
     }
   }
 
+  const piStackManifest = readJsonFn(path.join("packages/pi-stack", "package.json"));
+  const missingManagedThirdPartyDevDeps = THIRD_PARTY.filter((name) => piStackManifest.devDependencies?.[name] !== "*");
+  if (missingManagedThirdPartyDevDeps.length > 0) {
+    addBlocker(
+      "managed-third-party-dev-dependency-missing",
+      "installer-package-list",
+      `${missingManagedThirdPartyDevDeps.length} managed third-party package(s) are missing from packages/pi-stack/package.json devDependencies: ${missingManagedThirdPartyDevDeps.join(", ")}`,
+      { relPath: "packages/pi-stack/package.json", missing: missingManagedThirdPartyDevDeps },
+    );
+  }
   if (!/id-token:\s*write/.test(publishWorkflow)) {
     addBlocker("publish-provenance-permission-missing", "publish-workflow", "publish workflow must keep id-token: write for npm provenance", {
       relPath: ".github/workflows/publish.yml",

@@ -7,6 +7,7 @@
 | Skill | Descrição |
 |---|---|
 | `commit` | Como fazer commits no estilo Conventional Commits |
+| `git-checkout-cache` | Como trabalhar com checkouts e caches externos de forma read-only/explicit-root |
 | `git-workflow` | Estratégia de branching, PRs/MRs, resolução de conflitos e operações não-interativas |
 | `github` | `gh` CLI — issues, PRs, CI runs, releases e API queries |
 | `glab` | `glab` CLI — issues, merge requests, CI pipelines e API queries |

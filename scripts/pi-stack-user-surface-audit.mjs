@@ -8,7 +8,7 @@
  * de laboratório (scripts do workspace root).
  */
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -50,6 +50,63 @@ function groupByTarget(rows) {
 		}))
 		.sort((a, b) => b.count - a.count || a.targetSurface.localeCompare(b.targetSurface));
 }
+function normalizeEvidenceName(value) {
+	return String(value ?? "").toLowerCase().replace(/\.(test\.)?[cm]?[tj]sx?$/i, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function listSmokeTestFiles(cwd) {
+	const smokeDir = path.join(cwd, "packages", "pi-stack", "test", "smoke");
+	if (!existsSync(smokeDir)) return [];
+	return readdirSync(smokeDir, { withFileTypes: true })
+		.filter((entry) => entry.isFile() && /\.test\.[cm]?[tj]sx?$/i.test(entry.name))
+		.map((entry) => entry.name)
+		.sort();
+}
+
+function dogfoodAliasesForExtension(extensionName) {
+	return [extensionName, ...(DOGFOOD_TEST_ALIASES[extensionName] ?? [])].map(normalizeEvidenceName);
+}
+
+function buildDogfoodCoverage(shippedExtensions, scriptInventory, smokeTestFiles) {
+	const scriptsBySurface = new Map();
+	for (const row of scriptInventory) {
+		if (row.category !== "distributed-wrapper" || !row.targetSurface) continue;
+		const current = scriptsBySurface.get(row.targetSurface) ?? [];
+		current.push(row.name);
+		scriptsBySurface.set(row.targetSurface, current);
+	}
+
+	const normalizedTests = smokeTestFiles.map((file) => ({ file, normalized: normalizeEvidenceName(file) }));
+	const extensions = shippedExtensions.map((extensionName) => {
+		const aliases = dogfoodAliasesForExtension(extensionName);
+		const testFiles = normalizedTests
+			.filter((test) => aliases.some((alias) => test.normalized.includes(alias)))
+			.map((test) => test.file);
+		const wrapperScripts = scriptsBySurface.get(extensionName) ?? [];
+		const evidence = [
+			...(testFiles.length ? ["smoke-test"] : []),
+			...(wrapperScripts.length ? ["lab-wrapper"] : []),
+		];
+		return {
+			extensionName,
+			decision: evidence.length > 0 ? "covered" : "missing-dogfood-evidence",
+			evidence,
+			testFiles,
+			wrapperScripts,
+		};
+	});
+	const missing = extensions.filter((row) => row.decision !== "covered");
+	return {
+		mode: "pi-stack-shipped-extension-dogfood-coverage",
+		extensionCount: extensions.length,
+		coveredCount: extensions.length - missing.length,
+		missingCount: missing.length,
+		decision: missing.length === 0 ? "pass" : "blocked",
+		missingExtensions: missing.map((row) => row.extensionName),
+		extensions,
+	};
+}
+
 
 const DISTRIBUTED_WRAPPERS = [
 	{
@@ -152,14 +209,28 @@ const PROMOTION_CANDIDATES = [
 	},
 ];
 
+const DOGFOOD_TEST_ALIASES = {
+	"guardrails-core-tool-backed-route-canary-surface": ["guardrails-tool-backed-route-canary"],
+	"guardrails-core-structured-interview-surface": ["guardrails-structured-interview"],
+	"guardrails-core-lane-brainstorm-surface": ["autonomy-lane-brainstorm-surface"],
+	"guardrails-core-extended-surfaces": [
+		"guardrails-structured-io-tool",
+		"guardrails-structured-io-command",
+		"guardrails-macro-refactor-tool",
+		"guardrails-macro-refactor-command",
+	],
+};
+
 const INTERNAL_FAMILIES = new Set([
 	"actions",
 	"test",
 	"ci",
 	"gate",
+	"host",
 	"verify",
 	"docs",
 	"audit",
+	"agent-skills",
 	"release",
 	"publish",
 	"pi",
@@ -244,6 +315,8 @@ export function buildUserSurfaceAudit(cwd = process.cwd(), now = new Date()) {
 		}))
 		.sort((a, b) => a.name.localeCompare(b.name));
 
+	const smokeTestFiles = listSmokeTestFiles(cwd);
+
 	const categoryCounts = scriptInventory.reduce((out, row) => {
 		out[row.category] = (out[row.category] ?? 0) + 1;
 		return out;
@@ -251,6 +324,7 @@ export function buildUserSurfaceAudit(cwd = process.cwd(), now = new Date()) {
 
 	const distributionCandidates = scriptInventory.filter((row) => row.category === "promotion-candidate");
 	const distributedWrappers = scriptInventory.filter((row) => row.category === "distributed-wrapper");
+	const dogfoodCoverage = buildDogfoodCoverage(stackExtensions, scriptInventory, smokeTestFiles);
 
 	return {
 		generatedAtIso: now.toISOString(),
@@ -259,6 +333,7 @@ export function buildUserSurfaceAudit(cwd = process.cwd(), now = new Date()) {
 			version: stackPkg.version,
 			shippedExtensions: stackExtensions,
 		},
+		dogfoodCoverage,
 		categoryCounts,
 		promotionGroups: groupByTarget(distributionCandidates),
 		wrapperGroups: groupByTarget(distributedWrappers),
@@ -284,6 +359,7 @@ export function formatUserSurfaceAuditSummary(audit) {
 		`scripts: lab-only=${categoryCounts["lab-only"] ?? 0} repo-internal=${categoryCounts["repo-internal"] ?? 0} distributed-wrapper=${categoryCounts["distributed-wrapper"] ?? 0}`,
 		`promotion candidates: ${audit?.distributionCandidates?.length ?? 0}`,
 		`wrapper groups: ${audit?.wrapperGroups?.length ?? 0}`,
+		`dogfood coverage: ${audit?.dogfoodCoverage?.coveredCount ?? 0}/${audit?.dogfoodCoverage?.extensionCount ?? 0} missing=${audit?.dogfoodCoverage?.missingCount ?? 0}`,
 	];
 
 	if (Array.isArray(audit?.promotionGroups) && audit.promotionGroups.length > 0) {
@@ -300,6 +376,10 @@ export function formatUserSurfaceAuditSummary(audit) {
 		for (const group of audit.wrapperGroups.slice(0, 5)) {
 			lines.push(`- ${group.targetSurface}: ${group.count} script(s)`);
 		}
+	}
+
+	if (Array.isArray(audit?.dogfoodCoverage?.missingExtensions) && audit.dogfoodCoverage.missingExtensions.length > 0) {
+		lines.push(`missing dogfood: ${audit.dogfoodCoverage.missingExtensions.slice(0, 8).join(", ")}`);
 	}
 
 	lines.push("Use --json for the full script inventory.");

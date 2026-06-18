@@ -27,7 +27,8 @@
 		"README.md"
 	],
 	"dependencies": {
-		"@sinclair/typebox": "0.34.49"
+		"@sinclair/typebox": "0.34.49",
+		"@ifi/oh-pi-ant-colony": "*"
 	},
 	"pi": {
 		"extensions": [
@@ -82,6 +83,7 @@
 		"@ifi/pi-extension-subagents": "*",
 		"@ifi/pi-plan": "*",
 		"@ifi/pi-spec": "*",
-		"@ifi/pi-web-remote": "*"
+		"@ifi/pi-web-remote": "*",
+		"@ifi/oh-pi-prompts": "*"
 	}
 }

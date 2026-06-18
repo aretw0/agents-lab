@@ -127,3 +127,12 @@ test("classifyDiscourseText reports stale CI failure claims in public docs", () 
 
   assert.deepEqual(findings.map((finding) => finding.rule), ["stale-ci-failure-claim"]);
 });
+
+test("classifyDiscourseText reports loaded confidence claims in canonical docs", () => {
+  const findings = classifyDiscourseText(
+    "docs/guides/evidence-ladder.md",
+    "This creates indisputable results for the release.",
+  );
+
+  assert.deepEqual(findings.map((finding) => finding.rule), ["loaded-confidence-claim"]);
+});

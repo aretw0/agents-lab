@@ -1,6 +1,6 @@
 /**
  * @capability-id runtime-guardrails
- * @capability-criticality medium
+ * @capability-criticality high
  *
  * Deterministic canary for packet-shaped control-plane answers that were not
  * backed by the corresponding tool call in the current turn.

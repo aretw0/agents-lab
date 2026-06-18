@@ -5,6 +5,9 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { buildReleasePackageSmokeReport } from "./release-package-smoke.mjs";
+import { buildReleaseContentReviewAudit } from "./release-content-review-audit.mjs";
+import { buildPackagePromiseAudit } from "./package-promise-audit.mjs";
+import { buildAgentSkillsCompatAudit } from "./agent-skills-compat-audit.mjs";
 import { buildUserSurfaceAudit } from "./pi-stack-user-surface-audit.mjs";
 import { buildBoardSpecAudit } from "./project/board-spec-audit.mjs";
 import { buildBoardNextScopeIntake } from "./project/board-next-scope-intake.mjs";
@@ -704,6 +707,7 @@ function agentRunProviderProtectedBoardRecoveryApprovalEvidence(cwd) {
 
 function releaseGateKind(id) {
   if (id === "target-version-ready") return "operator-decision";
+  if (id === "release-content-review") return "operator-decision";
   if (id === "board-release-clear") return "board-state";
   return "technical-gate";
 }
@@ -752,22 +756,31 @@ function userSurfaceReadiness(cwd) {
   const audit = buildUserSurfaceAudit(cwd);
   const labOnlyScripts = audit.labOnlyScripts.map((row) => row.name);
   const distributionCandidates = audit.distributionCandidates.map((row) => row.name);
-  const ok = labOnlyScripts.length === 0 && distributionCandidates.length === 0;
+  const missingDogfoodExtensions = audit.dogfoodCoverage?.missingExtensions ?? [];
+  const ok = labOnlyScripts.length === 0 && distributionCandidates.length === 0 && missingDogfoodExtensions.length === 0;
   return {
     mode: "pi-stack-user-surface-readiness",
     ok,
     categoryCounts: audit.categoryCounts,
+    dogfoodCoverage: audit.dogfoodCoverage,
     labOnlyCount: labOnlyScripts.length,
     distributionCandidateCount: distributionCandidates.length,
     distributedWrapperCount: audit.distributedWrappers.length,
     repoInternalCount: audit.repoInternalScripts.length,
     wrapperGroupCount: audit.wrapperGroups.length,
+    missingDogfoodCount: missingDogfoodExtensions.length,
     labOnlyScripts,
     distributionCandidates,
+    missingDogfoodExtensions,
     summary: ok
-      ? "pi-stack user surface audit pass: no lab-only or promotion-candidate root scripts"
-      : `pi-stack user surface audit blocked: lab-only=${labOnlyScripts.length} promotion-candidate=${distributionCandidates.length}`,
+      ? `pi-stack user surface audit pass: no lab-only or promotion-candidate root scripts; dogfood coverage ${audit.dogfoodCoverage?.coveredCount ?? 0}/${audit.dogfoodCoverage?.extensionCount ?? 0}`
+      : `pi-stack user surface audit blocked: lab-only=${labOnlyScripts.length} promotion-candidate=${distributionCandidates.length} missing-dogfood=${missingDogfoodExtensions.length}`,
   };
+}
+
+function agentSkillsEvidence(report) {
+  if (!report.blockers.length) return report.summary;
+  return report.blockers.map((blocker) => [blocker.packageName || blocker.scope || "unknown", blocker.code].join(":")).join(", ");
 }
 
 function userSurfaceEvidence(report) {
@@ -775,6 +788,7 @@ function userSurfaceEvidence(report) {
   return [
     ...report.labOnlyScripts.map((name) => `lab-only:${name}`),
     ...report.distributionCandidates.map((name) => `promotion-candidate:${name}`),
+    ...report.missingDogfoodExtensions.map((name) => `missing-dogfood:${name}`),
   ].join(", ");
 }
 
@@ -1128,6 +1142,9 @@ export function gather(target, cwd = process.cwd()) {
     releaseDraft: existsSync(path.join(cwd, ".github", "workflows", "release-draft.yml")),
   };
   const packageSmoke = buildReleasePackageSmokeReport({ cwd, runPack: false });
+  const contentReview = buildReleaseContentReviewAudit({ cwd, target });
+  const packagePromise = buildPackagePromiseAudit(cwd);
+  const agentSkills = buildAgentSkillsCompatAudit(cwd);
   const boardSpecAudit = buildBoardSpecAudit({ cwd });
   const boardNextScopeIntake = buildBoardNextScopeIntake({ cwd });
   const agentRunDrivers = agentRunDriverGateReport(cwd);
@@ -1174,11 +1191,17 @@ export function gather(target, cwd = process.cwd()) {
       worktreeClean: worktree.clean,
       agentRunDrivers: agentRunDrivers.ok,
       packageSmoke: packageSmoke.ok,
+      contentReview: contentReview.decision === "pass",
+      packagePromise: packagePromise.decision === "pass",
+      agentSkills: agentSkills.decision === "pass",
       userSurface: userSurface.ok,
     },
     worktree,
     agentRunDrivers,
     packageSmoke,
+    contentReview,
+    packagePromise,
+    agentSkills,
     userSurface,
     boardSpecAudit,
     boardNextScopeIntake,
@@ -1197,6 +1220,9 @@ export function buildReport(data) {
     { id: "workflow-release-draft", ok: data.workflows.releaseDraft, evidence: ".github/workflows/release-draft.yml" },
     { id: "agent-run-driver-gate", ok: data.gates.agentRunDrivers, evidence: agentRunDriverGateEvidence(data.agentRunDrivers) },
     { id: "release-package-smoke", ok: data.packageSmoke.ok, evidence: data.packageSmoke.packageBlockers.length ? data.packageSmoke.packageBlockers.map((blocker) => blocker.id).join(", ") : "release package smoke report pass" },
+    { id: "release-content-review", ok: data.gates.contentReview, evidence: data.contentReview.blockers.length ? data.contentReview.summary : data.contentReview.summary },
+    { id: "package-promise-audit", ok: data.gates.packagePromise, evidence: data.packagePromise.blockers.length ? data.packagePromise.blockers.map((blocker) => [blocker.packageName, blocker.kind, blocker.name].join(":")).join(", ") : data.packagePromise.summary },
+    { id: "agent-skills-compat", ok: data.gates.agentSkills, evidence: agentSkillsEvidence(data.agentSkills) },
     { id: "pi-stack-user-surface", ok: data.gates.userSurface, evidence: userSurfaceEvidence(data.userSurface) },
     { id: "board-release-clear", ok: data.board.releaseReady, evidence: data.board.blockers.length ? data.board.blockers.join(", ") : "no open P0/in-progress/blocked tasks" },
   ].map((item) => ({ ...item, kind: releaseGateKind(item.id) }));
@@ -1315,6 +1341,9 @@ function main() {
       worktree: data.worktree,
       agentRunDrivers: data.agentRunDrivers,
       packageSmoke: data.packageSmoke,
+      contentReview: data.contentReview,
+      packagePromise: data.packagePromise,
+      agentSkills: data.agentSkills,
       userSurface: data.userSurface,
       board: data.board,
     };

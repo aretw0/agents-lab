@@ -25,6 +25,9 @@ Guias práticos para usar, operar, manter e distribuir a stack. Para escolher po
 
 | Guia | Descrição |
 |------|-----------|
+| [0-8-scope-boundary.md]({{ '/guides/0-8-scope-boundary.html' | relative_url }}) | Fronteira da 0.8.0: baseline confiável, laboratório avaliável, operação avançada e pesquisa futura |
+| [evidence-ladder.md]({{ '/guides/evidence-ladder.html' | relative_url }}) | Ladder de evidência para transformar claims do agents-lab em checks, packets e decisões de promoção |
+| [information-architecture-curation.md]({{ '/guides/information-architecture-curation.html' | relative_url }}) | Regras de discoverability e poda para site, docs do repo e documentação empacotada |
 | [publishing.md]({{ '/guides/publishing.html' | relative_url }}) | Workflow de release — changesets, versionamento lockstep, publish via tag |
 | [ROADMAP.md]({{ site.repo_url }}/blob/main/ROADMAP.md) | Direção macro da 0.8.0; estado diário continua em `.project/*` |
 
@@ -48,6 +51,7 @@ Guias práticos para usar, operar, manter e distribuir a stack. Para escolher po
 | [control-plane-ux-curation.md]({{ '/guides/control-plane-ux-curation.html' | relative_url }}) | Padrão de UX do control-plane (TUI+WEB): densidade adaptativa, anti-clutter e checklist de resize |
 | [control-plane-evolution-playbook.md]({{ '/guides/control-plane-evolution-playbook.html' | relative_url }}) | Playbook de evolução em fases: single control-plane -> delegação descartável -> federação multi-control-plane |
 | [primitive-growth-sanity-plan.md]({{ '/guides/primitive-growth-sanity-plan.html' | relative_url }}) | Plano de crescimento com sanidade: primitive-first, anti-gordura, orçamento de dívida e ladder de promoção segura |
+| [project-canonical-pipeline.md]({{ '/guides/project-canonical-pipeline.html' | relative_url }}) | Pipeline canônico `.project`-first para board, verification, handoff, adapters e continuidade |
 | [control-plane-operating-doctrine.md]({{ '/guides/control-plane-operating-doctrine.html' | relative_url }}) | Doutrina operacional do control-plane unattended: quando continuar, parar, reduzir gordura e escalar canários |
 | [control-plane-glossary.md]({{ '/guides/control-plane-glossary.html' | relative_url }}) | Glossário canônico do control-plane para reduzir alcunhas, aliases e progresso vazio |
 | [unified-dogfood-isolation.md]({{ '/guides/unified-dogfood-isolation.html' | relative_url }}) | Runbook para dogfood em ambiente isolado com TUI + WEB unificados |
@@ -67,6 +71,7 @@ Estes guias descrevem manutenção que pode acompanhar a stack ou inspirar outro
 | [dependency-upstream-governance.md]({{ '/guides/dependency-upstream-governance.html' | relative_url }}) | Governança para atribuir mudanças entre stack local, upstream Pi e dependências antes de decidir `assimilate|hold|reject` |
 | [host-disk-recovery.md]({{ '/guides/host-disk-recovery.html' | relative_url }}) | Recuperação dry-first de disco, cache e artefatos de sandbox sem perder continuidade |
 | [session-triage.md]({{ '/guides/session-triage.html' | relative_url }}) | Triagem de sessões/eventos recentes para transformar histórico em backlog revisável |
+| [mini-handoff-template.md]({{ '/guides/mini-handoff-template.html' | relative_url }}) | Template curto para fechar micro-lotes com decisão, evidência, riscos e próximos passos |
 | [reload-lifecycle-diagnostic.md]({{ '/guides/reload-lifecycle-diagnostic.html' | relative_url }}) | Packet read-only para diferenciar reload lento, reload travado e evidência insuficiente |
 | [i18n-intents.md]({{ '/guides/i18n-intents.html' | relative_url }}) | Runbook de intents soft/hard de internacionalização para comunicação e artefatos |
 | [mermaid-authoring.md]({{ '/guides/mermaid-authoring.html' | relative_url }}) | Regras portáveis para escrever Mermaid em Markdown, GitHub, Jekyll, Astro e Obsidian |
@@ -93,6 +98,7 @@ Research não é guia operacional por padrão. Estas páginas ficam aqui apenas 
 | Documento | Uso |
 |------|-----|
 | [0.8 readiness map]({{ '/research/0-8-readiness-map.html' | relative_url }}) | Estado verificável e próximos passos da 0.8.0 |
+| [0.8 evidence snapshot]({{ '/research/0-8-evidence-snapshot-2026-06-18.html' | relative_url }}) | Snapshot datado da primeira result set 0.8.x usando a ladder de evidência |
 | [0.8 local-safe compounding lane]({{ '/research/0-8-local-safe-compounding-lane.html' | relative_url }}) | Resumo da lane de estabilização 0.8 |
 | [0.8 delegation long-run runway]({{ '/research/0-8-delegation-long-run-runway.html' | relative_url }}) | Runway de delegação/long-run para evolução controlada |
 | [0.8 local-safe slice validation matrix]({{ '/research/0-8-local-safe-slice-validation-matrix.html' | relative_url }}) | Matriz de validação para fatias locais |

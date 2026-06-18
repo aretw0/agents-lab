@@ -25,7 +25,7 @@ test("release package smoke keeps release/package publishing dry-run gated", () 
   });
   assert.deepEqual(report.packageBlockers, []);
   assert.deepEqual(report.packageWarnings, []);
-  assert.equal(report.releaseVersion, "0.7.0");
+  assert.equal(report.releaseVersion, "0.8.0");
   assert.equal(report.githubReleases.draftOnly, true);
   assert.equal(report.githubReleases.manualDraft, true);
   assert.equal(report.githubPackages.configured, false);
@@ -114,5 +114,32 @@ test("release package smoke blocks lab-only scripts in published package manifes
   assert.deepEqual(report.packageBlockers[0].evidence, {
     relPath: "packages/pi-stack",
     scripts: ["agent-run:driver-canaries"],
+  });
+});
+
+
+test("release package smoke blocks managed third-party packages missing from pi-stack devDependencies", () => {
+  const piStackPackage = JSON.parse(readFixtureText("packages/pi-stack/package.json"));
+  const piStackPackagePath = path.join("packages/pi-stack", "package.json");
+  const devDependencies = { ...piStackPackage.devDependencies };
+  delete devDependencies["@ifi/oh-pi-prompts"];
+
+  const report = buildReleasePackageSmokeReport({
+    runPack: false,
+    readText: (relPath) => readFixtureText(relPath, {
+      [piStackPackagePath]: JSON.stringify({
+        ...piStackPackage,
+        devDependencies,
+      }),
+    }),
+  });
+
+  assert.equal(report.ok, false);
+  assert.equal(report.decision, "block");
+  assert.deepEqual(report.packageBlockers.map((blocker) => blocker.id), ["managed-third-party-dev-dependency-missing"]);
+  assert.equal(report.packageBlockers[0].kind, "installer-package-list");
+  assert.deepEqual(report.packageBlockers[0].evidence, {
+    relPath: "packages/pi-stack/package.json",
+    missing: ["@ifi/oh-pi-prompts"],
   });
 });

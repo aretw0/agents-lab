@@ -19,6 +19,8 @@ Este diretório guarda evidência datada, investigações, scorecards e checkpoi
 
 | Documento | Descrição | Status |
 |-----------|-----------|--------|
+| [0-8-complexity-debt-register-2026-06-18.md]({{ '/research/0-8-complexity-debt-register-2026-06-18.html' | relative_url }}) | Registro explicito das excecoes de complexidade aceitas temporariamente antes da 0.8.0 | Evidencia selecionada |
+| [0-8-evidence-snapshot-2026-06-18.md]({{ '/research/0-8-evidence-snapshot-2026-06-18.html' | relative_url }}) | Snapshot datado da primeira result set 0.8.x usando a ladder de evidência | Promovido como evidência selecionada |
 | [0-8-readiness-map.md]({{ '/research/0-8-readiness-map.html' | relative_url }}) | Estado verificável e próximos passos da 0.8.0 | Promovido como evidência selecionada |
 | [0-8-local-safe-compounding-lane.md]({{ '/research/0-8-local-safe-compounding-lane.html' | relative_url }}) | Lane local-safe de estabilização 0.8 | Evidência selecionada |
 | [0-8-delegation-long-run-runway.md]({{ '/research/0-8-delegation-long-run-runway.html' | relative_url }}) | Runway de delegação e long-run | Evidência selecionada |

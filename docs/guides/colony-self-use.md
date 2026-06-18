@@ -52,7 +52,7 @@ protocolo. No Pi TUI, basta invocar o skill para a task desejada.
 Regra de gate: workers de colônia não criam nem editam
 `.project/reports/TASK-ID-decision.md`. Esse arquivo é exclusivo do operador.
 Se um worker preencher `approved: true` ou `Fase 2 autorizada?: sim`, o gate
-deve ser tratado como inválido até nova revisão humana explícita.
+deve ser tratado como inválido até nova revisão explícita do operador.
 
 Os templates de artefato ficam em `.project/reports/`:
 

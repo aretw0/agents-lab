@@ -6,6 +6,7 @@
 
 | Skill | Descrição |
 |---|---|
+| `source-research` | Pesquisa source-backed com evidência, citações e separação entre fato, inferência e recomendação |
 | `web-browser` | Automação de browser via Chrome DevTools Protocol — navegar, screenshot, JS eval, click, logs de rede |
 
 ## Uso

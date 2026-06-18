@@ -1,6 +1,6 @@
 # @aretw0/pi-stack
 
-> Stack curada de extensões pi — um `pi install` que traz tudo.
+> Stack curada de extensões Pi para instalação, diagnóstico e operação local-first.
 
 ## Instalação
 
@@ -30,23 +30,51 @@ pi install https://github.com/aretw0/agents-lab
 
 | Pacote | O que traz |
 |---|---|
-| [`@aretw0/git-skills`](https://www.npmjs.com/package/@aretw0/git-skills) | `commit`, `git-workflow`, `github` (gh CLI), `glab` |
-| [`@aretw0/web-skills`](https://www.npmjs.com/package/@aretw0/web-skills) | `native-web-search`, `web-browser` (CDP) |
-| [`@aretw0/pi-skills`](https://www.npmjs.com/package/@aretw0/pi-skills) | `terminal-setup`, `create-pi-skill/extension/theme/prompt` |
-| [`@aretw0/lab-skills`](https://www.npmjs.com/package/@aretw0/lab-skills) | `evaluate-extension`, `cultivate-primitive`, `stack-feedback`, `provider-model-discovery`, `reality-check` |
+| [`@aretw0/git-skills`](https://www.npmjs.com/package/@aretw0/git-skills) | `commit`, `git-checkout-cache`, `git-workflow`, `github`, `glab` |
+| [`@aretw0/web-skills`](https://www.npmjs.com/package/@aretw0/web-skills) | `source-research`, `web-browser` (CDP) |
+| [`@aretw0/pi-skills`](https://www.npmjs.com/package/@aretw0/pi-skills) | criação/teste de skills/extensions/themes/prompts, `terminal-setup`, `project-intake`, `/hatch` |
+| [`@aretw0/lab-skills`](https://www.npmjs.com/package/@aretw0/lab-skills) | `evaluate-extension`, `cultivate-primitive`, `colony-dogfood`, `embed-pi-cli`, `provider-model-discovery`, `reality-check` |
 
 ### Extensions Incluídas
 
+Inventário completo da superfície instalada por `@aretw0/pi-stack` na 0.8.0. Cada item precisa aparecer aqui porque será instalado no usuário quando o pacote for instalado.
+
 | Extension | O que faz |
 |---|---|
-| `monitor-provider-patch` | Patch provider-aware para classifiers de monitor (Copilot/Codex + mapa custom) com comando `/monitor-provider` |
-| `environment-doctor` | Health check do ambiente na startup + comando `/doctor`, `/doctor pressure`, tools `environment_doctor_status`, `environment_dev_pressure_status` e `environment_runtime_health_status` |
-| `claude-code-adapter` | Scaffold experimental para runtime externo Claude Code (`/claude-code status|login|auth-status`, sem persistência de credenciais) |
-| `guardrails-core` | Guardrail unificado first-party: proteção de paths sensíveis + roteamento web determinístico por escopo + bloqueio de conflito de porta reservada pelo session-web + bloqueio de scans de conteúdo em `~/.pi/agent/sessions` e scans recursivos de conteúdo na raiz `.pi` (evita explosão de saída/stack overflow no TUI) |
-| `colony-pilot` | Primitiva de orquestração/visibilidade: prepara runbooks manuais para monitors, remote e colony, mantendo snapshot de colonies em background |
-| `web-session-gateway` | Gateway web first-party para observabilidade local da sessão (URL determinística, `/api/health` e painel web local) |
-| `quota-visibility` | Observabilidade de consumo/cota a partir de `~/.pi/agent/sessions` (burn rate, janelas de 5h/peak hours por provider, budgets provider/model, OpenAI Codex WHAM probe read-only, export de evidências) |
-| `machine-maintenance` | Gate determinístico de pressão de máquina + `workspace_storage_pressure_report` e `workspace_disk_cleanup_plan` report-only |
+| `monitor-provider-patch` | Patch provider-aware para classifiers de monitor com comando `/monitor-provider` |
+| `environment-doctor` | Diagnóstico de ambiente, runtime health e pressão de desenvolvimento via `/doctor` e tools |
+| `claude-code-adapter` | Bridge experimental report-only para status/login/auth-status do Claude Code CLI |
+| `guardrails-core` | Guardrails centrais: paths sensíveis, web routing, porta reservada, scans perigosos e superfícies base |
+| `guardrails-core-tool-backed-route-canary-surface` | Canary para respostas packet-shaped sem tool correspondente no turno |
+| `guardrails-core-structured-interview-surface` | Tools de entrevista estruturada, profile packet e intake de intenção do operador |
+| `guardrails-core-lane-brainstorm-surface` | Tools report-only para brainstorm, seed preview e seed decision de lanes locais |
+| `guardrails-core-extended-surfaces` | Superfícies adicionais de structured IO e macro-refactor report-only |
+| `guardrails-agent-run` | Driver bounded de agent-run: plan, dispatch readiness, lifecycle e outcome packets |
+| `guardrails-ops-calibration` | Calibração report-only de background processes, agents-as-tools e readiness operacional |
+| `guardrails-unattended-continuation` | Continuação unattended medida e fail-closed com rehearsal/readiness |
+| `guardrails-background-process` | Planejamento e rehearsal de processos em background sem start/stop automático por padrão |
+| `scheduler-governance` | Lease/ownership do scheduler com status, policy e apply gateado |
+| `stack-sovereignty` | Soberania e qualidade da stack: owners, overlap, complexity, bloat e discourse audit |
+| `colony-pilot` | Orquestração/visibilidade de colony com runbooks, preflight, budget e artifacts |
+| `web-session-gateway` | Gateway web local da sessão com URL determinística, health API e painel local |
+| `quota-visibility` | Observabilidade de consumo/cota, burn rate, budgets e routing advisory |
+| `provider-readiness` | Matriz de readiness provider/model para uso seguro e canários protegidos |
+| `subagent-readiness` | Gate de prontidão de subagentes/delegação com sinais reproduzíveis |
+| `session-analytics` | Analytics de sessões, timeline, model usage, summaries e outliers |
+| `project-board-surface` | Tools do board canônico local, query/update/verificação e backfill plan |
+| `handoff-advisor` | Conselhos de handoff/checkpoint para continuidade local-safe |
+| `quota-alerts` | Alertas e policy de quota por provider/model |
+| `safe-boot` | Perfil safe-core, snapshot/restore de settings e audit de artefatos runtime |
+| `governance-profiles` | Perfis de governança para defaults e modos operacionais da stack |
+| `quota-panel` | Painel TUI de quota/consumo para visibilidade recorrente |
+| `colony-panel` | Painel TUI de estado de colonies e artifacts |
+| `monitor-summary` | Resumo de runtime dos monitors e dedupe de status |
+| `monitor-sovereign` | Startup output soberano para monitores e ownership de stack |
+| `machine-maintenance` | Pressão de disco/máquina e planos de cleanup report-only/opt-in |
+| `context-watchdog` | Watchdog de contexto, preload, checkpoint, reload e resume |
+| `context-watchdog-surfaces` | Superfícies complementares do context-watchdog para decisão e operação |
+| `write-preview-guard` | Preview guard para escrita/mutação com confirmação explícita |
+| `custom-footer` | Footer TUI customizado da stack para status compacto |
 
 #### Defaults do `monitor-provider-patch`
 
@@ -97,6 +125,16 @@ Detalhes: [`docs/guides/monitor-overrides.md`](docs/guides/monitor-overrides.md)
 | `agents-lab` | Tema com realce de código melhorado — cyan/purple para identificadores, contraste alto |
 
 Ativar: `/settings` → selecionar `agents-lab`
+
+### Perfis de instalação
+
+O comando sem flags instala o perfil `strict-curated`: pacotes first-party mais `@davidorex/pi-project-workflows`, com filtros que mantêm capacidades frias ou opt-in. Os terceiros abaixo pertencem ao inventário gerenciado e entram apenas quando o usuário escolhe `--runtime-extras` ou `--stack-full`, conforme o perfil.
+
+| Perfil | Conteúdo |
+|---|---|
+| `strict-curated` (default) | `@aretw0/*` + `@davidorex/pi-project-workflows`, com filtros de superfície |
+| `curated-runtime` | baseline estrito + runtime/capability extras selecionados |
+| `stack-full` | todos os pacotes gerenciados, incluindo terceiros abaixo |
 
 ### Terceiros Curados
 

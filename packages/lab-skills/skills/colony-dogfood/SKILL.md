@@ -47,7 +47,7 @@ O worker deve criar `.project/reports/TASK-ID-research.md` preenchendo todos
 os campos do template. Se o budget for atingido antes da síntese estar
 completa, o worker deve marcar `status: parcial` e salvar o que conseguiu.
 Se o worker criar ou editar o arquivo de decisão, trate o gate como inválido
-até nova revisão humana explícita.
+até nova revisão explícita do operador.
 
 ### 4. Gate do operador (obrigatório)
 
@@ -56,7 +56,7 @@ Preencha `.project/reports/TASK-ID-decision.md` a partir do template.
 Marque `approved: true` ou `approved: false`.
 
 Só avance para Fase 2 se `approved: true` E `Fase 2 autorizada?: sim`, ambos
-preenchidos pelo operador humano.
+preenchidos pelo operador.
 
 ## Fase 2: Código
 

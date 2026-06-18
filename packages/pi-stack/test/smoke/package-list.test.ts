@@ -51,6 +51,15 @@ describe("package-list integrity", () => {
     }
   });
 
+  it("all third-party managed packages are declared as devDependencies", async () => {
+    const { THIRD_PARTY } = await import(path.join(PKG, "package-list.mjs"));
+    const pkg = JSON.parse(readFileSync(path.join(PKG, "package.json"), "utf8"));
+
+    for (const name of THIRD_PARTY) {
+      expect(pkg.devDependencies?.[name], `Managed third-party package "${name}" missing from devDependencies`).toBe("*");
+    }
+  });
+
   it("all first-party packages have pi-package keyword", async () => {
     const { FIRST_PARTY } = await import(path.join(PKG, "package-list.mjs"));
     const packagesDir = path.join(REPO_ROOT, "packages");
@@ -97,6 +106,7 @@ describe("published package dependency shape", () => {
   it("package.json declares runtime dependencies needed by published extensions", () => {
     const pkg = JSON.parse(readFileSync(path.join(PKG, "package.json"), "utf8"));
     expect(pkg.dependencies).toEqual({
+      "@ifi/oh-pi-ant-colony": "*",
       "@sinclair/typebox": "0.34.49",
     });
   });

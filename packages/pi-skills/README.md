@@ -12,7 +12,9 @@
 | `create-pi-web-extension` | Como criar/extender extensão web first-party com contrato determinístico e testes (smoke + e2e) |
 | `create-pi-theme` | Como criar um tema visual para o TUI |
 | `create-pi-prompt` | Como criar prompt templates — argumentos, empacotamento |
+| `pi-dev-workflow` | Fluxo de desenvolvimento local do pi com isolamento, validação e rollback |
 | `project-intake` | Triagem inicial agnóstica para iniciar projetos com primeira fatia local-safe |
+| `test-pi-extension` | Como testar extensão pi com smoke tests, harness e superfícies de comando/tool |
 | `control-plane-continuity` | Continuidade local-safe com entrevista curta, slices bounded, checkpoint e parada por risco real |
 | `mermaid-authoring` | Escrita e revisão de diagramas Mermaid com sintaxe portável entre Markdown, GitHub, Jekyll, Astro e Obsidian |
 

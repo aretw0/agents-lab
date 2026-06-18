@@ -12,7 +12,9 @@
 | `session-triage` | Consolida histórico recente (incluindo branch summaries) em pendências executáveis no board canônico |
 | `provider-model-discovery` | Descobre modelos de providers LLM em modo report-only, com inventário read-only, docs oficiais, gates de quota/billing/rate e shortlist para canary protegido |
 | `control-plane-ops` | Guia operação local-first com board canônico, long-runs bounded, handoff, rollout/rollback e mirrors externos |
+| `colony-dogfood` | Protocolo de dogfood de colônia com gates do operador, evidência e materialização faseada |
 | `cross-stack-intake` | Triagem inicial universal (leve/médio/pesado) com primeira fatia local-safe e validação focal |
+| `embed-pi-cli` | Guia para embutir pi em CLIs externos mantendo isolamento, docs e boundary de runtime |
 | `reality-check` | Checa prior art, evidência externa/cached, comparação local e decisão adotar/adaptar/rejeitar antes de promover gates amplos |
 
 ## Uso

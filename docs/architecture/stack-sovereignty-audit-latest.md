@@ -9,10 +9,10 @@ Mode: strict
 
 - capabilities: 19
 - ownerMissing: 0
-- coexisting: 5
+- coexisting: 7
 - highRisk: 0
 - curatedPackages: 18
-- installedPackagesEvaluated: 6
+- installedPackagesEvaluated: 8
 
 ## Capability matrix
 
@@ -21,7 +21,7 @@ Mode: strict
 | scheduler-runtime-governance | high | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | consolidate | medium |
 | monitor-provider-governance | high | @aretw0/pi-stack | owned | - | consolidate | low |
 | monitor-summary | low | @aretw0/pi-stack | owned | - | maintain | low |
-| colony-runtime-governance | medium | @aretw0/pi-stack | owned | - | consolidate | low |
+| colony-runtime-governance | medium | @aretw0/pi-stack | coexisting | @ifi/oh-pi-ant-colony | consolidate | low |
 | global-runtime-doctor | high | @aretw0/pi-stack | owned | - | maintain | low |
 | context-watchdog | medium | @aretw0/pi-stack | owned | - | maintain | low |
 | quota-visibility-ops | high | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | maintain | medium |
@@ -33,7 +33,7 @@ Mode: strict
 | stack-sovereignty-governance | high | @aretw0/pi-stack | owned | - | maintain | low |
 | project-board-surface | medium | @aretw0/pi-stack | owned | - | maintain | low |
 | runtime-guardrails | high | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | consolidate | medium |
-| session-web-observability | medium | @aretw0/pi-stack | owned | - | maintain | low |
+| session-web-observability | medium | @aretw0/pi-stack | coexisting | @ifi/pi-web-remote | maintain | low |
 | session-analytics | medium | @aretw0/pi-stack | owned | - | maintain | low |
 | background-process-control | high | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | consolidate | medium |
 | pi-session-presentation | low | @aretw0/pi-stack | coexisting | @ifi/oh-pi-extensions | consolidate | low |
