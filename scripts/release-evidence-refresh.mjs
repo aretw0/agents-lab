@@ -12,7 +12,7 @@ import { buildReport, gather } from "./release-readiness-report.mjs";
 
 const SCHEMA_VERSION = 1;
 
-function parseArgs(argv = process.argv.slice(2)) {
+export function parseArgs(argv = process.argv.slice(2)) {
   const out = {
     cwd: process.cwd(),
     target: "0.8.0",
@@ -24,7 +24,8 @@ function parseArgs(argv = process.argv.slice(2)) {
   };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
-    if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
+    if (arg === "--") continue;
+    else if (arg === "--cwd") out.cwd = argv[++index] ?? out.cwd;
     else if (arg === "--target") out.target = argv[++index] ?? out.target;
     else if (arg === "--tag") out.tag = argv[++index] ?? "";
     else if (arg === "--out") out.outPath = argv[++index] ?? out.outPath;

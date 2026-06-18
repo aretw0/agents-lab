@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { runReleaseEvidenceRefresh } from "../release-evidence-refresh.mjs";
+import { parseArgs, runReleaseEvidenceRefresh } from "../release-evidence-refresh.mjs";
 
 function workspace() {
   const cwd = mkdtempSync(path.join(tmpdir(), "release-evidence-refresh-"));
@@ -124,6 +124,15 @@ function writeMinimalReleaseWorkspace(cwd, gitHead) {
     blockers: [],
   }, null, 2));
 }
+
+test("release evidence refresh CLI accepts pnpm argument separator", () => {
+  const parsed = parseArgs(["--execute-canaries", "--pretty", "--", "--target", "0.8.0", "--tag", "v0.8.0"]);
+
+  assert.equal(parsed.executeCanaries, true);
+  assert.equal(parsed.pretty, true);
+  assert.equal(parsed.target, "0.8.0");
+  assert.equal(parsed.tag, "v0.8.0");
+});
 
 test("release evidence refresh writes canary, readiness, draft, and final gate artifacts", async () => {
   const cwd = workspace();
