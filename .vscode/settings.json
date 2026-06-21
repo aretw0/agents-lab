@@ -35,7 +35,7 @@
   "grunt.autoDetect": "off",
   "gulp.autoDetect": "off",
   "jake.autoDetect": "off",
-  "typescript.tsc.autoDetect": "off",
+  "js/ts.tsc.autoDetect": "off",
 
   "git.autoFetch": false,
   "git.autofetch": false,
@@ -56,24 +56,15 @@
 
   "debug.javascript.autoAttachFilter": "disabled",
 
-  "extensions.autoUpdate": false,
-  "extensions.autoCheckUpdates": false,
-
-  "typescript.tsserver.maxTsServerMemory": 1024,
-  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
-  "typescript.validate.enable": true,
-  "javascript.validate.enable": true,
-  "typescript.suggest.enabled": true,
-  "javascript.suggest.enabled": true,
-  "typescript.suggest.autoImports": false,
-  "javascript.suggest.autoImports": false,
-  "typescript.referencesCodeLens.enabled": false,
-  "javascript.referencesCodeLens.enabled": false,
-  "typescript.implementationsCodeLens.enabled": false,
-  "javascript.implementationsCodeLens.enabled": false,
-  "typescript.disableAutomaticTypeAcquisition": true,
-  "typescript.updateImportsOnFileMove.enabled": "never",
-  "javascript.updateImportsOnFileMove.enabled": "never",
+  "js/ts.tsserver.maxMemory": 1024,
+  "js/ts.tsserver.experimental.enableProjectDiagnostics": false,
+  "js/ts.validate.enabled": true,
+  "js/ts.suggest.enabled": true,
+  "js/ts.suggest.autoImports": false,
+  "js/ts.referencesCodeLens.enabled": false,
+  "js/ts.implementationsCodeLens.enabled": false,
+  "js/ts.tsserver.automaticTypeAcquisition.enabled": false,
+  "js/ts.updateImportsOnFileMove.enabled": "never",
 
   "files.watcherExclude": {
     "**/.git/objects/**": true,

@@ -111,6 +111,7 @@ git push && git push --tags  # GitHub Actions publica no npm
 - **Nomenclatura de arquivos:** Use **kebab-case** (ex.: `pi-agent-core.md`).
 - **Commits:** Seguir [Conventional Commits](https://www.conventionalcommits.org/) — o CI valida.
 - **Segredos:** Nunca commite chaves de API, tokens ou credenciais.
+- **VS Code (escopo de configuracao):** Nao versione chaves de escopo de aplicativo/perfil em `.vscode/settings.json` ou `.devcontainer/devcontainer.json` (ex.: `extensions.autoUpdate`, `extensions.autoCheckUpdates`). Essas opcoes devem ser definidas apenas nas configuracoes de usuario, no perfil **Padrao**.
 - **PRs pequenos:** Prefira PRs focados em um único tópico.
 - **Contexto:** Inclua sempre o contexto de por que a contribuição é relevante para o laboratório.
 
