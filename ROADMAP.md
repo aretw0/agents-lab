@@ -71,6 +71,14 @@ Objetivo: publicar uma baseline madura da `pi-stack` e do laboratório sem prome
 - validar instalação e smoke em ambiente limpo;
 - publicar somente com tag semver, provenance e rollback/deprecation documentado.
 
+### 6. Soberania do Runtime
+
+- bloquear release até o perfil default ficar soberano do fork legado `@mariozechner/*`;
+- manter o runtime próprio em `@earendil-works` e remover terceiros que ainda arrastam o fork antigo;
+- provar cada corte por evidência de avaliação reproduzível e agnóstica de agente, não por declaração;
+- adicionar `mariozechner-sovereignty-gate` ao readiness: árvore de deps no smoke, verdor de tarefa no release;
+- detalhar em `docs/superpowers/specs/2026-06-22-mariozechner-sovereignty-eval-convergence.md`.
+
 ## Depois da 0.8.0
 
 | Tema | Direção |
