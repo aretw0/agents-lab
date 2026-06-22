@@ -184,6 +184,7 @@
     "test:repo:edit": "node --test scripts/test/repo-edit.test.mjs",
     "test:package:boundary": "node --test scripts/test/package-boundary-audit.test.mjs",
     "test:engine:boundary": "node --test scripts/test/engine-boundary-audit.test.mjs",
+    "test:eval-contract": "node --test experiments/202606-eval-contract-baseline/tests/*.test.mjs",
     "test:project:task:complete": "node --test scripts/test/project-task-complete.test.mjs scripts/test/board-spec-audit.test.mjs",
     "test:autonomous-scheduler": "node --test scripts/test/autonomous-scheduler.test.mjs",
     "test:repo:bloat:audit": "node --test scripts/test/repo-bloat-audit.test.mjs",
