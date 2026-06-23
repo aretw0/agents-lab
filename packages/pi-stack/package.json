@@ -28,7 +28,8 @@
 	],
 	"dependencies": {
 		"@sinclair/typebox": "0.34.49",
-		"@ifi/oh-pi-ant-colony": "*"
+		"@ifi/oh-pi-ant-colony": "*",
+		"yaml": "^2.9.0"
 	},
 	"pi": {
 		"extensions": [
