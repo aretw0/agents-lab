@@ -108,6 +108,7 @@ describe("published package dependency shape", () => {
     expect(pkg.dependencies).toEqual({
       "@ifi/oh-pi-ant-colony": "*",
       "@sinclair/typebox": "0.34.49",
+      yaml: "^2.9.0",
     });
   });
 });
