@@ -12,14 +12,12 @@ export function fakePiDriver({ decision = "ready", dispatchAllowed = true, proce
   const driver = async (options) => {
     calls.push(options);
     if (throwError) throw new Error("fake pi-driver failed");
-    return {
-      mode: "agent-run-pi-driver",
-      schemaVersion: 1,
-      decision,
-      dispatchAllowed,
-      processStartAllowed,
-      summary: `agent-run-pi-driver: decision=${decision} dispatch=${dispatchAllowed ? "yes" : "no"}`,
-    };
+    const packet = { mode: "agent-run-pi-driver", schemaVersion: 1, decision, dispatchAllowed, processStartAllowed };
+    // Mirror the real runPiDriver: the blocked branch returns no summary.
+    if (decision !== "blocked") {
+      packet.summary = `agent-run-pi-driver: decision=${decision} dispatch=${dispatchAllowed ? "yes" : "no"}`;
+    }
+    return packet;
   };
   driver.calls = calls;
   return driver;

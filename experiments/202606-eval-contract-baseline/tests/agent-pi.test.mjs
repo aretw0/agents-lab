@@ -53,6 +53,7 @@ test("adapter returns blocked as data, not a throw", async () => {
   const result = await agent(projectTask);
   assert.equal(result.decision, "blocked");
   assert.equal(result.dispatchAllowed, false);
+  assert.equal(result.output, "pi-driver: decision=blocked"); // summary-absent fallback
 });
 
 test("adapter propagates a driver throw (runner records it as a non-pass)", async () => {
