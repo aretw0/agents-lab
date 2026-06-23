@@ -46,7 +46,13 @@ describe("normalizeWorkflowSpec", () => {
   });
 
   it("errors when the root is not an object", () => {
-    expect(normalizeWorkflowSpec(null).issues.some((i) => i.path === "")).toBe(true);
-    expect(normalizeWorkflowSpec([]).issues.some((i) => i.path === "")).toBe(true);
+    expect(normalizeWorkflowSpec(null).issues).toContainEqual({ severity: "error", path: "", message: "workflow must be a mapping" });
+    expect(normalizeWorkflowSpec([]).issues).toContainEqual({ severity: "error", path: "", message: "workflow must be a mapping" });
+  });
+
+  it("errors when input is present but not a mapping", () => {
+    const r = normalizeWorkflowSpec({ name: "x", input: "nope", steps: { a: { command: "y" } } });
+    expect(r.spec).toBeNull();
+    expect(r.issues).toContainEqual({ severity: "error", path: "input", message: "input must be a mapping" });
   });
 });

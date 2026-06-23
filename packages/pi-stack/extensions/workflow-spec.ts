@@ -33,10 +33,13 @@ export function normalizeWorkflowSpec(parsed: unknown): { spec: WorkflowSpec | n
     return { spec: null, issues: [{ severity: "error", path: "", message: "workflow must be a mapping" }] };
   }
 
-  const { name, description, version, steps } = parsed as Record<string, unknown>;
+  const { name, description, version, input, steps } = parsed as Record<string, unknown>;
 
   if (typeof name !== "string" || name.length === 0) {
     issues.push({ severity: "error", path: "name", message: "name is required and must be a non-empty string" });
+  }
+  if (input !== undefined && !isPlainObject(input)) {
+    issues.push({ severity: "error", path: "input", message: "input must be a mapping" });
   }
   if (description !== undefined && typeof description !== "string") {
     issues.push({ severity: "error", path: "description", message: "description must be a string" });
@@ -56,6 +59,7 @@ export function normalizeWorkflowSpec(parsed: unknown): { spec: WorkflowSpec | n
       const present = EXECUTOR_KEYS.filter((k) => k in rawStep);
       if (present.length !== 1) {
         issues.push({ severity: "error", path: `steps.${id}`, message: "step must have exactly one of: block, command, agent" });
+        continue; // sub-field errors are meaningless when the executor is wrong
       }
       if ("command" in rawStep && typeof rawStep.command !== "string") {
         issues.push({ severity: "error", path: `steps.${id}.command`, message: "command must be a string" });
