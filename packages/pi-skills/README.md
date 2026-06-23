@@ -17,6 +17,7 @@
 | `test-pi-extension` | Como testar extensão pi com smoke tests, harness e superfícies de comando/tool |
 | `control-plane-continuity` | Continuidade local-safe com entrevista curta, slices bounded, checkpoint e parada por risco real |
 | `mermaid-authoring` | Escrita e revisão de diagramas Mermaid com sintaxe portável entre Markdown, GitHub, Jekyll, Astro e Obsidian |
+| `pi-workflows-sovereign` | Forma first-party de workflows — listar e validar specs YAML (.workflows) com DAG e I/O tipado; substituto soberano de @davidorex/pi-workflows (execução chega no SP2) |
 
 ## Prompts
 
