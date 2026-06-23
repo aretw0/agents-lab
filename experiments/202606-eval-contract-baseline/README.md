@@ -24,6 +24,22 @@ agnostic to Pi/Refarm. The core imports no runtime (see `test:eval-contract`).
   Live runs (`--execute --approve`, real model output) are an opt-in cold path gated by
   `EVAL_PI_LIVE=1` — never exercised in CI.
 
+## Tasks
+- `tasks/ppw.mjs` — three T1 capability tasks for `@davidorex/pi-project-workflows`
+  (`ppw-monitors`, `ppw-project`, `ppw-workflows`). Each declares its required Pi
+  surface in `env.artifacts` (extension file + skill) and verifies `r.resolved === true`
+  via `adapters/capability-probe.mjs` (a sibling instrument to `agent-pi` that resolves
+  the surface on disk — no Pi import).
+
+  Why a probe, not `agent-pi`: the headless driver runs `--no-extensions --no-skills`,
+  so dispatch is blind to this dep's extension/skill surface. Resolution is the
+  dep-sensitive signal.
+
+  **Baseline & gate:** with the dep installed, `tests/ppw.test.mjs` is green — the
+  versioned "before" evidence. It flips red if the dep is dropped from
+  `packages/pi-stack/package-list.mjs` unless a first-party substitute resolves the same
+  `env.artifacts`. The dep only leaves the list when these tasks pass without it.
+
 ## Run
     pnpm run test:eval-contract
 
