@@ -12,7 +12,7 @@ const DEFAULT_ROOTS = ["packages/pi-stack/node_modules", "node_modules"];
  *
  * @param {object} [opts]
  * @param {string[]} [opts.roots] - node_modules roots, searched in order
- * @param {string} [opts.cwd] - base dir the roots resolve against
+ * @param {string} [opts.cwd] - base dir the roots resolve against; defaults to process.cwd() captured at factory-call time
  * @returns {(task: import("../contract/task.mjs").Task) => object}
  */
 export function createCapabilityProbe({ roots = DEFAULT_ROOTS, cwd = process.cwd() } = {}) {

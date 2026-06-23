@@ -10,7 +10,11 @@ function withTmpRoot(run) {
   const dir = mkdtempSync(join(tmpdir(), "cap-probe-"));
   try {
     writeFileSync(join(dir, "present.txt"), "ok");
-    return run(dir);
+    const result = run(dir);
+    // Guard: rmSync in finally would delete the dir before an async callback
+    // settled, silently passing the test. The probe is synchronous by design.
+    if (result instanceof Promise) throw new Error("withTmpRoot does not support async callbacks");
+    return result;
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
