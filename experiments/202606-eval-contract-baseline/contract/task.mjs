@@ -15,13 +15,17 @@ export const TIERS = ["T0", "T1", "T2", "T3"];
  * @property {string} tier
  * @property {string} instruction
  * @property {(r: AgentResult) => boolean} verify
+ * @property {Record<string, unknown>} [env] - opaque per-task environment for adapters
  */
 
 /** Validate and normalize a Task. Throws on invalid input. @returns {Task} */
-export function defineTask({ id, tier, instruction, verify } = {}) {
+export function defineTask({ id, tier, instruction, verify, env } = {}) {
   if (typeof id !== "string" || id.length === 0) throw new Error("task.id is required");
   if (!TIERS.includes(tier)) throw new Error(`task.tier must be one of ${TIERS.join(", ")}`);
   if (typeof instruction !== "string" || instruction.length === 0) throw new Error("task.instruction is required");
   if (typeof verify !== "function") throw new Error("task.verify must be a function");
-  return { id, tier, instruction, verify };
+  if (env !== undefined && (typeof env !== "object" || env === null || Array.isArray(env))) {
+    throw new Error("task.env must be a plain object when provided");
+  }
+  return env === undefined ? { id, tier, instruction, verify } : { id, tier, instruction, verify, env };
 }

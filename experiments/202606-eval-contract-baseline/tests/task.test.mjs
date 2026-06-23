@@ -20,3 +20,13 @@ test("defineTask rejects a missing verify function", () => {
 test("TIERS lists the basic-to-advanced ladder", () => {
   assert.deepEqual(TIERS, ["T0", "T1", "T2", "T3"]);
 });
+
+test("defineTask carries an optional env bag", () => {
+  const task = defineTask({ id: "x", tier: "T1", instruction: "i", verify: () => true, env: { model: "m", tools: ["bash"] } });
+  assert.deepEqual(task.env, { model: "m", tools: ["bash"] });
+});
+
+test("defineTask rejects a non-object env", () => {
+  assert.throws(() => defineTask({ id: "x", tier: "T0", instruction: "i", verify: () => true, env: [] }), /env must be a plain object/);
+  assert.throws(() => defineTask({ id: "x", tier: "T0", instruction: "i", verify: () => true, env: "nope" }), /env must be a plain object/);
+});
