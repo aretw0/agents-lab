@@ -1,9 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
 import { runTask } from "../contract/runner.mjs";
 import { buildReport } from "../contract/report.mjs";
 import { createCapabilityProbe } from "../adapters/capability-probe.mjs";
 import { ppwTasks, ppwMonitors, ppwProject, ppwWorkflows } from "../tasks/ppw.mjs";
+
+// Anchor the probe to the repo root so the baseline/gate is invocation-independent:
+// the dep resolves via the relative root packages/pi-stack/node_modules, so a probe
+// left on process.cwd() would go red for the wrong reason when run from another dir.
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../../");
 
 test("ppwTasks lists the three project-workflows capabilities at T1", () => {
   assert.deepEqual(
@@ -18,7 +25,7 @@ test("ppwTasks lists the three project-workflows capabilities at T1", () => {
 });
 
 test("each capability resolves with the dep present (baseline)", async () => {
-  const probe = createCapabilityProbe();
+  const probe = createCapabilityProbe({ cwd: repoRoot });
   for (const task of [ppwMonitors, ppwProject, ppwWorkflows]) {
     const result = await runTask(task, probe);
     assert.equal(result.passes, 1, `${task.id} should resolve with the dep installed`);
@@ -27,7 +34,7 @@ test("each capability resolves with the dep present (baseline)", async () => {
 });
 
 test("the baseline rolls up as a T1 measurement", async () => {
-  const probe = createCapabilityProbe();
+  const probe = createCapabilityProbe({ cwd: repoRoot });
   const results = [];
   for (const task of ppwTasks) results.push(await runTask(task, probe));
   const report = buildReport(results, { generatedAtIso: "2026-06-23T00:00:00.000Z" });
