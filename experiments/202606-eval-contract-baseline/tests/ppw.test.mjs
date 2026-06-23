@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { runTask } from "../contract/runner.mjs";
 import { buildReport } from "../contract/report.mjs";
 import { createCapabilityProbe } from "../adapters/capability-probe.mjs";
-import { ppwTasks, ppwMonitors, ppwProject, ppwWorkflows } from "../tasks/ppw.mjs";
+import { ppwTasks, ppwMonitors, ppwProject, ppwWorkflows, ppwWorkflowsForm } from "../tasks/ppw.mjs";
 
 // Anchor the probe to the repo root so the baseline/gate is invocation-independent:
 // the dep resolves via the relative root packages/pi-stack/node_modules, so a probe
@@ -40,4 +40,11 @@ test("the baseline rolls up as a T1 measurement", async () => {
   const report = buildReport(results, { generatedAtIso: "2026-06-23T00:00:00.000Z" });
   assert.deepEqual(report.summary.byTier.T1, { tasks: 3, passes: 3, attempts: 3 });
   assert.equal(report.summary.passRate, 1);
+});
+
+test("the first-party workflows form resolves (ppw-workflows-form)", async () => {
+  const firstPartyProbe = createCapabilityProbe({ roots: ["."], cwd: repoRoot });
+  const result = await runTask(ppwWorkflowsForm, firstPartyProbe);
+  assert.equal(result.passes, 1, "first-party workflow form + skill should resolve");
+  assert.equal(result.passRate, 1);
 });

@@ -40,3 +40,21 @@ export const ppwWorkflows = defineTask({
 });
 
 export const ppwTasks = [ppwMonitors, ppwProject, ppwWorkflows];
+
+// First-party workflows form (SP1). Artifacts are workspace files (repo-root-relative),
+// so this task is probed with roots ["."] + cwd=repoRoot, not the node_modules roots.
+// It proves the form is first-party; ppw-workflows stays dep-backed until run lands (SP2/SP3).
+export const ppwWorkflowsForm = defineTask({
+  id: "ppw-workflows-form",
+  tier: "T1",
+  instruction: "Provide the workflows form (list/validate YAML specs) as a first-party Pi extension + skill.",
+  verify: verifyResolved,
+  env: {
+    capability: "workflows-form",
+    owner: "@aretw0/pi-stack",
+    artifacts: [
+      "packages/pi-stack/extensions/workflow-form.ts",
+      "packages/pi-skills/skills/pi-workflows-sovereign/SKILL.md",
+    ],
+  },
+});
