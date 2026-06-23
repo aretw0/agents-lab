@@ -29,4 +29,5 @@ test("defineTask carries an optional env bag", () => {
 test("defineTask rejects a non-object env", () => {
   assert.throws(() => defineTask({ id: "x", tier: "T0", instruction: "i", verify: () => true, env: [] }), /env must be a plain object/);
   assert.throws(() => defineTask({ id: "x", tier: "T0", instruction: "i", verify: () => true, env: "nope" }), /env must be a plain object/);
+  assert.throws(() => defineTask({ id: "x", tier: "T0", instruction: "i", verify: () => true, env: null }), /env must be a plain object/);
 });
