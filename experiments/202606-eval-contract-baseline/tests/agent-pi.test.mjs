@@ -23,6 +23,8 @@ test("adapter maps instruction->prompt and merges defaults with task.env", async
   assert.equal(call.model, "task-model"); // task.env overrides defaults
   assert.deepEqual(call.tools, ["bash"]);
   assert.equal(call.mode, "print-readonly");
+  assert.deepEqual(call.files, []); // default when task.env omits it
+  assert.equal(call.fileContract, "read-only"); // default when task.env omits it
 });
 
 test("adapter always runs the driver in preview (execute false)", async () => {
